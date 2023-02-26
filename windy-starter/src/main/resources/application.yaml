@@ -1,0 +1,15 @@
+server:
+  port: 9768
+
+spring:
+  application:
+    name: JDevops
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:33060/windy?serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: zj137899
+
+#mybatis-plus:
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
