@@ -3,7 +3,7 @@ package com.zj.feature.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.zj.feature.entity.dto.PageSize;
+import com.zj.common.PageSize;
 import com.zj.feature.entity.dto.TestCaseDTO;
 import com.zj.feature.entity.po.TestCase;
 import com.zj.feature.mapper.TestCaseMapper;

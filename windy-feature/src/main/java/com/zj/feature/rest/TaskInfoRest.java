@@ -2,7 +2,7 @@ package com.zj.feature.rest;
 
 import com.zj.common.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
-import com.zj.feature.entity.dto.PageSize;
+import com.zj.common.PageSize;
 import com.zj.feature.entity.dto.TaskInfoDTO;
 import com.zj.feature.service.TaskInfoService;
 import org.springframework.beans.factory.annotation.Autowired;

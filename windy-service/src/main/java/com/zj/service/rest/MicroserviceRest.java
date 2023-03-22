@@ -1,10 +1,10 @@
-package com.zj.feature.rest;
+package com.zj.service.rest;
 
+import com.zj.common.PageSize;
 import com.zj.common.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
-import com.zj.feature.entity.dto.MicroserviceDTO;
-import com.zj.feature.entity.dto.PageSize;
-import com.zj.feature.service.MicroserviceService;
+import com.zj.service.entity.dto.MicroserviceDTO;
+import com.zj.service.service.MicroserviceService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;

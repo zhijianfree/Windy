@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.feature.entity.dto.ExecutePointDTO;
-import com.zj.feature.entity.dto.PageSize;
+import com.zj.common.PageSize;
 import com.zj.feature.entity.po.ExecutePoint;
 import com.zj.feature.executor.compare.CompareType;
 import com.zj.feature.mapper.ExecutePointMapper;
@@ -17,7 +17,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 

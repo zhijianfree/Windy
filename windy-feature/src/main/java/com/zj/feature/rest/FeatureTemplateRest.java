@@ -3,7 +3,7 @@ package com.zj.feature.rest;
 import com.zj.common.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
 import com.zj.feature.entity.dto.ExecuteTemplateDTO;
-import com.zj.feature.entity.dto.PageSize;
+import com.zj.common.PageSize;
 import com.zj.feature.service.FeatureConfigService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;

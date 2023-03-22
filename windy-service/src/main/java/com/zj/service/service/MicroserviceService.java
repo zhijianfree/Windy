@@ -1,14 +1,14 @@
-package com.zj.feature.service;
+package com.zj.service.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.feature.entity.dto.MicroserviceDTO;
-import com.zj.feature.entity.dto.PageSize;
-import com.zj.feature.entity.po.Microservice;
-import com.zj.feature.mapper.MicroserviceMapper;
+import com.zj.common.PageSize;
+import com.zj.service.entity.dto.MicroserviceDTO;
+import com.zj.service.entity.po.Microservice;
+import com.zj.service.mapper.MicroserviceMapper;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -73,5 +73,9 @@ public class MicroserviceService extends ServiceImpl<MicroserviceMapper, Microse
       BeanUtils.copyProperties(microservice, microserviceDto);
       return microserviceDto;
     }).collect(Collectors.toList());
+  }
+
+  public Microservice getServiceDetail(String serviceId) {
+    return getOne(Wrappers.lambdaQuery(Microservice.class).eq(Microservice::getServiceId, serviceId));
   }
 }

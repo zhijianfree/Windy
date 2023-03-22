@@ -1,7 +1,7 @@
-package com.zj.feature.mapper;
+package com.zj.service.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.zj.feature.entity.po.Microservice;
+import com.zj.service.entity.po.Microservice;
 
 
 public interface MicroserviceMapper extends BaseMapper<Microservice> {

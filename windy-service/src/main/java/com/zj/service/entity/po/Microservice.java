@@ -1,4 +1,4 @@
-package com.zj.feature.entity.po;
+package com.zj.service.entity.po;
 
 import lombok.Data;
 

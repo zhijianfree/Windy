@@ -53,7 +53,7 @@
     </dependency>
     <dependency>
       <groupId>com.zj</groupId>
-      <artifactId>windy-common</artifactId>
+      <artifactId>windy-service</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>

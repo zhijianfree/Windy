@@ -20,6 +20,7 @@
     <module>windy-starter</module>
     <module>windy-common</module>
     <module>windy-pipeline</module>
+    <module>windy-service</module>
   </modules>
 
 
@@ -40,6 +41,16 @@
       <dependency>
         <groupId>com.zj</groupId>
         <artifactId>windy-feature</artifactId>
+        <version>1.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>com.zj</groupId>
+        <artifactId>windy-pipeline</artifactId>
+        <version>1.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>com.zj</groupId>
+        <artifactId>windy-service</artifactId>
         <version>1.0-SNAPSHOT</version>
       </dependency>
 

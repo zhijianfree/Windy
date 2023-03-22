@@ -11,7 +11,7 @@ import com.zj.feature.entity.dto.CopyFeatureDTO;
 import com.zj.feature.entity.dto.ExecutePointDTO;
 import com.zj.feature.entity.dto.FeatureInfoDTO;
 import com.zj.feature.entity.dto.FeatureNodeDTO;
-import com.zj.feature.entity.dto.PageSize;
+import com.zj.common.PageSize;
 import com.zj.feature.entity.dto.TagFilterDTO;
 import com.zj.feature.entity.dto.TestCaseConfigDTO;
 import com.zj.feature.entity.dto.TestCaseDTO;

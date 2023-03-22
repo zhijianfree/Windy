@@ -9,10 +9,11 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>windy-starter</artifactId>
+  <artifactId>windy-service</artifactId>
 
   <properties>
-
+    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>8</maven.compiler.target>
   </properties>
 
   <dependencies>
@@ -20,29 +21,13 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
-
     <dependency>
       <groupId>com.zj</groupId>
-      <artifactId>windy-feature</artifactId>
+      <artifactId>windy-common</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.zj</groupId>
-      <artifactId>windy-pipeline</artifactId>
+      <groupId>com.baomidou</groupId>
+      <artifactId>mybatis-plus-boot-starter</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.zj</groupId>
-      <artifactId>windy-service</artifactId>
-    </dependency>
-
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
-
 </project>
