@@ -11,6 +11,9 @@ public enum ErrorCode {
   NOT_FOUND_CODE_CHANGE(HttpStatus.NOT_FOUND,"Pipeline.000003", "服务变更未找到"),
   NOT_FOUND_PIPELINE_GIT_BIND(HttpStatus.NOT_FOUND,"Pipeline.000004", "流水关联分支未找到"),
   UPDATE_PIPELINE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"Pipeline.000005", "更新流水线失败"),
+  NOT_FOUND_SERVICE(HttpStatus.NOT_FOUND,"Pipeline.000006", "未找到服务"),
+  REQUEST_GIT_SERVER_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,"Pipeline.000007", "请求Git服务错误"),
+  DELETE_PIPELINE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"Pipeline.000008", "删除流水线错误"),
 
   /*==================用例服务==================*/
   COMPARE_ERROR(HttpStatus.FORBIDDEN,"Feature.000002","feature compare error"),

@@ -19,6 +19,7 @@
     <module>windy-feature</module>
     <module>windy-starter</module>
     <module>windy-common</module>
+    <module>windy-pipeline</module>
   </modules>
 
 
