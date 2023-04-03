@@ -24,7 +24,7 @@ public class PipelineRecord {
   /**
    * 日志记录Id
    * */
-  private String recordId;
+  private String historyId;
 
   /**
    * 创建时间
@@ -37,6 +37,6 @@ public class PipelineRecord {
   private Long updateTime;
 
 
-  private Integer status;
+  private Integer pipelineStatus;
 
 }

@@ -1,5 +1,6 @@
-package com.zj.pipeline.entity.dto;
+package com.zj.pipeline.entity.vo;
 
+import java.util.List;
 import lombok.Data;
 
 /**
@@ -11,10 +12,10 @@ public class ConfigDetail {
   /**
    * node对应功能的服务地址
    * */
-  private String url;
+  private String actionId;
 
   /**
    * node执行的参数
    * */
-  private String data;
+  private List<CompareResult> compareInfo;
 }

@@ -11,9 +11,9 @@ import lombok.Data;
 @Builder
 public class TaskNodeRecord {
 
-  private String taskId;
-
   private String recordId;
+
+  private String historyId;
 
   private Integer status;
 

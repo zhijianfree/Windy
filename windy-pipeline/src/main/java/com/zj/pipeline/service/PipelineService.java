@@ -1,10 +1,12 @@
 package com.zj.pipeline.service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.pipeline.entity.dto.ConfigDetail;
+import com.zj.pipeline.entity.vo.ActionParam;
+import com.zj.pipeline.entity.dto.PipelineActionDto;
 import com.zj.pipeline.entity.dto.PipelineDTO;
 import com.zj.pipeline.entity.dto.PipelineNodeDTO;
 import com.zj.pipeline.entity.dto.PipelineStageDTO;
@@ -14,17 +16,18 @@ import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.pipeline.entity.po.PipelineNode;
 import com.zj.pipeline.entity.po.PipelineStage;
+import com.zj.pipeline.entity.vo.ConfigDetail;
 import com.zj.pipeline.executer.PipelineExecutor;
 import com.zj.pipeline.executer.vo.ExecuteParam;
 import com.zj.pipeline.executer.vo.ExecuteType;
 import com.zj.pipeline.executer.vo.HttpRequestContext;
 import com.zj.pipeline.executer.vo.NodeConfig;
+import com.zj.pipeline.executer.vo.RefreshContext;
 import com.zj.pipeline.executer.vo.Stage;
 import com.zj.pipeline.executer.vo.TaskNode;
 import com.zj.pipeline.mapper.PipelineMapper;
-import com.zj.pipeline.mapper.PipelineNodeMapper;
-import com.zj.pipeline.mapper.PipelineStageMapper;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -55,6 +58,9 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
 
   @Autowired
   private PipelineExecutor pipelineExecutor;
+
+  @Autowired
+  private PipelineActionService pipelineActionService;
 
   public PipelineDTO getPipeline(String service, String pipelineId) {
     Assert.notEmpty(service, "service can not be empty");
@@ -95,25 +101,23 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
         .collect(Collectors.toList());
 
     List<String> notExistNodes = oldPipeline.getStageList().stream().map(PipelineStageDTO::getNodes)
-        .filter(CollectionUtils::isNotEmpty)
-        .flatMap(Collection::stream).map(PipelineNodeDTO::getNodeId)
-        .filter(nodeId -> !nodeIds.contains(nodeId)).collect(Collectors.toList());
+        .filter(CollectionUtils::isNotEmpty).flatMap(Collection::stream)
+        .map(PipelineNodeDTO::getNodeId).filter(nodeId -> !nodeIds.contains(nodeId))
+        .collect(Collectors.toList());
 
     //如果node节点未变更则直接退出
-    if (CollectionUtils.isEmpty(notExistNodes)){
+    if (CollectionUtils.isEmpty(notExistNodes)) {
       return;
     }
     pipelineNodeService.remove(
         Wrappers.lambdaQuery(PipelineNode.class).in(PipelineNode::getNodeId, notExistNodes));
-
-
 
     List<String> newStageIds = stageList.stream().map(PipelineStageDTO::getStageId)
         .collect(Collectors.toList());
     List<String> notExistStages = oldPipeline.getStageList().stream()
         .map(PipelineStageDTO::getStageId).filter(stageId -> !newStageIds.contains(stageId))
         .collect(Collectors.toList());
-    if (CollectionUtils.isEmpty(notExistStages)){
+    if (CollectionUtils.isEmpty(notExistStages)) {
       return;
     }
     pipelineStageService.remove(
@@ -216,6 +220,7 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
     pipelineStage.setPipelineId(pipelineId);
     pipelineStage.setStageName(stageDto.getStageName());
     pipelineStage.setStageId(stageId);
+    pipelineStage.setConfigId(stageDto.getConfigId());
     pipelineStage.setType(stageDto.getType());
     pipelineStage.setCreateTime(currentTime);
     pipelineStage.setUpdateTime(currentTime);
@@ -249,7 +254,8 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
     }
 
     List<PipelineStage> pipelineStages = pipelineStageService.list(
-        Wrappers.lambdaQuery(PipelineStage.class).eq(PipelineStage::getPipelineId, pipelineId));
+        Wrappers.lambdaQuery(PipelineStage.class).eq(PipelineStage::getPipelineId, pipelineId)
+            .orderByAsc(PipelineStage::getType));
     if (CollectionUtils.isEmpty(pipelineStages)) {
       return false;
     }
@@ -260,6 +266,9 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
 
     List<Stage> stageList = pipelineStages.stream().map(this::assembleStageData)
         .collect(Collectors.toList());
+    //去除首尾两个节点
+    stageList.remove(0);
+    stageList.remove(stageList.size() -1);
     executeParam.setStages(stageList);
     pipelineExecutor.execute(executeParam);
     return true;
@@ -272,30 +281,41 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
 
     List<PipelineNode> pipelineNodes = pipelineNodeService.list(
         Wrappers.lambdaQuery(PipelineNode.class)
-            .eq(PipelineNode::getStageId, pipelineStage.getStageId()));
+            .eq(PipelineNode::getStageId, pipelineStage.getStageId()).orderByAsc(PipelineNode::getType));
     if (CollectionUtils.isEmpty(pipelineNodes)) {
       return stage;
     }
 
-    List<TaskNode> taskNodes = pipelineNodes.stream().map(pipelineNode -> {
-      TaskNode taskNode = new TaskNode();
-      taskNode.setNodeId(pipelineNode.getNodeId());
-      taskNode.setName(pipelineNode.getNodeName());
-      taskNode.setExecuteType(ExecuteType.HTTP.name());
-
-      ConfigDetail configDetail = JSON.parseObject(pipelineNode.getConfigDetail(),
-          ConfigDetail.class);
-
-      HttpRequestContext context = HttpRequestContext.builder().body(configDetail.getData())
-          .url(configDetail.getUrl()).build();
-      taskNode.setRequestContext(context);
-
-      NodeConfig nodeConfig = new NodeConfig();
-      taskNode.setNodeConfig(nodeConfig);
-      return taskNode;
-    }).collect(Collectors.toList());
+    List<TaskNode> taskNodes = pipelineNodes.stream().map(this::buildTaskNode)
+        .collect(Collectors.toList());
     stage.setNodeList(taskNodes);
     return stage;
+  }
+
+  private TaskNode buildTaskNode(PipelineNode pipelineNode) {
+    TaskNode taskNode = new TaskNode();
+    taskNode.setNodeId(pipelineNode.getNodeId());
+    taskNode.setName(pipelineNode.getNodeName());
+    taskNode.setExecuteType(ExecuteType.HTTP.name());
+
+    ConfigDetail configDetail = JSON.parseObject(pipelineNode.getConfigDetail(),
+        ConfigDetail.class);
+    PipelineActionDto action = pipelineActionService.getAction(configDetail.getActionId());
+    List<ActionParam> paramDetail = action.getParamDetail();
+    JSONObject jsonObject = new JSONObject();
+    paramDetail.forEach(param -> jsonObject.put(param.getName(), param.getValue()));
+
+    HttpRequestContext context = HttpRequestContext.builder().body(JSON.toJSONString(jsonObject))
+        .url(action.getActionUrl()).build();
+    taskNode.setRequestContext(context);
+
+    RefreshContext refreshContext = RefreshContext.builder().url(action.getQueryUrl())
+        .compareConfig(configDetail.getCompareInfo()).headers(new HashMap<>()).build();
+    taskNode.setRefreshContext(refreshContext);
+
+    NodeConfig nodeConfig = new NodeConfig();
+    taskNode.setNodeConfig(nodeConfig);
+    return taskNode;
   }
 
   public PipelineDTO getPipelineDetail(String pipelineId) {

@@ -9,7 +9,7 @@ public class NodeRecord {
 
   private String recordId;
 
-  private String taskId;
+  private String historyId;
 
   private Integer code;
 

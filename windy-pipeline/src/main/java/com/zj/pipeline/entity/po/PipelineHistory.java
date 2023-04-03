@@ -44,7 +44,7 @@ public class PipelineHistory {
   /**
    * 流水线结果
    * */
-  private String pipelineResult;
+  private Integer pipelineStatus;
 
   /**
    * 创建时间

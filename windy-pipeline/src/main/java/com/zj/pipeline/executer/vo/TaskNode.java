@@ -8,14 +8,38 @@ import lombok.Data;
  */
 @Data
 public class TaskNode {
+  /**
+   * 流水线节点Id
+   * */
   private String nodeId;
+
+  /**
+   * 流水线节点名称
+   * */
   private String name;
 
+  /**
+   * 运行记录Id
+   * */
+  private String recordId;
+
+  /**
+   * 执行类型，默认Http
+   * */
   private String executeType;
 
+  /**
+   * 出发节点执行的第三方接口信息
+   * */
   private RequestContext requestContext;
 
+  /**
+   * 刷新节点任务状态的第三方接口信息
+   * */
   private RefreshContext refreshContext;
 
+  /**
+   * 节点运行配置信息
+   * */
   private NodeConfig nodeConfig;
 }

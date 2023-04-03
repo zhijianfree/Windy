@@ -20,6 +20,11 @@ public class PipelineStageDTO {
 
   private String pipelineId;
 
+  /**
+   * 关联的配置Id
+   * */
+  private String configId;
+
   @NotEmpty
   private List<PipelineNodeDTO> nodes;
 

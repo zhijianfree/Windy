@@ -1,19 +1,27 @@
 package com.zj.pipeline.executer.enums;
 
 public enum ProcessStatus {
-  SUCCESS(1),
-  FAIL(2),
-  TIMEOUT(3),
-  RUNNING(4),
-  IGNORE_FAIL(5),;
+  SUCCESS(1, "处理成功"),
+  FAIL(2, "处理失败"),
+  TIMEOUT(3, "处理超时"),
+  RUNNING(4, "运行中"),
+  IGNORE_FAIL(5, "忽略失败"),
 
-  ProcessStatus(int type) {
+  STOP(6, "停止运行"),;
+
+  ProcessStatus(int type, String desc) {
     this.type = type;
+    this.desc = desc;
   }
 
-  private int type;
+  private final int type;
+  private final String desc;
 
   public int getType() {
     return type;
+  }
+
+  public String getDesc() {
+    return desc;
   }
 }
