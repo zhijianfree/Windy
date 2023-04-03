@@ -47,7 +47,7 @@ CREATE TABLE `pipeline_history` (
   `pipeline_name` varchar(100) DEFAULT NULL COMMENT '流水线名称',
   `branch` varchar(100)  NOT NULL COMMENT '流水线运行的分支',
   `pipeline_config` text NOT NULL COMMENT '流水线执行的配置',
-  `pipeline_result` varchar(100) NOT NULL COMMENT '流水线执行结果',
+  `pipeline_status` int(2) NOT NULL COMMENT '流水线执行结果',
   `executor` varchar(50) DEFAULT NULL COMMENT '执行人',
   `create_time` bigint DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint DEFAULT NULL COMMENT '更新时间',
@@ -83,12 +83,25 @@ CREATE TABLE `node_config` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 
 
+CREATE TABLE `microservice` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `service_id` varchar(64) DEFAULT NULL COMMENT '服务Id',
+  `service_name` varchar(100) NOT NULL COMMENT '服务名称',
+  `description` varchar(300) NOT NULL COMMENT '服务描述',
+  `owner` varchar(100) NOT NULL COMMENT '服务拥有者',
+  `create_time` bigint DEFAULT NULL COMMENT '创建时间',
+  `update_time` bigint DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+
+
 CREATE TABLE `pipeline_stage` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `stage_id` varchar(64) NOT NULL COMMENT '阶段Id',
+  `stage_id` varchar(64) DEFAULT NULL COMMENT '阶段Id',
   `pipeline_id` varchar(64) NOT NULL COMMENT '流水线Id',
+  `config_id` varchar(100) NOT NULL COMMENT '关联的配置Id',
   `stage_name` varchar(100) NOT NULL COMMENT '阶段名称',
-  `type` int(11) DEFAULT '0',
+  `type` int(11) DEFAULT '阶段类型',
   `create_time` bigint(20) NOT NULL COMMENT '创建时间',
   `update_time` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
@@ -133,3 +146,33 @@ CREATE TABLE `system_config` (
   `update_time` bigint DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+
+CREATE TABLE `pipeline_action` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `action_id` varchar(100) NOT NULL COMMENT '执行点ID',
+  `action_name` varchar(100) NOT NULL COMMENT '配置名称',
+  `user_id` varchar(100) DEFAULT NULL COMMENT '创建人',
+  `node_id` varchar(100) DEFAULT NULL COMMENT '执行点类型',
+  `action_url` varchar(100) NOT NULL COMMENT '请求地址',
+  `param_detail` text COMMENT '配置详情',
+  `query_url` varchar(100) NOT NULL COMMENT '请求地址',
+  `result`  varchar(256) DEFAULT NULL COMMENT '响应结果比较',
+  `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
+  `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
+  `description` varchar(256) DEFAULT NULL COMMENT '执行点描述',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+
+CREATE TABLE `node_bind` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `node_id` varchar(100) NOT NULL COMMENT '执行点ID',
+  `node_name` varchar(100) NOT NULL COMMENT '配置名称',
+  `user_id` varchar(100) DEFAULT NULL COMMENT '创建人',
+  `description` varchar(256) DEFAULT NULL COMMENT '描述',
+  `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
+  `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+
+INSERT INTO devops.system_config (config_id,config_name,parent_id,`type`,config_detail,sort,create_time,update_time) VALUES
+	 ('1','流水线默认配置',NULL,1,'[{"id":"0","name":"开始","status":"success","root":true,"group":"0","disable":true,"next":[{"index":1,"weight":0}]},{"id":"1","name":"构建","status":"success","root":true,"disable":true,"group":"1","next":[{"index":2,"weight":0}]},{"id":"2","name":"结束","disable":true,"status":"success","group":"2","root":true}]',1,1,1);
