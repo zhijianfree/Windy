@@ -8,4 +8,4 @@ windy:
       password: zhijian137899
       workspace: /Users/falcon/windy/
     maven:
-      path: /Users/falcon/soft/apache-maven-3.8.8
+      path: /Users/hiuielan/soft/apache-maven-3.6.3

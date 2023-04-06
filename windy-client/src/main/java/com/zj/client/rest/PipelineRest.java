@@ -22,7 +22,11 @@ public class PipelineRest {
 
   @PostMapping("/build")
   public ResponseModel runBuild(@RequestBody BuildParam buildParam) {
-    return pipelineService.buildCode(buildParam);
+    return new ResponseModel(pipelineService.buildCode(buildParam), "构建中");
   }
 
+  @PostMapping("/build/status")
+  public ResponseModel buildStatus(@RequestBody BuildParam buildParam) {
+    return new ResponseModel(pipelineService.getRecordStatus(buildParam.getRecordId()),"查询结果");
+  }
 }

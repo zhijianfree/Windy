@@ -9,6 +9,8 @@ import lombok.Data;
 @Data
 public class BuildParam {
 
+  private String recordId;
+
   private String gitUrl;
 
   private String pomPath;

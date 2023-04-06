@@ -1,10 +1,19 @@
 package com.zj.client.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.zj.client.entity.BuildParam;
+import com.zj.client.entity.ProcessStatus;
 import com.zj.client.entity.ResponseModel;
 import com.zj.client.pipeline.GitOperator;
 import com.zj.client.pipeline.MavenOperator;
 import java.io.File;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,21 +35,37 @@ public class PipelineService {
   @Autowired
   private MavenOperator mavenOperator;
 
-  public ResponseModel buildCode(BuildParam buildParam) {
-    try {
-      gitOperator.pullCode(buildParam.getGitUrl(), buildParam.getBranch());
+  private Map<String, Integer> statusMap = new ConcurrentHashMap<>();
 
-      String serviceName = GitOperator.getServiceFromUrl(buildParam.getGitUrl());
+  private ExecutorService executorService = new ThreadPoolExecutor(10, 20, 30, TimeUnit.MINUTES,
+      new LinkedBlockingQueue<>(100), new CallerRunsPolicy());
 
-      String pomPath =
-          workspace + File.separator + serviceName + File.separator + buildParam.getPomPath();
-      Integer exitCode = mavenOperator.build(pomPath);
-      log.info("get maven exit code={}", exitCode);
-      return new ResponseModel(true, "构建成功");
-    } catch (Exception e) {
-      log.error("buildCode error", e);
-      return new ResponseModel(false, e.getMessage());
-    }
+  public Boolean buildCode(BuildParam buildParam) {
+    executorService.execute(() ->{
+      try {
+        gitOperator.pullCode(buildParam.getGitUrl(), buildParam.getBranch());
 
+        String serviceName = GitOperator.getServiceFromUrl(buildParam.getGitUrl());
+        String pomPath =
+            workspace + File.separator + serviceName + File.separator + buildParam.getPomPath();
+        Integer exitCode = mavenOperator.build(pomPath);
+        log.info("get maven exit code={}", exitCode);
+        statusMap.put(buildParam.getRecordId(), ProcessStatus.SUCCESS.getType());
+      } catch (Exception e) {
+        log.error("buildCode error", e);
+        statusMap.put(buildParam.getRecordId(), ProcessStatus.FAIL.getType());
+      }
+    });
+
+    statusMap.put(buildParam.getRecordId(), ProcessStatus.RUNNING.getType());
+    return true;
+  }
+
+  public Object getRecordStatus(String recordId) {
+    Integer status = statusMap.get(recordId);
+
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("status", status);
+    return jsonObject;
   }
 }
