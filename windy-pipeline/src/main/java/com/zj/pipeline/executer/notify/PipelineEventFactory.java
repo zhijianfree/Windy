@@ -13,12 +13,11 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class PipelineStatusFactory {
-
+public class PipelineEventFactory {
 
   private static EventBus eventBus = new EventBus();
 
-  public PipelineStatusFactory(List<IStatusNotifyListener> notifyList) {
+  public PipelineEventFactory(List<IStatusNotifyListener> notifyList) {
     notifyList.forEach(listener ->{
       eventBus.register(listener);
     });
