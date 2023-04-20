@@ -7,7 +7,7 @@ import com.zj.pipeline.executer.po.TaskNodeRecord;
 import com.zj.pipeline.executer.vo.NodeConfig;
 import com.zj.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.pipeline.executer.vo.TaskNode;
-import com.zj.pipeline.service.PipelineRecordService;
+import com.zj.pipeline.service.PipelineNodeRecordService;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -28,17 +28,14 @@ public class NodeExecutor {
 
   private final List<INodeExecuteInterceptor> interceptors;
   private final Map<String, IRemoteInvoker> invokerMap;
-  private final PipelineStatusFactory pipelineStatusFactory;
-  private final PipelineRecordService pipelineRecordService;
+  private final PipelineNodeRecordService pipelineNodeRecordService;
 
-  public NodeExecutor(List<INodeExecuteInterceptor> interceptors,
-      List<IRemoteInvoker> invokers, PipelineStatusFactory pipelineStatusFactory,
-      PipelineRecordService pipelineRecordService) {
+  public NodeExecutor(List<INodeExecuteInterceptor> interceptors, List<IRemoteInvoker> invokers,
+      PipelineNodeRecordService pipelineNodeRecordService) {
     this.interceptors = interceptors;
     invokerMap = invokers.stream()
         .collect(Collectors.toMap(IRemoteInvoker::type, invoker -> invoker));
-    this.pipelineStatusFactory = pipelineStatusFactory;
-    this.pipelineRecordService = pipelineRecordService;
+    this.pipelineNodeRecordService = pipelineNodeRecordService;
   }
 
   /**
@@ -54,9 +51,8 @@ public class NodeExecutor {
     node.setRecordId(recordId);
     AtomicInteger status = new AtomicInteger(ProcessStatus.RUNNING.getType());
     TaskNodeRecord taskNodeRecord = TaskNodeRecord.builder().historyId(historyId).recordId(recordId)
-        .status(status.get()).build();
-    pipelineRecordService.saveTaskNodeRecord(taskNodeRecord);
-
+        .status(status.get()).nodeId(node.getNodeId()).build();
+    pipelineNodeRecordService.saveTaskNodeRecord(taskNodeRecord);
 
     try {
       IRemoteInvoker remoteInvoker = invokerMap.get(node.getExecuteType());
@@ -78,10 +74,10 @@ public class NodeExecutor {
 
     //保存node节点执行开始
     taskNodeRecord.setStatus(status.get());
-    pipelineRecordService.updateTaskNodeRecord(taskNodeRecord);
+    pipelineNodeRecordService.updateTaskNodeRecord(taskNodeRecord);
 
     if (CollectionUtils.isNotEmpty(interceptors)) {
-      interceptors.forEach(interceptor -> interceptor.after(node,status.get()));
+      interceptors.forEach(interceptor -> interceptor.after(node, status.get()));
     }
 
     if (Objects.equals(status.get(), ProcessStatus.FAIL.getType())) {
@@ -95,12 +91,12 @@ public class NodeExecutor {
     if (nodeConfig.isIgnoreError()) {
       log.info("pipeline ignore error recordId={}", recodeId);
       taskNodeRecord.setStatus(ProcessStatus.IGNORE_FAIL.getType());
-      pipelineRecordService.updateTaskNodeRecord(taskNodeRecord);
+      pipelineNodeRecordService.updateTaskNodeRecord(taskNodeRecord);
       return;
     }
 
     log.info("shutdown pipeline recordId={}", recodeId);
     PipelineStatusEvent event = PipelineStatusEvent.builder().build();
-    pipelineStatusFactory.sendNotifyEvent(event);
+    PipelineStatusFactory.sendNotifyEvent(event);
   }
 }

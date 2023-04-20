@@ -42,4 +42,9 @@ public class TaskNode {
    * 节点运行配置信息
    * */
   private NodeConfig nodeConfig;
+
+  /**
+   * 任务开始执行的时间点
+   * */
+  private Long executeTime;
 }

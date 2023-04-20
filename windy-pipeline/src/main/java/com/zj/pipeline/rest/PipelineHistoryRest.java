@@ -3,6 +3,7 @@ package com.zj.pipeline.rest;
 import com.zj.common.ResponseMeta;
 import com.zj.pipeline.entity.dto.PipelineHistoryDto;
 import com.zj.common.exception.ErrorCode;
+import com.zj.pipeline.entity.dto.PipelineExecuteInfo;
 import com.zj.pipeline.service.PipelineHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -49,8 +50,18 @@ public class PipelineHistoryRest {
 
   @ResponseBody
   @GetMapping("/{service}/{pipelineId}/latest/history")
-  public ResponseMeta<PipelineHistoryDto> getLatestPipelineHistory(@PathVariable("service") String service,
-                                                           @PathVariable("pipelineId") String pipelineId){
-    return new ResponseMeta<PipelineHistoryDto>(ErrorCode.SUCCESS, historyService.getLatestPipelineHistory(service, pipelineId));
+  public ResponseMeta<PipelineHistoryDto> getLatestPipelineHistory(
+      @PathVariable("service") String service,
+      @PathVariable("pipelineId") String pipelineId) {
+    return new ResponseMeta<PipelineHistoryDto>(ErrorCode.SUCCESS,
+        historyService.getLatestPipelineHistory(pipelineId));
+  }
+
+  @ResponseBody
+  @GetMapping("/{pipelineId}/status")
+  public ResponseMeta<PipelineExecuteInfo> getPipeLineStatusDetail(
+      @NotNull @PathVariable("pipelineId") String pipelineId) {
+    return new ResponseMeta<PipelineExecuteInfo>(ErrorCode.SUCCESS,
+        historyService.getPipeLineStatusDetail(pipelineId));
   }
 }

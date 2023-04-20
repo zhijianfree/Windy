@@ -2,6 +2,7 @@ package com.zj.pipeline.service;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.pipeline.entity.po.NodeRecord;
 import com.zj.pipeline.entity.po.PipelineHistory;
 import com.zj.pipeline.executer.enums.ProcessStatus;
@@ -20,10 +21,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class PipelineRecordService {
-
-  @Autowired
-  private NodeRecordMapper nodeRecordMapper;
+public class PipelineNodeRecordService extends ServiceImpl<NodeRecordMapper, NodeRecord> {
 
   @Autowired
   private PipelineHistoryMapper historyMapper;
@@ -36,7 +34,6 @@ public class PipelineRecordService {
     pipelineHistory.setPipelineStatus(ProcessStatus.RUNNING.getType());
     pipelineHistory.setBranch("master");
     pipelineHistory.setExecutor(pipelineRecord.getUserId());
-    pipelineHistory.setHistoryId(UUID.randomUUID().toString().replace("-", ""));
     pipelineHistory.setCreateTime(System.currentTimeMillis());
     pipelineHistory.setUpdateTime(System.currentTimeMillis());
     historyMapper.insert(pipelineHistory);
@@ -45,21 +42,26 @@ public class PipelineRecordService {
   public void saveTaskNodeRecord(TaskNodeRecord taskNodeRecord) {
     log.info("save task node record taskId={}", taskNodeRecord.getRecordId());
     NodeRecord nodeRecord = JSON.parseObject(JSON.toJSONString(taskNodeRecord), NodeRecord.class);
-    nodeRecordMapper.insert(nodeRecord);
+    nodeRecord.setCreateTime(System.currentTimeMillis());
+    nodeRecord.setUpdateTime(System.currentTimeMillis());
+    save(nodeRecord);
   }
 
   public void updateTaskNodeRecord(TaskNodeRecord taskNodeRecord) {
     log.info("update task node status taskId={}", taskNodeRecord.getRecordId());
     NodeRecord nodeRecord = JSON.parseObject(JSON.toJSONString(taskNodeRecord), NodeRecord.class);
-    nodeRecordMapper.update(nodeRecord, Wrappers.lambdaUpdate(NodeRecord.class)
+    update(nodeRecord, Wrappers.lambdaUpdate(NodeRecord.class)
         .eq(NodeRecord::getRecordId, taskNodeRecord.getRecordId()));
   }
 
-  public void updateTaskStatus(String taskId, ProcessStatus success) {
+  public void updateTaskNodeStatus(String recordId, Integer type) {
     NodeRecord nodeRecord = new NodeRecord();
-    nodeRecord.setStatus(success.getType());
-    nodeRecord.setHistoryId(taskId);
-    nodeRecordMapper.update(nodeRecord,
-        Wrappers.lambdaUpdate(NodeRecord.class).eq(NodeRecord::getHistoryId, taskId));
+    nodeRecord.setStatus(type);
+    update(nodeRecord,
+        Wrappers.lambdaUpdate(NodeRecord.class).eq(NodeRecord::getRecordId, recordId));
+  }
+
+  public NodeRecord getNodeRecord(String recordId) {
+    return getOne(Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getRecordId, recordId));
   }
 }

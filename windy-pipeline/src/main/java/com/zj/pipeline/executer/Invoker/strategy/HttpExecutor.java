@@ -1,9 +1,11 @@
 package com.zj.pipeline.executer.Invoker.strategy;
 
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.zj.pipeline.entity.vo.BaseExecuteParam;
 import com.zj.pipeline.executer.vo.RefreshContext;
-import com.zj.pipeline.service.PipelineRecordService;
-import com.zj.pipeline.executer.enums.ProcessStatus;
+import com.zj.pipeline.service.PipelineNodeRecordService;
 import com.zj.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.pipeline.executer.vo.ExecuteType;
 import com.zj.pipeline.executer.vo.HttpRequestContext;
@@ -31,10 +33,10 @@ public class HttpExecutor implements IRemoteInvoker {
   private OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
 
   @Autowired
-  private PipelineRecordService pipelineRecordService;
+  private PipelineNodeRecordService pipelineNodeRecordService;
 
-  public HttpExecutor(PipelineRecordService pipelineRecordService) {
-    this.pipelineRecordService = pipelineRecordService;
+  public HttpExecutor(PipelineNodeRecordService pipelineNodeRecordService) {
+    this.pipelineNodeRecordService = pipelineNodeRecordService;
   }
 
   @Override
@@ -42,11 +44,13 @@ public class HttpExecutor implements IRemoteInvoker {
     return ExecuteType.HTTP.name();
   }
 
-  public boolean triggerRun(RequestContext requestContext, String taskId) {
+  public boolean triggerRun(RequestContext requestContext, String recordId) {
     log.info("http executor is running");
     HttpRequestContext context = (HttpRequestContext) requestContext.getContext();
+    JSONObject jsonObject = JSON.parseObject(context.getBody());
+    jsonObject.put("recordId", recordId);
 
-    RequestBody requestBody = RequestBody.create(MEDIA_TYPE, context.getBody());
+    RequestBody requestBody = RequestBody.create(MEDIA_TYPE, JSON.toJSONString(jsonObject));
     Request request = new Request.Builder().url(context.getUrl()).post(requestBody).build();
     try {
       Response response = okHttpClient.newCall(request).execute();
@@ -58,8 +62,10 @@ public class HttpExecutor implements IRemoteInvoker {
   }
 
   @Override
-  public String queryStatus(RefreshContext refreshContext, String taskId) {
-    RequestBody requestBody = RequestBody.create(MEDIA_TYPE, "");
+  public String queryStatus(RefreshContext refreshContext, String recordId) {
+    BaseExecuteParam baseExecuteParam = new BaseExecuteParam();
+    baseExecuteParam.setRecordId(recordId);
+    RequestBody requestBody = RequestBody.create(MEDIA_TYPE, JSON.toJSONString(baseExecuteParam));
     Request request = new Request.Builder().url(refreshContext.getUrl()).post(requestBody).headers(
         Headers.of(refreshContext.getHeaders())).build();
     try {
@@ -68,7 +74,7 @@ public class HttpExecutor implements IRemoteInvoker {
         return null;
       }
 
-      return response.toString();
+      return response.body().string();
     } catch (IOException e) {
       log.error("request http error", e);
     }

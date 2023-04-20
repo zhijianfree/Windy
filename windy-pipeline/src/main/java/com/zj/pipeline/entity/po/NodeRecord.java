@@ -7,6 +7,8 @@ public class NodeRecord {
 
   private Long id;
 
+  private String nodeId;
+
   private String recordId;
 
   private String historyId;

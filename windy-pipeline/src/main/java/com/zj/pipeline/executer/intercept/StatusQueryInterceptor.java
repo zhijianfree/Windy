@@ -6,6 +6,7 @@ import com.zj.pipeline.executer.enums.ProcessStatus;
 import com.zj.pipeline.executer.vo.NodeConfig;
 import com.zj.pipeline.executer.vo.TaskNode;
 import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
  * @author falcon
  * @since 2023/3/30
  */
+@Slf4j
 @Component
 public class StatusQueryInterceptor implements INodeExecuteInterceptor {
 
@@ -26,6 +28,7 @@ public class StatusQueryInterceptor implements INodeExecuteInterceptor {
 
   @Override
   public void after(TaskNode node, Integer status) {
+    log.info("start run query recordId={} status={}",node.getRecordId(), status);
     NodeConfig nodeConfig = node.getNodeConfig();
     if (!Objects.equals(status, ProcessStatus.FAIL.getType()) && !nodeConfig.isIgnoreError()) {
       nodeStatusQueryLooper.addQuestTask(node);

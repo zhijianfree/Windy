@@ -1,39 +1,42 @@
 package com.zj.pipeline.service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.zj.pipeline.entity.dto.PipelineDTO;
-import com.zj.pipeline.entity.dto.PipelineHistoryDto;
-import com.zj.pipeline.entity.po.PipelineHistory;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
+import com.zj.pipeline.entity.dto.NodeStatus;
+import com.zj.pipeline.entity.dto.PipelineDTO;
+import com.zj.pipeline.entity.dto.PipelineHistoryDto;
+import com.zj.pipeline.entity.dto.PipelineExecuteInfo;
+import com.zj.pipeline.entity.po.NodeRecord;
+import com.zj.pipeline.entity.po.PipelineHistory;
+import com.zj.pipeline.executer.enums.ProcessStatus;
 import com.zj.pipeline.mapper.PipelineHistoryMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 /**
  * @author falcon
  * @since 2021/10/15
  */
 @Service
-public class PipelineHistoryService {
+public class PipelineHistoryService extends ServiceImpl<PipelineHistoryMapper, PipelineHistory> {
 
   @Autowired
   private PipelineService pipelineService;
 
   @Autowired
-  private PipelineHistoryMapper historyMapper;
+  private PipelineNodeRecordService recordService;
 
   public PipelineHistoryDto getPipelineHistory(String historyId) {
-    PipelineHistory pipelineHistory = historyMapper.selectOne(
+    PipelineHistory pipelineHistory = getOne(
         Wrappers.lambdaQuery(PipelineHistory.class).eq(PipelineHistory::getHistoryId, historyId));
-
     if (Objects.isNull(pipelineHistory)) {
       return null;
     }
@@ -46,8 +49,8 @@ public class PipelineHistoryService {
     history.setHistoryId(UUID.randomUUID().toString());
     history.setCreateTime(System.currentTimeMillis());
     history.setUpdateTime(System.currentTimeMillis());
-    int result = historyMapper.insert(history);
-    if (result > 0){
+    boolean result = save(history);
+    if (result) {
       return history.getHistoryId();
     }
 
@@ -60,23 +63,49 @@ public class PipelineHistoryService {
       throw new ApiException(ErrorCode.NOT_FOUND_PIPELINE);
     }
 
-    List<PipelineHistory> pipelineHistories = historyMapper.selectList(
+    List<PipelineHistory> pipelineHistories = list(
         Wrappers.lambdaQuery(PipelineHistory.class).eq(PipelineHistory::getPipelineId, pipelineId));
 
-    if (CollectionUtils.isEmpty(pipelineHistories)){
+    if (CollectionUtils.isEmpty(pipelineHistories)) {
       return Collections.emptyList();
     }
 
-    return pipelineHistories.stream().map(PipelineHistoryDto::toPipelineHistoryDto).collect(
-        Collectors.toList());
+    return pipelineHistories.stream().map(PipelineHistoryDto::toPipelineHistoryDto)
+        .collect(Collectors.toList());
   }
 
-  public PipelineHistoryDto getLatestPipelineHistory(String service, String pipelineId) {
-    PipelineHistory pipelineHistory = historyMapper.selectOne(Wrappers.lambdaQuery(PipelineHistory.class).eq(PipelineHistory::getPipelineId, pipelineId).orderByDesc(PipelineHistory::getUpdateTime).last("limit 1"));
-    if (Objects.isNull(pipelineHistory)){
+  public PipelineHistoryDto getLatestPipelineHistory(String pipelineId) {
+    PipelineHistory pipelineHistory = getOne(
+        Wrappers.lambdaQuery(PipelineHistory.class).eq(PipelineHistory::getPipelineId, pipelineId)
+            .orderByDesc(PipelineHistory::getUpdateTime).last("limit 1"));
+    if (Objects.isNull(pipelineHistory)) {
       return null;
     }
 
     return PipelineHistoryDto.toPipelineHistoryDto(pipelineHistory);
+  }
+
+  public void updateStatus(String historyId, ProcessStatus processStatus) {
+    PipelineHistory pipelineHistory = new PipelineHistory();
+    pipelineHistory.setHistoryId(historyId);
+    pipelineHistory.setPipelineStatus(processStatus.getType());
+    pipelineHistory.setUpdateTime(System.currentTimeMillis());
+    boolean result = update(pipelineHistory,
+        Wrappers.lambdaUpdate(PipelineHistory.class).eq(PipelineHistory::getHistoryId, historyId));
+  }
+
+  public PipelineExecuteInfo getPipeLineStatusDetail(String pipelineId) {
+    PipelineHistoryDto pipelineHistory = getLatestPipelineHistory(pipelineId);
+    List<NodeRecord> nodeRecords = recordService.list(Wrappers.lambdaQuery(NodeRecord.class)
+        .eq(NodeRecord::getHistoryId, pipelineHistory.getHistoryId()));
+    List<NodeStatus> statusList = nodeRecords.stream().map(nodeRecord -> {
+      NodeStatus nodeStatus = new NodeStatus();
+      nodeStatus.setNodeId(nodeRecord.getNodeId());
+      nodeStatus.setStatus(nodeRecord.getStatus());
+      return nodeStatus;
+    }).collect(Collectors.toList());
+
+    return PipelineExecuteInfo.builder().pipelineStatus(pipelineHistory.getPipelineStatus())
+        .nodeStatusList(statusList).build();
   }
 }

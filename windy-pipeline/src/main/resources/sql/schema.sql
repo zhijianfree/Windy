@@ -123,6 +123,7 @@ CREATE TABLE `pipeline_node` (
 
 CREATE TABLE `node_record` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `node_id` varchar(64) NOT NULL COMMENT '节点Id',
   `record_id` varchar(64) NOT NULL COMMENT '记录Id',
   `task_id` varchar(64) NOT NULL COMMENT '任务Id',
   `code` int(11) DEFAULT NULL COMMENT '处理结果状态码',

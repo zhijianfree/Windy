@@ -2,8 +2,6 @@ package com.zj.client.pipeline;
 
 import java.io.File;
 import java.io.IOException;
-import org.apache.commons.io.FileSystem;
-import org.apache.commons.io.FileSystemUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;

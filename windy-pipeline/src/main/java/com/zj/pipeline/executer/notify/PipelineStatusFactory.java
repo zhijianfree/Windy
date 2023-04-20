@@ -1,10 +1,10 @@
 package com.zj.pipeline.executer.notify;
 
+import com.google.common.eventbus.EventBus;
 import com.zj.pipeline.executer.IStatusNotifyListener;
 import com.zj.pipeline.executer.vo.PipelineStatusEvent;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,23 +15,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class PipelineStatusFactory {
 
-  private final List<IStatusNotifyListener> notifyList;
+
+  private static EventBus eventBus = new EventBus();
 
   public PipelineStatusFactory(List<IStatusNotifyListener> notifyList) {
-    this.notifyList = notifyList;
+    notifyList.forEach(listener ->{
+      eventBus.register(listener);
+    });
   }
 
-  public void sendNotifyEvent(PipelineStatusEvent event) {
-    if (CollectionUtils.isEmpty(notifyList)) {
-      return;
-    }
-
-    notifyList.forEach(statusNotify -> {
-      try {
-        statusNotify.statusChange(event);
-      } catch (Exception e) {
-        log.error("notify error", e);
-      }
-    });
+  public static void sendNotifyEvent(PipelineStatusEvent event) {
+    eventBus.post(event);
   }
 }

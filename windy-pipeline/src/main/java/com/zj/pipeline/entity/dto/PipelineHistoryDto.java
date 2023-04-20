@@ -21,6 +21,8 @@ public class PipelineHistoryDto {
   @NotEmpty
   private String pipelineId;
 
+  private String historyId;
+
   /**
    * 流水线名称
    * */
@@ -48,7 +50,7 @@ public class PipelineHistoryDto {
    * 流水线结果
    * */
   @NotEmpty
-  private String pipelineStatus;
+  private Integer pipelineStatus;
 
   /**
    * 创建时间

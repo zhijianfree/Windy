@@ -15,6 +15,8 @@ public class TaskNodeRecord {
 
   private String historyId;
 
+  private String nodeId;
+
   private Integer status;
 
   private Integer code;

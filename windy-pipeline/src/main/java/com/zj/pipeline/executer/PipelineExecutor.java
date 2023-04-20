@@ -4,7 +4,7 @@ import com.zj.pipeline.executer.enums.ProcessStatus;
 import com.zj.pipeline.executer.po.PipelineRecord;
 import com.zj.pipeline.executer.vo.ExecuteParam;
 import com.zj.pipeline.executer.vo.Stage;
-import com.zj.pipeline.service.PipelineRecordService;
+import com.zj.pipeline.service.PipelineNodeRecordService;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -35,11 +35,11 @@ public class PipelineExecutor {
   private Executor executor = new ThreadPoolExecutor(5, 10, 3, TimeUnit.HOURS,
       new LinkedBlockingQueue<>(100), new CallerRunsPolicy());
 
-  private final PipelineRecordService pipelineRecordService;
+  private final PipelineNodeRecordService pipelineNodeRecordService;
 
-  public PipelineExecutor(NodeExecutor nodeExecutor, PipelineRecordService pipelineRecordService) {
+  public PipelineExecutor(NodeExecutor nodeExecutor, PipelineNodeRecordService pipelineNodeRecordService) {
     this.nodeExecutor = nodeExecutor;
-    this.pipelineRecordService = pipelineRecordService;
+    this.pipelineNodeRecordService = pipelineNodeRecordService;
 
   }
 
@@ -59,7 +59,7 @@ public class PipelineExecutor {
     PipelineRecord pipelineRecord = PipelineRecord.builder()
         .pipelineId(executeParam.getPipelineId()).historyId(historyId)
         .pipelineStatus(ProcessStatus.RUNNING.getType()).build();
-    pipelineRecordService.savePipelineHistory(pipelineRecord);
+    pipelineNodeRecordService.savePipelineHistory(pipelineRecord);
 
     //todo 并行和串行执行
     stages.forEach(stage -> {
