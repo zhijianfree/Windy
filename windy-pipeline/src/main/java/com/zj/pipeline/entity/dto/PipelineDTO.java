@@ -56,6 +56,14 @@ public class PipelineDTO {
   private Integer pipelineType;
 
   /**
+   * 执行方式
+   * */
+  @NotNull
+  @Min(1)
+  @Max(3)
+  private Integer executeType;
+
+  /**
    * 流水线配置
    */
   private String pipelineConfig;
@@ -85,6 +93,7 @@ public class PipelineDTO {
     pipeline.setPipelineId(pipelineDTO.getPipelineId());
     pipeline.setPipelineConfig(pipelineDTO.getPipelineConfig());
     pipeline.setPipelineType(pipelineDTO.getPipelineType());
+    pipeline.setExecuteType(pipelineDTO.getExecuteType());
     pipeline.setCreator(pipelineDTO.getCreator());
     pipeline.setPipelineName(pipelineDTO.getPipelineName());
     pipeline.setServiceId(pipelineDTO.getServiceId());

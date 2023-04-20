@@ -24,6 +24,11 @@ public class TaskNode {
   private String recordId;
 
   /**
+   * 流水线历史记录Id
+   * */
+  private String historyId;
+
+  /**
    * 执行类型，默认Http
    * */
   private String executeType;

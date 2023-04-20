@@ -27,9 +27,9 @@ public class GitBind {
   private String gitUrl;
 
   /**
-   * 绑定类型： 0 push  1 merge
+   * 绑定类型： 0 未选中  1 选中
    * */
-  private Integer bindType;
+  private Boolean isChoose;
 
   /**
    * 流水线Id

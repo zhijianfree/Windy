@@ -1,5 +1,6 @@
 package com.zj.pipeline.entity.dto;
 
+import java.util.List;
 import lombok.Data;
 
 /**
@@ -12,4 +13,6 @@ public class NodeStatus {
   private String nodeId;
 
   private Integer status;
+
+  private List<String> message;
 }

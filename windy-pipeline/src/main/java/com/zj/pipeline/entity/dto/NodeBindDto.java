@@ -2,8 +2,10 @@ package com.zj.pipeline.entity.dto;
 
 import com.zj.pipeline.entity.po.NodeBind;
 import java.util.List;
+import java.util.UUID;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * @author falcon

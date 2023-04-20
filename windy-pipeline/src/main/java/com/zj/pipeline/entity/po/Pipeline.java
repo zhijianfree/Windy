@@ -37,6 +37,11 @@ public class Pipeline {
   private Integer pipelineType;
 
   /**
+   * 执行方式
+   * */
+  private Integer executeType;
+
+  /**
    * 流水线配置
    * */
   private String pipelineConfig;

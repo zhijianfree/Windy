@@ -34,10 +34,10 @@ public class GitBindDto {
     private String gitUrl;
 
     /**
-     * 绑定类型： 0 push  1 merge
+     * 绑定类型： 0 未选中  1 选中
      */
     @NotNull
-    private Integer bindType;
+    private Boolean isChoose;
 
     /**
      * 流水线Id
@@ -60,14 +60,14 @@ public class GitBindDto {
         gitBind.setBindId(gitBindDto.getBindId());
         gitBind.setGitBranch(gitBindDto.getGitBranch());
         gitBind.setGitUrl(gitBindDto.getGitUrl());
-        gitBind.setBindType(gitBindDto.getBindType());
+        gitBind.setIsChoose(gitBindDto.getIsChoose());
         gitBind.setPipelineId(gitBindDto.getPipelineId());
         return gitBind;
     }
 
     public static GitBindDto toGitBindDto(GitBind gitBind) {
         return GitBindDto.builder().bindId(gitBind.getBindId())
-                .bindType(gitBind.getBindType())
+                .isChoose(gitBind.getIsChoose())
                 .gitBranch(gitBind.getGitBranch())
                 .gitUrl(gitBind.getGitUrl())
                 .pipelineId(gitBind.getPipelineId())

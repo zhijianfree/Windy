@@ -1,7 +1,7 @@
 package com.zj.pipeline.executer;
 
 import com.zj.pipeline.executer.enums.ProcessStatus;
-import com.zj.pipeline.executer.po.PipelineRecord;
+import com.zj.pipeline.executer.vo.PipelineRecord;
 import com.zj.pipeline.executer.vo.ExecuteParam;
 import com.zj.pipeline.executer.vo.Stage;
 import com.zj.pipeline.service.PipelineNodeRecordService;

@@ -2,8 +2,8 @@ package com.zj.pipeline.executer;
 
 import com.zj.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.pipeline.executer.enums.ProcessStatus;
-import com.zj.pipeline.executer.notify.PipelineStatusFactory;
-import com.zj.pipeline.executer.po.TaskNodeRecord;
+import com.zj.pipeline.executer.notify.PipelineEventFactory;
+import com.zj.pipeline.executer.vo.TaskNodeRecord;
 import com.zj.pipeline.executer.vo.NodeConfig;
 import com.zj.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.pipeline.executer.vo.TaskNode;
@@ -97,6 +97,6 @@ public class NodeExecutor {
 
     log.info("shutdown pipeline recordId={}", recodeId);
     PipelineStatusEvent event = PipelineStatusEvent.builder().build();
-    PipelineStatusFactory.sendNotifyEvent(event);
+    PipelineEventFactory.sendNotifyEvent(event);
   }
 }

@@ -12,6 +12,8 @@ import lombok.Data;
 @Builder
 public class PipelineStatusEvent {
 
+  private String historyId;
+
   private String nodeId;
 
   private String recordId;

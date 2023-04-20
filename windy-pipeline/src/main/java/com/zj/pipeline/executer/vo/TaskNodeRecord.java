@@ -1,4 +1,4 @@
-package com.zj.pipeline.executer.po;
+package com.zj.pipeline.executer.vo;
 
 import lombok.Builder;
 import lombok.Data;

@@ -7,7 +7,7 @@ import com.google.common.eventbus.Subscribe;
 import com.zj.pipeline.entity.po.NodeRecord;
 import com.zj.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.pipeline.executer.enums.ProcessStatus;
-import com.zj.pipeline.executer.notify.PipelineStatusFactory;
+import com.zj.pipeline.executer.notify.PipelineEventFactory;
 import com.zj.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.pipeline.executer.vo.TaskNode;
 import com.zj.pipeline.service.PipelineNodeRecordService;
@@ -76,7 +76,7 @@ public class NodeStatusQueryLooper implements IStatusNotifyListener, Runnable {
 
         PipelineStatusEvent statusEvent = PipelineStatusEvent.builder().recordId(node.getRecordId())
             .nodeId(node.getNodeId()).processStatus(ProcessStatus.exchange(status)).build();
-        PipelineStatusFactory.sendNotifyEvent(statusEvent);
+        PipelineEventFactory.sendNotifyEvent(statusEvent);
         return;
       }
       cycleRunTask(node);
