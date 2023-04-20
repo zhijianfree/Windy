@@ -9,14 +9,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -32,18 +30,20 @@ public class PipelineExecutor {
 
   private NodeExecutor nodeExecutor;
 
-  private Executor executor = new ThreadPoolExecutor(5, 10, 3, TimeUnit.HOURS,
-      new LinkedBlockingQueue<>(100), new CallerRunsPolicy());
+  @Autowired
+  @Qualifier("pipelineExecutorPool")
+  private ExecutorService executorService;
 
   private final PipelineNodeRecordService pipelineNodeRecordService;
 
-  public PipelineExecutor(NodeExecutor nodeExecutor, PipelineNodeRecordService pipelineNodeRecordService) {
+  public PipelineExecutor(NodeExecutor nodeExecutor,
+      PipelineNodeRecordService pipelineNodeRecordService) {
     this.nodeExecutor = nodeExecutor;
     this.pipelineNodeRecordService = pipelineNodeRecordService;
 
   }
 
-  public void execute(ExecuteParam executeParam) {
+  public String execute(ExecuteParam executeParam) {
     List<Stage> stages = executeParam.getStages();
     if (CollectionUtils.isEmpty(stages)) {
       log.info("stage list is empty");
@@ -65,8 +65,10 @@ public class PipelineExecutor {
     stages.forEach(stage -> {
       log.info("start run stage={} name={}", stage.getStageId(), stage.getStageName());
       List<CompletableFuture<Void>> futures = stage.getNodeList().stream().map(
-          node -> CompletableFuture.runAsync(() -> nodeExecutor.runNodeTask(historyId, node),
-              executor)).collect(Collectors.toList());
+          node -> {
+            node.setHistoryId(historyId);
+            return CompletableFuture.runAsync(() -> nodeExecutor.runNodeTask(historyId, node), executorService);
+          }).collect(Collectors.toList());
 
       log.info("run after nodes");
       CompletableFuture.allOf(futures.toArray(new CompletableFuture[]{}))
@@ -77,5 +79,7 @@ public class PipelineExecutor {
             }
           });
     });
+
+    return historyId;
   }
 }

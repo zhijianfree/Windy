@@ -10,6 +10,8 @@ import com.zj.pipeline.executer.vo.PipelineRecord;
 import com.zj.pipeline.executer.vo.TaskNodeRecord;
 import com.zj.pipeline.mapper.NodeRecordMapper;
 import com.zj.pipeline.mapper.PipelineHistoryMapper;
+import java.util.Collections;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -46,21 +48,31 @@ public class PipelineNodeRecordService extends ServiceImpl<NodeRecordMapper, Nod
     save(nodeRecord);
   }
 
-  public void updateTaskNodeRecord(TaskNodeRecord taskNodeRecord) {
+  public void updateNodeRecord(TaskNodeRecord taskNodeRecord) {
     log.info("update task node status taskId={}", taskNodeRecord.getRecordId());
     NodeRecord nodeRecord = JSON.parseObject(JSON.toJSONString(taskNodeRecord), NodeRecord.class);
-    update(nodeRecord, Wrappers.lambdaUpdate(NodeRecord.class)
+    boolean update = update(nodeRecord, Wrappers.lambdaUpdate(NodeRecord.class)
         .eq(NodeRecord::getRecordId, taskNodeRecord.getRecordId()));
+    log.info("update node record status={}", update);
+
   }
 
-  public void updateTaskNodeStatus(String recordId, Integer type) {
+  public void updateNodeRecordStatus(String recordId, Integer type, String message) {
     NodeRecord nodeRecord = new NodeRecord();
     nodeRecord.setStatus(type);
-    update(nodeRecord,
+    nodeRecord.setResult(message);
+    boolean update = update(nodeRecord,
         Wrappers.lambdaUpdate(NodeRecord.class).eq(NodeRecord::getRecordId, recordId));
+    log.info("update result={}", update);
   }
 
-  public NodeRecord getNodeRecord(String recordId) {
-    return getOne(Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getRecordId, recordId));
+  public void batchUpdateStatus(List<String> recordIds, ProcessStatus processStatus) {
+    NodeRecord nodeRecord = new NodeRecord();
+    nodeRecord.setStatus(processStatus.getType());
+    nodeRecord.setResult(JSON.toJSONString(Collections.singleton(processStatus.getDesc())));
+    nodeRecord.setUpdateTime(System.currentTimeMillis());
+    boolean batchUpdate = update(nodeRecord,
+        Wrappers.lambdaUpdate(NodeRecord.class).in(NodeRecord::getRecordId, recordIds));
+    log.info("batch update record status={}", batchUpdate);
   }
 }

@@ -11,6 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
+ * 节点开始执行之后，需要轮询结果。
+ * 方法{@link StatusQueryInterceptor#after(TaskNode, Integer)}中将查询任务添加到
+ * {@link NodeStatusQueryLooper#addQuestTask(TaskNode)}
+ *
  * @author falcon
  * @since 2023/3/30
  */
@@ -27,10 +31,10 @@ public class StatusQueryInterceptor implements INodeExecuteInterceptor {
   }
 
   @Override
-  public void after(TaskNode node, Integer status) {
-    log.info("start run query recordId={} status={}",node.getRecordId(), status);
-    NodeConfig nodeConfig = node.getNodeConfig();
-    if (!Objects.equals(status, ProcessStatus.FAIL.getType()) && !nodeConfig.isIgnoreError()) {
+  public void after(TaskNode node, ProcessStatus status) {
+    log.info("start run query recordId={} status={}", node.getRecordId(), status);
+    //只有执行触发任务成功才需要轮询状态
+    if (!status.isFailStatus()) {
       nodeStatusQueryLooper.addQuestTask(node);
     }
   }

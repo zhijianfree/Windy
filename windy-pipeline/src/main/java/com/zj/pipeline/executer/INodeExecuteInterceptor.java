@@ -1,6 +1,7 @@
 package com.zj.pipeline.executer;
 
 
+import com.zj.pipeline.executer.enums.ProcessStatus;
 import com.zj.pipeline.executer.vo.TaskNode;
 
 /**
@@ -12,5 +13,5 @@ public interface INodeExecuteInterceptor {
 
   void before(TaskNode node);
 
-  void after(TaskNode node, Integer status);
+  void after(TaskNode node, ProcessStatus status);
 }

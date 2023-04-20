@@ -3,7 +3,7 @@ package com.zj.pipeline.executer.Invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.zj.pipeline.entity.vo.BaseExecuteParam;
+import com.zj.pipeline.executer.vo.BaseExecuteParam;
 import com.zj.pipeline.executer.vo.RefreshContext;
 import com.zj.pipeline.service.PipelineNodeRecordService;
 import com.zj.pipeline.executer.Invoker.IRemoteInvoker;
@@ -44,7 +44,7 @@ public class HttpExecutor implements IRemoteInvoker {
     return ExecuteType.HTTP.name();
   }
 
-  public boolean triggerRun(RequestContext requestContext, String recordId) {
+  public boolean triggerRun(RequestContext requestContext, String recordId) throws IOException {
     log.info("http executor is running");
     HttpRequestContext context = (HttpRequestContext) requestContext.getContext();
     JSONObject jsonObject = JSON.parseObject(context.getBody());
@@ -52,13 +52,8 @@ public class HttpExecutor implements IRemoteInvoker {
 
     RequestBody requestBody = RequestBody.create(MEDIA_TYPE, JSON.toJSONString(jsonObject));
     Request request = new Request.Builder().url(context.getUrl()).post(requestBody).build();
-    try {
-      Response response = okHttpClient.newCall(request).execute();
-      return response.isSuccessful();
-    } catch (IOException e) {
-      log.error("request http error", e);
-    }
-    return false;
+    Response response = okHttpClient.newCall(request).execute();
+    return response.isSuccessful();
   }
 
   @Override

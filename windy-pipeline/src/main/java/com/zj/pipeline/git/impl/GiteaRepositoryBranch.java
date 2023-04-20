@@ -1,6 +1,7 @@
 package com.zj.pipeline.git.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
@@ -8,8 +9,11 @@ import com.zj.pipeline.git.BaseRepository;
 import com.zj.pipeline.git.GitConstants;
 import com.zj.pipeline.git.IRepositoryBranch;
 import com.zj.pipeline.git.entity.CreateBranchVO;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 /**
@@ -38,7 +42,8 @@ public class GiteaRepositoryBranch extends BaseRepository implements IRepository
 
   @Override
   public boolean deleteBranch(String serviceName, String branchName) {
-    String gitPath = String.format(GitConstants.DELETE_BRANCH, getGitUser(), serviceName, branchName);
+    String gitPath = String.format(GitConstants.DELETE_BRANCH, getGitUser(), serviceName,
+        branchName);
     String result = requestProxy.delete(gitPath);
     log.info("request delete branch result = {}", result);
     return false;
@@ -46,6 +51,14 @@ public class GiteaRepositoryBranch extends BaseRepository implements IRepository
 
   @Override
   public List<String> listBranch(String serviceName) {
-    return null;
+    String gitPath = String.format(GitConstants.LIST_BRANCH, getGitUser(), serviceName);
+    String result = requestProxy.get(gitPath);
+    List<JSONObject> branches = JSON.parseArray(result, JSONObject.class);
+    if (CollectionUtils.isEmpty(branches)) {
+      return Collections.emptyList();
+    }
+
+    log.info("get list={}", result);
+    return branches.stream().map(json -> json.getString("name")).collect(Collectors.toList());
   }
 }

@@ -1,5 +1,6 @@
 package com.zj.pipeline.service;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.exception.ApiException;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -25,6 +27,7 @@ import org.springframework.util.CollectionUtils;
  * @author falcon
  * @since 2021/10/15
  */
+@Slf4j
 @Service
 public class PipelineHistoryService extends ServiceImpl<PipelineHistoryMapper, PipelineHistory> {
 
@@ -94,14 +97,15 @@ public class PipelineHistoryService extends ServiceImpl<PipelineHistoryMapper, P
         Wrappers.lambdaUpdate(PipelineHistory.class).eq(PipelineHistory::getHistoryId, historyId));
   }
 
-  public PipelineExecuteInfo getPipeLineStatusDetail(String pipelineId) {
-    PipelineHistoryDto pipelineHistory = getLatestPipelineHistory(pipelineId);
+  public PipelineExecuteInfo getPipeLineStatusDetail(String historyId) {
+    PipelineHistoryDto pipelineHistory = getPipelineHistory(historyId);
     List<NodeRecord> nodeRecords = recordService.list(Wrappers.lambdaQuery(NodeRecord.class)
-        .eq(NodeRecord::getHistoryId, pipelineHistory.getHistoryId()));
+        .eq(NodeRecord::getHistoryId, historyId));
     List<NodeStatus> statusList = nodeRecords.stream().map(nodeRecord -> {
       NodeStatus nodeStatus = new NodeStatus();
       nodeStatus.setNodeId(nodeRecord.getNodeId());
       nodeStatus.setStatus(nodeRecord.getStatus());
+      nodeStatus.setMessage(JSON.parseArray(nodeRecord.getResult(), String.class));
       return nodeStatus;
     }).collect(Collectors.toList());
 

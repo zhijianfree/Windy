@@ -1,18 +1,20 @@
 package com.zj.pipeline.executer;
 
+import com.alibaba.fastjson.JSON;
 import com.zj.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.pipeline.executer.enums.ProcessStatus;
 import com.zj.pipeline.executer.notify.PipelineEventFactory;
-import com.zj.pipeline.executer.vo.TaskNodeRecord;
 import com.zj.pipeline.executer.vo.NodeConfig;
 import com.zj.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.pipeline.executer.vo.TaskNode;
+import com.zj.pipeline.executer.vo.TaskNodeRecord;
 import com.zj.pipeline.service.PipelineNodeRecordService;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -49,9 +51,9 @@ public class NodeExecutor {
     log.info("start run task recordId={}", historyId);
     String recordId = UUID.randomUUID().toString();
     node.setRecordId(recordId);
-    AtomicInteger status = new AtomicInteger(ProcessStatus.RUNNING.getType());
+    AtomicReference<ProcessStatus> statusAtomic = new AtomicReference<>(ProcessStatus.RUNNING);
     TaskNodeRecord taskNodeRecord = TaskNodeRecord.builder().historyId(historyId).recordId(recordId)
-        .status(status.get()).nodeId(node.getNodeId()).build();
+        .status(statusAtomic.get().getType()).nodeId(node.getNodeId()).build();
     pipelineNodeRecordService.saveTaskNodeRecord(taskNodeRecord);
 
     try {
@@ -62,41 +64,53 @@ public class NodeExecutor {
 
       boolean executeFlag = remoteInvoker.triggerRun(node.getRequestContext(), recordId);
       if (!executeFlag) {
-        status.set(ProcessStatus.FAIL.getType());
-        shutdownPipeline(recordId, node, taskNodeRecord);
+        statusAtomic.set(ProcessStatus.FAIL);
+        notifyNodeEvent(recordId, node, taskNodeRecord);
       }
       log.info("task node run complete result={}", executeFlag);
     } catch (Exception e) {
       log.error("execute pipeline node error recordId={}", recordId, e);
       //如果请求失败则直接流水线终止
-      status.set(ProcessStatus.FAIL.getType());
+      statusAtomic.set(ProcessStatus.FAIL);
+      String errorMsg = getErrorMsg(e);
+      taskNodeRecord.setResult(errorMsg);
     }
 
     //保存node节点执行开始
-    taskNodeRecord.setStatus(status.get());
-    pipelineNodeRecordService.updateTaskNodeRecord(taskNodeRecord);
+    taskNodeRecord.setStatus(statusAtomic.get().getType());
+    pipelineNodeRecordService.updateNodeRecord(taskNodeRecord);
 
     if (CollectionUtils.isNotEmpty(interceptors)) {
-      interceptors.forEach(interceptor -> interceptor.after(node, status.get()));
+      interceptors.forEach(interceptor -> interceptor.after(node, statusAtomic.get()));
     }
 
-    if (Objects.equals(status.get(), ProcessStatus.FAIL.getType())) {
-      shutdownPipeline(recordId, node, taskNodeRecord);
+    if (statusAtomic.get().isFailStatus()) {
+      notifyNodeEvent(recordId, node, taskNodeRecord);
     }
   }
 
+  private String getErrorMsg(Exception exception) {
+    List<String> msg = new ArrayList<>();
+    msg.add("trigger node task error: " + exception.getCause().getMessage());
+    for (StackTraceElement element : exception.getStackTrace()) {
+      msg.add(element.toString());
+    }
+    return JSON.toJSONString(msg);
+  }
 
-  private void shutdownPipeline(String recodeId, TaskNode node, TaskNodeRecord taskNodeRecord) {
+
+  private void notifyNodeEvent(String recodeId, TaskNode node, TaskNodeRecord taskNodeRecord) {
     NodeConfig nodeConfig = node.getNodeConfig();
     if (nodeConfig.isIgnoreError()) {
       log.info("pipeline ignore error recordId={}", recodeId);
       taskNodeRecord.setStatus(ProcessStatus.IGNORE_FAIL.getType());
-      pipelineNodeRecordService.updateTaskNodeRecord(taskNodeRecord);
+      pipelineNodeRecordService.updateNodeRecord(taskNodeRecord);
       return;
     }
 
     log.info("shutdown pipeline recordId={}", recodeId);
-    PipelineStatusEvent event = PipelineStatusEvent.builder().build();
+    PipelineStatusEvent event = PipelineStatusEvent.builder().historyId(node.getHistoryId())
+        .recordId(recodeId).nodeId(node.getNodeId()).processStatus(ProcessStatus.FAIL).build();
     PipelineEventFactory.sendNotifyEvent(event);
   }
 }

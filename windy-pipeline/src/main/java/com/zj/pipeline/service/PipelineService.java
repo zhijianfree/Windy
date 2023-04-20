@@ -5,42 +5,44 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.pipeline.entity.vo.ActionParam;
+import com.zj.common.exception.ApiException;
+import com.zj.common.exception.ErrorCode;
 import com.zj.pipeline.entity.dto.PipelineActionDto;
 import com.zj.pipeline.entity.dto.PipelineDTO;
 import com.zj.pipeline.entity.dto.PipelineNodeDTO;
 import com.zj.pipeline.entity.dto.PipelineStageDTO;
 import com.zj.pipeline.entity.enums.PipelineStatus;
 import com.zj.pipeline.entity.po.Pipeline;
-import com.zj.common.exception.ApiException;
-import com.zj.common.exception.ErrorCode;
 import com.zj.pipeline.entity.po.PipelineNode;
 import com.zj.pipeline.entity.po.PipelineStage;
+import com.zj.pipeline.entity.vo.ActionParam;
 import com.zj.pipeline.entity.vo.ConfigDetail;
 import com.zj.pipeline.executer.PipelineExecutor;
+import com.zj.pipeline.executer.enums.ProcessStatus;
+import com.zj.pipeline.executer.notify.PipelineEventFactory;
 import com.zj.pipeline.executer.vo.ExecuteParam;
 import com.zj.pipeline.executer.vo.ExecuteType;
 import com.zj.pipeline.executer.vo.HttpRequestContext;
 import com.zj.pipeline.executer.vo.NodeConfig;
+import com.zj.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.pipeline.executer.vo.RefreshContext;
 import com.zj.pipeline.executer.vo.Stage;
 import com.zj.pipeline.executer.vo.TaskNode;
 import com.zj.pipeline.mapper.PipelineMapper;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * @author falcon
@@ -61,12 +63,6 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
 
   @Autowired
   private PipelineActionService pipelineActionService;
-
-  public PipelineDTO getPipeline(String service, String pipelineId) {
-    Assert.notEmpty(service, "service can not be empty");
-
-    return getPipeline(pipelineId);
-  }
 
   @Transactional
   public boolean updatePipeline(String service, String pipelineId, PipelineDTO pipelineDTO) {
@@ -247,17 +243,17 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
     return PipelineDTO.toPipelineDto(pipeline);
   }
 
-  public boolean execute(String pipelineId) {
+  public String execute(String pipelineId) {
     PipelineDTO pipeline = getPipeline(pipelineId);
     if (Objects.isNull(pipeline)) {
-      return false;
+      return null;
     }
 
     List<PipelineStage> pipelineStages = pipelineStageService.list(
         Wrappers.lambdaQuery(PipelineStage.class).eq(PipelineStage::getPipelineId, pipelineId)
             .orderByAsc(PipelineStage::getType));
     if (CollectionUtils.isEmpty(pipelineStages)) {
-      return false;
+      return null;
     }
 
     ExecuteParam executeParam = new ExecuteParam();
@@ -270,8 +266,7 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
     stageList.remove(0);
     stageList.remove(stageList.size() -1);
     executeParam.setStages(stageList);
-    pipelineExecutor.execute(executeParam);
-    return true;
+    return pipelineExecutor.execute(executeParam);
   }
 
   private Stage assembleStageData(PipelineStage pipelineStage) {
@@ -297,6 +292,7 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
     taskNode.setNodeId(pipelineNode.getNodeId());
     taskNode.setName(pipelineNode.getNodeName());
     taskNode.setExecuteType(ExecuteType.HTTP.name());
+    taskNode.setExecuteTime(System.currentTimeMillis());
 
     ConfigDetail configDetail = JSON.parseObject(pipelineNode.getConfigDetail(),
         ConfigDetail.class);
@@ -340,5 +336,12 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
     PipelineDTO pipeline = getPipeline(pipelineId);
     pipeline.setStageList(stageDTOList);
     return pipeline;
+  }
+
+  public Boolean pause(String historyId) {
+    PipelineStatusEvent event = PipelineStatusEvent.builder().historyId(historyId).processStatus(
+        ProcessStatus.STOP).build();
+    PipelineEventFactory.sendNotifyEvent(event);
+    return true;
   }
 }
