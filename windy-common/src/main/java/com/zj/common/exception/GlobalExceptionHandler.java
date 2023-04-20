@@ -31,6 +31,8 @@ public class GlobalExceptionHandler {
       log.warn("param validate error", e);
       message = resetParamErrorMsg(e);
     }
+
+    log.error("get error", e);
     return new ResponseEntity<>(new ResponseMeta(errorCode, message, null),
         HttpStatus.INTERNAL_SERVER_ERROR);
   }
