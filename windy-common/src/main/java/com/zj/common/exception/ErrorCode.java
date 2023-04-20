@@ -22,7 +22,8 @@ public enum ErrorCode {
   COMPARE_ERROR(HttpStatus.FORBIDDEN,"Feature.000002","feature compare error"),
   EXECUTE_POINT_NOT_FIND(HttpStatus.NOT_FOUND,"Feature.000003","can not find execute point"),
   FEATURE_NOT_FIND(HttpStatus.NOT_FOUND,"Feature.000004","can not find feature"),
-  SYSTEM_EXECUTE_ERROR(HttpStatus.BAD_REQUEST,"Feature.000101","unknown error occur when execute feature ")
+  SYSTEM_EXECUTE_ERROR(HttpStatus.BAD_REQUEST,"Feature.000101","unknown error occur when execute feature "),
+  SUB_FEATURE_EXIST(HttpStatus.BAD_REQUEST, "Feature.000005", "存在子用例不能删除目录"),
   ;
 
   ErrorCode(HttpStatus httpStatus,String code, String message) {

@@ -49,6 +49,8 @@ public class MicroserviceService extends ServiceImpl<MicroserviceMapper, Microse
     BeanUtils.copyProperties(microserviceDto, microservice);
     microservice.setServiceId(UUID.randomUUID().toString().replace("-", ""));
     microservice.setOwner("admin");
+    microservice.setCreateTime(System.currentTimeMillis());
+    microservice.setUpdateTime(System.currentTimeMillis());
     boolean save = save(microservice);
     return save ? microservice.getServiceId() : null;
   }
@@ -56,6 +58,7 @@ public class MicroserviceService extends ServiceImpl<MicroserviceMapper, Microse
   public String updateService(MicroserviceDTO microserviceDto) {
     Microservice microservice = new Microservice();
     BeanUtils.copyProperties(microserviceDto, microservice);
+    microservice.setUpdateTime(System.currentTimeMillis());
     boolean update = update(microservice, Wrappers.lambdaUpdate(Microservice.class)
         .eq(Microservice::getServiceId, microservice.getServiceId()));
     return update ? microserviceDto.getServiceId() : null;

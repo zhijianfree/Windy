@@ -56,6 +56,11 @@ public class GitBindRest {
         gitBindService.deleteGitBind(pipelineId,bindId));
   }
 
+  @GetMapping("/{serviceId}/branches")
+  public ResponseMeta<List<String>> getServiceBranch(@PathVariable("serviceId") String serviceId) {
+    return new ResponseMeta<List<String>>(ErrorCode.SUCCESS, gitBindService.getServiceBranch(serviceId));
+  }
+
   @PostMapping("/web/hook")
   public void codeWebHook(@RequestBody JSONObject data) {
     gitBindService.notifyHook(data);

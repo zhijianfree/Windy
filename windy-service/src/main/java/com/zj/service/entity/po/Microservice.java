@@ -17,6 +17,11 @@ public class Microservice {
     private String serviceName;
 
     /**
+     * 服务git地址
+     * */
+    private String gitUrl;
+
+    /**
      * 服务拥有者
      * */
     private String owner;

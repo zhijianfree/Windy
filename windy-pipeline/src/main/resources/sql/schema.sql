@@ -84,19 +84,6 @@ CREATE TABLE `node_config` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 
 
-CREATE TABLE `microservice` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `service_id` varchar(64) DEFAULT NULL COMMENT '服务Id',
-  `git_url` varchar(1000) DEFAULT NULL COMMENT '服务git地址',
-  `service_name` varchar(100) NOT NULL COMMENT '服务名称',
-  `description` varchar(300) NOT NULL COMMENT '服务描述',
-  `owner` varchar(100) NOT NULL COMMENT '服务拥有者',
-  `create_time` bigint DEFAULT NULL COMMENT '创建时间',
-  `update_time` bigint DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-
-
 CREATE TABLE `pipeline_stage` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `stage_id` varchar(64) DEFAULT NULL COMMENT '阶段Id',
@@ -129,7 +116,7 @@ CREATE TABLE `node_record` (
   `record_id` varchar(64) NOT NULL COMMENT '记录Id',
   `history_id` varchar(64) NOT NULL COMMENT '历史流水线记录Id',
   `code` int(11) DEFAULT NULL COMMENT '处理结果状态码',
-  `result` varchar(2000) DEFAULT NULL COMMENT '任务处理结果',
+  `result` text DEFAULT NULL COMMENT '任务处理结果',
   `status` int(11) DEFAULT NULL COMMENT '任务状态',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',

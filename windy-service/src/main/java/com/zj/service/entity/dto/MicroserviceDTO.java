@@ -16,6 +16,11 @@ public class MicroserviceDTO {
     private String serviceName;
 
     /**
+     * 服务git地址
+     * */
+    private String gitUrl;
+
+    /**
      * 服务描述
      * */
     private String description;
