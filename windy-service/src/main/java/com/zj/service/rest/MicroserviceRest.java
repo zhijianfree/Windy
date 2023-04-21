@@ -38,6 +38,11 @@ public class MicroserviceRest {
     return new ResponseMeta<PageSize<MicroserviceDTO>>(ErrorCode.SUCCESS, microservice.getServices(page, size, name));
   }
 
+  @GetMapping("/service/{serviceId}/detail")
+  public ResponseMeta<MicroserviceDTO> queryServiceDetail(@PathVariable("serviceId") String serviceId) {
+    return new ResponseMeta<MicroserviceDTO>(ErrorCode.SUCCESS, microservice.queryServiceDetail(serviceId));
+  }
+
   @ResponseBody
   @PostMapping("/services")
   public ResponseMeta<String> createService(@RequestBody MicroserviceDTO microserviceDto) {

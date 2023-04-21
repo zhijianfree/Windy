@@ -70,6 +70,14 @@ public class MicroserviceService extends ServiceImpl<MicroserviceMapper, Microse
     return remove ? 1 : 0;
   }
 
+  public MicroserviceDTO queryServiceDetail(String serviceId) {
+    Microservice microservice = getOne(
+        Wrappers.lambdaQuery(Microservice.class).eq(Microservice::getServiceId, serviceId));
+    MicroserviceDTO microserviceDto = new MicroserviceDTO();
+    BeanUtils.copyProperties(microservice, microserviceDto);
+    return microserviceDto;
+  }
+
   public List<MicroserviceDTO> getServices() {
     return list().stream().map(microservice -> {
       MicroserviceDTO microserviceDto = new MicroserviceDTO();

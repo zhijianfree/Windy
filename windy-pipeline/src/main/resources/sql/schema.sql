@@ -90,11 +90,11 @@ CREATE TABLE `pipeline_stage` (
   `pipeline_id` varchar(64) NOT NULL COMMENT '流水线Id',
   `config_id` varchar(100) NOT NULL COMMENT '关联的配置Id',
   `stage_name` varchar(100) NOT NULL COMMENT '阶段名称',
-  `type` int(11) DEFAULT '阶段类型',
+  `type` int DEFAULT 1 COMMENT '阶段类型',
   `create_time` bigint(20) NOT NULL COMMENT '创建时间',
   `update_time` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 
 CREATE TABLE `pipeline_node` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -164,5 +164,5 @@ CREATE TABLE `node_bind` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 
-INSERT INTO devops.system_config (config_id,config_name,parent_id,`type`,config_detail,sort,create_time,update_time) VALUES
-	 ('1','流水线默认配置',NULL,1,'[{"id":"0","name":"开始","status":"success","root":true,"group":"0","disable":true,"next":[{"index":1,"weight":0}]},{"id":"1","name":"构建","status":"success","root":true,"disable":true,"group":"1","next":[{"index":2,"weight":0}]},{"id":"2","name":"结束","disable":true,"status":"success","group":"2","root":true}]',1,1,1);
+INSERT INTO windy.system_config (config_id,config_name,parent_id,`type`,config_detail,sort,create_time,update_time) VALUES
+	 ('1','流水线默认配置',NULL,1,'[{"id":"0","name":"开始","status":"success","root":true,"group":"0","disable":true,"next":[{"index":1,"weight":0}]},{"id":"1","name":"结束","disable":true,"status":"success","group":"1","root":true}]',1,1,1);
