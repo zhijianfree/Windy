@@ -1,49 +1,37 @@
-# Windy
+## Windy
+Windy is a simple devops tool,it provides multi funtions to promise business. windy provide the pipeline web ui to help engineer to build and deploy thier codes.and it provides the feature design tool to help engineer to design how to test their code.
 
-## 一、背景
+### Global Design
+windy use web broker to support user to manage their pipelines and features. when web user run task, Master node will scan the tasks and split task to multi sub tasks, then dispatch sub task to client. when client receive the sub task , it will run it and notify task staus to master.
 
-对于云端开发来说，接口功能测试一般是自测接口功能，然后觉得没问题之后提交到测试，然后由测试人员介入完成对需求的每个功能去校验。对于测试人员来说，主要是两个方面需要考虑，<span style="font-weight:900">一是新功能开发完成之后是否满足业务需求， 二是新开发的功能是否对旧功能是否有影响。</span>
-<br/>
+![整体设计-整体设计](https://user-images.githubusercontent.com/21210211/233932843-8f0374aa-0862-4f69-9bf6-7c1b32746875.png)
 
-> 新功能校验
+### Pipline
 
-一般来说开发人员针对已开发完成的功能会做一些基本逻辑校验，比如使用 postman 本地调用测试接口，自测没问题之后提交给测试人员校验。相信大部分开发人员都是这样，在这种模式下自测的业务场景和实际调用的场景是比较单一的并且把一些边界业务遗留给测试人员，等测试人员发现之后需要返工修复 bug。由于在开发阶段没有充分的规避一些边界业务，导致开发和测试人员需要反复测试与修改增加了时间和人工成本。
+![整体设计-流水线](https://user-images.githubusercontent.com/21210211/233935517-06b86d99-107c-4dd3-9314-15c7492a119f.png)
 
-> 历史功能校验
+pipeline has multi sub nodes, every node define a single task. web user can define their own pipeline. And pipeline allow you add third service to execute, you just need config your service.
 
-一般来说需求业务不可能都是完全解耦的，都会有需求修改或者在原来需求上新增功能。但是这种变更的前提是，不能影响之前已有的功能。这个时候就是取舍的问题，在新增或者更新需求之后是否要将历史功能再此校验一遍。如果全部重新校验那么就会很大程度的增加测试的人工成本，如果是不测试那么对于线上历史功能的继承性没有保障。
+#### Custom Node Define
+you just need two steps to define your own pipeline node
+- Trigger Task: define a post url and body parameters to request your http interface.
+- Query Status: define a post url and body parameters to get task result
+when pipeline get result from  "Query status", pipeline will check  whether the result is success. 
 
-### 1.1 待解决的问题
+For example: <br/>
+user config the node that define "Trigger Task" url("http://localhost:8070/v1/devops/client/build") to tigger build, and config "Query Status" url("http://localhost:8070/v1/devops/client/build/status") to get execute status. and from "Query Status" define, pipeline will check whether  param "status" match expect value "1" 
+<img width="1405" alt="image" src="https://user-images.githubusercontent.com/21210211/233949274-bb714a11-7466-49fe-88ea-7850063f4360.png">
 
-#### 1.1.1 新功能与历史功能的校验
+### Feature
+windy provide web ui to define how to test code. when you write your feature, you can user http,mysql,dubbo,etc... templte to complete your feature. if you have your own template , you also can add it in windy 
 
-首先需要明确一点，除了简单业务(总共只有几个接口的场景)，如果测试的所有工作都是由人来执行那么可以说成本很高并且实际的结果不一定能保证。并且针对历史业务如果不尽可能的做全量测试，那么也不能保证历史功能的继承性。在这样的问题下，就需要有能力支持自动化执行用例测试，以及业务维度的测试保证。自动化用例执行的话
+For example:
+when you config your feature, you can drag template from right list to  middle area. and you can config parameters.
 
-#### 1.1.2 <span style="color:red">如何确保能有效的校验</span>
+<img width="1431" alt="image" src="https://user-images.githubusercontent.com/21210211/233954458-4a0c7972-4b34-437c-9955-604fd2402bbc.png">
 
-## 二 Windy 主要概念
+### Template
+you can manage templates in windy
+<img width="1433" alt="image" src="https://user-images.githubusercontent.com/21210211/233955404-c05dd560-f10b-4a4c-b7d3-0beaf453f3d2.png">
 
-### 2.1 服务
-> 在windy的设计中，服务是功能关联的基本对象，所有的功能都是绑定了服务，同时服务通过git关联了代码，所以最终所有的操作都是对于code的治理。
-
-### 2.2 流水线
-
-#### 2.2.1 变更
-变更的出现是为了将业务开发与需求或者是缺陷关联，这样就可以清晰的知道需求或者缺陷与开发的节奏，变更绑定了开发分支与需求或者缺陷的关系。
-
-#### 2.2.2 pipeline
-在业务开发中，代码开发完成是需要加入构建、部署、测试、上线的流程。pipeline就是为了解决这个问题产生的。开发可以根据自己的需求手动或者自动监听commit的方式触发流水线执行，然后完成一系列的流水线工作。
-
-#### 2.2.3 执行点
-执行点是基于pipeline来说的，对于pipeline来说它应该是一个执行容器，支持任何一种功能执行。所以在设计的时候就提供了执行点功能。执行点支持配置化，使用者可以基于配置的方式定制化指定代码在流水线执行的过程中需要经过哪些步骤。为了支持足够的动态化，所以配置是以http的Post方式提供，使用者可以自己diy。
-
-### 2.3 用例
-#### 2.3.1 测试集
-测试集是一系列测试用例点的集合，在这个集合中可以完成某次迭代的功能校验、可以对服务所有功能的校验、可以针对现有全量接口回归测试等等。
-
-#### 2.3.2 模版
-在用例编写的过程中，为了减少开发成本。可以自己提供不同的模版，然后只需要在模版中填写不同的参数即可完成用例的编写。可以参考提供的demo视频
-
-#### 2.3.3 任务
-任务的概念，其实可以理解为测试集的具体运行。测试集是为了测试接口功能完成了用例的编写，但是针对于不同测试需求，当在测试环境验证完成之后，还需要在预发环境也验证一次这个时候不可能重新编写一个，所以针对于环境的切换整体上看应该只需要切换配置。
 
