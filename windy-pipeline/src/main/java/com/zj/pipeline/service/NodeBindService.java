@@ -36,6 +36,7 @@ public class NodeBindService extends ServiceImpl<NodeBindMapper, NodeBind> {
   public Boolean createNodes(NodeBindDto nodeBindDto) {
     NodeBind nodeBind = nodeBindDto.toNodeBind();
     nodeBind.setNodeId(UUID.randomUUID().toString().replace("-", ""));
+    nodeBind.setUserId("admin");
     nodeBind.setCreateTime(System.currentTimeMillis());
     nodeBind.setUpdateTime(System.currentTimeMillis());
     boolean result = save(nodeBind);
@@ -62,8 +63,10 @@ public class NodeBindService extends ServiceImpl<NodeBindMapper, NodeBind> {
       List<String> removeList = oldList.stream()
           .filter(actionId -> !nodeBindDto.getExecutors().contains(actionId))
           .collect(Collectors.toList());
-      actionService.remove(
-          Wrappers.lambdaQuery(PipelineAction.class).in(PipelineAction::getActionId, removeList));
+      if (!CollectionUtils.isEmpty(removeList)){
+        actionService.remove(
+            Wrappers.lambdaQuery(PipelineAction.class).in(PipelineAction::getActionId, removeList));
+      }
 
       List<String> newList = nodeBindDto.getExecutors().stream()
           .filter(actionId -> !oldList.contains(actionId)).collect(Collectors.toList());

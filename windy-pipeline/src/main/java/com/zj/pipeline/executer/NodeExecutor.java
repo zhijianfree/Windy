@@ -91,7 +91,7 @@ public class NodeExecutor {
 
   private String getErrorMsg(Exception exception) {
     List<String> msg = new ArrayList<>();
-    msg.add("trigger node task error: " + exception.getCause().getMessage());
+    msg.add("trigger node task error: " + exception.toString());
     for (StackTraceElement element : exception.getStackTrace()) {
       msg.add(element.toString());
     }
