@@ -1,13 +1,17 @@
 package com.zj.feature.service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.PageSize;
+import com.zj.common.ResponseStatusModel;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.OrikaUtil;
+import com.zj.feature.entity.dto.FeatureHistoryDTO;
 import com.zj.feature.entity.dto.TaskInfoDTO;
 import com.zj.feature.entity.dto.TaskRecordDTO;
 import com.zj.feature.entity.po.FeatureInfo;
@@ -45,6 +49,9 @@ public class TaskInfoService extends ServiceImpl<TaskInfoMapper, TaskInfo> {
 
   @Autowired
   private TaskRecordService taskRecordService;
+
+  @Autowired
+  private FeatureHistoryService featureHistoryService;
 
   @Autowired
   private ICacheService cacheService;
@@ -163,5 +170,26 @@ public class TaskInfoService extends ServiceImpl<TaskInfoMapper, TaskInfo> {
     taskRecordDTO.setCreateTime(System.currentTimeMillis());
     taskRecordDTO.setUpdateTime(System.currentTimeMillis());
     return taskRecordDTO;
+  }
+
+  public ResponseStatusModel getTaskStatus(String taskId) {
+    List<TaskRecord> taskRecords = taskRecordService.list(Wrappers.lambdaQuery(TaskRecord.class).eq(TaskRecord::getTaskId, taskId).orderByDesc(TaskRecord::getCreateTime));
+    TaskRecord taskRecord = taskRecords.get(0);
+    Integer status = taskRecord.getStatus();
+    ResponseStatusModel responseStatusModel = new ResponseStatusModel();
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("status", status);
+
+    List<FeatureHistoryDTO> histories = featureHistoryService.getHistories(
+        taskRecord.getRecordId());
+    long successCount = histories.stream().filter(
+            history -> Objects.equals(history.getExecuteStatus(), ProcessStatus.SUCCESS.getType()))
+        .count();
+    jsonObject.put("success", successCount);
+    jsonObject.put("total", histories.size());
+
+    responseStatusModel.setData(jsonObject);
+    responseStatusModel.setMessage("");
+    return responseStatusModel;
   }
 }

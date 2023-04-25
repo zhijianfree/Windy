@@ -1,7 +1,7 @@
 package com.zj.pipeline.executer;
 
 
-import com.zj.pipeline.executer.enums.ProcessStatus;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.pipeline.executer.vo.TaskNode;
 
 /**

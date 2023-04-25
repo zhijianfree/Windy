@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.pipeline.entity.po.NodeRecord;
 import com.zj.pipeline.entity.po.PipelineHistory;
-import com.zj.pipeline.executer.enums.ProcessStatus;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.pipeline.executer.vo.PipelineRecord;
 import com.zj.pipeline.executer.vo.TaskNodeRecord;
 import com.zj.pipeline.mapper.NodeRecordMapper;

@@ -19,7 +19,7 @@ import com.zj.pipeline.entity.po.PipelineStage;
 import com.zj.pipeline.entity.vo.ActionParam;
 import com.zj.pipeline.entity.vo.ConfigDetail;
 import com.zj.pipeline.executer.PipelineExecutor;
-import com.zj.pipeline.executer.enums.ProcessStatus;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.pipeline.executer.notify.PipelineEventFactory;
 import com.zj.pipeline.executer.vo.ExecuteParam;
 import com.zj.pipeline.executer.vo.ExecuteType;
@@ -298,7 +298,7 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
     ConfigDetail configDetail = JSON.parseObject(pipelineNode.getConfigDetail(),
         ConfigDetail.class);
     PipelineActionDto action = pipelineActionService.getAction(configDetail.getActionId());
-    List<ActionParam> paramDetail = action.getParamDetail();
+    List<ActionParam> paramDetail = action.getParamList();
     JSONObject jsonObject = new JSONObject();
     paramDetail.forEach(param -> jsonObject.put(param.getName(), param.getValue()));
 
@@ -326,8 +326,7 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
         Wrappers.lambdaQuery(PipelineStage.class).eq(PipelineStage::getPipelineId, pipelineId)
             .orderByAsc(PipelineStage::getType));
     List<PipelineStageDTO> stageDTOList = pipelineStages.stream().map(stage -> {
-      PipelineStageDTO stageDTO = new PipelineStageDTO();
-      OrikaUtil.convert(stage, PipelineStageDTO.class);
+      PipelineStageDTO stageDTO = OrikaUtil.convert(stage, PipelineStageDTO.class);
       stageDTO.setNodes(stageNodeMap.get(stage.getStageId()));
       return stageDTO;
     }).collect(Collectors.toList());

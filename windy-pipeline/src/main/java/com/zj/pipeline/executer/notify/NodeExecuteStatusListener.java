@@ -9,7 +9,7 @@ import com.zj.pipeline.entity.dto.PipelineStageDTO;
 import com.zj.pipeline.entity.po.NodeRecord;
 import com.zj.pipeline.entity.po.PipelineNode;
 import com.zj.pipeline.executer.IStatusNotifyListener;
-import com.zj.pipeline.executer.enums.ProcessStatus;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.pipeline.service.PipelineHistoryService;
 import com.zj.pipeline.service.PipelineNodeRecordService;

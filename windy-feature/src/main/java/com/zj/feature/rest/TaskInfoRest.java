@@ -1,6 +1,7 @@
 package com.zj.feature.rest;
 
 import com.zj.common.ResponseMeta;
+import com.zj.common.ResponseStatusModel;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.PageSize;
 import com.zj.feature.entity.dto.TaskInfoDTO;
@@ -61,5 +62,10 @@ public class TaskInfoRest {
   public ResponseMeta<String> startTask(@PathVariable("taskId") String taskId) {
     String recordId = taskInfoService.startTask(taskId);
     return new ResponseMeta<>(ErrorCode.SUCCESS, recordId);
+  }
+
+  @GetMapping("/task/{taskId}/status")
+  public ResponseStatusModel getTaskStatus(@PathVariable("taskId") String taskId) {
+    return taskInfoService.getTaskStatus(taskId);
   }
 }

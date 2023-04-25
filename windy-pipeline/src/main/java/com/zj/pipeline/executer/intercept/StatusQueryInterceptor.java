@@ -2,10 +2,8 @@ package com.zj.pipeline.executer.intercept;
 
 import com.zj.pipeline.executer.INodeExecuteInterceptor;
 import com.zj.pipeline.executer.NodeStatusQueryLooper;
-import com.zj.pipeline.executer.enums.ProcessStatus;
-import com.zj.pipeline.executer.vo.NodeConfig;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.pipeline.executer.vo.TaskNode;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

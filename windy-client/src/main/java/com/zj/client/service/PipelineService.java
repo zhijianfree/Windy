@@ -3,7 +3,6 @@ package com.zj.client.service;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.client.entity.BuildParam;
 import com.zj.client.entity.ProcessStatus;
-import com.zj.client.entity.ResponseModel;
 import com.zj.client.pipeline.GitOperator;
 import com.zj.client.pipeline.MavenOperator;
 import java.io.File;

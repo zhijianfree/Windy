@@ -7,7 +7,7 @@ import com.google.common.eventbus.Subscribe;
 import com.zj.pipeline.entity.po.NodeRecord;
 import com.zj.pipeline.entity.vo.CompareResult;
 import com.zj.pipeline.executer.Invoker.IRemoteInvoker;
-import com.zj.pipeline.executer.enums.ProcessStatus;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.pipeline.executer.notify.PipelineEventFactory;
 import com.zj.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.pipeline.executer.vo.TaskNode;

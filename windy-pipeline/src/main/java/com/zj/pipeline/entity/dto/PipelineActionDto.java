@@ -21,23 +21,23 @@ public class PipelineActionDto {
   private String description;
   private String userId;
   private String actionUrl;
-  private List<ActionParam> paramDetail;
+  private List<ActionParam> paramList;
   private String queryUrl;
-  private List<CompareResult> results;
+  private List<CompareResult> compareResults;
   private Long createTime;
   private Long updateTime;
 
   public PipelineAction toPipelineAction() {
     PipelineAction pipelineAction = OrikaUtil.convert(this, PipelineAction.class);
-    pipelineAction.setParamDetail(JSON.toJSONString(this.getParamDetail()));
-    pipelineAction.setResult(JSON.toJSONString(this.getResults()));
+    pipelineAction.setParamDetail(JSON.toJSONString(this.getParamList()));
+    pipelineAction.setResult(JSON.toJSONString(this.getCompareResults()));
     return pipelineAction;
   }
 
   public static PipelineActionDto toPipelineActionDto(PipelineAction action) {
     PipelineActionDto pipelineAction = OrikaUtil.convert(action, PipelineActionDto.class);
-    pipelineAction.setParamDetail(JSON.parseArray(action.getParamDetail(), ActionParam.class));
-    pipelineAction.setResults(JSON.parseArray(action.getResult(), CompareResult.class));
+    pipelineAction.setParamList(JSON.parseArray(action.getParamDetail(), ActionParam.class));
+    pipelineAction.setCompareResults(JSON.parseArray(action.getResult(), CompareResult.class));
     return pipelineAction;
   }
 }

@@ -2,7 +2,7 @@ package com.zj.pipeline.executer;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.pipeline.executer.Invoker.IRemoteInvoker;
-import com.zj.pipeline.executer.enums.ProcessStatus;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.pipeline.executer.notify.PipelineEventFactory;
 import com.zj.pipeline.executer.vo.NodeConfig;
 import com.zj.pipeline.executer.vo.PipelineStatusEvent;

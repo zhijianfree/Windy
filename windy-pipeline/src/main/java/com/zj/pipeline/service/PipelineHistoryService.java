@@ -11,7 +11,7 @@ import com.zj.pipeline.entity.dto.PipelineHistoryDto;
 import com.zj.pipeline.entity.dto.PipelineExecuteInfo;
 import com.zj.pipeline.entity.po.NodeRecord;
 import com.zj.pipeline.entity.po.PipelineHistory;
-import com.zj.pipeline.executer.enums.ProcessStatus;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.pipeline.mapper.PipelineHistoryMapper;
 import java.util.Collections;
 import java.util.List;
