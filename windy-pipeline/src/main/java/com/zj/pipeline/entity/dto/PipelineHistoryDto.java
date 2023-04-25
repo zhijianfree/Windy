@@ -1,17 +1,15 @@
 package com.zj.pipeline.entity.dto;
 
+import com.zj.common.utils.OrikaUtil;
 import com.zj.pipeline.entity.po.PipelineHistory;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.beans.BeanUtils;
-
 import javax.validation.constraints.NotEmpty;
 
 /**
  * @author falcon
  * @since 2021/10/15
  */
-@Builder
 @Data
 public class PipelineHistoryDto {
 
@@ -58,14 +56,10 @@ public class PipelineHistoryDto {
   private Long createTime;
 
   public static PipelineHistoryDto toPipelineHistoryDto(PipelineHistory pipelineHistory){
-    PipelineHistoryDto pipelineHistoryDto = PipelineHistoryDto.builder().build();
-    BeanUtils.copyProperties(pipelineHistory,pipelineHistoryDto);
-    return pipelineHistoryDto;
+    return OrikaUtil.convert(pipelineHistory, PipelineHistoryDto.class);
   }
 
   public static PipelineHistory toPipelineHistory(PipelineHistoryDto pipelineHistoryDto){
-    PipelineHistory history = new PipelineHistory();
-    BeanUtils.copyProperties(pipelineHistoryDto, history);
-    return history;
+    return OrikaUtil.convert(pipelineHistoryDto, PipelineHistory.class);
   }
 }

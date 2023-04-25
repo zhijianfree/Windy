@@ -3,6 +3,7 @@ package com.zj.feature.service;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.utils.OrikaUtil;
 import com.zj.feature.entity.dto.ExecuteRecordDTO;
 import com.zj.feature.entity.po.ExecuteRecord;
 import com.zj.feature.mapper.ExecuteRecordMapper;
@@ -10,7 +11,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -26,8 +26,7 @@ public class ExecuteRecordService extends ServiceImpl<ExecuteRecordMapper, Execu
     }
 
     return featureHistories.stream().map(history -> {
-      ExecuteRecordDTO historyDTO = new ExecuteRecordDTO();
-      BeanUtils.copyProperties(history, historyDTO);
+      ExecuteRecordDTO historyDTO = OrikaUtil.convert(history, ExecuteRecordDTO.class);
       historyDTO.setExecuteResult(JSON.parseArray(history.getExecuteResult()));
       return historyDTO;
     }).collect(Collectors.toList());

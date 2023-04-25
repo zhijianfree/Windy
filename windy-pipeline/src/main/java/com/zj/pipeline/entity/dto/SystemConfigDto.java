@@ -1,11 +1,9 @@
 package com.zj.pipeline.entity.dto;
 
-import com.zj.pipeline.entity.po.NodeParamConfig;
+import com.zj.common.utils.OrikaUtil;
 import com.zj.pipeline.entity.po.SystemConfig;
-import lombok.Data;
-import org.springframework.beans.BeanUtils;
-
 import java.util.Objects;
+import lombok.Data;
 
 @Data
 public class SystemConfigDto {
@@ -54,14 +52,10 @@ public class SystemConfigDto {
             return null;
         }
 
-        SystemConfigDto systemConfigDto = new SystemConfigDto();
-        BeanUtils.copyProperties(systemConfig,systemConfigDto);
-        return systemConfigDto;
+        return OrikaUtil.convert(systemConfig, SystemConfigDto.class);
     }
 
     public static SystemConfig toSystemConfig(SystemConfigDto systemConfigDto){
-        SystemConfig systemConfig = new SystemConfig();
-        BeanUtils.copyProperties(systemConfigDto,systemConfig);
-        return systemConfig;
+        return OrikaUtil.convert(systemConfigDto, SystemConfig.class);
     }
 }

@@ -1,12 +1,12 @@
 package com.zj.pipeline.entity.dto;
 
 import com.alibaba.fastjson.JSON;
+import com.zj.common.utils.OrikaUtil;
 import com.zj.pipeline.entity.po.PipelineAction;
 import com.zj.pipeline.entity.vo.ActionParam;
 import com.zj.pipeline.entity.vo.CompareResult;
 import java.util.List;
 import lombok.Data;
-import org.springframework.beans.BeanUtils;
 
 /**
  * @author falcon
@@ -28,16 +28,14 @@ public class PipelineActionDto {
   private Long updateTime;
 
   public PipelineAction toPipelineAction() {
-    PipelineAction pipelineAction = new PipelineAction();
-    BeanUtils.copyProperties(this, pipelineAction);
+    PipelineAction pipelineAction = OrikaUtil.convert(this, PipelineAction.class);
     pipelineAction.setParamDetail(JSON.toJSONString(this.getParamDetail()));
     pipelineAction.setResult(JSON.toJSONString(this.getResults()));
     return pipelineAction;
   }
 
   public static PipelineActionDto toPipelineActionDto(PipelineAction action) {
-    PipelineActionDto pipelineAction = new PipelineActionDto();
-    BeanUtils.copyProperties(action, pipelineAction);
+    PipelineActionDto pipelineAction = OrikaUtil.convert(action, PipelineActionDto.class);
     pipelineAction.setParamDetail(JSON.parseArray(action.getParamDetail(), ActionParam.class));
     pipelineAction.setResults(JSON.parseArray(action.getResult(), CompareResult.class));
     return pipelineAction;

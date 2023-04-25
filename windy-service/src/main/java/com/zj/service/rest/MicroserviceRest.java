@@ -57,7 +57,7 @@ public class MicroserviceRest {
 
   @ResponseBody
   @DeleteMapping("/service/{serviceId}")
-  public ResponseMeta<Integer> deleteService(@PathVariable("serviceId") String serviceId) {
-    return new ResponseMeta<Integer>(ErrorCode.SUCCESS, microservice.deleteService(serviceId));
+  public ResponseMeta<Boolean> deleteService(@PathVariable("serviceId") String serviceId) {
+    return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, microservice.deleteService(serviceId));
   }
 }

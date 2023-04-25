@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.utils.OrikaUtil;
 import com.zj.feature.entity.dto.ExecuteTemplateDTO;
 import com.zj.common.PageSize;
 import com.zj.feature.entity.po.ExecuteTemplate;
@@ -16,7 +17,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -52,8 +52,7 @@ public class FeatureConfigService extends ServiceImpl<ExecuteTemplateMapper, Exe
   }
 
   public String createTemplate(ExecuteTemplateDTO executeTemplateDTO) {
-    ExecuteTemplate executeTemplate = new ExecuteTemplate();
-    BeanUtils.copyProperties(executeTemplateDTO, executeTemplate);
+    ExecuteTemplate executeTemplate = OrikaUtil.convert(executeTemplateDTO, ExecuteTemplate.class);
     executeTemplate.setTemplateId(UUID.randomUUID().toString());
     executeTemplate.setAuthor("admin");
     executeTemplate.setCreateTime(System.currentTimeMillis());
@@ -67,8 +66,7 @@ public class FeatureConfigService extends ServiceImpl<ExecuteTemplateMapper, Exe
   }
 
   public String updateTemplate(ExecuteTemplateDTO executeTemplateDTO) {
-    ExecuteTemplate executeTemplate = new ExecuteTemplate();
-    BeanUtils.copyProperties(executeTemplateDTO, executeTemplate);
+    ExecuteTemplate executeTemplate = OrikaUtil.convert(executeTemplateDTO, ExecuteTemplate.class);
     executeTemplate.setAuthor("admin");
     executeTemplate.setUpdateTime(System.currentTimeMillis());
     executeTemplate.setParam(JSON.toJSONString(executeTemplateDTO.getParams()));

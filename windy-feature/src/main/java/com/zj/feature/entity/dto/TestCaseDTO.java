@@ -1,9 +1,9 @@
 package com.zj.feature.entity.dto;
 
+import com.zj.common.utils.OrikaUtil;
 import com.zj.feature.entity.po.TestCase;
 import java.util.Objects;
 import lombok.Data;
-import org.springframework.beans.BeanUtils;
 
 /**
  * @author falcon
@@ -45,20 +45,13 @@ public class TestCaseDTO {
     if (Objects.isNull(testCase)) {
       return null;
     }
-
-    TestCaseDTO testCaseDTO = new TestCaseDTO();
-    BeanUtils.copyProperties(testCase, testCaseDTO);
-
-    return testCaseDTO;
+    return OrikaUtil.convert(testCase, TestCaseDTO.class);
   }
 
   public static TestCase toTestCase(TestCaseDTO testCaseDTO) {
     if (Objects.isNull(testCaseDTO)) {
       return null;
     }
-
-    TestCase testCase = new TestCase();
-    BeanUtils.copyProperties(testCaseDTO, testCase);
-    return testCase;
+    return OrikaUtil.convert(testCaseDTO, TestCase.class);
   }
 }

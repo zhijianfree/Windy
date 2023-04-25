@@ -1,12 +1,10 @@
 package com.zj.pipeline.entity.dto;
 
+import com.zj.common.utils.OrikaUtil;
 import com.zj.pipeline.entity.po.CodeChange;
-import lombok.Builder;
-import lombok.Data;
-
-import javax.validation.constraints.NotEmpty;
 import java.util.Objects;
-import org.springframework.beans.BeanUtils;
+import javax.validation.constraints.NotEmpty;
+import lombok.Data;
 
 /**
  * @author falcon
@@ -85,8 +83,6 @@ public class CodeChangeDto {
             return null;
         }
 
-        CodeChangeDto codeChangeDto = new CodeChangeDto();
-        BeanUtils.copyProperties(codeChange, codeChangeDto);
-        return codeChangeDto;
+        return OrikaUtil.convert(codeChange, CodeChangeDto.class);
     }
 }

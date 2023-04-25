@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.PageSize;
+import com.zj.common.utils.OrikaUtil;
 import com.zj.feature.entity.dto.TaskInfoDTO;
 import com.zj.feature.entity.dto.TaskRecordDTO;
 import com.zj.feature.entity.po.FeatureInfo;
@@ -24,7 +25,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -65,9 +65,7 @@ public class TaskInfoService extends ServiceImpl<TaskInfoMapper, TaskInfo> {
     }
 
     List<TaskInfoDTO> dtoList = taskInfoIPage.getRecords().stream().map(task -> {
-      TaskInfoDTO taskInfoDTO = new TaskInfoDTO();
-      BeanUtils.copyProperties(task, taskInfoDTO);
-
+      TaskInfoDTO taskInfoDTO = OrikaUtil.convert(task, TaskInfoDTO.class);
       boolean isRunning = isTaskRunning(taskInfoDTO);
       taskInfoDTO.setIsRunning(isRunning);
 
@@ -93,8 +91,7 @@ public class TaskInfoService extends ServiceImpl<TaskInfoMapper, TaskInfo> {
   }
 
   public Boolean createTask(TaskInfoDTO taskInfoDTO) {
-    TaskInfo taskInfo = new TaskInfo();
-    BeanUtils.copyProperties(taskInfoDTO, taskInfo);
+    TaskInfo taskInfo = OrikaUtil.convert(taskInfoDTO, TaskInfo.class);
     taskInfo.setTaskId(UUID.randomUUID().toString().replace("-", ""));
     taskInfo.setCreateTime(System.currentTimeMillis());
     taskInfo.setUpdateTime(System.currentTimeMillis());
@@ -102,8 +99,7 @@ public class TaskInfoService extends ServiceImpl<TaskInfoMapper, TaskInfo> {
   }
 
   public Boolean updateTask(TaskInfoDTO taskInfoDTO) {
-    TaskInfo taskInfo = new TaskInfo();
-    BeanUtils.copyProperties(taskInfoDTO, taskInfo);
+    TaskInfo taskInfo = OrikaUtil.convert(taskInfoDTO, TaskInfo.class);
     taskInfo.setUpdateTime(System.currentTimeMillis());
 
     return update(taskInfo,
@@ -119,9 +115,7 @@ public class TaskInfoService extends ServiceImpl<TaskInfoMapper, TaskInfo> {
     TaskInfo taskInfo = getOne(
         Wrappers.lambdaQuery(TaskInfo.class).eq(TaskInfo::getTaskId, taskId));
 
-    TaskInfoDTO taskInfoDTO = new TaskInfoDTO();
-    BeanUtils.copyProperties(taskInfo, taskInfoDTO);
-    return taskInfoDTO;
+    return OrikaUtil.convert(taskInfo, TaskInfoDTO.class);
   }
 
   public String startTask(String taskId) {

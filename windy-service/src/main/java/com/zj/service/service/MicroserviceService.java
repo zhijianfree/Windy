@@ -6,13 +6,13 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.PageSize;
+import com.zj.common.utils.OrikaUtil;
 import com.zj.service.entity.dto.MicroserviceDTO;
 import com.zj.service.entity.po.Microservice;
 import com.zj.service.mapper.MicroserviceMapper;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -33,11 +33,9 @@ public class MicroserviceService extends ServiceImpl<MicroserviceMapper, Microse
       return pageSize;
     }
 
-    List<MicroserviceDTO> microserviceDTOS = page.getRecords().stream().map(microservice -> {
-      MicroserviceDTO microserviceDto = new MicroserviceDTO();
-      BeanUtils.copyProperties(microservice, microserviceDto);
-      return microserviceDto;
-    }).collect(Collectors.toList());
+    List<MicroserviceDTO> microserviceDTOS = page.getRecords().stream()
+        .map(microservice -> OrikaUtil.convert(microservice, MicroserviceDTO.class))
+        .collect(Collectors.toList());
 
     pageSize.setData(microserviceDTOS);
     pageSize.setTotal(page.getTotal());
@@ -45,8 +43,7 @@ public class MicroserviceService extends ServiceImpl<MicroserviceMapper, Microse
   }
 
   public String createService(MicroserviceDTO microserviceDto) {
-    Microservice microservice = new Microservice();
-    BeanUtils.copyProperties(microserviceDto, microservice);
+    Microservice microservice = OrikaUtil.convert(microserviceDto, Microservice.class);
     microservice.setServiceId(UUID.randomUUID().toString().replace("-", ""));
     microservice.setOwner("admin");
     microservice.setCreateTime(System.currentTimeMillis());
@@ -56,37 +53,32 @@ public class MicroserviceService extends ServiceImpl<MicroserviceMapper, Microse
   }
 
   public String updateService(MicroserviceDTO microserviceDto) {
-    Microservice microservice = new Microservice();
-    BeanUtils.copyProperties(microserviceDto, microservice);
+    Microservice microservice = OrikaUtil.convert(microserviceDto, Microservice.class);
     microservice.setUpdateTime(System.currentTimeMillis());
     boolean update = update(microservice, Wrappers.lambdaUpdate(Microservice.class)
         .eq(Microservice::getServiceId, microservice.getServiceId()));
     return update ? microserviceDto.getServiceId() : null;
   }
 
-  public Integer deleteService(String serviceId) {
-    boolean remove = remove(
+  public Boolean deleteService(String serviceId) {
+    return remove(
         Wrappers.lambdaUpdate(Microservice.class).eq(Microservice::getServiceId, serviceId));
-    return remove ? 1 : 0;
   }
 
   public MicroserviceDTO queryServiceDetail(String serviceId) {
     Microservice microservice = getOne(
         Wrappers.lambdaQuery(Microservice.class).eq(Microservice::getServiceId, serviceId));
-    MicroserviceDTO microserviceDto = new MicroserviceDTO();
-    BeanUtils.copyProperties(microservice, microserviceDto);
-    return microserviceDto;
+    return OrikaUtil.convert(microservice, MicroserviceDTO.class);
   }
 
   public List<MicroserviceDTO> getServices() {
-    return list().stream().map(microservice -> {
-      MicroserviceDTO microserviceDto = new MicroserviceDTO();
-      BeanUtils.copyProperties(microservice, microserviceDto);
-      return microserviceDto;
-    }).collect(Collectors.toList());
+    return list().stream()
+        .map(microservice -> OrikaUtil.convert(microservice, MicroserviceDTO.class))
+        .collect(Collectors.toList());
   }
 
   public Microservice getServiceDetail(String serviceId) {
-    return getOne(Wrappers.lambdaQuery(Microservice.class).eq(Microservice::getServiceId, serviceId));
+    return getOne(
+        Wrappers.lambdaQuery(Microservice.class).eq(Microservice::getServiceId, serviceId));
   }
 }

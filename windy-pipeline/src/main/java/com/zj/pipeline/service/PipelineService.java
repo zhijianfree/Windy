@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
+import com.zj.common.utils.OrikaUtil;
 import com.zj.pipeline.entity.dto.PipelineActionDto;
 import com.zj.pipeline.entity.dto.PipelineDTO;
 import com.zj.pipeline.entity.dto.PipelineNodeDTO;
@@ -39,7 +40,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -264,7 +264,7 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
         .collect(Collectors.toList());
     //去除首尾两个节点
     stageList.remove(0);
-    stageList.remove(stageList.size() -1);
+    stageList.remove(stageList.size() - 1);
     executeParam.setStages(stageList);
     return pipelineExecutor.execute(executeParam);
   }
@@ -276,7 +276,8 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
 
     List<PipelineNode> pipelineNodes = pipelineNodeService.list(
         Wrappers.lambdaQuery(PipelineNode.class)
-            .eq(PipelineNode::getStageId, pipelineStage.getStageId()).orderByAsc(PipelineNode::getType));
+            .eq(PipelineNode::getStageId, pipelineStage.getStageId())
+            .orderByAsc(PipelineNode::getType));
     if (CollectionUtils.isEmpty(pipelineNodes)) {
       return stage;
     }
@@ -317,18 +318,16 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
   public PipelineDTO getPipelineDetail(String pipelineId) {
     List<PipelineNode> pipelineNodes = pipelineNodeService.list(
         Wrappers.lambdaQuery(PipelineNode.class).eq(PipelineNode::getPipelineId, pipelineId));
-    Map<String, List<PipelineNodeDTO>> stageNodeMap = pipelineNodes.stream().map(node -> {
-      PipelineNodeDTO pipelineNodeDTO = new PipelineNodeDTO();
-      BeanUtils.copyProperties(node, pipelineNodeDTO);
-      return pipelineNodeDTO;
-    }).collect(Collectors.groupingBy(PipelineNodeDTO::getStageId));
+    Map<String, List<PipelineNodeDTO>> stageNodeMap = pipelineNodes.stream()
+        .map(node -> OrikaUtil.convert(node, PipelineNodeDTO.class))
+        .collect(Collectors.groupingBy(PipelineNodeDTO::getStageId));
 
     List<PipelineStage> pipelineStages = pipelineStageService.list(
         Wrappers.lambdaQuery(PipelineStage.class).eq(PipelineStage::getPipelineId, pipelineId)
             .orderByAsc(PipelineStage::getType));
     List<PipelineStageDTO> stageDTOList = pipelineStages.stream().map(stage -> {
       PipelineStageDTO stageDTO = new PipelineStageDTO();
-      BeanUtils.copyProperties(stage, stageDTO);
+      OrikaUtil.convert(stage, PipelineStageDTO.class);
       stageDTO.setNodes(stageNodeMap.get(stage.getStageId()));
       return stageDTO;
     }).collect(Collectors.toList());
