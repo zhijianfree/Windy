@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
-import ma.glasnost.orika.metadata.ClassMapBuilder;
 
 /**
  * 对象拷贝

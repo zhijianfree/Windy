@@ -40,6 +40,7 @@
     <git-client.version>6.5.0.202303070854-r</git-client.version>
     <common-io.version>2.11.0</common-io.version>
     <guava.version>27.1-jre</guava.version>
+    <orika.version>1.5.4</orika.version>
   </properties>
 
   <dependencyManagement>
