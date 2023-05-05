@@ -1,37 +1,44 @@
 ## Windy
-Windy is a simple devops tool,it provides multi funtions to promise business. windy provide the pipeline web ui to help engineer to build and deploy thier codes.and it provides the feature design tool to help engineer to design how to test their code.
+   Windy是一款轻量级Devops平台工具,支持服务代码变更管理，代码部署、用例编写、代码测试、流水线扩展等特性。使用Windy你可以在最简化的资源的情况下，保证业务功能的正确性以及延续性(多次迭代的情况下，依然可以保证历史业务不受影响)。简单来说，windy覆盖了日常开发的整个生命周期，从代码构建、部署、测试、发布、上线都支持。
 
 ### Global Design
-windy use web broker to support user to manage their pipelines and features. when web user run task, Master node will scan the tasks and split task to multi sub tasks, then dispatch sub task to client. when client receive the sub task , it will run it and notify task staus to master.
+  Windy提供Web端页面，可以在页面端完成用例的设计以及流水线的编排。当要执行流水线或者用例时，用户在页面点击运行即可。分配器会从数据库中拉取任务，拉取到任务之后分配给子节点然后由子节点运行。<br/>
+  Master节点设计内含了eureka，提供了注册中心能力。这样可以管理和维护子节点信息。其中master节点和client节点都是高可用设计，保证任务执行的连贯性。
+  <br/>
+![整体设计-整体设计 drawio](https://user-images.githubusercontent.com/21210211/236386934-c0d7d62f-32aa-45ef-ab0d-33874d9caf7a.png)
 
-![整体设计-整体设计](https://user-images.githubusercontent.com/21210211/233932843-8f0374aa-0862-4f69-9bf6-7c1b32746875.png)
+
 
 ### Pipline
+流水线是一系列节点组合的任务组，对于流水线来说是从开始节点一直运行到结束节点，中间可以添加任意节点任务。一般添加构建、部署、测试、任务即可，如果想运行其他任务可以自定义配置节点。每个节点的配置分为两步，触发与查询。当流水线执行到当前节点时，流水线会先执行节点的"触发",触发成功后开始执行查询任务，查询到结果后更新节点任务状态。
 
-![整体设计-流水线](https://user-images.githubusercontent.com/21210211/233935517-06b86d99-107c-4dd3-9314-15c7492a119f.png)
+<br/>
 
-pipeline has multi sub nodes, every node define a single task. web user can define their own pipeline. And pipeline allow you add third service to execute, you just need config your service.
+![整体设计-流水线 drawio](https://user-images.githubusercontent.com/21210211/236386954-06c9bb13-c654-4d59-a4dc-d33ebad27a66.png)
 
-#### Custom Node Define
-you just need two steps to define your own pipeline node
-- Trigger Task: define a post url and body parameters to request your http interface.
-- Query Status: define a post url and body parameters to get task result
-when pipeline get result from  "Query status", pipeline will check  whether the result is success. 
+<br/>
 
-For example: <br/>
-user config the node that define "Trigger Task" url("http://localhost:8070/v1/devops/client/build") to tigger build, and config "Query Status" url("http://localhost:8070/v1/devops/client/build/status") to get execute status. and from "Query Status" define, pipeline will check whether  param "status" match expect value "1" 
+
+#### 自定义节点
+添加自定义节点只需要配置两个信息即可
+- 触发任务的地址和参数: 定义好调用的接口信息和参数，默认使用HTTTP的Post请求。
+- 查询状态: 定义好状态查询地址，默认使用HTTTP的Post请求，并且定义查询结果的期望值。当获取到查询结果，会根据定义好的参数值与期望值比对以此来确定任务是否执行成功。
+
+
+示例: <br/>
+添加任务节点"构建代码"时， 配置触发构建代码的url("http://localhost:8070/v1/devops/client/build")，并且配置查询状态地址url("http://localhost:8070/v1/devops/client/build/status"). 流水线执行节点状态查询时，会根据定义的响应字段 "status"查询其对应的值是否与期望值 "1"相等。 
 <img width="1405" alt="image" src="https://user-images.githubusercontent.com/21210211/233949274-bb714a11-7466-49fe-88ea-7850063f4360.png">
 
-### Feature
-windy provide web ui to define how to test code. when you write your feature, you can user http,mysql,dubbo,etc... templte to complete your feature. if you have your own template , you also can add it in windy 
+### 用例设计
+针对于每次的代码变更一般都会引入测试人员的介入，如果当业务开发量比较大的时候所有业务的正确性都靠测试来保证，那么测试资源肯定是不够的。并且测试过程中可能会存在一定的简单问题，在流程上反复打回增加流程成本，或者重复性功能测试产生不必要的人工成本。针对以上的问题，Windy提供了动态扩展以及界面编写用例的能力，开发或者测试人员在页面拖拽实现开发功能接口的测试。并且在用例编写完成之后，在后续的迭代中只需指定对应的用例运行就可以检测历史业务是否正确，不需要测试人员介入。针对于测试人员，可以通过用例设计实现端到端的模拟真实业务场景，更加有效的测试业务功能。
 
-For example:
-when you config your feature, you can drag template from right list to  middle area. and you can config parameters.
+示例:
+在用例设计页面，可以在右侧模版列表中拖拽到用例集中，然后在用例集中编写测试用例参数信息。多个模版组合在一起完成一个用例的编写。
 
 <img width="1431" alt="image" src="https://user-images.githubusercontent.com/21210211/233954458-4a0c7972-4b34-437c-9955-604fd2402bbc.png">
 
-### Template
-you can manage templates in windy
+### 模版
+模版是用力编写的最小单元，模版去除了代码开发，只将必要的字段作为参数让使用者填充整个功能在模版内实现。模版目前都是内置的，后续支持第三方dubbo、http、或者jar插件的方式实现。
 <img width="1433" alt="image" src="https://user-images.githubusercontent.com/21210211/233955404-c05dd560-f10b-4a4c-b7d3-0beaf453f3d2.png">
 
 
