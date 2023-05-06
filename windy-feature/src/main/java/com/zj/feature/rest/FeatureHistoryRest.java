@@ -12,20 +12,20 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/v1/devops")
+@RequestMapping("/v1/devops/feature")
 @RestController
 public class FeatureHistoryRest {
 
     @Autowired
     private FeatureHistoryService featureHistoryService;
 
-    @GetMapping("/feature/{featureId}/histories")
+    @GetMapping("/{featureId}/histories")
     public ResponseMeta<List<FeatureHistoryDTO>> queryFeatureHistories(@PathVariable("featureId") String featureId) {
         return new ResponseMeta<List<FeatureHistoryDTO>>(ErrorCode.SUCCESS, featureHistoryService.featureHistories(featureId));
     }
 
 
-    @DeleteMapping("/feature/history/{historyId}")
+    @DeleteMapping("/history/{historyId}")
     public ResponseMeta<Boolean> deleteFeatureHistory(@PathVariable("historyId") String historyId) {
         return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, featureHistoryService.deleteHistory(historyId));
     }

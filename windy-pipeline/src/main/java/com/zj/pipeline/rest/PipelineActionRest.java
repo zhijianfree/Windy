@@ -1,14 +1,10 @@
 package com.zj.pipeline.rest;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.zj.common.PageSize;
 import com.zj.common.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
 import com.zj.pipeline.entity.dto.PipelineActionDto;
-import com.zj.pipeline.entity.po.PipelineAction;
-import com.zj.pipeline.mapper.PipelineActionMapper;
 import com.zj.pipeline.service.PipelineActionService;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
