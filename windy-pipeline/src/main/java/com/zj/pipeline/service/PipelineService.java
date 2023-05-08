@@ -18,6 +18,7 @@ import com.zj.pipeline.entity.po.PipelineNode;
 import com.zj.pipeline.entity.po.PipelineStage;
 import com.zj.pipeline.entity.vo.ActionParam;
 import com.zj.pipeline.entity.vo.ConfigDetail;
+import com.zj.pipeline.executer.Invoker.builder.ContextBuilder;
 import com.zj.pipeline.executer.PipelineExecutor;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.pipeline.executer.notify.PipelineEventFactory;
@@ -27,6 +28,7 @@ import com.zj.pipeline.executer.vo.HttpRequestContext;
 import com.zj.pipeline.executer.vo.NodeConfig;
 import com.zj.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.pipeline.executer.vo.RefreshContext;
+import com.zj.pipeline.executer.vo.RequestContext;
 import com.zj.pipeline.executer.vo.Stage;
 import com.zj.pipeline.executer.vo.TaskNode;
 import com.zj.pipeline.mapper.PipelineMapper;
@@ -292,19 +294,14 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
     TaskNode taskNode = new TaskNode();
     taskNode.setNodeId(pipelineNode.getNodeId());
     taskNode.setName(pipelineNode.getNodeName());
-    taskNode.setExecuteType(ExecuteType.HTTP.name());
     taskNode.setExecuteTime(System.currentTimeMillis());
 
     ConfigDetail configDetail = JSON.parseObject(pipelineNode.getConfigDetail(),
         ConfigDetail.class);
     PipelineActionDto action = pipelineActionService.getAction(configDetail.getActionId());
-    List<ActionParam> paramDetail = action.getParamList();
-    JSONObject jsonObject = new JSONObject();
-    paramDetail.forEach(param -> jsonObject.put(param.getName(), param.getValue()));
-
-    HttpRequestContext context = HttpRequestContext.builder().body(JSON.toJSONString(jsonObject))
-        .url(action.getActionUrl()).build();
-    taskNode.setRequestContext(context);
+    taskNode.setExecuteType(action.getExecuteType());
+    RequestContext requestContext = ContextBuilder.createContext(action.getExecuteType(), action);
+    taskNode.setRequestContext(requestContext);
 
     RefreshContext refreshContext = RefreshContext.builder().url(action.getQueryUrl())
         .compareConfig(configDetail.getCompareInfo()).headers(new HashMap<>()).build();

@@ -40,8 +40,8 @@ public class HttpExecutor implements IRemoteInvoker {
   }
 
   @Override
-  public String type() {
-    return ExecuteType.HTTP.name();
+  public ExecuteType type() {
+    return ExecuteType.HTTP;
   }
 
   public boolean triggerRun(RequestContext requestContext, String recordId) throws IOException {

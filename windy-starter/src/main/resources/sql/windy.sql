@@ -460,6 +460,37 @@ CREATE TABLE `test_case_config` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
+## 流水线默认配置
 INSERT INTO windy.system_config (config_id,config_name,parent_id,`type`,config_detail,sort,create_time,update_time) VALUES
 	 ('1','流水线默认配置',NULL,1,'[{"id":"0","name":"开始","status":"success","root":true,"group":"0","disable":true,"next":[{"index":1,"weight":0}]},{"id":"1","name":"结束","disable":true,"status":"success","group":"1","root":true}]',1,1,1);
+
+## 添加默认用例模版
+INSERT INTO devops.execute_template(id, template_id, template_type, service, `method`, name, author, description, source, param, create_time, update_time)
+VALUES(1, '71a26960299f49c3aa26b687ea2fbdb2', 2, NULL, 'for', 'for循环', 'admin', '循环查询', NULL, NULL, 1, 1);
+INSERT INTO devops.execute_template(id, template_id, template_type, service, `method`, name, author, description, source, param, create_time, update_time)
+VALUES(2, '71a26960299f49c3aa26b687ea2fbdb3', 2, NULL, 'if', 'if判断', 'admin', '条件执行', NULL, NULL, 1, 2);
+INSERT INTO devops.execute_template
+(id, template_id, template_type, service, `method`, name, author, description, source, param, create_time, update_time)
+VALUES(3, '71a26960299f49c3aa26b687ea2fbdba', 1, 'com.zj.feature.ability.mysql.MysqlFeature', 'executeQuery', 'mysql查询', 'admin', '执行mysql语句', NULL, '[{"defaultValue":{"defaultValue":"NULL"},"description":"mysql连接地址","paramKey":"connect","type":0},{"defaultValue":{"defaultValue":"NULL"},"description":"数据库名称","paramKey":"dbName","type":0},{"defaultValue":{"defaultValue":"NULL"},"description":"数据库用户","paramKey":"user","type":0},{"defaultValue":{"defaultValue":"NULL"},"description":"用户密码","paramKey":"password","type":0},{"defaultValue":{"defaultValue":""},"description":"执行的sql","paramKey":"sql","type":0}]', 1670927202853, 1675219942024);
+INSERT INTO devops.execute_template
+(id, template_id, template_type, service, `method`, name, author, description, source, param, create_time, update_time)
+VALUES(4, 'f18a546c54fe4f70bae3a0b529e46908', 1, 'com.zj.feature.ability.http.HttpFeature', 'startHttp', 'Http请求', 'admin', '简单的http请求', NULL, '[{"defaultValue":{"defaultValue":""},"description":"请求的url","paramKey":"url","type":0},{"defaultValue":{"defaultValue":"","range":["GET","POST","PUT","DELETE"]},"description":"请求的Http方法","paramKey":"method","type":2},{"defaultValue":{"defaultValue":""},"description":"http请求的header","paramKey":"headers","type":1},{"defaultValue":{"defaultValue":""},"description":"请求的body内容","paramKey":"body","type":0}]', 1671003944283, 1675230014305);
+INSERT INTO devops.execute_template
+(id, template_id, template_type, service, `method`, name, author, description, source, param, create_time, update_time)
+VALUES(5, '75196a0088be47cea7c58452f432d6e5', 1, 'com.zj.feature.ability.atop.AtopFeature', 'atopRequest', 'atop接口请求', 'admin', '发起atop接口请求', NULL, '[{"defaultValue":{"defaultValue":"${remoteUrl}"},"description":"atop接口域名","paramKey":"url","type":0},{"defaultValue":{"defaultValue":""},"description":"请求的atop接口","paramKey":"api","type":0},{"defaultValue":{"defaultValue":""},"description":"接口版本号","paramKey":"version","type":0},{"defaultValue":{"defaultValue":"${clientId}"},"description":"客户端唯一标识ID","paramKey":"clientId","type":0},{"defaultValue":{"defaultValue":"${secret}"},"description":"客户端密钥","paramKey":"secret","type":0},{"defaultValue":{"defaultValue":""},"description":"请求的参数，json字符串格式","paramKey":"postData","type":0},{"defaultValue":{"defaultValue":"${sessionId}"},"description":"用户sessionId","paramKey":"sid","type":0}]', 1672900982693, 1677494163700);
+INSERT INTO devops.execute_template
+(id, template_id, template_type, service, `method`, name, author, description, source, param, create_time, update_time)
+VALUES(6, '566635e07a0d4e62a39abec42f3cd610', 1, 'com.zj.feature.ability.highway.HighwayFeature', 'requestHighway', 'Highway请求', 'admin', '发起Highway接口请求', NULL, '[{"defaultValue":{"defaultValue":"${remoteUrl}"},"description":"highway接口url","paramKey":"url","type":0},{"defaultValue":{"defaultValue":"","range":["GET","PUT","DELETE","POST"]},"description":"http请求方法","paramKey":"method","type":2},{"defaultValue":{"defaultValue":""},"description":"请求的内容","paramKey":"body","type":0},{"defaultValue":{"defaultValue":"${clientId}"},"description":"请求的clientId(IOT开放平台)","paramKey":"appKey","type":0},{"defaultValue":{"defaultValue":"${secret}"},"description":"请求的secret(IOT开放平台)","paramKey":"appSecret","type":0},{"defaultValue":{"defaultValue":""},"description":"请求的token，需要时填写","paramKey":"accessToken","type":0},{"defaultValue":{"defaultValue":""},"description":"http请求的header","paramKey":"header","type":1}]', 1672998035742, 1677227401010);
+INSERT INTO devops.execute_template
+(id, template_id, template_type, service, `method`, name, author, description, source, param, create_time, update_time)
+VALUES(7, '9dcb1e34d902487fa2e5698a14dbb552', 1, 'com.zj.feature.ability.kafka.KafkaFeature', 'startConsume', 'kafka消费', 'guyuelan', '消费kafka消息', NULL, '[{"description":"kafka地址ip:port格式","paramKey":"address","type":0},{"description":"kafka消费topic","paramKey":"topic","type":0},{"description":"kafka消费群组","paramKey":"group","type":0}]', 1673421517596, 1673421517596);
+INSERT INTO devops.execute_template
+(id, template_id, template_type, service, `method`, name, author, description, source, param, create_time, update_time)
+VALUES(8, 'ef4fa4c63cc8488c801590eca36580d4', 1, 'com.zj.feature.ability.kafka.KafkaFeature', 'produceMessage', '发送Kafak消息', 'guyuelan', '发送kafka消息', NULL, '[{"description":"发送的topic","paramKey":"topic","type":0},{"description":"发送消息的key","paramKey":"key","type":0},{"description":"发送kafka消息内容","paramKey":"value","type":0},{"description":"发送超时时间，单位秒","paramKey":"timeout","type":3},{"description":"kafka地址格式ip:port","paramKey":"address","type":0}]', 1673422627042, 1673423118348);
+INSERT INTO devops.execute_template
+(id, template_id, template_type, service, `method`, name, author, description, source, param, create_time, update_time)
+VALUES(9, 'd9329caeea7340f4bec38d5727e521c8', 1, 'com.zj.feature.ability.redis.RedisFeature', 'setValue', 'Redis设置Value', 'guyuelan', '设置redis值', NULL, '[{"description":"redis实例IP","paramKey":"ip","type":0},{"description":"redis实例端口","paramKey":"port","type":3},{"description":"设置Key","paramKey":"key","type":0},{"description":"设置value","paramKey":"value","type":0},{"description":"超时时间","paramKey":"timeout","type":3}]', 1673431790811, 1673431790811);
+INSERT INTO devops.execute_template
+(id, template_id, template_type, service, `method`, name, author, description, source, param, create_time, update_time)
+VALUES(10, 'a145661e75e040d0bb7be75fedf6c60e', 1, 'com.zj.feature.ability.redis.RedisFeature', 'getValue', '获取Redis值', 'guyuelan', '获取redis值', NULL, '[{"description":"redis实例ip","paramKey":"ip","type":0},{"description":"redis实例端口","paramKey":"port","type":3},{"description":"key","paramKey":"key","type":0}]', 1673431883618, 1673431883618);
+

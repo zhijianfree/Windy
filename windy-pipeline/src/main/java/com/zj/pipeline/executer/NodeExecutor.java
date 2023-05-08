@@ -36,7 +36,7 @@ public class NodeExecutor {
       PipelineNodeRecordService pipelineNodeRecordService) {
     this.interceptors = interceptors;
     invokerMap = invokers.stream()
-        .collect(Collectors.toMap(IRemoteInvoker::type, invoker -> invoker));
+        .collect(Collectors.toMap(invoker -> invoker.type().name(), invoker -> invoker));
     this.pipelineNodeRecordService = pipelineNodeRecordService;
   }
 

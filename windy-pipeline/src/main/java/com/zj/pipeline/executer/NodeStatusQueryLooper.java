@@ -45,6 +45,7 @@ public class NodeStatusQueryLooper implements IStatusNotifyListener, Runnable {
   public static final String OPERATOR_FORMAT = "操作符:【%s】";
 
   private final Map<String, Long> timeoutRecordMap = new ConcurrentHashMap<>();
+  private final Map<String, IRemoteInvoker> remoteInvokerMap;
 
   private CopyOnWriteArrayList<String> stopRecords = new CopyOnWriteArrayList<>();
   private final LinkedBlockingQueue<TaskNode> queue = new LinkedBlockingQueue<TaskNode>();
@@ -53,12 +54,14 @@ public class NodeStatusQueryLooper implements IStatusNotifyListener, Runnable {
   private ExecutorService executorService;
 
   private final PipelineNodeRecordService nodeRecordService;
-  private final IRemoteInvoker remoteInvoker;
+
 
   public NodeStatusQueryLooper(PipelineNodeRecordService nodeRecordService,
-      IRemoteInvoker remoteInvoker) {
+      List<IRemoteInvoker> remoteInvokers) {
     this.nodeRecordService = nodeRecordService;
-    this.remoteInvoker = remoteInvoker;
+    remoteInvokerMap = remoteInvokers.stream()
+        .collect(Collectors.toMap(invoker -> invoker.type().name(), invoker -> invoker));
+
     new Thread(this).start();
   }
 
@@ -68,6 +71,7 @@ public class NodeStatusQueryLooper implements IStatusNotifyListener, Runnable {
 
   private void runNode(TaskNode node) {
     executorService.execute(() -> {
+      IRemoteInvoker remoteInvoker = remoteInvokerMap.get(node.getExecuteType());
       String result = remoteInvoker.queryStatus(node.getRefreshContext(), node.getRecordId());
       log.info("get query status result={}", result);
 

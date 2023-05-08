@@ -1,6 +1,7 @@
 package com.zj.pipeline.executer.Invoker;
 
 
+import com.zj.pipeline.executer.vo.ExecuteType;
 import com.zj.pipeline.executer.vo.RefreshContext;
 import com.zj.pipeline.executer.vo.RequestContext;
 import java.io.IOException;
@@ -11,7 +12,7 @@ import java.io.IOException;
  */
 public interface IRemoteInvoker {
 
-  String type();
+  ExecuteType type();
 
   /**
    * 触发执行节点任务
