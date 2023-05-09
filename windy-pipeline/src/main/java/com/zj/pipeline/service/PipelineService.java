@@ -16,8 +16,10 @@ import com.zj.pipeline.entity.po.NodeRecord;
 import com.zj.pipeline.entity.po.Pipeline;
 import com.zj.pipeline.entity.po.PipelineNode;
 import com.zj.pipeline.entity.po.PipelineStage;
+import com.zj.pipeline.entity.vo.ActionDetail;
 import com.zj.pipeline.entity.vo.ConfigDetail;
-import com.zj.pipeline.executer.Invoker.builder.ContextBuilder;
+import com.zj.pipeline.executer.Invoker.builder.RefreshContextBuilder;
+import com.zj.pipeline.executer.Invoker.builder.RequestContextBuilder;
 import com.zj.pipeline.executer.PipelineExecutor;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.pipeline.executer.notify.PipelineEventFactory;
@@ -85,10 +87,12 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
     }
 
     List<PipelineStageDTO> stageList = pipelineDTO.getStageList();
+    List<PipelineStageDTO> temp = JSON.parseArray(JSON.toJSONString(stageList),
+        PipelineStageDTO.class);
     addOrUpdateNode(pipelineId, stageList);
 
     //删除不存在的节点
-    deleteNotExistStageAndNodes(oldPipeline, stageList);
+    deleteNotExistStageAndNodes(oldPipeline, temp);
     return true;
   }
 
@@ -173,17 +177,10 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
 
   @Transactional
   public Boolean deletePipeline(String service, String pipelineId) {
-    boolean deleteStage = pipelineStageService.remove(
+    pipelineStageService.remove(
         Wrappers.lambdaQuery(PipelineStage.class).eq(PipelineStage::getPipelineId, pipelineId));
-    if (!deleteStage) {
-      throw new ApiException(ErrorCode.DELETE_PIPELINE_ERROR);
-    }
-
-    boolean deleteNodeResult = pipelineNodeService.remove(
+    pipelineNodeService.remove(
         Wrappers.lambdaQuery(PipelineNode.class).eq(PipelineNode::getPipelineId, pipelineId));
-    if (!deleteNodeResult) {
-      throw new ApiException(ErrorCode.DELETE_PIPELINE_ERROR);
-    }
     return remove(Wrappers.lambdaQuery(Pipeline.class).eq(Pipeline::getPipelineId, pipelineId));
   }
 
@@ -298,11 +295,12 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
         ConfigDetail.class);
     PipelineActionDto action = pipelineActionService.getAction(configDetail.getActionId());
     taskNode.setExecuteType(action.getExecuteType());
-    RequestContext requestContext = ContextBuilder.createContext(action.getExecuteType(), action);
+
+    ActionDetail actionDetail = new ActionDetail(configDetail, action);
+    RequestContext requestContext = RequestContextBuilder.createContext(actionDetail);
     taskNode.setRequestContext(requestContext);
 
-    RefreshContext refreshContext = RefreshContext.builder().url(action.getQueryUrl())
-        .compareConfig(configDetail.getCompareInfo()).headers(new HashMap<>()).build();
+    RefreshContext refreshContext = RefreshContextBuilder.createContext(actionDetail);
     taskNode.setRefreshContext(refreshContext);
 
     NodeConfig nodeConfig = new NodeConfig();
@@ -338,7 +336,7 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
     if (CollectionUtils.isEmpty(records)) {
       return false;
     }
-    records.forEach(record ->{
+    records.forEach(record -> {
       TaskNode taskNode = new TaskNode();
       taskNode.setRecordId(record.getRecordId());
       taskNode.setNodeId(record.getNodeId());

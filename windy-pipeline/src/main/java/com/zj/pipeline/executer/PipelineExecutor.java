@@ -58,39 +58,4 @@ public class PipelineExecutor {
     executeProxy.execute(pipelineTask);
     return historyId;
   }
-
-//  public String execute(ExecuteParam executeParam) {
-//    List<Stage> stages = executeParam.getStages();
-//    /*
-//     * 每执行一次任务，应该都有执行任务的记录。任务记录的最小单位是节点任务，所有任务的状态都是异步刷新。任务状态异步刷新
-//     * 那么则需要每个任务在添加时`，都明确配置查询状态的接口。
-//     * */
-//    log.info("start run pipeline={} name={}", executeParam.getPipelineId(), executeParam.getName());
-//    String historyId = UUID.randomUUID().toString();
-//    PipelineRecord pipelineRecord = PipelineRecord.builder()
-//        .pipelineId(executeParam.getPipelineId()).historyId(historyId)
-//        .pipelineStatus(ProcessStatus.RUNNING.getType()).build();
-//    nodeRecordService.savePipelineHistory(pipelineRecord);
-//
-//    //todo 并行和串行执行
-//    stages.forEach(stage -> {
-//      log.info("start run stage={} name={}", stage.getStageId(), stage.getStageName());
-//      List<CompletableFuture<Void>> futures = stage.getNodeList().stream().map(
-//          node -> {
-//            node.setHistoryId(historyId);
-//            return CompletableFuture.runAsync(() -> nodeExecutor.runNodeTask(historyId, node), executorService);
-//          }).collect(Collectors.toList());
-//
-//      log.info("run after nodes");
-//      CompletableFuture.allOf(futures.toArray(new CompletableFuture[]{}))
-//          .whenComplete((unused, throwable) -> {
-//            log.info("pipeline run complete pipelineId={}", executeParam.getPipelineId());
-//            if (Objects.nonNull(throwable)) {
-//              log.info("run error", throwable);
-//            }
-//          });
-//    });
-//
-//    return historyId;
-//  }
 }

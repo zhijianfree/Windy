@@ -12,5 +12,9 @@ public enum ExecuteType {
   /**
    * 审批执行
    * */
-  APPROVAL
+  APPROVAL,
+  /**
+   * 执行测试用例任务
+   * */
+  TEST
 }

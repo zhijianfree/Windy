@@ -41,6 +41,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class TaskInfoService extends ServiceImpl<TaskInfoMapper, TaskInfo> {
 
+  public static final String FORMAT_TIPS = "任务执行状态: 成功数: %s 成功率百分比: %s";
   @Autowired
   private FeatureService featureService;
 
@@ -83,17 +84,17 @@ public class TaskInfoService extends ServiceImpl<TaskInfoMapper, TaskInfo> {
   }
 
   private boolean isTaskRunning(TaskInfoDTO taskInfoDTO) {
-    List<TaskRecord> taskRecords = taskRecordService.list(Wrappers.lambdaQuery(TaskRecord.class)
-        .eq(TaskRecord::getTaskId, taskInfoDTO.getTaskId()));
+    List<TaskRecord> taskRecords = taskRecordService.list(
+        Wrappers.lambdaQuery(TaskRecord.class).eq(TaskRecord::getTaskId, taskInfoDTO.getTaskId()));
     if (CollectionUtils.isEmpty(taskRecords)) {
       return false;
     }
 
     return taskRecords.stream().anyMatch(record -> {
-      String cache = cacheService
-          .getCache(FeatureConstant.RECORD_STATUS_CACHE_KEY + record.getRecordId());
-      return StringUtils.isNoneBlank(cache) || Objects
-          .equals(record.getStatus(), ExecuteStatusEnum.RUNNING.getStatus());
+      String cache = cacheService.getCache(
+          FeatureConstant.RECORD_STATUS_CACHE_KEY + record.getRecordId());
+      return StringUtils.isNoneBlank(cache) || Objects.equals(record.getStatus(),
+          ExecuteStatusEnum.RUNNING.getStatus());
     });
   }
 
@@ -114,8 +115,7 @@ public class TaskInfoService extends ServiceImpl<TaskInfoMapper, TaskInfo> {
   }
 
   public Boolean deleteTask(String taskId) {
-    return remove(
-        Wrappers.lambdaQuery(TaskInfo.class).eq(TaskInfo::getTaskId, taskId));
+    return remove(Wrappers.lambdaQuery(TaskInfo.class).eq(TaskInfo::getTaskId, taskId));
   }
 
   public TaskInfoDTO getTaskDetail(String taskId) {
@@ -150,8 +150,8 @@ public class TaskInfoService extends ServiceImpl<TaskInfoMapper, TaskInfo> {
   }
 
   private void saveCache(List<FeatureInfo> featureList, TaskRecordDTO taskRecordDTO) {
-    Map<String, Integer> map = featureList.stream()
-        .collect(Collectors.toMap(FeatureInfo::getFeatureId,
+    Map<String, Integer> map = featureList.stream().collect(
+        Collectors.toMap(FeatureInfo::getFeatureId,
             feature -> ExecuteStatusEnum.RUNNING.getStatus()));
     String recordId = FeatureConstant.RECORD_STATUS_CACHE_KEY + taskRecordDTO.getRecordId();
     cacheService.setCache(recordId, JSON.toJSONString(map));
@@ -173,23 +173,33 @@ public class TaskInfoService extends ServiceImpl<TaskInfoMapper, TaskInfo> {
   }
 
   public ResponseStatusModel getTaskStatus(String taskId) {
-    List<TaskRecord> taskRecords = taskRecordService.list(Wrappers.lambdaQuery(TaskRecord.class).eq(TaskRecord::getTaskId, taskId).orderByDesc(TaskRecord::getCreateTime));
+    List<TaskRecord> taskRecords = taskRecordService.list(
+        Wrappers.lambdaQuery(TaskRecord.class).eq(TaskRecord::getTaskId, taskId)
+            .orderByDesc(TaskRecord::getCreateTime));
     TaskRecord taskRecord = taskRecords.get(0);
     Integer status = taskRecord.getStatus();
     ResponseStatusModel responseStatusModel = new ResponseStatusModel();
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("status", status);
+    responseStatusModel.setStatus(status);
 
     List<FeatureHistoryDTO> histories = featureHistoryService.getHistories(
         taskRecord.getRecordId());
     long successCount = histories.stream().filter(
             history -> Objects.equals(history.getExecuteStatus(), ProcessStatus.SUCCESS.getType()))
         .count();
-    jsonObject.put("success", successCount);
-    jsonObject.put("total", histories.size());
 
+    JSONObject jsonObject = new JSONObject();
+    Float percent = (successCount * 1F/ histories.size()) * 100;
+    jsonObject.put("percent", percent.intValue());
     responseStatusModel.setData(jsonObject);
-    responseStatusModel.setMessage("");
+    String msg = String.format(FORMAT_TIPS, successCount,percent);
+    responseStatusModel.setMessage(msg);
     return responseStatusModel;
+  }
+
+  public List<TaskInfoDTO> getAllTaskList(String serviceId) {
+    List<TaskInfo> taskInfos = list(
+        Wrappers.lambdaQuery(TaskInfo.class).eq(TaskInfo::getServiceId, serviceId));
+    return taskInfos.stream().map(task -> OrikaUtil.convert(task, TaskInfoDTO.class))
+        .collect(Collectors.toList());
   }
 }

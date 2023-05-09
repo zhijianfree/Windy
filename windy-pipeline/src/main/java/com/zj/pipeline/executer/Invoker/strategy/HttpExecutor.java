@@ -11,6 +11,7 @@ import com.zj.pipeline.executer.vo.ExecuteType;
 import com.zj.pipeline.executer.vo.HttpRequestContext;
 import com.zj.pipeline.executer.vo.RequestContext;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
 import okhttp3.MediaType;
@@ -30,7 +31,8 @@ import org.springframework.stereotype.Component;
 public class HttpExecutor implements IRemoteInvoker {
 
   public static final MediaType MEDIA_TYPE = MediaType.parse("application/json;charset=utf-8");
-  private OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
+  private OkHttpClient okHttpClient = new OkHttpClient.Builder().readTimeout(10, TimeUnit.SECONDS)
+      .connectTimeout(5, TimeUnit.SECONDS).build();
 
   @Autowired
   private NodeRecordService nodeRecordService;

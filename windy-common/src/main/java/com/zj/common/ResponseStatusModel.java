@@ -8,6 +8,8 @@ import lombok.Data;
  */
 @Data
 public class ResponseStatusModel {
+
+  private Integer status;
   private Object data;
   private String message;
 
