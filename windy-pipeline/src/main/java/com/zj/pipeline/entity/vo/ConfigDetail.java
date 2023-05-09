@@ -10,7 +10,7 @@ import lombok.Data;
 @Data
 public class ConfigDetail {
   /**
-   * node对应功能的服务地址
+   * 执行的动作Id
    * */
   private String actionId;
 

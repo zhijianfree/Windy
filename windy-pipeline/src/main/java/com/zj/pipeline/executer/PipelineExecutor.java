@@ -1,20 +1,16 @@
 package com.zj.pipeline.executer;
 
 import com.zj.common.enums.ProcessStatus;
+import com.zj.pipeline.entity.vo.PipelineTask;
 import com.zj.pipeline.executer.vo.PipelineRecord;
 import com.zj.pipeline.executer.vo.ExecuteParam;
 import com.zj.pipeline.executer.vo.Stage;
-import com.zj.pipeline.service.PipelineNodeRecordService;
+import com.zj.pipeline.executer.vo.TaskNode;
+import com.zj.pipeline.service.NodeRecordService;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -28,28 +24,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class PipelineExecutor {
 
-  private NodeExecutor nodeExecutor;
+  private final ExecuteProxy executeProxy;
 
-  @Autowired
-  @Qualifier("pipelineExecutorPool")
-  private ExecutorService executorService;
+  private final NodeRecordService nodeRecordService;
 
-  private final PipelineNodeRecordService pipelineNodeRecordService;
-
-  public PipelineExecutor(NodeExecutor nodeExecutor,
-      PipelineNodeRecordService pipelineNodeRecordService) {
-    this.nodeExecutor = nodeExecutor;
-    this.pipelineNodeRecordService = pipelineNodeRecordService;
-
+  public PipelineExecutor(ExecuteProxy executeProxy, NodeRecordService nodeRecordService) {
+    this.executeProxy = executeProxy;
+    this.nodeRecordService = nodeRecordService;
   }
 
   public String execute(ExecuteParam executeParam) {
     List<Stage> stages = executeParam.getStages();
-    if (CollectionUtils.isEmpty(stages)) {
-      log.info("stage list is empty");
-      throw new IllegalArgumentException("stages is empty");
-    }
-
     /*
      * 每执行一次任务，应该都有执行任务的记录。任务记录的最小单位是节点任务，所有任务的状态都是异步刷新。任务状态异步刷新
      * 那么则需要每个任务在添加时`，都明确配置查询状态的接口。
@@ -59,27 +44,53 @@ public class PipelineExecutor {
     PipelineRecord pipelineRecord = PipelineRecord.builder()
         .pipelineId(executeParam.getPipelineId()).historyId(historyId)
         .pipelineStatus(ProcessStatus.RUNNING.getType()).build();
-    pipelineNodeRecordService.savePipelineHistory(pipelineRecord);
+    nodeRecordService.savePipelineHistory(pipelineRecord);
 
-    //todo 并行和串行执行
+    PipelineTask pipelineTask = new PipelineTask();
+    pipelineTask.setPipelineId(executeParam.getPipelineId());
+    pipelineTask.setHistoryId(historyId);
     stages.forEach(stage -> {
-      log.info("start run stage={} name={}", stage.getStageId(), stage.getStageName());
-      List<CompletableFuture<Void>> futures = stage.getNodeList().stream().map(
-          node -> {
-            node.setHistoryId(historyId);
-            return CompletableFuture.runAsync(() -> nodeExecutor.runNodeTask(historyId, node), executorService);
-          }).collect(Collectors.toList());
-
-      log.info("run after nodes");
-      CompletableFuture.allOf(futures.toArray(new CompletableFuture[]{}))
-          .whenComplete((unused, throwable) -> {
-            log.info("pipeline run complete pipelineId={}", executeParam.getPipelineId());
-            if (Objects.nonNull(throwable)) {
-              log.info("run error", throwable);
-            }
-          });
+      List<TaskNode> taskNodes = stage.getNodeList().stream()
+          .peek(node -> node.setHistoryId(historyId))
+          .collect(Collectors.toList());
+      pipelineTask.addAll(taskNodes);
     });
-
+    executeProxy.execute(pipelineTask);
     return historyId;
   }
+
+//  public String execute(ExecuteParam executeParam) {
+//    List<Stage> stages = executeParam.getStages();
+//    /*
+//     * 每执行一次任务，应该都有执行任务的记录。任务记录的最小单位是节点任务，所有任务的状态都是异步刷新。任务状态异步刷新
+//     * 那么则需要每个任务在添加时`，都明确配置查询状态的接口。
+//     * */
+//    log.info("start run pipeline={} name={}", executeParam.getPipelineId(), executeParam.getName());
+//    String historyId = UUID.randomUUID().toString();
+//    PipelineRecord pipelineRecord = PipelineRecord.builder()
+//        .pipelineId(executeParam.getPipelineId()).historyId(historyId)
+//        .pipelineStatus(ProcessStatus.RUNNING.getType()).build();
+//    nodeRecordService.savePipelineHistory(pipelineRecord);
+//
+//    //todo 并行和串行执行
+//    stages.forEach(stage -> {
+//      log.info("start run stage={} name={}", stage.getStageId(), stage.getStageName());
+//      List<CompletableFuture<Void>> futures = stage.getNodeList().stream().map(
+//          node -> {
+//            node.setHistoryId(historyId);
+//            return CompletableFuture.runAsync(() -> nodeExecutor.runNodeTask(historyId, node), executorService);
+//          }).collect(Collectors.toList());
+//
+//      log.info("run after nodes");
+//      CompletableFuture.allOf(futures.toArray(new CompletableFuture[]{}))
+//          .whenComplete((unused, throwable) -> {
+//            log.info("pipeline run complete pipelineId={}", executeParam.getPipelineId());
+//            if (Objects.nonNull(throwable)) {
+//              log.info("run error", throwable);
+//            }
+//          });
+//    });
+//
+//    return historyId;
+//  }
 }

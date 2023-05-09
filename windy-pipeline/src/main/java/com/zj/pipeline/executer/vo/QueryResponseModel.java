@@ -1,6 +1,7 @@
 package com.zj.pipeline.executer.vo;
 
 import com.alibaba.fastjson.JSONObject;
+import java.util.List;
 import lombok.Data;
 
 /**
@@ -9,14 +10,9 @@ import lombok.Data;
  */
 @Data
 public class QueryResponseModel {
+  private Integer status;
 
-  private String message;
+  private List<String> message;
 
-  private ResponseData data;
-
-  @Data
-  public static class ResponseData{
-
-    private Integer status;
-  }
+  private JSONObject data;
 }

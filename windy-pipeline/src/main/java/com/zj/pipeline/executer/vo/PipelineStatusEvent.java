@@ -1,6 +1,7 @@
 package com.zj.pipeline.executer.vo;
 
 import com.zj.common.enums.ProcessStatus;
+import java.util.List;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,11 +13,9 @@ import lombok.Data;
 @Builder
 public class PipelineStatusEvent {
 
-  private String historyId;
-
-  private String nodeId;
-
-  private String recordId;
-
   private ProcessStatus processStatus;
+
+  private List<String> errorMsg;
+
+  private TaskNode taskNode;
 }

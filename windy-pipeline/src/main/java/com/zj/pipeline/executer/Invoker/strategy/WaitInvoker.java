@@ -1,16 +1,15 @@
 package com.zj.pipeline.executer.Invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.pipeline.executer.vo.ExecuteType;
 import com.zj.pipeline.executer.vo.QueryResponseModel;
-import com.zj.pipeline.executer.vo.QueryResponseModel.ResponseData;
 import com.zj.pipeline.executer.vo.RefreshContext;
 import com.zj.pipeline.executer.vo.RequestContext;
 import com.zj.pipeline.executer.vo.WaitRequestContext;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -57,17 +56,14 @@ public class WaitInvoker implements IRemoteInvoker {
     CountDownLatch countDownLatch = countDownMap.get(recordId);
     long count = countDownLatch.getCount();
     QueryResponseModel responseModel = new QueryResponseModel();
-    responseModel.setMessage(MESSAGE_TIPS);
-
-    ResponseData responseData = new ResponseData();
-    responseData.setStatus(ProcessStatus.RUNNING.getType());
+    responseModel.setMessage(Collections.singletonList(MESSAGE_TIPS));
+    responseModel.setStatus(ProcessStatus.RUNNING.getType());
     if (count > 0) {
-      responseModel.setData(responseData);
       return JSON.toJSONString(responseModel);
     }
 
-    responseData.setStatus(ProcessStatus.SUCCESS.getType());
-    responseModel.setData(responseData);
+    log.info("wait task complete recordId={}", recordId);
+    responseModel.setStatus(ProcessStatus.SUCCESS.getType());
     return JSON.toJSONString(responseModel);
   }
 }

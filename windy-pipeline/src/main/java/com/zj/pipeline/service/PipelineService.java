@@ -1,7 +1,6 @@
 package com.zj.pipeline.service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -13,18 +12,16 @@ import com.zj.pipeline.entity.dto.PipelineDTO;
 import com.zj.pipeline.entity.dto.PipelineNodeDTO;
 import com.zj.pipeline.entity.dto.PipelineStageDTO;
 import com.zj.pipeline.entity.enums.PipelineStatus;
+import com.zj.pipeline.entity.po.NodeRecord;
 import com.zj.pipeline.entity.po.Pipeline;
 import com.zj.pipeline.entity.po.PipelineNode;
 import com.zj.pipeline.entity.po.PipelineStage;
-import com.zj.pipeline.entity.vo.ActionParam;
 import com.zj.pipeline.entity.vo.ConfigDetail;
 import com.zj.pipeline.executer.Invoker.builder.ContextBuilder;
 import com.zj.pipeline.executer.PipelineExecutor;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.pipeline.executer.notify.PipelineEventFactory;
 import com.zj.pipeline.executer.vo.ExecuteParam;
-import com.zj.pipeline.executer.vo.ExecuteType;
-import com.zj.pipeline.executer.vo.HttpRequestContext;
 import com.zj.pipeline.executer.vo.NodeConfig;
 import com.zj.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.pipeline.executer.vo.RefreshContext;
@@ -66,6 +63,9 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
   @Autowired
   private PipelineActionService pipelineActionService;
 
+  @Autowired
+  private NodeRecordService nodeRecordService;
+
   @Transactional
   public boolean updatePipeline(String service, String pipelineId, PipelineDTO pipelineDTO) {
     Assert.notEmpty(service, "service can not be empty");
@@ -104,22 +104,20 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
         .collect(Collectors.toList());
 
     //如果node节点未变更则直接退出
-    if (CollectionUtils.isEmpty(notExistNodes)) {
-      return;
+    if (CollectionUtils.isNotEmpty(notExistNodes)) {
+      pipelineNodeService.remove(
+          Wrappers.lambdaQuery(PipelineNode.class).in(PipelineNode::getNodeId, notExistNodes));
     }
-    pipelineNodeService.remove(
-        Wrappers.lambdaQuery(PipelineNode.class).in(PipelineNode::getNodeId, notExistNodes));
 
     List<String> newStageIds = stageList.stream().map(PipelineStageDTO::getStageId)
         .collect(Collectors.toList());
     List<String> notExistStages = oldPipeline.getStageList().stream()
         .map(PipelineStageDTO::getStageId).filter(stageId -> !newStageIds.contains(stageId))
         .collect(Collectors.toList());
-    if (CollectionUtils.isEmpty(notExistStages)) {
-      return;
+    if (CollectionUtils.isNotEmpty(notExistStages)) {
+      pipelineStageService.remove(
+          Wrappers.lambdaQuery(PipelineStage.class).in(PipelineStage::getStageId, notExistStages));
     }
-    pipelineStageService.remove(
-        Wrappers.lambdaQuery(PipelineStage.class).in(PipelineStage::getStageId, notExistStages));
   }
 
   private void addOrUpdateNode(String pipelineId, List<PipelineStageDTO> stageList) {
@@ -264,7 +262,7 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
 
     List<Stage> stageList = pipelineStages.stream().map(this::assembleStageData)
         .collect(Collectors.toList());
-    //去除首尾两个节点
+    //去除首尾开始与结束节点
     stageList.remove(0);
     stageList.remove(stageList.size() - 1);
     executeParam.setStages(stageList);
@@ -334,9 +332,23 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
   }
 
   public Boolean pause(String historyId) {
-    PipelineStatusEvent event = PipelineStatusEvent.builder().historyId(historyId).processStatus(
-        ProcessStatus.STOP).build();
-    PipelineEventFactory.sendNotifyEvent(event);
+    List<NodeRecord> records = nodeRecordService.list(
+        Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getHistoryId, historyId)
+            .eq(NodeRecord::getStatus, ProcessStatus.RUNNING.getType()));
+    if (CollectionUtils.isEmpty(records)) {
+      return false;
+    }
+    records.forEach(record ->{
+      TaskNode taskNode = new TaskNode();
+      taskNode.setRecordId(record.getRecordId());
+      taskNode.setNodeId(record.getNodeId());
+      taskNode.setHistoryId(historyId);
+      taskNode.setNodeConfig(new NodeConfig());
+      PipelineStatusEvent event = PipelineStatusEvent.builder().taskNode(taskNode)
+          .processStatus(ProcessStatus.STOP).build();
+      PipelineEventFactory.sendNotifyEvent(event);
+    });
+
     return true;
   }
 }

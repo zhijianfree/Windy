@@ -22,8 +22,9 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class PipelineNodeRecordService extends ServiceImpl<NodeRecordMapper, NodeRecord> {
+public class NodeRecordService extends ServiceImpl<NodeRecordMapper, NodeRecord> {
 
+  public static final String APPROVAL_TIPS = "审核通过";
   @Autowired
   private PipelineHistoryMapper historyMapper;
 
@@ -74,5 +75,15 @@ public class PipelineNodeRecordService extends ServiceImpl<NodeRecordMapper, Nod
     boolean batchUpdate = update(nodeRecord,
         Wrappers.lambdaUpdate(NodeRecord.class).in(NodeRecord::getRecordId, recordIds));
     log.info("batch update record status={}", batchUpdate);
+  }
+
+  public Boolean approval(String historyId, String nodeId) {
+    NodeRecord nodeRecord = getOne(
+        Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getHistoryId, historyId)
+            .eq(NodeRecord::getNodeId, nodeId));
+    log.info("get approval recordId={}", nodeRecord.getNodeId());
+    updateNodeRecordStatus(nodeRecord.getRecordId(), ProcessStatus.SUCCESS.getType(),
+        JSON.toJSONString(Collections.singletonList(APPROVAL_TIPS)));
+    return true;
   }
 }

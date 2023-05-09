@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.pipeline.executer.vo.BaseExecuteParam;
 import com.zj.pipeline.executer.vo.RefreshContext;
-import com.zj.pipeline.service.PipelineNodeRecordService;
+import com.zj.pipeline.service.NodeRecordService;
 import com.zj.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.pipeline.executer.vo.ExecuteType;
 import com.zj.pipeline.executer.vo.HttpRequestContext;
@@ -33,10 +33,10 @@ public class HttpExecutor implements IRemoteInvoker {
   private OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
 
   @Autowired
-  private PipelineNodeRecordService pipelineNodeRecordService;
+  private NodeRecordService nodeRecordService;
 
-  public HttpExecutor(PipelineNodeRecordService pipelineNodeRecordService) {
-    this.pipelineNodeRecordService = pipelineNodeRecordService;
+  public HttpExecutor(NodeRecordService nodeRecordService) {
+    this.nodeRecordService = nodeRecordService;
   }
 
   @Override

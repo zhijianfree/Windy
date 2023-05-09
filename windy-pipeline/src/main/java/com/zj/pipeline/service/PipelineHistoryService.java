@@ -35,7 +35,7 @@ public class PipelineHistoryService extends ServiceImpl<PipelineHistoryMapper, P
   private PipelineService pipelineService;
 
   @Autowired
-  private PipelineNodeRecordService recordService;
+  private NodeRecordService recordService;
 
   public PipelineHistoryDto getPipelineHistory(String historyId) {
     PipelineHistory pipelineHistory = getOne(
@@ -103,6 +103,7 @@ public class PipelineHistoryService extends ServiceImpl<PipelineHistoryMapper, P
         .eq(NodeRecord::getHistoryId, historyId));
     List<NodeStatus> statusList = nodeRecords.stream().map(nodeRecord -> {
       NodeStatus nodeStatus = new NodeStatus();
+      nodeStatus.setRecordId(nodeRecord.getRecordId());
       nodeStatus.setNodeId(nodeRecord.getNodeId());
       nodeStatus.setStatus(nodeRecord.getStatus());
       nodeStatus.setMessage(JSON.parseArray(nodeRecord.getResult(), String.class));

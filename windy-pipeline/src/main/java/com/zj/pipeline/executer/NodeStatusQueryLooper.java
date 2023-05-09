@@ -10,8 +10,9 @@ import com.zj.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.pipeline.executer.notify.PipelineEventFactory;
 import com.zj.pipeline.executer.vo.PipelineStatusEvent;
+import com.zj.pipeline.executer.vo.QueryResponseModel;
 import com.zj.pipeline.executer.vo.TaskNode;
-import com.zj.pipeline.service.PipelineNodeRecordService;
+import com.zj.pipeline.service.NodeRecordService;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -37,8 +38,6 @@ import org.springframework.stereotype.Component;
 public class NodeStatusQueryLooper implements IStatusNotifyListener, Runnable {
 
   public static final int MAX_REMOVE_TIME = 2 * 60 * 60 * 1000;
-  public static final String STATUS_KEY = "status";
-  public static final String MESSAGE_KEY = "message";
   public static final String DESCRIPTION_FORMAT = "比较响应字段:【%s】- 描述信息:%s";
   public static final String EXPECT_VALUE_FORMAT = "期待值:【%s】";
   public static final String RESULT_VALUE_FORMAT = "返回值:【%s】";
@@ -53,10 +52,10 @@ public class NodeStatusQueryLooper implements IStatusNotifyListener, Runnable {
   @Qualifier("queryLooperExecutorPool")
   private ExecutorService executorService;
 
-  private final PipelineNodeRecordService nodeRecordService;
+  private final NodeRecordService nodeRecordService;
 
 
-  public NodeStatusQueryLooper(PipelineNodeRecordService nodeRecordService,
+  public NodeStatusQueryLooper(NodeRecordService nodeRecordService,
       List<IRemoteInvoker> remoteInvokers) {
     this.nodeRecordService = nodeRecordService;
     remoteInvokerMap = remoteInvokers.stream()
@@ -81,37 +80,42 @@ public class NodeStatusQueryLooper implements IStatusNotifyListener, Runnable {
         return;
       }
 
-      JSONObject resultObject = JSON.parseObject(result, JSONObject.class);
-      Integer status = resultObject.getInteger(STATUS_KEY);
-      if (Objects.isNull(status)) {
+      QueryResponseModel queryResponse = JSON.parseObject(result, QueryResponseModel.class);
+      if (Objects.isNull(queryResponse.getStatus())) {
         log.info("get task record status is empty. recordId={}", node.getRecordId());
         cycleRunTask(node);
         return;
       }
 
-      if (!Objects.equals(ProcessStatus.RUNNING.getType(), status)) {
-        handleRecordFinalStatus(node, resultObject);
+      if (!Objects.equals(ProcessStatus.RUNNING.getType(), queryResponse.getStatus())) {
+        handleRecordFinalStatus(node, queryResponse);
         return;
       }
       cycleRunTask(node);
     });
   }
 
-  private void handleRecordFinalStatus(TaskNode node, JSONObject jsonObject) {
-    compareResultWithExpect(node, jsonObject);
-
-    updateNodeStatus(node, jsonObject);
-    notifyStatus(node, jsonObject);
+  private void handleRecordFinalStatus(TaskNode node, QueryResponseModel response) {
+    compareResultWithExpect(node, response);
+    notifyStatus(node, response);
   }
 
-  private void compareResultWithExpect(TaskNode node, JSONObject jsonObject) {
+  /**
+   * 将查询的成功的结果与配置的期望值比较
+   * */
+  private void compareResultWithExpect(TaskNode node, QueryResponseModel responseModel) {
+    if (!Objects.equals(responseModel.getStatus(), ProcessStatus.SUCCESS.getType())){
+      return;
+    }
+
+    JSONObject jsonObject = responseModel.getData();
     List<CompareResult> compareConfigs = node.getRefreshContext().getCompareConfig();
     for (CompareResult compareResult : compareConfigs) {
       boolean isMatch = CompareUtils.isMatch(compareResult.getOperator(),
           jsonObject.get(compareResult.getCompareKey()), compareResult.getValue());
       if (!isMatch) {
-        jsonObject.put(STATUS_KEY, ProcessStatus.FAIL.getType());
-        jsonObject.put(MESSAGE_KEY, exchangeTips(jsonObject, compareResult));
+        responseModel.setStatus(ProcessStatus.FAIL.getType());
+        responseModel.setMessage(exchangeTips(jsonObject, compareResult));
         return;
       }
     }
@@ -127,24 +131,11 @@ public class NodeStatusQueryLooper implements IStatusNotifyListener, Runnable {
     return Arrays.asList(desc, resultDesc, operatorDesc, expectDesc);
   }
 
-  private static void notifyStatus(TaskNode node, JSONObject jsonObject) {
-    PipelineStatusEvent statusEvent = PipelineStatusEvent.builder().recordId(node.getRecordId())
-        .nodeId(node.getNodeId()).historyId(node.getHistoryId())
-        .processStatus(ProcessStatus.exchange(jsonObject.getInteger(STATUS_KEY))).build();
+  private static void notifyStatus(TaskNode node, QueryResponseModel responseModel) {
+    PipelineStatusEvent statusEvent = PipelineStatusEvent.builder().taskNode(node)
+        .processStatus(ProcessStatus.exchange(responseModel.getStatus()))
+        .errorMsg(responseModel.getMessage()).build();
     PipelineEventFactory.sendNotifyEvent(statusEvent);
-  }
-
-  private void updateNodeStatus(TaskNode node, JSONObject jsonObject) {
-    //如果节点配置跳过，则修改状态为IGNORE
-    Integer status = jsonObject.getInteger(STATUS_KEY);
-    ProcessStatus processStatus = ProcessStatus.exchange(status);
-    if (processStatus.isFailStatus() && node.getNodeConfig().isIgnoreError()) {
-      jsonObject.put(STATUS_KEY, ProcessStatus.IGNORE_FAIL.getType());
-    }
-
-    String message = JSON.toJSONString(jsonObject.getJSONArray(MESSAGE_KEY));
-    nodeRecordService.updateNodeRecordStatus(node.getRecordId(), jsonObject.getInteger(STATUS_KEY),
-        message);
   }
 
   private void cycleRunTask(TaskNode node) {
@@ -157,10 +148,11 @@ public class NodeStatusQueryLooper implements IStatusNotifyListener, Runnable {
     long mills = dateNow - node.getExecuteTime();
     if (mills > MAX_REMOVE_TIME) {
       log.info("node record run timeout recordId={}", node.getRecordId());
-      JSONObject result = new JSONObject();
-      result.put(STATUS_KEY, ProcessStatus.TIMEOUT.getType());
-      result.put(MESSAGE_KEY, Collections.singletonList(ProcessStatus.TIMEOUT.getDesc()));
-      handleRecordFinalStatus(node, result);
+
+      QueryResponseModel queryResponseModel = new QueryResponseModel();
+      queryResponseModel.setStatus(ProcessStatus.TIMEOUT.getType());
+      queryResponseModel.setMessage(Collections.singletonList(ProcessStatus.TIMEOUT.getDesc()));
+      handleRecordFinalStatus(node, queryResponseModel);
       return;
     }
 
@@ -189,9 +181,10 @@ public class NodeStatusQueryLooper implements IStatusNotifyListener, Runnable {
       return;
     }
 
+    String historyId = event.getTaskNode().getHistoryId();
     if (Objects.equals(event.getProcessStatus().getType(), ProcessStatus.STOP.getType())) {
       List<NodeRecord> recordList = nodeRecordService.list(Wrappers.lambdaQuery(NodeRecord.class)
-          .eq(NodeRecord::getHistoryId, event.getHistoryId()));
+          .eq(NodeRecord::getHistoryId, historyId));
       List<String> recordIds = recordList.stream().map(NodeRecord::getRecordId)
           .collect(Collectors.toList());
       queue.removeIf(taskNode -> recordIds.contains(taskNode.getRecordId()));
@@ -201,7 +194,7 @@ public class NodeStatusQueryLooper implements IStatusNotifyListener, Runnable {
     }
 
     List<NodeRecord> recordList = nodeRecordService.list(Wrappers.lambdaQuery(NodeRecord.class)
-        .eq(NodeRecord::getHistoryId, event.getHistoryId()));
+        .eq(NodeRecord::getHistoryId, historyId));
     List<String> recordNodeIds = recordList.stream().map(NodeRecord::getRecordId)
         .collect(Collectors.toList());
     queue.removeIf(node -> recordNodeIds.contains(node.getRecordId()));

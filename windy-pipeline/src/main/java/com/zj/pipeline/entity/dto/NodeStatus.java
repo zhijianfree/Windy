@@ -12,6 +12,8 @@ public class NodeStatus {
 
   private String nodeId;
 
+  private String recordId;
+
   private Integer status;
 
   private List<String> message;

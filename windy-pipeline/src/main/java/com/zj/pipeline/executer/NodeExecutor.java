@@ -8,8 +8,9 @@ import com.zj.pipeline.executer.vo.NodeConfig;
 import com.zj.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.pipeline.executer.vo.TaskNode;
 import com.zj.pipeline.executer.vo.TaskNodeRecord;
-import com.zj.pipeline.service.PipelineNodeRecordService;
+import com.zj.pipeline.service.NodeRecordService;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -28,16 +29,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class NodeExecutor {
 
+  public static final String TRIGGER_TASK_ERROR = "trigger task error";
   private final List<INodeExecuteInterceptor> interceptors;
   private final Map<String, IRemoteInvoker> invokerMap;
-  private final PipelineNodeRecordService pipelineNodeRecordService;
+  private final NodeRecordService nodeRecordService;
 
   public NodeExecutor(List<INodeExecuteInterceptor> interceptors, List<IRemoteInvoker> invokers,
-      PipelineNodeRecordService pipelineNodeRecordService) {
+      NodeRecordService nodeRecordService) {
     this.interceptors = interceptors;
     invokerMap = invokers.stream()
         .collect(Collectors.toMap(invoker -> invoker.type().name(), invoker -> invoker));
-    this.pipelineNodeRecordService = pipelineNodeRecordService;
+    this.nodeRecordService = nodeRecordService;
   }
 
   /**
@@ -54,8 +56,9 @@ public class NodeExecutor {
     AtomicReference<ProcessStatus> statusAtomic = new AtomicReference<>(ProcessStatus.RUNNING);
     TaskNodeRecord taskNodeRecord = TaskNodeRecord.builder().historyId(historyId).recordId(recordId)
         .status(statusAtomic.get().getType()).nodeId(node.getNodeId()).build();
-    pipelineNodeRecordService.saveTaskNodeRecord(taskNodeRecord);
+    nodeRecordService.saveTaskNodeRecord(taskNodeRecord);
 
+    List<String> errorMsg = Collections.singletonList(TRIGGER_TASK_ERROR);
     try {
       IRemoteInvoker remoteInvoker = invokerMap.get(node.getExecuteType());
       if (Objects.isNull(remoteInvoker)) {
@@ -65,52 +68,39 @@ public class NodeExecutor {
       boolean executeFlag = remoteInvoker.triggerRun(node.getRequestContext(), recordId);
       if (!executeFlag) {
         statusAtomic.set(ProcessStatus.FAIL);
-        notifyNodeEvent(recordId, node, taskNodeRecord);
+        notifyNodeEvent(node, statusAtomic.get(), errorMsg);
       }
       log.info("task node run complete result={}", executeFlag);
     } catch (Exception e) {
       log.error("execute pipeline node error recordId={}", recordId, e);
       //如果请求失败则直接流水线终止
       statusAtomic.set(ProcessStatus.FAIL);
-      String errorMsg = getErrorMsg(e);
-      taskNodeRecord.setResult(errorMsg);
+      errorMsg = getErrorMsg(e);
     }
-
-    //保存node节点执行开始
-    taskNodeRecord.setStatus(statusAtomic.get().getType());
-    pipelineNodeRecordService.updateNodeRecord(taskNodeRecord);
 
     if (CollectionUtils.isNotEmpty(interceptors)) {
       interceptors.forEach(interceptor -> interceptor.after(node, statusAtomic.get()));
     }
 
     if (statusAtomic.get().isFailStatus()) {
-      notifyNodeEvent(recordId, node, taskNodeRecord);
+      notifyNodeEvent(node, statusAtomic.get(), errorMsg);
     }
   }
 
-  private String getErrorMsg(Exception exception) {
+  private List<String> getErrorMsg(Exception exception) {
     List<String> msg = new ArrayList<>();
     msg.add("trigger node task error: " + exception.toString());
     for (StackTraceElement element : exception.getStackTrace()) {
       msg.add(element.toString());
     }
-    return JSON.toJSONString(msg);
+    return msg;
   }
 
 
-  private void notifyNodeEvent(String recodeId, TaskNode node, TaskNodeRecord taskNodeRecord) {
-    NodeConfig nodeConfig = node.getNodeConfig();
-    if (nodeConfig.isIgnoreError()) {
-      log.info("pipeline ignore error recordId={}", recodeId);
-      taskNodeRecord.setStatus(ProcessStatus.IGNORE_FAIL.getType());
-      pipelineNodeRecordService.updateNodeRecord(taskNodeRecord);
-      return;
-    }
-
-    log.info("shutdown pipeline recordId={}", recodeId);
-    PipelineStatusEvent event = PipelineStatusEvent.builder().historyId(node.getHistoryId())
-        .recordId(recodeId).nodeId(node.getNodeId()).processStatus(ProcessStatus.FAIL).build();
+  private void notifyNodeEvent(TaskNode node, ProcessStatus status, List<String> errorMsg) {
+    log.info("shutdown pipeline recordId={}", node.getRecordId());
+    PipelineStatusEvent event = PipelineStatusEvent.builder().taskNode(node).processStatus(status)
+        .errorMsg(errorMsg).build();
     PipelineEventFactory.sendNotifyEvent(event);
   }
 }
