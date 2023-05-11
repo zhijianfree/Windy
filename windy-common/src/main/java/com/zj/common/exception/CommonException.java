@@ -1,7 +1,7 @@
 package com.zj.common.exception;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2021/9/28
  */
 public class CommonException extends RuntimeException{

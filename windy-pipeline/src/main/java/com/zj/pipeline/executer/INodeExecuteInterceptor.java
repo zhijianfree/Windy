@@ -5,7 +5,7 @@ import com.zj.common.enums.ProcessStatus;
 import com.zj.pipeline.executer.vo.TaskNode;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2022/5/30
  */
 public interface INodeExecuteInterceptor {

@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 /**
  * 监听node节点变化，更新流水线状态
  *
- * @author falcon
+ * @author guyuelan
  * @since 2023/3/30
  */
 @Slf4j

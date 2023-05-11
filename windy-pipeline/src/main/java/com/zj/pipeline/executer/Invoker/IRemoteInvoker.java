@@ -7,7 +7,7 @@ import com.zj.pipeline.executer.vo.RequestContext;
 import java.io.IOException;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2022/5/25
  */
 public interface IRemoteInvoker {

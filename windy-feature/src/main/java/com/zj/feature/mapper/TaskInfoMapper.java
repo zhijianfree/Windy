@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.zj.feature.entity.po.TaskInfo;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2022/12/29
  */
 public interface TaskInfoMapper extends BaseMapper<TaskInfo> {

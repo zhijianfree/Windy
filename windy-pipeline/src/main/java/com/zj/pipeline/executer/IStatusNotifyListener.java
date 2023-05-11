@@ -3,7 +3,7 @@ package com.zj.pipeline.executer;
 import com.zj.pipeline.executer.vo.PipelineStatusEvent;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/3/30
  */
 public interface IStatusNotifyListener {

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  * 方法{@link StatusQueryInterceptor#after(TaskNode, Integer)}中将查询任务添加到
  * {@link NodeStatusQueryLooper#addQuestTask(TaskNode)}
  *
- * @author falcon
+ * @author guyuelan
  * @since 2023/3/30
  */
 @Slf4j

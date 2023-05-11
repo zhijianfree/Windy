@@ -1,7 +1,7 @@
 package com.zj.pipeline.entity.enums;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2022/6/13
  */
 public enum PipelineExecuteType {

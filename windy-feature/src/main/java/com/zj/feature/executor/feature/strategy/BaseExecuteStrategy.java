@@ -15,7 +15,7 @@ import com.zj.feature.executor.vo.ExecutorUnit;
 import java.util.List;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/1/17
  */
 public abstract class BaseExecuteStrategy implements IExecuteStrategy {

@@ -1,6 +1,10 @@
 server:
   port: 8070
 
+spring:
+  application:
+    name: WindyClient
+
 windy:
   pipeline:
     git:
@@ -9,3 +13,43 @@ windy:
       workspace: /Users/falcon/windy/
     maven:
       path: /Users/hiuielan/soft/apache-maven-3.6.3
+
+eureka:
+  instance:
+    # 服务时效时间，默认90秒.当server 90秒内没有收到client的注册信息时，会将该节点剔除
+    lease-expiration-duration-in-seconds: 5
+    # 服务续约任务调用间隔时间，默认30秒.client每隔30秒向server上报自己状态，避免被server剔除
+    lease-renewal-interval-in-seconds: 30
+    # 注册服务时是否使用IP注册，默认false
+    prefer-ip-address: false
+
+  client:
+    # 是否注册
+    register-with-eureka: true
+    # 是否检索服务
+    fetch-registry: true
+    # 连接server服务器超时时间
+    eureka-server-connect-timeout-seconds: 5
+    # 连接server的连接空闲时长
+    eureka-connection-idle-timeout-seconds: 30
+    # 连接server读取数据超时时间
+    eureka-server-read-timeout-seconds: 8
+    # 连接server的最大连接数
+    eureka-server-total-connections: 200
+    # 对单个server的最大连接数
+    eureka-server-total-connections-per-host: 50
+    # 获取集群中最新的server节点数据
+    eureka-service-url-poll-interval-seconds: 30
+    # client维持与server的心跳线程数
+    heartbeat-executor-thread-pool-size: 2
+    # client本地缓存清单更新间隔，默认30秒.
+    # client每隔30秒，向server请求可用服务清单。对于API网关类应用，可以适当降低时间间隔
+    registry-fetch-interval-seconds: 90
+
+    service-url:
+      defaultZone: http://windy-master:9888/eureka/
+
+#logging:
+#  level:
+#    root: debug
+

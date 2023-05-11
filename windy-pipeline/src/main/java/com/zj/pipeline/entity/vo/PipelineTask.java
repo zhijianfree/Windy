@@ -10,7 +10,7 @@ import org.apache.commons.collections4.CollectionUtils;
 /**
  * 标记队列用来将同一个流水线的任务打标并放到一起
  * 这样就可以根据流水线的顺序执行
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/9
  */
 @Data

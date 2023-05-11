@@ -5,7 +5,7 @@ import com.zj.pipeline.entity.po.Pipeline;
 import com.zj.pipeline.entity.po.PipelineNode;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2021/9/28
  */
 public interface PipelineNodeMapper extends BaseMapper<PipelineNode> {

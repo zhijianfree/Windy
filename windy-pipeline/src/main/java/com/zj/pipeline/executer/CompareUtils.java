@@ -3,7 +3,7 @@ package com.zj.pipeline.executer;
 import java.util.Objects;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/4/12
  */
 public class CompareUtils {

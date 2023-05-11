@@ -3,7 +3,7 @@ package com.zj.pipeline.entity.dto;
 import lombok.Data;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/3/10
  */
 @Data
