@@ -55,12 +55,7 @@ public class PipelineHistoryService extends ServiceImpl<PipelineHistoryMapper, P
     history.setHistoryId(uniqueIdService.getUniqueId());
     history.setCreateTime(System.currentTimeMillis());
     history.setUpdateTime(System.currentTimeMillis());
-    boolean result = save(history);
-    if (result) {
-      return history.getHistoryId();
-    }
-
-    return "";
+    return save(history) ? history.getHistoryId() : "";
   }
 
   public List<PipelineHistoryDto> listPipelineHistories(String pipelineId) {
