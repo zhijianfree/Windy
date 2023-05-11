@@ -7,22 +7,26 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.PageSize;
+import com.zj.common.generate.UniqueIdService;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.feature.entity.dto.ExecuteTemplateDTO;
-import com.zj.common.PageSize;
 import com.zj.feature.entity.po.ExecuteTemplate;
 import com.zj.feature.entity.type.ExecutePointType;
 import com.zj.feature.mapper.ExecuteTemplateMapper;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 @Slf4j
 @Service
 public class FeatureConfigService extends ServiceImpl<ExecuteTemplateMapper, ExecuteTemplate> {
+
+  @Autowired
+  private UniqueIdService uniqueIdService;
 
   public PageSize<ExecuteTemplateDTO> getFeaturePage(Integer pageNo, Integer size, String name) {
     IPage<ExecuteTemplate> page = new Page<>(pageNo, size);
@@ -53,7 +57,7 @@ public class FeatureConfigService extends ServiceImpl<ExecuteTemplateMapper, Exe
 
   public String createTemplate(ExecuteTemplateDTO executeTemplateDTO) {
     ExecuteTemplate executeTemplate = OrikaUtil.convert(executeTemplateDTO, ExecuteTemplate.class);
-    executeTemplate.setTemplateId(UUID.randomUUID().toString());
+    executeTemplate.setTemplateId(uniqueIdService.getUniqueId());
     executeTemplate.setAuthor("admin");
     executeTemplate.setCreateTime(System.currentTimeMillis());
     executeTemplate.setUpdateTime(System.currentTimeMillis());

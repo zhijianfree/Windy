@@ -10,7 +10,6 @@ public enum ProcessStatus {
   TIMEOUT(3, "处理超时"),
   RUNNING(4, "运行中"),
   IGNORE_FAIL(5, "忽略失败"),
-
   STOP(6, "停止运行"),
   ;
 

@@ -4,31 +4,29 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.exception.ApiException;
+import com.zj.common.exception.ErrorCode;
+import com.zj.common.generate.UniqueIdService;
 import com.zj.pipeline.entity.dto.GitBindDto;
-import com.zj.pipeline.entity.dto.MicroserviceDto;
 import com.zj.pipeline.entity.dto.PipelineDTO;
 import com.zj.pipeline.entity.enums.PipelineExecuteType;
 import com.zj.pipeline.entity.po.GitBind;
-import com.zj.common.exception.ApiException;
-import com.zj.common.exception.ErrorCode;
-import com.zj.pipeline.git.IRepositoryBranch;
-import com.zj.service.entity.po.Microservice;
 import com.zj.pipeline.entity.po.Pipeline;
+import com.zj.pipeline.git.IRepositoryBranch;
 import com.zj.pipeline.mapper.GitBindMapper;
+import com.zj.service.entity.po.Microservice;
 import com.zj.service.service.MicroserviceService;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import org.springframework.util.StringUtils;
 
 /**
@@ -52,6 +50,9 @@ public class GitBindService extends ServiceImpl<GitBindMapper, GitBind> {
   @Autowired
   private IRepositoryBranch repositoryBranch;
 
+  @Autowired
+  private UniqueIdService uniqueIdService;
+
   public String createGitBind(GitBindDto gitBindDto) {
     List<GitBindDto> bindDtoList = listGitBinds(gitBindDto.getPipelineId());
     Optional<GitBindDto> optional = bindDtoList.stream()
@@ -62,7 +63,7 @@ public class GitBindService extends ServiceImpl<GitBindMapper, GitBind> {
     }
 
     GitBind gitBind = GitBindDto.toGitBind(gitBindDto);
-    gitBind.setBindId(UUID.randomUUID().toString());
+    gitBind.setBindId(uniqueIdService.getUniqueId());
     gitBind.setUpdateTime(System.currentTimeMillis());
     gitBind.setCreateTime(System.currentTimeMillis());
     if (save(gitBind)) {

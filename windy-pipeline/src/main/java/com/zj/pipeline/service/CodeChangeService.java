@@ -3,25 +3,24 @@ package com.zj.pipeline.service;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.exception.ApiException;
+import com.zj.common.exception.ErrorCode;
+import com.zj.common.generate.UniqueIdService;
 import com.zj.pipeline.entity.dto.CodeChangeDto;
 import com.zj.pipeline.entity.dto.RelationDemandBug;
 import com.zj.pipeline.entity.po.CodeChange;
-import com.zj.common.exception.ApiException;
-import com.zj.common.exception.ErrorCode;
-import com.zj.service.entity.po.Microservice;
 import com.zj.pipeline.git.IRepositoryBranch;
 import com.zj.pipeline.mapper.CodeChangeMapper;
+import com.zj.service.entity.po.Microservice;
 import com.zj.service.service.MicroserviceService;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * @author falcon
@@ -37,6 +36,9 @@ public class CodeChangeService extends ServiceImpl<CodeChangeMapper, CodeChange>
   @Autowired
   private MicroserviceService microservice;
 
+  @Autowired
+  private UniqueIdService uniqueIdService;
+
   public CodeChangeDto getCodeChange(String serviceId, String codeChangeId) {
     Assert.notEmpty(serviceId, "serviceId can not be null");
     CodeChange codeChange = getOne(
@@ -49,7 +51,7 @@ public class CodeChangeService extends ServiceImpl<CodeChangeMapper, CodeChange>
     repositoryBranch.createBranch(service.getServiceName(), codeChangeDto.getChangeBranch());
 
     CodeChange codeChange = CodeChangeDto.toCodeChange(codeChangeDto);
-    codeChange.setChangeId(UUID.randomUUID().toString());
+    codeChange.setChangeId(uniqueIdService.getUniqueId());
     codeChange.setUpdateTime(System.currentTimeMillis());
     codeChange.setCreateTime(System.currentTimeMillis());
     return save(codeChange) ? codeChange.getChangeId() : "";
@@ -90,7 +92,7 @@ public class CodeChangeService extends ServiceImpl<CodeChangeMapper, CodeChange>
 
   public List<RelationDemandBug> queryRelationIds(String queryName) {
     RelationDemandBug relationDemandBug = new RelationDemandBug();
-    String random = UUID.randomUUID().toString().replace("-", "");
+    String random = uniqueIdService.getUniqueId();
     relationDemandBug.setRelationId(random);
     relationDemandBug.setRelationType(1);
     relationDemandBug.setName(queryName + random.substring(0, 6));

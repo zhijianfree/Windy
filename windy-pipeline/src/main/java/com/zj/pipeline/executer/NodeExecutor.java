@@ -1,10 +1,9 @@
 package com.zj.pipeline.executer;
 
-import com.alibaba.fastjson.JSON;
-import com.zj.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.generate.UniqueIdService;
+import com.zj.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.pipeline.executer.notify.PipelineEventFactory;
-import com.zj.pipeline.executer.vo.NodeConfig;
 import com.zj.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.pipeline.executer.vo.TaskNode;
 import com.zj.pipeline.executer.vo.TaskNodeRecord;
@@ -14,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -33,13 +31,15 @@ public class NodeExecutor {
   private final List<INodeExecuteInterceptor> interceptors;
   private final Map<String, IRemoteInvoker> invokerMap;
   private final NodeRecordService nodeRecordService;
+  private final UniqueIdService uniqueIdService;
 
   public NodeExecutor(List<INodeExecuteInterceptor> interceptors, List<IRemoteInvoker> invokers,
-      NodeRecordService nodeRecordService) {
+      NodeRecordService nodeRecordService, UniqueIdService uniqueIdService) {
     this.interceptors = interceptors;
     invokerMap = invokers.stream()
         .collect(Collectors.toMap(invoker -> invoker.type().name(), invoker -> invoker));
     this.nodeRecordService = nodeRecordService;
+    this.uniqueIdService = uniqueIdService;
   }
 
   /**
@@ -51,7 +51,7 @@ public class NodeExecutor {
     }
 
     log.info("start run task recordId={}", historyId);
-    String recordId = UUID.randomUUID().toString();
+    String recordId = uniqueIdService.getUniqueId();
     node.setRecordId(recordId);
     AtomicReference<ProcessStatus> statusAtomic = new AtomicReference<>(ProcessStatus.RUNNING);
     TaskNodeRecord taskNodeRecord = TaskNodeRecord.builder().historyId(historyId).recordId(recordId)

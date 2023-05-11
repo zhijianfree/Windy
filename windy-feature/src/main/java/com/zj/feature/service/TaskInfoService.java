@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.PageSize;
 import com.zj.common.ResponseStatusModel;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.generate.UniqueIdService;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.feature.entity.dto.FeatureHistoryDTO;
 import com.zj.feature.entity.dto.TaskInfoDTO;
@@ -25,7 +26,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -56,6 +56,9 @@ public class TaskInfoService extends ServiceImpl<TaskInfoMapper, TaskInfo> {
 
   @Autowired
   private ICacheService cacheService;
+
+  @Autowired
+  private UniqueIdService uniqueIdService;
 
   public PageSize<TaskInfoDTO> getTaskList(String name, Integer pageNum, Integer size) {
     LambdaQueryWrapper<TaskInfo> wrapper = Wrappers.lambdaQuery(TaskInfo.class);
@@ -100,7 +103,7 @@ public class TaskInfoService extends ServiceImpl<TaskInfoMapper, TaskInfo> {
 
   public Boolean createTask(TaskInfoDTO taskInfoDTO) {
     TaskInfo taskInfo = OrikaUtil.convert(taskInfoDTO, TaskInfo.class);
-    taskInfo.setTaskId(UUID.randomUUID().toString().replace("-", ""));
+    taskInfo.setTaskId(uniqueIdService.getUniqueId());
     taskInfo.setCreateTime(System.currentTimeMillis());
     taskInfo.setUpdateTime(System.currentTimeMillis());
     return save(taskInfo);
@@ -162,7 +165,7 @@ public class TaskInfoService extends ServiceImpl<TaskInfoMapper, TaskInfo> {
     taskRecordDTO.setTaskConfig(taskDetail.getTaskConfig());
     taskRecordDTO.setTaskName(taskDetail.getTaskName());
     taskRecordDTO.setTaskId(taskDetail.getTaskId());
-    taskRecordDTO.setRecordId(UUID.randomUUID().toString().replace("-", ""));
+    taskRecordDTO.setRecordId(uniqueIdService.getUniqueId());
     taskRecordDTO.setUserId("admin");
     taskRecordDTO.setStatus(ExecuteStatusEnum.RUNNING.getStatus());
     taskRecordDTO.setMachines(taskDetail.getMachines());

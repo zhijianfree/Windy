@@ -12,12 +12,4 @@ public class ResponseStatusModel {
   private Integer status;
   private Object data;
   private String message;
-
-  public ResponseStatusModel() {
-  }
-
-  public ResponseStatusModel(Object data, String message) {
-    this.data = data;
-    this.message = message;
-  }
 }

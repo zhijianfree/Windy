@@ -1,14 +1,14 @@
 package com.zj.pipeline.executer;
 
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.generate.UniqueIdService;
 import com.zj.pipeline.entity.vo.PipelineTask;
-import com.zj.pipeline.executer.vo.PipelineRecord;
 import com.zj.pipeline.executer.vo.ExecuteParam;
+import com.zj.pipeline.executer.vo.PipelineRecord;
 import com.zj.pipeline.executer.vo.Stage;
 import com.zj.pipeline.executer.vo.TaskNode;
 import com.zj.pipeline.service.NodeRecordService;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -28,9 +28,13 @@ public class PipelineExecutor {
 
   private final NodeRecordService nodeRecordService;
 
-  public PipelineExecutor(ExecuteProxy executeProxy, NodeRecordService nodeRecordService) {
+  private final UniqueIdService uniqueIdService;
+
+  public PipelineExecutor(ExecuteProxy executeProxy, NodeRecordService nodeRecordService,
+      UniqueIdService uniqueIdService) {
     this.executeProxy = executeProxy;
     this.nodeRecordService = nodeRecordService;
+    this.uniqueIdService = uniqueIdService;
   }
 
   public String execute(ExecuteParam executeParam) {
@@ -40,7 +44,7 @@ public class PipelineExecutor {
      * 那么则需要每个任务在添加时`，都明确配置查询状态的接口。
      * */
     log.info("start run pipeline={} name={}", executeParam.getPipelineId(), executeParam.getName());
-    String historyId = UUID.randomUUID().toString();
+    String historyId = uniqueIdService.getUniqueId();
     PipelineRecord pipelineRecord = PipelineRecord.builder()
         .pipelineId(executeParam.getPipelineId()).historyId(historyId)
         .pipelineStatus(ProcessStatus.RUNNING.getType()).build();

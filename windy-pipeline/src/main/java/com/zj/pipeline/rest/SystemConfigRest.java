@@ -39,8 +39,8 @@ public class SystemConfigRest {
 
     @ResponseBody
     @DeleteMapping("/system/config/{configId}")
-    public ResponseMeta<Integer> deleteSystemConfig( @PathVariable("configId") String configId) {
-        return new ResponseMeta<Integer>(ErrorCode.SUCCESS,
+    public ResponseMeta<Boolean> deleteSystemConfig( @PathVariable("configId") String configId) {
+        return new ResponseMeta<Boolean>(ErrorCode.SUCCESS,
                 systemConfigService.deleteSystemConfig(configId));
     }
 

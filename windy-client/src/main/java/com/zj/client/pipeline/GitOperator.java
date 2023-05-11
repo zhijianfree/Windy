@@ -54,7 +54,6 @@ public class GitOperator {
   }
 
   public static String getServiceFromUrl(String gitUrl) {
-    //http://localhost:3000/guyuelan/Windy.git
     if (StringUtils.isBlank(gitUrl)) {
       return null;
     }

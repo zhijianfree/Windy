@@ -2,7 +2,7 @@ package com.zj.feature.executor.feature;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.zj.common.Constant;
+import com.zj.common.generate.UniqueIdService;
 import com.zj.feature.entity.dto.TaskRecordDTO;
 import com.zj.feature.entity.po.ExecutePoint;
 import com.zj.feature.entity.po.ExecuteRecord;
@@ -24,7 +24,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,25 +46,28 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
 
   private final TaskRecordService taskRecordService;
 
-  private ExecuteStrategyFactory executeStrategyFactory;
+  private final ExecuteStrategyFactory executeStrategyFactory;
+
+  private final UniqueIdService uniqueIdService;
 
   private final ExecutorService executorService = Executors.newFixedThreadPool(30);
 
   public FeatureExecutorImpl(ExecutePointService executePointService,
       FeatureHistoryService featureHistoryService, ExecuteRecordService executeRecordService,
       ICacheService cacheService, TaskRecordService taskRecordService,
-      ExecuteStrategyFactory executeStrategyFactory) {
+      ExecuteStrategyFactory executeStrategyFactory, UniqueIdService uniqueIdService) {
     this.executePointService = executePointService;
     this.featureHistoryService = featureHistoryService;
     this.executeRecordService = executeRecordService;
     this.cacheService = cacheService;
     this.taskRecordService = taskRecordService;
     this.executeStrategyFactory = executeStrategyFactory;
+    this.uniqueIdService = uniqueIdService;
   }
 
   @Override
   public String execute(String featureId, String recordId, ExecuteContext executeContext) {
-    String historyId = UUID.randomUUID().toString().replace("-", "");
+    String historyId = uniqueIdService.getUniqueId();
     featureHistoryService.saveFeatureHistory(featureId, historyId, recordId);
 
     executorService.execute(() -> {
@@ -120,7 +122,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
     executeRecord.setExecuteType(executePoint.getExecuteType());
     executeRecord.setCreateTime(System.currentTimeMillis());
     executeRecord.setTestStage(executePoint.getTestStage());
-    executeRecord.setExecuteRecordId(UUID.randomUUID().toString());
+    executeRecord.setExecuteRecordId(uniqueIdService.getUniqueId());
     executeRecordService.insert(executeRecord);
   }
 

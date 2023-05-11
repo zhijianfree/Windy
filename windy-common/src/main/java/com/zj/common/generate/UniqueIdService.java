@@ -1,4 +1,4 @@
-package com.zj.feature.service;
+package com.zj.common.generate;
 
 import java.util.UUID;
 import org.springframework.stereotype.Service;

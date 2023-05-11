@@ -6,13 +6,14 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.PageSize;
+import com.zj.common.generate.UniqueIdService;
 import com.zj.pipeline.entity.dto.PipelineActionDto;
 import com.zj.pipeline.entity.po.PipelineAction;
 import com.zj.pipeline.mapper.PipelineActionMapper;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -23,9 +24,12 @@ import org.springframework.util.StringUtils;
 @Service
 public class PipelineActionService extends ServiceImpl<PipelineActionMapper, PipelineAction> {
 
+  @Autowired
+  private UniqueIdService uniqueIdService;
+
   public Boolean createAction(PipelineActionDto actionDto) {
     PipelineAction pipelineAction = actionDto.toPipelineAction();
-    pipelineAction.setActionId(UUID.randomUUID().toString().replace("-", ""));
+    pipelineAction.setActionId(uniqueIdService.getUniqueId());
     pipelineAction.setCreateTime(System.currentTimeMillis());
     pipelineAction.setUpdateTime(System.currentTimeMillis());
     return save(pipelineAction);

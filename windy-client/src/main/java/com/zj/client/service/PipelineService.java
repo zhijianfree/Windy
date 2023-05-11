@@ -62,7 +62,6 @@ public class PipelineService {
 
   public Object getRecordStatus(String recordId) {
     Integer status = statusMap.get(recordId);
-
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("status", status);
     return jsonObject;

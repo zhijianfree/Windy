@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
+import com.zj.common.generate.UniqueIdService;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.feature.entity.dto.BatchDeleteDTO;
 import com.zj.feature.entity.dto.CopyFeatureDTO;

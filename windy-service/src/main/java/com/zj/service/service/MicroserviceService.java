@@ -6,19 +6,23 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.PageSize;
+import com.zj.common.generate.UniqueIdService;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.service.entity.dto.MicroserviceDTO;
 import com.zj.service.entity.po.Microservice;
 import com.zj.service.mapper.MicroserviceMapper;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 @Service
 public class MicroserviceService extends ServiceImpl<MicroserviceMapper, Microservice> {
+
+  @Autowired
+  private UniqueIdService uniqueIdService;
 
   public PageSize<MicroserviceDTO> getServices(Integer pageNo, Integer size, String name) {
     IPage<Microservice> iPage = new Page<Microservice>(pageNo, size);
@@ -44,7 +48,7 @@ public class MicroserviceService extends ServiceImpl<MicroserviceMapper, Microse
 
   public String createService(MicroserviceDTO microserviceDto) {
     Microservice microservice = OrikaUtil.convert(microserviceDto, Microservice.class);
-    microservice.setServiceId(UUID.randomUUID().toString().replace("-", ""));
+    microservice.setServiceId(uniqueIdService.getUniqueId());
     microservice.setOwner("admin");
     microservice.setCreateTime(System.currentTimeMillis());
     microservice.setUpdateTime(System.currentTimeMillis());

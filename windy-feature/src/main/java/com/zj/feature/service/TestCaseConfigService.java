@@ -2,13 +2,13 @@ package com.zj.feature.service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.generate.UniqueIdService;
 import com.zj.feature.entity.dto.TestCaseConfigDTO;
 import com.zj.feature.entity.po.TestCaseConfig;
 import com.zj.feature.mapper.TestCaseConfigMapper;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +20,9 @@ import org.springframework.util.CollectionUtils;
  */
 @Service
 public class TestCaseConfigService extends ServiceImpl<TestCaseConfigMapper, TestCaseConfig> {
+
+  @Autowired
+  private UniqueIdService uniqueIdService;
 
   public List<TestCaseConfigDTO> getTestCaseConfigs(String caseId) {
     List<TestCaseConfig> testCaseConfigs = list(
@@ -38,7 +41,7 @@ public class TestCaseConfigService extends ServiceImpl<TestCaseConfigMapper, Tes
 
     List<TestCaseConfig> caseConfigs = configs.stream().map(configDTO -> {
       TestCaseConfig testCaseConfig = TestCaseConfigDTO.toTestCaseConfig(configDTO);
-      testCaseConfig.setConfigId(UUID.randomUUID().toString().replace("-", ""));
+      testCaseConfig.setConfigId(uniqueIdService.getUniqueId());
       testCaseConfig.setCreateTime(System.currentTimeMillis());
       testCaseConfig.setUpdateTime(System.currentTimeMillis());
       return testCaseConfig;

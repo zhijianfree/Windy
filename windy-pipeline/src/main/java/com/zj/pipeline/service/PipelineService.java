@@ -4,8 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
+import com.zj.common.generate.UniqueIdService;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.pipeline.entity.dto.PipelineActionDto;
 import com.zj.pipeline.entity.dto.PipelineDTO;
@@ -21,7 +23,6 @@ import com.zj.pipeline.entity.vo.ConfigDetail;
 import com.zj.pipeline.executer.Invoker.builder.RefreshContextBuilder;
 import com.zj.pipeline.executer.Invoker.builder.RequestContextBuilder;
 import com.zj.pipeline.executer.PipelineExecutor;
-import com.zj.common.enums.ProcessStatus;
 import com.zj.pipeline.executer.notify.PipelineEventFactory;
 import com.zj.pipeline.executer.vo.ExecuteParam;
 import com.zj.pipeline.executer.vo.NodeConfig;
@@ -33,11 +34,9 @@ import com.zj.pipeline.executer.vo.TaskNode;
 import com.zj.pipeline.mapper.PipelineMapper;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -67,6 +66,9 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
 
   @Autowired
   private NodeRecordService nodeRecordService;
+
+  @Autowired
+  private UniqueIdService uniqueIdService;
 
   @Transactional
   public boolean updatePipeline(String service, String pipelineId, PipelineDTO pipelineDTO) {
@@ -191,7 +193,7 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
     }
 
     Long currentTime = System.currentTimeMillis();
-    String pipelineId = UUID.randomUUID().toString();
+    String pipelineId = uniqueIdService.getUniqueId();
     Pipeline pipeline = PipelineDTO.toPipeline(pipelineDTO);
     pipeline.setPipelineId(pipelineId);
     pipeline.setPipelineStatus(PipelineStatus.NORMAL.getType());
@@ -208,7 +210,7 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
 
   private void createNewStage(String pipelineId, PipelineStageDTO stageDto) {
     Long currentTime = System.currentTimeMillis();
-    String stageId = UUID.randomUUID().toString();
+    String stageId = uniqueIdService.getUniqueId();
     PipelineStage pipelineStage = new PipelineStage();
     pipelineStage.setPipelineId(pipelineId);
     pipelineStage.setStageName(stageDto.getStageName());
@@ -221,7 +223,7 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
 
     stageDto.getNodes().forEach(nodeDto -> {
       PipelineNode pipelineNode = new PipelineNode();
-      pipelineNode.setNodeId(UUID.randomUUID().toString());
+      pipelineNode.setNodeId(uniqueIdService.getUniqueId());
       pipelineNode.setPipelineId(pipelineId);
       pipelineNode.setStageId(stageId);
       pipelineNode.setType(nodeDto.getType());

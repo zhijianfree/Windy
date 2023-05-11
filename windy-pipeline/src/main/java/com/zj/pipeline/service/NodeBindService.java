@@ -6,13 +6,13 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.PageSize;
+import com.zj.common.generate.UniqueIdService;
 import com.zj.pipeline.entity.dto.NodeBindDto;
 import com.zj.pipeline.entity.dto.PipelineActionDto;
 import com.zj.pipeline.entity.po.NodeBind;
 import com.zj.pipeline.entity.po.PipelineAction;
 import com.zj.pipeline.mapper.NodeBindMapper;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +32,13 @@ public class NodeBindService extends ServiceImpl<NodeBindMapper, NodeBind> {
   @Autowired
   private PipelineActionService actionService;
 
+  @Autowired
+  private UniqueIdService uniqueIdService;
+
   @Transactional
   public Boolean createNodes(NodeBindDto nodeBindDto) {
     NodeBind nodeBind = nodeBindDto.toNodeBind();
-    nodeBind.setNodeId(UUID.randomUUID().toString().replace("-", ""));
+    nodeBind.setNodeId(uniqueIdService.getUniqueId());
     nodeBind.setUserId("admin");
     nodeBind.setCreateTime(System.currentTimeMillis());
     nodeBind.setUpdateTime(System.currentTimeMillis());
