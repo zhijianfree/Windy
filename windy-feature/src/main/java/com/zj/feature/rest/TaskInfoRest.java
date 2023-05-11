@@ -1,10 +1,12 @@
 package com.zj.feature.rest;
 
 import com.zj.common.ResponseMeta;
+import com.zj.common.ResponseStatusModel;
 import com.zj.common.exception.ErrorCode;
-import com.zj.feature.entity.dto.PageSize;
+import com.zj.common.PageSize;
 import com.zj.feature.entity.dto.TaskInfoDTO;
 import com.zj.feature.service.TaskInfoService;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +33,11 @@ public class TaskInfoRest {
   public ResponseMeta<PageSize<TaskInfoDTO>> getTaskList(@RequestParam(value = "page", defaultValue = "1") Integer page,
       @RequestParam(value = "size", defaultValue = "10") Integer size, @RequestParam(value = "name") String name) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, taskInfoService.getTaskList(name, page, size));
+  }
+
+  @GetMapping("/{serviceId}/tasks")
+  public ResponseMeta<List<TaskInfoDTO>> getAllTaskList(@PathVariable(value = "serviceId") String serviceId) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, taskInfoService.getAllTaskList(serviceId));
   }
 
   @PostMapping("/task")
@@ -61,5 +68,10 @@ public class TaskInfoRest {
   public ResponseMeta<String> startTask(@PathVariable("taskId") String taskId) {
     String recordId = taskInfoService.startTask(taskId);
     return new ResponseMeta<>(ErrorCode.SUCCESS, recordId);
+  }
+
+  @GetMapping("/task/{taskId}/status")
+  public ResponseStatusModel getTaskStatus(@PathVariable("taskId") String taskId) {
+    return taskInfoService.getTaskStatus(taskId);
   }
 }

@@ -2,9 +2,8 @@ package com.zj.feature.rest;
 
 import com.zj.common.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
-import com.zj.feature.entity.dto.FeatureHistoryDTO;
 import com.zj.feature.entity.dto.HistoryNodeDTO;
-import com.zj.feature.entity.dto.PageSize;
+import com.zj.common.PageSize;
 import com.zj.feature.entity.dto.TaskRecordDTO;
 import com.zj.feature.service.TaskRecordService;
 import java.util.List;

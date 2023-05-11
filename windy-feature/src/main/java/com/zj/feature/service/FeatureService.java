@@ -6,12 +6,14 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
+import com.zj.common.generate.UniqueIdService;
+import com.zj.common.utils.OrikaUtil;
 import com.zj.feature.entity.dto.BatchDeleteDTO;
 import com.zj.feature.entity.dto.CopyFeatureDTO;
 import com.zj.feature.entity.dto.ExecutePointDTO;
 import com.zj.feature.entity.dto.FeatureInfoDTO;
 import com.zj.feature.entity.dto.FeatureNodeDTO;
-import com.zj.feature.entity.dto.PageSize;
+import com.zj.common.PageSize;
 import com.zj.feature.entity.dto.TagFilterDTO;
 import com.zj.feature.entity.dto.TestCaseConfigDTO;
 import com.zj.feature.entity.dto.TestCaseDTO;
@@ -28,7 +30,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,8 +96,7 @@ public class FeatureService extends ServiceImpl<FeatureMapper, FeatureInfo> {
     if (Objects.isNull(featureInfo)) {
       throw new ApiException(ErrorCode.FEATURE_NOT_FIND);
     }
-    FeatureInfoDTO featureInfoDTO = new FeatureInfoDTO();
-    BeanUtils.copyProperties(featureInfo, featureInfoDTO);
+    FeatureInfoDTO featureInfoDTO = OrikaUtil.convert(featureInfo, FeatureInfoDTO.class);
     List<String> featureTags = featureTagService.getFeatureTags(featureId);
     featureInfoDTO.setTags(featureTags);
     return featureInfoDTO;
@@ -125,8 +125,7 @@ public class FeatureService extends ServiceImpl<FeatureMapper, FeatureInfo> {
 
   @Transactional
   public String createFeature(FeatureInfoDTO featureInfoDTO) {
-    FeatureInfo featureInfo = new FeatureInfo();
-    BeanUtils.copyProperties(featureInfoDTO, featureInfo);
+    FeatureInfo featureInfo = OrikaUtil.convert(featureInfoDTO, FeatureInfo.class);
     featureInfo.setFeatureId(uniqueIdService.getUniqueId());
     featureInfo.setCreateTime(System.currentTimeMillis());
     featureInfo.setUpdateTime(System.currentTimeMillis());
@@ -146,8 +145,7 @@ public class FeatureService extends ServiceImpl<FeatureMapper, FeatureInfo> {
       throw new ApiException(ErrorCode.FEATURE_NOT_FIND);
     }
 
-    FeatureInfo featureInfo = new FeatureInfo();
-    BeanUtils.copyProperties(featureInfoDTO, featureInfo);
+    FeatureInfo featureInfo = OrikaUtil.convert(featureInfoDTO, FeatureInfo.class);
     featureInfo.setCreateTime(System.currentTimeMillis());
     featureInfo.setUpdateTime(System.currentTimeMillis());
     featureInfo.setFeatureId(featureInfoDTO.getFeatureId());

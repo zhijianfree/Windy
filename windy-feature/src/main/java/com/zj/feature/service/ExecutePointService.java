@@ -4,17 +4,17 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.PageSize;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
+import com.zj.common.generate.UniqueIdService;
 import com.zj.feature.entity.dto.ExecutePointDTO;
-import com.zj.feature.entity.dto.PageSize;
 import com.zj.feature.entity.po.ExecutePoint;
 import com.zj.feature.executor.compare.CompareType;
 import com.zj.feature.mapper.ExecutePointMapper;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +24,9 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 @Service
 public class ExecutePointService extends ServiceImpl<ExecutePointMapper, ExecutePoint> {
+
+  @Autowired
+  private UniqueIdService uniqueIdService;
 
   public boolean updateByPointId(ExecutePoint executePoint) {
     return update(executePoint, Wrappers.lambdaUpdate(ExecutePoint.class)
@@ -75,7 +78,7 @@ public class ExecutePointService extends ServiceImpl<ExecutePointMapper, Execute
 
   public String createExecutePoint(ExecutePointDTO executePointDTO) {
     ExecutePoint executePoint = ExecutePointDTO.toExecutePoint(executePointDTO);
-    executePoint.setPointId(UUID.randomUUID().toString());
+    executePoint.setPointId(uniqueIdService.getUniqueId());
     executePoint.setCreateTime(System.currentTimeMillis());
     executePoint.setUpdateTime(System.currentTimeMillis());
     boolean result = save(executePoint);

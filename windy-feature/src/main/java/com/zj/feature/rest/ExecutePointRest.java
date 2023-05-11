@@ -3,7 +3,7 @@ package com.zj.feature.rest;
 import com.zj.common.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
 import com.zj.feature.entity.dto.ExecutePointDTO;
-import com.zj.feature.entity.dto.PageSize;
+import com.zj.common.PageSize;
 import com.zj.feature.service.ExecutePointService;
 import java.util.List;
 import javax.validation.Valid;
@@ -18,49 +18,49 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/v1/devops")
+@RequestMapping("/v1/devops/feature")
 @RestController
 public class ExecutePointRest {
     @Autowired
     private ExecutePointService executePointService;
 
-    @PostMapping("/feature/batch/execute/point")
+    @PostMapping("/batch/execute/point")
     public ResponseMeta<Void> batchAddExecutePoint(@Valid @RequestBody List<ExecutePointDTO> executePointDTOS){
         executePointService.batchAddTestFeature(executePointDTOS);
         return new ResponseMeta<>(ErrorCode.SUCCESS);
     }
 
-    @PostMapping("/feature/execute/point")
+    @PostMapping("/execute/point")
     public ResponseMeta<String> createExecutePoint(@Valid @RequestBody ExecutePointDTO executePointDTO) {
         return new ResponseMeta(ErrorCode.SUCCESS, executePointService.createExecutePoint(executePointDTO));
     }
 
-    @PutMapping("/feature/execute/point")
+    @PutMapping("/execute/point")
     public ResponseMeta<String> updateExecutePoint(@Valid @RequestBody ExecutePointDTO executePointDTO) {
         return new ResponseMeta(ErrorCode.SUCCESS, executePointService.updateExecutePoint(executePointDTO));
     }
 
-    @DeleteMapping("/feature/execute/point/{executePointId}")
+    @DeleteMapping("/execute/point/{executePointId}")
     public ResponseMeta<Boolean> deleteExecutePoint(@PathVariable("executePointId") String executePointId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, executePointService.deleteByExecutePointId(executePointId));
     }
 
-    @DeleteMapping("/feature/{featureId}/execute/points")
+    @DeleteMapping("/{featureId}/execute/points")
     public ResponseMeta<Integer> deleteExecutePointByFeatureId(@PathVariable("featureId") String featureId) {
         return new ResponseMeta(ErrorCode.SUCCESS, executePointService.deleteByFeatureId(featureId));
     }
 
-    @GetMapping("/feature/execute/point/{executePointId}")
+    @GetMapping("/execute/point/{executePointId}")
     public ResponseMeta<ExecutePointDTO> queryExecutePoint(@PathVariable("executePointId") String executePointId) {
         return new ResponseMeta(ErrorCode.SUCCESS, executePointService.getExecutePointDTO(executePointId));
     }
 
-    @GetMapping("/feature/{featureId}/execute/points")
+    @GetMapping("/{featureId}/execute/points")
     public ResponseMeta<PageSize<ExecutePointDTO>> queryExecutePoint(@PathVariable("featureId") String featureId, @RequestParam(value = "page", defaultValue = "1") int page, @RequestParam(value = "size", defaultValue = "10") int size) {
         return new ResponseMeta(ErrorCode.SUCCESS, executePointService.queryExecutePointPage(featureId, page, size));
     }
 
-    @GetMapping("/feature/execute/operators")
+    @GetMapping("/execute/operators")
     public ResponseMeta<List<String>> queryExecutePointOperators() {
         return new ResponseMeta<List<String>>(ErrorCode.SUCCESS, executePointService.queryExecutePointOperators());
     }

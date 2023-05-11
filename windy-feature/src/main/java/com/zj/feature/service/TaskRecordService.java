@@ -4,14 +4,12 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.utils.OrikaUtil;
 import com.zj.feature.entity.dto.FeatureHistoryDTO;
-import com.zj.feature.entity.dto.FeatureNodeDTO;
 import com.zj.feature.entity.dto.HistoryNodeDTO;
-import com.zj.feature.entity.dto.PageSize;
-import com.zj.feature.entity.dto.TaskInfoDTO;
+import com.zj.common.PageSize;
 import com.zj.feature.entity.dto.TaskRecordDTO;
 import com.zj.feature.entity.po.FeatureInfo;
-import com.zj.feature.entity.po.TaskInfo;
 import com.zj.feature.entity.po.TaskRecord;
 import com.zj.feature.mapper.TaskRecordMapper;
 import java.util.Collections;
@@ -19,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -40,8 +37,7 @@ public class TaskRecordService extends ServiceImpl<TaskRecordMapper, TaskRecord>
   private TestCaseService testCaseService;
 
   public boolean insert(TaskRecordDTO taskRecordDTO) {
-    TaskRecord taskRecord = new TaskRecord();
-    BeanUtils.copyProperties(taskRecordDTO, taskRecord);
+    TaskRecord taskRecord = OrikaUtil.convert(taskRecordDTO, TaskRecord.class);
     return save(taskRecord);
   }
 
@@ -65,11 +61,8 @@ public class TaskRecordService extends ServiceImpl<TaskRecordMapper, TaskRecord>
       return pageSize;
     }
 
-    List<TaskRecordDTO> dtoList = recordIPage.getRecords().stream().map(record -> {
-      TaskRecordDTO taskInfoDTO = new TaskRecordDTO();
-      BeanUtils.copyProperties(record, taskInfoDTO);
-      return taskInfoDTO;
-    }).collect(Collectors.toList());
+    List<TaskRecordDTO> dtoList = recordIPage.getRecords().stream()
+        .map(record -> OrikaUtil.convert(record, TaskRecordDTO.class)).collect(Collectors.toList());
     pageSize.setData(dtoList);
     return pageSize;
   }
@@ -136,8 +129,6 @@ public class TaskRecordService extends ServiceImpl<TaskRecordMapper, TaskRecord>
       return null;
     }
 
-    TaskRecordDTO taskRecordDTO = new TaskRecordDTO();
-    BeanUtils.copyProperties(taskRecord, taskRecordDTO);
-    return taskRecordDTO;
+    return OrikaUtil.convert(taskRecord, TaskRecordDTO.class);
   }
 }

@@ -29,7 +29,7 @@ CREATE TABLE `execute_point` (
   `sort_order` int DEFAULT NULL COMMENT '特性排序',
   `create_time` bigint DEFAULT NULL COMMENT '创建时间',
   `update_time` varchar(100) DEFAULT NULL COMMENT '更新时间'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 
 #用例详情表
 CREATE TABLE `feature_info` (
@@ -137,21 +137,9 @@ CREATE TABLE `task_record` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 
-#服务表
-CREATE TABLE `microservice` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `service_id` varchar(64) DEFAULT NULL COMMENT '服务Id',
-  `service_name` varchar(100) NOT NULL COMMENT '服务名称',
-  `description` varchar(300) NOT NULL COMMENT '服务描述',
-  `owner` varchar(100) NOT NULL COMMENT '服务拥有者',
-  `create_time` bigint DEFAULT NULL COMMENT '创建时间',
-  `update_time` bigint DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-
 #用例标签表
 CREATE TABLE `feature_tag` (
   `feature_id` varchar(64) DEFAULT NULL COMMENT '用例Id',
   `tag_value` varchar(100) NOT NULL COMMENT '标签值',
-  `create_time` bigint DEFAULT NULL COMMENT '创建时间',
+  `create_time` bigint DEFAULT NULL COMMENT '创建时间'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4

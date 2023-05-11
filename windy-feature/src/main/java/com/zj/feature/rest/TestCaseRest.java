@@ -2,8 +2,7 @@ package com.zj.feature.rest;
 
 import com.zj.common.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
-import com.zj.feature.entity.dto.FeatureInfoDTO;
-import com.zj.feature.entity.dto.PageSize;
+import com.zj.common.PageSize;
 import com.zj.feature.entity.dto.TestCaseConfigDTO;
 import com.zj.feature.entity.dto.TestCaseDTO;
 import com.zj.feature.service.TestCaseConfigService;
@@ -48,8 +47,8 @@ public class TestCaseRest {
   }
 
   @PutMapping("/case")
-  public ResponseMeta<Integer> updateTestCase(@RequestBody TestCaseDTO testCaseDTO) {
-    Integer result = testCaseService.updateTestCase(testCaseDTO);
+  public ResponseMeta<Boolean> updateTestCase(@RequestBody TestCaseDTO testCaseDTO) {
+    Boolean result = testCaseService.updateTestCase(testCaseDTO);
     return new ResponseMeta<>(ErrorCode.SUCCESS, result);
   }
 
@@ -60,8 +59,8 @@ public class TestCaseRest {
   }
 
   @DeleteMapping("/case/{caseId}")
-  public ResponseMeta<Integer> deleteTestCase(@PathVariable("caseId") String caseId) {
-    Integer result = testCaseService.deleteTestCase(caseId);
+  public ResponseMeta<Boolean> deleteTestCase(@PathVariable("caseId") String caseId) {
+    Boolean result = testCaseService.deleteTestCase(caseId);
     return new ResponseMeta<>(ErrorCode.SUCCESS, result);
   }
 

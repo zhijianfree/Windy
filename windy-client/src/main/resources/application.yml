@@ -1,0 +1,11 @@
+server:
+  port: 8070
+
+windy:
+  pipeline:
+    git:
+      user: guyuelan
+      password: zhijian137899
+      workspace: /Users/falcon/windy/
+    maven:
+      path: /Users/hiuielan/soft/apache-maven-3.6.3

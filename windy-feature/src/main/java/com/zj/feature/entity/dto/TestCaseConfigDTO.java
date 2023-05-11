@@ -1,8 +1,8 @@
 package com.zj.feature.entity.dto;
 
+import com.zj.common.utils.OrikaUtil;
 import com.zj.feature.entity.po.TestCaseConfig;
 import lombok.Data;
-import org.springframework.beans.BeanUtils;
 
 /**
  * @author falcon
@@ -53,14 +53,10 @@ public class TestCaseConfigDTO {
   private Long createTime;
 
   public static TestCaseConfig toTestCaseConfig(TestCaseConfigDTO configDTO) {
-    TestCaseConfig testCaseConfig = new TestCaseConfig();
-    BeanUtils.copyProperties(configDTO, testCaseConfig);
-    return testCaseConfig;
+    return OrikaUtil.convert(configDTO, TestCaseConfig.class);
   }
 
-  public static TestCaseConfigDTO toTestCaseConfigDTO(TestCaseConfig configDTO) {
-    TestCaseConfigDTO testCaseConfig = new TestCaseConfigDTO();
-    BeanUtils.copyProperties(configDTO, testCaseConfig);
-    return testCaseConfig;
+  public static TestCaseConfigDTO toTestCaseConfigDTO(TestCaseConfig config) {
+    return OrikaUtil.convert(config, TestCaseConfigDTO.class);
   }
 }

@@ -3,19 +3,23 @@ package com.zj.feature.service;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.generate.UniqueIdService;
+import com.zj.common.utils.OrikaUtil;
 import com.zj.feature.entity.dto.ExecuteRecordDTO;
 import com.zj.feature.entity.po.ExecuteRecord;
 import com.zj.feature.mapper.ExecuteRecordMapper;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
-import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
 public class ExecuteRecordService extends ServiceImpl<ExecuteRecordMapper, ExecuteRecord> {
+
+  @Autowired
+  private UniqueIdService uniqueIdService;
 
   public List<ExecuteRecordDTO> getExecuteRecords(String historyId) {
     List<ExecuteRecord> featureHistories = list(Wrappers.lambdaQuery(ExecuteRecord.class)
@@ -26,15 +30,14 @@ public class ExecuteRecordService extends ServiceImpl<ExecuteRecordMapper, Execu
     }
 
     return featureHistories.stream().map(history -> {
-      ExecuteRecordDTO historyDTO = new ExecuteRecordDTO();
-      BeanUtils.copyProperties(history, historyDTO);
+      ExecuteRecordDTO historyDTO = OrikaUtil.convert(history, ExecuteRecordDTO.class);
       historyDTO.setExecuteResult(JSON.parseArray(history.getExecuteResult()));
       return historyDTO;
     }).collect(Collectors.toList());
   }
 
   public boolean insert(ExecuteRecord executeRecord) {
-    executeRecord.setExecuteRecordId(UUID.randomUUID().toString());
+    executeRecord.setExecuteRecordId(uniqueIdService.getUniqueId());
     executeRecord.setCreateTime(System.currentTimeMillis());
     return save(executeRecord);
   }

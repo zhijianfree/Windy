@@ -6,7 +6,7 @@ import com.zj.feature.entity.dto.BatchDeleteDTO;
 import com.zj.feature.entity.dto.CopyFeatureDTO;
 import com.zj.feature.entity.dto.FeatureInfoDTO;
 import com.zj.feature.entity.dto.FeatureNodeDTO;
-import com.zj.feature.entity.dto.PageSize;
+import com.zj.common.PageSize;
 import com.zj.feature.entity.dto.TagFilterDTO;
 import com.zj.feature.entity.po.FeatureInfo;
 import com.zj.feature.executor.ExecuteHandler;
@@ -34,11 +34,11 @@ public class FeatureInfoRest {
   @Autowired
   private ExecuteHandler executeFeature;
 
-  @GetMapping("/{testCaseId}/tree/features")
+  @GetMapping("/{caseId}/tree/features")
   public ResponseMeta<List<FeatureInfo>> getFeatureTreeList(
-      @PathVariable("testCaseId") String testCaseId) {
+      @PathVariable("caseId") String caseId) {
     return new ResponseMeta(ErrorCode.SUCCESS,
-        featureService.getFeatureTreeList(testCaseId));
+        featureService.getFeatureTreeList(caseId));
   }
 
   @PostMapping("/feature")
@@ -67,13 +67,13 @@ public class FeatureInfoRest {
         featureService.getFeatureById(featureId));
   }
 
-  @GetMapping("/case/{testCaseId}/features")
+  @GetMapping("/case/{caseId}/features")
   public ResponseMeta<PageSize<FeatureInfo>> queryFeatureTask(
-      @PathVariable("testCaseId") String testCaseId,
+      @PathVariable("caseId") String caseId,
       @RequestParam(value = "page", defaultValue = "1") int page,
       @RequestParam(value = "size", defaultValue = "10") int size) {
     return new ResponseMeta(ErrorCode.SUCCESS,
-        featureService.queryFeaturePage(testCaseId, page, size));
+        featureService.queryFeaturePage(caseId, page, size));
   }
 
   @PostMapping("/feature/start/{featureId}")

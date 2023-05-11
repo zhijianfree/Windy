@@ -25,6 +25,14 @@
       <groupId>com.zj</groupId>
       <artifactId>windy-feature</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.zj</groupId>
+      <artifactId>windy-pipeline</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.zj</groupId>
+      <artifactId>windy-service</artifactId>
+    </dependency>
 
   </dependencies>
 

@@ -11,14 +11,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/v1/devops")
+@RequestMapping("/v1/devops/feature")
 @RestController
 public class ExecutePointRecordRest {
 
     @Autowired
     private ExecuteRecordService executeRecordService;
 
-    @GetMapping("/feature/{historyId}/records")
+    @GetMapping("/{historyId}/records")
     public ResponseMeta<List<ExecuteRecordDTO>> queryFeatureHistories(@PathVariable("historyId") String historyId) {
         return new ResponseMeta<List<ExecuteRecordDTO>>(ErrorCode.SUCCESS, executeRecordService.getExecuteRecords(historyId));
     }

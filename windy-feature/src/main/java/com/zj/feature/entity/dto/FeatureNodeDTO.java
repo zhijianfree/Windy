@@ -1,11 +1,11 @@
 package com.zj.feature.entity.dto;
 
+import com.zj.common.utils.OrikaUtil;
 import com.zj.feature.entity.po.FeatureInfo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
-import org.springframework.beans.BeanUtils;
 
 /**
  * @author falcon
@@ -29,8 +29,7 @@ public class FeatureNodeDTO {
   private List<FeatureNodeDTO> children;
 
   public static FeatureNodeDTO toNode(FeatureInfo featureInfo) {
-    FeatureNodeDTO featureNodeDTO = new FeatureNodeDTO();
-    BeanUtils.copyProperties(featureInfo, featureNodeDTO);
+    FeatureNodeDTO featureNodeDTO = OrikaUtil.convert(featureInfo, FeatureNodeDTO.class);
     featureNodeDTO.setChildren(new ArrayList<>());
     return featureNodeDTO;
   }

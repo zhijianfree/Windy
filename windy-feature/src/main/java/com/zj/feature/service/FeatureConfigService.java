@@ -7,23 +7,26 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.feature.ability.ParameterDefine;
+import com.zj.common.PageSize;
+import com.zj.common.generate.UniqueIdService;
+import com.zj.common.utils.OrikaUtil;
 import com.zj.feature.entity.dto.ExecuteTemplateDTO;
-import com.zj.feature.entity.dto.PageSize;
 import com.zj.feature.entity.po.ExecuteTemplate;
 import com.zj.feature.entity.type.ExecutePointType;
 import com.zj.feature.mapper.ExecuteTemplateMapper;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 @Slf4j
 @Service
 public class FeatureConfigService extends ServiceImpl<ExecuteTemplateMapper, ExecuteTemplate> {
+
+  @Autowired
+  private UniqueIdService uniqueIdService;
 
   public PageSize<ExecuteTemplateDTO> getFeaturePage(Integer pageNo, Integer size, String name) {
     IPage<ExecuteTemplate> page = new Page<>(pageNo, size);
@@ -53,9 +56,8 @@ public class FeatureConfigService extends ServiceImpl<ExecuteTemplateMapper, Exe
   }
 
   public String createTemplate(ExecuteTemplateDTO executeTemplateDTO) {
-    ExecuteTemplate executeTemplate = new ExecuteTemplate();
-    BeanUtils.copyProperties(executeTemplateDTO, executeTemplate);
-    executeTemplate.setTemplateId(UUID.randomUUID().toString());
+    ExecuteTemplate executeTemplate = OrikaUtil.convert(executeTemplateDTO, ExecuteTemplate.class);
+    executeTemplate.setTemplateId(uniqueIdService.getUniqueId());
     executeTemplate.setAuthor("admin");
     executeTemplate.setCreateTime(System.currentTimeMillis());
     executeTemplate.setUpdateTime(System.currentTimeMillis());
@@ -68,8 +70,7 @@ public class FeatureConfigService extends ServiceImpl<ExecuteTemplateMapper, Exe
   }
 
   public String updateTemplate(ExecuteTemplateDTO executeTemplateDTO) {
-    ExecuteTemplate executeTemplate = new ExecuteTemplate();
-    BeanUtils.copyProperties(executeTemplateDTO, executeTemplate);
+    ExecuteTemplate executeTemplate = OrikaUtil.convert(executeTemplateDTO, ExecuteTemplate.class);
     executeTemplate.setAuthor("admin");
     executeTemplate.setUpdateTime(System.currentTimeMillis());
     executeTemplate.setParam(JSON.toJSONString(executeTemplateDTO.getParams()));
