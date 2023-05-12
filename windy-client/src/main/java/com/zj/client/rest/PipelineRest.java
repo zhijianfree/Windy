@@ -2,7 +2,7 @@ package com.zj.client.rest;
 
 import com.zj.client.entity.BuildParam;
 import com.zj.client.entity.ResponseModel;
-import com.zj.client.service.PipelineService;
+import com.zj.client.service.CodeBuildService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,15 +18,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class PipelineRest {
 
   @Autowired
-  private PipelineService pipelineService;
+  private CodeBuildService codeBuildService;
 
   @PostMapping("/build")
   public ResponseModel runBuild(@RequestBody BuildParam buildParam) {
-    return new ResponseModel(pipelineService.buildCode(buildParam), "构建中");
+    return new ResponseModel(codeBuildService.buildCode(buildParam), "构建中");
   }
 
   @PostMapping("/build/status")
   public ResponseModel buildStatus(@RequestBody BuildParam buildParam) {
-    return new ResponseModel(pipelineService.getRecordStatus(buildParam.getRecordId()),"查询结果");
+    return new ResponseModel(codeBuildService.getRecordStatus(buildParam.getRecordId()),"查询结果");
   }
 }

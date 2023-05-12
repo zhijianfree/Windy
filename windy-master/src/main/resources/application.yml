@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: WindyMaster
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:33060/windy?serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: zj137899
 
 eureka:
   server:

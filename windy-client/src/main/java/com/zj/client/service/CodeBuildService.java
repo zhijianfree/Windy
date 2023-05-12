@@ -3,8 +3,8 @@ package com.zj.client.service;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.client.entity.BuildParam;
 import com.zj.client.entity.ProcessStatus;
-import com.zj.client.pipeline.GitOperator;
-import com.zj.client.pipeline.MavenOperator;
+import com.zj.client.pipeline.git.GitOperator;
+import com.zj.client.pipeline.maven.MavenOperator;
 import java.io.File;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class PipelineService {
+public class CodeBuildService {
 
   @Value("windy.pipeline.git.workspace:/opt/windy/")
   private String workspace;

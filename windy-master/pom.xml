@@ -16,6 +16,14 @@
   </properties>
 
   <dependencies>
+    <!--    内部模块应用开始-->
+    <dependency>
+      <groupId>com.zj</groupId>
+      <artifactId>windy-common</artifactId>
+    </dependency>
+    <!--    内部模块应用结束-->
+
+    <!--    外部依赖开始-->
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
@@ -40,6 +48,20 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.mariadb.jdbc</groupId>
+      <artifactId>mariadb-java-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.baomidou</groupId>
+      <artifactId>mybatis-plus-boot-starter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <!--    外部依赖结束-->
   </dependencies>
 
   <build>

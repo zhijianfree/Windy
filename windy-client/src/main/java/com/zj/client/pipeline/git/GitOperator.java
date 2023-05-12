@@ -1,4 +1,4 @@
-package com.zj.client.pipeline;
+package com.zj.client.pipeline.git;
 
 import java.io.File;
 import java.io.IOException;
