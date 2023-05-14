@@ -1,7 +1,10 @@
 package com.zj.client.pipeline.executer;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.eventbus.Subscribe;
+import com.zj.client.notify.IResultEventNotify;
+import com.zj.client.notify.NotifyType;
 import com.zj.client.pipeline.executer.notify.IStatusNotifyListener;
 import com.zj.client.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.client.pipeline.executer.vo.TaskNode;
@@ -26,20 +29,23 @@ public class ExecuteProxy implements IStatusNotifyListener {
   private NodeExecutor nodeExecutor;
 
   @Autowired
+  private IResultEventNotify resultEventNotify;
+
+  @Autowired
   @Qualifier("pipelineExecutorPool")
   private ExecutorService executorService;
 
   /**
    * 流水线的执行应该是每个节点做为一个任务，这样就可以充分使用client的扩展性
-   * */
+   */
   public void runNode(TaskNode taskNode) {
     CompletableFuture.supplyAsync(() -> {
       if (Objects.isNull(taskNode)) {
         return null;
       }
-      return nodeExecutor.runNodeTask(taskNode.getHistoryId(), taskNode);
+      nodeExecutor.runNodeTask(taskNode.getHistoryId(), taskNode);
+      return taskNode.getRecordId();
     }, executorService).whenComplete((node, e) -> {
-      //todo  通知单个节点执行完成
       log.info("complete trigger action recordId = {}", JSON.toJSONString(node));
     });
   }
@@ -47,12 +53,6 @@ public class ExecuteProxy implements IStatusNotifyListener {
   @Override
   @Subscribe
   public void statusChange(PipelineStatusEvent event) {
-    updateNodeStatus(event);
-
-    //todo 通知单个节点执行完成
-  }
-
-  private void updateNodeStatus(PipelineStatusEvent event) {
     TaskNode taskNode = event.getTaskNode();
     //如果节点配置跳过，则修改状态为IGNORE
     ProcessStatus processStatus = event.getProcessStatus();
@@ -61,6 +61,9 @@ public class ExecuteProxy implements IStatusNotifyListener {
     }
 
     String message = JSON.toJSONString(event.getErrorMsg());
-//    nodeRecordService.updateNodeRecordStatus(taskNode.getRecordId(), processStatus.getType(), message);
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("message", message);
+    resultEventNotify
+        .notify(taskNode.getRecordId(), NotifyType.UPDATE_NODE_RECORD, processStatus, jsonObject);
   }
 }

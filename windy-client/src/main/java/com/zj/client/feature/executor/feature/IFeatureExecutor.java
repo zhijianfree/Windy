@@ -8,6 +8,6 @@ import java.util.concurrent.CompletableFuture;
 
 public interface IFeatureExecutor {
 
-    CompletableFuture<ExecuteResult> execute(List<ExecutePoint> executePointList, String featureId, String recordId,
+    void execute(List<ExecutePoint> executePointList, String featureId, String recordId,
         ExecuteContext executeContext);
 }

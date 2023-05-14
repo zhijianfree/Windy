@@ -1,5 +1,7 @@
 package com.zj.client.pipeline.executer;
 
+import com.zj.client.notify.IResultEventNotify;
+import com.zj.client.notify.NotifyType;
 import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.client.pipeline.executer.intercept.INodeExecuteInterceptor;
 import com.zj.client.pipeline.executer.notify.PipelineEventFactory;
@@ -30,26 +32,28 @@ public class NodeExecutor {
   private final List<INodeExecuteInterceptor> interceptors;
   private final Map<String, IRemoteInvoker> invokerMap;
   private final UniqueIdService uniqueIdService;
+  private final IResultEventNotify resultEventNotify;
 
   public NodeExecutor(List<INodeExecuteInterceptor> interceptors, List<IRemoteInvoker> invokers,
-      UniqueIdService uniqueIdService) {
+      UniqueIdService uniqueIdService, IResultEventNotify resultEventNotify) {
     this.interceptors = interceptors;
     invokerMap = invokers.stream()
         .collect(Collectors.toMap(invoker -> invoker.type().name(), invoker -> invoker));
     this.uniqueIdService = uniqueIdService;
+    this.resultEventNotify = resultEventNotify;
   }
 
   /**
    * 单个节点的执行逻辑主要涉及记录状态、调用第三方接口、查询任务状态（拦截器中实现）
    */
-  public TaskNodeRecord runNodeTask(String historyId, TaskNode node) {
+  public void runNodeTask(String historyId, TaskNode node) {
     log.info("start run task recordId={}", historyId);
     interceptors.forEach(interceptor -> interceptor.before(node));
 
     String recordId = uniqueIdService.getUniqueId();
     node.setRecordId(recordId);
     AtomicReference<ProcessStatus> statusAtomic = new AtomicReference<>(ProcessStatus.RUNNING);
-    TaskNodeRecord taskNodeRecord = buildRecord(historyId, node, recordId, statusAtomic);
+    saveRecord(historyId, node, recordId, statusAtomic);
     List<String> errorMsg = Collections.singletonList(TRIGGER_TASK_ERROR);
     try {
       IRemoteInvoker remoteInvoker = invokerMap.get(node.getExecuteType());
@@ -61,7 +65,7 @@ public class NodeExecutor {
       if (!executeFlag) {
         statusAtomic.set(ProcessStatus.FAIL);
         notifyNodeEvent(node, statusAtomic.get(), errorMsg);
-        return taskNodeRecord;
+        return;
       }
       log.info("task node run complete result={}", executeFlag);
     } catch (Exception e) {
@@ -72,18 +76,17 @@ public class NodeExecutor {
     }
 
     interceptors.forEach(interceptor -> interceptor.after(node, statusAtomic.get()));
-
     notifyNodeEvent(node, statusAtomic.get(), errorMsg);
-
-    return taskNodeRecord;
   }
 
-  private TaskNodeRecord buildRecord(String historyId, TaskNode node, String recordId,
+  private void saveRecord(String historyId, TaskNode node, String recordId,
       AtomicReference<ProcessStatus> statusAtomic) {
     long currentTimeMillis = System.currentTimeMillis();
-    return TaskNodeRecord.builder().historyId(historyId).recordId(recordId)
+    TaskNodeRecord taskNodeRecord = TaskNodeRecord.builder().historyId(historyId).recordId(recordId)
         .status(statusAtomic.get().getType()).nodeId(node.getNodeId()).createTime(currentTimeMillis)
         .updateTime(currentTimeMillis).build();
+
+    resultEventNotify.notify(recordId, NotifyType.CREATE_NODE_RECORD, ProcessStatus.RUNNING, taskNodeRecord);
   }
 
   private List<String> getErrorMsg(Exception exception) {
