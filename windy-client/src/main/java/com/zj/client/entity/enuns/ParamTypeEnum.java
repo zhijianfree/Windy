@@ -4,7 +4,6 @@ public enum ParamTypeEnum {
     STRING(0),
     MAP(1),
     LIST(2),
-
     INTEGER(3),
 
     FLOAT(4),

@@ -1,6 +1,6 @@
 package com.zj.pipeline.executer.vo;
 
-import com.zj.pipeline.entity.vo.CompareResult;
+import com.zj.domain.entity.dto.pipeline.CompareResult;
 import java.util.List;
 import java.util.Map;
 import lombok.Builder;

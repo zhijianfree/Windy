@@ -7,11 +7,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.PageSize;
 import com.zj.common.generate.UniqueIdService;
-import com.zj.pipeline.entity.dto.NodeBindDto;
-import com.zj.pipeline.entity.dto.PipelineActionDto;
-import com.zj.pipeline.entity.po.NodeBind;
-import com.zj.pipeline.entity.po.PipelineAction;
-import com.zj.pipeline.mapper.NodeBindMapper;
+import com.zj.domain.entity.dto.pipeline.NodeBindDto;
+import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
+import com.zj.domain.entity.po.pipeline.NodeBind;
+import com.zj.domain.entity.po.pipeline.PipelineAction;
+import com.zj.domain.mapper.pipeline.NodeBindMapper;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -57,8 +57,7 @@ public class NodeBindService extends ServiceImpl<NodeBindMapper, NodeBind> {
     boolean result = update(nodeBind,
         Wrappers.lambdaUpdate(NodeBind.class).eq(NodeBind::getNodeId, nodeBind.getNodeId()));
 
-    List<PipelineAction> actions = actionService.list(Wrappers.lambdaQuery(PipelineAction.class)
-        .eq(PipelineAction::getNodeId, nodeBind.getNodeId()));
+    List<PipelineAction> actions = actionService.getActionsByNodeId(nodeBind.getNodeId());
     if (!CollectionUtils.isEmpty(actions)) {
       List<String> oldList = actions.stream().map(PipelineAction::getActionId)
           .collect(Collectors.toList());
@@ -66,9 +65,8 @@ public class NodeBindService extends ServiceImpl<NodeBindMapper, NodeBind> {
       List<String> removeList = oldList.stream()
           .filter(actionId -> !nodeBindDto.getExecutors().contains(actionId))
           .collect(Collectors.toList());
-      if (!CollectionUtils.isEmpty(removeList)){
-        actionService.remove(
-            Wrappers.lambdaQuery(PipelineAction.class).in(PipelineAction::getActionId, removeList));
+      if (!CollectionUtils.isEmpty(removeList)) {
+        actionService.batchDelete(removeList);
       }
 
       List<String> newList = nodeBindDto.getExecutors().stream()
@@ -84,10 +82,9 @@ public class NodeBindService extends ServiceImpl<NodeBindMapper, NodeBind> {
       return false;
     }
 
-    PipelineAction pipelineAction = new PipelineAction();
+    PipelineActionDto pipelineAction = new PipelineActionDto();
     pipelineAction.setNodeId(nodeId);
-    return actionService.update(pipelineAction,
-        Wrappers.lambdaUpdate(PipelineAction.class).in(PipelineAction::getActionId, actionIds));
+    return actionService.updateAction(pipelineAction);
   }
 
   public NodeBind getNode(String nodeId) {
@@ -113,14 +110,12 @@ public class NodeBindService extends ServiceImpl<NodeBindMapper, NodeBind> {
   }
 
   public List<PipelineActionDto> getNodeExecutors(String nodeId) {
-    List<PipelineAction> actions = actionService.list(
-        Wrappers.lambdaQuery(PipelineAction.class).eq(PipelineAction::getNodeId, nodeId));
-
-    return actions.stream().map(PipelineActionDto::toPipelineActionDto)
+    List<PipelineAction> actions = actionService.getActionsByNodeId(nodeId);
+    return actions.stream().map(PipelineActionService::toPipelineActionDto)
         .collect(Collectors.toList());
   }
 
   public List<NodeBind> getAllNodes() {
-      return list();
+    return list();
   }
 }

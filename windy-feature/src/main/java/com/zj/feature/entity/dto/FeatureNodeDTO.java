@@ -1,7 +1,7 @@
 package com.zj.feature.entity.dto;
 
 import com.zj.common.utils.OrikaUtil;
-import com.zj.feature.entity.po.FeatureInfo;
+import com.zj.domain.entity.po.feature.FeatureInfo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.NotNull;

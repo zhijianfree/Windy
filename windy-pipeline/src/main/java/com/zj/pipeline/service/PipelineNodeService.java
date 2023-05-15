@@ -1,8 +1,8 @@
 package com.zj.pipeline.service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.pipeline.entity.po.PipelineNode;
-import com.zj.pipeline.mapper.PipelineNodeMapper;
+import com.zj.domain.entity.po.pipeline.PipelineNode;
+import com.zj.domain.mapper.pipeline.PipelineNodeMapper;
 import org.springframework.stereotype.Service;
 
 /**

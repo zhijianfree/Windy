@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.zj.client.entity.BuildParam;
 import com.zj.client.pipeline.git.GitOperator;
 import com.zj.client.pipeline.maven.MavenOperator;
+import com.zj.common.enums.ProcessStatus;
 import java.io.File;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

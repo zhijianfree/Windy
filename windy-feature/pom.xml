@@ -82,6 +82,10 @@
       <artifactId>windy-service</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.zj</groupId>
+      <artifactId>windy-domain</artifactId>
+    </dependency>
+    <dependency>
       <groupId>ognl</groupId>
       <artifactId>ognl</artifactId>
     </dependency>

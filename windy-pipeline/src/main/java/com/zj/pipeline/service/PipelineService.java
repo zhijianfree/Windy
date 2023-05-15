@@ -1,23 +1,27 @@
 package com.zj.pipeline.service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.netflix.discovery.shared.Applications;
+import com.zj.common.ResponseMeta;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.pipeline.entity.dto.PipelineActionDto;
-import com.zj.pipeline.entity.dto.PipelineDTO;
-import com.zj.pipeline.entity.dto.PipelineNodeDTO;
-import com.zj.pipeline.entity.dto.PipelineStageDTO;
+import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
+import com.zj.domain.entity.dto.pipeline.PipelineDTO;
+import com.zj.domain.entity.dto.pipeline.PipelineNodeDTO;
+import com.zj.domain.entity.dto.pipeline.PipelineStageDTO;
+import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.pipeline.entity.enums.PipelineStatus;
-import com.zj.pipeline.entity.po.NodeRecord;
-import com.zj.pipeline.entity.po.Pipeline;
-import com.zj.pipeline.entity.po.PipelineNode;
-import com.zj.pipeline.entity.po.PipelineStage;
+import com.zj.domain.entity.po.pipeline.NodeRecord;
+import com.zj.domain.entity.po.pipeline.Pipeline;
+import com.zj.domain.entity.po.pipeline.PipelineNode;
+import com.zj.domain.entity.po.pipeline.PipelineStage;
 import com.zj.pipeline.entity.vo.ActionDetail;
 import com.zj.pipeline.entity.vo.ConfigDetail;
 import com.zj.pipeline.executer.Invoker.builder.RefreshContextBuilder;
@@ -31,7 +35,7 @@ import com.zj.pipeline.executer.vo.RefreshContext;
 import com.zj.pipeline.executer.vo.RequestContext;
 import com.zj.pipeline.executer.vo.Stage;
 import com.zj.pipeline.executer.vo.TaskNode;
-import com.zj.pipeline.mapper.PipelineMapper;
+import com.zj.domain.mapper.pipeline.PipelineMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -41,8 +45,11 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * @author guyuelan
@@ -70,6 +77,9 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
   @Autowired
   private UniqueIdService uniqueIdService;
 
+  @Autowired
+  private IPipelineRepository pipelineRepository;
+
   @Transactional
   public boolean updatePipeline(String service, String pipelineId, PipelineDTO pipelineDTO) {
     Assert.notEmpty(service, "service can not be empty");
@@ -78,12 +88,7 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
       throw new ApiException(ErrorCode.NOT_FOUND_PIPELINE);
     }
 
-    Long currentTime = System.currentTimeMillis();
-    Pipeline pipeline = PipelineDTO.toPipeline(pipelineDTO);
-    pipeline.setUpdateTime(currentTime);
-    pipeline.setPipelineId(pipelineId);
-    boolean result = update(pipeline, Wrappers.lambdaUpdate(Pipeline.class)
-        .eq(Pipeline::getPipelineId, pipeline.getPipelineId()));
+    boolean result = pipelineRepository.updatePipeline(pipelineDTO);
     if (!result) {
       throw new ApiException(ErrorCode.UPDATE_PIPELINE_ERROR);
     }
@@ -141,7 +146,7 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
 
       //修改stage节点
       Long currentTime = System.currentTimeMillis();
-      PipelineStage pipelineStage = convertClass(stageDto, PipelineStage.class);
+      PipelineStage pipelineStage = OrikaUtil.convert(stageDto, PipelineStage.class);
       pipelineStage.setUpdateTime(currentTime);
       pipelineStageService.update(pipelineStage, Wrappers.lambdaUpdate(PipelineStage.class)
           .eq(PipelineStage::getStageId, pipelineStage.getStageId()));
@@ -150,7 +155,7 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
       List<PipelineNodeDTO> stageDtoNodes = stageDto.getNodes();
       if (CollectionUtils.isNotEmpty(stageDtoNodes)) {
         stageDtoNodes.forEach(dto -> {
-          PipelineNode pipelineNode = convertClass(dto, PipelineNode.class);
+          PipelineNode pipelineNode = OrikaUtil.convert(dto, PipelineNode.class);
           pipelineNode.setUpdateTime(currentTime);
           pipelineNodeService.update(pipelineNode, Wrappers.lambdaUpdate(PipelineNode.class)
               .eq(PipelineNode::getNodeId, pipelineNode.getNodeId()));
@@ -159,22 +164,9 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
     });
   }
 
-  private <T> T convertClass(Object source, Class<T> cls) {
-    return JSON.parseObject(JSON.toJSONString(source), cls);
-  }
-
 
   public List<PipelineDTO> listPipelines(String serviceId) {
-    Assert.notEmpty(serviceId, "service can not be empty");
-
-    List<Pipeline> pipelines = list(
-        Wrappers.lambdaQuery(Pipeline.class).eq(Pipeline::getServiceId, serviceId));
-
-    if (CollectionUtils.isEmpty(pipelines)) {
-      return new ArrayList<>();
-    }
-
-    return pipelines.stream().map(PipelineDTO::toPipelineDto).collect(Collectors.toList());
+    return pipelineRepository.listPipelines(serviceId);
   }
 
   @Transactional
@@ -183,7 +175,7 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
         Wrappers.lambdaQuery(PipelineStage.class).eq(PipelineStage::getPipelineId, pipelineId));
     pipelineNodeService.remove(
         Wrappers.lambdaQuery(PipelineNode.class).eq(PipelineNode::getPipelineId, pipelineId));
-    return remove(Wrappers.lambdaQuery(Pipeline.class).eq(Pipeline::getPipelineId, pipelineId));
+    return pipelineRepository.deletePipeline(pipelineId);
   }
 
   @Transactional
@@ -192,20 +184,16 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
       return "";
     }
 
-    Long currentTime = System.currentTimeMillis();
     String pipelineId = uniqueIdService.getUniqueId();
-    Pipeline pipeline = PipelineDTO.toPipeline(pipelineDTO);
-    pipeline.setPipelineId(pipelineId);
-    pipeline.setPipelineStatus(PipelineStatus.NORMAL.getType());
-    pipeline.setUpdateTime(currentTime);
-    pipeline.setCreateTime(currentTime);
-    boolean result = save(pipeline);
+    pipelineDTO.setPipelineId(pipelineId);
+    pipelineDTO.setPipelineStatus(PipelineStatus.NORMAL.getType());
+    boolean result = pipelineRepository.createPipeline(pipelineDTO);
     if (!result) {
-      throw new RuntimeException("create pipeline error");
+      throw new ApiException(ErrorCode.CREATE_PIPELINE);
     }
 
     pipelineDTO.getStageList().forEach(stageDto -> createNewStage(pipelineId, stageDto));
-    return pipeline.getPipelineId();
+    return pipelineId;
   }
 
   private void createNewStage(String pipelineId, PipelineStageDTO stageDto) {
@@ -236,14 +224,32 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
   }
 
   public PipelineDTO getPipeline(String pipelineId) {
-    Pipeline pipeline = getOne(
-        Wrappers.<Pipeline>lambdaQuery().eq(Pipeline::getPipelineId, pipelineId));
-
-    return PipelineDTO.toPipelineDto(pipeline);
+    return pipelineRepository.getPipeline(pipelineId);
   }
 
+  @Autowired
+  private RestTemplate restTemplate;
+
+
+  @Autowired
+  private DiscoveryClient discoveryClient;
   public String execute(String pipelineId) {
     PipelineDTO pipeline = getPipeline(pipelineId);
+    if (true) {
+      List<String> services = discoveryClient.getServices();
+      log.info("get service list ={}", JSON.toJSONString(services));
+      String url = "http://WindyMaster/v1/devops/dispatch/task";
+      JSONObject jsonObject = new JSONObject();
+      jsonObject.put("sourceId", pipelineId);
+      jsonObject.put("sourceName", pipeline.getPipelineName());
+      jsonObject.put("type", 1);
+      ResponseEntity<ResponseMeta> responseEntity = restTemplate.postForEntity(url, jsonObject,
+          ResponseMeta.class);
+      log.info("get test result code= {} result={}", responseEntity.getStatusCode(),
+          responseEntity.getBody());
+      return "11";
+    }
+
     if (Objects.isNull(pipeline)) {
       return null;
     }

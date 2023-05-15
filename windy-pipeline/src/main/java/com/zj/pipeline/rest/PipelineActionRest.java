@@ -3,7 +3,7 @@ package com.zj.pipeline.rest;
 import com.zj.common.PageSize;
 import com.zj.common.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
-import com.zj.pipeline.entity.dto.PipelineActionDto;
+import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
 import com.zj.pipeline.service.PipelineActionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;

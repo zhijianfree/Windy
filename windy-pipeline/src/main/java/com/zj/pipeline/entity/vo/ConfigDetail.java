@@ -1,5 +1,6 @@
 package com.zj.pipeline.entity.vo;
 
+import com.zj.domain.entity.dto.pipeline.CompareResult;
 import java.util.List;
 import java.util.Map;
 import lombok.Data;

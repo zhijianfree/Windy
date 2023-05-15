@@ -1,15 +1,14 @@
 package com.zj.client.feature.executor.feature;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.client.entity.enuns.ExecuteStatusEnum;
 import com.zj.client.entity.po.ExecutePoint;
 import com.zj.client.entity.po.ExecuteRecord;
 import com.zj.client.entity.po.FeatureHistory;
 import com.zj.client.entity.vo.ExecuteDetail;
 import com.zj.client.entity.vo.FeatureResponse;
 import com.zj.client.feature.executor.feature.strategy.ExecuteStrategyFactory;
-import com.zj.client.feature.executor.vo.ExecuteContext;
 import com.zj.client.feature.executor.vo.ExecutorUnit;
+import com.zj.client.feature.executor.vo.FeatureParam;
 import com.zj.client.notify.IResultEventNotify;
 import com.zj.client.notify.NotifyType;
 import com.zj.common.enums.ProcessStatus;
@@ -47,41 +46,40 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
   }
 
   @Override
-  public void execute(List<ExecutePoint> executePointList, String featureId, String recordId,
-      ExecuteContext executeContext) {
+  public void execute(FeatureParam featureParam) {
     String historyId = uniqueIdService.getUniqueId();
-    createFeatureHistory(featureId, historyId, recordId);
+    createFeatureHistory(featureParam.getFeatureId(), historyId, featureParam.getTaskId());
 
     CompletableFuture.runAsync(() -> {
       //1 根据用户的选择先排序执行点
-      List<ExecutePoint> executePoints = executePointList.stream()
+      List<ExecutePoint> executePoints = featureParam.getExecutePointList().stream()
           .sorted(Comparator.comparing(ExecutePoint::getSortOrder)).collect(Collectors.toList());
 
-      AtomicInteger status = new AtomicInteger(ExecuteStatusEnum.SUCCESS.getStatus());
+      AtomicInteger status = new AtomicInteger(ProcessStatus.SUCCESS.getType());
       for (ExecutePoint executePoint : executePoints) {
         ExecuteRecord executeRecord = new ExecuteRecord();
         try {
           //2 使用策略类执行用例
           List<FeatureResponse> responses = executeStrategyFactory.execute(executePoint,
-              executeContext);
+              featureParam.getExecuteContext());
 
           boolean allSuccess = responses.stream().allMatch(FeatureResponse::isSuccess);
-          executeRecord.setStatus(allSuccess ? ExecuteStatusEnum.SUCCESS.getStatus()
-              : ExecuteStatusEnum.FAILED.getStatus());
+          executeRecord.setStatus(allSuccess ? ProcessStatus.SUCCESS.getType()
+              : ProcessStatus.FAIL.getType());
           executeRecord.setExecuteResult(JSON.toJSONString(responses));
         } catch (Exception e) {
           log.error("execute error", e);
           FeatureResponse featureResponse = createFailResponse(executePoint, e);
-          executeRecord.setStatus(ExecuteStatusEnum.FAILED.getStatus());
+          executeRecord.setStatus(ProcessStatus.FAIL.getType());
           executeRecord.setExecuteResult(
               JSON.toJSONString(Collections.singletonList(featureResponse)));
         }
 
         //3 保存执行点记录
         saveRecord(historyId, executePoint, executeRecord);
-        if (Objects.equals(executeRecord.getStatus(), ExecuteStatusEnum.FAILED.getStatus())) {
+        if (Objects.equals(executeRecord.getStatus(), ProcessStatus.FAIL.getType())) {
           log.warn("execute feature error featureId= {}", executePoint.getFeatureId());
-          status.set(ExecuteStatusEnum.FAILED.getStatus());
+          status.set(ProcessStatus.FAIL.getType());
           break;
         }
       }
@@ -105,12 +103,12 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
     resultEventNotify.notify(recordId, NotifyType.CREATE_EXECUTE_POINT_RECORD, ProcessStatus.RUNNING, executeRecord);
   }
 
-  public void createFeatureHistory(String featureId, String historyId, String recordId) {
+  public void createFeatureHistory(String featureId, String historyId, String taskId) {
     FeatureHistory featureHistory = new FeatureHistory();
     featureHistory.setFeatureId(featureId);
-    featureHistory.setExecuteStatus(ExecuteStatusEnum.RUNNING.getStatus());
+    featureHistory.setExecuteStatus(ProcessStatus.RUNNING.getType());
     featureHistory.setHistoryId(historyId);
-    featureHistory.setRecordId(recordId);
+    featureHistory.setRecordId(taskId);
     featureHistory.setCreateTime(System.currentTimeMillis());
     resultEventNotify.notify(historyId,NotifyType.CREATE_FEATURE_HISTORY,  ProcessStatus.RUNNING, featureHistory);
   }

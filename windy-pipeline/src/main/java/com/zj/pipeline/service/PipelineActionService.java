@@ -1,5 +1,6 @@
 package com.zj.pipeline.service;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -7,9 +8,13 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.PageSize;
 import com.zj.common.generate.UniqueIdService;
-import com.zj.pipeline.entity.dto.PipelineActionDto;
-import com.zj.pipeline.entity.po.PipelineAction;
-import com.zj.pipeline.mapper.PipelineActionMapper;
+import com.zj.common.utils.OrikaUtil;
+import com.zj.domain.entity.dto.pipeline.ActionParam;
+import com.zj.domain.entity.dto.pipeline.CompareResult;
+import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
+import com.zj.domain.entity.po.pipeline.PipelineAction;
+import com.zj.domain.mapper.pipeline.PipelineActionMapper;
+import com.zj.domain.repository.pipeline.IPipelineActionRepository;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -22,56 +27,53 @@ import org.springframework.util.StringUtils;
  * @since 2023/3/27
  */
 @Service
-public class PipelineActionService extends ServiceImpl<PipelineActionMapper, PipelineAction> {
+public class PipelineActionService {
 
   @Autowired
   private UniqueIdService uniqueIdService;
 
+  private IPipelineActionRepository pipelineActionRepository;
+
   public Boolean createAction(PipelineActionDto actionDto) {
-    PipelineAction pipelineAction = actionDto.toPipelineAction();
-    pipelineAction.setActionId(uniqueIdService.getUniqueId());
-    pipelineAction.setCreateTime(System.currentTimeMillis());
-    pipelineAction.setUpdateTime(System.currentTimeMillis());
-    return save(pipelineAction);
+    actionDto.setActionId(uniqueIdService.getUniqueId());
+    return pipelineActionRepository.createAction(actionDto);
   }
 
   public PipelineActionDto getAction(String actionId) {
-    PipelineAction action = getOne(
-        Wrappers.lambdaQuery(PipelineAction.class).eq(PipelineAction::getActionId, actionId));
-    if (Objects.isNull(action)) {
-      return null;
-    }
-    return PipelineActionDto.toPipelineActionDto(action);
+    return pipelineActionRepository.getAction(actionId);
   }
 
   public Boolean updateAction(PipelineActionDto actionDto) {
-    PipelineAction pipelineAction = actionDto.toPipelineAction();
-    pipelineAction.setUpdateTime(System.currentTimeMillis());
-    return update(pipelineAction, Wrappers.lambdaUpdate(PipelineAction.class)
-        .eq(PipelineAction::getActionId, actionDto.getActionId()));
+    return pipelineActionRepository.updateAction(actionDto);
   }
 
   public Boolean deleteAction(String actionId) {
-    return remove(
-        Wrappers.lambdaQuery(PipelineAction.class).eq(PipelineAction::getActionId, actionId));
+    return pipelineActionRepository.deleteAction(actionId);
   }
 
   public PageSize<PipelineActionDto> getActions(Integer page, Integer size, String name) {
-    LambdaQueryWrapper<PipelineAction> queryWrapper = Wrappers.lambdaQuery(PipelineAction.class)
-        .orderByDesc(PipelineAction::getCreateTime);
-    if (!StringUtils.isEmpty(name)){
-      queryWrapper.like(PipelineAction::getActionName, name);
-    }
-    IPage<PipelineAction> actionIPage = new Page<>(page, size);
-    IPage<PipelineAction> list = page(actionIPage, queryWrapper);
-
-    List<PipelineActionDto> actionList = list.getRecords().stream()
-        .map(PipelineActionDto::toPipelineActionDto)
-        .collect(Collectors.toList());
+    IPage<PipelineAction> actionPage = pipelineActionRepository.getActions(page, size, name);
+    List<PipelineActionDto> actionList = actionPage.getRecords().stream()
+        .map(PipelineActionService::toPipelineActionDto).collect(Collectors.toList());
 
     PageSize<PipelineActionDto> pageSize = new PageSize<>();
-    pageSize.setTotal(list.getTotal());
+    pageSize.setTotal(actionPage.getTotal());
     pageSize.setData(actionList);
     return pageSize;
+  }
+
+  public static PipelineActionDto toPipelineActionDto(PipelineAction action) {
+    PipelineActionDto pipelineAction = OrikaUtil.convert(action, PipelineActionDto.class);
+    pipelineAction.setParamList(JSON.parseArray(action.getParamDetail(), ActionParam.class));
+    pipelineAction.setCompareResults(JSON.parseArray(action.getResult(), CompareResult.class));
+    return pipelineAction;
+  }
+
+  public List<PipelineAction> getActionsByNodeId(String nodeId) {
+    return pipelineActionRepository.getActionsByNodeId(nodeId);
+  }
+
+  public boolean batchDelete(List<String> removeList) {
+    return pipelineActionRepository.batchDelete(removeList);
   }
 }

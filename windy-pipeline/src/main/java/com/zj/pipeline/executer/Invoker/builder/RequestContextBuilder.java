@@ -1,10 +1,8 @@
 package com.zj.pipeline.executer.Invoker.builder;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.zj.pipeline.entity.dto.PipelineActionDto;
+import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
 import com.zj.pipeline.entity.vo.ActionDetail;
-import com.zj.pipeline.entity.vo.ActionParam;
 import com.zj.pipeline.entity.vo.ConfigDetail;
 import com.zj.pipeline.executer.vo.ExecuteType;
 import com.zj.pipeline.executer.vo.HttpRequestContext;
@@ -16,7 +14,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
 /**

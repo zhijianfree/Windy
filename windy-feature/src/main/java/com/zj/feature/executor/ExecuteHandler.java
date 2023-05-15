@@ -2,7 +2,6 @@ package com.zj.feature.executor;
 
 import com.zj.feature.entity.dto.FeatureInfoDTO;
 import com.zj.feature.entity.dto.TestCaseConfigDTO;
-import com.zj.feature.entity.po.FeatureInfo;
 import com.zj.feature.executor.vo.ExecuteContext;
 import com.zj.feature.service.FeatureService;
 import com.zj.feature.service.TestCaseConfigService;

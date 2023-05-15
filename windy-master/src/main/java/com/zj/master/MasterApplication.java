@@ -3,6 +3,7 @@ package com.zj.master;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -11,9 +12,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @since 2023/5/11
  */
 @EnableScheduling
-@EnableEurekaServer
-@MapperScan("com.zj.master")
-@SpringBootApplication
+@MapperScan({"com.zj.domain"})
+@SpringBootApplication(scanBasePackages = {"com.zj.master", "com.zj.common", "com.zj.domain"})
+@EnableEurekaClient
 public class MasterApplication {
 
   public static void main(String[] args) {

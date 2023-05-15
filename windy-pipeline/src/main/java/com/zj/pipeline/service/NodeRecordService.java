@@ -3,13 +3,14 @@ package com.zj.pipeline.service;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.pipeline.entity.po.NodeRecord;
-import com.zj.pipeline.entity.po.PipelineHistory;
+import com.zj.domain.entity.po.pipeline.NodeRecord;
+import com.zj.domain.entity.po.pipeline.PipelineHistory;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.pipeline.executer.vo.PipelineRecord;
 import com.zj.pipeline.executer.vo.TaskNodeRecord;
-import com.zj.pipeline.mapper.NodeRecordMapper;
-import com.zj.pipeline.mapper.PipelineHistoryMapper;
+import com.zj.domain.mapper.pipeline.NodeRecordMapper;
+import com.zj.domain.mapper.pipeline.PipelineHistoryMapper;
 import java.util.Collections;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,9 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class NodeRecordService extends ServiceImpl<NodeRecordMapper, NodeRecord> {
+
+  @Autowired
+  private INodeRecordRepository nodeRecordRepository;
 
   public static final String APPROVAL_TIPS = "审核通过";
   @Autowired
@@ -44,36 +48,24 @@ public class NodeRecordService extends ServiceImpl<NodeRecordMapper, NodeRecord>
   public void saveTaskNodeRecord(TaskNodeRecord taskNodeRecord) {
     log.info("save task node record taskId={}", taskNodeRecord.getRecordId());
     NodeRecord nodeRecord = JSON.parseObject(JSON.toJSONString(taskNodeRecord), NodeRecord.class);
-    nodeRecord.setCreateTime(System.currentTimeMillis());
-    nodeRecord.setUpdateTime(System.currentTimeMillis());
-    save(nodeRecord);
+    nodeRecordRepository.saveNodeRecord(nodeRecord);
   }
 
   public void updateNodeRecord(TaskNodeRecord taskNodeRecord) {
     log.info("update task node status taskId={}", taskNodeRecord.getRecordId());
     NodeRecord nodeRecord = JSON.parseObject(JSON.toJSONString(taskNodeRecord), NodeRecord.class);
-    boolean update = update(nodeRecord, Wrappers.lambdaUpdate(NodeRecord.class)
-        .eq(NodeRecord::getRecordId, taskNodeRecord.getRecordId()));
+    boolean update = nodeRecordRepository.updateNodeRecord(nodeRecord);
     log.info("update node record status={}", update);
 
   }
 
   public void updateNodeRecordStatus(String recordId, Integer type, String message) {
-    NodeRecord nodeRecord = new NodeRecord();
-    nodeRecord.setStatus(type);
-    nodeRecord.setResult(message);
-    boolean update = update(nodeRecord,
-        Wrappers.lambdaUpdate(NodeRecord.class).eq(NodeRecord::getRecordId, recordId));
+    boolean update = nodeRecordRepository.updateNodeRecordStatus(recordId, type, message);
     log.info("update result={}", update);
   }
 
   public void batchUpdateStatus(List<String> recordIds, ProcessStatus processStatus) {
-    NodeRecord nodeRecord = new NodeRecord();
-    nodeRecord.setStatus(processStatus.getType());
-    nodeRecord.setResult(JSON.toJSONString(Collections.singleton(processStatus.getDesc())));
-    nodeRecord.setUpdateTime(System.currentTimeMillis());
-    boolean batchUpdate = update(nodeRecord,
-        Wrappers.lambdaUpdate(NodeRecord.class).in(NodeRecord::getRecordId, recordIds));
+    boolean batchUpdate = nodeRecordRepository.batchUpdateStatus(recordIds, processStatus);
     log.info("batch update record status={}", batchUpdate);
   }
 

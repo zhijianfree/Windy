@@ -1,5 +1,6 @@
 package com.zj.client.pipeline.executer.vo;
 
+import com.zj.client.entity.dto.BaseParam;
 import lombok.Data;
 
 /**
@@ -7,7 +8,7 @@ import lombok.Data;
  * @since 2022/5/23
  */
 @Data
-public class TaskNode {
+public class TaskNode extends BaseParam {
   /**
    * 流水线节点Id
    * */

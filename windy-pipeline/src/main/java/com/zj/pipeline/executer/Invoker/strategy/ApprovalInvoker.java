@@ -2,7 +2,7 @@ package com.zj.pipeline.executer.Invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.zj.pipeline.entity.po.NodeRecord;
+import com.zj.domain.entity.po.pipeline.NodeRecord;
 import com.zj.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.pipeline.executer.vo.ExecuteType;
 import com.zj.pipeline.executer.vo.QueryResponseModel;

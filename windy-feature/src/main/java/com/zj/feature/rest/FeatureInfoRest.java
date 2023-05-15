@@ -8,7 +8,7 @@ import com.zj.feature.entity.dto.FeatureInfoDTO;
 import com.zj.feature.entity.dto.FeatureNodeDTO;
 import com.zj.common.PageSize;
 import com.zj.feature.entity.dto.TagFilterDTO;
-import com.zj.feature.entity.po.FeatureInfo;
+import com.zj.domain.entity.po.feature.FeatureInfo;
 import com.zj.feature.executor.ExecuteHandler;
 import com.zj.feature.service.FeatureService;
 import java.util.List;

@@ -10,6 +10,32 @@ spring:
     username: root
     password: zj137899
 
+eureka:
+  server:
+    # server清理无效节点的时间间隔
+    eviction-interval-timer-in-ms: 60
+    # 是否开启自我保护，默认true
+    enable-self-preservation: true
+    # 开启自我保护的系数
+    renewal-percent-threshold: 0.85
+  instance:
+    hostname: windy-master
+    # 服务时效时间，默认90秒.当server 90秒内没有收到client的注册信息时，会将该节点剔除
+    lease-expiration-duration-in-seconds: 90
+    # 服务续约任务调用间隔时间，默认30秒.client每隔30秒向server上报自己状态，避免被server剔除
+    lease-renewal-interval-in-seconds: 30
+    # 注册服务时是否使用IP注册，默认false
+    prefer-ip-address: false
+  client:
+    register-with-eureka: false #false表示不向注册中心注册自己。
+    fetch-registry: false #false表示自己端就是注册中心，我的职责就是维护服务实例，并不需要去检索服务
+    service-url:
+      defaultZone: http://windy-master:9768/eureka/
+
+logging:
+  level:
+    com.netflix: warn
+
 #mybatis-plus:
 #  configuration:
 #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

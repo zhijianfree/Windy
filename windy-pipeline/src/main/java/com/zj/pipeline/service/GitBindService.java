@@ -7,13 +7,13 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
-import com.zj.pipeline.entity.dto.GitBindDto;
-import com.zj.pipeline.entity.dto.PipelineDTO;
+import com.zj.domain.entity.dto.pipeline.GitBindDto;
+import com.zj.domain.entity.dto.pipeline.PipelineDTO;
 import com.zj.pipeline.entity.enums.PipelineExecuteType;
-import com.zj.pipeline.entity.po.GitBind;
-import com.zj.pipeline.entity.po.Pipeline;
+import com.zj.domain.entity.po.pipeline.GitBind;
+import com.zj.domain.entity.po.pipeline.Pipeline;
 import com.zj.pipeline.git.IRepositoryBranch;
-import com.zj.pipeline.mapper.GitBindMapper;
+import com.zj.domain.mapper.pipeline.GitBindMapper;
 import com.zj.service.entity.po.Microservice;
 import com.zj.service.service.MicroserviceService;
 import java.util.Collections;
@@ -62,7 +62,7 @@ public class GitBindService extends ServiceImpl<GitBindMapper, GitBind> {
       throw new ApiException(ErrorCode.BRANCH_ALREADY_BIND);
     }
 
-    GitBind gitBind = GitBindDto.toGitBind(gitBindDto);
+    GitBind gitBind = toGitBind(gitBindDto);
     gitBind.setBindId(uniqueIdService.getUniqueId());
     gitBind.setUpdateTime(System.currentTimeMillis());
     gitBind.setCreateTime(System.currentTimeMillis());
@@ -81,7 +81,7 @@ public class GitBindService extends ServiceImpl<GitBindMapper, GitBind> {
     if (CollectionUtils.isEmpty(gitBinds)) {
       return Collections.emptyList();
     }
-    return gitBinds.stream().map(GitBindDto::toGitBindDto).collect(Collectors.toList());
+    return gitBinds.stream().map(GitBindService::toGitBindDto).collect(Collectors.toList());
   }
 
   public Boolean updateGitBind(GitBindDto gitBindDto) {
@@ -91,7 +91,7 @@ public class GitBindService extends ServiceImpl<GitBindMapper, GitBind> {
     if (Objects.isNull(gitBind)) {
       throw new ApiException(ErrorCode.NOT_FOUND_PIPELINE_GIT_BIND);
     }
-    GitBind update = GitBindDto.toGitBind(gitBindDto);
+    GitBind update = toGitBind(gitBindDto);
     update.setUpdateTime(System.currentTimeMillis());
     return update(update,
         Wrappers.lambdaUpdate(GitBind.class).eq(GitBind::getBindId, gitBindDto.getBindId()));
@@ -159,5 +159,26 @@ public class GitBindService extends ServiceImpl<GitBindMapper, GitBind> {
   public List<String> getServiceBranch(String serviceId) {
     Microservice serviceDetail = microserviceService.getServiceDetail(serviceId);
     return repositoryBranch.listBranch(serviceDetail.getServiceName());
+  }
+
+  public static GitBind toGitBind(GitBindDto gitBindDto) {
+    GitBind gitBind = new GitBind();
+    gitBind.setBindId(gitBindDto.getBindId());
+    gitBind.setGitBranch(gitBindDto.getGitBranch());
+    gitBind.setGitUrl(gitBindDto.getGitUrl());
+    gitBind.setIsChoose(gitBindDto.getIsChoose());
+    gitBind.setPipelineId(gitBindDto.getPipelineId());
+    return gitBind;
+  }
+
+  public static GitBindDto toGitBindDto(GitBind gitBind) {
+    return GitBindDto.builder().bindId(gitBind.getBindId())
+        .isChoose(gitBind.getIsChoose())
+        .gitBranch(gitBind.getGitBranch())
+        .gitUrl(gitBind.getGitUrl())
+        .pipelineId(gitBind.getPipelineId())
+        .createTime(gitBind.getCreateTime())
+        .updateTime(gitBind.getUpdateTime())
+        .build();
   }
 }

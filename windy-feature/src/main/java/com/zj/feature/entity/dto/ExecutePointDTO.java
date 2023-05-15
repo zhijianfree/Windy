@@ -1,7 +1,7 @@
 package com.zj.feature.entity.dto;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.feature.entity.po.ExecutePoint;
+import com.zj.domain.entity.po.feature.ExecutePoint;
 import com.zj.feature.executor.compare.CompareDefine;
 import com.zj.feature.executor.vo.ExecutorUnit;
 import com.zj.feature.executor.vo.VariableDefine;

@@ -2,7 +2,7 @@ package com.zj.feature.executor.interceptor;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.feature.entity.dto.ParamDefine;
-import com.zj.feature.entity.po.ExecutePoint;
+import com.zj.domain.entity.po.feature.ExecutePoint;
 import com.zj.feature.entity.vo.ExecuteDetail;
 import com.zj.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.feature.executor.vo.ExecuteContext;

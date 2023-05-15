@@ -1,7 +1,7 @@
 package com.zj.pipeline.rest;
 
 import com.zj.common.ResponseMeta;
-import com.zj.pipeline.entity.dto.SystemConfigDto;
+import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
 import com.zj.common.exception.ErrorCode;
 import com.zj.pipeline.service.SystemConfigService;
 import org.springframework.beans.factory.annotation.Autowired;

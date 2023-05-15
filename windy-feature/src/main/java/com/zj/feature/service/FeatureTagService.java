@@ -2,8 +2,8 @@ package com.zj.feature.service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.feature.entity.po.FeatureTag;
-import com.zj.feature.mapper.FeatureTagMapper;
+import com.zj.domain.entity.po.feature.FeatureTag;
+import com.zj.domain.mapper.feeature.FeatureTagMapper;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
