@@ -12,12 +12,14 @@ import com.zj.domain.mapper.pipeline.PipelineActionMapper;
 import com.zj.domain.repository.pipeline.IPipelineActionRepository;
 import java.util.List;
 import java.util.Objects;
+import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 /**
  * @author falcon
  * @since 2023/5/15
  */
+@Repository
 public class PipelineActionRepository extends
     ServiceImpl<PipelineActionMapper, PipelineAction> implements IPipelineActionRepository {
 

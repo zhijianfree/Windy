@@ -1,6 +1,6 @@
 package com.zj.client.pipeline.executer.vo;
 
-import com.zj.client.entity.dto.BaseParam;
+import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 
 /**
@@ -8,7 +8,7 @@ import lombok.Data;
  * @since 2022/5/23
  */
 @Data
-public class TaskNode extends BaseParam {
+public class TaskNode {
   /**
    * 流水线节点Id
    * */
@@ -37,7 +37,7 @@ public class TaskNode extends BaseParam {
   /**
    * 出发节点执行的第三方接口信息
    * */
-  private RequestContext requestContext;
+  private JSONObject requestContext;
 
   /**
    * 刷新节点任务状态的第三方接口信息
@@ -53,4 +53,9 @@ public class TaskNode extends BaseParam {
    * 任务开始执行的时间点
    * */
   private Long executeTime;
+
+  /**
+   * 主节点IP
+   * */
+  private String masterIp;
 }

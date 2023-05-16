@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExecuteProxy {
 
+  public static final String TASK_DONE_TIPS = "no task need run";
   @Autowired
   private ClientProxy clientProxy;
 
@@ -41,6 +42,7 @@ public class ExecuteProxy {
   private final Map<String, PipelineTask> pipelineTaskMap = new ConcurrentHashMap<>();
 
   public void runTask(PipelineTask pipelineTask) {
+    log.info("start run task ={}", JSON.toJSONString(pipelineTask));
     CompletableFuture.supplyAsync(() -> {
       LinkedBlockingQueue<TaskNode> taskNodeQueue = pipelineTask.getTaskNodes();
       TaskNode taskNode = taskNodeQueue.poll();
@@ -52,8 +54,11 @@ public class ExecuteProxy {
       pipelineTaskMap.put(pipelineTask.getHistoryId(), pipelineTask);
       return taskNode;
     }, executorService).whenComplete((node, e) -> {
-      String recordId = Optional.ofNullable(node).map(TaskNode::getRecordId).orElse("empty");
+      String recordId = Optional.ofNullable(node).map(TaskNode::getRecordId).orElse(TASK_DONE_TIPS);
       log.info("complete trigger action recordId = {}", recordId);
+    }).exceptionally((e) ->{
+      log.error("handle task error", e);
+      return null;
     });
   }
 
@@ -69,7 +74,8 @@ public class ExecuteProxy {
 
     //根据节点状态判断整个流水线状态
     NodeRecord record = nodeRecordRepository.getRecordById(recordId);
-    pipelineEndProcessor.statusChange(historyId, record.getNodeId(), ProcessStatus.exchange(status));
+    pipelineEndProcessor.statusChange(historyId, record.getNodeId(),
+        ProcessStatus.exchange(status));
 
     PipelineTask pipelineTask = pipelineTaskMap.get(historyId);
     if (Objects.isNull(pipelineTask)) {

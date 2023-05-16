@@ -10,7 +10,6 @@ import lombok.Data;
  * @since 2022/6/15
  */
 @Data
-@Builder
 public class RefreshContext {
 
   private String url;
@@ -18,4 +17,14 @@ public class RefreshContext {
   private Map<String, String> headers;
 
   private List<CompareResult> compareConfig;
+
+  public RefreshContext() {
+  }
+
+  public RefreshContext(String url, Map<String, String> headers,
+      List<CompareResult> compareConfig) {
+    this.url = url;
+    this.headers = headers;
+    this.compareConfig = compareConfig;
+  }
 }

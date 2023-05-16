@@ -4,7 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.eventbus.Subscribe;
 import com.zj.client.notify.IResultEventNotify;
-import com.zj.client.notify.NotifyType;
+import com.zj.common.enums.NotifyType;
+import com.zj.client.notify.ResultEvent;
 import com.zj.client.pipeline.executer.notify.IStatusNotifyListener;
 import com.zj.client.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.client.pipeline.executer.vo.TaskNode;
@@ -63,7 +64,10 @@ public class ExecuteProxy implements IStatusNotifyListener {
     String message = JSON.toJSONString(event.getErrorMsg());
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("message", message);
-    resultEventNotify
-        .notify(taskNode.getRecordId(), NotifyType.UPDATE_NODE_RECORD, processStatus, jsonObject);
+
+    ResultEvent resultEvent = ResultEvent.builder().executeId(taskNode.getRecordId())
+        .status(processStatus).notifyType(NotifyType.UPDATE_NODE_RECORD).object(jsonObject)
+        .masterIP(taskNode.getMasterIp()).build();
+    resultEventNotify.notifyEvent(resultEvent);
   }
 }

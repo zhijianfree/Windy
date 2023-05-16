@@ -2,13 +2,13 @@ package com.zj.feature.service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.feature.entity.dto.FeatureHistoryDTO;
 import com.zj.feature.entity.dto.FeatureInfoDTO;
 import com.zj.domain.entity.po.feature.FeatureHistory;
-import com.zj.feature.entity.type.ExecuteStatusEnum;
 import com.zj.domain.mapper.feeature.FeatureHistoryMapper;
 import java.util.Collections;
 import java.util.List;
@@ -100,7 +100,7 @@ public class FeatureHistoryService extends ServiceImpl<FeatureHistoryMapper, Fea
 
     FeatureHistory featureHistory = new FeatureHistory();
     featureHistory.setFeatureId(featureId);
-    featureHistory.setExecuteStatus(ExecuteStatusEnum.RUNNING.getStatus());
+    featureHistory.setExecuteStatus(ProcessStatus.RUNNING.getType());
     featureHistory.setHistoryId(historyId);
     featureHistory.setRecordId(recordId);
     featureHistory.setFeatureName(featureInfo.getFeatureName());

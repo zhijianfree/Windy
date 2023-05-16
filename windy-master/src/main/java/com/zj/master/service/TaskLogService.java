@@ -42,7 +42,7 @@ public class TaskLogService extends ServiceImpl<TaskLogMapper, TaskLog> {
     Long dateNow = System.currentTimeMillis();
     taskLog.setCreateTime(dateNow);
     taskLog.setUpdateTime(dateNow);
-    taskLog.setLogType(taskLog.getLogType());
+    taskLog.setLogType(task.getType());
     taskLog.setNodeIp(IpUtils.getLocalIP());
     save(taskLog);
   }

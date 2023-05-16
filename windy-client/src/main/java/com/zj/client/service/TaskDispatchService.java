@@ -1,15 +1,16 @@
 package com.zj.client.service;
 
-import com.zj.client.entity.dto.BaseParam;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.zj.client.entity.enuns.DispatchType;
 import com.zj.client.feature.executor.feature.IFeatureExecutor;
 import com.zj.client.feature.executor.vo.FeatureParam;
 import com.zj.client.pipeline.executer.ExecuteProxy;
 import com.zj.client.pipeline.executer.vo.TaskNode;
+import com.zj.common.utils.OrikaUtil;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -22,7 +23,7 @@ public class TaskDispatchService {
   private IFeatureExecutor featureExecutor;
   private ExecuteProxy executeProxy;
 
-  private final Map<String, Function<BaseParam, Boolean>> funcMap = new HashMap<>();
+  private final Map<String, Function<JSONObject, Boolean>> funcMap = new HashMap<>();
 
   public TaskDispatchService(IFeatureExecutor featureExecutor, ExecuteProxy executeProxy) {
     this.featureExecutor = featureExecutor;
@@ -32,21 +33,21 @@ public class TaskDispatchService {
   }
 
 
-  public Boolean dispatch(BaseParam baseParam) {
-    String dispatchType = baseParam.getDispatchType();
-    Function<BaseParam, Boolean> func = funcMap.get(dispatchType);
-    return func.apply(baseParam);
+  public Boolean dispatch(JSONObject params) {
+    String dispatchType = params.getString("dispatchType");
+    Function<JSONObject, Boolean> func = funcMap.get(dispatchType);
+    return func.apply(params);
   }
 
 
-  private boolean runFeature(BaseParam baseParam) {
-    FeatureParam featureParam = (FeatureParam) baseParam;
+  private boolean runFeature(JSONObject baseParam) {
+    FeatureParam featureParam = JSON.toJavaObject(baseParam, FeatureParam.class);
     featureExecutor.execute(featureParam);
     return true;
   }
 
-  private boolean runPipeline(BaseParam baseParam) {
-    TaskNode taskNode = (TaskNode) baseParam;
+  private boolean runPipeline(JSONObject baseParam) {
+    TaskNode taskNode = JSON.toJavaObject(baseParam, TaskNode.class);
     executeProxy.runNode(taskNode);
     return true;
   }

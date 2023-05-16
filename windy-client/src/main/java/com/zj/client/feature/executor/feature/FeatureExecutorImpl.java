@@ -10,7 +10,8 @@ import com.zj.client.feature.executor.feature.strategy.ExecuteStrategyFactory;
 import com.zj.client.feature.executor.vo.ExecutorUnit;
 import com.zj.client.feature.executor.vo.FeatureParam;
 import com.zj.client.notify.IResultEventNotify;
-import com.zj.client.notify.NotifyType;
+import com.zj.common.enums.NotifyType;
+import com.zj.client.notify.ResultEvent;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
 import java.util.Collections;
@@ -85,7 +86,10 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
       }
 
       //4 更新整个用例执行结果
-      resultEventNotify.notify(historyId, NotifyType.UPDATE_FEATURE_HISTORY, ProcessStatus.exchange(status.get()), null);
+      ResultEvent resultEvent = ResultEvent.builder().executeId(historyId)
+          .notifyType(NotifyType.UPDATE_FEATURE_HISTORY)
+          .status(ProcessStatus.exchange(status.get())).build();
+      resultEventNotify.notifyEvent(resultEvent);
     }, executorService);
   }
 
@@ -100,7 +104,11 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
     executeRecord.setTestStage(executePoint.getTestStage());
     String recordId = uniqueIdService.getUniqueId();
     executeRecord.setExecuteRecordId(recordId);
-    resultEventNotify.notify(recordId, NotifyType.CREATE_EXECUTE_POINT_RECORD, ProcessStatus.RUNNING, executeRecord);
+
+    ResultEvent resultEvent = ResultEvent.builder().executeId(recordId)
+        .notifyType(NotifyType.CREATE_EXECUTE_POINT_RECORD)
+        .status(ProcessStatus.RUNNING).object(executeRecord).build();
+    resultEventNotify.notifyEvent(resultEvent);
   }
 
   public void createFeatureHistory(String featureId, String historyId, String taskId) {
@@ -110,7 +118,11 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
     featureHistory.setHistoryId(historyId);
     featureHistory.setRecordId(taskId);
     featureHistory.setCreateTime(System.currentTimeMillis());
-    resultEventNotify.notify(historyId,NotifyType.CREATE_FEATURE_HISTORY,  ProcessStatus.RUNNING, featureHistory);
+
+    ResultEvent resultEvent = ResultEvent.builder().executeId(historyId)
+        .notifyType(NotifyType.CREATE_FEATURE_HISTORY)
+        .status(ProcessStatus.RUNNING).object(featureHistory).build();
+    resultEventNotify.notifyEvent(resultEvent);
   }
 
   private FeatureResponse createFailResponse(ExecutePoint executePoint, Exception e) {

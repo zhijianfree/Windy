@@ -7,12 +7,13 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+
 /**
  * @author guyuelan
  * @since 2023/5/11
  */
 @EnableScheduling
-@MapperScan({"com.zj.domain"})
+@MapperScan("com.zj.domain.mapper.*")
 @SpringBootApplication(scanBasePackages = {"com.zj.master", "com.zj.common", "com.zj.domain"})
 @EnableEurekaClient
 public class MasterApplication {

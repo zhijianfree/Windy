@@ -5,7 +5,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.netflix.discovery.shared.Application;
 import com.netflix.discovery.shared.Applications;
+import com.netflix.eureka.EurekaServerContextHolder;
 import com.zj.common.ResponseMeta;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ApiException;
@@ -236,6 +238,9 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
   public String execute(String pipelineId) {
     PipelineDTO pipeline = getPipeline(pipelineId);
     if (true) {
+      List<Application> applications = EurekaServerContextHolder.getInstance()
+          .getServerContext().getRegistry().getSortedApplications();
+      log.info("get service applications ={}",JSON.toJSONString(applications));
       List<String> services = discoveryClient.getServices();
       log.info("get service list ={}", JSON.toJSONString(services));
       String url = "http://WindyMaster/v1/devops/dispatch/task";
@@ -243,8 +248,8 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
       jsonObject.put("sourceId", pipelineId);
       jsonObject.put("sourceName", pipeline.getPipelineName());
       jsonObject.put("type", 1);
-      ResponseEntity<ResponseMeta> responseEntity = restTemplate.postForEntity(url, jsonObject,
-          ResponseMeta.class);
+      ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, jsonObject,
+          String.class);
       log.info("get test result code= {} result={}", responseEntity.getStatusCode(),
           responseEntity.getBody());
       return "11";

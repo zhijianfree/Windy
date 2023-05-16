@@ -1,14 +1,12 @@
 package com.zj.master.dispatch.pipeline;
 
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDTO;
 import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
 import com.zj.domain.entity.dto.pipeline.PipelineNodeDTO;
-import com.zj.domain.entity.po.pipeline.PipelineStage;
 import com.zj.domain.repository.pipeline.IPipelineActionRepository;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import com.zj.domain.repository.pipeline.IPipelineNodeRepository;
@@ -24,9 +22,6 @@ import com.zj.master.entity.vo.NodeConfig;
 import com.zj.master.entity.vo.RefreshContext;
 import com.zj.master.entity.vo.RequestContext;
 import com.zj.master.entity.vo.TaskNode;
-import com.zj.master.service.PipelineStageService;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -41,13 +36,10 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class PipelineDispatch  implements IDispatchExecutor {
+public class PipelineDispatch implements IDispatchExecutor {
 
   @Autowired
   private IPipelineRepository pipelineRepository;
-
-  @Autowired
-  private PipelineStageService pipelineStageService;
 
   @Autowired
   private IPipelineNodeRepository pipelineNodeRepository;
@@ -73,35 +65,19 @@ public class PipelineDispatch  implements IDispatchExecutor {
   public boolean dispatch(TaskDetailDto task) {
     PipelineDTO pipeline = pipelineRepository.getPipeline(task.getSourceId());
     if (Objects.isNull(pipeline)) {
+      log.info("can not find pipeline name={} pipelineId={}", task.getSourceName(),
+          task.getSourceId());
       return false;
     }
 
-    List<PipelineStage> pipelineStages = pipelineStageService.list(
-        Wrappers.lambdaQuery(PipelineStage.class).eq(PipelineStage::getPipelineId, pipeline.getPipelineId())
-            .orderByAsc(PipelineStage::getType));
-    if (CollectionUtils.isEmpty(pipelineStages)) {
+    List<PipelineNodeDTO> pipelineNodes = pipelineNodeRepository.getPipelineNodes(
+        pipeline.getPipelineId());
+    if (CollectionUtils.isEmpty(pipelineNodes)) {
+      log.info("can not find pipeline nodes name={} pipelineId={}", task.getSourceName(),
+          task.getSourceId());
       return false;
     }
 
-    List<TaskNode> taskNodeList = pipelineStages.stream().map(pipelineStage -> {
-      List<TaskNode> taskNodes = new ArrayList<>();
-      List<PipelineNodeDTO> pipelineNodes = pipelineNodeRepository.getPipelineNodes(
-          pipeline.getPipelineId());
-      if (CollectionUtils.isEmpty(pipelineNodes)) {
-        return taskNodes;
-      }
-      return pipelineNodes.stream().map(this::buildTaskNode).collect(Collectors.toList());
-    }).filter(CollectionUtils::isNotEmpty).flatMap(Collection::stream).collect(Collectors.toList());
-
-    if (CollectionUtils.isEmpty(taskNodeList)) {
-      log.info("can not find task node pipelineId={}", task.getSourceId());
-      return false;
-    }
-
-    /*
-     * 每执行一次任务，应该都有执行任务的记录。任务记录的最小单位是节点任务，所有任务的状态都是异步刷新。任务状态异步刷新
-     * 那么则需要每个任务在添加时`，都明确配置查询状态的接口。
-     * */
     log.info("start run pipeline={} name={}", task.getSourceId(), task.getSourceName());
     String historyId = uniqueIdService.getUniqueId();
     saveHistory(pipeline.getPipelineId(), historyId);
@@ -109,6 +85,9 @@ public class PipelineDispatch  implements IDispatchExecutor {
     PipelineTask pipelineTask = new PipelineTask();
     pipelineTask.setPipelineId(pipeline.getPipelineId());
     pipelineTask.setHistoryId(historyId);
+
+    List<TaskNode> taskNodeList = pipelineNodes.stream().map(this::buildTaskNode)
+        .collect(Collectors.toList());
     pipelineTask.addAll(taskNodeList);
     executeProxy.runTask(pipelineTask);
     return true;
@@ -129,6 +108,7 @@ public class PipelineDispatch  implements IDispatchExecutor {
 
 
   private TaskNode buildTaskNode(PipelineNodeDTO pipelineNode) {
+    log.info("start build taskNode ={}", JSON.toJSONString(pipelineNode));
     TaskNode taskNode = new TaskNode();
     taskNode.setNodeId(pipelineNode.getNodeId());
     taskNode.setName(pipelineNode.getNodeName());

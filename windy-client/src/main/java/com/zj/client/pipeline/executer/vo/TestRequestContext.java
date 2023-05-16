@@ -8,8 +8,11 @@ import lombok.Data;
  * @since 2023/5/9
  */
 @Data
-@Builder
-public class TestRequestContext extends RequestContext{
+public class TestRequestContext{
 
   private String taskId;
+
+  public TestRequestContext(String taskId) {
+    this.taskId = taskId;
+  }
 }

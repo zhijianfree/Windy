@@ -1,11 +1,14 @@
 package com.zj.client.pipeline.executer;
 
+import com.alibaba.fastjson.JSONObject;
 import com.zj.client.notify.IResultEventNotify;
-import com.zj.client.notify.NotifyType;
+import com.zj.common.enums.NotifyType;
+import com.zj.client.notify.ResultEvent;
 import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.client.pipeline.executer.intercept.INodeExecuteInterceptor;
 import com.zj.client.pipeline.executer.notify.PipelineEventFactory;
 import com.zj.client.pipeline.executer.vo.PipelineStatusEvent;
+import com.zj.client.pipeline.executer.vo.RequestContext;
 import com.zj.client.pipeline.executer.vo.TaskNode;
 import com.zj.client.pipeline.executer.vo.TaskNodeRecord;
 import com.zj.common.enums.ProcessStatus;
@@ -60,8 +63,9 @@ public class NodeExecutor {
       if (Objects.isNull(remoteInvoker)) {
         throw new RuntimeException("can not find remote invoker");
       }
-
-      boolean executeFlag = remoteInvoker.triggerRun(node.getRequestContext(), recordId);
+      JSONObject context = node.getRequestContext();
+      RequestContext requestContext = new RequestContext(context);
+      boolean executeFlag = remoteInvoker.triggerRun(requestContext, recordId);
       if (!executeFlag) {
         statusAtomic.set(ProcessStatus.FAIL);
         notifyNodeEvent(node, statusAtomic.get(), errorMsg);
@@ -86,7 +90,10 @@ public class NodeExecutor {
         .status(statusAtomic.get().getType()).nodeId(node.getNodeId()).createTime(currentTimeMillis)
         .updateTime(currentTimeMillis).build();
 
-    resultEventNotify.notify(recordId, NotifyType.CREATE_NODE_RECORD, ProcessStatus.RUNNING, taskNodeRecord);
+    ResultEvent resultEvent = ResultEvent.builder().executeId(recordId)
+        .notifyType(NotifyType.CREATE_NODE_RECORD).status(ProcessStatus.RUNNING)
+        .object(taskNodeRecord).masterIP(node.getMasterIp()).build();
+    resultEventNotify.notifyEvent(resultEvent);
   }
 
   private List<String> getErrorMsg(Exception exception) {

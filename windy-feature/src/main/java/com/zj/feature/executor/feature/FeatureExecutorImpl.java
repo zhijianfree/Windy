@@ -2,11 +2,11 @@ package com.zj.feature.executor.feature;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.feature.entity.dto.TaskRecordDTO;
 import com.zj.domain.entity.po.feature.ExecutePoint;
 import com.zj.domain.entity.po.feature.ExecuteRecord;
-import com.zj.feature.entity.type.ExecuteStatusEnum;
 import com.zj.feature.entity.vo.ExecuteDetail;
 import com.zj.feature.entity.vo.FeatureConstant;
 import com.zj.feature.entity.vo.FeatureResponse;
@@ -77,7 +77,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
       executePoints = executePoints.stream()
           .sorted(Comparator.comparing(ExecutePoint::getSortOrder)).collect(Collectors.toList());;
 
-      AtomicInteger status = new AtomicInteger(ExecuteStatusEnum.SUCCESS.getStatus());
+      AtomicInteger status = new AtomicInteger(ProcessStatus.SUCCESS.getType());
       for (ExecutePoint executePoint : executePoints) {
         ExecuteRecord executeRecord = new ExecuteRecord();
         try {
@@ -85,22 +85,22 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
           List<FeatureResponse> responses = executeStrategyFactory.execute(executePoint, executeContext);
 
           boolean allSuccess = responses.stream().allMatch(FeatureResponse::isSuccess);
-          executeRecord.setStatus(allSuccess ? ExecuteStatusEnum.SUCCESS.getStatus()
-                  : ExecuteStatusEnum.FAILED.getStatus());
+          executeRecord.setStatus(allSuccess ? ProcessStatus.SUCCESS.getType()
+                  : ProcessStatus.FAIL.getType());
           executeRecord.setExecuteResult(JSON.toJSONString(responses));
         } catch (Exception e) {
           log.error("execute error", e);
           FeatureResponse featureResponse = createFailResponse(executePoint, e);
-          executeRecord.setStatus(ExecuteStatusEnum.FAILED.getStatus());
+          executeRecord.setStatus(ProcessStatus.FAIL.getType());
           executeRecord.setExecuteResult(JSON.toJSONString(Collections.singletonList(featureResponse)));
         }
 
         //3 保存执行点记录
         saveRecord2DB(historyId, executePoint, executeRecord);
 
-        if (Objects.equals(executeRecord.getStatus(), ExecuteStatusEnum.FAILED.getStatus())) {
+        if (Objects.equals(executeRecord.getStatus(), ProcessStatus.FAIL.getType())) {
           log.warn("execute feature error featureId= {}", executePoint.getFeatureId());
-          status.set(ExecuteStatusEnum.FAILED.getStatus());
+          status.set(ProcessStatus.FAIL.getType());
           break;
         }
       }
@@ -144,7 +144,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
     //如果所有的用例都执行完成，则修改记录并且删除缓存
     jsonObject.put(featureId, status);
     boolean allComplete = jsonObject.keySet().stream().noneMatch(
-        key -> Objects.equals(jsonObject.getInteger(key), ExecuteStatusEnum.RUNNING.getStatus()));
+        key -> Objects.equals(jsonObject.getInteger(key), ProcessStatus.RUNNING.getType()));
     if (allComplete) {
       log.info("all features complete clear cache and update status recordId={}", recordId);
       cacheService.deleteCache(cacheKey);

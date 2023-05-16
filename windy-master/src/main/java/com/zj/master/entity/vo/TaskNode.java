@@ -7,7 +7,7 @@ import lombok.Data;
  * @since 2022/5/23
  */
 @Data
-public class TaskNode {
+public class TaskNode extends BaseDispatch{
   /**
    * 流水线节点Id
    * */

@@ -8,8 +8,7 @@ import lombok.Data;
  * @since 2022/5/25
  */
 @Data
-@Builder
-public class HttpRequestContext extends RequestContext {
+public class HttpRequestContext {
 
   private String url;
 

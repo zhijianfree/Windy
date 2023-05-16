@@ -1,9 +1,0 @@
-package com.zj.client.notify;
-
-public enum NotifyType {
-  CREATE_FEATURE_HISTORY,
-  UPDATE_FEATURE_HISTORY,
-  CREATE_EXECUTE_POINT_RECORD,
-  UPDATE_NODE_RECORD,
-  CREATE_NODE_RECORD,
-}

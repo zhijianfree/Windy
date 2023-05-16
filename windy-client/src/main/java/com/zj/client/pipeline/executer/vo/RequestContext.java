@@ -6,7 +6,13 @@ package com.zj.client.pipeline.executer.vo;
  */
 public class RequestContext {
 
-  public RequestContext getContext() {
-    return this;
+  private Object data;
+
+  public RequestContext(Object data) {
+    this.data = data;
+  }
+
+  public Object getData() {
+    return data;
   }
 }

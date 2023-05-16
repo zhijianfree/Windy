@@ -9,6 +9,7 @@ import com.zj.client.pipeline.executer.vo.ExecuteType;
 import com.zj.client.pipeline.executer.vo.HttpRequestContext;
 import com.zj.client.pipeline.executer.vo.RefreshContext;
 import com.zj.client.pipeline.executer.vo.RequestContext;
+import com.zj.common.utils.OrikaUtil;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
@@ -37,9 +38,10 @@ public class HttpExecutor implements IRemoteInvoker {
     return ExecuteType.HTTP;
   }
 
-  public boolean triggerRun(RequestContext requestContext, String recordId) throws IOException {
+  public boolean triggerRun(RequestContext requestContext, String recordId)
+      throws IOException {
     log.info("http executor is running");
-    HttpRequestContext context = (HttpRequestContext) requestContext.getContext();
+    HttpRequestContext context = OrikaUtil.convert(requestContext.getData(), HttpRequestContext.class);
     JSONObject jsonObject = JSON.parseObject(context.getBody());
     jsonObject.put("recordId", recordId);
 
@@ -58,7 +60,7 @@ public class HttpExecutor implements IRemoteInvoker {
         Headers.of(refreshContext.getHeaders())).build();
     try {
       Response response = okHttpClient.newCall(request).execute();
-      if (!response.isSuccessful()){
+      if (!response.isSuccessful()) {
         return null;
       }
 

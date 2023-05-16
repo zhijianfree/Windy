@@ -8,6 +8,7 @@ import com.zj.client.pipeline.executer.vo.RefreshContext;
 import com.zj.client.pipeline.executer.vo.RequestContext;
 import com.zj.client.pipeline.executer.vo.WaitRequestContext;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.utils.OrikaUtil;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
@@ -35,7 +36,7 @@ public class WaitInvoker implements IRemoteInvoker {
 
   @Override
   public boolean triggerRun(RequestContext requestContext, String recordId) throws IOException {
-    WaitRequestContext waitRequestContext = (WaitRequestContext) requestContext;
+    WaitRequestContext waitRequestContext = OrikaUtil.convert(requestContext.getData(), WaitRequestContext.class);
     CompletableFuture.runAsync(() -> {
       try {
         CountDownLatch countDownLatch = new CountDownLatch(1);

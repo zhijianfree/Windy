@@ -1,8 +1,6 @@
 package com.zj.client.feature.executor.vo;
 
-import com.zj.client.entity.dto.BaseParam;
 import com.zj.client.entity.po.ExecutePoint;
-import com.zj.client.feature.executor.vo.ExecuteContext;
 import java.util.List;
 import lombok.Data;
 
@@ -11,7 +9,7 @@ import lombok.Data;
  * @since 2023/5/15
  */
 @Data
-public class FeatureParam extends BaseParam {
+public class FeatureParam {
   /**
    * 用例的执行点列表，要将这个参数传递过来，
    * 这样设计就可以保证client端最轻量化，不连接数据库，只做任务执行

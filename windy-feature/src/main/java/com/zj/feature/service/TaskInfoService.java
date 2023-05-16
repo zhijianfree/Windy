@@ -18,7 +18,6 @@ import com.zj.feature.entity.dto.TaskRecordDTO;
 import com.zj.domain.entity.po.feature.FeatureInfo;
 import com.zj.domain.entity.po.feature.TaskInfo;
 import com.zj.domain.entity.po.feature.TaskRecord;
-import com.zj.feature.entity.type.ExecuteStatusEnum;
 import com.zj.feature.entity.vo.FeatureConstant;
 import com.zj.feature.executor.IFeatureExecutor;
 import com.zj.domain.mapper.feeature.TaskInfoMapper;
@@ -97,7 +96,7 @@ public class TaskInfoService extends ServiceImpl<TaskInfoMapper, TaskInfo> {
       String cache = cacheService.getCache(
           FeatureConstant.RECORD_STATUS_CACHE_KEY + record.getRecordId());
       return StringUtils.isNoneBlank(cache) || Objects.equals(record.getStatus(),
-          ExecuteStatusEnum.RUNNING.getStatus());
+          ProcessStatus.RUNNING.getType());
     });
   }
 
@@ -155,7 +154,7 @@ public class TaskInfoService extends ServiceImpl<TaskInfoMapper, TaskInfo> {
   private void saveCache(List<FeatureInfo> featureList, TaskRecordDTO taskRecordDTO) {
     Map<String, Integer> map = featureList.stream().collect(
         Collectors.toMap(FeatureInfo::getFeatureId,
-            feature -> ExecuteStatusEnum.RUNNING.getStatus()));
+            feature -> ProcessStatus.RUNNING.getType()));
     String recordId = FeatureConstant.RECORD_STATUS_CACHE_KEY + taskRecordDTO.getRecordId();
     cacheService.setCache(recordId, JSON.toJSONString(map));
   }
@@ -167,7 +166,7 @@ public class TaskInfoService extends ServiceImpl<TaskInfoMapper, TaskInfo> {
     taskRecordDTO.setTaskId(taskDetail.getTaskId());
     taskRecordDTO.setRecordId(uniqueIdService.getUniqueId());
     taskRecordDTO.setUserId("admin");
-    taskRecordDTO.setStatus(ExecuteStatusEnum.RUNNING.getStatus());
+    taskRecordDTO.setStatus(ProcessStatus.RUNNING.getType());
     taskRecordDTO.setMachines(taskDetail.getMachines());
     taskRecordDTO.setTestCaseId(taskDetail.getTestCaseId());
     taskRecordDTO.setCreateTime(System.currentTimeMillis());

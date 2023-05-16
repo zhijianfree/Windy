@@ -8,6 +8,7 @@ import com.zj.client.pipeline.executer.vo.RefreshContext;
 import com.zj.client.pipeline.executer.vo.RequestContext;
 import com.zj.client.pipeline.executer.vo.TestRequestContext;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.utils.OrikaUtil;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,8 +41,9 @@ public class TestFeatureInvoker implements IRemoteInvoker {
   }
 
   @Override
-  public boolean triggerRun(RequestContext requestContext, String recordId) throws IOException {
-    TestRequestContext context = (TestRequestContext) requestContext;
+  public boolean triggerRun(RequestContext requestContext, String recordId)
+      throws IOException {
+    TestRequestContext context = OrikaUtil.convert(requestContext.getData(), TestRequestContext.class);
     String taskId = context.getTaskId();
     String url = String.format(START_TASK_URL, taskId);
     RequestBody requestBody = RequestBody.create(MEDIA_TYPE, "");
@@ -56,7 +58,7 @@ public class TestFeatureInvoker implements IRemoteInvoker {
     QueryResponseModel queryResponseModel = new QueryResponseModel();
     try {
       Response response = okHttpClient.newCall(request).execute();
-      if (!response.isSuccessful()){
+      if (!response.isSuccessful()) {
         queryResponseModel.setStatus(ProcessStatus.FAIL.getType());
         queryResponseModel.setMessage(Collections.singletonList("request http error"));
         return JSON.toJSONString(queryResponseModel);

@@ -9,7 +9,7 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class WaitRequestContext extends RequestContext{
+public class WaitRequestContext{
 
   /**
    * 等待时长，单位s
