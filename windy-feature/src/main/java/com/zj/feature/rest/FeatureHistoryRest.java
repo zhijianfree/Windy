@@ -1,8 +1,8 @@
 package com.zj.feature.rest;
 
-import com.zj.common.ResponseMeta;
+import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
-import com.zj.feature.entity.dto.FeatureHistoryDTO;
+import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
 import com.zj.feature.service.FeatureHistoryService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +20,8 @@ public class FeatureHistoryRest {
     private FeatureHistoryService featureHistoryService;
 
     @GetMapping("/{featureId}/histories")
-    public ResponseMeta<List<FeatureHistoryDTO>> queryFeatureHistories(@PathVariable("featureId") String featureId) {
-        return new ResponseMeta<List<FeatureHistoryDTO>>(ErrorCode.SUCCESS, featureHistoryService.featureHistories(featureId));
+    public ResponseMeta<List<FeatureHistoryDto>> queryFeatureHistories(@PathVariable("featureId") String featureId) {
+        return new ResponseMeta<List<FeatureHistoryDto>>(ErrorCode.SUCCESS, featureHistoryService.featureHistories(featureId));
     }
 
 

@@ -1,6 +1,7 @@
 package com.zj.domain.repository.pipeline;
 
 import com.zj.common.enums.ProcessStatus;
+import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.entity.po.pipeline.NodeRecord;
 import java.util.List;
 
@@ -10,11 +11,11 @@ import java.util.List;
  */
 public interface INodeRecordRepository {
 
-  boolean saveNodeRecord(NodeRecord nodeRecord);
+  boolean saveNodeRecord(NodeRecordDto nodeRecord);
 
-  boolean updateNodeRecord(NodeRecord nodeRecord);
+  boolean updateNodeRecord(NodeRecordDto nodeRecord);
 
-  boolean updateNodeRecordStatus(String recordId, Integer type, String message);
+  boolean updateNodeRecordStatus(String recordId, Integer status, String message);
 
   boolean batchUpdateStatus(List<String> recordIds, ProcessStatus processStatus);
 

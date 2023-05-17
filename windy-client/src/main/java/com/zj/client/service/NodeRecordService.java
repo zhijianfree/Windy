@@ -1,7 +1,10 @@
 package com.zj.client.service;
 
+import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.po.NodeRecord;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * @author falcon
@@ -10,8 +13,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class NodeRecordService {
 
+  public static final String QUERY_MASTER_NODE_RECORD = "http://WindyMaster/v1/devops/master/record/";
+  @Autowired
+  private RestTemplate restTemplate;
+
   public NodeRecord getRecord(String recordId) {
-    //todo 此处调用master接口获取记录状态
-    return null;
+    String url = QUERY_MASTER_NODE_RECORD + recordId;
+    String result = restTemplate.getForObject(url, String.class);
+    return JSON.parseObject(result, NodeRecord.class);
   }
 }

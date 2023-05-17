@@ -1,10 +1,10 @@
 package com.zj.feature.rest;
 
-import com.zj.common.ResponseMeta;
+import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
 import com.zj.feature.entity.dto.HistoryNodeDTO;
-import com.zj.common.PageSize;
-import com.zj.feature.entity.dto.TaskRecordDTO;
+import com.zj.common.model.PageSize;
+import com.zj.domain.entity.dto.feature.TaskRecordDto;
 import com.zj.feature.service.TaskRecordService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,16 +23,16 @@ public class TaskRecordRest {
   private TaskRecordService taskRecordService;
 
   @GetMapping("/task/records")
-  public ResponseMeta<PageSize<TaskRecordDTO>> getTaskRecordList(
+  public ResponseMeta<PageSize<TaskRecordDto>> getTaskRecordList(
       @RequestParam(value = "page", defaultValue = "1") Integer page,
       @RequestParam(value = "size", defaultValue = "10") Integer size) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, taskRecordService.getTaskRecordPage(page, size));
   }
 
   @GetMapping("/task/record/{recordId}")
-  public ResponseMeta<TaskRecordDTO> getTaskRecordDetail(
+  public ResponseMeta<TaskRecordDto> getTaskRecordDetail(
       @PathVariable("recordId") String recordId) {
-    return new ResponseMeta<TaskRecordDTO>(ErrorCode.SUCCESS,
+    return new ResponseMeta<TaskRecordDto>(ErrorCode.SUCCESS,
         taskRecordService.getTaskRecord(recordId));
   }
 

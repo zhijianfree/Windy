@@ -1,4 +1,4 @@
-package com.zj.feature.entity.dto;
+package com.zj.domain.entity.dto.feature;
 
 import java.util.List;
 import lombok.Data;
@@ -8,7 +8,7 @@ import lombok.Data;
  * @since 2023/1/30
  */
 @Data
-public class BatchDeleteDTO {
+public class BatchDeleteDto {
 
   private List<String> features;
 }

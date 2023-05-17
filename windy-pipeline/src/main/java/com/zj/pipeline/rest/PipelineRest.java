@@ -1,6 +1,6 @@
 package com.zj.pipeline.rest;
 
-import com.zj.common.ResponseMeta;
+import com.zj.common.model.ResponseMeta;
 import com.zj.domain.entity.dto.pipeline.PipelineDTO;
 import com.zj.common.exception.ErrorCode;
 import com.zj.pipeline.service.PipelineService;

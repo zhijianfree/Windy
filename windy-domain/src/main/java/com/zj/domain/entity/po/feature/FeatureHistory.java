@@ -36,4 +36,6 @@ public class FeatureHistory {
      * 创建时间
      * */
     private Long createTime;
+
+    private Long updateTime;
 }

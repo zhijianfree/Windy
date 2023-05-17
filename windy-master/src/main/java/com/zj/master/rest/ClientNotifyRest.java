@@ -1,8 +1,9 @@
 package com.zj.master.rest;
 
 import com.alibaba.fastjson.JSONObject;
-import com.zj.common.ResponseMeta;
+import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
+import com.zj.common.model.ResultEvent;
 import com.zj.master.service.ClientNotifyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +23,7 @@ public class ClientNotifyRest {
   private ClientNotifyService clientNotifyService;
 
   @PostMapping("/notify")
-  public ResponseMeta<Boolean> notifyEvent(@RequestBody JSONObject params) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, clientNotifyService.notifyEvent(params));
+  public ResponseMeta<Boolean> notifyEvent(@RequestBody ResultEvent resultEvent) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, clientNotifyService.notifyEvent(resultEvent));
   }
 }

@@ -7,7 +7,6 @@ import com.zj.client.entity.po.ExecutePoint;
 import com.zj.client.entity.vo.FeatureResponse;
 import com.zj.client.feature.executor.compare.CompareHandler;
 import com.zj.client.feature.executor.compare.ognl.OgnlDataParser;
-import com.zj.client.feature.executor.feature.IRemoteInvoker;
 import com.zj.client.feature.executor.interceptor.InterceptorProxy;
 import com.zj.client.feature.executor.vo.ExecuteContext;
 import com.zj.client.feature.executor.vo.ExecutorUnit;

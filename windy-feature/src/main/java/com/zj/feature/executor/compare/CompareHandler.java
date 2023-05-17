@@ -1,6 +1,5 @@
 package com.zj.feature.executor.compare;
 
-import com.zj.common.Constant;
 import com.zj.common.exception.ErrorCode;
 import com.zj.feature.entity.vo.ExecuteDetail;
 import com.zj.feature.executor.compare.ognl.OgnlDataParser;

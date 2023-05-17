@@ -49,6 +49,7 @@ public class TestFeatureInvoker implements IRemoteInvoker {
     RequestBody requestBody = RequestBody.create(MEDIA_TYPE, "");
     Request request = new Request.Builder().url(url).post(requestBody).build();
     Response response = okHttpClient.newCall(request).execute();
+    log.info("trigger run task result={}", response.body().string());
     return response.isSuccessful();
   }
 

@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.utils.OrikaUtil;
+import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.entity.po.pipeline.NodeRecord;
 import com.zj.domain.mapper.pipeline.NodeRecordMapper;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
@@ -22,7 +24,8 @@ public class NodeRecordRepository extends ServiceImpl<NodeRecordMapper, NodeReco
     INodeRecordRepository {
 
   @Override
-  public boolean saveNodeRecord(NodeRecord nodeRecord) {
+  public boolean saveNodeRecord(NodeRecordDto nodeRecordDto) {
+    NodeRecord nodeRecord = OrikaUtil.convert(nodeRecordDto, NodeRecord.class);
     long dateNow = System.currentTimeMillis();
     nodeRecord.setUpdateTime(dateNow);
     nodeRecord.setCreateTime(dateNow);
@@ -30,7 +33,8 @@ public class NodeRecordRepository extends ServiceImpl<NodeRecordMapper, NodeReco
   }
 
   @Override
-  public boolean updateNodeRecord(NodeRecord nodeRecord) {
+  public boolean updateNodeRecord(NodeRecordDto nodeRecordDto) {
+    NodeRecord nodeRecord = OrikaUtil.convert(nodeRecordDto, NodeRecord.class);
     long dateNow = System.currentTimeMillis();
     nodeRecord.setUpdateTime(dateNow);
     return update(nodeRecord, Wrappers.lambdaUpdate(NodeRecord.class)
@@ -39,12 +43,10 @@ public class NodeRecordRepository extends ServiceImpl<NodeRecordMapper, NodeReco
 
   @Override
   public boolean updateNodeRecordStatus(String recordId, Integer type, String message) {
-    NodeRecord nodeRecord = new NodeRecord();
+    NodeRecordDto nodeRecord = new NodeRecordDto();
     nodeRecord.setStatus(type);
     nodeRecord.setRecordId(recordId);
     nodeRecord.setResult(message);
-    long dateNow = System.currentTimeMillis();
-    nodeRecord.setUpdateTime(dateNow);
     return updateNodeRecord(nodeRecord);
   }
 

@@ -5,11 +5,12 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.feature.entity.dto.FeatureHistoryDTO;
+import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
+import com.zj.domain.entity.dto.feature.FeatureInfoDto;
+import com.zj.domain.repository.feature.ITaskRecordRepository;
 import com.zj.feature.entity.dto.HistoryNodeDTO;
-import com.zj.common.PageSize;
-import com.zj.feature.entity.dto.TaskRecordDTO;
-import com.zj.domain.entity.po.feature.FeatureInfo;
+import com.zj.common.model.PageSize;
+import com.zj.domain.entity.dto.feature.TaskRecordDto;
 import com.zj.domain.entity.po.feature.TaskRecord;
 import com.zj.domain.mapper.feeature.TaskRecordMapper;
 import java.util.Collections;
@@ -22,7 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
-public class TaskRecordService extends ServiceImpl<TaskRecordMapper, TaskRecord> {
+public class TaskRecordService {
 
   @Autowired
   private FeatureHistoryService featureHistoryService;
@@ -36,64 +37,50 @@ public class TaskRecordService extends ServiceImpl<TaskRecordMapper, TaskRecord>
   @Autowired
   private TestCaseService testCaseService;
 
-  public boolean insert(TaskRecordDTO taskRecordDTO) {
-    TaskRecord taskRecord = OrikaUtil.convert(taskRecordDTO, TaskRecord.class);
-    return save(taskRecord);
+  @Autowired
+  private ITaskRecordRepository taskRecordRepository;
+
+  public boolean insert(TaskRecordDto taskRecordDto) {
+    return taskRecordRepository.save(taskRecordDto);
   }
 
   public boolean updateRecordStatus(String recordId, int status) {
-    TaskRecord taskRecord = new TaskRecord();
-    taskRecord.setRecordId(recordId);
-    taskRecord.setStatus(status);
-    return saveOrUpdate(taskRecord,
-        Wrappers.lambdaUpdate(TaskRecord.class).eq(TaskRecord::getRecordId, recordId));
+    return taskRecordRepository.updateRecordStatus(recordId, status);
   }
 
-  public PageSize<TaskRecordDTO> getTaskRecordPage(Integer pageNum, Integer size) {
-    IPage<TaskRecord> page = new Page<>(pageNum, size);
-    IPage<TaskRecord> recordIPage = page(page,
-        Wrappers.lambdaQuery(TaskRecord.class).orderByDesc(TaskRecord::getUpdateTime));
-
-    PageSize<TaskRecordDTO> pageSize = new PageSize<>();
+  public PageSize<TaskRecordDto> getTaskRecordPage(Integer pageNum, Integer size) {
+    IPage<TaskRecordDto> recordIPage = taskRecordRepository.getTaskRecordPage(pageNum, size);
+    PageSize<TaskRecordDto> pageSize = new PageSize<>();
     pageSize.setTotal(recordIPage.getTotal());
-    if (CollectionUtils.isEmpty(recordIPage.getRecords())) {
-      pageSize.setData(Collections.emptyList());
-      return pageSize;
-    }
-
-    List<TaskRecordDTO> dtoList = recordIPage.getRecords().stream()
-        .map(record -> OrikaUtil.convert(record, TaskRecordDTO.class)).collect(Collectors.toList());
-    pageSize.setData(dtoList);
+    pageSize.setData(recordIPage.getRecords());
     return pageSize;
   }
 
   public boolean deleteTaskRecord(String recordId) {
-    TaskRecord taskRecord = getOne(
-        Wrappers.lambdaQuery(TaskRecord.class).eq(TaskRecord::getRecordId, recordId));
+    TaskRecordDto taskRecord = taskRecordRepository.getTaskRecord(recordId);
     boolean executeHistory = featureHistoryService.deleteByRecordId(taskRecord.getTestCaseId());
-    boolean flag = remove(
-        Wrappers.lambdaQuery(TaskRecord.class).eq(TaskRecord::getRecordId, recordId));
+    boolean flag = taskRecordRepository.deleteTaskRecord(recordId);
     return executeHistory && flag;
   }
 
   public List<HistoryNodeDTO> getTaskResult(String recordId) {
-    List<FeatureHistoryDTO> histories = featureHistoryService.getHistories(recordId);
+    List<FeatureHistoryDto> histories = featureHistoryService.getHistories(recordId);
     if (CollectionUtils.isEmpty(histories)) {
       return Collections.emptyList();
     }
 
-    Map<String, FeatureHistoryDTO> historyMap = histories.stream()
-        .collect(Collectors.toMap(FeatureHistoryDTO::getFeatureId, history -> history));
-    TaskRecordDTO record = getTaskRecord(recordId);
+    Map<String, FeatureHistoryDto> historyMap = histories.stream()
+        .collect(Collectors.toMap(FeatureHistoryDto::getFeatureId, history -> history));
+    TaskRecordDto record = getTaskRecord(recordId);
     String testCaseId = record.getTestCaseId();
-    List<FeatureInfo> featureInfos = featureService.queryFeatureList(testCaseId);
+    List<FeatureInfoDto> featureInfos = featureService.queryFeatureList(testCaseId);
     List<HistoryNodeDTO> historyNodeDTOS = featureInfos.stream().map(feature -> {
       HistoryNodeDTO historyNodeDTO = new HistoryNodeDTO();
       historyNodeDTO.setParentId(feature.getParentId());
       historyNodeDTO.setRecordId(recordId);
       historyNodeDTO.setFeatureId(feature.getFeatureId());
       historyNodeDTO.setFeatureName(feature.getFeatureName());
-      FeatureHistoryDTO featureHistory = historyMap.get(feature.getFeatureId());
+      FeatureHistoryDto featureHistory = historyMap.get(feature.getFeatureId());
       if (Objects.nonNull(featureHistory)) {
         historyNodeDTO.setHistoryId(featureHistory.getHistoryId());
         historyNodeDTO.setExecuteStatus(historyNodeDTO.getExecuteStatus());
@@ -122,13 +109,11 @@ public class TaskRecordService extends ServiceImpl<TaskRecordMapper, TaskRecord>
     });
   }
 
-  public TaskRecordDTO getTaskRecord(String recordId) {
-    TaskRecord taskRecord = getOne(
-        Wrappers.lambdaQuery(TaskRecord.class).eq(TaskRecord::getRecordId, recordId));
-    if (Objects.isNull(taskRecord)) {
-      return null;
-    }
+  public TaskRecordDto getTaskRecord(String recordId) {
+    return taskRecordRepository.getTaskRecord(recordId);
+  }
 
-    return OrikaUtil.convert(taskRecord, TaskRecordDTO.class);
+  public List<TaskRecordDto> getTaskRecordsByTaskId(String taskId) {
+    return taskRecordRepository.getTaskRecordsOrderByTime(taskId);
   }
 }

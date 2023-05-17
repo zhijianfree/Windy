@@ -3,9 +3,10 @@ package com.zj.client.pipeline.executer;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.eventbus.Subscribe;
+import com.zj.client.entity.po.NodeRecord;
 import com.zj.client.notify.IResultEventNotify;
 import com.zj.common.enums.NotifyType;
-import com.zj.client.notify.ResultEvent;
+import com.zj.common.model.ResultEvent;
 import com.zj.client.pipeline.executer.notify.IStatusNotifyListener;
 import com.zj.client.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.client.pipeline.executer.vo.TaskNode;
@@ -54,6 +55,7 @@ public class ExecuteProxy implements IStatusNotifyListener {
   @Override
   @Subscribe
   public void statusChange(PipelineStatusEvent event) {
+    log.info("receive event bus notify ={}", JSON.toJSONString(event));
     TaskNode taskNode = event.getTaskNode();
     //如果节点配置跳过，则修改状态为IGNORE
     ProcessStatus processStatus = event.getProcessStatus();
@@ -61,13 +63,14 @@ public class ExecuteProxy implements IStatusNotifyListener {
       processStatus = ProcessStatus.IGNORE_FAIL;
     }
 
+    NodeRecord nodeRecord = new NodeRecord();
+    nodeRecord.setHistoryId(taskNode.getHistoryId());
     String message = JSON.toJSONString(event.getErrorMsg());
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("message", message);
+    nodeRecord.setResult(message);
 
-    ResultEvent resultEvent = ResultEvent.builder().executeId(taskNode.getRecordId())
-        .status(processStatus).notifyType(NotifyType.UPDATE_NODE_RECORD).object(jsonObject)
-        .masterIP(taskNode.getMasterIp()).build();
+    ResultEvent resultEvent = new ResultEvent().executeId(taskNode.getRecordId())
+        .status(processStatus).notifyType(NotifyType.UPDATE_NODE_RECORD).params(nodeRecord)
+        .masterIP(taskNode.getMasterIp());
     resultEventNotify.notifyEvent(resultEvent);
   }
 }

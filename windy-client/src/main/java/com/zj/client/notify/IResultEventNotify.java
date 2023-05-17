@@ -1,6 +1,8 @@
 package com.zj.client.notify;
 
 
+import com.zj.common.model.ResultEvent;
+
 public interface IResultEventNotify {
 
   /**

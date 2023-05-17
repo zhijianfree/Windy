@@ -1,9 +1,9 @@
-package com.zj.feature.entity.dto;
+package com.zj.domain.entity.dto.feature;
 
 import lombok.Data;
 
 @Data
-public class ExecuteRecordDTO {
+public class ExecuteRecordDto {
 
     /**
      * 执行Id

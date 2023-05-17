@@ -1,6 +1,5 @@
 package com.zj.feature.executor.compare.operator;
 
-import com.zj.common.Constant;
 import com.zj.common.exception.ErrorCode;
 import com.zj.feature.executor.compare.CompareDefine;
 import com.zj.feature.executor.compare.CompareResult;

@@ -3,7 +3,6 @@ package com.zj.feature.ability.mysql;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.zj.common.Constant;
 import com.zj.feature.ability.Feature;
 import com.zj.feature.ability.FeatureDefine;
 import com.zj.feature.ability.ParameterDefine;

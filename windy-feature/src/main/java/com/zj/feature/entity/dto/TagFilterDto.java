@@ -10,7 +10,7 @@ import lombok.Data;
  * @since 2023/1/28
  */
 @Data
-public class TagFilterDTO {
+public class TagFilterDto {
 
   /**
    * 过滤的标签列表

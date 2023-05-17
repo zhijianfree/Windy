@@ -51,4 +51,7 @@ public class ExecuteRecord {
      * 创建时间
      */
     private Long createTime;
+
+    private Long updateTime;
+
 }

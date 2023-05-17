@@ -1,6 +1,7 @@
 package com.zj.feature.entity.dto;
 
 import com.zj.common.utils.OrikaUtil;
+import com.zj.domain.entity.dto.feature.FeatureInfoDto;
 import com.zj.domain.entity.po.feature.FeatureInfo;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ public class FeatureNodeDTO {
   private List<ExecutePointDTO> testFeatures;
   private List<FeatureNodeDTO> children;
 
-  public static FeatureNodeDTO toNode(FeatureInfo featureInfo) {
+  public static FeatureNodeDTO toNode(FeatureInfoDto featureInfo) {
     FeatureNodeDTO featureNodeDTO = OrikaUtil.convert(featureInfo, FeatureNodeDTO.class);
     featureNodeDTO.setChildren(new ArrayList<>());
     return featureNodeDTO;

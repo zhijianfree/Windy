@@ -1,6 +1,6 @@
 package com.zj.master.rest;
 
-import com.zj.common.ResponseMeta;
+import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
 import com.zj.master.entity.dto.TaskDetailDto;
 import com.zj.master.service.TaskLogService;

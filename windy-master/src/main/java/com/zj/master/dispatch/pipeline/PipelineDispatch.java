@@ -54,7 +54,7 @@ public class PipelineDispatch implements IDispatchExecutor {
   private UniqueIdService uniqueIdService;
 
   @Autowired
-  private ExecuteProxy executeProxy;
+  private PipelineExecuteProxy pipelineExecuteProxy;
 
   @Override
   public Integer type() {
@@ -78,18 +78,19 @@ public class PipelineDispatch implements IDispatchExecutor {
       return false;
     }
 
-    log.info("start run pipeline={} name={}", task.getSourceId(), task.getSourceName());
     String historyId = uniqueIdService.getUniqueId();
     saveHistory(pipeline.getPipelineId(), historyId);
+    log.info("start run pipeline={} name={} historyId={}", task.getSourceId(), task.getSourceName(),
+        historyId);
 
     PipelineTask pipelineTask = new PipelineTask();
     pipelineTask.setPipelineId(pipeline.getPipelineId());
     pipelineTask.setHistoryId(historyId);
 
-    List<TaskNode> taskNodeList = pipelineNodes.stream().map(this::buildTaskNode)
+    List<TaskNode> taskNodeList = pipelineNodes.stream().map(node -> buildTaskNode(node, historyId))
         .collect(Collectors.toList());
     pipelineTask.addAll(taskNodeList);
-    executeProxy.runTask(pipelineTask);
+    pipelineExecuteProxy.runTask(pipelineTask);
     return true;
   }
 
@@ -107,12 +108,13 @@ public class PipelineDispatch implements IDispatchExecutor {
   }
 
 
-  private TaskNode buildTaskNode(PipelineNodeDTO pipelineNode) {
+  private TaskNode buildTaskNode(PipelineNodeDTO pipelineNode, String historyId) {
     log.info("start build taskNode ={}", JSON.toJSONString(pipelineNode));
     TaskNode taskNode = new TaskNode();
     taskNode.setNodeId(pipelineNode.getNodeId());
     taskNode.setName(pipelineNode.getNodeName());
     taskNode.setExecuteTime(System.currentTimeMillis());
+    taskNode.setHistoryId(historyId);
 
     ConfigDetail configDetail = JSON.parseObject(pipelineNode.getConfigDetail(),
         ConfigDetail.class);

@@ -1,27 +1,20 @@
 package com.zj.feature.service;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.utils.OrikaUtil;
-import com.zj.feature.entity.dto.FeatureHistoryDTO;
+import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
+import com.zj.domain.repository.feature.IFeatureHistoryRepository;
 import com.zj.feature.entity.dto.FeatureInfoDTO;
-import com.zj.domain.entity.po.feature.FeatureHistory;
-import com.zj.domain.mapper.feeature.FeatureHistoryMapper;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Service
-public class FeatureHistoryService extends ServiceImpl<FeatureHistoryMapper, FeatureHistory> {
+public class FeatureHistoryService {
 
   @Autowired
   private ExecuteRecordService executeRecordService;
@@ -29,67 +22,27 @@ public class FeatureHistoryService extends ServiceImpl<FeatureHistoryMapper, Fea
   @Autowired
   private FeatureService featureService;
 
-  public List<FeatureHistoryDTO> featureHistories(String featureId) {
-    List<FeatureHistory> featureHistories = list(
-        Wrappers.lambdaQuery(FeatureHistory.class).eq(FeatureHistory::getFeatureId, featureId)
-            .orderByDesc(FeatureHistory::getCreateTime));
+  @Autowired
+  private IFeatureHistoryRepository featureHistoryRepository;
 
-    if (CollectionUtils.isEmpty(featureHistories)) {
-      return Collections.emptyList();
-    }
-
-    return featureHistories.stream()
-        .map(history -> OrikaUtil.convert(history, FeatureHistoryDTO.class))
-        .collect(Collectors.toList());
-  }
-
-  public boolean insert(FeatureHistory featureHistory) {
-    return save(featureHistory);
+  public List<FeatureHistoryDto> featureHistories(String featureId) {
+    return featureHistoryRepository.featureHistories(featureId);
   }
 
   public boolean deleteHistory(String historyId) {
-    boolean deleteRecode = executeRecordService.deleteByHistoryId(historyId);
-    boolean result = remove(
-        Wrappers.lambdaQuery(FeatureHistory.class).eq(FeatureHistory::getHistoryId, historyId));
-    log.info("delete recode={} delete history={}", deleteRecode, result);
-    return result && deleteRecode;
+    return featureHistoryRepository.deleteHistory(historyId);
   }
 
-  public List<FeatureHistoryDTO> getHistories(String recordId) {
-    List<FeatureHistory> histories = list(
-        Wrappers.lambdaQuery(FeatureHistory.class).eq(FeatureHistory::getRecordId, recordId));
-    if (CollectionUtils.isEmpty(histories)) {
-      return Collections.emptyList();
-    }
-
-    return histories.stream().map(history -> OrikaUtil.convert(history, FeatureHistoryDTO.class))
-        .collect(Collectors.toList());
+  public List<FeatureHistoryDto> getHistories(String taskId) {
+    return featureHistoryRepository.getHistoriesByTaskId(taskId);
   }
 
-  public boolean deleteByRecordId(String recordId) {
-    List<FeatureHistory> histories = list(
-        Wrappers.lambdaQuery(FeatureHistory.class).eq(FeatureHistory::getRecordId, recordId));
-    List<String> historyIds = histories.stream().map(FeatureHistory::getHistoryId)
-        .collect(Collectors.toList());
-    boolean deleteRecode = executeRecordService.batchDeleteByHistoryId(historyIds);
-
-    if (CollectionUtils.isEmpty(historyIds)) {
-      return deleteRecode;
-    }
-
-    boolean result = remove(
-        Wrappers.lambdaQuery(FeatureHistory.class).in(FeatureHistory::getHistoryId, historyIds));
-    log.info("delete testCase history  testcaseId={} history={} recode={} delete ", recordId,
-        result, deleteRecode);
-    return result && deleteRecode;
+  public boolean deleteByRecordId(String taskId) {
+    return featureHistoryRepository.deleteByRecordId(taskId);
   }
 
   public boolean updateStatus(String historyId, int status) {
-    FeatureHistory featureHistory = new FeatureHistory();
-    featureHistory.setHistoryId(historyId);
-    featureHistory.setExecuteStatus(status);
-    return update(featureHistory,
-        Wrappers.lambdaUpdate(FeatureHistory.class).eq(FeatureHistory::getHistoryId, historyId));
+    return featureHistoryRepository.updateStatus(historyId, status);
   }
 
   public void saveFeatureHistory(String featureId, String historyId, String recordId) {
@@ -98,13 +51,12 @@ public class FeatureHistoryService extends ServiceImpl<FeatureHistoryMapper, Fea
       throw new ApiException(ErrorCode.FEATURE_NOT_FIND);
     }
 
-    FeatureHistory featureHistory = new FeatureHistory();
+    FeatureHistoryDto featureHistory = new FeatureHistoryDto();
     featureHistory.setFeatureId(featureId);
     featureHistory.setExecuteStatus(ProcessStatus.RUNNING.getType());
     featureHistory.setHistoryId(historyId);
     featureHistory.setRecordId(recordId);
     featureHistory.setFeatureName(featureInfo.getFeatureName());
-    featureHistory.setCreateTime(System.currentTimeMillis());
-    insert(featureHistory);
+    featureHistoryRepository.saveHistory(featureHistory);
   }
 }

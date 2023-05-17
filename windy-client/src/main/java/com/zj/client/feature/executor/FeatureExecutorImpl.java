@@ -1,4 +1,4 @@
-package com.zj.client.feature.executor.feature;
+package com.zj.client.feature.executor;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.po.ExecutePoint;
@@ -11,7 +11,7 @@ import com.zj.client.feature.executor.vo.ExecutorUnit;
 import com.zj.client.feature.executor.vo.FeatureParam;
 import com.zj.client.notify.IResultEventNotify;
 import com.zj.common.enums.NotifyType;
-import com.zj.client.notify.ResultEvent;
+import com.zj.common.model.ResultEvent;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
 import java.util.Collections;
@@ -86,9 +86,9 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
       }
 
       //4 更新整个用例执行结果
-      ResultEvent resultEvent = ResultEvent.builder().executeId(historyId)
+      ResultEvent resultEvent = new ResultEvent().executeId(historyId)
           .notifyType(NotifyType.UPDATE_FEATURE_HISTORY)
-          .status(ProcessStatus.exchange(status.get())).build();
+          .status(ProcessStatus.exchange(status.get()));
       resultEventNotify.notifyEvent(resultEvent);
     }, executorService);
   }
@@ -105,9 +105,9 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
     String recordId = uniqueIdService.getUniqueId();
     executeRecord.setExecuteRecordId(recordId);
 
-    ResultEvent resultEvent = ResultEvent.builder().executeId(recordId)
+    ResultEvent resultEvent = new ResultEvent().executeId(recordId)
         .notifyType(NotifyType.CREATE_EXECUTE_POINT_RECORD)
-        .status(ProcessStatus.RUNNING).object(executeRecord).build();
+        .status(ProcessStatus.RUNNING).params(executeRecord);
     resultEventNotify.notifyEvent(resultEvent);
   }
 
@@ -119,9 +119,9 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
     featureHistory.setRecordId(taskId);
     featureHistory.setCreateTime(System.currentTimeMillis());
 
-    ResultEvent resultEvent = ResultEvent.builder().executeId(historyId)
+    ResultEvent resultEvent = new ResultEvent().executeId(historyId)
         .notifyType(NotifyType.CREATE_FEATURE_HISTORY)
-        .status(ProcessStatus.RUNNING).object(featureHistory).build();
+        .status(ProcessStatus.RUNNING).params(featureHistory);
     resultEventNotify.notifyEvent(resultEvent);
   }
 

@@ -1,6 +1,6 @@
 package com.zj.pipeline.rest;
 
-import com.zj.common.ResponseMeta;
+import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
 import com.zj.pipeline.service.NodeRecordService;
 import org.springframework.beans.factory.annotation.Autowired;

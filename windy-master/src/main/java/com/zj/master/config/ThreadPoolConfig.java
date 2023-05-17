@@ -19,7 +19,13 @@ public class ThreadPoolConfig {
 
   @Bean("pipelineExecutorPool")
   public ExecutorService getPipelineExecutor() {
-    return new ThreadPoolExecutor(5, 10, 3, TimeUnit.HOURS, new LinkedBlockingQueue<>(100),
+    return new ThreadPoolExecutor(20, 40, 3, TimeUnit.HOURS, new LinkedBlockingQueue<>(100),
+        new CallerRunsPolicy());
+  }
+
+  @Bean("featureExecutorPool")
+  public ExecutorService getFeatureExecutor() {
+    return new ThreadPoolExecutor(20, 40, 3, TimeUnit.HOURS, new LinkedBlockingQueue<>(100),
         new CallerRunsPolicy());
   }
 }

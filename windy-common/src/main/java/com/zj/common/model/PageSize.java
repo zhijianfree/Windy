@@ -1,4 +1,4 @@
-package com.zj.common;
+package com.zj.common.model;
 
 import java.util.List;
 import lombok.Data;

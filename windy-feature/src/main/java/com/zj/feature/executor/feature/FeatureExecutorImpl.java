@@ -4,9 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
-import com.zj.feature.entity.dto.TaskRecordDTO;
+import com.zj.domain.entity.dto.feature.ExecuteRecordDto;
+import com.zj.domain.entity.dto.feature.TaskRecordDto;
 import com.zj.domain.entity.po.feature.ExecutePoint;
-import com.zj.domain.entity.po.feature.ExecuteRecord;
 import com.zj.feature.entity.vo.ExecuteDetail;
 import com.zj.feature.entity.vo.FeatureConstant;
 import com.zj.feature.entity.vo.FeatureResponse;
@@ -79,7 +79,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
 
       AtomicInteger status = new AtomicInteger(ProcessStatus.SUCCESS.getType());
       for (ExecutePoint executePoint : executePoints) {
-        ExecuteRecord executeRecord = new ExecuteRecord();
+        ExecuteRecordDto executeRecord = new ExecuteRecordDto();
         try {
           //2 使用策略类执行用例
           List<FeatureResponse> responses = executeStrategyFactory.execute(executePoint, executeContext);
@@ -114,7 +114,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
     return historyId;
   }
 
-  private void saveRecord2DB(String historyId, ExecutePoint executePoint, ExecuteRecord executeRecord) {
+  private void saveRecord2DB(String historyId, ExecutePoint executePoint, ExecuteRecordDto executeRecord) {
     executeRecord.setHistoryId(historyId);
     executeRecord.setExecutePointId(executePoint.getPointId());
     ExecutorUnit unit = JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit.class);
@@ -123,7 +123,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
     executeRecord.setCreateTime(System.currentTimeMillis());
     executeRecord.setTestStage(executePoint.getTestStage());
     executeRecord.setExecuteRecordId(uniqueIdService.getUniqueId());
-    executeRecordService.insert(executeRecord);
+    executeRecordService.save(executeRecord);
   }
 
   private void updateTaskExecuteStatus(String recordId, String featureId, Integer status) {
@@ -171,7 +171,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
   }
 
   @Override
-  public List<String> batchRunTask(List<String> featureIds, TaskRecordDTO taskRecord) {
+  public List<String> batchRunTask(List<String> featureIds, TaskRecordDto taskRecord) {
     ExecuteContext executeContext = buildTaskConfig(taskRecord.getTaskConfig());
     return featureIds.stream()
         .map(featureId -> execute(featureId, taskRecord.getRecordId(), executeContext))

@@ -3,7 +3,7 @@ package com.zj.client.pipeline.executer;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.client.notify.IResultEventNotify;
 import com.zj.common.enums.NotifyType;
-import com.zj.client.notify.ResultEvent;
+import com.zj.common.model.ResultEvent;
 import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.client.pipeline.executer.intercept.INodeExecuteInterceptor;
 import com.zj.client.pipeline.executer.notify.PipelineEventFactory;
@@ -90,9 +90,9 @@ public class NodeExecutor {
         .status(statusAtomic.get().getType()).nodeId(node.getNodeId()).createTime(currentTimeMillis)
         .updateTime(currentTimeMillis).build();
 
-    ResultEvent resultEvent = ResultEvent.builder().executeId(recordId)
+    ResultEvent resultEvent = new ResultEvent().executeId(recordId)
         .notifyType(NotifyType.CREATE_NODE_RECORD).status(ProcessStatus.RUNNING)
-        .object(taskNodeRecord).masterIP(node.getMasterIp()).build();
+        .params(taskNodeRecord).masterIP(node.getMasterIp());
     resultEventNotify.notifyEvent(resultEvent);
   }
 

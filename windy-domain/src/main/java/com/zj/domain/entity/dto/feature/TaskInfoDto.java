@@ -1,4 +1,4 @@
-package com.zj.feature.entity.dto;
+package com.zj.domain.entity.dto.feature;
 
 import lombok.Data;
 
@@ -7,7 +7,7 @@ import lombok.Data;
  * @since 2022/12/29
  */
 @Data
-public class TaskInfoDTO {
+public class TaskInfoDto {
 
   private Long id;
 

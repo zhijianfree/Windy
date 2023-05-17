@@ -3,6 +3,7 @@ package com.zj.pipeline.service;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.entity.po.pipeline.NodeRecord;
 import com.zj.domain.entity.po.pipeline.PipelineHistory;
 import com.zj.common.enums.ProcessStatus;
@@ -47,16 +48,8 @@ public class NodeRecordService extends ServiceImpl<NodeRecordMapper, NodeRecord>
 
   public void saveTaskNodeRecord(TaskNodeRecord taskNodeRecord) {
     log.info("save task node record taskId={}", taskNodeRecord.getRecordId());
-    NodeRecord nodeRecord = JSON.parseObject(JSON.toJSONString(taskNodeRecord), NodeRecord.class);
+    NodeRecordDto nodeRecord = JSON.parseObject(JSON.toJSONString(taskNodeRecord), NodeRecordDto.class);
     nodeRecordRepository.saveNodeRecord(nodeRecord);
-  }
-
-  public void updateNodeRecord(TaskNodeRecord taskNodeRecord) {
-    log.info("update task node status taskId={}", taskNodeRecord.getRecordId());
-    NodeRecord nodeRecord = JSON.parseObject(JSON.toJSONString(taskNodeRecord), NodeRecord.class);
-    boolean update = nodeRecordRepository.updateNodeRecord(nodeRecord);
-    log.info("update node record status={}", update);
-
   }
 
   public void updateNodeRecordStatus(String recordId, Integer type, String message) {

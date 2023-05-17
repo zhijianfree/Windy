@@ -1,26 +1,19 @@
 package com.zj.pipeline.service;
 
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.common.PageSize;
+import com.zj.common.model.PageSize;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.pipeline.ActionParam;
 import com.zj.domain.entity.dto.pipeline.CompareResult;
 import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
 import com.zj.domain.entity.po.pipeline.PipelineAction;
-import com.zj.domain.mapper.pipeline.PipelineActionMapper;
 import com.zj.domain.repository.pipeline.IPipelineActionRepository;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 /**
  * @author guyuelan

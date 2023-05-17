@@ -1,13 +1,14 @@
 package com.zj.feature.rest;
 
-import com.zj.common.ResponseMeta;
+import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
-import com.zj.feature.entity.dto.BatchDeleteDTO;
+import com.zj.domain.entity.dto.feature.BatchDeleteDto;
+import com.zj.domain.entity.dto.feature.FeatureInfoDto;
 import com.zj.feature.entity.dto.CopyFeatureDTO;
 import com.zj.feature.entity.dto.FeatureInfoDTO;
 import com.zj.feature.entity.dto.FeatureNodeDTO;
-import com.zj.common.PageSize;
-import com.zj.feature.entity.dto.TagFilterDTO;
+import com.zj.common.model.PageSize;
+import com.zj.feature.entity.dto.TagFilterDto;
 import com.zj.domain.entity.po.feature.FeatureInfo;
 import com.zj.feature.executor.ExecuteHandler;
 import com.zj.feature.service.FeatureService;
@@ -57,7 +58,7 @@ public class FeatureInfoRest {
   }
 
   @PostMapping("/delete/features")
-  public ResponseMeta<Boolean> batchDeleteFeature(@RequestBody BatchDeleteDTO batchDeleteDTO) {
+  public ResponseMeta<Boolean> batchDeleteFeature(@RequestBody BatchDeleteDto batchDeleteDTO) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, featureService.batchDeleteByFeatureId(batchDeleteDTO));
   }
 
@@ -68,7 +69,7 @@ public class FeatureInfoRest {
   }
 
   @GetMapping("/case/{caseId}/features")
-  public ResponseMeta<PageSize<FeatureInfo>> queryFeatureTask(
+  public ResponseMeta<PageSize<FeatureInfoDto>> queryFeatureTask(
       @PathVariable("caseId") String caseId,
       @RequestParam(value = "page", defaultValue = "1") int page,
       @RequestParam(value = "size", defaultValue = "10") int size) {
@@ -83,7 +84,7 @@ public class FeatureInfoRest {
 
   @PostMapping("/feature/tag/filter")
   public ResponseMeta<List<FeatureNodeDTO>> getFeaturesByTag(
-      @Valid @RequestBody TagFilterDTO tagFilterDTO) {
+      @Valid @RequestBody TagFilterDto tagFilterDTO) {
     return new ResponseMeta<List<FeatureNodeDTO>>(ErrorCode.SUCCESS,
         featureService.filterFeaturesByTag(tagFilterDTO));
   }

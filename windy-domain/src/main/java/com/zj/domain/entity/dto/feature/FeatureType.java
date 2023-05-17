@@ -1,4 +1,4 @@
-package com.zj.feature.entity.type;
+package com.zj.domain.entity.dto.feature;
 
 public enum FeatureType {
   ITEM("用例", 1),

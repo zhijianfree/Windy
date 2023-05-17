@@ -1,8 +1,8 @@
 package com.zj.feature.rest;
 
-import com.zj.common.ResponseMeta;
+import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.PageSize;
+import com.zj.common.model.PageSize;
 import com.zj.feature.entity.dto.TestCaseConfigDTO;
 import com.zj.feature.entity.dto.TestCaseDTO;
 import com.zj.feature.service.TestCaseConfigService;

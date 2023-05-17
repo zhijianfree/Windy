@@ -2,6 +2,8 @@ package com.zj.master.dispatch.pipeline;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.utils.IpUtils;
+import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.entity.po.pipeline.NodeRecord;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.master.dispatch.ClientProxy;
@@ -24,9 +26,10 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class ExecuteProxy {
+public class PipelineExecuteProxy {
 
   public static final String TASK_DONE_TIPS = "no task need run";
+  public static final String DISPATCH_PIPELINE_TYPE = "PIPELINE";
   @Autowired
   private ClientProxy clientProxy;
 
@@ -50,7 +53,10 @@ public class ExecuteProxy {
         return null;
       }
 
+      taskNode.setDispatchType(DISPATCH_PIPELINE_TYPE);
+      taskNode.setMasterIp(IpUtils.getLocalIP());
       clientProxy.sendPipelineNodeTask(taskNode);
+
       pipelineTaskMap.put(pipelineTask.getHistoryId(), pipelineTask);
       return taskNode;
     }, executorService).whenComplete((node, e) -> {
@@ -63,27 +69,28 @@ public class ExecuteProxy {
   }
 
 
-  public void statusChange(String historyId, String recordId, Integer status, String message) {
+  public void statusChange(NodeRecordDto nodeRecord) {
     //todo 如果节点配置跳过，则修改状态为IGNORE
 //    if (processStatus.isFailStatus() && taskNode.getNodeConfig().isIgnoreError()) {
 //      processStatus = ProcessStatus.IGNORE_FAIL;
 //    }
 
     //1 更新节点状态
-    nodeRecordRepository.updateNodeRecordStatus(recordId, status, message);
+    nodeRecordRepository.updateNodeRecord(nodeRecord);
 
-    //根据节点状态判断整个流水线状态
-    NodeRecord record = nodeRecordRepository.getRecordById(recordId);
-    pipelineEndProcessor.statusChange(historyId, record.getNodeId(),
-        ProcessStatus.exchange(status));
+    //2 根据节点状态判断整个流水线状态
+    NodeRecord record = nodeRecordRepository.getRecordById(nodeRecord.getRecordId());
+    pipelineEndProcessor.statusChange(nodeRecord.getHistoryId(), record.getNodeId(),
+        ProcessStatus.exchange(nodeRecord.getStatus()));
 
-    PipelineTask pipelineTask = pipelineTaskMap.get(historyId);
+    //3 根据historyId关联的任务来执行下一个任务
+    PipelineTask pipelineTask = pipelineTaskMap.get(nodeRecord.getHistoryId());
     if (Objects.isNull(pipelineTask)) {
-      log.info("can not find Pipeline task historyId={}", historyId);
+      log.info("not find Pipeline task historyId={}", nodeRecord.getHistoryId());
       return;
     }
 
-    //继续递归执行下一个任务
+    //3.1 继续递归执行下一个任务
     runTask(pipelineTask);
   }
 }
