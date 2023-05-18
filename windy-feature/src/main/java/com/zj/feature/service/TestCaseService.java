@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.model.PageSize;
 import com.zj.common.generate.UniqueIdService;
-import com.zj.feature.entity.dto.TestCaseDTO;
+import com.zj.domain.entity.dto.feature.TestCaseDto;
 import com.zj.domain.entity.po.feature.TestCase;
 import com.zj.domain.mapper.feeature.TestCaseMapper;
 import java.util.List;
@@ -25,12 +25,12 @@ public class TestCaseService extends ServiceImpl<TestCaseMapper, TestCase> {
   @Autowired
   private UniqueIdService uniqueIdService;
 
-  public PageSize<TestCaseDTO> getTestCaseList(String serviceId, Integer page, Integer pageSize) {
+  public PageSize<TestCaseDto> getTestCaseList(String serviceId, Integer page, Integer pageSize) {
     IPage<TestCase> pageObj = page(new Page<>(page, pageSize),
         Wrappers.lambdaQuery(TestCase.class).eq(TestCase::getServiceId, serviceId));
 
     List<TestCase> records = pageObj.getRecords();
-    PageSize<TestCaseDTO> dtoPageSize = new PageSize<>();
+    PageSize<TestCaseDto> dtoPageSize = new PageSize<>();
     if (CollectionUtils.isEmpty(records)) {
       dtoPageSize.setTotal(0);
       return dtoPageSize;
@@ -39,12 +39,12 @@ public class TestCaseService extends ServiceImpl<TestCaseMapper, TestCase> {
     long total = pageObj.getTotal();
     dtoPageSize.setTotal(total);
     dtoPageSize.setData(
-        records.stream().map(TestCaseDTO::toTestCaseDTO).collect(Collectors.toList()));
+        records.stream().map(TestCaseDto::toTestCaseDTO).collect(Collectors.toList()));
     return dtoPageSize;
   }
 
-  public String createTestCase(TestCaseDTO testCaseDTO) {
-    TestCase testCase = TestCaseDTO.toTestCase(testCaseDTO);
+  public String createTestCase(TestCaseDto testCaseDTO) {
+    TestCase testCase = TestCaseDto.toTestCase(testCaseDTO);
     String testCaseId = uniqueIdService.getUniqueId();
     testCase.setTestCaseId(testCaseId);
     long dateNow = System.currentTimeMillis();
@@ -54,8 +54,8 @@ public class TestCaseService extends ServiceImpl<TestCaseMapper, TestCase> {
     return testCaseId;
   }
 
-  public Boolean updateTestCase(TestCaseDTO testCaseDTO) {
-    TestCase testCase = TestCaseDTO.toTestCase(testCaseDTO);
+  public Boolean updateTestCase(TestCaseDto testCaseDTO) {
+    TestCase testCase = TestCaseDto.toTestCase(testCaseDTO);
     long dateNow = System.currentTimeMillis();
     testCase.setUpdateTime(dateNow);
 
@@ -63,10 +63,10 @@ public class TestCaseService extends ServiceImpl<TestCaseMapper, TestCase> {
         .eq(TestCase::getTestCaseId, testCase.getTestCaseId()));
   }
 
-  public TestCaseDTO getTestCase(String caseId) {
+  public TestCaseDto getTestCase(String caseId) {
     TestCase testCase = getOne(Wrappers.lambdaQuery(TestCase.class)
         .eq(TestCase::getTestCaseId, caseId));
-    return TestCaseDTO.toTestCaseDTO(testCase);
+    return TestCaseDto.toTestCaseDTO(testCase);
   }
 
   public Boolean deleteTestCase(String caseId) {

@@ -49,7 +49,8 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
   @Override
   public void execute(FeatureParam featureParam) {
     String historyId = uniqueIdService.getUniqueId();
-    createFeatureHistory(featureParam.getFeatureId(), historyId, featureParam.getTaskId());
+    FeatureHistory featureHistory = saveFeatureHistory(featureParam.getFeatureId(), historyId,
+        featureParam.getTaskRecordId());
 
     CompletableFuture.runAsync(() -> {
       //1 根据用户的选择先排序执行点
@@ -59,6 +60,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
       AtomicInteger status = new AtomicInteger(ProcessStatus.SUCCESS.getType());
       for (ExecutePoint executePoint : executePoints) {
         ExecuteRecord executeRecord = new ExecuteRecord();
+        executeRecord.setHistoryId(historyId);
         try {
           //2 使用策略类执行用例
           List<FeatureResponse> responses = executeStrategyFactory.execute(executePoint,
@@ -77,25 +79,27 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
         }
 
         //3 保存执行点记录
-        saveRecord(historyId, executePoint, executeRecord);
+        saveRecord(featureParam.getMasterIp(), executePoint, executeRecord);
         if (Objects.equals(executeRecord.getStatus(), ProcessStatus.FAIL.getType())) {
           log.warn("execute feature error featureId= {}", executePoint.getFeatureId());
-          status.set(ProcessStatus.FAIL.getType());
+          status.set(executeRecord.getStatus());
           break;
         }
       }
 
+      featureHistory.setExecuteStatus(status.get());
       //4 更新整个用例执行结果
-      ResultEvent resultEvent = new ResultEvent().executeId(historyId)
+      ResultEvent resultEvent = new ResultEvent().executeId(featureParam.getTaskRecordId())
           .notifyType(NotifyType.UPDATE_FEATURE_HISTORY)
-          .status(ProcessStatus.exchange(status.get()));
+          .masterIP(featureParam.getMasterIp())
+          .status(ProcessStatus.exchange(status.get()))
+          .params(featureHistory);
       resultEventNotify.notifyEvent(resultEvent);
     }, executorService);
   }
 
-  private void saveRecord(String historyId, ExecutePoint executePoint,
+  private void saveRecord(String masterIp, ExecutePoint executePoint,
       ExecuteRecord executeRecord) {
-    executeRecord.setHistoryId(historyId);
     executeRecord.setExecutePointId(executePoint.getPointId());
     ExecutorUnit unit = JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit.class);
     executeRecord.setExecutePointName(unit.getName());
@@ -107,11 +111,12 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
 
     ResultEvent resultEvent = new ResultEvent().executeId(recordId)
         .notifyType(NotifyType.CREATE_EXECUTE_POINT_RECORD)
-        .status(ProcessStatus.RUNNING).params(executeRecord);
+        .masterIP(masterIp)
+        .status(ProcessStatus.exchange(executeRecord.getStatus())).params(executeRecord);
     resultEventNotify.notifyEvent(resultEvent);
   }
 
-  public void createFeatureHistory(String featureId, String historyId, String taskId) {
+  public FeatureHistory saveFeatureHistory(String featureId, String historyId, String taskId) {
     FeatureHistory featureHistory = new FeatureHistory();
     featureHistory.setFeatureId(featureId);
     featureHistory.setExecuteStatus(ProcessStatus.RUNNING.getType());
@@ -123,6 +128,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
         .notifyType(NotifyType.CREATE_FEATURE_HISTORY)
         .status(ProcessStatus.RUNNING).params(featureHistory);
     resultEventNotify.notifyEvent(resultEvent);
+    return featureHistory;
   }
 
   private FeatureResponse createFailResponse(ExecutePoint executePoint, Exception e) {

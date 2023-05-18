@@ -38,10 +38,10 @@ public class UpdateNodeRecordEvent implements INotifyEvent{
     NodeRecordDto nodeRecord = JSON.parseObject(string, NodeRecordDto.class);
     nodeRecord.setRecordId(resultEvent.getExecuteId());
     nodeRecord.setStatus(resultEvent.getStatus().getType());
+    boolean updateStatus = nodeRecordRepository.updateNodeRecord(nodeRecord);
 
     //单个节点状态变化要通知给执行者，然后执行一下节点的任务
     pipelineExecuteProxy.statusChange(nodeRecord);
-
-    return nodeRecordRepository.updateNodeRecord(nodeRecord);
+    return updateStatus;
   }
 }

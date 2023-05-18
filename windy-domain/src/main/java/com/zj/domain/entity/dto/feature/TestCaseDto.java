@@ -1,4 +1,4 @@
-package com.zj.feature.entity.dto;
+package com.zj.domain.entity.dto.feature;
 
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.po.feature.TestCase;
@@ -10,7 +10,7 @@ import lombok.Data;
  * @since 2022/12/12
  */
 @Data
-public class TestCaseDTO {
+public class TestCaseDto {
 
   /**
    * 测试用例集ID
@@ -41,14 +41,14 @@ public class TestCaseDTO {
 
   private Long updateTime;
 
-  public static TestCaseDTO toTestCaseDTO(TestCase testCase) {
+  public static TestCaseDto toTestCaseDTO(TestCase testCase) {
     if (Objects.isNull(testCase)) {
       return null;
     }
-    return OrikaUtil.convert(testCase, TestCaseDTO.class);
+    return OrikaUtil.convert(testCase, TestCaseDto.class);
   }
 
-  public static TestCase toTestCase(TestCaseDTO testCaseDTO) {
+  public static TestCase toTestCase(TestCaseDto testCaseDTO) {
     if (Objects.isNull(testCaseDTO)) {
       return null;
     }

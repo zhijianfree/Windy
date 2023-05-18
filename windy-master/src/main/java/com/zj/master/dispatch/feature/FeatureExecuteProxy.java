@@ -1,11 +1,15 @@
 package com.zj.master.dispatch.feature;
 
+import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.IpUtils;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
+import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
 import com.zj.domain.repository.feature.IExecutePointRepository;
+import com.zj.domain.repository.feature.IFeatureHistoryRepository;
 import com.zj.master.dispatch.ClientProxy;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,7 +37,14 @@ public class FeatureExecuteProxy {
   private ExecutorService executorService;
 
   @Autowired
+  private TaskEndProcessor taskEndProcessor;
+
+  @Autowired
   private IExecutePointRepository executePointRepository;
+
+  @Autowired
+  private IFeatureHistoryRepository featureHistoryRepository;
+
   public static final String TASK_FEATURE_TIPS = "no task need run";
   private final Map<String, FeatureTask> featureTaskMap = new ConcurrentHashMap<>();
 
@@ -42,6 +53,7 @@ public class FeatureExecuteProxy {
       LinkedBlockingQueue<String> featureIds = featureTask.getFeatureIds();
       String featureId = featureIds.poll();
       if (StringUtils.isBlank(featureId)) {
+        featureTaskMap.remove(featureTask.getTaskRecordId());
         return null;
       }
 
@@ -69,5 +81,23 @@ public class FeatureExecuteProxy {
         featureId);
     featureExecuteParam.setExecutePointList(executePoints);
     return featureExecuteParam;
+  }
+
+  public void featureStatusChange(String taskRecordId, FeatureHistoryDto history) {
+    ProcessStatus processStatus = ProcessStatus.exchange(history.getExecuteStatus());
+    if (processStatus.isFailStatus()){
+      featureHistoryRepository.updateStatus(history.getHistoryId(), processStatus.getType());
+    }
+
+    //每个用例执行完成之后都需要判断下是整个任务是否执行完成
+    taskEndProcessor.process(taskRecordId, processStatus);
+
+    FeatureTask featureTask = featureTaskMap.get(taskRecordId);
+    if (Objects.isNull(featureTask)) {
+      log.info("can not find feature task");
+      return;
+    }
+
+    execute(featureTask);
   }
 }

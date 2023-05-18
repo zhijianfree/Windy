@@ -8,6 +8,7 @@ import com.zj.domain.entity.po.feature.FeatureHistory;
 import com.zj.domain.mapper.feeature.FeatureHistoryMapper;
 import com.zj.domain.repository.feature.IExecuteRecordRepository;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
+import com.zj.domain.repository.feature.ITestCaseRepository;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +26,9 @@ import org.springframework.util.CollectionUtils;
 @Repository
 public class FeatureHistoryRepository extends
     ServiceImpl<FeatureHistoryMapper, FeatureHistory> implements IFeatureHistoryRepository {
+
+  @Autowired
+  private ITestCaseRepository testCaseRepository;
 
   @Autowired
   private IExecuteRecordRepository executeRecordRepository;
@@ -101,5 +105,12 @@ public class FeatureHistoryRepository extends
     featureHistory.setExecuteStatus(status);
     return update(featureHistory,
         Wrappers.lambdaUpdate(FeatureHistory.class).eq(FeatureHistory::getHistoryId, historyId));
+  }
+
+  @Override
+  public List<FeatureHistoryDto> getTaskRecordFeatures(String taskRecordId) {
+    List<FeatureHistory> histories = list(
+        Wrappers.lambdaQuery(FeatureHistory.class).eq(FeatureHistory::getRecordId, taskRecordId));
+    return OrikaUtil.convertList(histories, FeatureHistoryDto.class);
   }
 }

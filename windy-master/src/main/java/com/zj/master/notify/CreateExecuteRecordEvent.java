@@ -5,6 +5,7 @@ import com.zj.common.enums.NotifyType;
 import com.zj.common.model.ResultEvent;
 import com.zj.domain.entity.dto.feature.ExecuteRecordDto;
 import com.zj.domain.repository.feature.IExecuteRecordRepository;
+import com.zj.master.dispatch.feature.FeatureExecuteProxy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

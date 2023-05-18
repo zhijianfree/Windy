@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TaskDispatchService {
 
+  public static final String DISPATCH_TYPE_KEY = "dispatchType";
   private IFeatureExecutor featureExecutor;
   private ExecuteProxy executeProxy;
 
@@ -33,20 +34,20 @@ public class TaskDispatchService {
 
 
   public Boolean dispatch(JSONObject params) {
-    String dispatchType = params.getString("dispatchType");
+    String dispatchType = params.getString(DISPATCH_TYPE_KEY);
     Function<JSONObject, Boolean> func = funcMap.get(dispatchType);
     return func.apply(params);
   }
 
 
-  private boolean runFeature(JSONObject baseParam) {
-    FeatureParam featureParam = JSON.toJavaObject(baseParam, FeatureParam.class);
+  private boolean runFeature(JSONObject params) {
+    FeatureParam featureParam = JSON.toJavaObject(params, FeatureParam.class);
     featureExecutor.execute(featureParam);
     return true;
   }
 
-  private boolean runPipeline(JSONObject baseParam) {
-    TaskNode taskNode = JSON.toJavaObject(baseParam, TaskNode.class);
+  private boolean runPipeline(JSONObject params) {
+    TaskNode taskNode = JSON.toJavaObject(params, TaskNode.class);
     executeProxy.runNode(taskNode);
     return true;
   }

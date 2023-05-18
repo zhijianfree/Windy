@@ -16,7 +16,7 @@ import com.zj.feature.entity.dto.FeatureNodeDTO;
 import com.zj.common.model.PageSize;
 import com.zj.feature.entity.dto.TagFilterDto;
 import com.zj.feature.entity.dto.TestCaseConfigDTO;
-import com.zj.feature.entity.dto.TestCaseDTO;
+import com.zj.domain.entity.dto.feature.TestCaseDto;
 import com.zj.domain.entity.po.feature.ExecutePoint;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -175,7 +175,7 @@ public class FeatureService {
 
   @Transactional
   public Boolean copyFeatures(CopyFeatureDTO copyFeatureDTO) {
-    TestCaseDTO testCase = testCaseService.getTestCase(copyFeatureDTO.getTestCaseId());
+    TestCaseDto testCase = testCaseService.getTestCase(copyFeatureDTO.getTestCaseId());
     testCase.setTestCaseName(testCase.getTestCaseName() + COPY_STRING);
     String newCaseId = testCaseService.createTestCase(testCase);
     log.info("new caseId={} old case Id={}", newCaseId, copyFeatureDTO.getTestCaseId());

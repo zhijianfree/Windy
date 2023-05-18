@@ -23,10 +23,15 @@ public class FeatureParam {
   /**
    * 任务Id
    * */
-  String taskId;
+  String taskRecordId;
 
   /**
    * 用例执行上下文，也就是测试集或者任务的全局变量
    * */
   ExecuteContext executeContext;
+
+  /**
+   * 分配任务的masterIP
+   * */
+  private String masterIp;
 }

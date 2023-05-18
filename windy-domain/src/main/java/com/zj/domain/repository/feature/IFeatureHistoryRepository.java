@@ -20,4 +20,6 @@ public interface IFeatureHistoryRepository {
   boolean deleteByRecordId(String taskId);
 
   boolean updateStatus(String historyId, int status);
+
+  List<FeatureHistoryDto> getTaskRecordFeatures(String taskRecordId);
 }
