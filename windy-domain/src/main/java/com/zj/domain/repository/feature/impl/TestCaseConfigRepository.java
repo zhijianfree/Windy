@@ -24,4 +24,26 @@ public class TestCaseConfigRepository extends
         Wrappers.lambdaQuery(TestCaseConfig.class).eq(TestCaseConfig::getUnionId, caseId));
     return OrikaUtil.convertList(configs, TestCaseConfigDto.class);
   }
+
+  @Override
+  public boolean saveConfig(TestCaseConfigDto caseConfig) {
+    TestCaseConfig testCaseConfig = OrikaUtil.convert(caseConfig, TestCaseConfig.class);
+    long dateNow = System.currentTimeMillis();
+    testCaseConfig.setUpdateTime(dateNow);
+    testCaseConfig.setCreateTime(dateNow);
+    return save(testCaseConfig);
+  }
+
+  @Override
+  public boolean updateCaseConfig(TestCaseConfigDto configDto) {
+    TestCaseConfig testCaseConfig = OrikaUtil.convert(configDto, TestCaseConfig.class);
+    return update(testCaseConfig, Wrappers.lambdaUpdate(TestCaseConfig.class)
+        .eq(TestCaseConfig::getConfigId, configDto.getConfigId()));
+  }
+
+  @Override
+  public boolean deleteCaseConfig(String configId) {
+    return remove(
+        Wrappers.lambdaQuery(TestCaseConfig.class).eq(TestCaseConfig::getConfigId, configId));
+  }
 }

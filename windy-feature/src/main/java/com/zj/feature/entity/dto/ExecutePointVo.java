@@ -1,6 +1,7 @@
 package com.zj.feature.entity.dto;
 
 import com.alibaba.fastjson.JSON;
+import com.zj.domain.entity.dto.feature.ExecutePointDto;
 import com.zj.domain.entity.po.feature.ExecutePoint;
 import com.zj.feature.entity.vo.CompareDefine;
 import com.zj.feature.entity.vo.ExecutorUnit;
@@ -12,7 +13,7 @@ import javax.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class ExecutePointDto {
+public class ExecutePointVo {
 
     private String pointId;
 
@@ -35,8 +36,8 @@ public class ExecutePointDto {
     private Integer testStage;
     private Integer sortOrder;
 
-    public static ExecutePoint toExecutePoint(ExecutePointDto dto) {
-        ExecutePoint point = new ExecutePoint();
+    public static ExecutePointDto toExecutePoint(ExecutePointVo dto) {
+        ExecutePointDto point = new ExecutePointDto();
         point.setFeatureId(dto.getFeatureId());
         point.setPointId(dto.getPointId());
         point.setDescription(dto.getDescription());
@@ -49,8 +50,8 @@ public class ExecutePointDto {
         return point;
     }
 
-    public static ExecutePointDto toExecutePointDTO(ExecutePoint executePoint){
-        ExecutePointDto dto = new ExecutePointDto();
+    public static ExecutePointVo toExecutePointDTO(ExecutePointDto executePoint){
+        ExecutePointVo dto = new ExecutePointVo();
         dto.setDescription(executePoint.getDescription());
         dto.setPointId(executePoint.getPointId());
         dto.setExecuteType(executePoint.getExecuteType());

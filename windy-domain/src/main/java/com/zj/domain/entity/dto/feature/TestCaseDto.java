@@ -40,18 +40,4 @@ public class TestCaseDto {
   private Long createTime;
 
   private Long updateTime;
-
-  public static TestCaseDto toTestCaseDTO(TestCase testCase) {
-    if (Objects.isNull(testCase)) {
-      return null;
-    }
-    return OrikaUtil.convert(testCase, TestCaseDto.class);
-  }
-
-  public static TestCase toTestCase(TestCaseDto testCaseDTO) {
-    if (Objects.isNull(testCaseDTO)) {
-      return null;
-    }
-    return OrikaUtil.convert(testCaseDTO, TestCase.class);
-  }
 }

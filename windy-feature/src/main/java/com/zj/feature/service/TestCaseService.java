@@ -9,6 +9,7 @@ import com.zj.common.generate.UniqueIdService;
 import com.zj.domain.entity.dto.feature.TestCaseDto;
 import com.zj.domain.entity.po.feature.TestCase;
 import com.zj.domain.mapper.feeature.TestCaseMapper;
+import com.zj.domain.repository.feature.ITestCaseRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,16 +21,17 @@ import org.springframework.util.CollectionUtils;
  * @since 2022/12/12
  */
 @Service
-public class TestCaseService extends ServiceImpl<TestCaseMapper, TestCase> {
+public class TestCaseService {
 
   @Autowired
   private UniqueIdService uniqueIdService;
 
-  public PageSize<TestCaseDto> getTestCaseList(String serviceId, Integer page, Integer pageSize) {
-    IPage<TestCase> pageObj = page(new Page<>(page, pageSize),
-        Wrappers.lambdaQuery(TestCase.class).eq(TestCase::getServiceId, serviceId));
+  @Autowired
+  private ITestCaseRepository testCaseRepository;
 
-    List<TestCase> records = pageObj.getRecords();
+  public PageSize<TestCaseDto> getTestCaseList(String serviceId, Integer page, Integer pageSize) {
+    IPage<TestCaseDto> pageObj = testCaseRepository.getCasePage(serviceId, page, pageSize);
+    List<TestCaseDto> records = pageObj.getRecords();
     PageSize<TestCaseDto> dtoPageSize = new PageSize<>();
     if (CollectionUtils.isEmpty(records)) {
       dtoPageSize.setTotal(0);
@@ -38,39 +40,28 @@ public class TestCaseService extends ServiceImpl<TestCaseMapper, TestCase> {
 
     long total = pageObj.getTotal();
     dtoPageSize.setTotal(total);
-    dtoPageSize.setData(
-        records.stream().map(TestCaseDto::toTestCaseDTO).collect(Collectors.toList()));
+    dtoPageSize.setData(records);
     return dtoPageSize;
   }
 
-  public String createTestCase(TestCaseDto testCaseDTO) {
-    TestCase testCase = TestCaseDto.toTestCase(testCaseDTO);
+  public String createTestCase(TestCaseDto testCaseDto) {
     String testCaseId = uniqueIdService.getUniqueId();
-    testCase.setTestCaseId(testCaseId);
-    long dateNow = System.currentTimeMillis();
-    testCase.setCreateTime(dateNow);
-    testCase.setUpdateTime(dateNow);
-    save(testCase);
+    testCaseDto.setTestCaseId(testCaseId);
+    testCaseRepository.saveCase(testCaseDto);
     return testCaseId;
   }
 
-  public Boolean updateTestCase(TestCaseDto testCaseDTO) {
-    TestCase testCase = TestCaseDto.toTestCase(testCaseDTO);
+  public Boolean updateTestCase(TestCaseDto testCaseDto) {
     long dateNow = System.currentTimeMillis();
-    testCase.setUpdateTime(dateNow);
-
-    return update(testCase, Wrappers.lambdaUpdate(TestCase.class)
-        .eq(TestCase::getTestCaseId, testCase.getTestCaseId()));
+    testCaseDto.setUpdateTime(dateNow);
+    return testCaseRepository.updateCase(testCaseDto);
   }
 
   public TestCaseDto getTestCase(String caseId) {
-    TestCase testCase = getOne(Wrappers.lambdaQuery(TestCase.class)
-        .eq(TestCase::getTestCaseId, caseId));
-    return TestCaseDto.toTestCaseDTO(testCase);
+    return testCaseRepository.getTestCaseById(caseId);
   }
 
   public Boolean deleteTestCase(String caseId) {
-    return remove(Wrappers.lambdaQuery(TestCase.class)
-        .eq(TestCase::getTestCaseId, caseId));
+    return testCaseRepository.deleteTestCase(caseId);
   }
 }

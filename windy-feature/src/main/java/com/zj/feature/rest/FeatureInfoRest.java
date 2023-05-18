@@ -6,7 +6,7 @@ import com.zj.common.model.ResponseMeta;
 import com.zj.domain.entity.dto.feature.BatchDeleteDto;
 import com.zj.domain.entity.po.feature.FeatureInfo;
 import com.zj.feature.entity.dto.CopyFeatureDto;
-import com.zj.feature.entity.dto.FeatureInfoDto;
+import com.zj.feature.entity.dto.FeatureInfoVo;
 import com.zj.feature.entity.dto.FeatureNodeDto;
 import com.zj.feature.entity.dto.TagFilterDto;
 import com.zj.feature.service.FeatureService;
@@ -38,12 +38,12 @@ public class FeatureInfoRest {
   }
 
   @PostMapping("/feature")
-  public ResponseMeta<String> createFeature(@Valid @RequestBody FeatureInfoDto featureInfoDTO) {
+  public ResponseMeta<String> createFeature(@Valid @RequestBody FeatureInfoVo featureInfoDTO) {
     return new ResponseMeta(ErrorCode.SUCCESS, featureService.createFeature(featureInfoDTO));
   }
 
   @PutMapping("/feature")
-  public ResponseMeta<String> updateFeature(@Valid @RequestBody FeatureInfoDto featureInfoDTO) {
+  public ResponseMeta<String> updateFeature(@Valid @RequestBody FeatureInfoVo featureInfoDTO) {
     return new ResponseMeta(ErrorCode.SUCCESS, featureService.updateFeatureInfo(featureInfoDTO));
   }
 
@@ -58,8 +58,8 @@ public class FeatureInfoRest {
   }
 
   @GetMapping("/feature/{featureId}")
-  public ResponseMeta<FeatureInfoDto> queryFeature(@PathVariable("featureId") String featureId) {
-    return new ResponseMeta<FeatureInfoDto>(ErrorCode.SUCCESS,
+  public ResponseMeta<FeatureInfoVo> queryFeature(@PathVariable("featureId") String featureId) {
+    return new ResponseMeta<FeatureInfoVo>(ErrorCode.SUCCESS,
         featureService.getFeatureById(featureId));
   }
 

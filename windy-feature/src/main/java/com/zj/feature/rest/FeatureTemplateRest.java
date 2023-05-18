@@ -2,7 +2,7 @@ package com.zj.feature.rest;
 
 import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
-import com.zj.feature.entity.dto.ExecuteTemplateDto;
+import com.zj.feature.entity.dto.ExecuteTemplateVo;
 import com.zj.common.model.PageSize;
 import com.zj.feature.service.FeatureConfigService;
 import java.util.List;
@@ -27,40 +27,40 @@ public class FeatureTemplateRest {
 
   @ResponseBody
   @GetMapping("/templates/page")
-  public ResponseMeta<PageSize<ExecuteTemplateDto>> getFeaturePage(
+  public ResponseMeta<PageSize<ExecuteTemplateVo>> getFeaturePage(
       @RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "size", defaultValue = "10") Integer size,
       @RequestParam(value = "name", defaultValue = "") String name) {
-    PageSize<ExecuteTemplateDto> featureConfigs = featureConfigService.getFeaturePage(page, size, name);
+    PageSize<ExecuteTemplateVo> featureConfigs = featureConfigService.getFeaturePage(page, size, name);
     return new ResponseMeta(ErrorCode.SUCCESS, featureConfigs);
   }
 
   @ResponseBody
   @GetMapping("/templates")
-  public ResponseMeta<List<ExecuteTemplateDto>> getFeatureTemplates() {
-    List<ExecuteTemplateDto> featureConfigs = featureConfigService.getFeatureList();
+  public ResponseMeta<List<ExecuteTemplateVo>> getFeatureTemplates() {
+    List<ExecuteTemplateVo> featureConfigs = featureConfigService.getFeatureList();
     return new ResponseMeta(ErrorCode.SUCCESS, featureConfigs);
   }
 
   @ResponseBody
   @PostMapping("/template")
   public ResponseMeta<String> createFeatureTemplate(
-      @RequestBody ExecuteTemplateDto executeTemplate) {
+      @RequestBody ExecuteTemplateVo executeTemplate) {
     return new ResponseMeta<String>(ErrorCode.SUCCESS,
         featureConfigService.createTemplate(executeTemplate));
   }
 
   @ResponseBody
   @PutMapping("/template")
-  public ResponseMeta<String> updateFeatureTemplate(@RequestBody ExecuteTemplateDto executeTemplate) {
+  public ResponseMeta<String> updateFeatureTemplate(@RequestBody ExecuteTemplateVo executeTemplate) {
     return new ResponseMeta<String>(ErrorCode.SUCCESS,
         featureConfigService.updateTemplate(executeTemplate));
   }
 
   @ResponseBody
   @GetMapping("/template/{templateId}")
-  public ResponseMeta<ExecuteTemplateDto> getExecuteTemplate(
+  public ResponseMeta<ExecuteTemplateVo> getExecuteTemplate(
       @PathVariable("templateId") String templateId) {
-    ExecuteTemplateDto featureConfig = featureConfigService.getExecuteTemplate(templateId);
+    ExecuteTemplateVo featureConfig = featureConfigService.getExecuteTemplate(templateId);
     return new ResponseMeta(ErrorCode.SUCCESS, featureConfig);
   }
 

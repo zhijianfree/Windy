@@ -51,12 +51,4 @@ public class TestCaseConfigDto {
   private Long updateTime;
 
   private Long createTime;
-
-  public static TestCaseConfig toTestCaseConfig(TestCaseConfigDto configDTO) {
-    return OrikaUtil.convert(configDTO, TestCaseConfig.class);
-  }
-
-  public static TestCaseConfigDto toTestCaseConfigDTO(TestCaseConfig config) {
-    return OrikaUtil.convert(config, TestCaseConfigDto.class);
-  }
 }

@@ -5,7 +5,7 @@ import javax.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class FeatureInfoDto {
+public class FeatureInfoVo {
     private String featureId;
     @NotNull
     private String featureName;
@@ -18,6 +18,6 @@ public class FeatureInfoDto {
     private String testCaseId;
     private Long createTime;
     private Long updateTime;
-    private List<ExecutePointDto> testFeatures;
+    private List<ExecutePointVo> testFeatures;
 
 }

@@ -1,4 +1,4 @@
-package com.zj.feature.config;
+package com.zj.domain.config;
 
 import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.pagination.optimize.JsqlParserCountOptimize;

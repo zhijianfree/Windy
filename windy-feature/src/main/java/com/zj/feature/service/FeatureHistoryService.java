@@ -5,7 +5,7 @@ import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
-import com.zj.feature.entity.dto.FeatureInfoDto;
+import com.zj.feature.entity.dto.FeatureInfoVo;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +46,7 @@ public class FeatureHistoryService {
   }
 
   public void saveFeatureHistory(String featureId, String historyId, String recordId) {
-    FeatureInfoDto featureInfo = featureService.getFeatureById(featureId);
+    FeatureInfoVo featureInfo = featureService.getFeatureById(featureId);
     if (Objects.isNull(featureInfo)) {
       throw new ApiException(ErrorCode.FEATURE_NOT_FIND);
     }

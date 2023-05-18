@@ -1,4 +1,4 @@
-package com.zj.feature.entity.type;
+package com.zj.domain.entity.enums;
 
 public enum ExecutePointType {
   NORMAL(1, "普通用例"),

@@ -10,4 +10,10 @@ import java.util.List;
 public interface ITestCaseConfigRepository {
 
   List<TestCaseConfigDto> getCaseConfigs(String caseId);
+
+  boolean saveConfig(TestCaseConfigDto caseConfig);
+
+  boolean updateCaseConfig(TestCaseConfigDto configDto);
+
+  boolean deleteCaseConfig(String configId);
 }

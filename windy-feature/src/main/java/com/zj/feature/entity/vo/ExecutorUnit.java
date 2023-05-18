@@ -1,6 +1,6 @@
 package com.zj.feature.entity.vo;
 
-import com.zj.feature.entity.dto.ExecutePointDto;
+import com.zj.feature.entity.dto.ExecutePointVo;
 import com.zj.feature.entity.dto.ParamDefineDto;
 import java.util.List;
 import lombok.Data;
@@ -30,5 +30,5 @@ public class ExecutorUnit {
     /**
      * 针对for循环的需要特殊处理
      * */
-    private List<ExecutePointDto> executePoints;
+    private List<ExecutePointVo> executePoints;
 }

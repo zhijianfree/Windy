@@ -25,7 +25,7 @@ public class FeatureNodeDto {
   private String testCaseId;
   private Long createTime;
   private Long updateTime;
-  private List<ExecutePointDto> testFeatures;
+  private List<ExecutePointVo> testFeatures;
   private List<FeatureNodeDto> children;
 
   public static FeatureNodeDto toNode(FeatureInfoDto featureInfo) {
