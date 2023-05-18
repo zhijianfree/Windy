@@ -1,12 +1,18 @@
 package com.zj.master.dispatch.pipeline;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.eventbus.Subscribe;
+import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.IpUtils;
 import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.entity.po.pipeline.NodeRecord;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
+import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import com.zj.master.dispatch.ClientProxy;
+import com.zj.master.dispatch.listener.IInnerEventListener;
+import com.zj.master.dispatch.listener.InnerEvent;
+import com.zj.common.model.StopDispatch;
 import com.zj.master.entity.vo.TaskNode;
 import java.util.Map;
 import java.util.Objects;
@@ -26,7 +32,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class PipelineExecuteProxy {
+public class PipelineExecuteProxy implements IInnerEventListener {
 
   public static final String TASK_DONE_TIPS = "no task need run";
   public static final String DISPATCH_PIPELINE_TYPE = "PIPELINE";
@@ -38,6 +44,9 @@ public class PipelineExecuteProxy {
   private ExecutorService executorService;
   @Autowired
   private INodeRecordRepository nodeRecordRepository;
+
+  @Autowired
+  private IPipelineHistoryRepository pipelineHistoryRepository;
 
   @Autowired
   private PipelineEndProcessor pipelineEndProcessor;
@@ -55,14 +64,14 @@ public class PipelineExecuteProxy {
 
       taskNode.setDispatchType(DISPATCH_PIPELINE_TYPE);
       taskNode.setMasterIp(IpUtils.getLocalIP());
-      clientProxy.sendPipelineNodeTask(taskNode);
+      clientProxy.sendDispatchTask(taskNode);
 
       pipelineTaskMap.put(pipelineTask.getHistoryId(), pipelineTask);
       return taskNode;
     }, executorService).whenComplete((node, e) -> {
       String recordId = Optional.ofNullable(node).map(TaskNode::getRecordId).orElse(TASK_DONE_TIPS);
       log.info("complete trigger action recordId = {}", recordId);
-    }).exceptionally((e) ->{
+    }).exceptionally((e) -> {
       log.error("handle task error", e);
       return null;
     });
@@ -92,5 +101,29 @@ public class PipelineExecuteProxy {
 
     //3.1 继续递归执行下一个任务
     runTask(pipelineTask);
+  }
+
+  @Override
+  @Subscribe
+  public void handle(InnerEvent event) {
+    if (!Objects.equals(event.getLogType().getType(), LogType.PIPELINE.getType())) {
+      return;
+    }
+
+    PipelineTask pipelineTask = pipelineTaskMap.remove(event.getTargetId());
+    if (Objects.isNull(pipelineTask)) {
+      log.info("remove pipeline task but not find it ={}", event.getTargetId());
+      return;
+    }
+
+    //只有流水线的执行才需要通知到client
+    StopDispatch stopDispatch = new StopDispatch();
+    stopDispatch.setLogType(event.getLogType());
+    stopDispatch.setTargetId(event.getTargetId());
+    clientProxy.stopDispatchTask(stopDispatch);
+    log.info("stop pipeline task pipelineId={} historyId={}", pipelineTask.getPipelineId(),
+        pipelineTask.getHistoryId());
+
+    pipelineHistoryRepository.updateStatus(event.getTargetId(), ProcessStatus.STOP);
   }
 }

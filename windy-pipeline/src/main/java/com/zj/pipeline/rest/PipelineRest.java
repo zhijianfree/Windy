@@ -61,8 +61,8 @@ public class PipelineRest {
 
   @ResponseBody
   @PostMapping("/{pipelineId}")
-  public ResponseMeta<String> execute(@PathVariable("pipelineId") String pipelineId) {
-    return new ResponseMeta<String>(ErrorCode.SUCCESS, pipelineService.execute(pipelineId));
+  public ResponseMeta<Boolean> execute(@PathVariable("pipelineId") String pipelineId) {
+    return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, pipelineService.execute(pipelineId));
   }
 
   @ResponseBody

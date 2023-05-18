@@ -7,12 +7,11 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.BatchDeleteDto;
-import com.zj.domain.entity.dto.feature.FeatureInfoDto;
 import com.zj.domain.repository.feature.IFeatureRepository;
-import com.zj.feature.entity.dto.CopyFeatureDTO;
-import com.zj.feature.entity.dto.ExecutePointDTO;
-import com.zj.feature.entity.dto.FeatureInfoDTO;
-import com.zj.feature.entity.dto.FeatureNodeDTO;
+import com.zj.feature.entity.dto.CopyFeatureDto;
+import com.zj.feature.entity.dto.ExecutePointDto;
+import com.zj.feature.entity.dto.FeatureInfoDto;
+import com.zj.feature.entity.dto.FeatureNodeDto;
 import com.zj.common.model.PageSize;
 import com.zj.feature.entity.dto.TagFilterDto;
 import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
@@ -56,9 +55,9 @@ public class FeatureService {
   @Autowired
   private IFeatureRepository featureRepository;
 
-  public List<FeatureNodeDTO> getFeatureTreeList(String testCaseId) {
-    List<FeatureInfoDto> featureList = featureRepository.queryFeatureList(testCaseId);
-    FeatureNodeDTO root = new FeatureNodeDTO();
+  public List<FeatureNodeDto> getFeatureTreeList(String testCaseId) {
+    List<com.zj.domain.entity.dto.feature.FeatureInfoDto> featureList = featureRepository.queryFeatureList(testCaseId);
+    FeatureNodeDto root = new FeatureNodeDto();
     root = convertTree(featureList, root);
     return root.getChildren();
   }
@@ -66,14 +65,14 @@ public class FeatureService {
   /**
    * 递归转为tree结构
    */
-  public FeatureNodeDTO convertTree(List<FeatureInfoDto> featureList, FeatureNodeDTO parent) {
+  public FeatureNodeDto convertTree(List<com.zj.domain.entity.dto.feature.FeatureInfoDto> featureList, FeatureNodeDto parent) {
     if (CollectionUtils.isEmpty(featureList)) {
       return parent;
     }
 
-    List<FeatureNodeDTO> list = featureList.stream()
+    List<FeatureNodeDto> list = featureList.stream()
         .filter(feature -> Objects.equals(feature.getParentId(), parent.getFeatureId()))
-        .map(FeatureNodeDTO::toNode)
+        .map(FeatureNodeDto::toNode)
         .collect(Collectors.toList());
     parent.setChildren(list);
 
@@ -85,40 +84,40 @@ public class FeatureService {
     return parent;
   }
 
-  public boolean updateByFeatureId(FeatureInfoDto featureInfo) {
+  public boolean updateByFeatureId(com.zj.domain.entity.dto.feature.FeatureInfoDto featureInfo) {
     return featureRepository.deleteByFeatureId(featureInfo.getFeatureId());
   }
 
-  public FeatureInfoDTO getFeatureById(String featureId) {
-    FeatureInfoDto featureInfo = featureRepository.getFeatureById(featureId);
+  public FeatureInfoDto getFeatureById(String featureId) {
+    com.zj.domain.entity.dto.feature.FeatureInfoDto featureInfo = featureRepository.getFeatureById(featureId);
     if (Objects.isNull(featureInfo)) {
       throw new ApiException(ErrorCode.FEATURE_NOT_FIND);
     }
-    FeatureInfoDTO featureInfoDTO = OrikaUtil.convert(featureInfo, FeatureInfoDTO.class);
+    FeatureInfoDto featureInfoDTO = OrikaUtil.convert(featureInfo, FeatureInfoDto.class);
     List<String> featureTags = featureTagService.getFeatureTags(featureId);
     featureInfoDTO.setTags(featureTags);
     return featureInfoDTO;
   }
 
-  public PageSize<FeatureInfoDto> queryFeaturePage(String testCaseId, int page, int size) {
-    IPage<FeatureInfoDto> featurePage = featureRepository.queryFeaturePage(testCaseId, page, size);
-    PageSize<FeatureInfoDto> detailPageSize = new PageSize<>();
+  public PageSize<com.zj.domain.entity.dto.feature.FeatureInfoDto> queryFeaturePage(String testCaseId, int page, int size) {
+    IPage<com.zj.domain.entity.dto.feature.FeatureInfoDto> featurePage = featureRepository.queryFeaturePage(testCaseId, page, size);
+    PageSize<com.zj.domain.entity.dto.feature.FeatureInfoDto> detailPageSize = new PageSize<>();
     detailPageSize.setTotal(featurePage.getTotal());
     detailPageSize.setData(featurePage.getRecords());
     return detailPageSize;
   }
 
-  public List<FeatureInfoDto> queryFeatureList(String testCaseId) {
+  public List<com.zj.domain.entity.dto.feature.FeatureInfoDto> queryFeatureList(String testCaseId) {
     return featureRepository.queryFeatureList(testCaseId);
   }
 
-  public List<FeatureInfoDto> queryNotContainFolder(String testCaseId) {
+  public List<com.zj.domain.entity.dto.feature.FeatureInfoDto> queryNotContainFolder(String testCaseId) {
     return featureRepository.queryNotContainFolder(testCaseId);
   }
 
   @Transactional
-  public String createFeature(FeatureInfoDTO featureInfoDTO) {
-    FeatureInfoDto featureInfo = OrikaUtil.convert(featureInfoDTO, FeatureInfoDto.class);
+  public String createFeature(FeatureInfoDto featureInfoDTO) {
+    com.zj.domain.entity.dto.feature.FeatureInfoDto featureInfo = OrikaUtil.convert(featureInfoDTO, com.zj.domain.entity.dto.feature.FeatureInfoDto.class);
     featureInfo.setFeatureId(uniqueIdService.getUniqueId());
     boolean result = featureRepository.createFeature(featureInfo);
 
@@ -131,15 +130,15 @@ public class FeatureService {
   }
 
   @Transactional
-  public String updateFeatureInfo(FeatureInfoDTO featureInfoDTO) {
+  public String updateFeatureInfo(FeatureInfoDto featureInfoDTO) {
     if (Objects.isNull(getFeatureById(featureInfoDTO.getFeatureId()))) {
       throw new ApiException(ErrorCode.FEATURE_NOT_FIND);
     }
 
-    FeatureInfoDto featureInfo = OrikaUtil.convert(featureInfoDTO, FeatureInfoDto.class);
+    com.zj.domain.entity.dto.feature.FeatureInfoDto featureInfo = OrikaUtil.convert(featureInfoDTO, com.zj.domain.entity.dto.feature.FeatureInfoDto.class);
     boolean result = featureRepository.updateFeatureInfo(featureInfo);
 
-    List<ExecutePointDTO> executePoints = featureInfoDTO.getTestFeatures();
+    List<ExecutePointDto> executePoints = featureInfoDTO.getTestFeatures();
     if (!CollectionUtils.isEmpty(executePoints)) {
       int featureResult = updateExecutePoint(executePoints);
       if (featureResult < 1) {
@@ -155,13 +154,13 @@ public class FeatureService {
     return featureInfo.getFeatureId();
   }
 
-  private int updateExecutePoint(List<ExecutePointDTO> executePointDTOS) {
+  private int updateExecutePoint(List<ExecutePointDto> executePointDtos) {
     int result = 0;
-    if (CollectionUtils.isEmpty(executePointDTOS)) {
+    if (CollectionUtils.isEmpty(executePointDtos)) {
       return result;
     }
 
-    return executePointDTOS.stream().mapToInt(executePointDTO -> {
+    return executePointDtos.stream().mapToInt(executePointDTO -> {
       if (Objects.isNull(executePointDTO.getPointId())) {
         executePointDTO.setPointId(uniqueIdService.getUniqueId());
         String pointId = executePointService.createExecutePoint(executePointDTO);
@@ -174,20 +173,20 @@ public class FeatureService {
   }
 
   @Transactional
-  public Boolean copyFeatures(CopyFeatureDTO copyFeatureDTO) {
+  public Boolean copyFeatures(CopyFeatureDto copyFeatureDTO) {
     TestCaseDto testCase = testCaseService.getTestCase(copyFeatureDTO.getTestCaseId());
     testCase.setTestCaseName(testCase.getTestCaseName() + COPY_STRING);
     String newCaseId = testCaseService.createTestCase(testCase);
     log.info("new caseId={} old case Id={}", newCaseId, copyFeatureDTO.getTestCaseId());
 
-    List<FeatureInfoDto> featureList = featureRepository.queryFeatureList(
+    List<com.zj.domain.entity.dto.feature.FeatureInfoDto> featureList = featureRepository.queryFeatureList(
         copyFeatureDTO.getFeatureIds());
     log.info("get feature list ={}", JSON.toJSONString(featureList));
 
     //1 先复制用例
     Long currentTime = System.currentTimeMillis();
     Map<String, String> idRecordMap = new HashMap<>();
-    List<FeatureInfoDto> newList = featureList.stream().peek(feature -> {
+    List<com.zj.domain.entity.dto.feature.FeatureInfoDto> newList = featureList.stream().peek(feature -> {
       String uniqueId = uniqueIdService.getUniqueId();
       idRecordMap.put(feature.getFeatureId(), uniqueId);
       feature.setFeatureId(uniqueId);
@@ -237,7 +236,7 @@ public class FeatureService {
 
   @Transactional
   public boolean deleteByFeatureId(String featureId) {
-    List<FeatureInfoDto> subFeatures = featureRepository.getSubFeatures(featureId);
+    List<com.zj.domain.entity.dto.feature.FeatureInfoDto> subFeatures = featureRepository.getSubFeatures(featureId);
     if (!CollectionUtils.isEmpty(subFeatures)) {
       throw new ApiException(ErrorCode.SUB_FEATURE_EXIST);
     }
@@ -249,15 +248,15 @@ public class FeatureService {
     return featureRepository.batchDeleteByFeatureId(batchDeleteDto);
   }
 
-  public List<FeatureNodeDTO> filterFeaturesByTag(TagFilterDto tagFilterDTO) {
-    List<FeatureInfoDto> featuresByTag = getFeaturesByTag(tagFilterDTO);
-    FeatureNodeDTO featureNode = new FeatureNodeDTO();
+  public List<FeatureNodeDto> filterFeaturesByTag(TagFilterDto tagFilterDTO) {
+    List<com.zj.domain.entity.dto.feature.FeatureInfoDto> featuresByTag = getFeaturesByTag(tagFilterDTO);
+    FeatureNodeDto featureNode = new FeatureNodeDto();
     featureNode = convertTree(featuresByTag, featureNode);
     return featureNode.getChildren();
   }
 
-  public List<FeatureInfoDto> getFeaturesByTag(TagFilterDto filterDto) {
-    List<FeatureInfoDto> featureList = featureRepository.queryFeatureList(
+  public List<com.zj.domain.entity.dto.feature.FeatureInfoDto> getFeaturesByTag(TagFilterDto filterDto) {
+    List<com.zj.domain.entity.dto.feature.FeatureInfoDto> featureList = featureRepository.queryFeatureList(
         filterDto.getTestCaseId());
     if (CollectionUtils.isEmpty(featureList)) {
       return Collections.emptyList();
@@ -270,5 +269,10 @@ public class FeatureService {
 
     return featureList.stream().filter(feature -> featuresTags.contains(feature.getFeatureId()))
         .collect(Collectors.toList());
+  }
+
+  public Boolean executeFeature(String featureId) {
+    //todo 单个任务执行
+    return null;
   }
 }

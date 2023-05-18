@@ -6,7 +6,7 @@ import com.zj.common.generate.UniqueIdService;
 import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDTO;
 import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
-import com.zj.domain.entity.dto.pipeline.PipelineNodeDTO;
+import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
 import com.zj.domain.repository.pipeline.IPipelineActionRepository;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import com.zj.domain.repository.pipeline.IPipelineNodeRepository;
@@ -70,7 +70,7 @@ public class PipelineDispatch implements IDispatchExecutor {
       return false;
     }
 
-    List<PipelineNodeDTO> pipelineNodes = pipelineNodeRepository.getPipelineNodes(
+    List<PipelineNodeDto> pipelineNodes = pipelineNodeRepository.getPipelineNodes(
         pipeline.getPipelineId());
     if (CollectionUtils.isEmpty(pipelineNodes)) {
       log.info("can not find pipeline nodes name={} pipelineId={}", task.getSourceName(),
@@ -108,7 +108,7 @@ public class PipelineDispatch implements IDispatchExecutor {
   }
 
 
-  private TaskNode buildTaskNode(PipelineNodeDTO pipelineNode, String historyId) {
+  private TaskNode buildTaskNode(PipelineNodeDto pipelineNode, String historyId) {
     log.info("start build taskNode ={}", JSON.toJSONString(pipelineNode));
     TaskNode taskNode = new TaskNode();
     taskNode.setNodeId(pipelineNode.getNodeId());

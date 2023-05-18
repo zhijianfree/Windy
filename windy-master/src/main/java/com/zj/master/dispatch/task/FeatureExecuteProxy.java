@@ -1,12 +1,18 @@
 package com.zj.master.dispatch.task;
 
+import com.google.common.eventbus.Subscribe;
+import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.IpUtils;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
 import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
 import com.zj.domain.repository.feature.IExecutePointRepository;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
+import com.zj.domain.repository.feature.ITaskRecordRepository;
 import com.zj.master.dispatch.ClientProxy;
+import com.zj.master.dispatch.listener.IInnerEventListener;
+import com.zj.master.dispatch.listener.InnerEvent;
+import com.zj.common.model.StopDispatch;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,7 +33,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class FeatureExecuteProxy {
+public class FeatureExecuteProxy implements IInnerEventListener {
 
   public static final String DISPATCH_FEATURE_TYPE = "FEATURE";
   @Autowired
@@ -41,6 +47,9 @@ public class FeatureExecuteProxy {
 
   @Autowired
   private IExecutePointRepository executePointRepository;
+
+  @Autowired
+  private ITaskRecordRepository taskRecordRepository;
 
   @Autowired
   private IFeatureHistoryRepository featureHistoryRepository;
@@ -60,7 +69,7 @@ public class FeatureExecuteProxy {
       FeatureExecuteParam featureExecuteParam = getFeatureExecuteParam(featureTask, featureId);
       featureExecuteParam.setDispatchType(DISPATCH_FEATURE_TYPE);
       featureExecuteParam.setMasterIp(IpUtils.getLocalIP());
-      clientProxy.sendPipelineNodeTask(featureExecuteParam);
+      clientProxy.sendDispatchTask(featureExecuteParam);
       featureTaskMap.put(featureTask.getTaskRecordId(), featureTask);
       return featureId;
     }, executorService).whenComplete((featureId, e) -> {
@@ -101,5 +110,24 @@ public class FeatureExecuteProxy {
       log.info("feature task start cycle run");
       execute(featureTask);
     }
+  }
+
+  @Override
+  @Subscribe
+  public void handle(InnerEvent event) {
+    if (!Objects.equals(event.getLogType().getType(), LogType.FEATURE_TASK.getType())) {
+      return;
+    }
+
+    FeatureTask featureTask = featureTaskMap.remove(event.getTargetId());
+    if (Objects.isNull(featureTask)) {
+      log.info("remove feature task but not find it ={}", event.getTargetId());
+      return;
+    }
+
+
+    log.info("stop pipeline task taskId={} taskRecordId={}", featureTask.getTaskId(),
+        featureTask.getTaskRecordId());
+    taskRecordRepository.updateRecordStatus(event.getTargetId(), ProcessStatus.STOP.getType());
   }
 }

@@ -6,6 +6,7 @@ import com.zj.master.entity.dto.TaskDetailDto;
 import com.zj.master.service.TaskLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,5 +25,10 @@ public class TaskLogRest {
   @PostMapping("/task")
   private ResponseMeta<Boolean> createTask(@RequestBody TaskDetailDto taskDetailDto) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, taskLogService.createTask(taskDetailDto));
+  }
+
+  @PutMapping("/stop")
+  private ResponseMeta<Boolean> stopTask(@RequestBody TaskDetailDto taskDetailDto) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, taskLogService.pauseTask(taskDetailDto));
   }
 }

@@ -2,7 +2,7 @@ package com.zj.feature.rest;
 
 import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
-import com.zj.feature.entity.dto.HistoryNodeDTO;
+import com.zj.feature.entity.dto.HistoryNodeDto;
 import com.zj.common.model.PageSize;
 import com.zj.domain.entity.dto.feature.TaskRecordDto;
 import com.zj.feature.service.TaskRecordService;
@@ -37,7 +37,7 @@ public class TaskRecordRest {
   }
 
   @GetMapping("/task/record/{recordId}/history")
-  public ResponseMeta<List<HistoryNodeDTO>> getTaskResult(
+  public ResponseMeta<List<HistoryNodeDto>> getTaskResult(
       @PathVariable("recordId") String recordId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, taskRecordService.getTaskResult(recordId));
   }

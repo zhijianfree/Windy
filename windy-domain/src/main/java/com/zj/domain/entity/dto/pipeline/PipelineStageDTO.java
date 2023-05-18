@@ -26,6 +26,6 @@ public class PipelineStageDTO {
   private String configId;
 
   @NotEmpty
-  private List<PipelineNodeDTO> nodes;
+  private List<PipelineNodeDto> nodes;
 
 }

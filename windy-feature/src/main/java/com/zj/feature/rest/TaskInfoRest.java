@@ -65,9 +65,8 @@ public class TaskInfoRest {
   }
 
   @PostMapping("/task/{taskId}")
-  public ResponseMeta<String> startTask(@PathVariable("taskId") String taskId) {
-    String recordId = taskInfoService.startTask(taskId);
-    return new ResponseMeta<>(ErrorCode.SUCCESS, recordId);
+  public ResponseMeta<Boolean> startTask(@PathVariable("taskId") String taskId) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, taskInfoService.startTask(taskId));
   }
 
   @GetMapping("/task/{taskId}/status")

@@ -6,7 +6,11 @@ import com.zj.client.entity.enuns.DispatchType;
 import com.zj.client.feature.executor.IFeatureExecutor;
 import com.zj.client.feature.executor.vo.FeatureParam;
 import com.zj.client.pipeline.executer.ExecuteProxy;
+import com.zj.client.pipeline.executer.notify.PipelineEventFactory;
+import com.zj.client.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.client.pipeline.executer.vo.TaskNode;
+import com.zj.common.enums.ProcessStatus;
+import com.zj.common.model.StopDispatch;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -52,4 +56,14 @@ public class TaskDispatchService {
     return true;
   }
 
+  public Boolean stopDispatch(StopDispatch stopDispatch) {
+    TaskNode taskNode = new TaskNode();
+    taskNode.setHistoryId(stopDispatch.getTargetId());
+    PipelineStatusEvent event = PipelineStatusEvent.builder()
+        .processStatus(ProcessStatus.STOP)
+        .taskNode(taskNode).build();
+
+    PipelineEventFactory.sendNotifyEvent(event);
+    return true;
+  }
 }

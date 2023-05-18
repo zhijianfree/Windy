@@ -1,35 +1,29 @@
 package com.zj.feature.service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.netflix.discovery.shared.Application;
-import com.netflix.eureka.EurekaServerContextHolder;
 import com.zj.common.enums.LogType;
-import com.zj.common.model.PageSize;
-import com.zj.common.model.ResponseStatusModel;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
+import com.zj.common.model.DispatchModel;
+import com.zj.common.model.PageSize;
+import com.zj.common.model.ResponseStatusModel;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
-import com.zj.domain.entity.dto.feature.FeatureInfoDto;
 import com.zj.domain.entity.dto.feature.TaskInfoDto;
-import com.zj.domain.repository.feature.ITaskRepository;
 import com.zj.domain.entity.dto.feature.TaskRecordDto;
 import com.zj.domain.entity.po.feature.TaskInfo;
-import com.zj.domain.entity.po.feature.TaskRecord;
-import com.zj.feature.entity.vo.FeatureConstant;
-import com.zj.feature.executor.IFeatureExecutor;
+import com.zj.domain.repository.feature.ITaskRepository;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -44,11 +38,7 @@ import org.springframework.web.client.RestTemplate;
 public class TaskInfoService {
 
   public static final String FORMAT_TIPS = "任务执行状态: 成功数: %s 成功率百分比: %s";
-  @Autowired
-  private FeatureService featureService;
-
-  @Autowired
-  private IFeatureExecutor IFeatureExecutor;
+  public static final String WINDY_MASTER_DISPATCH_URL = "http://WindyMaster/v1/devops/dispatch/task";
 
   @Autowired
   private TaskRecordService taskRecordService;
@@ -57,13 +47,13 @@ public class TaskInfoService {
   private FeatureHistoryService featureHistoryService;
 
   @Autowired
-  private ICacheService cacheService;
-
-  @Autowired
   private UniqueIdService uniqueIdService;
 
   @Autowired
   private ITaskRepository taskRepository;
+
+  @Autowired
+  private RestTemplate restTemplate;
 
   public PageSize<TaskInfoDto> getTaskList(String name, Integer pageNum, Integer size) {
     IPage<TaskInfo> taskInfoIPage = taskRepository.getTaskList(name, pageNum, size);
@@ -78,7 +68,6 @@ public class TaskInfoService {
       TaskInfoDto taskInfoDTO = OrikaUtil.convert(task, TaskInfoDto.class);
       boolean isRunning = isTaskRunning(taskInfoDTO);
       taskInfoDTO.setIsRunning(isRunning);
-
       return taskInfoDTO;
     }).collect(Collectors.toList());
     pageSize.setData(dtoList);
@@ -86,17 +75,14 @@ public class TaskInfoService {
   }
 
   private boolean isTaskRunning(TaskInfoDto taskInfoDTO) {
-    List<TaskRecordDto> taskRecords = taskRecordService.getTaskRecordsByTaskId(taskInfoDTO.getTaskId());
+    List<TaskRecordDto> taskRecords = taskRecordService.getTaskRecordsByTaskId(
+        taskInfoDTO.getTaskId());
     if (CollectionUtils.isEmpty(taskRecords)) {
       return false;
     }
 
-    return taskRecords.stream().anyMatch(record -> {
-      String cache = cacheService.getCache(
-          FeatureConstant.RECORD_STATUS_CACHE_KEY + record.getRecordId());
-      return StringUtils.isNoneBlank(cache) || Objects.equals(record.getStatus(),
-          ProcessStatus.RUNNING.getType());
-    });
+    return taskRecords.stream()
+        .anyMatch(record -> Objects.equals(ProcessStatus.RUNNING.getType(), record.getStatus()));
   }
 
   public Boolean createTask(TaskInfoDto taskInfoDTO) {
@@ -117,75 +103,31 @@ public class TaskInfoService {
     return taskRepository.getTaskDetail(taskId);
   }
 
-  @Autowired
-  private DiscoveryClient discoveryClient;
-
-  @Autowired
-  private RestTemplate restTemplate;
-
-  public String startTask(String taskId) {
+  public Boolean startTask(String taskId) {
     TaskInfoDto taskDetail = getTaskDetail(taskId);
     if (Objects.isNull(taskDetail)) {
       log.info("can not find task={}", taskId);
-      return null;
+      return false;
     }
 
-    if (true){
-      List<Application> applications = EurekaServerContextHolder.getInstance()
-          .getServerContext().getRegistry().getSortedApplications();
-      log.info("get service applications ={}",JSON.toJSONString(applications));
-      List<String> services = discoveryClient.getServices();
-      log.info("get service list ={}", JSON.toJSONString(services));
-      String url = "http://WindyMaster/v1/devops/dispatch/task";
-      JSONObject jsonObject = new JSONObject();
-      jsonObject.put("sourceId", taskId);
-      jsonObject.put("sourceName", taskDetail.getTaskName());
-      jsonObject.put("type", LogType.FEATURE_TASK.getType());
-      ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, jsonObject,
-          String.class);
+    DispatchModel dispatchModel = new DispatchModel();
+    dispatchModel.setType(LogType.FEATURE_TASK.getType());
+    dispatchModel.setSourceId(taskId);
+    dispatchModel.setSourceName(taskDetail.getTaskName());
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<DispatchModel> httpEntity = new HttpEntity<>(dispatchModel, headers);
+    try{
+      ResponseEntity<String> responseEntity = restTemplate.postForEntity(WINDY_MASTER_DISPATCH_URL,
+          httpEntity, String.class);
       log.info("get test result code= {} result={}", responseEntity.getStatusCode(),
           responseEntity.getBody());
-      return "11";
+      return responseEntity.getStatusCode().is2xxSuccessful();
+    }catch (Exception e){
+      log.error("request dispatch task error", e);
     }
-
-    String testCaseId = taskDetail.getTestCaseId();
-    List<FeatureInfoDto> featureList = featureService.queryNotContainFolder(testCaseId);
-    if (CollectionUtils.isEmpty(featureList)) {
-      log.info("can not find feature list by testCaseId={}", testCaseId);
-      return null;
-    }
-    TaskRecordDto taskRecordDTO = buildTaskRecordDTO(taskDetail);
-    taskRecordService.insert(taskRecordDTO);
-
-    saveCache(featureList, taskRecordDTO);
-
-    List<String> featureIds = featureList.stream().map(FeatureInfoDto::getFeatureId)
-        .collect(Collectors.toList());
-    IFeatureExecutor.batchRunTask(featureIds, taskRecordDTO);
-    return taskRecordDTO.getRecordId();
-  }
-
-  private void saveCache(List<FeatureInfoDto> featureList, TaskRecordDto taskRecordDTO) {
-    Map<String, Integer> map = featureList.stream().collect(
-        Collectors.toMap(FeatureInfoDto::getFeatureId,
-            feature -> ProcessStatus.RUNNING.getType()));
-    String recordId = FeatureConstant.RECORD_STATUS_CACHE_KEY + taskRecordDTO.getRecordId();
-    cacheService.setCache(recordId, JSON.toJSONString(map));
-  }
-
-  private TaskRecordDto buildTaskRecordDTO(TaskInfoDto taskDetail) {
-    TaskRecordDto taskRecordDTO = new TaskRecordDto();
-    taskRecordDTO.setTaskConfig(taskDetail.getTaskConfig());
-    taskRecordDTO.setTaskName(taskDetail.getTaskName());
-    taskRecordDTO.setTaskId(taskDetail.getTaskId());
-    taskRecordDTO.setRecordId(uniqueIdService.getUniqueId());
-    taskRecordDTO.setUserId("admin");
-    taskRecordDTO.setStatus(ProcessStatus.RUNNING.getType());
-    taskRecordDTO.setMachines(taskDetail.getMachines());
-    taskRecordDTO.setTestCaseId(taskDetail.getTestCaseId());
-    taskRecordDTO.setCreateTime(System.currentTimeMillis());
-    taskRecordDTO.setUpdateTime(System.currentTimeMillis());
-    return taskRecordDTO;
+    return false;
   }
 
   public ResponseStatusModel getTaskStatus(String taskId) {
@@ -202,10 +144,10 @@ public class TaskInfoService {
         .count();
 
     JSONObject jsonObject = new JSONObject();
-    Float percent = (successCount * 1F/ histories.size()) * 100;
+    Float percent = (successCount * 1F / histories.size()) * 100;
     jsonObject.put("percent", percent.intValue());
     responseStatusModel.setData(jsonObject);
-    String msg = String.format(FORMAT_TIPS, successCount,percent);
+    String msg = String.format(FORMAT_TIPS, successCount, percent);
     responseStatusModel.setMessage(msg);
     return responseStatusModel;
   }

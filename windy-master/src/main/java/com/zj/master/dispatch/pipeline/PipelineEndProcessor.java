@@ -1,7 +1,7 @@
 package com.zj.master.dispatch.pipeline;
 
 import com.zj.common.enums.ProcessStatus;
-import com.zj.domain.entity.dto.pipeline.PipelineNodeDTO;
+import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
 import com.zj.domain.entity.po.pipeline.NodeRecord;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
@@ -50,10 +50,10 @@ public class PipelineEndProcessor {
         .map(NodeRecord::getNodeId).collect(Collectors.toList());
 
     //3 如果所有节点执行都是成功则流水线执行完成
-    PipelineNodeDTO pipelineNode = pipelineNodeRepository.getPipelineNode(nodeId);
-    List<PipelineNodeDTO> pipelineNodes = pipelineNodeRepository.getPipelineNodes(
+    PipelineNodeDto pipelineNode = pipelineNodeRepository.getPipelineNode(nodeId);
+    List<PipelineNodeDto> pipelineNodes = pipelineNodeRepository.getPipelineNodes(
         pipelineNode.getPipelineId());
-    boolean isAllComplete = pipelineNodes.stream().map(PipelineNodeDTO::getNodeId)
+    boolean isAllComplete = pipelineNodes.stream().map(PipelineNodeDto::getNodeId)
         .allMatch(recordNodeIds::contains);
     if (isAllComplete) {
       log.info("pipeline run complete success historyId={}", historyId);

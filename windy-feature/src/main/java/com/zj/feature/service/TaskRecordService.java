@@ -1,18 +1,12 @@
 package com.zj.feature.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
 import com.zj.domain.entity.dto.feature.FeatureInfoDto;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
-import com.zj.feature.entity.dto.HistoryNodeDTO;
+import com.zj.feature.entity.dto.HistoryNodeDto;
 import com.zj.common.model.PageSize;
 import com.zj.domain.entity.dto.feature.TaskRecordDto;
-import com.zj.domain.entity.po.feature.TaskRecord;
-import com.zj.domain.mapper.feeature.TaskRecordMapper;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +21,6 @@ public class TaskRecordService {
 
   @Autowired
   private FeatureHistoryService featureHistoryService;
-
-  @Autowired
-  private ICacheService cacheService;
 
   @Autowired
   private FeatureService featureService;
@@ -63,7 +54,7 @@ public class TaskRecordService {
     return executeHistory && flag;
   }
 
-  public List<HistoryNodeDTO> getTaskResult(String recordId) {
+  public List<HistoryNodeDto> getTaskResult(String recordId) {
     List<FeatureHistoryDto> histories = featureHistoryService.getHistories(recordId);
     if (CollectionUtils.isEmpty(histories)) {
       return Collections.emptyList();
@@ -74,8 +65,8 @@ public class TaskRecordService {
     TaskRecordDto record = getTaskRecord(recordId);
     String testCaseId = record.getTestCaseId();
     List<FeatureInfoDto> featureInfos = featureService.queryFeatureList(testCaseId);
-    List<HistoryNodeDTO> historyNodeDTOS = featureInfos.stream().map(feature -> {
-      HistoryNodeDTO historyNodeDTO = new HistoryNodeDTO();
+    List<HistoryNodeDto> historyNodeDtos = featureInfos.stream().map(feature -> {
+      HistoryNodeDto historyNodeDTO = new HistoryNodeDto();
       historyNodeDTO.setParentId(feature.getParentId());
       historyNodeDTO.setRecordId(recordId);
       historyNodeDTO.setFeatureId(feature.getFeatureId());
@@ -88,17 +79,17 @@ public class TaskRecordService {
       return historyNodeDTO;
     }).collect(Collectors.toList());
 
-    HistoryNodeDTO root = new HistoryNodeDTO();
-    convertTree(historyNodeDTOS, root);
+    HistoryNodeDto root = new HistoryNodeDto();
+    convertTree(historyNodeDtos, root);
     return root.getChildren();
   }
 
-  private void convertTree(List<HistoryNodeDTO> featureList, HistoryNodeDTO parent) {
+  private void convertTree(List<HistoryNodeDto> featureList, HistoryNodeDto parent) {
     if (CollectionUtils.isEmpty(featureList)) {
       return;
     }
 
-    List<HistoryNodeDTO> list = featureList.stream()
+    List<HistoryNodeDto> list = featureList.stream()
         .filter(feature -> Objects.equals(feature.getParentId(), parent.getFeatureId()))
         .collect(Collectors.toList());
     parent.setChildren(list);

@@ -1,41 +1,26 @@
 package com.zj.pipeline.service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.netflix.discovery.shared.Application;
-import com.netflix.eureka.EurekaServerContextHolder;
+import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
+import com.zj.common.model.DispatchModel;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDTO;
-import com.zj.domain.entity.dto.pipeline.PipelineNodeDTO;
+import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
 import com.zj.domain.entity.dto.pipeline.PipelineStageDTO;
-import com.zj.domain.repository.pipeline.IPipelineRepository;
-import com.zj.pipeline.entity.enums.PipelineStatus;
 import com.zj.domain.entity.po.pipeline.NodeRecord;
 import com.zj.domain.entity.po.pipeline.Pipeline;
 import com.zj.domain.entity.po.pipeline.PipelineNode;
 import com.zj.domain.entity.po.pipeline.PipelineStage;
-import com.zj.pipeline.entity.vo.ActionDetail;
-import com.zj.pipeline.entity.vo.ConfigDetail;
-import com.zj.pipeline.executer.Invoker.builder.RefreshContextBuilder;
-import com.zj.pipeline.executer.Invoker.builder.RequestContextBuilder;
-import com.zj.pipeline.executer.PipelineExecutor;
-import com.zj.pipeline.executer.notify.PipelineEventFactory;
-import com.zj.pipeline.executer.vo.ExecuteParam;
-import com.zj.pipeline.executer.vo.NodeConfig;
-import com.zj.pipeline.executer.vo.PipelineStatusEvent;
-import com.zj.pipeline.executer.vo.RefreshContext;
-import com.zj.pipeline.executer.vo.RequestContext;
-import com.zj.pipeline.executer.vo.Stage;
-import com.zj.pipeline.executer.vo.TaskNode;
 import com.zj.domain.mapper.pipeline.PipelineMapper;
+import com.zj.domain.repository.pipeline.IPipelineRepository;
+import com.zj.pipeline.entity.enums.PipelineStatus;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +29,9 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,14 +45,13 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
 
+  public static final String WINDY_MASTER_DISPATCH_URL = "http://WindyMaster/v1/devops/dispatch/task";
+  public static final String WINDY_MASTER_STOP_URL = "http://WindyMaster/v1/devops/dispatch/stop";
   @Autowired
   private PipelineNodeService pipelineNodeService;
 
   @Autowired
   private PipelineStageService pipelineStageService;
-
-  @Autowired
-  private PipelineExecutor pipelineExecutor;
 
   @Autowired
   private PipelineActionService pipelineActionService;
@@ -78,6 +64,9 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
 
   @Autowired
   private IPipelineRepository pipelineRepository;
+
+  @Autowired
+  private RestTemplate restTemplate;
 
   @Transactional
   public boolean updatePipeline(String service, String pipelineId, PipelineDTO pipelineDTO) {
@@ -105,18 +94,17 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
   private void deleteNotExistStageAndNodes(PipelineDTO oldPipeline,
       List<PipelineStageDTO> stageList) {
     List<String> nodeIds = stageList.stream().map(PipelineStageDTO::getNodes)
-        .flatMap(Collection::stream).filter(Objects::nonNull).map(PipelineNodeDTO::getNodeId)
+        .flatMap(Collection::stream).filter(Objects::nonNull).map(PipelineNodeDto::getNodeId)
         .collect(Collectors.toList());
 
     List<String> notExistNodes = oldPipeline.getStageList().stream().map(PipelineStageDTO::getNodes)
         .filter(CollectionUtils::isNotEmpty).flatMap(Collection::stream)
-        .map(PipelineNodeDTO::getNodeId).filter(nodeId -> !nodeIds.contains(nodeId))
+        .map(PipelineNodeDto::getNodeId).filter(nodeId -> !nodeIds.contains(nodeId))
         .collect(Collectors.toList());
 
     //如果node节点未变更则直接退出
     if (CollectionUtils.isNotEmpty(notExistNodes)) {
-      pipelineNodeService.remove(
-          Wrappers.lambdaQuery(PipelineNode.class).in(PipelineNode::getNodeId, notExistNodes));
+      pipelineNodeService.deleteNodeIds(notExistNodes);
     }
 
     List<String> newStageIds = stageList.stream().map(PipelineStageDTO::getStageId)
@@ -151,14 +139,9 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
           .eq(PipelineStage::getStageId, pipelineStage.getStageId()));
 
       //修改node节点
-      List<PipelineNodeDTO> stageDtoNodes = stageDto.getNodes();
+      List<PipelineNodeDto> stageDtoNodes = stageDto.getNodes();
       if (CollectionUtils.isNotEmpty(stageDtoNodes)) {
-        stageDtoNodes.forEach(dto -> {
-          PipelineNode pipelineNode = OrikaUtil.convert(dto, PipelineNode.class);
-          pipelineNode.setUpdateTime(currentTime);
-          pipelineNodeService.update(pipelineNode, Wrappers.lambdaUpdate(PipelineNode.class)
-              .eq(PipelineNode::getNodeId, pipelineNode.getNodeId()));
-        });
+        stageDtoNodes.forEach(dto -> pipelineNodeService.updateNode(dto));
       }
     });
   }
@@ -172,8 +155,7 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
   public Boolean deletePipeline(String service, String pipelineId) {
     pipelineStageService.remove(
         Wrappers.lambdaQuery(PipelineStage.class).eq(PipelineStage::getPipelineId, pipelineId));
-    pipelineNodeService.remove(
-        Wrappers.lambdaQuery(PipelineNode.class).eq(PipelineNode::getPipelineId, pipelineId));
+    pipelineNodeService.deleteByPipeline(pipelineId);
     return pipelineRepository.deletePipeline(pipelineId);
   }
 
@@ -209,16 +191,14 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
     pipelineStageService.save(pipelineStage);
 
     stageDto.getNodes().forEach(nodeDto -> {
-      PipelineNode pipelineNode = new PipelineNode();
+      PipelineNodeDto pipelineNode = new PipelineNodeDto();
       pipelineNode.setNodeId(uniqueIdService.getUniqueId());
       pipelineNode.setPipelineId(pipelineId);
       pipelineNode.setStageId(stageId);
       pipelineNode.setType(nodeDto.getType());
       pipelineNode.setNodeName(nodeDto.getNodeName());
-      pipelineNode.setCreateTime(currentTime);
-      pipelineNode.setUpdateTime(currentTime);
       pipelineNode.setConfigDetail(nodeDto.getConfigDetail());
-      pipelineNodeService.save(pipelineNode);
+      pipelineNodeService.saveNode(pipelineNode);
     });
   }
 
@@ -226,104 +206,37 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
     return pipelineRepository.getPipeline(pipelineId);
   }
 
-  @Autowired
-  private RestTemplate restTemplate;
-
-
-  @Autowired
-  private DiscoveryClient discoveryClient;
-  public String execute(String pipelineId) {
+  public Boolean execute(String pipelineId) {
     PipelineDTO pipeline = getPipeline(pipelineId);
-    if (true) {
-      List<Application> applications = EurekaServerContextHolder.getInstance()
-          .getServerContext().getRegistry().getSortedApplications();
-      log.info("get service applications ={}",JSON.toJSONString(applications));
-      List<String> services = discoveryClient.getServices();
-      log.info("get service list ={}", JSON.toJSONString(services));
-      String url = "http://WindyMaster/v1/devops/dispatch/task";
-      JSONObject jsonObject = new JSONObject();
-      jsonObject.put("sourceId", pipelineId);
-      jsonObject.put("sourceName", pipeline.getPipelineName());
-      jsonObject.put("type", 1);
-      ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, jsonObject,
-          String.class);
+    if (Objects.isNull(pipeline)) {
+      return false;
+    }
+
+    DispatchModel dispatchModel = new DispatchModel();
+    dispatchModel.setSourceId(pipelineId);
+    dispatchModel.setSourceName(pipeline.getPipelineName());
+    dispatchModel.setType(LogType.PIPELINE.getType());
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<DispatchModel> httpEntity = new HttpEntity<>(dispatchModel, headers);
+    try {
+      ResponseEntity<String> responseEntity = restTemplate.postForEntity(WINDY_MASTER_DISPATCH_URL,
+          httpEntity, String.class);
       log.info("get test result code= {} result={}", responseEntity.getStatusCode(),
           responseEntity.getBody());
-      return "11";
+      return responseEntity.getStatusCode().is2xxSuccessful();
+    } catch (Exception e) {
+      log.error("request dispatch pipeline task error", e);
     }
 
-    if (Objects.isNull(pipeline)) {
-      return null;
-    }
-
-    List<PipelineStage> pipelineStages = pipelineStageService.list(
-        Wrappers.lambdaQuery(PipelineStage.class).eq(PipelineStage::getPipelineId, pipelineId)
-            .orderByAsc(PipelineStage::getType));
-    if (CollectionUtils.isEmpty(pipelineStages)) {
-      return null;
-    }
-
-    ExecuteParam executeParam = new ExecuteParam();
-    executeParam.setPipelineId(pipelineId);
-    executeParam.setName(pipeline.getPipelineName());
-
-    List<Stage> stageList = pipelineStages.stream().map(this::assembleStageData)
-        .collect(Collectors.toList());
-    //去除首尾开始与结束节点
-    stageList.remove(0);
-    stageList.remove(stageList.size() - 1);
-    executeParam.setStages(stageList);
-    return pipelineExecutor.execute(executeParam);
-  }
-
-  private Stage assembleStageData(PipelineStage pipelineStage) {
-    Stage stage = new Stage();
-    stage.setStageId(pipelineStage.getStageId());
-    stage.setStageName(pipelineStage.getStageName());
-
-    List<PipelineNode> pipelineNodes = pipelineNodeService.list(
-        Wrappers.lambdaQuery(PipelineNode.class)
-            .eq(PipelineNode::getStageId, pipelineStage.getStageId())
-            .orderByAsc(PipelineNode::getType));
-    if (CollectionUtils.isEmpty(pipelineNodes)) {
-      return stage;
-    }
-
-    List<TaskNode> taskNodes = pipelineNodes.stream().map(this::buildTaskNode)
-        .collect(Collectors.toList());
-    stage.setNodeList(taskNodes);
-    return stage;
-  }
-
-  private TaskNode buildTaskNode(PipelineNode pipelineNode) {
-    TaskNode taskNode = new TaskNode();
-    taskNode.setNodeId(pipelineNode.getNodeId());
-    taskNode.setName(pipelineNode.getNodeName());
-    taskNode.setExecuteTime(System.currentTimeMillis());
-
-    ConfigDetail configDetail = JSON.parseObject(pipelineNode.getConfigDetail(),
-        ConfigDetail.class);
-    PipelineActionDto action = pipelineActionService.getAction(configDetail.getActionId());
-    taskNode.setExecuteType(action.getExecuteType());
-
-    ActionDetail actionDetail = new ActionDetail(configDetail, action);
-    RequestContext requestContext = RequestContextBuilder.createContext(actionDetail);
-    taskNode.setRequestContext(requestContext);
-
-    RefreshContext refreshContext = RefreshContextBuilder.createContext(actionDetail);
-    taskNode.setRefreshContext(refreshContext);
-
-    NodeConfig nodeConfig = new NodeConfig();
-    taskNode.setNodeConfig(nodeConfig);
-    return taskNode;
+    return false;
   }
 
   public PipelineDTO getPipelineDetail(String pipelineId) {
-    List<PipelineNode> pipelineNodes = pipelineNodeService.list(
-        Wrappers.lambdaQuery(PipelineNode.class).eq(PipelineNode::getPipelineId, pipelineId));
-    Map<String, List<PipelineNodeDTO>> stageNodeMap = pipelineNodes.stream()
-        .map(node -> OrikaUtil.convert(node, PipelineNodeDTO.class))
-        .collect(Collectors.groupingBy(PipelineNodeDTO::getStageId));
+    List<PipelineNodeDto> pipelineNodes = pipelineNodeService.getPipelineNodes(pipelineId);
+    Map<String, List<PipelineNodeDto>> stageNodeMap = pipelineNodes.stream()
+        .collect(Collectors.groupingBy(PipelineNodeDto::getStageId));
 
     List<PipelineStage> pipelineStages = pipelineStageService.list(
         Wrappers.lambdaQuery(PipelineStage.class).eq(PipelineStage::getPipelineId, pipelineId)
@@ -346,17 +259,23 @@ public class PipelineService extends ServiceImpl<PipelineMapper, Pipeline> {
     if (CollectionUtils.isEmpty(records)) {
       return false;
     }
-    records.forEach(record -> {
-      TaskNode taskNode = new TaskNode();
-      taskNode.setRecordId(record.getRecordId());
-      taskNode.setNodeId(record.getNodeId());
-      taskNode.setHistoryId(historyId);
-      taskNode.setNodeConfig(new NodeConfig());
-      PipelineStatusEvent event = PipelineStatusEvent.builder().taskNode(taskNode)
-          .processStatus(ProcessStatus.STOP).build();
-      PipelineEventFactory.sendNotifyEvent(event);
-    });
 
+    DispatchModel dispatchModel = new DispatchModel();
+    dispatchModel.setSourceId(historyId);
+    dispatchModel.setType(LogType.PIPELINE.getType());
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<DispatchModel> httpEntity = new HttpEntity<>(dispatchModel, headers);
+    try {
+      ResponseEntity<String> responseEntity = restTemplate.postForEntity(WINDY_MASTER_STOP_URL,
+          httpEntity, String.class);
+      log.info("get test result code= {} result={}", responseEntity.getStatusCode(),
+          responseEntity.getBody());
+      return responseEntity.getStatusCode().is2xxSuccessful();
+    } catch (Exception e) {
+      log.error("request dispatch pipeline task error", e);
+    }
     return true;
   }
 }

@@ -8,10 +8,10 @@ import com.zj.common.model.PageSize;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
-import com.zj.feature.entity.dto.ExecutePointDTO;
+import com.zj.feature.entity.dto.ExecutePointDto;
 import com.zj.domain.entity.po.feature.ExecutePoint;
-import com.zj.feature.executor.compare.CompareType;
 import com.zj.domain.mapper.feeature.ExecutePointMapper;
+import com.zj.feature.entity.type.CompareType;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -42,13 +42,13 @@ public class ExecutePointService extends ServiceImpl<ExecutePointMapper, Execute
         Wrappers.lambdaQuery(ExecutePoint.class).eq(ExecutePoint::getFeatureId, featureId));
   }
 
-  public ExecutePointDTO getExecutePointDTO(String executePointId) {
+  public ExecutePointDto getExecutePointDTO(String executePointId) {
     ExecutePoint executePoint = getExecutePointById(executePointId);
     if (Objects.isNull(executePoint)) {
       throw new ApiException(ErrorCode.EXECUTE_POINT_NOT_FIND);
     }
 
-    return ExecutePointDTO.toExecutePointDTO(executePoint);
+    return ExecutePointDto.toExecutePointDTO(executePoint);
   }
 
   private ExecutePoint getExecutePointById(String executePointId) {
@@ -61,23 +61,23 @@ public class ExecutePointService extends ServiceImpl<ExecutePointMapper, Execute
         .orderByDesc(ExecutePoint::getCreateTime));
   }
 
-  public PageSize<ExecutePointDTO> queryExecutePointPage(String featureId, int page, int size) {
+  public PageSize<ExecutePointDto> queryExecutePointPage(String featureId, int page, int size) {
     Page<ExecutePoint> pageSize = new Page<>(page, size);
     Page<ExecutePoint> result = page(pageSize,
         Wrappers.lambdaQuery(ExecutePoint.class).eq(ExecutePoint::getFeatureId, featureId)
             .orderByAsc(ExecutePoint::getSortOrder));
 
-    List<ExecutePointDTO> executePointDTOS = result.getRecords().stream()
-        .map(ExecutePointDTO::toExecutePointDTO).collect(Collectors.toList());
+    List<ExecutePointDto> executePointDtos = result.getRecords().stream()
+        .map(ExecutePointDto::toExecutePointDTO).collect(Collectors.toList());
 
-    PageSize<ExecutePointDTO> detailPageSize = new PageSize<>();
+    PageSize<ExecutePointDto> detailPageSize = new PageSize<>();
     detailPageSize.setTotal(result.getTotal());
-    detailPageSize.setData(executePointDTOS);
+    detailPageSize.setData(executePointDtos);
     return detailPageSize;
   }
 
-  public String createExecutePoint(ExecutePointDTO executePointDTO) {
-    ExecutePoint executePoint = ExecutePointDTO.toExecutePoint(executePointDTO);
+  public String createExecutePoint(ExecutePointDto executePointDTO) {
+    ExecutePoint executePoint = ExecutePointDto.toExecutePoint(executePointDTO);
     executePoint.setPointId(uniqueIdService.getUniqueId());
     executePoint.setCreateTime(System.currentTimeMillis());
     executePoint.setUpdateTime(System.currentTimeMillis());
@@ -87,7 +87,7 @@ public class ExecutePointService extends ServiceImpl<ExecutePointMapper, Execute
     return executePoint.getPointId();
   }
 
-  public String updateExecutePoint(ExecutePointDTO executePointDTO) {
+  public String updateExecutePoint(ExecutePointDto executePointDTO) {
     ExecutePoint executePoint = getExecutePointById(executePointDTO.getPointId());
     if (Objects.isNull(executePoint)) {
       return null;
@@ -107,13 +107,13 @@ public class ExecutePointService extends ServiceImpl<ExecutePointMapper, Execute
     return executePoint.getPointId();
   }
 
-  public void batchAddTestFeature(List<ExecutePointDTO> executePointDTOS) {
-    if (CollectionUtils.isEmpty(executePointDTOS)) {
+  public void batchAddTestFeature(List<ExecutePointDto> executePointDtos) {
+    if (CollectionUtils.isEmpty(executePointDtos)) {
       log.warn("batch add test feature is empty list");
       return;
     }
 
-    executePointDTOS.forEach(executePointDTO -> {
+    executePointDtos.forEach(executePointDTO -> {
       ExecutePoint executePoint = getExecutePointById(executePointDTO.getPointId());
       if (Objects.isNull(executePoint)) {
         createExecutePoint(executePointDTO);

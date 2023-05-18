@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class NodeStatusQueryLooper implements Runnable {
+public class NodeStatusQueryLooper implements Runnable, IStatusNotifyListener {
 
   public static final int MAX_REMOVE_TIME = 2 * 60 * 60 * 1000;
   public static final String DESCRIPTION_FORMAT = "比较响应字段:【%s】- 描述信息:%s";
@@ -66,7 +66,6 @@ public class NodeStatusQueryLooper implements Runnable {
 
       if (stopRecordMap.containsKey(node.getRecordId())) {
         log.info("record result ignore , because pipeline is stop recordId={}", node.getRecordId());
-        stopRecordMap.remove(node.getRecordId());
         return;
       }
 
@@ -92,9 +91,9 @@ public class NodeStatusQueryLooper implements Runnable {
 
   /**
    * 将查询的成功的结果与配置的期望值比较
-   * */
+   */
   private void compareResultWithExpect(TaskNode node, QueryResponseModel responseModel) {
-    if (!Objects.equals(responseModel.getStatus(), ProcessStatus.SUCCESS.getType())){
+    if (!Objects.equals(responseModel.getStatus(), ProcessStatus.SUCCESS.getType())) {
       return;
     }
 
@@ -159,7 +158,15 @@ public class NodeStatusQueryLooper implements Runnable {
     }
   }
 
-  public void statusChange(String recordId, Integer status) {
+  @Override
+  public void statusChange(PipelineStatusEvent event) {
+    String historyId = event.getTaskNode().getHistoryId();
+    queue.stream().filter(node -> Objects.equals(node.getHistoryId(), historyId)).forEach(node -> {
+      removeItem(node.getRecordId(), event.getProcessStatus().getType());
+    });
+  }
+
+  public void removeItem(String recordId, Integer status) {
     log.info("receive pipeline stop recordId={} status={}", recordId, status);
     queue.removeIf(taskNode -> Objects.equals(recordId, taskNode.getRecordId()));
     putAndCheckRecord(recordId);

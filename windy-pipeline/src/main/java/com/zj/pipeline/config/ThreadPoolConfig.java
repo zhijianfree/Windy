@@ -17,18 +17,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ThreadPoolConfig {
 
-  @Bean("pipelineExecutorPool")
-  public ExecutorService getPipelineExecutor() {
-    return new ThreadPoolExecutor(5, 10, 3, TimeUnit.HOURS, new LinkedBlockingQueue<>(100),
-        new CallerRunsPolicy());
-  }
-
-  @Bean("queryLooperExecutorPool")
-  public ExecutorService getQueryLooperExecutor() {
-    return new ThreadPoolExecutor(20, 60, 10, TimeUnit.MINUTES, new LinkedBlockingQueue<>(1000),
-        new CallerRunsPolicy());
-  }
-
   @Bean("webHookExecutorPool")
   public ExecutorService getWebHookExecutor() {
     return new ThreadPoolExecutor(5, 20, 10, TimeUnit.MINUTES, new LinkedBlockingQueue<>(100),

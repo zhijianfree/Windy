@@ -1,6 +1,6 @@
 package com.zj.domain.repository.pipeline;
 
-import com.zj.domain.entity.dto.pipeline.PipelineNodeDTO;
+import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
 import java.util.List;
 
 /**
@@ -9,7 +9,15 @@ import java.util.List;
  */
 public interface IPipelineNodeRepository {
 
-  PipelineNodeDTO getPipelineNode(String pipelineNodeId);
+  PipelineNodeDto getPipelineNode(String pipelineNodeId);
 
-  List<PipelineNodeDTO> getPipelineNodes(String pipelineId);
+  List<PipelineNodeDto> getPipelineNodes(String pipelineId);
+
+  boolean deleteNodeIds(List<String> nodeIds);
+
+  void updateNode(PipelineNodeDto dto);
+
+  boolean deleteByPipelineId(String pipelineId);
+
+  void saveNode(PipelineNodeDto pipelineNode);
 }
