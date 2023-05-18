@@ -1,14 +1,13 @@
-package com.zj.master.dispatch.feature;
+package com.zj.master.dispatch.task;
 
 import com.zj.master.entity.vo.ExecuteContext;
-import com.zj.master.entity.vo.TaskNode;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/17
  */
 @Data

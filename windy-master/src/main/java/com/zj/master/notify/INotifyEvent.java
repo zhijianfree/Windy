@@ -5,7 +5,7 @@ import com.zj.common.enums.NotifyType;
 import com.zj.common.model.ResultEvent;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/17
  */
 public interface INotifyEvent {

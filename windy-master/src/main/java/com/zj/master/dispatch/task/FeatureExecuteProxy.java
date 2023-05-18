@@ -1,4 +1,4 @@
-package com.zj.master.dispatch.feature;
+package com.zj.master.dispatch.task;
 
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.IpUtils;
@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/17
  */
 @Slf4j
@@ -75,7 +75,7 @@ public class FeatureExecuteProxy {
   private FeatureExecuteParam getFeatureExecuteParam(FeatureTask featureTask, String featureId) {
     FeatureExecuteParam featureExecuteParam = new FeatureExecuteParam();
     featureExecuteParam.setFeatureId(featureId);
-    featureExecuteParam.setExecuteContext(featureExecuteParam.getExecuteContext());
+    featureExecuteParam.setExecuteContext(featureTask.getExecuteContext().toMap());
     featureExecuteParam.setTaskRecordId(featureTask.getTaskRecordId());
     List<ExecutePointDto> executePoints = executePointRepository.getExecutePointByFeatureId(
         featureId);
@@ -90,14 +90,16 @@ public class FeatureExecuteProxy {
     }
 
     //每个用例执行完成之后都需要判断下是整个任务是否执行完成
-    taskEndProcessor.process(taskRecordId, processStatus);
-
-    FeatureTask featureTask = featureTaskMap.get(taskRecordId);
-    if (Objects.isNull(featureTask)) {
-      log.info("can not find feature task");
+    boolean isTaskEnd = taskEndProcessor.process(taskRecordId, processStatus);
+    if (isTaskEnd){
+      featureTaskMap.remove(taskRecordId);
       return;
     }
 
-    execute(featureTask);
+    FeatureTask featureTask = featureTaskMap.get(taskRecordId);
+    if (Objects.nonNull(featureTask)) {
+      log.info("feature task start cycle run");
+      execute(featureTask);
+    }
   }
 }

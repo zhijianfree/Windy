@@ -1,4 +1,4 @@
-package com.zj.feature.entity.dto;
+package com.zj.domain.entity.dto.feature;
 
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.po.feature.TestCaseConfig;
@@ -9,7 +9,7 @@ import lombok.Data;
  * @since 2022/12/19
  */
 @Data
-public class TestCaseConfigDTO {
+public class TestCaseConfigDto {
 
   private String configId;
 
@@ -52,11 +52,11 @@ public class TestCaseConfigDTO {
 
   private Long createTime;
 
-  public static TestCaseConfig toTestCaseConfig(TestCaseConfigDTO configDTO) {
+  public static TestCaseConfig toTestCaseConfig(TestCaseConfigDto configDTO) {
     return OrikaUtil.convert(configDTO, TestCaseConfig.class);
   }
 
-  public static TestCaseConfigDTO toTestCaseConfigDTO(TestCaseConfig config) {
-    return OrikaUtil.convert(config, TestCaseConfigDTO.class);
+  public static TestCaseConfigDto toTestCaseConfigDTO(TestCaseConfig config) {
+    return OrikaUtil.convert(config, TestCaseConfigDto.class);
   }
 }

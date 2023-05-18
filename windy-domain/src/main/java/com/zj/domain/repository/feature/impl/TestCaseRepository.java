@@ -10,7 +10,7 @@ import com.zj.domain.repository.feature.ITestCaseRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/18
  */
 @Repository
@@ -18,7 +18,7 @@ public class TestCaseRepository extends ServiceImpl<TestCaseMapper, TestCase> im
     ITestCaseRepository {
 
   @Override
-  public TestCaseDto getTestCaseByTaskId(String caseId) {
+  public TestCaseDto getTestCaseById(String caseId) {
     TestCase testCase = getOne(
         Wrappers.lambdaQuery(TestCase.class).eq(TestCase::getTestCaseId, caseId));
     return OrikaUtil.convert(testCase, TestCaseDto.class);

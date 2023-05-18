@@ -15,7 +15,7 @@ import com.zj.master.dispatch.IDispatchExecutor;
 import com.zj.master.dispatch.pipeline.builder.RefreshContextBuilder;
 import com.zj.master.dispatch.pipeline.builder.RequestContextBuilder;
 import com.zj.master.entity.dto.TaskDetailDto;
-import com.zj.master.entity.enums.LogType;
+import com.zj.common.enums.LogType;
 import com.zj.master.entity.vo.ActionDetail;
 import com.zj.master.entity.vo.ConfigDetail;
 import com.zj.master.entity.vo.NodeConfig;
@@ -31,7 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/15
  */
 @Slf4j

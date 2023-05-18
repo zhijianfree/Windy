@@ -1,4 +1,4 @@
-package com.zj.master.entity.enums;
+package com.zj.common.enums;
 
 public enum LogType {
   PIPELINE(1, "流水线"),

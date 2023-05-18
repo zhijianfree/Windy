@@ -26,4 +26,8 @@ public class ExecuteContext {
   public Map<String, Object> toMap() {
     return contextMap;
   }
+
+  public void bindMap(Map<String, Object> mapContext) {
+    contextMap.putAll(mapContext);
+  }
 }

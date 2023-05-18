@@ -6,7 +6,7 @@ import com.zj.domain.entity.po.pipeline.NodeRecord;
 import java.util.List;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/15
  */
 public interface INodeRecordRepository {

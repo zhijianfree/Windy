@@ -5,13 +5,13 @@ import com.zj.common.enums.NotifyType;
 import com.zj.common.model.ResultEvent;
 import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
-import com.zj.master.dispatch.feature.FeatureExecuteProxy;
+import com.zj.master.dispatch.task.FeatureExecuteProxy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/17
  */
 @Slf4j

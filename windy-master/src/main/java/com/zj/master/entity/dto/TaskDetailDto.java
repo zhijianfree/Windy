@@ -1,9 +1,10 @@
 package com.zj.master.entity.dto;
 
+import com.zj.common.enums.LogType;
 import lombok.Data;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/12
  */
 @Data
@@ -21,7 +22,7 @@ public class TaskDetailDto {
   private String sourceName;
 
   /**
-   * 任务类型{@link com.zj.master.entity.enums.LogType}
+   * 任务类型{@link LogType}
    * */
   private Integer type;
 }

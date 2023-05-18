@@ -3,7 +3,7 @@ package com.zj.feature.rest;
 import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.PageSize;
-import com.zj.feature.entity.dto.TestCaseConfigDTO;
+import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
 import com.zj.domain.entity.dto.feature.TestCaseDto;
 import com.zj.feature.service.TestCaseConfigService;
 import com.zj.feature.service.TestCaseService;
@@ -53,7 +53,7 @@ public class TestCaseRest {
   }
 
   @GetMapping("/case/{caseId}")
-  public ResponseMeta<TestCaseDto> updateTestCase(@PathVariable("caseId") String caseId) {
+  public ResponseMeta<TestCaseDto> getTestCase(@PathVariable("caseId") String caseId) {
     TestCaseDto testCase = testCaseService.getTestCase(caseId);
     return new ResponseMeta<>(ErrorCode.SUCCESS, testCase);
   }
@@ -65,19 +65,19 @@ public class TestCaseRest {
   }
 
   @GetMapping("/case/{caseId}/configs")
-  public ResponseMeta<List<TestCaseConfigDTO>> getTestCaseConfigs(@PathVariable("caseId") String caseId) {
-    List<TestCaseConfigDTO> result = testCaseConfigService.getTestCaseConfigs(caseId);
+  public ResponseMeta<List<TestCaseConfigDto>> getTestCaseConfigs(@PathVariable("caseId") String caseId) {
+    List<TestCaseConfigDto> result = testCaseConfigService.getTestCaseConfigs(caseId);
     return new ResponseMeta<>(ErrorCode.SUCCESS, result);
   }
 
   @PostMapping("/case/config")
-  public ResponseMeta<Integer> addCaseConfig(@RequestBody List<TestCaseConfigDTO> configs) {
+  public ResponseMeta<Integer> addCaseConfig(@RequestBody List<TestCaseConfigDto> configs) {
     Integer result = testCaseConfigService.addCaseConfigs(configs);
     return new ResponseMeta<>(ErrorCode.SUCCESS, result);
   }
 
   @PutMapping("/case/config")
-  public ResponseMeta<Boolean> updateCaseConfig(@RequestBody TestCaseConfigDTO configDTO) {
+  public ResponseMeta<Boolean> updateCaseConfig(@RequestBody TestCaseConfigDto configDTO) {
     Boolean result = testCaseConfigService.updateCaseConfigs(configDTO);
     return new ResponseMeta<>(ErrorCode.SUCCESS, result);
   }

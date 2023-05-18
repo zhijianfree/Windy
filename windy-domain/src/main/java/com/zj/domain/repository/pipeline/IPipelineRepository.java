@@ -4,7 +4,7 @@ import com.zj.domain.entity.dto.pipeline.PipelineDTO;
 import java.util.List;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/15
  */
 public interface IPipelineRepository {

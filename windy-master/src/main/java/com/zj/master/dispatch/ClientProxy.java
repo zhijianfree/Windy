@@ -6,12 +6,14 @@ import com.zj.master.entity.vo.BaseDispatch;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/15
  */
 @Slf4j
@@ -23,7 +25,9 @@ public class ClientProxy {
   private RestTemplate restTemplate;
 
   public void sendPipelineNodeTask(BaseDispatch baseDispatch) {
-    HttpEntity<BaseDispatch> http = new HttpEntity<>(baseDispatch);
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<BaseDispatch> http = new HttpEntity<>(baseDispatch, headers);
     log.info("request body={}", JSON.toJSONString(baseDispatch));
     ResponseEntity<String> responseEntity = restTemplate.postForEntity(DISPATCH_TASK_CLIENT, http, String.class);
     log.info("get response status result ={}", responseEntity.getBody());

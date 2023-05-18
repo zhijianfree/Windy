@@ -4,6 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.netflix.discovery.shared.Application;
+import com.netflix.eureka.EurekaServerContextHolder;
+import com.zj.common.enums.LogType;
 import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseStatusModel;
 import com.zj.common.enums.ProcessStatus;
@@ -26,8 +29,11 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * @author guyuelan
@@ -111,11 +117,35 @@ public class TaskInfoService {
     return taskRepository.getTaskDetail(taskId);
   }
 
+  @Autowired
+  private DiscoveryClient discoveryClient;
+
+  @Autowired
+  private RestTemplate restTemplate;
+
   public String startTask(String taskId) {
     TaskInfoDto taskDetail = getTaskDetail(taskId);
     if (Objects.isNull(taskDetail)) {
       log.info("can not find task={}", taskId);
       return null;
+    }
+
+    if (true){
+      List<Application> applications = EurekaServerContextHolder.getInstance()
+          .getServerContext().getRegistry().getSortedApplications();
+      log.info("get service applications ={}",JSON.toJSONString(applications));
+      List<String> services = discoveryClient.getServices();
+      log.info("get service list ={}", JSON.toJSONString(services));
+      String url = "http://WindyMaster/v1/devops/dispatch/task";
+      JSONObject jsonObject = new JSONObject();
+      jsonObject.put("sourceId", taskId);
+      jsonObject.put("sourceName", taskDetail.getTaskName());
+      jsonObject.put("type", LogType.FEATURE_TASK.getType());
+      ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, jsonObject,
+          String.class);
+      log.info("get test result code= {} result={}", responseEntity.getStatusCode(),
+          responseEntity.getBody());
+      return "11";
     }
 
     String testCaseId = taskDetail.getTestCaseId();

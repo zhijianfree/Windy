@@ -5,7 +5,7 @@ import com.zj.domain.entity.po.feature.ExecuteRecord;
 import java.util.List;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/17
  */
 public interface IExecuteRecordRepository {

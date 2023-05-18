@@ -1,7 +1,7 @@
 package com.zj.feature.executor;
 
 import com.zj.feature.entity.dto.FeatureInfoDTO;
-import com.zj.feature.entity.dto.TestCaseConfigDTO;
+import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
 import com.zj.feature.executor.vo.ExecuteContext;
 import com.zj.feature.service.FeatureService;
 import com.zj.feature.service.TestCaseConfigService;
@@ -33,7 +33,7 @@ public class ExecuteHandler {
   private ExecuteContext loadExecuteContext(String featureId) {
     FeatureInfoDTO feature = featureService.getFeatureById(featureId);
     String testCaseId = feature.getTestCaseId();
-    List<TestCaseConfigDTO> caseConfigs = caseConfigService.getTestCaseConfigs(testCaseId);
+    List<TestCaseConfigDto> caseConfigs = caseConfigService.getTestCaseConfigs(testCaseId);
     if (CollectionUtils.isEmpty(caseConfigs)) {
       return new ExecuteContext();
     }

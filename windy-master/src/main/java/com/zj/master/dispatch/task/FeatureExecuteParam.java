@@ -1,13 +1,14 @@
-package com.zj.master.dispatch.feature;
+package com.zj.master.dispatch.task;
 
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
 import com.zj.master.entity.vo.BaseDispatch;
 import com.zj.master.entity.vo.ExecuteContext;
 import java.util.List;
+import java.util.Map;
 import lombok.Data;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/15
  */
 @Data
@@ -30,5 +31,5 @@ public class FeatureExecuteParam extends BaseDispatch {
   /**
    * 用例执行上下文，也就是测试集或者任务的全局变量
    * */
-  ExecuteContext executeContext;
+  Map<String, Object> executeContext;
 }

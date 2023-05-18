@@ -3,7 +3,7 @@ package com.zj.domain.entity.po.log;
 import lombok.Data;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/12
  */
 @Data

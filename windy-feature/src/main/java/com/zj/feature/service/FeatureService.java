@@ -15,7 +15,7 @@ import com.zj.feature.entity.dto.FeatureInfoDTO;
 import com.zj.feature.entity.dto.FeatureNodeDTO;
 import com.zj.common.model.PageSize;
 import com.zj.feature.entity.dto.TagFilterDto;
-import com.zj.feature.entity.dto.TestCaseConfigDTO;
+import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
 import com.zj.domain.entity.dto.feature.TestCaseDto;
 import com.zj.domain.entity.po.feature.ExecutePoint;
 import java.util.ArrayList;
@@ -227,7 +227,7 @@ public class FeatureService {
     log.info("batch save points={}", JSON.toJSONString(newExecutePoints));
 
     //3 复制全局变量
-    List<TestCaseConfigDTO> caseConfigs = testCaseConfigService.getTestCaseConfigs(
+    List<TestCaseConfigDto> caseConfigs = testCaseConfigService.getTestCaseConfigs(
         copyFeatureDTO.getTestCaseId());
     caseConfigs.forEach(configDTO -> configDTO.setUnionId(newCaseId));
     testCaseConfigService.addCaseConfigs(caseConfigs);

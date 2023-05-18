@@ -13,7 +13,7 @@ import java.util.function.Function;
 import org.springframework.stereotype.Service;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/15
  */
 @Service
@@ -41,7 +41,7 @@ public class TaskDispatchService {
 
 
   private boolean runFeature(JSONObject params) {
-    FeatureParam featureParam = JSON.toJavaObject(params, FeatureParam.class);
+    FeatureParam featureParam = JSON.parseObject(JSON.toJSONString(params), FeatureParam.class);
     featureExecutor.execute(featureParam);
     return true;
   }

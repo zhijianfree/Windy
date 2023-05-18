@@ -1,53 +1,45 @@
 package com.zj.master.dispatch.feature;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.domain.entity.dto.feature.FeatureInfoDto;
-import com.zj.domain.entity.dto.feature.TaskInfoDto;
-import com.zj.domain.entity.dto.feature.TaskRecordDto;
-import com.zj.domain.entity.po.feature.FeatureInfo;
-import com.zj.domain.repository.feature.IExecutePointRepository;
+import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
 import com.zj.domain.repository.feature.IFeatureRepository;
-import com.zj.domain.repository.feature.ITaskRecordRepository;
-import com.zj.domain.repository.feature.ITaskRepository;
+import com.zj.domain.repository.feature.ITestCaseConfigRepository;
+import com.zj.domain.repository.feature.ITestCaseRepository;
 import com.zj.master.dispatch.IDispatchExecutor;
+import com.zj.master.dispatch.task.FeatureExecuteProxy;
+import com.zj.master.dispatch.task.FeatureTask;
 import com.zj.master.entity.dto.TaskDetailDto;
-import com.zj.master.entity.enums.LogType;
+import com.zj.common.enums.LogType;
 import com.zj.master.entity.vo.ExecuteContext;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 /**
- * @author falcon
- * @since 2023/5/17
+ * @author guyuelan
+ * @since 2023/5/18
  */
-@Slf4j
 @Component
 public class FeatureDispatch implements IDispatchExecutor {
 
-  @Autowired
-  private ITaskRepository taskRepository;
-
+  public static final String TEMP_KEY = "temp_";
   @Autowired
   private IFeatureRepository featureRepository;
 
   @Autowired
-  private ITaskRecordRepository taskRecordRepository;
+  private ITestCaseRepository testCaseRepository;
 
   @Autowired
-  private FeatureExecuteProxy featureExecuteProxy;
+  private ITestCaseConfigRepository testCaseConfigRepository;
 
   @Autowired
   private UniqueIdService uniqueIdService;
+
+  @Autowired
+  private FeatureExecuteProxy featureExecuteProxy;
 
   @Override
   public Integer type() {
@@ -56,67 +48,33 @@ public class FeatureDispatch implements IDispatchExecutor {
 
   @Override
   public boolean dispatch(TaskDetailDto task) {
-    TaskInfoDto taskDetail = taskRepository.getTaskDetail(task.getSourceId());
-    if (Objects.isNull(taskDetail)) {
-      log.info("can not find task={}", task.getSourceId());
-      return false;
-    }
+    String featureString = task.getSourceId();
+    List<String> featureIds = JSON.parseArray(featureString, String.class);
+    FeatureInfoDto feature = featureRepository.getFeatureById(featureIds.get(0));
+    List<TestCaseConfigDto> caseConfigs = testCaseConfigRepository.getCaseConfigs(
+        feature.getTestCaseId());
+    ExecuteContext executeContext = buildTaskConfig(caseConfigs);
+    FeatureTask featureTask = new FeatureTask();
+    featureTask.setExecuteContext(executeContext);
+    featureTask.addAll(featureIds);
 
-    String testCaseId = taskDetail.getTestCaseId();
-    List<FeatureInfoDto> featureList = featureRepository.queryNotContainFolder(testCaseId);
-    if (CollectionUtils.isEmpty(featureList)) {
-      log.info("can not find feature list by testCaseId={}", testCaseId);
-      return false;
-    }
+    //这个是临时的recordId，没有任何业务含义，只是为了支持多个用例的执行
+    String tempRecordId = TEMP_KEY + uniqueIdService.getUniqueId();
+    featureTask.setTaskRecordId(tempRecordId);
 
-    TaskRecordDto taskRecordDto = buildTaskRecordDTO(taskDetail);
-    taskRecordRepository.save(taskRecordDto);
-
-    FeatureTask featureTask = buildFeatureTask(task, featureList, taskRecordDto);
     featureExecuteProxy.execute(featureTask);
     return false;
   }
 
-  private FeatureTask buildFeatureTask(TaskDetailDto task, List<FeatureInfoDto> featureList,
-      TaskRecordDto taskRecordDto) {
-    FeatureTask featureTask = new FeatureTask();
-    ExecuteContext executeContext = buildTaskConfig(taskRecordDto.getTaskConfig());
-    featureTask.setExecuteContext(executeContext);
-
-    List<String> featureIds = featureList.stream().map(FeatureInfoDto::getFeatureId)
-        .collect(Collectors.toList());
-    featureTask.addAll(featureIds);
-
-    featureTask.setTaskRecordId(taskRecordDto.getRecordId());
-    featureTask.setTaskId(task.getSourceId());
-    return featureTask;
-  }
-
-  private ExecuteContext buildTaskConfig(String taskConfig) {
+  private ExecuteContext buildTaskConfig(List<TestCaseConfigDto> configs) {
     ExecuteContext executeContext = new ExecuteContext();
-    if (StringUtils.isBlank(taskConfig)) {
+    if (CollectionUtils.isEmpty(configs)) {
       return executeContext;
     }
 
-    JSONObject jsonObject = JSON.parseObject(taskConfig);
-    for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
-      executeContext.set(entry.getKey(), entry.getValue());
+    for (TestCaseConfigDto config : configs) {
+      executeContext.set(config.getParamKey(), config.getValue());
     }
     return executeContext;
-  }
-
-  private TaskRecordDto buildTaskRecordDTO(TaskInfoDto taskDetail) {
-    TaskRecordDto taskRecordDTO = new TaskRecordDto();
-    taskRecordDTO.setTaskConfig(taskDetail.getTaskConfig());
-    taskRecordDTO.setTaskName(taskDetail.getTaskName());
-    taskRecordDTO.setTaskId(taskDetail.getTaskId());
-    taskRecordDTO.setRecordId(uniqueIdService.getUniqueId());
-    taskRecordDTO.setUserId("admin");
-    taskRecordDTO.setStatus(ProcessStatus.RUNNING.getType());
-    taskRecordDTO.setMachines(taskDetail.getMachines());
-    taskRecordDTO.setTestCaseId(taskDetail.getTestCaseId());
-    taskRecordDTO.setCreateTime(System.currentTimeMillis());
-    taskRecordDTO.setUpdateTime(System.currentTimeMillis());
-    return taskRecordDTO;
   }
 }

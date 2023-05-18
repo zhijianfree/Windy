@@ -3,7 +3,7 @@ package com.zj.feature.service;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.generate.UniqueIdService;
-import com.zj.feature.entity.dto.TestCaseConfigDTO;
+import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
 import com.zj.domain.entity.po.feature.TestCaseConfig;
 import com.zj.domain.mapper.feeature.TestCaseConfigMapper;
 import java.util.Collections;
@@ -24,23 +24,23 @@ public class TestCaseConfigService extends ServiceImpl<TestCaseConfigMapper, Tes
   @Autowired
   private UniqueIdService uniqueIdService;
 
-  public List<TestCaseConfigDTO> getTestCaseConfigs(String caseId) {
+  public List<TestCaseConfigDto> getTestCaseConfigs(String caseId) {
     List<TestCaseConfig> testCaseConfigs = list(
         Wrappers.lambdaQuery(TestCaseConfig.class).eq(TestCaseConfig::getUnionId, caseId));
     if (CollectionUtils.isEmpty(testCaseConfigs)) {
       return Collections.emptyList();
     }
-    return testCaseConfigs.stream().map(TestCaseConfigDTO::toTestCaseConfigDTO)
+    return testCaseConfigs.stream().map(TestCaseConfigDto::toTestCaseConfigDTO)
         .collect(Collectors.toList());
   }
 
-  public Integer addCaseConfigs(List<TestCaseConfigDTO> configs) {
+  public Integer addCaseConfigs(List<TestCaseConfigDto> configs) {
     if (CollectionUtils.isEmpty(configs)) {
       return 0;
     }
 
     List<TestCaseConfig> caseConfigs = configs.stream().map(configDTO -> {
-      TestCaseConfig testCaseConfig = TestCaseConfigDTO.toTestCaseConfig(configDTO);
+      TestCaseConfig testCaseConfig = TestCaseConfigDto.toTestCaseConfig(configDTO);
       testCaseConfig.setConfigId(uniqueIdService.getUniqueId());
       testCaseConfig.setCreateTime(System.currentTimeMillis());
       testCaseConfig.setUpdateTime(System.currentTimeMillis());
@@ -49,11 +49,11 @@ public class TestCaseConfigService extends ServiceImpl<TestCaseConfigMapper, Tes
     return caseConfigs.stream().mapToInt(caseConfig -> save(caseConfig) ? 1 : 0).sum();
   }
 
-  public boolean updateCaseConfigs(TestCaseConfigDTO configDTO) {
+  public boolean updateCaseConfigs(TestCaseConfigDto configDTO) {
     if (Objects.isNull(configDTO)) {
       return false;
     }
-    TestCaseConfig testCaseConfig = TestCaseConfigDTO.toTestCaseConfig(configDTO);
+    TestCaseConfig testCaseConfig = TestCaseConfigDto.toTestCaseConfig(configDTO);
 
     return update(testCaseConfig, Wrappers.lambdaUpdate(TestCaseConfig.class)
         .eq(TestCaseConfig::getConfigId, configDTO.getConfigId()));

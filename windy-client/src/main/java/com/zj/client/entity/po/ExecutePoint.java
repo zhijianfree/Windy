@@ -1,9 +1,10 @@
 package com.zj.client.entity.po;
 
+import java.io.Serializable;
 import lombok.Data;
 
 @Data
-public class ExecutePoint {
+public class ExecutePoint implements Serializable {
     private Long id;
     /**
      * 执行点Id
