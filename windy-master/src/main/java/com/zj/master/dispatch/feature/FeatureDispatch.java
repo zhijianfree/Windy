@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.domain.entity.dto.feature.FeatureInfoDto;
 import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
+import com.zj.domain.entity.dto.log.TaskLogDto;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.domain.repository.feature.ITestCaseConfigRepository;
 import com.zj.domain.repository.feature.ITestCaseRepository;
@@ -57,12 +58,18 @@ public class FeatureDispatch implements IDispatchExecutor {
     FeatureTask featureTask = new FeatureTask();
     featureTask.setExecuteContext(executeContext);
     featureTask.addAll(featureIds);
+    featureTask.setLogId(task.getTaskLogId());
 
     //这个是临时的recordId，没有任何业务含义，只是为了支持多个用例的执行
     String tempRecordId = TEMP_KEY + uniqueIdService.getUniqueId();
     featureTask.setTaskRecordId(tempRecordId);
 
     featureExecuteProxy.execute(featureTask);
+    return false;
+  }
+
+  @Override
+  public boolean resume(TaskLogDto taskLog) {
     return false;
   }
 

@@ -7,6 +7,7 @@ import com.zj.domain.entity.dto.feature.TaskRecordDto;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
+import com.zj.domain.repository.log.ITaskLogRepository;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -31,7 +32,10 @@ public class TaskEndProcessor {
   @Autowired
   private IFeatureRepository featureRepository;
 
-  public boolean process(String taskRecordId, ProcessStatus status) {
+  @Autowired
+  private ITaskLogRepository taskLogRepository;
+
+  public boolean process(String taskRecordId, ProcessStatus status, String logId) {
     TaskRecordDto taskRecord = taskRecordRepository.getTaskRecord(taskRecordId);
     if (Objects.isNull(taskRecord)) {
       //如果找不到任务记录，可能是任务删除了或者是Id为临时记录Id，无任何业务含义
@@ -41,6 +45,7 @@ public class TaskEndProcessor {
 
     if (status.isFailStatus()) {
       taskRecordRepository.updateRecordStatus(taskRecordId, status.getType());
+      taskLogRepository.updateLogStatus(logId, status.getType());
       return true;
     }
 
@@ -53,7 +58,9 @@ public class TaskEndProcessor {
     boolean allSuccess = features.stream()
         .allMatch(feature -> recordFeatureIds.contains(feature.getFeatureId()));
     if (allSuccess) {
-      return taskRecordRepository.updateRecordStatus(taskRecordId, ProcessStatus.SUCCESS.getType());
+      int success = ProcessStatus.SUCCESS.getType();
+      taskLogRepository.updateLogStatus(logId, success);
+      return taskRecordRepository.updateRecordStatus(taskRecordId, success);
     }
 
     return false;

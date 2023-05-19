@@ -91,8 +91,11 @@ public class NodeExecutor {
         .updateTime(currentTimeMillis).build();
 
     ResultEvent resultEvent = new ResultEvent().executeId(recordId)
-        .notifyType(NotifyType.CREATE_NODE_RECORD).status(ProcessStatus.RUNNING)
-        .params(taskNodeRecord).masterIP(node.getMasterIp());
+        .notifyType(NotifyType.CREATE_NODE_RECORD)
+        .status(ProcessStatus.RUNNING)
+        .params(taskNodeRecord)
+        .masterIP(node.getMasterIp())
+        .logId(node.getLogId());
     resultEventNotify.notifyEvent(resultEvent);
   }
 

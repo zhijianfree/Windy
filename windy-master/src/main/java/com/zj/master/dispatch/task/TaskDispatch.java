@@ -7,9 +7,12 @@ import com.zj.common.generate.UniqueIdService;
 import com.zj.domain.entity.dto.feature.FeatureInfoDto;
 import com.zj.domain.entity.dto.feature.TaskInfoDto;
 import com.zj.domain.entity.dto.feature.TaskRecordDto;
+import com.zj.domain.entity.dto.log.SubTaskLogDto;
+import com.zj.domain.entity.dto.log.TaskLogDto;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
 import com.zj.domain.repository.feature.ITaskRepository;
+import com.zj.domain.repository.log.ISubTaskLogRepository;
 import com.zj.master.dispatch.IDispatchExecutor;
 import com.zj.master.entity.dto.TaskDetailDto;
 import com.zj.common.enums.LogType;
@@ -45,6 +48,9 @@ public class TaskDispatch implements IDispatchExecutor {
   private FeatureExecuteProxy featureExecuteProxy;
 
   @Autowired
+  private ISubTaskLogRepository subTaskLogRepository;
+
+  @Autowired
   private UniqueIdService uniqueIdService;
 
   @Override
@@ -71,8 +77,27 @@ public class TaskDispatch implements IDispatchExecutor {
     taskRecordRepository.save(taskRecordDto);
 
     FeatureTask featureTask = buildFeatureTask(task, featureList, taskRecordDto);
+    saveSubTaskLog(featureTask);
     featureExecuteProxy.execute(featureTask);
     return false;
+  }
+
+  private void saveSubTaskLog(FeatureTask featureTask) {
+    List<SubTaskLogDto> subTaskLogs = featureTask.getFeatureIds().stream()
+        .map(featureId -> buildSubTaskLog(featureTask, featureId)).collect(Collectors.toList());
+    subTaskLogRepository.batchSaveLogs(subTaskLogs);
+  }
+
+  private SubTaskLogDto buildSubTaskLog(FeatureTask featureTask, String featureId) {
+    SubTaskLogDto subTaskLogDto = new SubTaskLogDto();
+    subTaskLogDto.setSubTaskId(uniqueIdService.getUniqueId());
+    subTaskLogDto.setLogId(featureTask.getLogId());
+    subTaskLogDto.setExecuteId(featureId);
+    subTaskLogDto.setStatus(ProcessStatus.RUNNING.getType());
+    long dateNow = System.currentTimeMillis();
+    subTaskLogDto.setCreateTime(dateNow);
+    subTaskLogDto.setUpdateTime(dateNow);
+    return subTaskLogDto;
   }
 
   private FeatureTask buildFeatureTask(TaskDetailDto task, List<FeatureInfoDto> featureList,
@@ -87,6 +112,7 @@ public class TaskDispatch implements IDispatchExecutor {
 
     featureTask.setTaskRecordId(taskRecordDto.getRecordId());
     featureTask.setTaskId(task.getSourceId());
+    featureTask.setLogId(task.getTaskLogId());
     return featureTask;
   }
 
@@ -116,5 +142,10 @@ public class TaskDispatch implements IDispatchExecutor {
     taskRecordDTO.setCreateTime(System.currentTimeMillis());
     taskRecordDTO.setUpdateTime(System.currentTimeMillis());
     return taskRecordDTO;
+  }
+
+  @Override
+  public boolean resume(TaskLogDto taskLog) {
+    return false;
   }
 }

@@ -10,6 +10,8 @@ import lombok.Data;
  */
 @Data
 public class ResultEvent {
+
+  private String logId;
   private String masterIP;
   private String executeId;
   private NotifyType notifyType;
@@ -38,6 +40,11 @@ public class ResultEvent {
 
   public ResultEvent params(Object params) {
     this.params = params;
+    return this;
+  }
+
+  public ResultEvent logId(String logId) {
+    this.logId = logId;
     return this;
   }
 }

@@ -6,6 +6,8 @@ import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.common.utils.IpUtils;
+import com.zj.domain.entity.dto.log.TaskLogDto;
+import com.zj.domain.repository.log.ITaskLogRepository;
 import com.zj.master.dispatch.Dispatcher;
 import com.zj.master.dispatch.listener.InnerEvent;
 import com.zj.master.dispatch.listener.TaskInnerEventFactory;
@@ -23,32 +25,35 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class TaskLogService extends ServiceImpl<TaskLogMapper, TaskLog> {
+public class TaskLogService {
 
   @Autowired
   private UniqueIdService uniqueIdService;
+
+  @Autowired
+  private ITaskLogRepository taskLogRepository;
 
   @Autowired
   private Dispatcher dispatcher;
 
   public Boolean createTask(TaskDetailDto task) {
     log.info("receive task detail ={}", JSON.toJSONString(task));
-    saveLog(task);
+    TaskLogDto taskLog = saveLog(task);
+    task.setTaskLogId(taskLog.getLogId());
     return dispatcher.dispatch(task);
   }
 
-  private void saveLog(TaskDetailDto task) {
-    TaskLog taskLog = new TaskLog();
+  private TaskLogDto saveLog(TaskDetailDto task) {
+    TaskLogDto taskLog = new TaskLogDto();
     taskLog.setLogId(uniqueIdService.getUniqueId());
     taskLog.setSourceId(task.getSourceId());
     taskLog.setSourceName(task.getSourceName());
     taskLog.setLogStatus(ProcessStatus.RUNNING.getType());
-    Long dateNow = System.currentTimeMillis();
-    taskLog.setCreateTime(dateNow);
-    taskLog.setUpdateTime(dateNow);
     taskLog.setLogType(task.getType());
     taskLog.setNodeIp(IpUtils.getLocalIP());
-    save(taskLog);
+    taskLog.setLockVersion(1);
+    taskLogRepository.saveLog(taskLog);
+    return taskLog;
   }
 
   public Boolean pauseTask(TaskDetailDto taskDetailDto) {

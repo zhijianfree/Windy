@@ -7,6 +7,7 @@ import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.master.entity.dto.TaskDetailDto;
 import com.zj.master.service.TaskLogService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +25,7 @@ public class NodeRecordRest {
   @Autowired
   private INodeRecordRepository nodeRecordRepository;
 
-  @PostMapping("/{recordId}")
+  @GetMapping("/{recordId}")
   private ResponseMeta<NodeRecord> createTask(@PathVariable("recordId") String recordId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, nodeRecordRepository.getRecordById(recordId));
   }

@@ -1,4 +1,4 @@
-package com.zj.domain.mapper.log;
+package com.zj.domain.entity.dto.log;
 
 import lombok.Data;
 
@@ -7,7 +7,7 @@ import lombok.Data;
  * @since 2023/5/12
  */
 @Data
-public class SubTaskLog {
+public class SubTaskLogDto {
 
   private Long id;
 
@@ -35,6 +35,8 @@ public class SubTaskLog {
    * 父任务Id
    * */
   private String logId;
+
+  private Integer status;
 
   private Long createTime;
 

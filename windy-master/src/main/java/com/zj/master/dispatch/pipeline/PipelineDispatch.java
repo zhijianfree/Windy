@@ -3,10 +3,15 @@ package com.zj.master.dispatch.pipeline;
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
+import com.zj.domain.entity.dto.log.SubTaskLogDto;
+import com.zj.domain.entity.dto.log.TaskLogDto;
 import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDTO;
 import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
 import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
+import com.zj.domain.entity.po.log.SubTaskLog;
+import com.zj.domain.repository.log.ISubTaskLogRepository;
+import com.zj.domain.repository.log.ITaskLogRepository;
 import com.zj.domain.repository.pipeline.IPipelineActionRepository;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import com.zj.domain.repository.pipeline.IPipelineNodeRepository;
@@ -56,6 +61,9 @@ public class PipelineDispatch implements IDispatchExecutor {
   @Autowired
   private PipelineExecuteProxy pipelineExecuteProxy;
 
+  @Autowired
+  private ISubTaskLogRepository subTaskLogRepository;
+
   @Override
   public Integer type() {
     return LogType.PIPELINE.getType();
@@ -86,12 +94,31 @@ public class PipelineDispatch implements IDispatchExecutor {
     PipelineTask pipelineTask = new PipelineTask();
     pipelineTask.setPipelineId(pipeline.getPipelineId());
     pipelineTask.setHistoryId(historyId);
+    pipelineTask.setLogId(task.getTaskLogId());
 
     List<TaskNode> taskNodeList = pipelineNodes.stream().map(node -> buildTaskNode(node, historyId))
         .collect(Collectors.toList());
     pipelineTask.addAll(taskNodeList);
+
+    createSubTaskLog(pipelineTask);
     pipelineExecuteProxy.runTask(pipelineTask);
     return true;
+  }
+
+  private void createSubTaskLog(PipelineTask pipelineTask) {
+    List<SubTaskLogDto> logList = pipelineTask.getTaskNodes().stream().map(taskNode -> {
+      SubTaskLogDto subTaskLog = new SubTaskLogDto();
+      subTaskLog.setSubTaskId(uniqueIdService.getUniqueId());
+      subTaskLog.setLogId(pipelineTask.getLogId());
+      subTaskLog.setExecuteId(taskNode.getNodeId());
+      subTaskLog.setStatus(ProcessStatus.RUNNING.getType());
+      long dateNow = System.currentTimeMillis();
+      subTaskLog.setCreateTime(dateNow);
+      subTaskLog.setUpdateTime(dateNow);
+      return subTaskLog;
+    }).collect(Collectors.toList());
+
+    subTaskLogRepository.batchSaveLogs(logList);
   }
 
   private void saveHistory(String pipelineId, String historyId) {
@@ -131,5 +158,10 @@ public class PipelineDispatch implements IDispatchExecutor {
     NodeConfig nodeConfig = new NodeConfig();
     taskNode.setNodeConfig(nodeConfig);
     return taskNode;
+  }
+
+  @Override
+  public boolean resume(TaskLogDto taskLog) {
+    return false;
   }
 }

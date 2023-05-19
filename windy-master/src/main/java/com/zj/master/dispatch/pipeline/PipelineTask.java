@@ -15,9 +15,20 @@ import org.apache.commons.collections4.CollectionUtils;
 @Data
 public class PipelineTask {
 
+  /**
+   * 流水线历史记录Id
+   * */
   private String historyId;
 
+  /**
+   * 流线Id
+   * */
   private String pipelineId;
+
+  /**
+   * master节点执行记录的Id，恢复奔溃任务时使用
+   * */
+  private String logId;
 
   private LinkedBlockingQueue<TaskNode> taskNodes;
 

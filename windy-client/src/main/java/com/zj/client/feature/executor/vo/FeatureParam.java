@@ -35,4 +35,6 @@ public class FeatureParam {
    * 分配任务的masterIP
    * */
   private String masterIp;
+
+  private String logId;
 }

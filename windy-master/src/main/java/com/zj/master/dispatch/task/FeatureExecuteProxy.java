@@ -99,13 +99,13 @@ public class FeatureExecuteProxy implements IInnerEventListener {
     }
 
     //每个用例执行完成之后都需要判断下是整个任务是否执行完成
-    boolean isTaskEnd = taskEndProcessor.process(taskRecordId, processStatus);
+    FeatureTask featureTask = featureTaskMap.get(taskRecordId);
+    boolean isTaskEnd = taskEndProcessor.process(taskRecordId, processStatus, featureTask.getLogId());
     if (isTaskEnd){
       featureTaskMap.remove(taskRecordId);
       return;
     }
 
-    FeatureTask featureTask = featureTaskMap.get(taskRecordId);
     if (Objects.nonNull(featureTask)) {
       log.info("feature task start cycle run");
       execute(featureTask);

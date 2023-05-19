@@ -5,6 +5,7 @@ import com.zj.common.enums.NotifyType;
 import com.zj.common.model.ResultEvent;
 import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.entity.po.pipeline.NodeRecord;
+import com.zj.domain.repository.log.ISubTaskLogRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.master.dispatch.pipeline.PipelineExecuteProxy;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,9 @@ public class UpdateNodeRecordEvent implements INotifyEvent{
   @Autowired
   private PipelineExecuteProxy pipelineExecuteProxy;
 
+  @Autowired
+  private ISubTaskLogRepository subTaskLogRepository;
+
   @Override
   public NotifyType type() {
     return NotifyType.UPDATE_NODE_RECORD;
@@ -40,6 +44,8 @@ public class UpdateNodeRecordEvent implements INotifyEvent{
     nodeRecord.setStatus(resultEvent.getStatus().getType());
     boolean updateStatus = nodeRecordRepository.updateNodeRecord(nodeRecord);
 
+    subTaskLogRepository.updateLogStatus(resultEvent.getLogId(), nodeRecord.getNodeId(),
+        nodeRecord.getStatus());
     //单个节点状态变化要通知给执行者，然后执行一下节点的任务
     pipelineExecuteProxy.statusChange(nodeRecord);
     return updateStatus;

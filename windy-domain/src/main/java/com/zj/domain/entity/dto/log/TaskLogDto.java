@@ -1,4 +1,4 @@
-package com.zj.domain.entity.po.log;
+package com.zj.domain.entity.dto.log;
 
 import lombok.Data;
 
@@ -7,9 +7,7 @@ import lombok.Data;
  * @since 2023/5/12
  */
 @Data
-public class TaskLog {
-
-  private Long id;
+public class TaskLogDto {
 
   /**
    * 日志Id

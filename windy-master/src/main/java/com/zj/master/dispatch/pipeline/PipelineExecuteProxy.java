@@ -62,6 +62,7 @@ public class PipelineExecuteProxy implements IInnerEventListener {
         return null;
       }
 
+      taskNode.setLogId(pipelineTask.getLogId());
       taskNode.setDispatchType(DISPATCH_PIPELINE_TYPE);
       taskNode.setMasterIp(IpUtils.getLocalIP());
       clientProxy.sendDispatchTask(taskNode);
@@ -89,11 +90,12 @@ public class PipelineExecuteProxy implements IInnerEventListener {
 
     //2 根据节点状态判断整个流水线状态
     NodeRecord record = nodeRecordRepository.getRecordById(nodeRecord.getRecordId());
+
+    PipelineTask pipelineTask = pipelineTaskMap.get(nodeRecord.getHistoryId());
     pipelineEndProcessor.statusChange(nodeRecord.getHistoryId(), record.getNodeId(),
-        ProcessStatus.exchange(nodeRecord.getStatus()));
+        ProcessStatus.exchange(nodeRecord.getStatus()), pipelineTask.getLogId());
 
     //3 根据historyId关联的任务来执行下一个任务
-    PipelineTask pipelineTask = pipelineTaskMap.get(nodeRecord.getHistoryId());
     if (Objects.isNull(pipelineTask)) {
       log.info("not find Pipeline task historyId={}", nodeRecord.getHistoryId());
       return;

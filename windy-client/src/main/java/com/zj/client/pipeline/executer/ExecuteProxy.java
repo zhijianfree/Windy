@@ -69,7 +69,10 @@ public class ExecuteProxy implements IStatusNotifyListener {
     nodeRecord.setResult(message);
 
     ResultEvent resultEvent = new ResultEvent().executeId(taskNode.getRecordId())
-        .status(processStatus).notifyType(NotifyType.UPDATE_NODE_RECORD).params(nodeRecord)
+        .notifyType(NotifyType.UPDATE_NODE_RECORD)
+        .status(processStatus)
+        .logId(taskNode.getLogId())
+        .params(nodeRecord)
         .masterIP(taskNode.getMasterIp());
     resultEventNotify.notifyEvent(resultEvent);
   }

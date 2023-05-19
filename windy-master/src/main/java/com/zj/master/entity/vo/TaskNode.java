@@ -52,4 +52,6 @@ public class TaskNode extends BaseDispatch{
    * 任务开始执行的时间点
    * */
   private Long executeTime;
+
+  private String logId;
 }

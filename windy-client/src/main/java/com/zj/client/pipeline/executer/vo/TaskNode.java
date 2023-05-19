@@ -58,4 +58,6 @@ public class TaskNode {
    * 主节点IP
    * */
   private String masterIp;
+
+  private String logId;
 }

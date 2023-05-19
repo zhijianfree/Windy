@@ -1,5 +1,6 @@
 package com.zj.master.dispatch;
 
+import com.zj.domain.entity.dto.log.TaskLogDto;
 import com.zj.master.entity.dto.TaskDetailDto;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,7 @@ public class Dispatcher {
         .collect(Collectors.toMap(IDispatchExecutor::type, dispatchExecutor -> dispatchExecutor));
   }
 
-  public Boolean dispatch(TaskDetailDto task) {
+  public boolean dispatch(TaskDetailDto task) {
     log.info("go into dispatch name={}", task.getSourceName());
     IDispatchExecutor dispatchExecutor = dispatchExecutorMap.get(task.getType());
     if (Objects.isNull(dispatchExecutor)) {
@@ -35,5 +36,10 @@ public class Dispatcher {
     }
     log.info("start dispatch name={}", task.getSourceName());
     return dispatchExecutor.dispatch(task);
+  }
+
+  public boolean resumeTask(TaskLogDto taskLog) {
+    IDispatchExecutor dispatchExecutor = dispatchExecutorMap.get(taskLog.getLogType());
+    return dispatchExecutor.resume(taskLog);
   }
 }

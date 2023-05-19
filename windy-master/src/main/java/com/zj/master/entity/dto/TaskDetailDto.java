@@ -25,4 +25,9 @@ public class TaskDetailDto {
    * 任务类型{@link LogType}
    * */
   private Integer type;
+
+  /**
+   * 执行记录Id
+   * */
+  private String taskLogId;
 }

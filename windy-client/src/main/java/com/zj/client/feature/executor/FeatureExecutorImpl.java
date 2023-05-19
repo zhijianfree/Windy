@@ -79,7 +79,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
         }
 
         //3 保存执行点记录
-        saveRecord(featureParam.getMasterIp(), executePoint, executeRecord);
+        saveRecord(featureParam, executePoint, executeRecord);
         if (Objects.equals(executeRecord.getStatus(), ProcessStatus.FAIL.getType())) {
           log.warn("execute feature error featureId= {}", executePoint.getFeatureId());
           status.set(executeRecord.getStatus());
@@ -92,13 +92,14 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
       ResultEvent resultEvent = new ResultEvent().executeId(featureParam.getTaskRecordId())
           .notifyType(NotifyType.UPDATE_FEATURE_HISTORY)
           .masterIP(featureParam.getMasterIp())
+          .logId(featureParam.getLogId())
           .status(ProcessStatus.exchange(status.get()))
           .params(featureHistory);
       resultEventNotify.notifyEvent(resultEvent);
     }, executorService);
   }
 
-  private void saveRecord(String masterIp, ExecutePoint executePoint,
+  private void saveRecord(FeatureParam featureParam, ExecutePoint executePoint,
       ExecuteRecord executeRecord) {
     executeRecord.setExecutePointId(executePoint.getPointId());
     ExecutorUnit unit = JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit.class);
@@ -111,7 +112,8 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
 
     ResultEvent resultEvent = new ResultEvent().executeId(recordId)
         .notifyType(NotifyType.CREATE_EXECUTE_POINT_RECORD)
-        .masterIP(masterIp)
+        .masterIP(featureParam.getMasterIp())
+        .logId(featureParam.getLogId())
         .status(ProcessStatus.exchange(executeRecord.getStatus())).params(executeRecord);
     resultEventNotify.notifyEvent(resultEvent);
   }
