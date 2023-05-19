@@ -64,24 +64,4 @@ public class CodeChangeDto {
      * 更新时间
      */
     private Long updateTime;
-
-    public static CodeChange toCodeChange(CodeChangeDto codeChangeDto) {
-        CodeChange codeChange = new CodeChange();
-        codeChange.setChangeId(codeChangeDto.getChangeId());
-        codeChange.setChangeDesc(codeChangeDto.getChangeDesc());
-        codeChange.setChangeName(codeChangeDto.getChangeName());
-        codeChange.setChangeBranch(codeChangeDto.getChangeBranch());
-        codeChange.setServiceId(codeChangeDto.getServiceId());
-        codeChange.setCreator(codeChangeDto.getCreator());
-        codeChange.setRelationId(codeChangeDto.getRelationId());
-        return codeChange;
-    }
-
-    public static CodeChangeDto toCodeChangeDto(CodeChange codeChange) {
-        if (Objects.isNull(codeChange)) {
-            return null;
-        }
-
-        return OrikaUtil.convert(codeChange, CodeChangeDto.class);
-    }
 }

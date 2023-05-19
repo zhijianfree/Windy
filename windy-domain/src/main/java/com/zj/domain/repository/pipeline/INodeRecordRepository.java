@@ -19,7 +19,9 @@ public interface INodeRecordRepository {
 
   boolean batchUpdateStatus(List<String> recordIds, ProcessStatus processStatus);
 
-  List<NodeRecord> getRecordsByHistoryId(String historyId);
+  List<NodeRecordDto> getRecordsByHistoryId(String historyId);
 
   NodeRecord getRecordById(String recordId);
+
+  NodeRecordDto getRecordByNodeAndHistory(String historyId, String nodeId);
 }

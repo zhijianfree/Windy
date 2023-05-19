@@ -11,7 +11,6 @@ import javax.validation.constraints.NotNull;
  * @since 2021/10/15
  */
 
-@Builder
 @Data
 public class GitBindDto {
 

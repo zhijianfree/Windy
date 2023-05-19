@@ -9,6 +9,7 @@ import com.zj.common.generate.UniqueIdService;
 import com.zj.domain.entity.dto.pipeline.CodeChangeDto;
 import com.zj.domain.entity.dto.pipeline.RelationDemandBug;
 import com.zj.domain.entity.po.pipeline.CodeChange;
+import com.zj.domain.repository.pipeline.ICodeChangeRepository;
 import com.zj.pipeline.git.IRepositoryBranch;
 import com.zj.domain.mapper.pipeline.CodeChangeMapper;
 import com.zj.service.entity.po.Microservice;
@@ -28,7 +29,7 @@ import org.springframework.util.CollectionUtils;
  */
 @Slf4j
 @Service
-public class CodeChangeService extends ServiceImpl<CodeChangeMapper, CodeChange> {
+public class CodeChangeService {
 
   @Autowired
   private IRepositoryBranch repositoryBranch;
@@ -39,55 +40,46 @@ public class CodeChangeService extends ServiceImpl<CodeChangeMapper, CodeChange>
   @Autowired
   private UniqueIdService uniqueIdService;
 
+  @Autowired
+  private ICodeChangeRepository codeChangeRepository;
+
   public CodeChangeDto getCodeChange(String serviceId, String codeChangeId) {
     Assert.notEmpty(serviceId, "serviceId can not be null");
-    CodeChange codeChange = getOne(
-        Wrappers.<CodeChange>lambdaQuery().eq(CodeChange::getChangeId, codeChangeId));
-    return CodeChangeDto.toCodeChangeDto(codeChange);
+    return codeChangeRepository.getCodeChange(codeChangeId);
   }
 
-  public String createCodeChange(CodeChangeDto codeChangeDto) {
-    Microservice service = checkServiceExist(codeChangeDto.getServiceId());
-    repositoryBranch.createBranch(service.getServiceName(), codeChangeDto.getChangeBranch());
+  public String createCodeChange(CodeChangeDto codeChange) {
+    Microservice service = checkServiceExist(codeChange.getServiceId());
+    repositoryBranch.createBranch(service.getServiceName(), codeChange.getChangeBranch());
 
-    CodeChange codeChange = CodeChangeDto.toCodeChange(codeChangeDto);
     codeChange.setChangeId(uniqueIdService.getUniqueId());
     codeChange.setUpdateTime(System.currentTimeMillis());
     codeChange.setCreateTime(System.currentTimeMillis());
-    return save(codeChange) ? codeChange.getChangeId() : "";
+    return codeChangeRepository.saveCodeChange(codeChange) ? codeChange.getChangeId() : "";
   }
 
   public boolean updateCodeChange(String serviceId, String codeChangeId,
-      CodeChangeDto codeChangeDto) {
+      CodeChangeDto codeChange) {
     CodeChangeDto changeDto = getCodeChange(serviceId, codeChangeId);
     if (Objects.isNull(changeDto)) {
       throw new ApiException(ErrorCode.NOT_FOUND_CODE_CHANGE);
     }
 
-    CodeChange codeChange = CodeChangeDto.toCodeChange(codeChangeDto);
     codeChange.setChangeId(codeChangeId);
     codeChange.setUpdateTime(System.currentTimeMillis());
-    return update(codeChange, Wrappers.lambdaUpdate(CodeChange.class)
-        .eq(CodeChange::getChangeId, codeChange.getChangeId()));
+    return codeChangeRepository.updateCodeChange(codeChange);
   }
 
   public List<CodeChangeDto> listCodeChanges(String serviceId) {
     checkServiceExist(serviceId);
-
-    List<CodeChange> codeChanges = list(
-        Wrappers.lambdaQuery(CodeChange.class).eq(CodeChange::getServiceId, serviceId));
-    if (CollectionUtils.isEmpty(codeChanges)) {
-      return Collections.emptyList();
-    }
-
-    return codeChanges.stream().map(CodeChangeDto::toCodeChangeDto).collect(Collectors.toList());
+    return codeChangeRepository.getServiceChanges(serviceId);
   }
 
   public Boolean deleteCodeChange(String serviceId, String codeChangeId) {
     Microservice service = checkServiceExist(serviceId);
     CodeChangeDto codeChange = getCodeChange(serviceId, codeChangeId);
     repositoryBranch.deleteBranch(service.getServiceName(), codeChange.getChangeBranch());
-    return remove(Wrappers.lambdaQuery(CodeChange.class).eq(CodeChange::getChangeId, codeChangeId));
+    return codeChangeRepository.deleteCodeChange(codeChangeId);
   }
 
   public List<RelationDemandBug> queryRelationIds(String queryName) {

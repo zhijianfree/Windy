@@ -4,10 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.entity.po.pipeline.NodeRecord;
 import com.zj.domain.mapper.pipeline.NodeRecordMapper;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import java.util.Collections;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,7 +20,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class NodeRecordService extends ServiceImpl<NodeRecordMapper, NodeRecord> {
+public class NodeRecordService {
 
   @Autowired
   private INodeRecordRepository nodeRecordRepository;
@@ -31,12 +33,14 @@ public class NodeRecordService extends ServiceImpl<NodeRecordMapper, NodeRecord>
   }
 
   public Boolean approval(String historyId, String nodeId) {
-    NodeRecord nodeRecord = getOne(
-        Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getHistoryId, historyId)
-            .eq(NodeRecord::getNodeId, nodeId));
+    NodeRecordDto nodeRecord = nodeRecordRepository.getRecordByNodeAndHistory(historyId, nodeId);
     log.info("get approval recordId={}", nodeRecord.getNodeId());
     updateNodeRecordStatus(nodeRecord.getRecordId(), ProcessStatus.SUCCESS.getType(),
         JSON.toJSONString(Collections.singletonList(APPROVAL_TIPS)));
     return true;
+  }
+
+  public List<NodeRecordDto> getNodeRecordsByHistory(String historyId) {
+    return nodeRecordRepository.getRecordsByHistoryId(historyId);
   }
 }

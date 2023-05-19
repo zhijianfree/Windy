@@ -8,6 +8,7 @@ import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.common.utils.OrikaUtil;
+import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.entity.dto.pipeline.NodeStatus;
 import com.zj.domain.entity.dto.pipeline.PipelineDTO;
 import com.zj.domain.entity.dto.pipeline.PipelineExecuteInfo;
@@ -31,7 +32,7 @@ import org.springframework.util.CollectionUtils;
  */
 @Slf4j
 @Service
-public class PipelineHistoryService extends ServiceImpl<PipelineHistoryMapper, PipelineHistory> {
+public class PipelineHistoryService {
 
   @Autowired
   private PipelineService pipelineService;
@@ -69,8 +70,7 @@ public class PipelineHistoryService extends ServiceImpl<PipelineHistoryMapper, P
 
   public PipelineExecuteInfo getPipeLineStatusDetail(String historyId) {
     PipelineHistoryDto pipelineHistory = getPipelineHistory(historyId);
-    List<NodeRecord> nodeRecords = recordService.list(
-        Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getHistoryId, historyId));
+    List<NodeRecordDto> nodeRecords = recordService.getNodeRecordsByHistory(historyId);
     List<NodeStatus> statusList = nodeRecords.stream().map(nodeRecord -> {
       NodeStatus nodeStatus = new NodeStatus();
       nodeStatus.setRecordId(nodeRecord.getRecordId());

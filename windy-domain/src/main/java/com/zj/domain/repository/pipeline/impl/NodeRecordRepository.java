@@ -63,12 +63,22 @@ public class NodeRecordRepository extends ServiceImpl<NodeRecordMapper, NodeReco
   }
 
   @Override
-  public List<NodeRecord> getRecordsByHistoryId(String historyId) {
-    return list(Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getHistoryId, historyId));
+  public List<NodeRecordDto> getRecordsByHistoryId(String historyId) {
+    List<NodeRecord> nodeRecords = list(
+        Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getHistoryId, historyId));
+    return OrikaUtil.convertList(nodeRecords, NodeRecordDto.class);
   }
 
   @Override
   public NodeRecord getRecordById(String recordId) {
     return getOne(Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getRecordId, recordId));
+  }
+
+  @Override
+  public NodeRecordDto getRecordByNodeAndHistory(String historyId, String nodeId) {
+    NodeRecord nodeRecord = getOne(
+        Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getHistoryId, historyId)
+            .eq(NodeRecord::getNodeId, nodeId));
+    return OrikaUtil.convert(nodeRecord, NodeRecordDto.class);
   }
 }

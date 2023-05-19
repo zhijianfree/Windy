@@ -9,6 +9,7 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.domain.entity.dto.pipeline.GitBindDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDTO;
+import com.zj.domain.repository.pipeline.IGitBindRepository;
 import com.zj.pipeline.entity.enums.PipelineExecuteType;
 import com.zj.domain.entity.po.pipeline.GitBind;
 import com.zj.domain.entity.po.pipeline.Pipeline;
@@ -35,7 +36,7 @@ import org.springframework.util.StringUtils;
  */
 @Slf4j
 @Service
-public class GitBindService extends ServiceImpl<GitBindMapper, GitBind> {
+public class GitBindService {
 
   @Autowired
   private MicroserviceService microserviceService;
@@ -53,6 +54,9 @@ public class GitBindService extends ServiceImpl<GitBindMapper, GitBind> {
   @Autowired
   private UniqueIdService uniqueIdService;
 
+  @Autowired
+  private IGitBindRepository gitBindRepository;
+
   public String createGitBind(GitBindDto gitBindDto) {
     List<GitBindDto> bindDtoList = listGitBinds(gitBindDto.getPipelineId());
     Optional<GitBindDto> optional = bindDtoList.stream()
@@ -62,49 +66,34 @@ public class GitBindService extends ServiceImpl<GitBindMapper, GitBind> {
       throw new ApiException(ErrorCode.BRANCH_ALREADY_BIND);
     }
 
-    GitBind gitBind = toGitBind(gitBindDto);
-    gitBind.setBindId(uniqueIdService.getUniqueId());
-    gitBind.setUpdateTime(System.currentTimeMillis());
-    gitBind.setCreateTime(System.currentTimeMillis());
-    if (save(gitBind)) {
-      return gitBind.getBindId();
-    }
-    return "";
+    gitBindDto.setBindId(uniqueIdService.getUniqueId());
+    boolean result = gitBindRepository.saveGitBind(gitBindDto);
+    return result ? gitBindDto.getBindId() : "";
   }
 
   public List<GitBindDto> listGitBinds(String pipelineId) {
     checkPipelineExist(pipelineId);
-
-    List<GitBind> gitBinds = list(
-        Wrappers.lambdaQuery(GitBind.class).eq(GitBind::getPipelineId, pipelineId));
-
-    if (CollectionUtils.isEmpty(gitBinds)) {
-      return Collections.emptyList();
-    }
-    return gitBinds.stream().map(GitBindService::toGitBindDto).collect(Collectors.toList());
+    return gitBindRepository.getPipelineGitBinds(pipelineId);
   }
 
   public Boolean updateGitBind(GitBindDto gitBindDto) {
     checkPipelineExist(gitBindDto.getPipelineId());
 
-    GitBind gitBind = getGitBind(gitBindDto.getBindId());
+    GitBindDto gitBind = getGitBind(gitBindDto.getBindId());
     if (Objects.isNull(gitBind)) {
       throw new ApiException(ErrorCode.NOT_FOUND_PIPELINE_GIT_BIND);
     }
-    GitBind update = toGitBind(gitBindDto);
-    update.setUpdateTime(System.currentTimeMillis());
-    return update(update,
-        Wrappers.lambdaUpdate(GitBind.class).eq(GitBind::getBindId, gitBindDto.getBindId()));
+
+    return gitBindRepository.updateGitBind(gitBindDto);
   }
 
-  private GitBind getGitBind(String bindId) {
-    return getOne(Wrappers.lambdaQuery(GitBind.class).eq(GitBind::getBindId, bindId));
+  private GitBindDto getGitBind(String bindId) {
+    return gitBindRepository.getGitBind(bindId);
   }
 
   public Boolean deleteGitBind(String pipelineId, String bindId) {
     checkPipelineExist(pipelineId);
-
-    return remove(Wrappers.lambdaQuery(GitBind.class).eq(GitBind::getBindId, bindId));
+    return gitBindRepository.deleteGitBind(bindId);
   }
 
   private void checkPipelineExist(String pipelineId) {
@@ -159,26 +148,5 @@ public class GitBindService extends ServiceImpl<GitBindMapper, GitBind> {
   public List<String> getServiceBranch(String serviceId) {
     Microservice serviceDetail = microserviceService.getServiceDetail(serviceId);
     return repositoryBranch.listBranch(serviceDetail.getServiceName());
-  }
-
-  public static GitBind toGitBind(GitBindDto gitBindDto) {
-    GitBind gitBind = new GitBind();
-    gitBind.setBindId(gitBindDto.getBindId());
-    gitBind.setGitBranch(gitBindDto.getGitBranch());
-    gitBind.setGitUrl(gitBindDto.getGitUrl());
-    gitBind.setIsChoose(gitBindDto.getIsChoose());
-    gitBind.setPipelineId(gitBindDto.getPipelineId());
-    return gitBind;
-  }
-
-  public static GitBindDto toGitBindDto(GitBind gitBind) {
-    return GitBindDto.builder().bindId(gitBind.getBindId())
-        .isChoose(gitBind.getIsChoose())
-        .gitBranch(gitBind.getGitBranch())
-        .gitUrl(gitBind.getGitUrl())
-        .pipelineId(gitBind.getPipelineId())
-        .createTime(gitBind.getCreateTime())
-        .updateTime(gitBind.getUpdateTime())
-        .build();
   }
 }

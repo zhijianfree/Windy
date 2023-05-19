@@ -9,7 +9,7 @@ import lombok.Data;
  * @since 2022/6/22
  */
 @Data
-public class PipelineStageDTO {
+public class PipelineStageDto {
 
   private String stageId;
 
