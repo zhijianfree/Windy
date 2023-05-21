@@ -6,6 +6,7 @@ import com.zj.domain.entity.dto.log.SubTaskLogDto;
 import com.zj.domain.entity.dto.log.TaskLogDto;
 import com.zj.domain.repository.log.ISubTaskLogRepository;
 import com.zj.domain.repository.log.ITaskLogRepository;
+import com.zj.master.dispatch.Dispatcher;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -38,6 +39,9 @@ public class TaskScheduleJob {
   @Value("${task.log.max.wait.time:300}")
   private Integer maxExecuteWaitTime;
 
+  @Autowired
+  private Dispatcher dispatcher;
+
   @Scheduled(cron = "0 0 0/1 * * ? ")
   public void scanTaskLog() {
     // 1 扫描任务日志，只获取正在执行中的日志
@@ -53,9 +57,13 @@ public class TaskScheduleJob {
     //todo 暂时不考虑
 
     // 4 筛选出来的任务开始切换到当前节点执行
-    runningTaskLog.forEach(taskLog -> {
+    runningTaskLog.forEach(taskLog -> dispatcher.resumeTask(taskLog));
+  }
 
-    });
+
+  @Scheduled(cron = "0 0 0 * * ?")
+  public void deleteOldLog() {
+    taskLogRepository.delete7DayLog();
   }
 
   private List<TaskLogDto> resolveNoMasterTaskLog(List<TaskLogDto> runningTaskLog) {
@@ -64,11 +72,6 @@ public class TaskScheduleJob {
         //使用乐观锁，保证当前任务只被一个节点覆盖
         log -> taskLogRepository.updateLogMasterIp(log.getLogId(), IpUtils.getLocalIP(),
             log.getLockVersion())).collect(Collectors.toList());
-  }
-
-  @Scheduled(cron = "0 0 0 * * ?")
-  public void deleteOldLog() {
-    taskLogRepository.delete7DayLog();
   }
 
   private List<String> getCurrentMasterIpList() {

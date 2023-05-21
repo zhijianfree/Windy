@@ -17,10 +17,12 @@ import com.zj.master.dispatch.IDispatchExecutor;
 import com.zj.master.entity.dto.TaskDetailDto;
 import com.zj.common.enums.LogType;
 import com.zj.master.entity.vo.ExecuteContext;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,6 +148,23 @@ public class TaskDispatch implements IDispatchExecutor {
 
   @Override
   public boolean resume(TaskLogDto taskLog) {
+    List<SubTaskLogDto> tasks = subTaskLogRepository.getSubTaskByLogId(taskLog.getLogId());
+    List<SubTaskLogDto> sorted = tasks.stream()
+        .filter(subTask -> Objects.equals(subTask.getStatus(), ProcessStatus.RUNNING.getType()))
+        .sorted(Comparator.comparing(SubTaskLogDto::getSortIndex)).collect(Collectors.toList());
+
+    // todo  日志是否可以存储执行参数？
+//    FeatureTask featureTask = new FeatureTask();
+//    ExecuteContext executeContext = buildTaskConfig(taskRecordDto.getTaskConfig());
+//    featureTask.setExecuteContext(executeContext);
+//
+//    List<String> featureIds = featureList.stream().map(FeatureInfoDto::getFeatureId)
+//        .collect(Collectors.toList());
+//    featureTask.addAll(featureIds);
+//
+//    featureTask.setTaskRecordId(taskRecordDto.getRecordId());
+//    featureTask.setTaskId(task.getSourceId());
+//    featureTask.setLogId(task.getTaskLogId());
     return false;
   }
 }

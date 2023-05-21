@@ -36,6 +36,8 @@ public class SubTaskLogDto {
    * */
   private String logId;
 
+  private Integer sortIndex;
+
   private Integer status;
 
   private Long createTime;
