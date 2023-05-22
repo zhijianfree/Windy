@@ -1,16 +1,15 @@
 package com.zj.master.schedule;
 
-import com.zj.common.enums.ProcessStatus;
+import com.alibaba.fastjson.JSON;
 import com.zj.common.utils.IpUtils;
-import com.zj.domain.entity.dto.log.SubTaskLogDto;
-import com.zj.domain.entity.dto.log.TaskLogDto;
+import com.zj.domain.entity.dto.log.DispatchLogDto;
 import com.zj.domain.repository.log.ISubTaskLogRepository;
-import com.zj.domain.repository.log.ITaskLogRepository;
+import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.master.dispatch.Dispatcher;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,12 +22,13 @@ import org.springframework.stereotype.Component;
  * @author guyuelan
  * @since 2023/5/11
  */
+@Slf4j
 @Component
 public class TaskScheduleJob {
 
   public static final String WINDY_MASTER_NAME = "WindyMaster";
   @Autowired
-  private ITaskLogRepository taskLogRepository;
+  private IDispatchLogRepository taskLogRepository;
 
   @Autowired
   private ISubTaskLogRepository subTaskLogRepository;
@@ -42,20 +42,23 @@ public class TaskScheduleJob {
   @Autowired
   private Dispatcher dispatcher;
 
-  @Scheduled(cron = "0 0 0/1 * * ? ")
+  //  @Scheduled(cron = "0 0 0/1 * * ? ")
+  @Scheduled(cron = "0/5 * * * * ? ")
   public void scanTaskLog() {
+    log.info("start scan log......");
     // 1 扫描任务日志，只获取正在执行中的日志
-    List<TaskLogDto> runningTaskLog = taskLogRepository.getRunningTaskLog();
+    List<DispatchLogDto> runningTaskLog = taskLogRepository.getRunningTaskLog();
     if (CollectionUtils.isEmpty(runningTaskLog)) {
       return;
     }
 
     // 2 判断扫描到的任务执行的master节点是否还存在，不存在准备进入重选节点流程
-    List<TaskLogDto> noMasterLogList = resolveNoMasterTaskLog(runningTaskLog);
+    List<DispatchLogDto> noMasterLogList = resolveNoMasterTaskLog(runningTaskLog);
 
     // 3 根据时间判断，在一定的时间间隔内仍未完成的任务日志，转移当前任务的执行节点为自己。
     //todo 暂时不考虑
 
+    log.info("start run no master task ={}", JSON.toJSONString(noMasterLogList));
     // 4 筛选出来的任务开始切换到当前节点执行
     noMasterLogList.forEach(taskLog -> dispatcher.resumeTask(taskLog));
   }
@@ -66,7 +69,7 @@ public class TaskScheduleJob {
     taskLogRepository.delete7DayLog();
   }
 
-  private List<TaskLogDto> resolveNoMasterTaskLog(List<TaskLogDto> runningTaskLog) {
+  private List<DispatchLogDto> resolveNoMasterTaskLog(List<DispatchLogDto> runningTaskLog) {
     List<String> masterIps = getCurrentMasterIpList();
     return runningTaskLog.stream().filter(log -> masterIps.contains(log.getNodeIp())).filter(
         //使用乐观锁，保证当前任务只被一个节点覆盖

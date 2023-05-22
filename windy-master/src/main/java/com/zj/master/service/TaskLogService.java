@@ -1,19 +1,16 @@
 package com.zj.master.service;
 
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.common.utils.IpUtils;
-import com.zj.domain.entity.dto.log.TaskLogDto;
-import com.zj.domain.repository.log.ITaskLogRepository;
+import com.zj.domain.entity.dto.log.DispatchLogDto;
+import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.master.dispatch.Dispatcher;
 import com.zj.master.dispatch.listener.InnerEvent;
 import com.zj.master.dispatch.listener.TaskInnerEventFactory;
 import com.zj.master.entity.dto.TaskDetailDto;
-import com.zj.domain.entity.po.log.TaskLog;
-import com.zj.domain.mapper.log.TaskLogMapper;
 import com.zj.master.entity.enums.EventType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,20 +28,20 @@ public class TaskLogService {
   private UniqueIdService uniqueIdService;
 
   @Autowired
-  private ITaskLogRepository taskLogRepository;
+  private IDispatchLogRepository taskLogRepository;
 
   @Autowired
   private Dispatcher dispatcher;
 
   public Boolean createTask(TaskDetailDto task) {
     log.info("receive task detail ={}", JSON.toJSONString(task));
-    TaskLogDto taskLog = saveLog(task);
+    DispatchLogDto taskLog = saveLog(task);
     task.setTaskLogId(taskLog.getLogId());
     return dispatcher.dispatch(task);
   }
 
-  private TaskLogDto saveLog(TaskDetailDto task) {
-    TaskLogDto taskLog = new TaskLogDto();
+  private DispatchLogDto saveLog(TaskDetailDto task) {
+    DispatchLogDto taskLog = new DispatchLogDto();
     taskLog.setLogId(uniqueIdService.getUniqueId());
     taskLog.setSourceId(task.getSourceId());
     taskLog.setSourceName(task.getSourceName());

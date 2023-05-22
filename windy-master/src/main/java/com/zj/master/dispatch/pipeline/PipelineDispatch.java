@@ -4,11 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.domain.entity.dto.log.SubTaskLogDto;
-import com.zj.domain.entity.dto.log.TaskLogDto;
+import com.zj.domain.entity.dto.log.DispatchLogDto;
 import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
 import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
+import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.domain.repository.log.ISubTaskLogRepository;
 import com.zj.domain.repository.pipeline.IPipelineActionRepository;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
@@ -62,6 +63,9 @@ public class PipelineDispatch implements IDispatchExecutor {
   @Autowired
   private ISubTaskLogRepository subTaskLogRepository;
 
+  @Autowired
+  private IDispatchLogRepository dispatchLogRepository;
+
   @Override
   public Integer type() {
     return LogType.PIPELINE.getType();
@@ -88,6 +92,8 @@ public class PipelineDispatch implements IDispatchExecutor {
     saveHistory(pipeline.getPipelineId(), historyId);
     log.info("start run pipeline={} name={} historyId={}", task.getSourceId(), task.getSourceName(),
         historyId);
+
+    dispatchLogRepository.updateLogSourceRecord(task.getTaskLogId(), historyId);
 
     PipelineTask pipelineTask = new PipelineTask();
     pipelineTask.setPipelineId(pipeline.getPipelineId());
@@ -159,7 +165,7 @@ public class PipelineDispatch implements IDispatchExecutor {
   }
 
   @Override
-  public boolean resume(TaskLogDto taskLog) {
+  public boolean resume(DispatchLogDto taskLog) {
     PipelineDto pipeline = pipelineRepository.getPipeline(taskLog.getSourceId());
     if (Objects.isNull(pipeline)) {
       log.info("can not find pipeline name={} pipelineId={}", taskLog.getSourceName(),

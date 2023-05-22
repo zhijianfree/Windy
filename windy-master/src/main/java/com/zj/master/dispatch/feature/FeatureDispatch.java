@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.domain.entity.dto.feature.FeatureInfoDto;
 import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
-import com.zj.domain.entity.dto.log.TaskLogDto;
+import com.zj.domain.entity.dto.log.DispatchLogDto;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.domain.repository.feature.ITestCaseConfigRepository;
 import com.zj.domain.repository.feature.ITestCaseRepository;
@@ -71,7 +71,7 @@ public class FeatureDispatch implements IDispatchExecutor {
   }
 
   @Override
-  public boolean resume(TaskLogDto taskLog) {
+  public boolean resume(DispatchLogDto taskLog) {
     log.info("临时任务不支持恢复");
     return false;
   }

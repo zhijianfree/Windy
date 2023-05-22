@@ -7,7 +7,7 @@ import com.zj.domain.entity.dto.feature.TaskRecordDto;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
-import com.zj.domain.repository.log.ITaskLogRepository;
+import com.zj.domain.repository.log.IDispatchLogRepository;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -33,7 +33,7 @@ public class TaskEndProcessor {
   private IFeatureRepository featureRepository;
 
   @Autowired
-  private ITaskLogRepository taskLogRepository;
+  private IDispatchLogRepository taskLogRepository;
 
   public boolean process(String taskRecordId, ProcessStatus status, String logId) {
     TaskRecordDto taskRecord = taskRecordRepository.getTaskRecord(taskRecordId);

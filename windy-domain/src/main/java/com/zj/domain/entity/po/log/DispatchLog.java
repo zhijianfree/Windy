@@ -1,4 +1,4 @@
-package com.zj.domain.entity.dto.log;
+package com.zj.domain.entity.po.log;
 
 import lombok.Data;
 
@@ -7,7 +7,9 @@ import lombok.Data;
  * @since 2023/5/12
  */
 @Data
-public class TaskLogDto {
+public class DispatchLog {
+
+  private Long id;
 
   /**
    * 日志Id
@@ -25,11 +27,6 @@ public class TaskLogDto {
   private String sourceId;
 
   /**
-   * 来源记录Id
-   * */
-  private String sourceRecordId;
-
-  /**
    * 任务来源名称
    * */
   private String sourceName;
@@ -43,6 +40,11 @@ public class TaskLogDto {
    * 日志状态
    * */
   private Integer logStatus;
+
+  /**
+   * 来源记录Id
+   * */
+  private String sourceRecordId;
 
   /**
    * 乐观锁版本号

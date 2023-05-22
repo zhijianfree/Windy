@@ -8,21 +8,20 @@ import com.zj.domain.entity.dto.feature.FeatureInfoDto;
 import com.zj.domain.entity.dto.feature.TaskInfoDto;
 import com.zj.domain.entity.dto.feature.TaskRecordDto;
 import com.zj.domain.entity.dto.log.SubTaskLogDto;
-import com.zj.domain.entity.dto.log.TaskLogDto;
+import com.zj.domain.entity.dto.log.DispatchLogDto;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
 import com.zj.domain.repository.feature.ITaskRepository;
 import com.zj.domain.repository.log.ISubTaskLogRepository;
+import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.master.dispatch.IDispatchExecutor;
 import com.zj.master.entity.dto.TaskDetailDto;
 import com.zj.common.enums.LogType;
 import com.zj.master.entity.vo.ExecuteContext;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +52,9 @@ public class TaskDispatch implements IDispatchExecutor {
   private ISubTaskLogRepository subTaskLogRepository;
 
   @Autowired
+  private IDispatchLogRepository dispatchLogRepository;
+
+  @Autowired
   private UniqueIdService uniqueIdService;
 
   @Override
@@ -77,6 +79,8 @@ public class TaskDispatch implements IDispatchExecutor {
 
     TaskRecordDto taskRecordDto = buildTaskRecordDTO(taskDetail);
     taskRecordRepository.save(taskRecordDto);
+
+    dispatchLogRepository.updateLogSourceRecord(task.getTaskLogId(), taskRecordDto.getRecordId());
 
     FeatureTask featureTask = buildFeatureTask(task, featureList, taskRecordDto);
     saveSubTaskLog(featureTask);
@@ -147,7 +151,7 @@ public class TaskDispatch implements IDispatchExecutor {
   }
 
   @Override
-  public boolean resume(TaskLogDto taskLog) {
+  public boolean resume(DispatchLogDto taskLog) {
     TaskInfoDto taskDetail = taskRepository.getTaskDetail(taskLog.getSourceId());
     if (Objects.isNull(taskDetail)) {
       log.info("can not find task={}", taskLog.getSourceId());
@@ -172,7 +176,7 @@ public class TaskDispatch implements IDispatchExecutor {
     return true;
   }
 
-  private FeatureTask buildResumeFeatureTask(TaskLogDto taskLog, TaskInfoDto taskDetail,
+  private FeatureTask buildResumeFeatureTask(DispatchLogDto taskLog, TaskInfoDto taskDetail,
       List<FeatureInfoDto> featureList, List<String> completedFeatures) {
     FeatureTask featureTask = new FeatureTask();
     ExecuteContext executeContext = buildTaskConfig(taskDetail.getTaskConfig());

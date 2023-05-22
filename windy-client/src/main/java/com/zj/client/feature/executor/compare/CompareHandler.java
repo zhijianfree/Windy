@@ -73,6 +73,10 @@ public class CompareHandler {
    * 预处理是将全局符替换成运行后的真实数据
    */
   private void preHandle(ExecuteDetail executeDetail, List<CompareDefine> compareDefines) {
+    if (Objects.isNull(executeDetail.responseBody())) {
+      return;
+    }
+
     compareDefines.stream().filter(
         compare -> StringUtils.isNoneBlank(compare.getCompareKey()) && StringUtils.isNoneBlank(
             compare.getCompareKey())).forEach(compareDefine -> {
