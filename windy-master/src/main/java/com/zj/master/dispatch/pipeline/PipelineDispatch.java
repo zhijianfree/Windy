@@ -162,6 +162,37 @@ public class PipelineDispatch implements IDispatchExecutor {
 
   @Override
   public boolean resume(TaskLogDto taskLog) {
-    return false;
+    PipelineDTO pipeline = pipelineRepository.getPipeline(taskLog.getSourceId());
+    if (Objects.isNull(pipeline)) {
+      log.info("can not find pipeline name={} pipelineId={}", taskLog.getSourceName(),
+          taskLog.getSourceId());
+      return false;
+    }
+
+    List<PipelineNodeDto> pipelineNodes = pipelineNodeRepository.getPipelineNodes(
+        pipeline.getPipelineId());
+    if (CollectionUtils.isEmpty(pipelineNodes)) {
+      log.info("can not find pipeline nodes name={} pipelineId={}", taskLog.getSourceName(),
+          taskLog.getSourceId());
+      return false;
+    }
+
+    PipelineTask pipelineTask = new PipelineTask();
+    pipelineTask.setPipelineId(pipeline.getPipelineId());
+    pipelineTask.setHistoryId(taskLog.getSourceRecordId());
+    pipelineTask.setLogId(taskLog.getLogId());
+
+    List<String> subTasks = subTaskLogRepository.getSubTaskByLogId(taskLog.getLogId()).stream()
+        .filter(subTask -> !ProcessStatus.isCompleteStatus(subTask.getStatus()))
+        .map(SubTaskLogDto::getExecuteId).collect(
+            Collectors.toList());
+
+    List<TaskNode> taskNodeList = pipelineNodes.stream()
+        .filter(node -> !subTasks.contains(node.getNodeId()))
+        .map(node -> buildTaskNode(node, taskLog.getSourceRecordId()))
+        .collect(Collectors.toList());
+    pipelineTask.addAll(taskNodeList);
+    pipelineExecuteProxy.runTask(pipelineTask);
+    return true;
   }
 }

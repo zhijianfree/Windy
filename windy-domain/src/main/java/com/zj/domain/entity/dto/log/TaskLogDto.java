@@ -25,6 +25,11 @@ public class TaskLogDto {
   private String sourceId;
 
   /**
+   * 来源记录Id
+   * */
+  private String sourceRecordId;
+
+  /**
    * 任务来源名称
    * */
   private String sourceName;

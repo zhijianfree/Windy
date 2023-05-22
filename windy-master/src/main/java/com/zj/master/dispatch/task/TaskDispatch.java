@@ -148,23 +148,46 @@ public class TaskDispatch implements IDispatchExecutor {
 
   @Override
   public boolean resume(TaskLogDto taskLog) {
-    List<SubTaskLogDto> tasks = subTaskLogRepository.getSubTaskByLogId(taskLog.getLogId());
-    List<SubTaskLogDto> sorted = tasks.stream()
-        .filter(subTask -> Objects.equals(subTask.getStatus(), ProcessStatus.RUNNING.getType()))
-        .sorted(Comparator.comparing(SubTaskLogDto::getSortIndex)).collect(Collectors.toList());
+    TaskInfoDto taskDetail = taskRepository.getTaskDetail(taskLog.getSourceId());
+    if (Objects.isNull(taskDetail)) {
+      log.info("can not find task={}", taskLog.getSourceId());
+      return false;
+    }
 
-    // todo  日志是否可以存储执行参数？
-//    FeatureTask featureTask = new FeatureTask();
-//    ExecuteContext executeContext = buildTaskConfig(taskRecordDto.getTaskConfig());
-//    featureTask.setExecuteContext(executeContext);
-//
-//    List<String> featureIds = featureList.stream().map(FeatureInfoDto::getFeatureId)
-//        .collect(Collectors.toList());
-//    featureTask.addAll(featureIds);
-//
-//    featureTask.setTaskRecordId(taskRecordDto.getRecordId());
-//    featureTask.setTaskId(task.getSourceId());
-//    featureTask.setLogId(task.getTaskLogId());
-    return false;
+    String testCaseId = taskDetail.getTestCaseId();
+    List<FeatureInfoDto> featureList = featureRepository.queryNotContainFolder(testCaseId);
+    if (CollectionUtils.isEmpty(featureList)) {
+      log.info("can not find feature list by testCaseId={}", testCaseId);
+      return false;
+    }
+    List<SubTaskLogDto> tasks = subTaskLogRepository.getSubTaskByLogId(taskLog.getLogId());
+    List<String> completedFeatures = tasks.stream()
+        .filter(subTask -> !ProcessStatus.isCompleteStatus(subTask.getStatus()))
+        .map(SubTaskLogDto::getExecuteId)
+        .collect(Collectors.toList());
+
+    FeatureTask featureTask = buildResumeFeatureTask(taskLog, taskDetail,
+        featureList, completedFeatures);
+    featureExecuteProxy.execute(featureTask);
+    return true;
+  }
+
+  private FeatureTask buildResumeFeatureTask(TaskLogDto taskLog, TaskInfoDto taskDetail,
+      List<FeatureInfoDto> featureList, List<String> completedFeatures) {
+    FeatureTask featureTask = new FeatureTask();
+    ExecuteContext executeContext = buildTaskConfig(taskDetail.getTaskConfig());
+    featureTask.setExecuteContext(executeContext);
+
+    //已执行完成状态的任务无需在恢复
+    List<String> featureIds = featureList.stream()
+        .map(FeatureInfoDto::getFeatureId)
+        .filter(featureId -> !completedFeatures.contains(featureId))
+        .collect(Collectors.toList());
+    featureTask.addAll(featureIds);
+
+    featureTask.setTaskRecordId(taskLog.getSourceRecordId());
+    featureTask.setTaskId(taskLog.getSourceId());
+    featureTask.setLogId(taskLog.getLogId());
+    return featureTask;
   }
 }

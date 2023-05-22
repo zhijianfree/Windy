@@ -15,6 +15,7 @@ import com.zj.master.entity.dto.TaskDetailDto;
 import com.zj.common.enums.LogType;
 import com.zj.master.entity.vo.ExecuteContext;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Component;
  * @author guyuelan
  * @since 2023/5/18
  */
+@Slf4j
 @Component
 public class FeatureDispatch implements IDispatchExecutor {
 
@@ -70,6 +72,7 @@ public class FeatureDispatch implements IDispatchExecutor {
 
   @Override
   public boolean resume(TaskLogDto taskLog) {
+    log.info("临时任务不支持恢复");
     return false;
   }
 
