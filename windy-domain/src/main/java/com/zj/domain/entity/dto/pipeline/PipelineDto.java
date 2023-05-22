@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
  * @since 2021/9/28
  */
 @Data
-public class PipelineDTO {
+public class PipelineDto {
 
   /**
    * 流水线Id
@@ -72,6 +72,6 @@ public class PipelineDTO {
   @NotEmpty
   private List<PipelineStageDto> stageList;
 
-  public PipelineDTO() {
+  public PipelineDto() {
   }
 }

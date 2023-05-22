@@ -6,7 +6,7 @@ import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.pipeline.PipelineDTO;
+import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
 import com.zj.domain.entity.po.pipeline.PipelineHistory;
 import com.zj.domain.mapper.pipeline.PipelineHistoryMapper;
@@ -52,7 +52,7 @@ public class PipelineHistoryRepository extends
 
   @Override
   public List<PipelineHistoryDto> listPipelineHistories(String pipelineId) {
-    PipelineDTO pipeline = pipelineRepository.getPipeline(pipelineId);
+    PipelineDto pipeline = pipelineRepository.getPipeline(pipelineId);
     if (Objects.isNull(pipeline)) {
       throw new ApiException(ErrorCode.NOT_FOUND_PIPELINE);
     }

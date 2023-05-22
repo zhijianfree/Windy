@@ -1,30 +1,18 @@
 package com.zj.pipeline.service;
 
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.exception.ApiException;
-import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
-import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.entity.dto.pipeline.NodeStatus;
-import com.zj.domain.entity.dto.pipeline.PipelineDTO;
 import com.zj.domain.entity.dto.pipeline.PipelineExecuteInfo;
 import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
-import com.zj.domain.entity.po.pipeline.NodeRecord;
-import com.zj.domain.entity.po.pipeline.PipelineHistory;
-import com.zj.domain.mapper.pipeline.PipelineHistoryMapper;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 /**
  * @author guyuelan

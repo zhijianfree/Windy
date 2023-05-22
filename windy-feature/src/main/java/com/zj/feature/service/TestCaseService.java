@@ -1,17 +1,11 @@
 package com.zj.feature.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.common.model.PageSize;
 import com.zj.common.generate.UniqueIdService;
+import com.zj.common.model.PageSize;
 import com.zj.domain.entity.dto.feature.TestCaseDto;
-import com.zj.domain.entity.po.feature.TestCase;
-import com.zj.domain.mapper.feeature.TestCaseMapper;
 import com.zj.domain.repository.feature.ITestCaseRepository;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;

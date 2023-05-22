@@ -9,7 +9,6 @@ import com.zj.domain.entity.dto.feature.TestCaseDto;
 import com.zj.domain.entity.po.feature.TestCase;
 import com.zj.domain.mapper.feeature.TestCaseMapper;
 import com.zj.domain.repository.feature.ITestCaseRepository;
-import org.graalvm.compiler.core.common.type.ArithmeticOpTable.BinaryOp.Or;
 import org.springframework.stereotype.Repository;
 
 /**

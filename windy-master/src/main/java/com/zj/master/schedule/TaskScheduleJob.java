@@ -57,7 +57,7 @@ public class TaskScheduleJob {
     //todo 暂时不考虑
 
     // 4 筛选出来的任务开始切换到当前节点执行
-    runningTaskLog.forEach(taskLog -> dispatcher.resumeTask(taskLog));
+    noMasterLogList.forEach(taskLog -> dispatcher.resumeTask(taskLog));
   }
 
 

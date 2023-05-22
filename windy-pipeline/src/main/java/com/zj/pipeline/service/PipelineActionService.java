@@ -25,6 +25,7 @@ public class PipelineActionService {
   @Autowired
   private UniqueIdService uniqueIdService;
 
+  @Autowired
   private IPipelineActionRepository pipelineActionRepository;
 
   public Boolean createAction(PipelineActionDto actionDto) {

@@ -1,7 +1,7 @@
 package com.zj.pipeline.rest;
 
 import com.zj.common.model.ResponseMeta;
-import com.zj.domain.entity.dto.pipeline.PipelineDTO;
+import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.common.exception.ErrorCode;
 import com.zj.pipeline.service.PipelineService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,14 +23,14 @@ public class PipelineRest {
 
   @ResponseBody
   @GetMapping("/{service}/{pipelineId}")
-  public ResponseMeta<PipelineDTO> queryPipeline(@PathVariable("service") String service,
+  public ResponseMeta<PipelineDto> queryPipeline(@PathVariable("service") String service,
       @PathVariable("pipelineId") String pipelineId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, pipelineService.getPipelineDetail(pipelineId));
   }
 
   @ResponseBody
   @PostMapping("")
-  public ResponseMeta<String> createPipeline(@Validated @RequestBody PipelineDTO pipelineDTO) {
+  public ResponseMeta<String> createPipeline(@Validated @RequestBody PipelineDto pipelineDTO) {
     return new ResponseMeta<String>(ErrorCode.SUCCESS,
         pipelineService.createPipeline(pipelineDTO));
   }
@@ -39,14 +39,14 @@ public class PipelineRest {
   @PutMapping("/{service}/{pipelineId}")
   public ResponseMeta<Boolean> updatePipeline(@PathVariable("service") String service,
       @PathVariable("pipelineId") String pipelineId,
-      @RequestBody PipelineDTO pipelineDTO) {
+      @RequestBody PipelineDto pipelineDTO) {
     return new ResponseMeta<Boolean>(ErrorCode.SUCCESS,
         pipelineService.updatePipeline(service, pipelineId, pipelineDTO));
   }
 
   @ResponseBody
   @GetMapping("/{serviceId}/list")
-  public ResponseMeta<List<PipelineDTO>> listPipelines(
+  public ResponseMeta<List<PipelineDto>> listPipelines(
       @PathVariable("serviceId") String serviceId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, pipelineService.listPipelines(serviceId));
   }

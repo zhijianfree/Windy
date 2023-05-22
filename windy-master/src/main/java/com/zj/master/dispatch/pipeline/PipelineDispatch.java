@@ -6,12 +6,10 @@ import com.zj.common.generate.UniqueIdService;
 import com.zj.domain.entity.dto.log.SubTaskLogDto;
 import com.zj.domain.entity.dto.log.TaskLogDto;
 import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
-import com.zj.domain.entity.dto.pipeline.PipelineDTO;
+import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
 import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
-import com.zj.domain.entity.po.log.SubTaskLog;
 import com.zj.domain.repository.log.ISubTaskLogRepository;
-import com.zj.domain.repository.log.ITaskLogRepository;
 import com.zj.domain.repository.pipeline.IPipelineActionRepository;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import com.zj.domain.repository.pipeline.IPipelineNodeRepository;
@@ -71,7 +69,7 @@ public class PipelineDispatch implements IDispatchExecutor {
 
   @Override
   public boolean dispatch(TaskDetailDto task) {
-    PipelineDTO pipeline = pipelineRepository.getPipeline(task.getSourceId());
+    PipelineDto pipeline = pipelineRepository.getPipeline(task.getSourceId());
     if (Objects.isNull(pipeline)) {
       log.info("can not find pipeline name={} pipelineId={}", task.getSourceName(),
           task.getSourceId());
@@ -162,7 +160,7 @@ public class PipelineDispatch implements IDispatchExecutor {
 
   @Override
   public boolean resume(TaskLogDto taskLog) {
-    PipelineDTO pipeline = pipelineRepository.getPipeline(taskLog.getSourceId());
+    PipelineDto pipeline = pipelineRepository.getPipeline(taskLog.getSourceId());
     if (Objects.isNull(pipeline)) {
       log.info("can not find pipeline name={} pipelineId={}", taskLog.getSourceName(),
           taskLog.getSourceId());

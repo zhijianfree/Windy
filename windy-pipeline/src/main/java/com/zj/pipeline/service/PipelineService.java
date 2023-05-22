@@ -2,19 +2,17 @@ package com.zj.pipeline.service;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.common.model.DispatchModel;
-import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
-import com.zj.domain.entity.dto.pipeline.PipelineDTO;
+import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
 import com.zj.domain.entity.dto.pipeline.PipelineStageDto;
-import com.zj.domain.entity.po.pipeline.PipelineStage;
+import com.zj.domain.entity.po.pipeline.Pipeline;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.pipeline.entity.enums.PipelineStatus;
 import java.util.Collection;
@@ -66,9 +64,9 @@ public class PipelineService {
   private RestTemplate restTemplate;
 
   @Transactional
-  public boolean updatePipeline(String service, String pipelineId, PipelineDTO pipelineDTO) {
+  public boolean updatePipeline(String service, String pipelineId, PipelineDto pipelineDTO) {
     Assert.notEmpty(service, "service can not be empty");
-    PipelineDTO oldPipeline = getPipelineDetail(pipelineId);
+    PipelineDto oldPipeline = getPipelineDetail(pipelineId);
     if (Objects.isNull(oldPipeline)) {
       throw new ApiException(ErrorCode.NOT_FOUND_PIPELINE);
     }
@@ -88,7 +86,7 @@ public class PipelineService {
     return true;
   }
 
-  private void deleteNotExistStageAndNodes(PipelineDTO oldPipeline,
+  private void deleteNotExistStageAndNodes(PipelineDto oldPipeline,
       List<PipelineStageDto> stageList) {
     List<String> nodeIds = stageList.stream().map(PipelineStageDto::getNodes)
         .flatMap(Collection::stream).filter(Objects::nonNull).map(PipelineNodeDto::getNodeId)
@@ -138,7 +136,7 @@ public class PipelineService {
   }
 
 
-  public List<PipelineDTO> listPipelines(String serviceId) {
+  public List<PipelineDto> listPipelines(String serviceId) {
     return pipelineRepository.listPipelines(serviceId);
   }
 
@@ -150,7 +148,7 @@ public class PipelineService {
   }
 
   @Transactional
-  public String createPipeline(PipelineDTO pipelineDTO) {
+  public String createPipeline(PipelineDto pipelineDTO) {
     if (Objects.isNull(pipelineDTO)) {
       return "";
     }
@@ -190,12 +188,12 @@ public class PipelineService {
     });
   }
 
-  public PipelineDTO getPipeline(String pipelineId) {
+  public PipelineDto getPipeline(String pipelineId) {
     return pipelineRepository.getPipeline(pipelineId);
   }
 
   public Boolean execute(String pipelineId) {
-    PipelineDTO pipeline = getPipeline(pipelineId);
+    PipelineDto pipeline = getPipeline(pipelineId);
     if (Objects.isNull(pipeline)) {
       return false;
     }
@@ -221,7 +219,7 @@ public class PipelineService {
     return false;
   }
 
-  public PipelineDTO getPipelineDetail(String pipelineId) {
+  public PipelineDto getPipelineDetail(String pipelineId) {
     List<PipelineNodeDto> pipelineNodes = pipelineNodeService.getPipelineNodes(pipelineId);
     Map<String, List<PipelineNodeDto>> stageNodeMap = pipelineNodes.stream()
         .collect(Collectors.groupingBy(PipelineNodeDto::getStageId));
@@ -231,7 +229,7 @@ public class PipelineService {
       stage.setNodes(stageNodeMap.get(stage.getStageId()));
     }).collect(Collectors.toList());
 
-    PipelineDTO pipeline = getPipeline(pipelineId);
+    PipelineDto pipeline = getPipeline(pipelineId);
     pipeline.setStageList(stageDTOList);
     return pipeline;
   }
@@ -261,5 +259,9 @@ public class PipelineService {
       log.error("request dispatch pipeline task error", e);
     }
     return true;
+  }
+
+  public List<PipelineDto> getServicePipelines(String serviceId) {
+    return pipelineRepository.getServicePipelines(serviceId);
   }
 }
