@@ -1,4 +1,4 @@
-package com.zj.client.entity;
+package com.zj.client.entity.dto;
 
 import lombok.Data;
 

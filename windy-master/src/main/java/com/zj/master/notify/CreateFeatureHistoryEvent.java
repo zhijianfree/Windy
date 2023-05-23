@@ -5,6 +5,7 @@ import com.zj.common.enums.NotifyType;
 import com.zj.common.model.ResultEvent;
 import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
+import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,9 @@ public class CreateFeatureHistoryEvent implements INotifyEvent {
   @Autowired
   private IFeatureHistoryRepository featureHistoryRepository;
 
+  @Autowired
+  private ISubDispatchLogRepository subDispatchLogRepository;
+
   @Override
   public NotifyType type() {
     return NotifyType.CREATE_FEATURE_HISTORY;
@@ -32,6 +36,9 @@ public class CreateFeatureHistoryEvent implements INotifyEvent {
         JSON.toJSONString(resultEvent.getParams()));
     FeatureHistoryDto featureHistoryDto = JSON.parseObject(
         JSON.toJSONString(resultEvent.getParams()), FeatureHistoryDto.class);
+
+    subDispatchLogRepository.updateSubLogClientIp(resultEvent.getLogId(),
+        featureHistoryDto.getFeatureId(), resultEvent.getClientIp());
 
     featureHistoryDto.setExecuteStatus(resultEvent.getStatus().getType());
     return featureHistoryRepository.saveHistory(featureHistoryDto);

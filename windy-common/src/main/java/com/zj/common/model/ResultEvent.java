@@ -13,6 +13,8 @@ public class ResultEvent {
 
   private String logId;
   private String masterIP;
+
+  private String clientIp;
   private String executeId;
   private NotifyType notifyType;
   private ProcessStatus status;
@@ -45,6 +47,11 @@ public class ResultEvent {
 
   public ResultEvent logId(String logId) {
     this.logId = logId;
+    return this;
+  }
+
+  public ResultEvent clientIp(String clientIp) {
+    this.clientIp = clientIp;
     return this;
   }
 }

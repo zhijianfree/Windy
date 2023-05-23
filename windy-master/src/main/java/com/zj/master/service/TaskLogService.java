@@ -33,7 +33,7 @@ public class TaskLogService {
   @Autowired
   private Dispatcher dispatcher;
 
-  public Boolean createTask(TaskDetailDto task) {
+  public String createTask(TaskDetailDto task) {
     log.info("receive task detail ={}", JSON.toJSONString(task));
     DispatchLogDto taskLog = saveLog(task);
     task.setTaskLogId(taskLog.getLogId());

@@ -1,26 +1,29 @@
 package com.zj.client.pipeline.executer.Invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.zj.client.entity.vo.TestFeatureParamVo;
 import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.client.pipeline.executer.vo.ExecuteType;
 import com.zj.client.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.pipeline.executer.vo.RefreshContext;
 import com.zj.client.pipeline.executer.vo.RequestContext;
 import com.zj.client.pipeline.executer.vo.TestRequestContext;
+import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.model.ResponseMeta;
 import com.zj.common.utils.OrikaUtil;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * @author guyuelan
@@ -30,10 +33,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class TestFeatureInvoker implements IRemoteInvoker {
 
-  public static final MediaType MEDIA_TYPE = MediaType.parse("application/json;charset=utf-8");
-  public static final String START_TASK_URL = "http://localhost:9768/v1/devops/feature/task/%s";
-  private OkHttpClient okHttpClient = new OkHttpClient.Builder().readTimeout(10, TimeUnit.SECONDS)
-      .connectTimeout(5, TimeUnit.SECONDS).build();
+  public static final String START_TASK_URL = "http://WindyMaster/v1/devops/dispatch/task";
+
+  private static final String TASK_STATUS_URL = "http://WindyMaster/v1/devops/master/task/%s";
+  public static final String TASK_TIPS = "pipeline test task";
+
+  @Autowired
+  private RestTemplate restTemplate;
 
   @Override
   public ExecuteType type() {
@@ -41,36 +47,59 @@ public class TestFeatureInvoker implements IRemoteInvoker {
   }
 
   @Override
-  public boolean triggerRun(RequestContext requestContext, String recordId)
-      throws IOException {
-    TestRequestContext context = OrikaUtil.convert(requestContext.getData(), TestRequestContext.class);
+  public boolean triggerRun(RequestContext requestContext, String recordId) {
+    TestRequestContext context = OrikaUtil.convert(requestContext.getData(),
+        TestRequestContext.class);
     String taskId = context.getTaskId();
-    String url = String.format(START_TASK_URL, taskId);
-    RequestBody requestBody = RequestBody.create(MEDIA_TYPE, "");
-    Request request = new Request.Builder().url(url).post(requestBody).build();
-    Response response = okHttpClient.newCall(request).execute();
-    log.info("trigger run task result={}", response.body().string());
-    return response.isSuccessful();
+    TestFeatureParamVo paramVo = new TestFeatureParamVo();
+    paramVo.setSourceId(taskId);
+    paramVo.setSourceName(TASK_TIPS);
+    paramVo.setType(LogType.FEATURE_TASK.getType());
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<TestFeatureParamVo> httpEntity = new HttpEntity<>(paramVo, headers);
+    try {
+      ResponseEntity<JSONObject> responseEntity = restTemplate.postForEntity(START_TASK_URL, httpEntity,
+          JSONObject.class);
+
+      JSONObject jsonObject = responseEntity.getBody();
+      log.info("get TestFeatureInvoker triggerRun code= {} result={}",
+          responseEntity.getStatusCode(), JSON.toJSONString(jsonObject));
+
+      //触发任务执行，将任务的记录Id传递给刷新动作
+      if (responseEntity.getStatusCode().is2xxSuccessful()) {
+        String url = String.format(TASK_STATUS_URL, jsonObject.getString("data"));
+        requestContext.getTaskNode().getRefreshContext().setUrl(url);
+      }
+      return responseEntity.getStatusCode().is2xxSuccessful();
+    } catch (Exception e) {
+      log.error("request dispatch task error", e);
+    }
+    return false;
   }
 
   @Override
   public String queryStatus(RefreshContext refreshContext, String recordId) {
-    Request request = new Request.Builder().url(refreshContext.getUrl()).get().build();
     QueryResponseModel queryResponseModel = new QueryResponseModel();
     try {
-      Response response = okHttpClient.newCall(request).execute();
-      if (!response.isSuccessful()) {
+      log.info("get refresh url ={}", refreshContext.getUrl());
+      ResponseEntity<JSONObject> responseEntity = restTemplate.getForEntity(refreshContext.getUrl(),
+          JSONObject.class);
+      log.info("get TestFeatureInvoker queryStatus code= {} result={}",
+          responseEntity.getStatusCode(), JSON.toJSONString(responseEntity.getBody()));
+      if (responseEntity.getStatusCode().isError()) {
         queryResponseModel.setStatus(ProcessStatus.FAIL.getType());
         queryResponseModel.setMessage(Collections.singletonList("request http error"));
         return JSON.toJSONString(queryResponseModel);
       }
 
-      return response.body().string();
-    } catch (IOException e) {
-      log.error("request http error", e);
+      return JSON.toJSONString(responseEntity.getBody());
+    } catch (Exception e) {
+      log.error("request dispatch task error", e);
+      queryResponseModel.setStatus(ProcessStatus.FAIL.getType());
       queryResponseModel.setMessage(getErrorMsg(e));
     }
-
     return JSON.toJSONString(queryResponseModel);
   }
 

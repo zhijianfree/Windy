@@ -70,8 +70,10 @@ public class NodeRecordRepository extends ServiceImpl<NodeRecordMapper, NodeReco
   }
 
   @Override
-  public NodeRecord getRecordById(String recordId) {
-    return getOne(Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getRecordId, recordId));
+  public NodeRecordDto getRecordById(String recordId) {
+    NodeRecord nodeRecord = getOne(
+        Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getRecordId, recordId));
+    return OrikaUtil.convert(nodeRecord, NodeRecordDto.class);
   }
 
   @Override
@@ -80,5 +82,16 @@ public class NodeRecordRepository extends ServiceImpl<NodeRecordMapper, NodeReco
         Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getHistoryId, historyId)
             .eq(NodeRecord::getNodeId, nodeId));
     return OrikaUtil.convert(nodeRecord, NodeRecordDto.class);
+  }
+
+  @Override
+  public void updateRunningNodeStatus(String historyId, ProcessStatus processStatus) {
+    NodeRecord nodeRecord = new NodeRecord();
+    nodeRecord.setStatus(processStatus.getType());
+    nodeRecord.setResult(JSON.toJSONString(Collections.singleton(processStatus.getDesc())));
+    nodeRecord.setUpdateTime(System.currentTimeMillis());
+    update(nodeRecord,
+        Wrappers.lambdaUpdate(NodeRecord.class).eq(NodeRecord::getHistoryId, historyId)
+            .eq(NodeRecord::getStatus, ProcessStatus.RUNNING.getType()));
   }
 }

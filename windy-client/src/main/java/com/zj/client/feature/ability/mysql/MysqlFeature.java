@@ -3,7 +3,7 @@ package com.zj.client.feature.ability.mysql;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.zj.client.entity.vo.ExecuteDetail;
+import com.zj.client.entity.vo.ExecuteDetailVo;
 import com.zj.client.feature.ability.Feature;
 import com.zj.client.feature.ability.FeatureDefine;
 import com.zj.client.feature.ability.ParameterDefine;
@@ -27,8 +27,8 @@ import org.springframework.stereotype.Component;
 public class MysqlFeature implements Feature {
     private String driver = "org.mariadb.jdbc.Driver";
     private String jdbcUrl = "jdbc:mysql://%s/%s";
-    public ExecuteDetail executeQuery(String connect,String dbName,String user,String password,String sql){
-        ExecuteDetail executeDetail = new ExecuteDetail();
+    public ExecuteDetailVo executeQuery(String connect,String dbName,String user,String password,String sql){
+        ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
         Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;
@@ -53,20 +53,20 @@ public class MysqlFeature implements Feature {
                 jsonArray.add(jsonObject);
             }
 
-            executeDetail.setStatus(true);
-            executeDetail.setResBody(jsonArray);
+            executeDetailVo.setStatus(true);
+            executeDetailVo.setResBody(jsonArray);
         } catch (Exception e) {
             log.info("execute mysql query sql error={}", ExceptionUtils.getSimplifyError(e));
-            executeDetail.setErrorMessage(ExceptionUtils.getSimplifyError(e));
-            executeDetail.setStatus(false);
+            executeDetailVo.setErrorMessage(ExceptionUtils.getSimplifyError(e));
+            executeDetailVo.setStatus(false);
         }
 
-        executeDetail.addRequestInfo("url: " + jdbcUrl);
-        executeDetail.addRequestInfo("user: " + user);
-        executeDetail.addRequestInfo("password: " + user);
-        executeDetail.addRequestInfo("sql: " + sql);
+        executeDetailVo.addRequestInfo("url: " + jdbcUrl);
+        executeDetailVo.addRequestInfo("user: " + user);
+        executeDetailVo.addRequestInfo("password: " + user);
+        executeDetailVo.addRequestInfo("sql: " + sql);
 
-        return executeDetail;
+        return executeDetailVo;
     }
 
     @Override

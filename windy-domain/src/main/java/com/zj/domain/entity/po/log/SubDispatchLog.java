@@ -7,7 +7,7 @@ import lombok.Data;
  * @since 2023/5/12
  */
 @Data
-public class SubTaskLog {
+public class SubDispatchLog {
 
   private Long id;
 
@@ -35,6 +35,8 @@ public class SubTaskLog {
    * 子任务状态
    * */
   private Integer status;
+
+  private String clientIp;
 
   /**
    * 父任务Id

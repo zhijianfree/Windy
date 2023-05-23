@@ -11,7 +11,7 @@ public interface IDispatchExecutor {
 
   Integer type();
 
-  boolean dispatch(TaskDetailDto task);
+  String dispatch(TaskDetailDto task);
 
   boolean resume(DispatchLogDto taskLog);
 }

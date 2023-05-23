@@ -7,6 +7,6 @@ import com.zj.domain.entity.po.log.DispatchLog;
  * @author guyuelan
  * @since 2023/5/12
  */
-public interface TaskLogMapper extends BaseMapper<DispatchLog> {
+public interface DispatchLogMapper extends BaseMapper<DispatchLog> {
 
 }

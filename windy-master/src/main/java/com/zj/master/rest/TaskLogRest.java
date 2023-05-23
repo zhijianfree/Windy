@@ -23,11 +23,11 @@ public class TaskLogRest {
   private TaskLogService taskLogService;
 
   @PostMapping("/task")
-  private ResponseMeta<Boolean> createTask(@RequestBody TaskDetailDto taskDetailDto) {
+  private ResponseMeta<String> createTask(@RequestBody TaskDetailDto taskDetailDto) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, taskLogService.createTask(taskDetailDto));
   }
 
-  @PutMapping("/stop")
+  @PostMapping("/stop")
   private ResponseMeta<Boolean> stopTask(@RequestBody TaskDetailDto taskDetailDto) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, taskLogService.pauseTask(taskDetailDto));
   }

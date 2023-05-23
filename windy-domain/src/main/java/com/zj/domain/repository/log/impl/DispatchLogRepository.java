@@ -6,19 +6,24 @@ import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.log.DispatchLogDto;
 import com.zj.domain.entity.po.log.DispatchLog;
-import com.zj.domain.mapper.log.TaskLogMapper;
+import com.zj.domain.mapper.log.DispatchLogMapper;
 import com.zj.domain.repository.log.IDispatchLogRepository;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Repository;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/19
  */
 @Repository
-public class DispatchLogRepository extends ServiceImpl<TaskLogMapper, DispatchLog> implements
+public class DispatchLogRepository extends ServiceImpl<DispatchLogMapper, DispatchLog> implements
     IDispatchLogRepository {
+
+  public static final int PLUS_VERSION = 1;
 
   @Override
   public List<DispatchLogDto> getRunningTaskLog() {
@@ -28,9 +33,18 @@ public class DispatchLogRepository extends ServiceImpl<TaskLogMapper, DispatchLo
   }
 
   @Override
-  public void delete7DayLog() {
+  public List<String> delete7DayLog() {
     long dateTime = new DateTime().minusDays(7).toDate().getTime();
-    remove(Wrappers.lambdaQuery(DispatchLog.class).lt(DispatchLog::getCreateTime, dateTime));
+    List<DispatchLog> dispatchLogs = list(
+        Wrappers.lambdaQuery(DispatchLog.class).lt(DispatchLog::getCreateTime, dateTime));
+    if (CollectionUtils.isEmpty(dispatchLogs)) {
+      return Collections.emptyList();
+    }
+
+    boolean result = remove(
+        Wrappers.lambdaQuery(DispatchLog.class).lt(DispatchLog::getCreateTime, dateTime));
+    return result ? dispatchLogs.stream().map(DispatchLog::getLogId).collect(Collectors.toList())
+        : Collections.emptyList();
   }
 
   @Override
@@ -57,7 +71,7 @@ public class DispatchLogRepository extends ServiceImpl<TaskLogMapper, DispatchLo
     dispatchLog.setLogId(logId);
     dispatchLog.setNodeIp(localIP);
     dispatchLog.setUpdateTime(System.currentTimeMillis());
-    dispatchLog.setLockVersion(lockVersion);
+    dispatchLog.setLockVersion(lockVersion + PLUS_VERSION);
     return update(dispatchLog,
         Wrappers.lambdaUpdate(DispatchLog.class).eq(DispatchLog::getLogId, logId)
             .eq(DispatchLog::getLockVersion, lockVersion));
@@ -70,5 +84,12 @@ public class DispatchLogRepository extends ServiceImpl<TaskLogMapper, DispatchLo
     dispatchLog.setSourceRecordId(sourceRecordId);
     dispatchLog.setUpdateTime(System.currentTimeMillis());
     update(dispatchLog, Wrappers.lambdaUpdate(DispatchLog.class).eq(DispatchLog::getLogId, logId));
+  }
+
+  @Override
+  public DispatchLogDto getDispatchLogBySourceId(String targetId) {
+    DispatchLog dispatchLog = getOne(
+        Wrappers.lambdaQuery(DispatchLog.class).eq(DispatchLog::getSourceId, targetId));
+    return OrikaUtil.convert(dispatchLog, DispatchLogDto.class);
   }
 }

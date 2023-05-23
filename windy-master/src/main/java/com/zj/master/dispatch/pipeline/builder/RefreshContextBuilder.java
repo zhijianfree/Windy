@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 public class RefreshContextBuilder {
 
   private static final String TASK_ID = "taskId";
-  private static final String TASK_STATUS_URL = "http://localhost:9768/v1/devops/feature/task/%s/status";
 
   public static RefreshContext createContext(ActionDetail actionDetail) {
     PipelineActionDto action = actionDetail.getAction();
@@ -38,10 +37,8 @@ public class RefreshContextBuilder {
   }
 
   private static RefreshContext buildTestContext(ActionDetail actionDetail) {
-    Map<String, String> paramMap = actionDetail.getConfigDetail().getRequestContext();
-    String url = String.format(TASK_STATUS_URL, paramMap.get(TASK_ID));
     ConfigDetail configDetail = actionDetail.getConfigDetail();
-    return RefreshContext.builder().url(url).compareConfig(configDetail.getCompareInfo())
+    return RefreshContext.builder().compareConfig(configDetail.getCompareInfo())
         .headers(new HashMap<>()).build();
   }
 }

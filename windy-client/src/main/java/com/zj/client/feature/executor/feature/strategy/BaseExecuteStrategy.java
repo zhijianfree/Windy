@@ -2,7 +2,7 @@ package com.zj.client.feature.executor.feature.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.po.ExecutePoint;
-import com.zj.client.entity.vo.ExecuteDetail;
+import com.zj.client.entity.vo.ExecuteDetailVo;
 import com.zj.client.entity.vo.FeatureResponse;
 import com.zj.client.feature.executor.compare.CompareDefine;
 import com.zj.client.feature.executor.compare.CompareHandler;
@@ -43,19 +43,19 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
     interceptorProxy.beforeExecute(executorUnit, executeContext);
 
     //3 调用方法执行
-    ExecuteDetail executeDetail = (ExecuteDetail) IRemoteInvoker.invoke(executorUnit);
+    ExecuteDetailVo executeDetailVo = (ExecuteDetailVo) IRemoteInvoker.invoke(executorUnit);
 
     //4 将执行之后的响应结果添加到context中，方便后面用例使用
-    interceptorProxy.afterExecute(executePoint, executeDetail, executeContext);
+    interceptorProxy.afterExecute(executePoint, executeDetailVo, executeContext);
 
     //5 下面开始对比
     String compareInfo = executePoint.getCompareDefine();
     List<CompareDefine> compareDefines = JSON.parseArray(compareInfo, CompareDefine.class);
-    CompareResult compareResult = compareHandler.compare(executeDetail, compareDefines);
+    CompareResult compareResult = compareHandler.compare(executeDetailVo, compareDefines);
 
     //6 返回执行状态
     return FeatureResponse.builder().name(executorUnit.getName())
-        .pointId(executePoint.getPointId()).executeDetail(executeDetail)
+        .pointId(executePoint.getPointId()).executeDetailVo(executeDetailVo)
         .compareResult(compareResult).build();
   }
 }

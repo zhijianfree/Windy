@@ -13,6 +13,7 @@ import com.zj.client.pipeline.executer.vo.TaskNode;
 import com.zj.client.pipeline.executer.vo.TaskNodeRecord;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
+import com.zj.common.utils.IpUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -50,7 +51,7 @@ public class NodeExecutor {
    * 单个节点的执行逻辑主要涉及记录状态、调用第三方接口、查询任务状态（拦截器中实现）
    */
   public void runNodeTask(String historyId, TaskNode node) {
-    log.info("start run task recordId={}", historyId);
+    log.info("start run task historyId={}", historyId);
     interceptors.forEach(interceptor -> interceptor.before(node));
 
     String recordId = uniqueIdService.getUniqueId();
@@ -64,7 +65,7 @@ public class NodeExecutor {
         throw new RuntimeException("can not find remote invoker");
       }
       JSONObject context = node.getRequestContext();
-      RequestContext requestContext = new RequestContext(context);
+      RequestContext requestContext = new RequestContext(context, node);
       boolean executeFlag = remoteInvoker.triggerRun(requestContext, recordId);
       if (!executeFlag) {
         statusAtomic.set(ProcessStatus.FAIL);
@@ -95,6 +96,7 @@ public class NodeExecutor {
         .status(ProcessStatus.RUNNING)
         .params(taskNodeRecord)
         .masterIP(node.getMasterIp())
+        .clientIp(IpUtils.getLocalIP())
         .logId(node.getLogId());
     resultEventNotify.notifyEvent(resultEvent);
   }

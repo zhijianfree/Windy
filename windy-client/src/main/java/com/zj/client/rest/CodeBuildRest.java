@@ -1,7 +1,7 @@
 package com.zj.client.rest;
 
-import com.zj.client.entity.BuildParam;
-import com.zj.client.entity.ResponseModel;
+import com.zj.client.entity.dto.BuildParam;
+import com.zj.client.entity.dto.ResponseModel;
 import com.zj.client.service.CodeBuildService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -2,7 +2,7 @@ package com.zj.client.feature.ability.http;
 
 import com.alibaba.fastjson.JSON;
 
-import com.zj.client.entity.vo.ExecuteDetail;
+import com.zj.client.entity.vo.ExecuteDetailVo;
 import com.zj.client.feature.ability.Feature;
 import com.zj.client.feature.ability.FeatureDefine;
 import com.zj.client.utils.ExceptionUtils;
@@ -31,7 +31,7 @@ public class HttpFeature implements Feature {
         return null;
     }
 
-    public ExecuteDetail startHttp(String url, String method, Map<String, String> headers, String body) {
+    public ExecuteDetailVo startHttp(String url, String method, Map<String, String> headers, String body) {
         if (Objects.isNull(headers)){
             headers = new HashMap<>();
         }
@@ -40,35 +40,35 @@ public class HttpFeature implements Feature {
         return startRequest(request, body);
     }
 
-    private ExecuteDetail startRequest(Request request, String body) {
-        ExecuteDetail executeDetail = new ExecuteDetail();
+    private ExecuteDetailVo startRequest(Request request, String body) {
+        ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
         try (Response response = okHttpClient.newCall(request).execute()) {
             Optional.ofNullable(response.body()).ifPresent(responseBody -> {
                 try {
                     String string = responseBody.string();
-                    executeDetail.setResBody(JSON.parse(string));
+                    executeDetailVo.setResBody(JSON.parse(string));
                 } catch (IOException e) {
-                    executeDetail.setErrorMessage(ExceptionUtils.getSimplifyError(e));
+                    executeDetailVo.setErrorMessage(ExceptionUtils.getSimplifyError(e));
                 }
             });
-            executeDetail.setStatus(response.code() == HttpStatus.OK.value());
+            executeDetailVo.setStatus(response.code() == HttpStatus.OK.value());
         } catch (IOException e) {
             log.error("run http feature error", e);
-            executeDetail.setErrorMessage(ExceptionUtils.getSimplifyError(e));
+            executeDetailVo.setErrorMessage(ExceptionUtils.getSimplifyError(e));
         }
 
-        recordExecuteDetail(request, body, executeDetail);
-        return executeDetail;
+        recordExecuteDetail(request, body, executeDetailVo);
+        return executeDetailVo;
     }
 
-    private void recordExecuteDetail(Request request, String body, ExecuteDetail executeDetail) {
-        executeDetail.addRequestInfo(request.method() + " " + request.url().url());
-        executeDetail.addRequestInfo("Headers: ");
+    private void recordExecuteDetail(Request request, String body, ExecuteDetailVo executeDetailVo) {
+        executeDetailVo.addRequestInfo(request.method() + " " + request.url().url());
+        executeDetailVo.addRequestInfo("Headers: ");
         Headers headers = request.headers();
         for (String name : headers.names()) {
-            executeDetail.addRequestInfo(name + " - " + headers.get(name));
+            executeDetailVo.addRequestInfo(name + " - " + headers.get(name));
         }
-        executeDetail.setRequestBody(body);
+        executeDetailVo.setRequestBody(body);
     }
 
     private Request requestFactory(String url, String method, Map<String, String> headers, String body) {

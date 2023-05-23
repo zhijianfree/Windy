@@ -4,8 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.NotifyType;
 import com.zj.common.model.ResultEvent;
 import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
-import com.zj.domain.entity.po.pipeline.NodeRecord;
-import com.zj.domain.repository.log.ISubTaskLogRepository;
+import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.master.dispatch.pipeline.PipelineExecuteProxy;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +26,7 @@ public class UpdateNodeRecordEvent implements INotifyEvent{
   private PipelineExecuteProxy pipelineExecuteProxy;
 
   @Autowired
-  private ISubTaskLogRepository subTaskLogRepository;
+  private ISubDispatchLogRepository subTaskLogRepository;
 
   @Override
   public NotifyType type() {

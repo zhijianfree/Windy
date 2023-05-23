@@ -1,6 +1,7 @@
 package com.zj.pipeline.service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
@@ -192,10 +193,10 @@ public class PipelineService {
     return pipelineRepository.getPipeline(pipelineId);
   }
 
-  public Boolean execute(String pipelineId) {
+  public String execute(String pipelineId) {
     PipelineDto pipeline = getPipeline(pipelineId);
     if (Objects.isNull(pipeline)) {
-      return false;
+      return null;
     }
 
     DispatchModel dispatchModel = new DispatchModel();
@@ -207,16 +208,17 @@ public class PipelineService {
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<DispatchModel> httpEntity = new HttpEntity<>(dispatchModel, headers);
     try {
-      ResponseEntity<String> responseEntity = restTemplate.postForEntity(WINDY_MASTER_DISPATCH_URL,
-          httpEntity, String.class);
+      ResponseEntity<JSONObject> responseEntity = restTemplate.postForEntity(WINDY_MASTER_DISPATCH_URL,
+          httpEntity, JSONObject.class);
+      JSONObject body = responseEntity.getBody();
       log.info("get test result code= {} result={}", responseEntity.getStatusCode(),
-          responseEntity.getBody());
-      return responseEntity.getStatusCode().is2xxSuccessful();
+          JSON.toJSONString(body));
+      return body.getString("data");
     } catch (Exception e) {
       log.error("request dispatch pipeline task error", e);
     }
 
-    return false;
+    return null;
   }
 
   public PipelineDto getPipelineDetail(String pipelineId) {

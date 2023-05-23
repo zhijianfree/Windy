@@ -4,6 +4,7 @@ import com.zj.common.enums.ProcessStatus;
 import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
+import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import com.zj.domain.repository.pipeline.IPipelineNodeRepository;
@@ -34,7 +35,7 @@ public class PipelineEndProcessor {
   private IPipelineRepository pipelineRepository;
 
   @Autowired
-  private ITaskRecordRepository taskRecordRepository;
+  private IDispatchLogRepository dispatchLogRepository;
 
   @Autowired
   private IPipelineHistoryRepository pipelineHistoryRepository;
@@ -45,7 +46,7 @@ public class PipelineEndProcessor {
     //1 如果是失败状态，那么直接更新流水线执行状态
     if (processStatus.isFailStatus()) {
       pipelineHistoryRepository.updateStatus(historyId, processStatus);
-      taskRecordRepository.updateRecordStatus(logId, processStatus.getType());
+      dispatchLogRepository.updateLogStatus(logId, processStatus.getType());
       return;
     }
 
@@ -64,7 +65,7 @@ public class PipelineEndProcessor {
     if (isAllComplete) {
       log.info("pipeline run complete success historyId={}", historyId);
       pipelineHistoryRepository.updateStatus(historyId, ProcessStatus.SUCCESS);
-      taskRecordRepository.updateRecordStatus(logId, ProcessStatus.SUCCESS.getType());
+      dispatchLogRepository.updateLogStatus(logId, ProcessStatus.SUCCESS.getType());
     }
   }
 }

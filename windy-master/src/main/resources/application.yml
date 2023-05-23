@@ -35,7 +35,7 @@ eureka:
     # 对单个server的最大连接数
     eureka-server-total-connections-per-host: 50
     # 获取集群中最新的server节点数据
-    eureka-service-url-poll-interval-seconds: 5
+    eureka-service-url-poll-interval-seconds: 2
     # client维持与server的心跳线程数
     heartbeat-executor-thread-pool-size: 2
     # client本地缓存清单更新间隔，默认30秒.

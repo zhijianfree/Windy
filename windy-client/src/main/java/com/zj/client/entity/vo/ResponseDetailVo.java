@@ -3,7 +3,7 @@ package com.zj.client.entity.vo;
 import lombok.Data;
 
 @Data
-public class ResponseDetail {
+public class ResponseDetailVo {
     /**
      * 响应状态码 200成功
      * */

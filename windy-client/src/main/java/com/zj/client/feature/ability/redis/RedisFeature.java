@@ -1,7 +1,7 @@
 package com.zj.client.feature.ability.redis;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.client.entity.vo.ExecuteDetail;
+import com.zj.client.entity.vo.ExecuteDetailVo;
 import com.zj.client.feature.ability.Feature;
 import com.zj.client.feature.ability.FeatureDefine;
 import java.util.List;
@@ -16,52 +16,52 @@ import redis.clients.jedis.Jedis;
 @Slf4j
 public class RedisFeature implements Feature {
 
-  public ExecuteDetail setValue(String ip, Integer port, String key, String value,
+  public ExecuteDetailVo setValue(String ip, Integer port, String key, String value,
       Integer timeout) {
-    ExecuteDetail executeDetail = new ExecuteDetail();
-    saveRequestParam(ip, port, key, value, timeout, executeDetail);
+    ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
+    saveRequestParam(ip, port, key, value, timeout, executeDetailVo);
     try {
       Jedis jedis = new Jedis(ip, port);
       String result = jedis.setex(key, timeout, value);
       log.info("get request result={}", result);
-      executeDetail.setStatus(true);
-      executeDetail.setResBody(result);
+      executeDetailVo.setStatus(true);
+      executeDetailVo.setResBody(result);
       jedis.close();
     } catch (Exception e) {
-      executeDetail.setStatus(false);
-      executeDetail.setErrorMessage(e.getMessage());
+      executeDetailVo.setStatus(false);
+      executeDetailVo.setErrorMessage(e.getMessage());
       log.error("request redis error", e);
     }
-    return executeDetail;
+    return executeDetailVo;
   }
 
-  public ExecuteDetail getValue(String ip, Integer port,String key) {
-    ExecuteDetail executeDetail = new ExecuteDetail();
-    executeDetail.addRequestInfo("ip: " + ip);
-    executeDetail.addRequestInfo("port: " + port);
-    executeDetail.addRequestInfo("key: " + key);
+  public ExecuteDetailVo getValue(String ip, Integer port,String key) {
+    ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
+    executeDetailVo.addRequestInfo("ip: " + ip);
+    executeDetailVo.addRequestInfo("port: " + port);
+    executeDetailVo.addRequestInfo("key: " + key);
 
     try {
       Jedis jedis = new Jedis(ip, port);
       String result = jedis.get(key);
       jedis.close();
-      executeDetail.setStatus(true);
-      executeDetail.setResBody(result);
+      executeDetailVo.setStatus(true);
+      executeDetailVo.setResBody(result);
     }catch (Exception e){
-      executeDetail.setStatus(false);
-      executeDetail.setErrorMessage(e.getMessage());
+      executeDetailVo.setStatus(false);
+      executeDetailVo.setErrorMessage(e.getMessage());
       log.error("get redis error", e);
     }
-    return executeDetail;
+    return executeDetailVo;
   }
 
   private static void saveRequestParam(String ip, Integer port, String key, String value, Integer timeout,
-      ExecuteDetail executeDetail) {
-    executeDetail.addRequestInfo("ip: " + ip);
-    executeDetail.addRequestInfo("port: " + port);
-    executeDetail.addRequestInfo("key: " + key);
-    executeDetail.addRequestInfo("value: " + value);
-    executeDetail.addRequestInfo("timeout: " + timeout);
+      ExecuteDetailVo executeDetailVo) {
+    executeDetailVo.addRequestInfo("ip: " + ip);
+    executeDetailVo.addRequestInfo("port: " + port);
+    executeDetailVo.addRequestInfo("key: " + key);
+    executeDetailVo.addRequestInfo("value: " + value);
+    executeDetailVo.addRequestInfo("timeout: " + timeout);
   }
 
   @Override
@@ -71,10 +71,10 @@ public class RedisFeature implements Feature {
 
   public static void main(String[] args) {
     RedisFeature redisFeature = new RedisFeature();
-    ExecuteDetail executeDetail = redisFeature.setValue("10.202.162.127", 6379, "name_huhu", "guyuelan", 5);
-    System.out.println(JSON.toJSONString(executeDetail));
+    ExecuteDetailVo executeDetailVo = redisFeature.setValue("10.202.162.127", 6379, "name_huhu", "guyuelan", 5);
+    System.out.println(JSON.toJSONString(executeDetailVo));
 
-    ExecuteDetail result = redisFeature.getValue("10.202.162.127", 6379, "name_huhu");
+    ExecuteDetailVo result = redisFeature.getValue("10.202.162.127", 6379, "name_huhu");
     System.out.println(JSON.toJSONString(result));
 
   }

@@ -18,6 +18,10 @@ eureka:
     enable-self-preservation: true
     # 开启自我保护的系数
     renewal-percent-threshold: 0.85
+    # 一级缓存与二级缓存同步时间
+    response-cache-update-interval-ms: 0
+    # 关闭服务端一级cache缓存
+    use-read-only-response-cache: false
   instance:
     hostname: windy-master
     # 服务时效时间，默认90秒.当server 90秒内没有收到client的注册信息时，会将该节点剔除

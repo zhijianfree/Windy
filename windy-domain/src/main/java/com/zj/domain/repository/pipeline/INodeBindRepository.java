@@ -6,7 +6,7 @@ import com.zj.domain.entity.po.pipeline.NodeBind;
 import java.util.List;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/19
  */
 public interface INodeBindRepository {

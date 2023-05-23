@@ -50,7 +50,7 @@ public class TaskEndProcessor {
     }
 
     //1 找到任务记录关联的所有用例
-    List<FeatureInfoDto> features = featureRepository.queryFeatureList(taskRecord.getTestCaseId());
+    List<FeatureInfoDto> features = featureRepository.queryNotContainFolder(taskRecord.getTestCaseId());
     //2 找到任务关联所有用例的执行记录(找到的记录都是成功的，否则不会进入到当前逻辑)
     List<String> recordFeatureIds = featureHistoryRepository.getTaskRecordFeatures(taskRecordId)
         .stream().map(FeatureHistoryDto::getFeatureId).collect(Collectors.toList());

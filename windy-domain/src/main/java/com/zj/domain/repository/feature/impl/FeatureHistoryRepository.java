@@ -2,6 +2,7 @@ package com.zj.domain.repository.feature.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
 import com.zj.domain.entity.po.feature.FeatureHistory;
@@ -67,9 +68,9 @@ public class FeatureHistoryRepository extends
   }
 
   @Override
-  public List<FeatureHistoryDto> getHistoriesByTaskId(String taskId) {
+  public List<FeatureHistoryDto> getHistoriesByTaskRecordId(String taskRecordId) {
     List<FeatureHistory> histories = list(
-        Wrappers.lambdaQuery(FeatureHistory.class).eq(FeatureHistory::getRecordId, taskId));
+        Wrappers.lambdaQuery(FeatureHistory.class).eq(FeatureHistory::getRecordId, taskRecordId));
     if (CollectionUtils.isEmpty(histories)) {
       return Collections.emptyList();
     }
@@ -103,6 +104,7 @@ public class FeatureHistoryRepository extends
     FeatureHistory featureHistory = new FeatureHistory();
     featureHistory.setHistoryId(historyId);
     featureHistory.setExecuteStatus(status);
+    featureHistory.setUpdateTime(System.currentTimeMillis());
     return update(featureHistory,
         Wrappers.lambdaUpdate(FeatureHistory.class).eq(FeatureHistory::getHistoryId, historyId));
   }
@@ -112,5 +114,15 @@ public class FeatureHistoryRepository extends
     List<FeatureHistory> histories = list(
         Wrappers.lambdaQuery(FeatureHistory.class).eq(FeatureHistory::getRecordId, taskRecordId));
     return OrikaUtil.convertList(histories, FeatureHistoryDto.class);
+  }
+
+  @Override
+  public void stopTaskFeatures(String taskRecordId, ProcessStatus processStatus) {
+    FeatureHistory featureHistory = new FeatureHistory();
+    featureHistory.setExecuteStatus(processStatus.getType());
+    featureHistory.setUpdateTime(System.currentTimeMillis());
+    update(featureHistory,
+        Wrappers.lambdaUpdate(FeatureHistory.class).eq(FeatureHistory::getRecordId, taskRecordId)
+            .eq(FeatureHistory::getExecuteStatus, ProcessStatus.RUNNING.getType()));
   }
 }

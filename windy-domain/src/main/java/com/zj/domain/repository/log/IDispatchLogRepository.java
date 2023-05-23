@@ -4,14 +4,14 @@ import com.zj.domain.entity.dto.log.DispatchLogDto;
 import java.util.List;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/19
  */
 public interface IDispatchLogRepository {
 
   List<DispatchLogDto> getRunningTaskLog();
 
-  void delete7DayLog();
+  List<String> delete7DayLog();
 
   void saveLog(DispatchLogDto taskLog);
 
@@ -20,4 +20,6 @@ public interface IDispatchLogRepository {
   boolean updateLogMasterIp(String logId, String localIP, Integer lockVersion);
 
   void updateLogSourceRecord(String logId, String recordId);
+
+  DispatchLogDto getDispatchLogBySourceId(String targetId);
 }

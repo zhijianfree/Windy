@@ -24,12 +24,12 @@ public class Dispatcher {
         .collect(Collectors.toMap(IDispatchExecutor::type, dispatchExecutor -> dispatchExecutor));
   }
 
-  public boolean dispatch(TaskDetailDto task) {
+  public String dispatch(TaskDetailDto task) {
     log.info("go into dispatch name={}", task.getSourceName());
     IDispatchExecutor dispatchExecutor = dispatchExecutorMap.get(task.getType());
     if (Objects.isNull(dispatchExecutor)) {
       log.info("can not find dispatch executor");
-      return false;
+      return null;
     }
     log.info("start dispatch name={}", task.getSourceName());
     return dispatchExecutor.dispatch(task);

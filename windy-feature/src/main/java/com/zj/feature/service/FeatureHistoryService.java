@@ -34,7 +34,7 @@ public class FeatureHistoryService {
   }
 
   public List<FeatureHistoryDto> getHistories(String taskId) {
-    return featureHistoryRepository.getHistoriesByTaskId(taskId);
+    return featureHistoryRepository.getHistoriesByTaskRecordId(taskId);
   }
 
   public boolean deleteByRecordId(String taskId) {

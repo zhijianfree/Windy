@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.client.entity.dto.ParamDefine;
 import com.zj.client.entity.enuns.ParamTypeEnum;
-import com.zj.client.entity.vo.ExecuteDetail;
+import com.zj.client.entity.vo.ExecuteDetailVo;
 import com.zj.client.feature.executor.vo.ExecutorUnit;
 import com.zj.client.utils.ExceptionUtils;
 import java.util.List;
@@ -44,10 +44,10 @@ public class MethodInvoke implements IRemoteInvoker {
           .append(" ] method [ ")
           .append(executorUnit.getMethod())
           .append(" ]\r\n").append("\tat").append(ExceptionUtils.getSimplifyError(e));
-      ExecuteDetail executeDetail = new ExecuteDetail();
-      executeDetail.setStatus(false);
-      executeDetail.setErrorMessage(stringBuilder.toString());
-      return executeDetail;
+      ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
+      executeDetailVo.setStatus(false);
+      executeDetailVo.setErrorMessage(stringBuilder.toString());
+      return executeDetailVo;
     }
   }
 

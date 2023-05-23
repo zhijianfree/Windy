@@ -5,7 +5,7 @@ import com.zj.common.enums.NotifyType;
 import com.zj.common.model.ResultEvent;
 import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
-import com.zj.domain.repository.log.ISubTaskLogRepository;
+import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.master.dispatch.task.FeatureExecuteProxy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class UpdateFeatureHistoryEvent implements INotifyEvent {
   private FeatureExecuteProxy featureExecuteProxy;
 
   @Autowired
-  private ISubTaskLogRepository subTaskLogRepository;
+  private ISubDispatchLogRepository subTaskLogRepository;
 
   @Override
   public NotifyType type() {
@@ -39,7 +39,7 @@ public class UpdateFeatureHistoryEvent implements INotifyEvent {
         JSON.toJSONString(resultEvent.getParams()));
     FeatureHistoryDto history = JSON.parseObject(
         JSON.toJSONString(resultEvent.getParams()), FeatureHistoryDto.class);
-    boolean updateStatus = featureHistoryRepository.updateStatus(resultEvent.getExecuteId(),
+    boolean updateStatus = featureHistoryRepository.updateStatus(history.getHistoryId(),
         resultEvent.getStatus().getType());
 
     subTaskLogRepository.updateLogStatus(resultEvent.getLogId(), history.getHistoryId(),

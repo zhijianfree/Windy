@@ -21,7 +21,9 @@ public interface INodeRecordRepository {
 
   List<NodeRecordDto> getRecordsByHistoryId(String historyId);
 
-  NodeRecord getRecordById(String recordId);
+  NodeRecordDto getRecordById(String recordId);
 
   NodeRecordDto getRecordByNodeAndHistory(String historyId, String nodeId);
+
+  void updateRunningNodeStatus(String historyId, ProcessStatus stop);
 }

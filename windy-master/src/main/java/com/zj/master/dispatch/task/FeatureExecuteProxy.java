@@ -6,13 +6,13 @@ import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.IpUtils;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
 import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
+import com.zj.domain.entity.dto.feature.TaskRecordDto;
 import com.zj.domain.repository.feature.IExecutePointRepository;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
 import com.zj.master.dispatch.ClientProxy;
 import com.zj.master.dispatch.listener.IInnerEventListener;
 import com.zj.master.dispatch.listener.InnerEvent;
-import com.zj.common.model.StopDispatch;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -57,12 +57,18 @@ public class FeatureExecuteProxy implements IInnerEventListener {
   public static final String TASK_FEATURE_TIPS = "no task need run";
   private final Map<String, FeatureTask> featureTaskMap = new ConcurrentHashMap<>();
 
-  public void execute(FeatureTask featureTask){
+  public void execute(FeatureTask featureTask) {
     CompletableFuture.supplyAsync(() -> {
       LinkedBlockingQueue<String> featureIds = featureTask.getFeatureIds();
       String featureId = featureIds.poll();
       if (StringUtils.isBlank(featureId)) {
         featureTaskMap.remove(featureTask.getTaskRecordId());
+        return null;
+      }
+
+      TaskRecordDto taskRecord = taskRecordRepository.getTaskRecord(featureTask.getTaskRecordId());
+      if (Objects.isNull(taskRecord) || ProcessStatus.isCompleteStatus(taskRecord.getStatus())) {
+        log.info("task record is done not execute status={}", taskRecord.getStatus());
         return null;
       }
 
@@ -75,7 +81,7 @@ public class FeatureExecuteProxy implements IInnerEventListener {
     }, executorService).whenComplete((featureId, e) -> {
       String recordId = Optional.ofNullable(featureId).orElse(TASK_FEATURE_TIPS);
       log.info("complete trigger action recordId = {}", recordId);
-    }).exceptionally((e) ->{
+    }).exceptionally((e) -> {
       log.error("handle task error", e);
       return null;
     });
@@ -94,22 +100,26 @@ public class FeatureExecuteProxy implements IInnerEventListener {
 
   public void featureStatusChange(String taskRecordId, FeatureHistoryDto history) {
     ProcessStatus processStatus = ProcessStatus.exchange(history.getExecuteStatus());
-    if (processStatus.isFailStatus()){
+    if (processStatus.isFailStatus()) {
       featureHistoryRepository.updateStatus(history.getHistoryId(), processStatus.getType());
     }
 
     //每个用例执行完成之后都需要判断下是整个任务是否执行完成
     FeatureTask featureTask = featureTaskMap.get(taskRecordId);
-    boolean isTaskEnd = taskEndProcessor.process(taskRecordId, processStatus, featureTask.getLogId());
-    if (isTaskEnd){
+    if (Objects.isNull(featureTask)) {
+      log.info("can not find task record");
+      return;
+    }
+
+    boolean isTaskEnd = taskEndProcessor.process(taskRecordId, processStatus,
+        featureTask.getLogId());
+    if (isTaskEnd) {
       featureTaskMap.remove(taskRecordId);
       return;
     }
 
-    if (Objects.nonNull(featureTask)) {
-      log.info("feature task start cycle run");
-      execute(featureTask);
-    }
+    log.info("feature task start cycle run");
+    execute(featureTask);
   }
 
   @Override
@@ -119,15 +129,15 @@ public class FeatureExecuteProxy implements IInnerEventListener {
       return;
     }
 
-    FeatureTask featureTask = featureTaskMap.remove(event.getTargetId());
-    if (Objects.isNull(featureTask)) {
-      log.info("remove feature task but not find it ={}", event.getTargetId());
-      return;
+    String taskRecordId = event.getTargetId();
+    FeatureTask featureTask = featureTaskMap.remove(taskRecordId);
+    if (Objects.nonNull(featureTask)) {
+      featureTaskMap.remove(taskRecordId);
     }
-
 
     log.info("stop pipeline task taskId={} taskRecordId={}", featureTask.getTaskId(),
         featureTask.getTaskRecordId());
-    taskRecordRepository.updateRecordStatus(event.getTargetId(), ProcessStatus.STOP.getType());
+    taskRecordRepository.updateRecordStatus(taskRecordId, ProcessStatus.STOP.getType());
+    featureHistoryRepository.stopTaskFeatures(taskRecordId, ProcessStatus.STOP);
   }
 }

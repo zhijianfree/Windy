@@ -3,7 +3,7 @@ package com.zj.client.feature.executor.interceptor;
 import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.dto.ParamDefine;
 import com.zj.client.entity.po.ExecutePoint;
-import com.zj.client.entity.vo.ExecuteDetail;
+import com.zj.client.entity.vo.ExecuteDetailVo;
 import com.zj.client.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.client.feature.executor.vo.ExecuteContext;
 import com.zj.client.feature.executor.vo.ExecutorUnit;
@@ -26,7 +26,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
   }
 
   @Override
-  public void afterExecute(ExecutePoint executePoint, ExecuteDetail executeDetail,
+  public void afterExecute(ExecutePoint executePoint, ExecuteDetailVo executeDetailVo,
       ExecuteContext context) {
     String variables = executePoint.getVariables();
     List<VariableDefine> variableDefines = JSON.parseArray(variables, VariableDefine.class);
@@ -35,7 +35,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
     }
 
     //将执行完的结果转化为变量的值
-    Object responseBody = executeDetail.getResponseDetail().getResponseBody();
+    Object responseBody = executeDetailVo.getResponseDetailVo().getResponseBody();
     variableDefines.forEach(variableDefine -> {
       String expressionString = variableDefine.getVariableValue();
       if (StringUtils.isBlank(expressionString)) {

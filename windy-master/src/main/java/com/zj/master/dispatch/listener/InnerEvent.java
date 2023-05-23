@@ -5,7 +5,7 @@ import com.zj.master.entity.enums.EventType;
 import lombok.Data;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/18
  */
 @Data

@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class NodeStatusQueryLooper implements Runnable, IStatusNotifyListener {
+public class NodeStatusQueryLooper implements Runnable {
 
   public static final int MAX_REMOVE_TIME = 2 * 60 * 60 * 1000;
   public static final String DESCRIPTION_FORMAT = "比较响应字段:【%s】- 描述信息:%s";
@@ -158,11 +158,13 @@ public class NodeStatusQueryLooper implements Runnable, IStatusNotifyListener {
     }
   }
 
-  @Override
-  public void statusChange(PipelineStatusEvent event) {
-    String historyId = event.getTaskNode().getHistoryId();
+  public void stopPipeline(String historyId) {
     queue.stream().filter(node -> Objects.equals(node.getHistoryId(), historyId)).forEach(node -> {
-      removeItem(node.getRecordId(), event.getProcessStatus().getType());
+      PipelineStatusEvent statusEvent = PipelineStatusEvent.builder().taskNode(node)
+          .processStatus(ProcessStatus.STOP)
+          .errorMsg(Collections.singletonList("user stop")).build();
+      PipelineEventFactory.sendNotifyEvent(statusEvent);
+      removeItem(node.getRecordId(), ProcessStatus.STOP.getType());
     });
   }
 

@@ -3,43 +3,43 @@ package com.zj.client.entity.vo;
 import lombok.Data;
 
 @Data
-public class ExecuteDetail {
+public class ExecuteDetailVo {
 
   /**
    * 当前任务执行的请求信息与请求参数
    */
-  private RequestDetail requestDetail = new RequestDetail();
+  private RequestDetailVo requestDetailVo = new RequestDetailVo();
 
   /**
    * 当前请求执行完成之后的响应结果
    */
-  private ResponseDetail responseDetail = new ResponseDetail();
+  private ResponseDetailVo responseDetailVo = new ResponseDetailVo();
 
   public void setStatus(Boolean code) {
-    responseDetail.setResponseStatus(code);
+    responseDetailVo.setResponseStatus(code);
   }
 
   public void setResBody(Object responseBody) {
-    responseDetail.setResponseBody(responseBody);
+    responseDetailVo.setResponseBody(responseBody);
   }
 
   public void setErrorMessage(String errorMessage) {
-    responseDetail.setErrorMessage(errorMessage);
+    responseDetailVo.setErrorMessage(errorMessage);
   }
 
   public void addRequestInfo(String info) {
-    requestDetail.getRequest().add(info);
+    requestDetailVo.getRequest().add(info);
   }
 
   public void setRequestBody(Object requestBody) {
-    requestDetail.setRequestBody(requestBody);
+    requestDetailVo.setRequestBody(requestBody);
   }
 
   public Boolean responseStatus() {
-    return responseDetail.getResponseStatus();
+    return responseDetailVo.getResponseStatus();
   }
 
   public Object responseBody() {
-    return responseDetail.getResponseBody();
+    return responseDetailVo.getResponseBody();
   }
 }

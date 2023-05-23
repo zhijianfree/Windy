@@ -73,7 +73,7 @@ public class PipelineHistoryRepository extends
   public PipelineHistoryDto getLatestPipelineHistory(String pipelineId) {
     PipelineHistory pipelineHistory = getOne(
         Wrappers.lambdaQuery(PipelineHistory.class).eq(PipelineHistory::getPipelineId, pipelineId)
-            .orderByDesc(PipelineHistory::getUpdateTime).last(LAST_SQL));
+            .orderByDesc(PipelineHistory::getCreateTime).last(LAST_SQL));
     if (Objects.isNull(pipelineHistory)) {
       return null;
     }

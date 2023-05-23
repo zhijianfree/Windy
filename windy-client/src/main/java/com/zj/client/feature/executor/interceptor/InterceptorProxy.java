@@ -1,7 +1,7 @@
 package com.zj.client.feature.executor.interceptor;
 
 import com.zj.client.entity.po.ExecutePoint;
-import com.zj.client.entity.vo.ExecuteDetail;
+import com.zj.client.entity.vo.ExecuteDetailVo;
 import com.zj.client.feature.executor.vo.ExecuteContext;
 import com.zj.client.feature.executor.vo.ExecutorUnit;
 import java.util.List;
@@ -20,9 +20,9 @@ public class InterceptorProxy {
         IExecuteInterceptor.beforeExecute(executorUnit, context));
   }
 
-  public void afterExecute(ExecutePoint executePoint, ExecuteDetail executeDetail,
+  public void afterExecute(ExecutePoint executePoint, ExecuteDetailVo executeDetailVo,
       ExecuteContext context) {
     interceptors.forEach(IExecuteInterceptor -> IExecuteInterceptor
-            .afterExecute(executePoint, executeDetail, context));
+            .afterExecute(executePoint, executeDetailVo, context));
   }
 }

@@ -7,12 +7,12 @@ import com.zj.common.generate.UniqueIdService;
 import com.zj.domain.entity.dto.feature.FeatureInfoDto;
 import com.zj.domain.entity.dto.feature.TaskInfoDto;
 import com.zj.domain.entity.dto.feature.TaskRecordDto;
-import com.zj.domain.entity.dto.log.SubTaskLogDto;
+import com.zj.domain.entity.dto.log.SubDispatchLogDto;
 import com.zj.domain.entity.dto.log.DispatchLogDto;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
 import com.zj.domain.repository.feature.ITaskRepository;
-import com.zj.domain.repository.log.ISubTaskLogRepository;
+import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.master.dispatch.IDispatchExecutor;
 import com.zj.master.entity.dto.TaskDetailDto;
@@ -49,7 +49,7 @@ public class TaskDispatch implements IDispatchExecutor {
   private FeatureExecuteProxy featureExecuteProxy;
 
   @Autowired
-  private ISubTaskLogRepository subTaskLogRepository;
+  private ISubDispatchLogRepository subTaskLogRepository;
 
   @Autowired
   private IDispatchLogRepository dispatchLogRepository;
@@ -63,18 +63,18 @@ public class TaskDispatch implements IDispatchExecutor {
   }
 
   @Override
-  public boolean dispatch(TaskDetailDto task) {
+  public String dispatch(TaskDetailDto task) {
     TaskInfoDto taskDetail = taskRepository.getTaskDetail(task.getSourceId());
     if (Objects.isNull(taskDetail)) {
       log.info("can not find task={}", task.getSourceId());
-      return false;
+      return null;
     }
 
     String testCaseId = taskDetail.getTestCaseId();
     List<FeatureInfoDto> featureList = featureRepository.queryNotContainFolder(testCaseId);
     if (CollectionUtils.isEmpty(featureList)) {
       log.info("can not find feature list by testCaseId={}", testCaseId);
-      return false;
+      return "";
     }
 
     TaskRecordDto taskRecordDto = buildTaskRecordDTO(taskDetail);
@@ -85,25 +85,25 @@ public class TaskDispatch implements IDispatchExecutor {
     FeatureTask featureTask = buildFeatureTask(task, featureList, taskRecordDto);
     saveSubTaskLog(featureTask);
     featureExecuteProxy.execute(featureTask);
-    return false;
+    return taskRecordDto.getRecordId();
   }
 
   private void saveSubTaskLog(FeatureTask featureTask) {
-    List<SubTaskLogDto> subTaskLogs = featureTask.getFeatureIds().stream()
+    List<SubDispatchLogDto> subTaskLogs = featureTask.getFeatureIds().stream()
         .map(featureId -> buildSubTaskLog(featureTask, featureId)).collect(Collectors.toList());
     subTaskLogRepository.batchSaveLogs(subTaskLogs);
   }
 
-  private SubTaskLogDto buildSubTaskLog(FeatureTask featureTask, String featureId) {
-    SubTaskLogDto subTaskLogDto = new SubTaskLogDto();
-    subTaskLogDto.setSubTaskId(uniqueIdService.getUniqueId());
-    subTaskLogDto.setLogId(featureTask.getLogId());
-    subTaskLogDto.setExecuteId(featureId);
-    subTaskLogDto.setStatus(ProcessStatus.RUNNING.getType());
+  private SubDispatchLogDto buildSubTaskLog(FeatureTask featureTask, String featureId) {
+    SubDispatchLogDto subDispatchLogDto = new SubDispatchLogDto();
+    subDispatchLogDto.setSubTaskId(uniqueIdService.getUniqueId());
+    subDispatchLogDto.setLogId(featureTask.getLogId());
+    subDispatchLogDto.setExecuteId(featureId);
+    subDispatchLogDto.setStatus(ProcessStatus.RUNNING.getType());
     long dateNow = System.currentTimeMillis();
-    subTaskLogDto.setCreateTime(dateNow);
-    subTaskLogDto.setUpdateTime(dateNow);
-    return subTaskLogDto;
+    subDispatchLogDto.setCreateTime(dateNow);
+    subDispatchLogDto.setUpdateTime(dateNow);
+    return subDispatchLogDto;
   }
 
   private FeatureTask buildFeatureTask(TaskDetailDto task, List<FeatureInfoDto> featureList,
@@ -164,10 +164,10 @@ public class TaskDispatch implements IDispatchExecutor {
       log.info("can not find feature list by testCaseId={}", testCaseId);
       return false;
     }
-    List<SubTaskLogDto> tasks = subTaskLogRepository.getSubTaskByLogId(taskLog.getLogId());
+    List<SubDispatchLogDto> tasks = subTaskLogRepository.getSubTaskByLogId(taskLog.getLogId());
     List<String> completedFeatures = tasks.stream()
         .filter(subTask -> !ProcessStatus.isCompleteStatus(subTask.getStatus()))
-        .map(SubTaskLogDto::getExecuteId)
+        .map(SubDispatchLogDto::getExecuteId)
         .collect(Collectors.toList());
 
     FeatureTask featureTask = buildResumeFeatureTask(taskLog, taskDetail,

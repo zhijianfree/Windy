@@ -3,11 +3,12 @@ package com.zj.master.schedule;
 import com.alibaba.fastjson.JSON;
 import com.zj.common.utils.IpUtils;
 import com.zj.domain.entity.dto.log.DispatchLogDto;
-import com.zj.domain.repository.log.ISubTaskLogRepository;
+import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.master.dispatch.Dispatcher;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -31,7 +32,7 @@ public class TaskScheduleJob {
   private IDispatchLogRepository taskLogRepository;
 
   @Autowired
-  private ISubTaskLogRepository subTaskLogRepository;
+  private ISubDispatchLogRepository subDispatchLogRepository;
 
   @Autowired
   private DiscoveryClient discoveryClient;
@@ -66,15 +67,22 @@ public class TaskScheduleJob {
 
   @Scheduled(cron = "0 0 0 * * ?")
   public void deleteOldLog() {
-    taskLogRepository.delete7DayLog();
+    List<String> logIds = taskLogRepository.delete7DayLog();
+    if (CollectionUtils.isEmpty(logIds)) {
+      return;
+    }
+
+    subDispatchLogRepository.batchDeleteByLogIds(logIds);
   }
 
   private List<DispatchLogDto> resolveNoMasterTaskLog(List<DispatchLogDto> runningTaskLog) {
+    String localIP = IpUtils.getLocalIP();
     List<String> masterIps = getCurrentMasterIpList();
-    return runningTaskLog.stream().filter(log -> masterIps.contains(log.getNodeIp())).filter(
-        //使用乐观锁，保证当前任务只被一个节点覆盖
-        log -> taskLogRepository.updateLogMasterIp(log.getLogId(), IpUtils.getLocalIP(),
-            log.getLockVersion())).collect(Collectors.toList());
+    return runningTaskLog.stream().filter(log -> !Objects.equals(localIP, log.getNodeIp()))
+        .filter(log -> !masterIps.contains(log.getNodeIp())).filter(
+            //使用乐观锁，保证当前任务只被一个节点覆盖
+            log -> taskLogRepository.updateLogMasterIp(log.getLogId(), localIP,
+                log.getLockVersion())).collect(Collectors.toList());
   }
 
   private List<String> getCurrentMasterIpList() {

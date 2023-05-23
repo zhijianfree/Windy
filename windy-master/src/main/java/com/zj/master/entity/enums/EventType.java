@@ -1,7 +1,7 @@
 package com.zj.master.entity.enums;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/18
  */
 public enum EventType {

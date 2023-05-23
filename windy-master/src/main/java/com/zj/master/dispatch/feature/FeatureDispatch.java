@@ -50,7 +50,7 @@ public class FeatureDispatch implements IDispatchExecutor {
   }
 
   @Override
-  public boolean dispatch(TaskDetailDto task) {
+  public String dispatch(TaskDetailDto task) {
     String featureString = task.getSourceId();
     List<String> featureIds = JSON.parseArray(featureString, String.class);
     FeatureInfoDto feature = featureRepository.getFeatureById(featureIds.get(0));
@@ -67,7 +67,7 @@ public class FeatureDispatch implements IDispatchExecutor {
     featureTask.setTaskRecordId(tempRecordId);
 
     featureExecuteProxy.execute(featureTask);
-    return false;
+    return tempRecordId;
   }
 
   @Override

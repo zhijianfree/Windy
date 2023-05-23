@@ -1,6 +1,6 @@
 package com.zj.client.feature.executor.compare;
 
-import com.zj.client.entity.vo.ExecuteDetail;
+import com.zj.client.entity.vo.ExecuteDetailVo;
 import com.zj.client.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.common.exception.ErrorCode;
 import java.util.List;
@@ -28,7 +28,7 @@ public class CompareHandler {
         compareOperator -> compareOperator));
   }
 
-  public CompareResult compare(ExecuteDetail executeDetail, List<CompareDefine> compareDefines) {
+  public CompareResult compare(ExecuteDetailVo executeDetailVo, List<CompareDefine> compareDefines) {
     CompareResult compareResult = new CompareResult();
     compareResult.setCompareStatus(true);
     if (CollectionUtils.isEmpty(compareDefines)) {
@@ -41,7 +41,7 @@ public class CompareHandler {
             compare.getExpectValue())).collect(
         Collectors.toList());
 
-    preHandle(executeDetail, compareDefines);
+    preHandle(executeDetailVo, compareDefines);
 
     for (CompareDefine compareDefine : compareDefines) {
       compareResult = compareOne(compareDefine);
@@ -72,8 +72,8 @@ public class CompareHandler {
   /**
    * 预处理是将全局符替换成运行后的真实数据
    */
-  private void preHandle(ExecuteDetail executeDetail, List<CompareDefine> compareDefines) {
-    if (Objects.isNull(executeDetail.responseBody())) {
+  private void preHandle(ExecuteDetailVo executeDetailVo, List<CompareDefine> compareDefines) {
+    if (Objects.isNull(executeDetailVo.responseBody())) {
       return;
     }
 
@@ -82,17 +82,17 @@ public class CompareHandler {
             compare.getCompareKey())).forEach(compareDefine -> {
       String key = compareDefine.getCompareKey();
       if (Objects.equals(key, RESPONSE_CODE)) {
-        compareDefine.setResponseValue(String.valueOf(executeDetail.responseStatus()));
+        compareDefine.setResponseValue(String.valueOf(executeDetailVo.responseStatus()));
         return;
       }
 
       if (Objects.equals(key, RESPONSE_BODY)) {
-        compareDefine.setResponseValue(executeDetail.responseBody());
+        compareDefine.setResponseValue(executeDetailVo.responseBody());
         return;
       }
 
       String compare = key.replace("$", "#");
-      Object result = ognlDataParser.parserExpression(executeDetail.responseBody(), compare);
+      Object result = ognlDataParser.parserExpression(executeDetailVo.responseBody(), compare);
       compareDefine.setResponseValue(result);
     });
   }

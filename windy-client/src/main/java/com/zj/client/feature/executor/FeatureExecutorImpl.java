@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.po.ExecutePoint;
 import com.zj.client.entity.po.ExecuteRecord;
 import com.zj.client.entity.po.FeatureHistory;
-import com.zj.client.entity.vo.ExecuteDetail;
+import com.zj.client.entity.vo.ExecuteDetailVo;
 import com.zj.client.entity.vo.FeatureResponse;
 import com.zj.client.feature.executor.feature.strategy.ExecuteStrategyFactory;
 import com.zj.client.feature.executor.vo.ExecutorUnit;
@@ -14,6 +14,7 @@ import com.zj.common.enums.NotifyType;
 import com.zj.common.model.ResultEvent;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
+import com.zj.common.utils.IpUtils;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -113,6 +114,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
     ResultEvent resultEvent = new ResultEvent().executeId(recordId)
         .notifyType(NotifyType.CREATE_EXECUTE_POINT_RECORD)
         .masterIP(featureParam.getMasterIp())
+        .clientIp(IpUtils.getLocalIP())
         .logId(featureParam.getLogId())
         .status(ProcessStatus.exchange(executeRecord.getStatus())).params(executeRecord);
     resultEventNotify.notifyEvent(resultEvent);
@@ -134,10 +136,10 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
   }
 
   private FeatureResponse createFailResponse(ExecutePoint executePoint, Exception e) {
-    ExecuteDetail executeDetail = new ExecuteDetail();
-    executeDetail.setErrorMessage(e.toString());
-    executeDetail.setStatus(false);
+    ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
+    executeDetailVo.setErrorMessage(e.toString());
+    executeDetailVo.setStatus(false);
     return FeatureResponse.builder()
-        .pointId(executePoint.getPointId()).executeDetail(executeDetail).build();
+        .pointId(executePoint.getPointId()).executeDetailVo(executeDetailVo).build();
   }
 }

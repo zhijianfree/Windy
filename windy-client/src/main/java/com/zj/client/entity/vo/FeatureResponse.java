@@ -11,7 +11,7 @@ public class FeatureResponse {
     /**
      * 执行的详细信息
      */
-    private ExecuteDetail executeDetail;
+    private ExecuteDetailVo executeDetailVo;
 
     private CompareResult compareResult;
 
@@ -27,8 +27,8 @@ public class FeatureResponse {
 
     public boolean isSuccess() {
         boolean invokeStatus = true;
-        if (Objects.nonNull(executeDetail)) {
-            invokeStatus = executeDetail.getResponseDetail().getResponseStatus();
+        if (Objects.nonNull(executeDetailVo)) {
+            invokeStatus = executeDetailVo.getResponseDetailVo().getResponseStatus();
         }
 
         boolean compareStatus = true;

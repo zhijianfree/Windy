@@ -1,6 +1,6 @@
 package com.zj.client.feature.ability.kafka;
 
-import com.zj.client.entity.vo.ExecuteDetail;
+import com.zj.client.entity.vo.ExecuteDetailVo;
 import com.zj.client.feature.ability.Feature;
 import com.zj.client.feature.ability.FeatureDefine;
 import java.nio.charset.StandardCharsets;
@@ -29,9 +29,9 @@ import org.apache.kafka.common.header.Header;
 @Slf4j
 public class KafkaFeature implements Feature {
 
-  public ExecuteDetail startConsume(String address, String topic, String group) {
-    ExecuteDetail executeDetail = new ExecuteDetail();
-    saveRequestParam(executeDetail, address, topic, group);
+  public ExecuteDetailVo startConsume(String address, String topic, String group) {
+    ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
+    saveRequestParam(executeDetailVo, address, topic, group);
 
     KafkaConsumer<String, String> consumer = buildConsumer(address, topic, group);
     ConsumerRecords<String, String> consumerRecords = consumer.poll(Duration.ofSeconds(100));
@@ -54,21 +54,21 @@ public class KafkaFeature implements Feature {
       log.info("get consume result ={} headers={} value={} topic={}", next.key(), next.headers(),
           next.value(), next.topic());
     }
-    executeDetail.setStatus(true);
-    executeDetail.setResBody(kafkaResults);
+    executeDetailVo.setStatus(true);
+    executeDetailVo.setResBody(kafkaResults);
     consumer.commitSync();
     consumer.close();
-    return executeDetail;
+    return executeDetailVo;
   }
 
-  public ExecuteDetail produceMessage(String topic, String key, String value, Integer timeout,
+  public ExecuteDetailVo produceMessage(String topic, String key, String value, Integer timeout,
       String address) {
-    ExecuteDetail executeDetail = new ExecuteDetail();
-    executeDetail.addRequestInfo("address: " + address);
-    executeDetail.addRequestInfo("topic: " + topic);
-    executeDetail.addRequestInfo("key: " + key);
-    executeDetail.addRequestInfo("value: " + value);
-    executeDetail.addRequestInfo("timeout: " + timeout);
+    ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
+    executeDetailVo.addRequestInfo("address: " + address);
+    executeDetailVo.addRequestInfo("topic: " + topic);
+    executeDetailVo.addRequestInfo("key: " + key);
+    executeDetailVo.addRequestInfo("value: " + value);
+    executeDetailVo.addRequestInfo("timeout: " + timeout);
     try {
       Properties props = new Properties();
       props.put("bootstrap.servers", address);
@@ -78,22 +78,22 @@ public class KafkaFeature implements Feature {
       KafkaProducer<String, String> producer = new KafkaProducer<String, String>(props);
       ProducerRecord<String, String> record = new ProducerRecord<String, String>(topic, key, value);
       RecordMetadata recordMetadata = producer.send(record).get(timeout, TimeUnit.SECONDS);
-      executeDetail.setStatus(true);
-      executeDetail.setResBody(recordMetadata);
+      executeDetailVo.setStatus(true);
+      executeDetailVo.setResBody(recordMetadata);
       producer.close();
     } catch (Exception e) {
-      executeDetail.setStatus(false);
-      executeDetail.setErrorMessage(e.getMessage());
+      executeDetailVo.setStatus(false);
+      executeDetailVo.setErrorMessage(e.getMessage());
       log.error("produceMessage invoke error", e);
     }
-    return executeDetail;
+    return executeDetailVo;
   }
 
-  private void saveRequestParam(ExecuteDetail executeDetail, String address, String topic,
+  private void saveRequestParam(ExecuteDetailVo executeDetailVo, String address, String topic,
       String group) {
-    executeDetail.addRequestInfo("address: " + address);
-    executeDetail.addRequestInfo("group: " + group);
-    executeDetail.addRequestInfo("topic: " + topic);
+    executeDetailVo.addRequestInfo("address: " + address);
+    executeDetailVo.addRequestInfo("group: " + group);
+    executeDetailVo.addRequestInfo("topic: " + topic);
   }
 
   private KafkaConsumer<String, String> buildConsumer(String address, String topic, String group) {
