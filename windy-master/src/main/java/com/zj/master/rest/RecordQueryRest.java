@@ -37,7 +37,7 @@ public class RecordQueryRest {
     return new ResponseMeta<>(ErrorCode.SUCCESS, recordQueryService.getRecord(recordId));
   }
 
-  @GetMapping("/task/{taskRecordId}")
+  @GetMapping("/task/{taskRecordId}/status")
   private ResponseStatusModel getTaskStatus(@PathVariable("taskRecordId") String taskRecordId) {
     return recordQueryService.getTaskStatus(taskRecordId);
   }

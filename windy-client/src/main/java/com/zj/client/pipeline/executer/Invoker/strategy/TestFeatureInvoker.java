@@ -11,7 +11,6 @@ import com.zj.client.pipeline.executer.vo.RequestContext;
 import com.zj.client.pipeline.executer.vo.TestRequestContext;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.model.ResponseMeta;
 import com.zj.common.utils.OrikaUtil;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,8 +34,8 @@ public class TestFeatureInvoker implements IRemoteInvoker {
 
   public static final String START_TASK_URL = "http://WindyMaster/v1/devops/dispatch/task";
 
-  private static final String TASK_STATUS_URL = "http://WindyMaster/v1/devops/master/task/%s";
-  public static final String TASK_TIPS = "pipeline test task";
+  private static final String TASK_STATUS_URL = "http://WindyMaster/v1/devops/master/task/%s/status";
+  public static final String TASK_TIPS = "pipeline feature task";
 
   @Autowired
   private RestTemplate restTemplate;

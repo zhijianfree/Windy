@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @author guyuelan
  * @since 2023/3/29
  */
-
+@EnableScheduling
 @EnableEurekaClient
 @SpringBootApplication(scanBasePackages = {"com.zj.client", "com.zj.common"})
 public class ClientApplication {

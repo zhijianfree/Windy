@@ -2,7 +2,6 @@ package com.zj.client.pipeline.executer.notify;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.eventbus.Subscribe;
 import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.client.pipeline.executer.vo.CompareResult;
 import com.zj.client.pipeline.executer.vo.PipelineStatusEvent;
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -151,6 +149,10 @@ public class NodeStatusQueryLooper implements Runnable {
       } catch (InterruptedException e) {
         log.info("get task from queue error", e);
       }
+
+      try {
+        Thread.sleep(5000);
+      } catch (InterruptedException e) {}
 
       if (Objects.nonNull(taskNode)) {
         runNode(taskNode);

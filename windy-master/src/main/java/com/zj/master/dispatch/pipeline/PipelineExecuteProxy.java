@@ -72,7 +72,7 @@ public class PipelineExecuteProxy implements IInnerEventListener {
       taskNode.setDispatchType(DISPATCH_PIPELINE_TYPE);
       taskNode.setMasterIp(IpUtils.getLocalIP());
       boolean dispatchResult = clientProxy.sendDispatchTask(taskNode);
-      if (!dispatchResult){
+      if (!dispatchResult) {
         log.info("dispatch pipeline task to client fail ");
         pipelineHistoryRepository.updateStatus(taskNode.getHistoryId(), ProcessStatus.FAIL);
         dispatchLogRepository.updateLogStatus(logId, ProcessStatus.FAIL.getType());
@@ -102,6 +102,8 @@ public class PipelineExecuteProxy implements IInnerEventListener {
         taskNode.getHistoryId());
     if (Objects.isNull(pipelineHistory) || ProcessStatus.isCompleteStatus(
         pipelineHistory.getPipelineStatus())) {
+      log.info("can not find pipeline history or history has done. historyId={}",
+          taskNode.getHistoryId());
       return null;
     }
     return taskNode;

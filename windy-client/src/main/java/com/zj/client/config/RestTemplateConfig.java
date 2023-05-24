@@ -31,7 +31,7 @@ public class RestTemplateConfig {
   public RestTemplate getTemplate(List<ClientHttpRequestInterceptor> clients) {
     HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
     requestFactory.setReadTimeout(10000);
-    requestFactory.setConnectTimeout(5000);
+    requestFactory.setConnectTimeout(10000);
 
     //这种写法既可以指定超时时间也可以重复读取response响应数据
     InterceptingClientHttpRequestFactory interceptorFactory =

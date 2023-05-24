@@ -26,7 +26,7 @@ public class DispatchLogRepository extends ServiceImpl<DispatchLogMapper, Dispat
   public static final int PLUS_VERSION = 1;
 
   @Override
-  public List<DispatchLogDto> getRunningTaskLog() {
+  public List<DispatchLogDto> getRunningDispatchLog() {
     List<DispatchLog> dispatchLogs = list(Wrappers.lambdaQuery(DispatchLog.class)
         .eq(DispatchLog::getLogStatus, ProcessStatus.RUNNING.getType()));
     return OrikaUtil.convertList(dispatchLogs, DispatchLogDto.class);

@@ -99,11 +99,6 @@ public class FeatureExecuteProxy implements IInnerEventListener {
   }
 
   public void featureStatusChange(String taskRecordId, FeatureHistoryDto history) {
-    ProcessStatus processStatus = ProcessStatus.exchange(history.getExecuteStatus());
-    if (processStatus.isFailStatus()) {
-      featureHistoryRepository.updateStatus(history.getHistoryId(), processStatus.getType());
-    }
-
     //每个用例执行完成之后都需要判断下是整个任务是否执行完成
     FeatureTask featureTask = featureTaskMap.get(taskRecordId);
     if (Objects.isNull(featureTask)) {
@@ -111,6 +106,7 @@ public class FeatureExecuteProxy implements IInnerEventListener {
       return;
     }
 
+    ProcessStatus processStatus = ProcessStatus.exchange(history.getExecuteStatus());
     boolean isTaskEnd = taskEndProcessor.process(taskRecordId, processStatus,
         featureTask.getLogId());
     if (isTaskEnd) {

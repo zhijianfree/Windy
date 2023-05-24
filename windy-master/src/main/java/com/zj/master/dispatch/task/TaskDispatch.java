@@ -82,22 +82,25 @@ public class TaskDispatch implements IDispatchExecutor {
 
     dispatchLogRepository.updateLogSourceRecord(task.getTaskLogId(), taskRecordDto.getRecordId());
 
-    FeatureTask featureTask = buildFeatureTask(task, featureList, taskRecordDto);
-    saveSubTaskLog(featureTask);
+    List<String> featureIds = featureList.stream().map(FeatureInfoDto::getFeatureId)
+        .collect(Collectors.toList());
+    FeatureTask featureTask = buildFeatureTask(task, featureIds, taskRecordDto);
+    saveSubTaskLog(featureIds, featureTask.getLogId());
     featureExecuteProxy.execute(featureTask);
     return taskRecordDto.getRecordId();
   }
 
-  private void saveSubTaskLog(FeatureTask featureTask) {
-    List<SubDispatchLogDto> subTaskLogs = featureTask.getFeatureIds().stream()
-        .map(featureId -> buildSubTaskLog(featureTask, featureId)).collect(Collectors.toList());
+  private List<SubDispatchLogDto> saveSubTaskLog(List<String> featureIds, String logId) {
+    List<SubDispatchLogDto> subTaskLogs = featureIds.stream()
+        .map(featureId -> buildSubTaskLog(logId, featureId)).collect(Collectors.toList());
     subTaskLogRepository.batchSaveLogs(subTaskLogs);
+    return subTaskLogs;
   }
 
-  private SubDispatchLogDto buildSubTaskLog(FeatureTask featureTask, String featureId) {
+  private SubDispatchLogDto buildSubTaskLog(String logId, String featureId) {
     SubDispatchLogDto subDispatchLogDto = new SubDispatchLogDto();
     subDispatchLogDto.setSubTaskId(uniqueIdService.getUniqueId());
-    subDispatchLogDto.setLogId(featureTask.getLogId());
+    subDispatchLogDto.setLogId(logId);
     subDispatchLogDto.setExecuteId(featureId);
     subDispatchLogDto.setStatus(ProcessStatus.RUNNING.getType());
     long dateNow = System.currentTimeMillis();
@@ -106,14 +109,11 @@ public class TaskDispatch implements IDispatchExecutor {
     return subDispatchLogDto;
   }
 
-  private FeatureTask buildFeatureTask(TaskDetailDto task, List<FeatureInfoDto> featureList,
+  private FeatureTask buildFeatureTask(TaskDetailDto task, List<String> featureIds,
       TaskRecordDto taskRecordDto) {
     FeatureTask featureTask = new FeatureTask();
     ExecuteContext executeContext = buildTaskConfig(taskRecordDto.getTaskConfig());
     featureTask.setExecuteContext(executeContext);
-
-    List<String> featureIds = featureList.stream().map(FeatureInfoDto::getFeatureId)
-        .collect(Collectors.toList());
     featureTask.addAll(featureIds);
 
     featureTask.setTaskRecordId(taskRecordDto.getRecordId());
@@ -151,10 +151,10 @@ public class TaskDispatch implements IDispatchExecutor {
   }
 
   @Override
-  public boolean resume(DispatchLogDto taskLog) {
-    TaskInfoDto taskDetail = taskRepository.getTaskDetail(taskLog.getSourceId());
+  public boolean resume(DispatchLogDto dispatchLog) {
+    TaskInfoDto taskDetail = taskRepository.getTaskDetail(dispatchLog.getSourceId());
     if (Objects.isNull(taskDetail)) {
-      log.info("can not find task={}", taskLog.getSourceId());
+      log.info("can not find task={}", dispatchLog.getSourceId());
       return false;
     }
 
@@ -164,14 +164,27 @@ public class TaskDispatch implements IDispatchExecutor {
       log.info("can not find feature list by testCaseId={}", testCaseId);
       return false;
     }
-    List<SubDispatchLogDto> tasks = subTaskLogRepository.getSubTaskByLogId(taskLog.getLogId());
-    List<String> completedFeatures = tasks.stream()
+
+    List<SubDispatchLogDto> subLogs = subTaskLogRepository.getSubLogByLogId(dispatchLog.getLogId());
+    if (CollectionUtils.isEmpty(subLogs)) {
+      //如果找不到子任务执行记录，那么就需要重新创建
+      List<String> featureIds = featureList.stream().map(FeatureInfoDto::getFeatureId)
+          .collect(Collectors.toList());
+      subLogs = saveSubTaskLog(featureIds, dispatchLog.getLogId());
+    }
+
+    List<String> completedFeatures = subLogs.stream()
         .filter(subTask -> !ProcessStatus.isCompleteStatus(subTask.getStatus()))
         .map(SubDispatchLogDto::getExecuteId)
         .collect(Collectors.toList());
 
-    FeatureTask featureTask = buildResumeFeatureTask(taskLog, taskDetail,
+    FeatureTask featureTask = buildResumeFeatureTask(dispatchLog, taskDetail,
         featureList, completedFeatures);
+    if (StringUtils.isBlank(dispatchLog.getSourceRecordId())) {
+      TaskRecordDto taskRecordDto = buildTaskRecordDTO(taskDetail);
+      taskRecordRepository.save(taskRecordDto);
+      featureTask.setTaskRecordId(taskRecordDto.getRecordId());
+    }
     featureExecuteProxy.execute(featureTask);
     return true;
   }

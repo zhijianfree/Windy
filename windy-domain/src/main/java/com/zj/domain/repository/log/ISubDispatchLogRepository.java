@@ -13,7 +13,7 @@ public interface ISubDispatchLogRepository {
 
   void updateLogStatus(String logId, String executeId, Integer status);
 
-  List<SubDispatchLogDto> getSubTaskByLogId(String logId);
+  List<SubDispatchLogDto> getSubLogByLogId(String logId);
 
   void batchDeleteByLogIds(List<String> logIds);
 

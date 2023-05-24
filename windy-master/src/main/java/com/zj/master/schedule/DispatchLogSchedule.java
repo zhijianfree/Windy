@@ -1,6 +1,7 @@
 package com.zj.master.schedule;
 
 import com.alibaba.fastjson.JSON;
+import com.zj.common.monitor.InstanceMonitor;
 import com.zj.common.utils.IpUtils;
 import com.zj.domain.entity.dto.log.DispatchLogDto;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
@@ -25,7 +26,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class TaskScheduleJob {
+public class DispatchLogSchedule {
 
   public static final String WINDY_MASTER_NAME = "WindyMaster";
   @Autowired
@@ -37,6 +38,9 @@ public class TaskScheduleJob {
   @Autowired
   private DiscoveryClient discoveryClient;
 
+  @Autowired
+  private InstanceMonitor instanceMonitor;
+
   @Value("${task.log.max.wait.time:300}")
   private Integer maxExecuteWaitTime;
 
@@ -46,9 +50,12 @@ public class TaskScheduleJob {
   //  @Scheduled(cron = "0 0 0/1 * * ? ")
   @Scheduled(cron = "0/5 * * * * ? ")
   public void scanTaskLog() {
+    if (!instanceMonitor.isSuitable()){
+      return;
+    }
     log.info("start scan log......");
     // 1 扫描任务日志，只获取正在执行中的日志
-    List<DispatchLogDto> runningTaskLog = taskLogRepository.getRunningTaskLog();
+    List<DispatchLogDto> runningTaskLog = taskLogRepository.getRunningDispatchLog();
     if (CollectionUtils.isEmpty(runningTaskLog)) {
       return;
     }

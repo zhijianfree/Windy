@@ -9,7 +9,7 @@ import java.util.List;
  */
 public interface IDispatchLogRepository {
 
-  List<DispatchLogDto> getRunningTaskLog();
+  List<DispatchLogDto> getRunningDispatchLog();
 
   List<String> delete7DayLog();
 

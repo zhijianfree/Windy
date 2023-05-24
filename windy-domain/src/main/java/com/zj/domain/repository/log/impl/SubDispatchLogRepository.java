@@ -42,7 +42,7 @@ public class SubDispatchLogRepository extends
   }
 
   @Override
-  public List<SubDispatchLogDto> getSubTaskByLogId(String logId) {
+  public List<SubDispatchLogDto> getSubLogByLogId(String logId) {
     List<SubDispatchLog> taskLogs = list(
         Wrappers.lambdaQuery(SubDispatchLog.class).eq(SubDispatchLog::getLogId, logId));
     return OrikaUtil.convertList(taskLogs, SubDispatchLogDto.class);
