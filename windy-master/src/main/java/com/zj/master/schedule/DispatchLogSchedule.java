@@ -41,16 +41,13 @@ public class DispatchLogSchedule {
   @Autowired
   private InstanceMonitor instanceMonitor;
 
-  @Value("${task.log.max.wait.time:300}")
-  private Integer maxExecuteWaitTime;
-
   @Autowired
   private Dispatcher dispatcher;
 
   //  @Scheduled(cron = "0 0 0/1 * * ? ")
   @Scheduled(cron = "0/5 * * * * ? ")
   public void scanTaskLog() {
-    if (!instanceMonitor.isSuitable()){
+    if (!instanceMonitor.isSuitable()) {
       return;
     }
     log.info("start scan log......");
@@ -61,14 +58,21 @@ public class DispatchLogSchedule {
     }
 
     // 2 判断扫描到的任务执行的master节点是否还存在，不存在准备进入重选节点流程
-    List<DispatchLogDto> noMasterLogList = resolveNoMasterTaskLog(runningTaskLog);
+    List<DispatchLogDto> needRunList = resolveNoMasterTaskLog(runningTaskLog);
 
-    // 3 根据时间判断，在一定的时间间隔内仍未完成的任务日志，转移当前任务的执行节点为自己。
-    //todo 暂时不考虑
+    // 3 但是节点重启后由于IP未变化，但是重启节点没有执行任务
+    List<DispatchLogDto> localIpNoRun = resolveLocalIpTaskLog(runningTaskLog);
+    needRunList.addAll(localIpNoRun);
+    List<DispatchLogDto> logs = needRunList.stream().distinct().collect(Collectors.toList());
 
-    log.info("start run no master task ={}", JSON.toJSONString(noMasterLogList));
+    log.info("start run no master task ={}", JSON.toJSONString(logs));
     // 4 筛选出来的任务开始切换到当前节点执行
-    noMasterLogList.forEach(taskLog -> dispatcher.resumeTask(taskLog));
+    logs.forEach(taskLog -> dispatcher.resumeTask(taskLog));
+  }
+
+  private List<DispatchLogDto> resolveLocalIpTaskLog(List<DispatchLogDto> runningTaskLog) {
+    return runningTaskLog.stream().filter(log -> !dispatcher.isExitInJvm(log))
+        .collect(Collectors.toList());
   }
 
 

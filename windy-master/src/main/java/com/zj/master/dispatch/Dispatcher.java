@@ -40,4 +40,9 @@ public class Dispatcher {
     IDispatchExecutor dispatchExecutor = dispatchExecutorMap.get(taskLog.getLogType());
     return dispatchExecutor.resume(taskLog);
   }
+
+  public boolean isExitInJvm(DispatchLogDto taskLog){
+    IDispatchExecutor dispatchExecutor = dispatchExecutorMap.get(taskLog.getLogType());
+    return dispatchExecutor.isExitInJvm(taskLog);
+  }
 }

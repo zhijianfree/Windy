@@ -11,6 +11,8 @@ public interface IDispatchExecutor {
 
   Integer type();
 
+  boolean isExitInJvm(DispatchLogDto taskLog);
+
   String dispatch(TaskDetailDto task);
 
   boolean resume(DispatchLogDto taskLog);

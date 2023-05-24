@@ -160,4 +160,8 @@ public class PipelineExecuteProxy implements IInnerEventListener {
     clientProxy.stopDispatchTask(stopDispatch);
     log.info("stop pipeline task historyId={}", historyId);
   }
+
+  public boolean isExitTask(String sourceRecordId) {
+    return pipelineTaskMap.containsKey(sourceRecordId);
+  }
 }

@@ -63,6 +63,11 @@ public class TaskDispatch implements IDispatchExecutor {
   }
 
   @Override
+  public boolean isExitInJvm(DispatchLogDto taskLog) {
+    return featureExecuteProxy.isExitTask(taskLog.getSourceRecordId());
+  }
+
+  @Override
   public String dispatch(TaskDetailDto task) {
     TaskInfoDto taskDetail = taskRepository.getTaskDetail(task.getSourceId());
     if (Objects.isNull(taskDetail)) {

@@ -87,6 +87,10 @@ public class FeatureExecuteProxy implements IInnerEventListener {
     });
   }
 
+  public boolean isExitTask(String recordId) {
+    return featureTaskMap.containsKey(recordId);
+  }
+
   private FeatureExecuteParam getFeatureExecuteParam(FeatureTask featureTask, String featureId) {
     FeatureExecuteParam featureExecuteParam = new FeatureExecuteParam();
     featureExecuteParam.setFeatureId(featureId);

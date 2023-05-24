@@ -75,6 +75,10 @@ public class PipelineDispatch implements IDispatchExecutor {
   }
 
   @Override
+  public boolean isExitInJvm(DispatchLogDto taskLog) {
+    return pipelineExecuteProxy.isExitTask(taskLog.getSourceRecordId());
+  }
+  @Override
   public String dispatch(TaskDetailDto task) {
     PipelineDto pipeline = pipelineRepository.getPipeline(task.getSourceId());
     if (Objects.isNull(pipeline)) {

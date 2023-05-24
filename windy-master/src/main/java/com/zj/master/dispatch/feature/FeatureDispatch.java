@@ -50,6 +50,11 @@ public class FeatureDispatch implements IDispatchExecutor {
   }
 
   @Override
+  public boolean isExitInJvm(DispatchLogDto taskLog) {
+    return featureExecuteProxy.isExitTask(taskLog.getSourceRecordId());
+  }
+
+  @Override
   public String dispatch(TaskDetailDto task) {
     String featureString = task.getSourceId();
     List<String> featureIds = JSON.parseArray(featureString, String.class);
