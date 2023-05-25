@@ -3,6 +3,7 @@ package com.zj.client.feature.executor.vo;
 import com.zj.client.entity.dto.ExecutePointDTO;
 import com.zj.client.entity.dto.ParamDefine;
 import java.util.List;
+import java.util.Map;
 import lombok.Data;
 
 @Data
@@ -21,6 +22,11 @@ public class ExecutorUnit {
      * 执行方法
      * */
     private String method;
+
+    /**
+     * http类型时使用
+     * */
+    private Map<String, String> headers;
 
     /**
      * 方法参数

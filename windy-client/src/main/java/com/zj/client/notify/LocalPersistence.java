@@ -38,7 +38,7 @@ public class LocalPersistence implements DisposableBean {
 //    String localPatch = "/opt/windy/persist/persist.log";
     String localPatch = "/Users/falcon/persist/persist.log";
     if (isWindowsSystem()) {
-      localPatch = "D:\\\\windy\\\\persist\\\\persist.txt";
+      localPatch = "C:\\\\windy\\\\persist\\\\persist.txt";
     }
     file = new File(localPatch);
     if (!file.exists()) {
@@ -66,16 +66,7 @@ public class LocalPersistence implements DisposableBean {
     saveEvent2File();
   }
 
-  public List<ResultEvent> getNeedNotifyEvents() {
-    List<ResultEvent> resultEvents = readEventsFromFile();
-    while (unPersistEventList.size() > 0) {
-      resultEvents.add(unPersistEventList.remove(0));
-    }
-
-    return resultEvents;
-  }
-
-  private List<ResultEvent> readEventsFromFile() {
+  public List<ResultEvent> readEventsFromFile() {
     try {
       List<String> list = Files.readLines(file, Charsets.UTF_8);
       if (CollectionUtils.isEmpty(list)) {

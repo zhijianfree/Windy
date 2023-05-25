@@ -4,6 +4,7 @@ import com.zj.client.entity.enuns.ExecutePointType;
 import com.zj.client.entity.po.ExecutePoint;
 import com.zj.client.entity.vo.FeatureResponse;
 import com.zj.client.feature.executor.compare.CompareHandler;
+import com.zj.client.feature.executor.feature.IExecuteInvoker;
 import com.zj.client.feature.executor.interceptor.InterceptorProxy;
 import com.zj.client.feature.executor.vo.ExecuteContext;
 import java.util.Collections;
@@ -20,9 +21,9 @@ import org.springframework.stereotype.Service;
 public class INormalExecuteStrategy extends BaseExecuteStrategy {
 
   public INormalExecuteStrategy(InterceptorProxy interceptorProxy,
-      com.zj.client.feature.executor.feature.IRemoteInvoker IRemoteInvoker,
+      IExecuteInvoker IExecuteInvoker,
       CompareHandler compareHandler) {
-    super(interceptorProxy, IRemoteInvoker, compareHandler);
+    super(interceptorProxy, IExecuteInvoker, compareHandler);
   }
 
   @Override

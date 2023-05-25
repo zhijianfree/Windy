@@ -8,11 +8,13 @@ import com.zj.client.feature.executor.compare.CompareDefine;
 import com.zj.client.feature.executor.compare.CompareHandler;
 import com.zj.client.feature.executor.compare.CompareResult;
 import com.zj.client.feature.executor.feature.IExecuteStrategy;
-import com.zj.client.feature.executor.feature.IRemoteInvoker;
+import com.zj.client.feature.executor.feature.IExecuteInvoker;
 import com.zj.client.feature.executor.interceptor.InterceptorProxy;
 import com.zj.client.feature.executor.vo.ExecuteContext;
 import com.zj.client.feature.executor.vo.ExecutorUnit;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author guyuelan
@@ -22,19 +24,19 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
 
   private InterceptorProxy interceptorProxy;
 
-  private com.zj.client.feature.executor.feature.IRemoteInvoker IRemoteInvoker;
+  private Map<Integer, IExecuteInvoker> executeInvokerMap;
 
   private final CompareHandler compareHandler;
 
-  public BaseExecuteStrategy(InterceptorProxy interceptorProxy, IRemoteInvoker remoteInvoker,
-      CompareHandler compareHandler) {
+  public BaseExecuteStrategy(InterceptorProxy interceptorProxy,
+      List<IExecuteInvoker> executeInvokers, CompareHandler compareHandler) {
     this.interceptorProxy = interceptorProxy;
-    this.IRemoteInvoker = remoteInvoker;
+    this.executeInvokerMap = executeInvokers.stream()
+        .collect(Collectors.toMap(invoker -> invoker.type().getType(), invoker -> invoker));
     this.compareHandler = compareHandler;
   }
 
-  public FeatureResponse executeFeature(ExecuteContext executeContext,
-      ExecutePoint executePoint) {
+  public FeatureResponse executeFeature(ExecuteContext executeContext, ExecutePoint executePoint) {
     //1 执行用例，目前使用反射执行，后续考虑使用dubbo调用
     String featureInfo = executePoint.getFeatureInfo();
     ExecutorUnit executorUnit = JSON.parseObject(featureInfo, ExecutorUnit.class);
@@ -43,7 +45,8 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
     interceptorProxy.beforeExecute(executorUnit, executeContext);
 
     //3 调用方法执行
-    ExecuteDetailVo executeDetailVo = (ExecuteDetailVo) IRemoteInvoker.invoke(executorUnit);
+    IExecuteInvoker executeInvoker = executeInvokerMap.get(executePoint.getExecuteType());
+    ExecuteDetailVo executeDetailVo = (ExecuteDetailVo) executeInvoker.invoke(executorUnit);
 
     //4 将执行之后的响应结果添加到context中，方便后面用例使用
     interceptorProxy.afterExecute(executePoint, executeDetailVo, executeContext);
@@ -54,8 +57,7 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
     CompareResult compareResult = compareHandler.compare(executeDetailVo, compareDefines);
 
     //6 返回执行状态
-    return FeatureResponse.builder().name(executorUnit.getName())
-        .pointId(executePoint.getPointId()).executeDetailVo(executeDetailVo)
-        .compareResult(compareResult).build();
+    return FeatureResponse.builder().name(executorUnit.getName()).pointId(executePoint.getPointId())
+        .executeDetailVo(executeDetailVo).compareResult(compareResult).build();
   }
 }

@@ -13,6 +13,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -92,7 +93,10 @@ public class ResultEventNotify implements IResultEventNotify {
       return;
     }
 
-    List<ResultEvent> resultEvents = localPersistence.getNeedNotifyEvents();
+    List<ResultEvent> resultEvents = localPersistence.readEventsFromFile();
+    if (CollectionUtils.isEmpty(resultEvents)) {
+      return;
+    }
     resultEvents.forEach(this::notifyEvent);
     localPersistence.clearFileContent();
   }

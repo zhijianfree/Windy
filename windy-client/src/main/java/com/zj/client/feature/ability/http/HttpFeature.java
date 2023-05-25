@@ -23,7 +23,7 @@ import org.springframework.http.HttpStatus;
 
 @Slf4j
 public class HttpFeature implements Feature {
-    private MediaType mediaType = MediaType.get("application/json; charset=utf-8");
+    private static MediaType mediaType = MediaType.get("application/json; charset=utf-8");
     private OkHttpClient okHttpClient = new OkHttpClient();
 
     @Override
@@ -32,10 +32,6 @@ public class HttpFeature implements Feature {
     }
 
     public ExecuteDetailVo startHttp(String url, String method, Map<String, String> headers, String body) {
-        if (Objects.isNull(headers)){
-            headers = new HashMap<>();
-        }
-
         Request request = requestFactory(url, method, headers, body);
         return startRequest(request, body);
     }
@@ -71,7 +67,7 @@ public class HttpFeature implements Feature {
         executeDetailVo.setRequestBody(body);
     }
 
-    private Request requestFactory(String url, String method, Map<String, String> headers, String body) {
+    public static Request requestFactory(String url, String method, Map<String, String> headers, String body) {
         method = method.toUpperCase();
         Request request = null;
         switch (method) {

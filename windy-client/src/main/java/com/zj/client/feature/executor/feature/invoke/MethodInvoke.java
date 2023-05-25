@@ -1,12 +1,14 @@
-package com.zj.client.feature.executor.feature;
+package com.zj.client.feature.executor.feature.invoke;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.client.entity.dto.ParamDefine;
 import com.zj.client.entity.enuns.ParamTypeEnum;
 import com.zj.client.entity.vo.ExecuteDetailVo;
+import com.zj.client.feature.executor.feature.IExecuteInvoker;
 import com.zj.client.feature.executor.vo.ExecutorUnit;
 import com.zj.client.utils.ExceptionUtils;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -18,7 +20,12 @@ import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Component
-public class MethodInvoke implements IRemoteInvoker {
+public class MethodInvoke implements IExecuteInvoker {
+
+  @Override
+  public InvokerType type() {
+    return InvokerType.METHOD;
+  }
 
   public Object invoke(ExecutorUnit executorUnit) {
     try {
@@ -53,6 +60,9 @@ public class MethodInvoke implements IRemoteInvoker {
 
   public static Object convertDataToType(ParamDefine paramDefine) {
     if (Objects.equals(ParamTypeEnum.MAP.getType(), paramDefine.getType())) {
+      if (Objects.isNull(paramDefine.getValue())){
+        return new HashMap<>();
+      }
       return (Map<String, Object>) JSONObject.parse(JSON.toJSONString(paramDefine.getValue()));
     }
 

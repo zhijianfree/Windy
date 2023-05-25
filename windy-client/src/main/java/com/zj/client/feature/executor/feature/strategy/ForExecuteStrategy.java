@@ -6,6 +6,7 @@ import com.zj.client.entity.enuns.ExecutePointType;
 import com.zj.client.entity.po.ExecutePoint;
 import com.zj.client.entity.vo.FeatureResponse;
 import com.zj.client.feature.executor.compare.CompareHandler;
+import com.zj.client.feature.executor.feature.IExecuteInvoker;
 import com.zj.client.feature.executor.interceptor.InterceptorProxy;
 import com.zj.client.feature.executor.vo.ExecuteContext;
 import com.zj.client.feature.executor.vo.ExecutorUnit;
@@ -24,9 +25,9 @@ import org.springframework.stereotype.Component;
 public class ForExecuteStrategy extends BaseExecuteStrategy{
 
   public ForExecuteStrategy(InterceptorProxy interceptorProxy,
-      com.zj.client.feature.executor.feature.IRemoteInvoker IRemoteInvoker,
+      IExecuteInvoker IExecuteInvoker,
       CompareHandler compareHandler) {
-    super(interceptorProxy, IRemoteInvoker, compareHandler);
+    super(interceptorProxy, IExecuteInvoker, compareHandler);
   }
 
   @Override

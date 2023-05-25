@@ -8,4 +8,8 @@ import lombok.Data;
 public class RequestDetailVo {
     private List<String> request = new ArrayList<>();
     private Object requestBody;
+
+    public void addRequest(String info) {
+        request.add(info);
+    }
 }
