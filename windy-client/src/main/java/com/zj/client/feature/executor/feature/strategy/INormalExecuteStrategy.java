@@ -21,9 +21,9 @@ import org.springframework.stereotype.Service;
 public class INormalExecuteStrategy extends BaseExecuteStrategy {
 
   public INormalExecuteStrategy(InterceptorProxy interceptorProxy,
-      IExecuteInvoker IExecuteInvoker,
+      List<IExecuteInvoker> IExecuteInvokers,
       CompareHandler compareHandler) {
-    super(interceptorProxy, IExecuteInvoker, compareHandler);
+    super(interceptorProxy, IExecuteInvokers, compareHandler);
   }
 
   @Override

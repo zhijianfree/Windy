@@ -28,9 +28,9 @@ public class IFExecuteStrategy extends BaseExecuteStrategy {
   private OgnlDataParser ognlDataParser = new OgnlDataParser();
 
   public IFExecuteStrategy(InterceptorProxy interceptorProxy,
-      IExecuteInvoker IExecuteInvoker,
+      List<IExecuteInvoker> executeInvokers,
       CompareHandler compareHandler) {
-    super(interceptorProxy, IExecuteInvoker, compareHandler);
+    super(interceptorProxy, executeInvokers, compareHandler);
   }
 
   @Override

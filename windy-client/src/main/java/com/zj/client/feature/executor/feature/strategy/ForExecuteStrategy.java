@@ -25,9 +25,9 @@ import org.springframework.stereotype.Component;
 public class ForExecuteStrategy extends BaseExecuteStrategy{
 
   public ForExecuteStrategy(InterceptorProxy interceptorProxy,
-      IExecuteInvoker IExecuteInvoker,
+      List<IExecuteInvoker> executeInvokers,
       CompareHandler compareHandler) {
-    super(interceptorProxy, IExecuteInvoker, compareHandler);
+    super(interceptorProxy, executeInvokers, compareHandler);
   }
 
   @Override
