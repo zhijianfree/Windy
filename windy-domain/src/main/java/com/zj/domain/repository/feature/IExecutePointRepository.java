@@ -30,5 +30,9 @@ public interface IExecutePointRepository {
 
   Page<ExecutePointDto> queryExecutePointPage(String featureId, int page, int size);
 
-  void saveBatch(List<ExecutePointDto> newExecutePoints);
+  boolean saveBatch(List<ExecutePointDto> newExecutePoints);
+
+  boolean updateBatch(List<ExecutePointDto> newExecutePoints);
+
+  List<ExecutePointDto> getTemplateExecutePoints(String templateId);
 }

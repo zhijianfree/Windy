@@ -1,6 +1,7 @@
 package com.zj.feature.entity.dto;
 
 import com.alibaba.fastjson.JSON;
+import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
 import com.zj.domain.entity.po.feature.ExecutePoint;
 import com.zj.feature.entity.vo.CompareDefine;
@@ -24,6 +25,8 @@ public class ExecutePointVo {
 
   private String description;
 
+  private String templateId;
+
   @NotNull
   private ExecutorUnit executorUnit;
 
@@ -42,12 +45,13 @@ public class ExecutePointVo {
     point.setFeatureId(dto.getFeatureId());
     point.setPointId(dto.getPointId());
     point.setDescription(dto.getDescription());
+    point.setSortOrder(dto.getSortOrder());
+    point.setTemplateId(dto.getTemplateId());
+    point.setTestStage(dto.getTestStage());
+    point.setExecuteType(dto.getExecuteType());
     point.setCompareDefine(JSON.toJSONString(dto.getCompareDefine()));
     point.setVariables(JSON.toJSONString(dto.getVariableDefine()));
     point.setFeatureInfo(JSON.toJSONString(dto.getExecutorUnit()));
-    point.setSortOrder(dto.getSortOrder());
-    point.setTestStage(dto.getTestStage());
-    point.setExecuteType(dto.getExecuteType());
     return point;
   }
 
@@ -57,11 +61,12 @@ public class ExecutePointVo {
     dto.setPointId(executePoint.getPointId());
     dto.setExecuteType(executePoint.getExecuteType());
     dto.setFeatureId(executePoint.getFeatureId());
+    dto.setTestStage(executePoint.getTestStage());
+    dto.setSortOrder(executePoint.getSortOrder());
+    dto.setTemplateId(executePoint.getTemplateId());
     dto.setExecutorUnit(JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit.class));
     dto.setCompareDefine(JSON.parseArray(executePoint.getCompareDefine(), CompareDefine.class));
     dto.setVariableDefine(JSON.parseArray(executePoint.getVariables(), VariableDefine.class));
-    dto.setTestStage(executePoint.getTestStage());
-    dto.setSortOrder(executePoint.getSortOrder());
     return dto;
   }
 

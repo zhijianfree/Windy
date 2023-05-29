@@ -18,6 +18,8 @@ public class ExecutorUnit {
      * */
     private String service;
 
+    private Integer invokeType;
+
     /**
      * 执行方法
      * */

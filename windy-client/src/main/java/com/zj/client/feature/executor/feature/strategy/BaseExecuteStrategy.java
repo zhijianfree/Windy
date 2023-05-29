@@ -45,7 +45,7 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
     interceptorProxy.beforeExecute(executorUnit, executeContext);
 
     //3 调用方法执行
-    IExecuteInvoker executeInvoker = executeInvokerMap.get(executePoint.getExecuteType());
+    IExecuteInvoker executeInvoker = executeInvokerMap.get(executorUnit.getInvokeType());
     ExecuteDetailVo executeDetailVo = (ExecuteDetailVo) executeInvoker.invoke(executorUnit);
 
     //4 将执行之后的响应结果添加到context中，方便后面用例使用

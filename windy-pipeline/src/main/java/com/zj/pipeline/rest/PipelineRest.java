@@ -22,9 +22,8 @@ public class PipelineRest {
   private PipelineService pipelineService;
 
   @ResponseBody
-  @GetMapping("/{service}/{pipelineId}")
-  public ResponseMeta<PipelineDto> queryPipeline(@PathVariable("service") String service,
-      @PathVariable("pipelineId") String pipelineId) {
+  @GetMapping("/detail/{pipelineId}")
+  public ResponseMeta<PipelineDto> queryPipeline(@PathVariable("pipelineId") String pipelineId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, pipelineService.getPipelineDetail(pipelineId));
   }
 

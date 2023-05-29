@@ -43,7 +43,7 @@ public class FeatureInfoRest {
   }
 
   @PutMapping("/feature")
-  public ResponseMeta<String> updateFeature(@Valid @RequestBody FeatureInfoVo featureInfoDTO) {
+  public ResponseMeta<String> updateFeature(@RequestBody FeatureInfoVo featureInfoDTO) {
     return new ResponseMeta(ErrorCode.SUCCESS, featureService.updateFeatureInfo(featureInfoDTO));
   }
 

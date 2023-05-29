@@ -20,6 +20,8 @@ public class ExecutePointDto {
      * */
     private String featureId;
 
+    private String templateId;
+
     /**
      * 执行点信息(包含参数信息)
      * */

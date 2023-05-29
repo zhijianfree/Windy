@@ -58,8 +58,8 @@ public class ExecutePointService{
     return detailPageSize;
   }
 
-  public String createExecutePoint(ExecutePointVo executePointDTO) {
-    ExecutePointDto executePoint = ExecutePointVo.toExecutePoint(executePointDTO);
+  public String createExecutePoint(ExecutePointVo executePointVo) {
+    ExecutePointDto executePoint = ExecutePointVo.toExecutePoint(executePointVo);
     executePoint.setPointId(uniqueIdService.getUniqueId());
     boolean result = executePointRepository.saveExecutePoint(executePoint);
 
@@ -67,19 +67,19 @@ public class ExecutePointService{
     return executePoint.getPointId();
   }
 
-  public String updateExecutePoint(ExecutePointVo executePointDTO) {
-    ExecutePointDto executePoint = getExecutePointById(executePointDTO.getPointId());
+  public String updateExecutePoint(ExecutePointVo executePointVo) {
+    ExecutePointDto executePoint = getExecutePointById(executePointVo.getPointId());
     if (Objects.isNull(executePoint)) {
       return null;
     }
 
-    executePoint.setTestStage(executePointDTO.getTestStage());
-    executePoint.setDescription(executePointDTO.getDescription());
-    executePoint.setSortOrder(executePointDTO.getSortOrder());
-    executePoint.setExecuteType(executePointDTO.getExecuteType());
-    executePoint.setFeatureInfo(JSON.toJSONString(executePointDTO.getExecutorUnit()));
-    executePoint.setCompareDefine(JSON.toJSONString(executePointDTO.getCompareDefine()));
-    executePoint.setVariables(JSON.toJSONString(executePointDTO.getVariableDefine()));
+    executePoint.setTestStage(executePointVo.getTestStage());
+    executePoint.setDescription(executePointVo.getDescription());
+    executePoint.setSortOrder(executePointVo.getSortOrder());
+    executePoint.setExecuteType(executePointVo.getExecuteType());
+    executePoint.setFeatureInfo(JSON.toJSONString(executePointVo.getExecutorUnit()));
+    executePoint.setCompareDefine(JSON.toJSONString(executePointVo.getCompareDefine()));
+    executePoint.setVariables(JSON.toJSONString(executePointVo.getVariableDefine()));
     executePoint.setUpdateTime(System.currentTimeMillis());
     boolean result = updateByPointId(executePoint);
 

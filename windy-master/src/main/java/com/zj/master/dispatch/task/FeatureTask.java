@@ -18,6 +18,8 @@ public class FeatureTask {
    * */
   private String taskRecordId;
 
+  private boolean isTempTask;
+
   /**
    * 用例任务Id
    * */

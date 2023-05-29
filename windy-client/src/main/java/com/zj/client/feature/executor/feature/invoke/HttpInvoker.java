@@ -9,11 +9,13 @@ import com.zj.client.feature.executor.feature.IExecuteInvoker;
 import com.zj.client.feature.executor.vo.ExecutorUnit;
 import com.zj.client.utils.ExceptionUtils;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.apache.commons.lang3.text.StrSubstitutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -33,16 +35,12 @@ public class HttpInvoker implements IExecuteInvoker {
 
   @Override
   public Object invoke(ExecutorUnit executorUnit) {
-    JSONObject jsonObject = new JSONObject();
-    executorUnit.getParams().forEach(param -> {
-      Object Value = MethodInvoke.convertDataToType(param);
-      jsonObject.put(param.getParamKey(), Value);
-    });
-
+    Map<String, Object> bodyMap = getParamsMap(executorUnit);
+    assemblyUrlParam(executorUnit, bodyMap);
     String url = executorUnit.getService();
     String method = executorUnit.getMethod();
-    String body = JSONObject.toJSONString(jsonObject);
-    Map<String, String> headers = executorUnit.getHeaders();
+    String body = JSONObject.toJSONString(bodyMap);
+    Map<String, String> headers = Optional.ofNullable(executorUnit.getHeaders()).orElse(new HashMap<>());
     Request request = HttpFeature.requestFactory(url, method, headers, body);
 
     //执行并记录状态数据
@@ -65,5 +63,19 @@ public class HttpInvoker implements IExecuteInvoker {
     executeDetailVo.setRequestDetailVo(requestDetailVo);
 
     return executeDetailVo;
+  }
+
+  private void assemblyUrlParam(ExecutorUnit executorUnit, Map<String, Object> paramsMap) {
+    StrSubstitutor strSubstitutor = new StrSubstitutor(paramsMap);
+    String url = strSubstitutor.replace(executorUnit.getService());
+    executorUnit.setService(url);
+  }
+
+  private static Map<String, Object> getParamsMap(ExecutorUnit executorUnit) {
+    Map<String, Object> paramsMap = new HashMap<>();
+    executorUnit.getParams().forEach(param -> {
+      paramsMap.put(param.getParamKey(), param.getValue());
+    });
+    return paramsMap;
   }
 }

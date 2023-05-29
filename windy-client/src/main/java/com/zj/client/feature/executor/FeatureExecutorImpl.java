@@ -103,8 +103,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
   private void saveRecord(FeatureParam featureParam, ExecutePoint executePoint,
       ExecuteRecord executeRecord) {
     executeRecord.setExecutePointId(executePoint.getPointId());
-    ExecutorUnit unit = JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit.class);
-    executeRecord.setExecutePointName(unit.getName());
+    executeRecord.setExecutePointName(executePoint.getDescription());
     executeRecord.setExecuteType(executePoint.getExecuteType());
     executeRecord.setCreateTime(System.currentTimeMillis());
     executeRecord.setTestStage(executePoint.getTestStage());

@@ -2,13 +2,16 @@ package com.zj.feature.service;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.zj.common.enums.LogType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
+import com.zj.common.model.DispatchModel;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.BatchDeleteDto;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
 import com.zj.domain.entity.dto.feature.FeatureInfoDto;
+import com.zj.domain.entity.dto.feature.TaskInfoDto;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.feature.entity.dto.CopyFeatureDto;
 import com.zj.feature.entity.dto.ExecutePointVo;
@@ -27,11 +30,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @Service
@@ -55,6 +63,11 @@ public class FeatureService {
 
   @Autowired
   private IFeatureRepository featureRepository;
+
+  @Autowired
+  private RestTemplate restTemplate;
+
+  public static final String WINDY_MASTER_DISPATCH_URL = "http://WindyMaster/v1/devops/dispatch/task";
 
   public List<FeatureNodeDto> getFeatureTreeList(String testCaseId) {
     List<FeatureInfoDto> featureList = featureRepository.queryFeatureList(testCaseId);
@@ -122,7 +135,7 @@ public class FeatureService {
     featureInfo.setFeatureId(uniqueIdService.getUniqueId());
     boolean result = featureRepository.createFeature(featureInfo);
 
-    if (!CollectionUtils.isEmpty(featureInfoDTO.getTags())) {
+    if (CollectionUtils.isNotEmpty(featureInfoDTO.getTags())) {
       featureTagService.batchAddTag(featureInfo.getFeatureId(), featureInfoDTO.getTags());
     }
 
@@ -140,7 +153,7 @@ public class FeatureService {
     boolean result = featureRepository.updateFeatureInfo(featureInfo);
 
     List<ExecutePointVo> executePoints = featureInfoDTO.getTestFeatures();
-    if (!CollectionUtils.isEmpty(executePoints)) {
+    if (CollectionUtils.isNotEmpty(executePoints)) {
       int featureResult = updateExecutePoint(executePoints);
       if (featureResult < 1) {
         throw new ApiException(ErrorCode.ERROR);
@@ -155,20 +168,20 @@ public class FeatureService {
     return featureInfo.getFeatureId();
   }
 
-  private int updateExecutePoint(List<ExecutePointVo> executePointDtos) {
+  private int updateExecutePoint(List<ExecutePointVo> executePointVos) {
     int result = 0;
-    if (CollectionUtils.isEmpty(executePointDtos)) {
+    if (CollectionUtils.isEmpty(executePointVos)) {
       return result;
     }
 
-    return executePointDtos.stream().mapToInt(executePointDTO -> {
-      if (Objects.isNull(executePointDTO.getPointId())) {
-        executePointDTO.setPointId(uniqueIdService.getUniqueId());
-        String pointId = executePointService.createExecutePoint(executePointDTO);
+    return executePointVos.stream().mapToInt(executePointVo -> {
+      if (Objects.isNull(executePointVo.getPointId())) {
+        executePointVo.setPointId(uniqueIdService.getUniqueId());
+        String pointId = executePointService.createExecutePoint(executePointVo);
         return StringUtils.isEmpty(pointId) ? 0 : 1;
       }
 
-      String pointId = executePointService.updateExecutePoint(executePointDTO);
+      String pointId = executePointService.updateExecutePoint(executePointVo);
       return StringUtils.isEmpty(pointId) ? 0 : 1;
     }).sum();
   }
@@ -273,7 +286,29 @@ public class FeatureService {
   }
 
   public Boolean executeFeature(String featureId) {
-    //todo 单个任务执行
-    return null;
+    FeatureInfoVo feature = getFeatureById(featureId);
+    if (Objects.isNull(feature)) {
+      log.info("can not find feature={}", featureId);
+      return false;
+    }
+
+    DispatchModel dispatchModel = new DispatchModel();
+    dispatchModel.setType(LogType.FEATURE.getType());
+    dispatchModel.setSourceId(JSON.toJSONString(Collections.singletonList(featureId)));
+    dispatchModel.setSourceName(feature.getFeatureName());
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<DispatchModel> httpEntity = new HttpEntity<>(dispatchModel, headers);
+    try {
+      ResponseEntity<String> responseEntity = restTemplate.postForEntity(WINDY_MASTER_DISPATCH_URL,
+          httpEntity, String.class);
+      log.info("get test result code= {} result={}", responseEntity.getStatusCode(),
+          responseEntity.getBody());
+      return responseEntity.getStatusCode().is2xxSuccessful();
+    } catch (Exception e) {
+      log.error("request dispatch task error", e);
+    }
+    return false;
   }
 }

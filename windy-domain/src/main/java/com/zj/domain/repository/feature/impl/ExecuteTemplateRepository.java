@@ -7,7 +7,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.ExecuteTemplateDto;
-import com.zj.domain.entity.enums.ExecutePointType;
 import com.zj.domain.entity.po.feature.ExecuteTemplate;
 import com.zj.domain.mapper.feeature.ExecuteTemplateMapper;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
@@ -62,8 +61,7 @@ public class ExecuteTemplateRepository extends
   @Override
   public IPage<ExecuteTemplateDto> getPage(Integer pageNo, Integer size, String name) {
     IPage<ExecuteTemplate> page = new Page<>(pageNo, size);
-    LambdaQueryWrapper<ExecuteTemplate> queryWrapper = Wrappers.lambdaQuery(ExecuteTemplate.class)
-        .eq(ExecuteTemplate::getTemplateType, ExecutePointType.NORMAL.getType());
+    LambdaQueryWrapper<ExecuteTemplate> queryWrapper = Wrappers.lambdaQuery(ExecuteTemplate.class);
     if (!StringUtils.isEmpty(name)) {
       queryWrapper.and(wrapper -> wrapper.like(ExecuteTemplate::getName, name));
     }

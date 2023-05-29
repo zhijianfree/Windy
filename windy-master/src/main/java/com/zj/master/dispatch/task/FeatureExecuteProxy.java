@@ -11,6 +11,7 @@ import com.zj.domain.repository.feature.IExecutePointRepository;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
 import com.zj.master.dispatch.ClientProxy;
+import com.zj.master.dispatch.feature.FeatureDispatch;
 import com.zj.master.dispatch.listener.IInnerEventListener;
 import com.zj.master.dispatch.listener.InnerEvent;
 import java.util.List;
@@ -58,16 +59,19 @@ public class FeatureExecuteProxy implements IInnerEventListener {
   private final Map<String, FeatureTask> featureTaskMap = new ConcurrentHashMap<>();
 
   public void execute(FeatureTask featureTask) {
+    featureTaskMap.put(featureTask.getTaskRecordId(), featureTask);
     CompletableFuture.supplyAsync(() -> {
       LinkedBlockingQueue<String> featureIds = featureTask.getFeatureIds();
       String featureId = featureIds.poll();
+      String taskRecordId = featureTask.getTaskRecordId();
       if (StringUtils.isBlank(featureId)) {
-        featureTaskMap.remove(featureTask.getTaskRecordId());
+        featureTaskMap.remove(taskRecordId);
         return null;
       }
 
-      TaskRecordDto taskRecord = taskRecordRepository.getTaskRecord(featureTask.getTaskRecordId());
-      if (Objects.isNull(taskRecord) || ProcessStatus.isCompleteStatus(taskRecord.getStatus())) {
+      TaskRecordDto taskRecord = taskRecordRepository.getTaskRecord(taskRecordId);
+      if (!taskRecordId.startsWith(FeatureDispatch.TEMP_KEY) && (Objects.isNull(taskRecord)
+          || ProcessStatus.isCompleteStatus(taskRecord.getStatus()))) {
         log.info("task record is done not execute status={}", taskRecord.getStatus());
         return null;
       }
@@ -76,7 +80,6 @@ public class FeatureExecuteProxy implements IInnerEventListener {
       featureExecuteParam.setDispatchType(DISPATCH_FEATURE_TYPE);
       featureExecuteParam.setMasterIp(IpUtils.getLocalIP());
       clientProxy.sendDispatchTask(featureExecuteParam);
-      featureTaskMap.put(featureTask.getTaskRecordId(), featureTask);
       return featureId;
     }, executorService).whenComplete((featureId, e) -> {
       String recordId = Optional.ofNullable(featureId).orElse(TASK_FEATURE_TIPS);
@@ -88,6 +91,9 @@ public class FeatureExecuteProxy implements IInnerEventListener {
   }
 
   public boolean isExitTask(String recordId) {
+    if (StringUtils.isBlank(recordId)) {
+      return false;
+    }
     return featureTaskMap.containsKey(recordId);
   }
 

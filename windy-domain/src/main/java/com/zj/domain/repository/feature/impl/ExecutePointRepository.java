@@ -98,8 +98,21 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
   }
 
   @Override
-  public void saveBatch(List<ExecutePointDto> executePoints) {
+  public boolean saveBatch(List<ExecutePointDto> executePoints) {
     List<ExecutePoint> pointList = OrikaUtil.convertList(executePoints, ExecutePoint.class);
-    saveBatch(pointList);
+    return saveBatch(pointList);
+  }
+
+  @Override
+  public boolean updateBatch(List<ExecutePointDto> newExecutePoints) {
+    List<ExecutePoint> pointList = OrikaUtil.convertList(newExecutePoints, ExecutePoint.class);
+    return updateBatchById(pointList);
+  }
+
+  @Override
+  public List<ExecutePointDto> getTemplateExecutePoints(String templateId) {
+    List<ExecutePoint> executePoints = list(
+        Wrappers.lambdaQuery(ExecutePoint.class).eq(ExecutePoint::getTemplateId, templateId));
+    return OrikaUtil.convertList(executePoints, ExecutePointDto.class);
   }
 }

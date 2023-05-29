@@ -25,6 +25,8 @@ public class ExecutePoint {
      * */
     private String featureInfo;
 
+    private String templateId;
+
     /**
      * 包含比较信息
      * */

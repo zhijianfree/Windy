@@ -23,13 +23,13 @@ public class PipelineDto {
   /**
    * 流水线名称
    */
-  @NotEmpty
+  @NotEmpty(message = "流水线名称不能为空")
   private String pipelineName;
 
   /**
    * 服务Id
    */
-  @NotEmpty
+  @NotEmpty(message = "服务Id不能为空")
   private String serviceId;
 
   /**
@@ -40,13 +40,12 @@ public class PipelineDto {
   /**
    * 流水线创建者
    */
-  @NotEmpty
   private String creator;
 
   /**
    * 流水线类型
    */
-  @NotNull
+  @NotNull(message = "流水线类型不能为空")
   @Min(1)
   @Max(3)
   private Integer pipelineType;
@@ -54,7 +53,7 @@ public class PipelineDto {
   /**
    * 执行方式
    * */
-  @NotNull
+  @NotNull(message = "执行方式不能为空")
   @Min(1)
   @Max(3)
   private Integer executeType;
