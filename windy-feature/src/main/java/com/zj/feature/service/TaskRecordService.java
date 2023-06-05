@@ -107,4 +107,9 @@ public class TaskRecordService {
   public List<TaskRecordDto> getTaskRecordsByTaskId(String taskId) {
     return taskRecordRepository.getTaskRecordsOrderByTime(taskId);
   }
+
+  public Boolean stopTaskRecord(String recordId) {
+    //todo notify master to stop dispatch task
+    return taskRecordRepository.deleteTaskRecord(recordId);
+  }
 }

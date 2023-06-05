@@ -4,12 +4,14 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.TaskRecordDto;
 import com.zj.domain.entity.po.feature.TaskRecord;
 import com.zj.domain.mapper.feeature.TaskRecordMapper;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
@@ -47,8 +49,12 @@ public class TaskRecordRepository extends ServiceImpl<TaskRecordMapper, TaskReco
     IPage<TaskRecord> recordIPage = page(page,
         Wrappers.lambdaQuery(TaskRecord.class).orderByDesc(TaskRecord::getUpdateTime));
 
-    List<TaskRecordDto> list = OrikaUtil.convertList(recordIPage.getRecords(),
-        TaskRecordDto.class);
+    List<TaskRecordDto> list = OrikaUtil.convertList(recordIPage.getRecords(), TaskRecordDto.class);
+    list = list.stream().peek(record -> {
+      String desc = ProcessStatus.exchange(record.getStatus()).getDesc();
+      record.setStatusName(desc);
+    }).collect(Collectors.toList());
+
     Page<TaskRecordDto> recordDtoPage = new Page<>();
     recordDtoPage.setTotal(recordDtoPage.getTotal());
     recordDtoPage.setRecords(list);
@@ -64,8 +70,7 @@ public class TaskRecordRepository extends ServiceImpl<TaskRecordMapper, TaskReco
 
   @Override
   public boolean deleteTaskRecord(String recordId) {
-    return remove(
-        Wrappers.lambdaQuery(TaskRecord.class).eq(TaskRecord::getRecordId, recordId));
+    return remove(Wrappers.lambdaQuery(TaskRecord.class).eq(TaskRecord::getRecordId, recordId));
   }
 
   @Override
