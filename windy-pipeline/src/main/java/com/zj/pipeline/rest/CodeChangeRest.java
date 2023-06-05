@@ -1,9 +1,9 @@
 package com.zj.pipeline.rest;
 
-import com.zj.common.ResponseMeta;
-import com.zj.pipeline.entity.dto.CodeChangeDto;
+import com.zj.common.model.ResponseMeta;
+import com.zj.domain.entity.dto.pipeline.CodeChangeDto;
 import com.zj.common.exception.ErrorCode;
-import com.zj.pipeline.entity.dto.RelationDemandBug;
+import com.zj.domain.entity.dto.pipeline.RelationDemandBug;
 import com.zj.pipeline.service.CodeChangeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2021/10/15
  */
 

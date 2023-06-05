@@ -1,10 +1,10 @@
 package com.zj.feature.rest;
 
-import com.zj.common.ResponseMeta;
+import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.PageSize;
-import com.zj.feature.entity.dto.TestCaseConfigDTO;
-import com.zj.feature.entity.dto.TestCaseDTO;
+import com.zj.common.model.PageSize;
+import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
+import com.zj.domain.entity.dto.feature.TestCaseDto;
 import com.zj.feature.service.TestCaseConfigService;
 import com.zj.feature.service.TestCaseService;
 import java.util.List;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2022/12/12
  */
 @RequestMapping("/v1/devops/feature")
@@ -34,27 +34,27 @@ public class TestCaseRest {
   private TestCaseConfigService testCaseConfigService;
 
   @RequestMapping("/{serviceId}/cases")
-  public ResponseMeta<PageSize<TestCaseDTO>> getTestCases(@PathVariable("serviceId") String serviceId, @RequestParam("page") Integer page,
+  public ResponseMeta<PageSize<TestCaseDto>> getTestCases(@PathVariable("serviceId") String serviceId, @RequestParam("page") Integer page,
       @RequestParam("pageSize") Integer pageSize) {
-    PageSize<TestCaseDTO> testCaseDTOS = testCaseService.getTestCaseList(serviceId, page, pageSize);
+    PageSize<TestCaseDto> testCaseDTOS = testCaseService.getTestCaseList(serviceId, page, pageSize);
     return new ResponseMeta<>(ErrorCode.SUCCESS, testCaseDTOS);
   }
 
   @PostMapping("/case")
-  public ResponseMeta<String> createTestCases(@RequestBody TestCaseDTO testCaseDTO) {
+  public ResponseMeta<String> createTestCases(@RequestBody TestCaseDto testCaseDTO) {
     String testCaseId = testCaseService.createTestCase(testCaseDTO);
     return new ResponseMeta<>(ErrorCode.SUCCESS, testCaseId);
   }
 
   @PutMapping("/case")
-  public ResponseMeta<Boolean> updateTestCase(@RequestBody TestCaseDTO testCaseDTO) {
+  public ResponseMeta<Boolean> updateTestCase(@RequestBody TestCaseDto testCaseDTO) {
     Boolean result = testCaseService.updateTestCase(testCaseDTO);
     return new ResponseMeta<>(ErrorCode.SUCCESS, result);
   }
 
   @GetMapping("/case/{caseId}")
-  public ResponseMeta<TestCaseDTO> updateTestCase(@PathVariable("caseId") String caseId) {
-    TestCaseDTO testCase = testCaseService.getTestCase(caseId);
+  public ResponseMeta<TestCaseDto> getTestCase(@PathVariable("caseId") String caseId) {
+    TestCaseDto testCase = testCaseService.getTestCase(caseId);
     return new ResponseMeta<>(ErrorCode.SUCCESS, testCase);
   }
 
@@ -65,19 +65,19 @@ public class TestCaseRest {
   }
 
   @GetMapping("/case/{caseId}/configs")
-  public ResponseMeta<List<TestCaseConfigDTO>> getTestCaseConfigs(@PathVariable("caseId") String caseId) {
-    List<TestCaseConfigDTO> result = testCaseConfigService.getTestCaseConfigs(caseId);
+  public ResponseMeta<List<TestCaseConfigDto>> getTestCaseConfigs(@PathVariable("caseId") String caseId) {
+    List<TestCaseConfigDto> result = testCaseConfigService.getTestCaseConfigs(caseId);
     return new ResponseMeta<>(ErrorCode.SUCCESS, result);
   }
 
   @PostMapping("/case/config")
-  public ResponseMeta<Integer> addCaseConfig(@RequestBody List<TestCaseConfigDTO> configs) {
+  public ResponseMeta<Integer> addCaseConfig(@RequestBody List<TestCaseConfigDto> configs) {
     Integer result = testCaseConfigService.addCaseConfigs(configs);
     return new ResponseMeta<>(ErrorCode.SUCCESS, result);
   }
 
   @PutMapping("/case/config")
-  public ResponseMeta<Boolean> updateCaseConfig(@RequestBody TestCaseConfigDTO configDTO) {
+  public ResponseMeta<Boolean> updateCaseConfig(@RequestBody TestCaseConfigDto configDTO) {
     Boolean result = testCaseConfigService.updateCaseConfigs(configDTO);
     return new ResponseMeta<>(ErrorCode.SUCCESS, result);
   }

@@ -1,12 +1,8 @@
 package com.zj.feature.service;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.generate.UniqueIdService;
-import com.zj.feature.entity.dto.TestCaseConfigDTO;
-import com.zj.feature.entity.po.TestCaseConfig;
-import com.zj.feature.mapper.TestCaseConfigMapper;
-import java.util.Collections;
+import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
+import com.zj.domain.repository.feature.ITestCaseConfigRepository;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -15,52 +11,45 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2022/12/19
  */
 @Service
-public class TestCaseConfigService extends ServiceImpl<TestCaseConfigMapper, TestCaseConfig> {
+public class TestCaseConfigService {
 
   @Autowired
   private UniqueIdService uniqueIdService;
 
-  public List<TestCaseConfigDTO> getTestCaseConfigs(String caseId) {
-    List<TestCaseConfig> testCaseConfigs = list(
-        Wrappers.lambdaQuery(TestCaseConfig.class).eq(TestCaseConfig::getUnionId, caseId));
-    if (CollectionUtils.isEmpty(testCaseConfigs)) {
-      return Collections.emptyList();
-    }
-    return testCaseConfigs.stream().map(TestCaseConfigDTO::toTestCaseConfigDTO)
-        .collect(Collectors.toList());
+  @Autowired
+  private ITestCaseConfigRepository testCaseConfigRepository;
+
+  public List<TestCaseConfigDto> getTestCaseConfigs(String caseId) {
+    return testCaseConfigRepository.getCaseConfigs(caseId);
   }
 
-  public Integer addCaseConfigs(List<TestCaseConfigDTO> configs) {
+  public Integer addCaseConfigs(List<TestCaseConfigDto> configs) {
     if (CollectionUtils.isEmpty(configs)) {
       return 0;
     }
 
-    List<TestCaseConfig> caseConfigs = configs.stream().map(configDTO -> {
-      TestCaseConfig testCaseConfig = TestCaseConfigDTO.toTestCaseConfig(configDTO);
+    List<TestCaseConfigDto> caseConfigs = configs.stream().map(testCaseConfig -> {
       testCaseConfig.setConfigId(uniqueIdService.getUniqueId());
       testCaseConfig.setCreateTime(System.currentTimeMillis());
       testCaseConfig.setUpdateTime(System.currentTimeMillis());
       return testCaseConfig;
     }).collect(Collectors.toList());
-    return caseConfigs.stream().mapToInt(caseConfig -> save(caseConfig) ? 1 : 0).sum();
+    return caseConfigs.stream()
+        .mapToInt(caseConfig -> testCaseConfigRepository.saveConfig(caseConfig) ? 1 : 0).sum();
   }
 
-  public boolean updateCaseConfigs(TestCaseConfigDTO configDTO) {
-    if (Objects.isNull(configDTO)) {
+  public boolean updateCaseConfigs(TestCaseConfigDto configDto) {
+    if (Objects.isNull(configDto)) {
       return false;
     }
-    TestCaseConfig testCaseConfig = TestCaseConfigDTO.toTestCaseConfig(configDTO);
-
-    return update(testCaseConfig, Wrappers.lambdaUpdate(TestCaseConfig.class)
-        .eq(TestCaseConfig::getConfigId, configDTO.getConfigId()));
+    return testCaseConfigRepository.updateCaseConfig(configDto);
   }
 
   public boolean deleteCaseConfig(String configId) {
-    return remove(
-        Wrappers.lambdaQuery(TestCaseConfig.class).eq(TestCaseConfig::getConfigId, configId));
+    return testCaseConfigRepository.deleteCaseConfig(configId);
   }
 }

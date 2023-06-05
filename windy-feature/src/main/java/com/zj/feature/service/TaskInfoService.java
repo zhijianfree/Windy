@@ -1,52 +1,44 @@
 package com.zj.feature.service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.common.PageSize;
-import com.zj.common.ResponseStatusModel;
+import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
+import com.zj.common.model.DispatchModel;
+import com.zj.common.model.PageSize;
+import com.zj.common.model.ResponseStatusModel;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.feature.entity.dto.FeatureHistoryDTO;
-import com.zj.feature.entity.dto.TaskInfoDTO;
-import com.zj.feature.entity.dto.TaskRecordDTO;
-import com.zj.feature.entity.po.FeatureInfo;
-import com.zj.feature.entity.po.TaskInfo;
-import com.zj.feature.entity.po.TaskRecord;
-import com.zj.feature.entity.type.ExecuteStatusEnum;
-import com.zj.feature.entity.vo.FeatureConstant;
-import com.zj.feature.executor.IFeatureExecutor;
-import com.zj.feature.mapper.TaskInfoMapper;
+import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
+import com.zj.domain.entity.dto.feature.TaskInfoDto;
+import com.zj.domain.entity.dto.feature.TaskRecordDto;
+import com.zj.domain.entity.po.feature.TaskInfo;
+import com.zj.domain.repository.feature.ITaskRepository;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestTemplate;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2022/12/29
  */
 @Slf4j
 @Service
-public class TaskInfoService extends ServiceImpl<TaskInfoMapper, TaskInfo> {
+public class TaskInfoService {
 
   public static final String FORMAT_TIPS = "任务执行状态: 成功数: %s 成功率百分比: %s";
-  @Autowired
-  private FeatureService featureService;
-
-  @Autowired
-  private IFeatureExecutor IFeatureExecutor;
+  public static final String WINDY_MASTER_DISPATCH_URL = "http://WindyMaster/v1/devops/dispatch/task";
 
   @Autowired
   private TaskRecordService taskRecordService;
@@ -55,154 +47,112 @@ public class TaskInfoService extends ServiceImpl<TaskInfoMapper, TaskInfo> {
   private FeatureHistoryService featureHistoryService;
 
   @Autowired
-  private ICacheService cacheService;
-
-  @Autowired
   private UniqueIdService uniqueIdService;
 
-  public PageSize<TaskInfoDTO> getTaskList(String name, Integer pageNum, Integer size) {
-    LambdaQueryWrapper<TaskInfo> wrapper = Wrappers.lambdaQuery(TaskInfo.class);
-    if (StringUtils.isNoneBlank(name)) {
-      wrapper = wrapper.like(TaskInfo::getTaskName, name);
-    }
-    IPage<TaskInfo> page = new Page<>(pageNum, size);
-    IPage<TaskInfo> taskInfoIPage = page(page, wrapper);
+  @Autowired
+  private ITaskRepository taskRepository;
 
-    PageSize<TaskInfoDTO> pageSize = new PageSize<>();
+  @Autowired
+  private RestTemplate restTemplate;
+
+  public PageSize<TaskInfoDto> getTaskList(String name, Integer pageNum, Integer size) {
+    IPage<TaskInfo> taskInfoIPage = taskRepository.getTaskList(name, pageNum, size);
+    PageSize<TaskInfoDto> pageSize = new PageSize<>();
     pageSize.setTotal(taskInfoIPage.getTotal());
     if (CollectionUtils.isEmpty(taskInfoIPage.getRecords())) {
       pageSize.setData(Collections.emptyList());
       return pageSize;
     }
 
-    List<TaskInfoDTO> dtoList = taskInfoIPage.getRecords().stream().map(task -> {
-      TaskInfoDTO taskInfoDTO = OrikaUtil.convert(task, TaskInfoDTO.class);
+    List<TaskInfoDto> dtoList = taskInfoIPage.getRecords().stream().map(task -> {
+      TaskInfoDto taskInfoDTO = OrikaUtil.convert(task, TaskInfoDto.class);
       boolean isRunning = isTaskRunning(taskInfoDTO);
       taskInfoDTO.setIsRunning(isRunning);
-
       return taskInfoDTO;
     }).collect(Collectors.toList());
     pageSize.setData(dtoList);
     return pageSize;
   }
 
-  private boolean isTaskRunning(TaskInfoDTO taskInfoDTO) {
-    List<TaskRecord> taskRecords = taskRecordService.list(
-        Wrappers.lambdaQuery(TaskRecord.class).eq(TaskRecord::getTaskId, taskInfoDTO.getTaskId()));
+  private boolean isTaskRunning(TaskInfoDto taskInfoDTO) {
+    List<TaskRecordDto> taskRecords = taskRecordService.getTaskRecordsByTaskId(
+        taskInfoDTO.getTaskId());
     if (CollectionUtils.isEmpty(taskRecords)) {
       return false;
     }
 
-    return taskRecords.stream().anyMatch(record -> {
-      String cache = cacheService.getCache(
-          FeatureConstant.RECORD_STATUS_CACHE_KEY + record.getRecordId());
-      return StringUtils.isNoneBlank(cache) || Objects.equals(record.getStatus(),
-          ExecuteStatusEnum.RUNNING.getStatus());
-    });
+    return taskRecords.stream()
+        .anyMatch(record -> Objects.equals(ProcessStatus.RUNNING.getType(), record.getStatus()));
   }
 
-  public Boolean createTask(TaskInfoDTO taskInfoDTO) {
-    TaskInfo taskInfo = OrikaUtil.convert(taskInfoDTO, TaskInfo.class);
-    taskInfo.setTaskId(uniqueIdService.getUniqueId());
-    taskInfo.setCreateTime(System.currentTimeMillis());
-    taskInfo.setUpdateTime(System.currentTimeMillis());
-    return save(taskInfo);
+  public Boolean createTask(TaskInfoDto taskInfoDTO) {
+    String taskId = uniqueIdService.getUniqueId();
+    taskInfoDTO.setTaskId(taskId);
+    return taskRepository.createTask(taskInfoDTO);
   }
 
-  public Boolean updateTask(TaskInfoDTO taskInfoDTO) {
-    TaskInfo taskInfo = OrikaUtil.convert(taskInfoDTO, TaskInfo.class);
-    taskInfo.setUpdateTime(System.currentTimeMillis());
-
-    return update(taskInfo,
-        Wrappers.lambdaUpdate(TaskInfo.class).eq(TaskInfo::getTaskId, taskInfoDTO.getTaskId()));
+  public Boolean updateTask(TaskInfoDto taskInfoDTO) {
+    return taskRepository.updateTask(taskInfoDTO);
   }
 
   public Boolean deleteTask(String taskId) {
-    return remove(Wrappers.lambdaQuery(TaskInfo.class).eq(TaskInfo::getTaskId, taskId));
+    return taskRepository.deleteTask(taskId);
   }
 
-  public TaskInfoDTO getTaskDetail(String taskId) {
-    TaskInfo taskInfo = getOne(
-        Wrappers.lambdaQuery(TaskInfo.class).eq(TaskInfo::getTaskId, taskId));
-
-    return OrikaUtil.convert(taskInfo, TaskInfoDTO.class);
+  public TaskInfoDto getTaskDetail(String taskId) {
+    return taskRepository.getTaskDetail(taskId);
   }
 
-  public String startTask(String taskId) {
-    TaskInfoDTO taskDetail = getTaskDetail(taskId);
+  public Boolean startTask(String taskId) {
+    TaskInfoDto taskDetail = getTaskDetail(taskId);
     if (Objects.isNull(taskDetail)) {
       log.info("can not find task={}", taskId);
-      return null;
+      return false;
     }
 
-    String testCaseId = taskDetail.getTestCaseId();
-    List<FeatureInfo> featureList = featureService.queryNotContainFolder(testCaseId);
-    if (CollectionUtils.isEmpty(featureList)) {
-      log.info("can not find feature list by testCaseId={}", testCaseId);
-      return null;
+    DispatchModel dispatchModel = new DispatchModel();
+    dispatchModel.setType(LogType.FEATURE_TASK.getType());
+    dispatchModel.setSourceId(taskId);
+    dispatchModel.setSourceName(taskDetail.getTaskName());
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<DispatchModel> httpEntity = new HttpEntity<>(dispatchModel, headers);
+    try{
+      ResponseEntity<String> responseEntity = restTemplate.postForEntity(WINDY_MASTER_DISPATCH_URL,
+          httpEntity, String.class);
+      log.info("get test result code= {} result={}", responseEntity.getStatusCode(),
+          responseEntity.getBody());
+      return responseEntity.getStatusCode().is2xxSuccessful();
+    }catch (Exception e){
+      log.error("request dispatch task error", e);
     }
-    TaskRecordDTO taskRecordDTO = buildTaskRecordDTO(taskDetail);
-    taskRecordService.insert(taskRecordDTO);
-
-    saveCache(featureList, taskRecordDTO);
-
-    List<String> featureIds = featureList.stream().map(FeatureInfo::getFeatureId)
-        .collect(Collectors.toList());
-    IFeatureExecutor.batchRunTask(featureIds, taskRecordDTO);
-    return taskRecordDTO.getRecordId();
-  }
-
-  private void saveCache(List<FeatureInfo> featureList, TaskRecordDTO taskRecordDTO) {
-    Map<String, Integer> map = featureList.stream().collect(
-        Collectors.toMap(FeatureInfo::getFeatureId,
-            feature -> ExecuteStatusEnum.RUNNING.getStatus()));
-    String recordId = FeatureConstant.RECORD_STATUS_CACHE_KEY + taskRecordDTO.getRecordId();
-    cacheService.setCache(recordId, JSON.toJSONString(map));
-  }
-
-  private TaskRecordDTO buildTaskRecordDTO(TaskInfoDTO taskDetail) {
-    TaskRecordDTO taskRecordDTO = new TaskRecordDTO();
-    taskRecordDTO.setTaskConfig(taskDetail.getTaskConfig());
-    taskRecordDTO.setTaskName(taskDetail.getTaskName());
-    taskRecordDTO.setTaskId(taskDetail.getTaskId());
-    taskRecordDTO.setRecordId(uniqueIdService.getUniqueId());
-    taskRecordDTO.setUserId("admin");
-    taskRecordDTO.setStatus(ExecuteStatusEnum.RUNNING.getStatus());
-    taskRecordDTO.setMachines(taskDetail.getMachines());
-    taskRecordDTO.setTestCaseId(taskDetail.getTestCaseId());
-    taskRecordDTO.setCreateTime(System.currentTimeMillis());
-    taskRecordDTO.setUpdateTime(System.currentTimeMillis());
-    return taskRecordDTO;
+    return false;
   }
 
   public ResponseStatusModel getTaskStatus(String taskId) {
-    List<TaskRecord> taskRecords = taskRecordService.list(
-        Wrappers.lambdaQuery(TaskRecord.class).eq(TaskRecord::getTaskId, taskId)
-            .orderByDesc(TaskRecord::getCreateTime));
-    TaskRecord taskRecord = taskRecords.get(0);
+    List<TaskRecordDto> taskRecords = taskRecordService.getTaskRecordsByTaskId(taskId);
+    TaskRecordDto taskRecord = taskRecords.get(0);
     Integer status = taskRecord.getStatus();
     ResponseStatusModel responseStatusModel = new ResponseStatusModel();
     responseStatusModel.setStatus(status);
 
-    List<FeatureHistoryDTO> histories = featureHistoryService.getHistories(
+    List<FeatureHistoryDto> histories = featureHistoryService.getHistories(
         taskRecord.getRecordId());
     long successCount = histories.stream().filter(
             history -> Objects.equals(history.getExecuteStatus(), ProcessStatus.SUCCESS.getType()))
         .count();
 
     JSONObject jsonObject = new JSONObject();
-    Float percent = (successCount * 1F/ histories.size()) * 100;
+    Float percent = (successCount * 1F / histories.size()) * 100;
     jsonObject.put("percent", percent.intValue());
     responseStatusModel.setData(jsonObject);
-    String msg = String.format(FORMAT_TIPS, successCount,percent);
+    String msg = String.format(FORMAT_TIPS, successCount, percent);
     responseStatusModel.setMessage(msg);
     return responseStatusModel;
   }
 
-  public List<TaskInfoDTO> getAllTaskList(String serviceId) {
-    List<TaskInfo> taskInfos = list(
-        Wrappers.lambdaQuery(TaskInfo.class).eq(TaskInfo::getServiceId, serviceId));
-    return taskInfos.stream().map(task -> OrikaUtil.convert(task, TaskInfoDTO.class))
-        .collect(Collectors.toList());
+  public List<TaskInfoDto> getAllTaskList(String serviceId) {
+    return taskRepository.getAllTaskList(serviceId);
   }
 }

@@ -1,6 +1,6 @@
 package com.zj.common.exception;
 
-import com.zj.common.ResponseMeta;
+import com.zj.common.model.ResponseMeta;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2021/9/28
  */
 @Slf4j

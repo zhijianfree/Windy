@@ -1,11 +1,11 @@
 package com.zj.pipeline.rest;
 
-import com.zj.common.PageSize;
-import com.zj.common.ResponseMeta;
+import com.zj.common.model.PageSize;
+import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
-import com.zj.pipeline.entity.dto.NodeBindDto;
-import com.zj.pipeline.entity.dto.PipelineActionDto;
-import com.zj.pipeline.entity.po.NodeBind;
+import com.zj.domain.entity.dto.pipeline.NodeBindDto;
+import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
+import com.zj.domain.entity.po.pipeline.NodeBind;
 import com.zj.pipeline.service.NodeBindService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/3/27
  */
 @RestController
@@ -41,7 +41,7 @@ public class NodeBindRest {
   }
 
   @GetMapping("/node/{nodeId}")
-  public ResponseMeta<NodeBind> getNode(@PathVariable("nodeId") String nodeId) {
+  public ResponseMeta<NodeBindDto> getNode(@PathVariable("nodeId") String nodeId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, service.getNode(nodeId));
   }
 
@@ -51,18 +51,20 @@ public class NodeBindRest {
   }
 
   @GetMapping("/nodes")
-  public PageSize<NodeBind> getNodes(@RequestParam("page") Integer page,
+  public PageSize<NodeBindDto> getNodes(@RequestParam("page") Integer page,
       @RequestParam("size") Integer size, @RequestParam("name") String name) {
     return service.getNodes(page, size, name);
   }
 
   @GetMapping("/nodes/all")
-  public ResponseMeta<List<NodeBind>> getAllNodes() {
-    return new ResponseMeta<List<NodeBind>>(ErrorCode.SUCCESS, service.getAllNodes());
+  public ResponseMeta<List<NodeBindDto>> getAllNodes() {
+    return new ResponseMeta<List<NodeBindDto>>(ErrorCode.SUCCESS, service.getAllNodes());
   }
 
   @GetMapping("/{nodeId}/executors")
-  public ResponseMeta<List<PipelineActionDto>> getNodeExecutors(@PathVariable("nodeId") String nodeId) {
-    return new ResponseMeta<List<PipelineActionDto>>(ErrorCode.SUCCESS, service.getNodeExecutors(nodeId));
+  public ResponseMeta<List<PipelineActionDto>> getNodeExecutors(
+      @PathVariable("nodeId") String nodeId) {
+    return new ResponseMeta<List<PipelineActionDto>>(ErrorCode.SUCCESS,
+        service.getNodeExecutors(nodeId));
   }
 }

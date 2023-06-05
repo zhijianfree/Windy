@@ -18,6 +18,8 @@ public enum ErrorCode {
 
   BRANCH_ALREADY_BIND(HttpStatus.INTERNAL_SERVER_ERROR,"Pipeline.000009", "分支已经绑定"),
 
+  CREATE_PIPELINE(HttpStatus.INTERNAL_SERVER_ERROR,"Pipeline.000010", "创建流水线失败"),
+
   /*==================用例服务==================*/
   COMPARE_ERROR(HttpStatus.FORBIDDEN,"Feature.000002","feature compare error"),
   EXECUTE_POINT_NOT_FIND(HttpStatus.NOT_FOUND,"Feature.000003","can not find execute point"),

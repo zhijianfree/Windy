@@ -3,20 +3,17 @@ package com.zj.pipeline.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
-import com.zj.pipeline.entity.dto.GitBindDto;
-import com.zj.pipeline.entity.dto.PipelineDTO;
+import com.zj.domain.entity.dto.pipeline.GitBindDto;
+import com.zj.domain.entity.dto.pipeline.PipelineDto;
+import com.zj.domain.repository.pipeline.IGitBindRepository;
 import com.zj.pipeline.entity.enums.PipelineExecuteType;
-import com.zj.pipeline.entity.po.GitBind;
-import com.zj.pipeline.entity.po.Pipeline;
+import com.zj.domain.entity.po.pipeline.Pipeline;
 import com.zj.pipeline.git.IRepositoryBranch;
-import com.zj.pipeline.mapper.GitBindMapper;
 import com.zj.service.entity.po.Microservice;
 import com.zj.service.service.MicroserviceService;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -30,12 +27,12 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2021/10/15
  */
 @Slf4j
 @Service
-public class GitBindService extends ServiceImpl<GitBindMapper, GitBind> {
+public class GitBindService {
 
   @Autowired
   private MicroserviceService microserviceService;
@@ -53,6 +50,9 @@ public class GitBindService extends ServiceImpl<GitBindMapper, GitBind> {
   @Autowired
   private UniqueIdService uniqueIdService;
 
+  @Autowired
+  private IGitBindRepository gitBindRepository;
+
   public String createGitBind(GitBindDto gitBindDto) {
     List<GitBindDto> bindDtoList = listGitBinds(gitBindDto.getPipelineId());
     Optional<GitBindDto> optional = bindDtoList.stream()
@@ -62,53 +62,38 @@ public class GitBindService extends ServiceImpl<GitBindMapper, GitBind> {
       throw new ApiException(ErrorCode.BRANCH_ALREADY_BIND);
     }
 
-    GitBind gitBind = GitBindDto.toGitBind(gitBindDto);
-    gitBind.setBindId(uniqueIdService.getUniqueId());
-    gitBind.setUpdateTime(System.currentTimeMillis());
-    gitBind.setCreateTime(System.currentTimeMillis());
-    if (save(gitBind)) {
-      return gitBind.getBindId();
-    }
-    return "";
+    gitBindDto.setBindId(uniqueIdService.getUniqueId());
+    boolean result = gitBindRepository.saveGitBind(gitBindDto);
+    return result ? gitBindDto.getBindId() : "";
   }
 
   public List<GitBindDto> listGitBinds(String pipelineId) {
     checkPipelineExist(pipelineId);
-
-    List<GitBind> gitBinds = list(
-        Wrappers.lambdaQuery(GitBind.class).eq(GitBind::getPipelineId, pipelineId));
-
-    if (CollectionUtils.isEmpty(gitBinds)) {
-      return Collections.emptyList();
-    }
-    return gitBinds.stream().map(GitBindDto::toGitBindDto).collect(Collectors.toList());
+    return gitBindRepository.getPipelineGitBinds(pipelineId);
   }
 
   public Boolean updateGitBind(GitBindDto gitBindDto) {
     checkPipelineExist(gitBindDto.getPipelineId());
 
-    GitBind gitBind = getGitBind(gitBindDto.getBindId());
+    GitBindDto gitBind = getGitBind(gitBindDto.getBindId());
     if (Objects.isNull(gitBind)) {
       throw new ApiException(ErrorCode.NOT_FOUND_PIPELINE_GIT_BIND);
     }
-    GitBind update = GitBindDto.toGitBind(gitBindDto);
-    update.setUpdateTime(System.currentTimeMillis());
-    return update(update,
-        Wrappers.lambdaUpdate(GitBind.class).eq(GitBind::getBindId, gitBindDto.getBindId()));
+
+    return gitBindRepository.updateGitBind(gitBindDto);
   }
 
-  private GitBind getGitBind(String bindId) {
-    return getOne(Wrappers.lambdaQuery(GitBind.class).eq(GitBind::getBindId, bindId));
+  private GitBindDto getGitBind(String bindId) {
+    return gitBindRepository.getGitBind(bindId);
   }
 
   public Boolean deleteGitBind(String pipelineId, String bindId) {
     checkPipelineExist(pipelineId);
-
-    return remove(Wrappers.lambdaQuery(GitBind.class).eq(GitBind::getBindId, bindId));
+    return gitBindRepository.deleteGitBind(bindId);
   }
 
   private void checkPipelineExist(String pipelineId) {
-    PipelineDTO pipelineDTO = pipelineService.getPipeline(pipelineId);
+    PipelineDto pipelineDTO = pipelineService.getPipeline(pipelineId);
     if (Objects.isNull(pipelineDTO)) {
       throw new ApiException(ErrorCode.NOT_FOUND_PIPELINE);
     }
@@ -128,14 +113,13 @@ public class GitBindService extends ServiceImpl<GitBindMapper, GitBind> {
 
     Microservice microservice = microserviceService.getOne(
         Wrappers.lambdaQuery(Microservice.class).eq(Microservice::getServiceName, name));
-    List<Pipeline> pipelines = pipelineService.list(Wrappers.lambdaQuery(Pipeline.class)
-        .eq(Pipeline::getServiceId, microservice.getServiceId()));
+    List<PipelineDto> pipelines = pipelineService.getServicePipelines(microservice.getServiceId());
     if (CollectionUtils.isEmpty(pipelines)) {
       log.info("can not find pipelines service={}", name);
       return;
     }
 
-    List<Pipeline> pushPipelines = pipelines.stream()
+    List<PipelineDto> pushPipelines = pipelines.stream()
         .filter(pipeline -> Objects.equals(PipelineExecuteType.PUSH.getType(),
             pipeline.getExecuteType())).collect(Collectors.toList());
     pushPipelines.forEach(pipeline -> executorService.execute(() -> {

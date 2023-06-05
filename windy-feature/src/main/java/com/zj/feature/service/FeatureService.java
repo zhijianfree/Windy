@@ -1,26 +1,26 @@
 package com.zj.feature.service;
 
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.zj.common.enums.LogType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
+import com.zj.common.model.DispatchModel;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.feature.entity.dto.BatchDeleteDTO;
-import com.zj.feature.entity.dto.CopyFeatureDTO;
-import com.zj.feature.entity.dto.ExecutePointDTO;
-import com.zj.feature.entity.dto.FeatureInfoDTO;
-import com.zj.feature.entity.dto.FeatureNodeDTO;
-import com.zj.common.PageSize;
-import com.zj.feature.entity.dto.TagFilterDTO;
-import com.zj.feature.entity.dto.TestCaseConfigDTO;
-import com.zj.feature.entity.dto.TestCaseDTO;
-import com.zj.feature.entity.po.ExecutePoint;
-import com.zj.feature.entity.po.FeatureInfo;
-import com.zj.feature.entity.type.FeatureType;
-import com.zj.feature.mapper.FeatureMapper;
+import com.zj.domain.entity.dto.feature.BatchDeleteDto;
+import com.zj.domain.entity.dto.feature.ExecutePointDto;
+import com.zj.domain.entity.dto.feature.FeatureInfoDto;
+import com.zj.domain.entity.dto.feature.TaskInfoDto;
+import com.zj.domain.repository.feature.IFeatureRepository;
+import com.zj.feature.entity.dto.CopyFeatureDto;
+import com.zj.feature.entity.dto.ExecutePointVo;
+import com.zj.feature.entity.dto.FeatureInfoVo;
+import com.zj.feature.entity.dto.FeatureNodeDto;
+import com.zj.common.model.PageSize;
+import com.zj.feature.entity.dto.TagFilterDto;
+import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
+import com.zj.domain.entity.dto.feature.TestCaseDto;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,15 +30,20 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @Service
-public class FeatureService extends ServiceImpl<FeatureMapper, FeatureInfo> {
+public class FeatureService {
 
   public static final String COPY_STRING = " copy";
   @Autowired
@@ -56,9 +61,17 @@ public class FeatureService extends ServiceImpl<FeatureMapper, FeatureInfo> {
   @Autowired
   private UniqueIdService uniqueIdService;
 
-  public List<FeatureNodeDTO> getFeatureTreeList(String testCaseId) {
-    List<FeatureInfo> featureList = queryFeatureList(testCaseId);
-    FeatureNodeDTO root = new FeatureNodeDTO();
+  @Autowired
+  private IFeatureRepository featureRepository;
+
+  @Autowired
+  private RestTemplate restTemplate;
+
+  public static final String WINDY_MASTER_DISPATCH_URL = "http://WindyMaster/v1/devops/dispatch/task";
+
+  public List<FeatureNodeDto> getFeatureTreeList(String testCaseId) {
+    List<FeatureInfoDto> featureList = featureRepository.queryFeatureList(testCaseId);
+    FeatureNodeDto root = new FeatureNodeDto();
     root = convertTree(featureList, root);
     return root.getChildren();
   }
@@ -66,14 +79,14 @@ public class FeatureService extends ServiceImpl<FeatureMapper, FeatureInfo> {
   /**
    * 递归转为tree结构
    */
-  public FeatureNodeDTO convertTree(List<FeatureInfo> featureList, FeatureNodeDTO parent) {
+  public FeatureNodeDto convertTree(List<FeatureInfoDto> featureList, FeatureNodeDto parent) {
     if (CollectionUtils.isEmpty(featureList)) {
       return parent;
     }
 
-    List<FeatureNodeDTO> list = featureList.stream()
+    List<FeatureNodeDto> list = featureList.stream()
         .filter(feature -> Objects.equals(feature.getParentId(), parent.getFeatureId()))
-        .map(FeatureNodeDTO::toNode)
+        .map(FeatureNodeDto::toNode)
         .collect(Collectors.toList());
     parent.setChildren(list);
 
@@ -85,53 +98,44 @@ public class FeatureService extends ServiceImpl<FeatureMapper, FeatureInfo> {
     return parent;
   }
 
-  public boolean updateByFeatureId(FeatureInfo featureInfo) {
-    return update(featureInfo, Wrappers.lambdaUpdate(FeatureInfo.class)
-        .eq(FeatureInfo::getFeatureId, featureInfo.getFeatureId()));
+  public boolean updateByFeatureId(FeatureInfoDto featureInfo) {
+    return featureRepository.deleteByFeatureId(featureInfo.getFeatureId());
   }
 
-  public FeatureInfoDTO getFeatureById(String featureId) {
-    FeatureInfo featureInfo = getOne(
-        Wrappers.lambdaQuery(FeatureInfo.class).eq(FeatureInfo::getFeatureId, featureId));
+  public FeatureInfoVo getFeatureById(String featureId) {
+    FeatureInfoDto featureInfo = featureRepository.getFeatureById(featureId);
     if (Objects.isNull(featureInfo)) {
       throw new ApiException(ErrorCode.FEATURE_NOT_FIND);
     }
-    FeatureInfoDTO featureInfoDTO = OrikaUtil.convert(featureInfo, FeatureInfoDTO.class);
+    FeatureInfoVo featureInfoDTO = OrikaUtil.convert(featureInfo, FeatureInfoVo.class);
     List<String> featureTags = featureTagService.getFeatureTags(featureId);
     featureInfoDTO.setTags(featureTags);
     return featureInfoDTO;
   }
 
-  public PageSize<FeatureInfo> queryFeaturePage(String testCaseId, int page, int size) {
-    Page<FeatureInfo> pageSize = new Page<>(page, size);
-    Page<FeatureInfo> result = page(pageSize,
-        Wrappers.lambdaQuery(FeatureInfo.class).eq(FeatureInfo::getTestCaseId, testCaseId));
-
-    PageSize<FeatureInfo> detailPageSize = new PageSize<>();
-    detailPageSize.setTotal(result.getTotal());
-    detailPageSize.setData(result.getRecords());
+  public PageSize<FeatureInfoDto> queryFeaturePage(String testCaseId, int page, int size) {
+    IPage<FeatureInfoDto> featurePage = featureRepository.queryFeaturePage(testCaseId, page, size);
+    PageSize<FeatureInfoDto> detailPageSize = new PageSize<>();
+    detailPageSize.setTotal(featurePage.getTotal());
+    detailPageSize.setData(featurePage.getRecords());
     return detailPageSize;
   }
 
-  public List<FeatureInfo> queryFeatureList(String testCaseId) {
-    return list(Wrappers.lambdaQuery(FeatureInfo.class).eq(FeatureInfo::getTestCaseId, testCaseId));
+  public List<FeatureInfoDto> queryFeatureList(String testCaseId) {
+    return featureRepository.queryFeatureList(testCaseId);
   }
 
-  public List<FeatureInfo> queryNotContainFolder(String testCaseId) {
-    return list(Wrappers.lambdaQuery(FeatureInfo.class)
-        .eq(FeatureInfo::getFeatureType, FeatureType.ITEM.getType())
-        .eq(FeatureInfo::getTestCaseId, testCaseId));
+  public List<FeatureInfoDto> queryNotContainFolder(String testCaseId) {
+    return featureRepository.queryNotContainFolder(testCaseId);
   }
 
   @Transactional
-  public String createFeature(FeatureInfoDTO featureInfoDTO) {
-    FeatureInfo featureInfo = OrikaUtil.convert(featureInfoDTO, FeatureInfo.class);
+  public String createFeature(FeatureInfoVo featureInfoDTO) {
+    FeatureInfoDto featureInfo = OrikaUtil.convert(featureInfoDTO, FeatureInfoDto.class);
     featureInfo.setFeatureId(uniqueIdService.getUniqueId());
-    featureInfo.setCreateTime(System.currentTimeMillis());
-    featureInfo.setUpdateTime(System.currentTimeMillis());
-    boolean result = save(featureInfo);
+    boolean result = featureRepository.createFeature(featureInfo);
 
-    if (!CollectionUtils.isEmpty(featureInfoDTO.getTags())) {
+    if (CollectionUtils.isNotEmpty(featureInfoDTO.getTags())) {
       featureTagService.batchAddTag(featureInfo.getFeatureId(), featureInfoDTO.getTags());
     }
 
@@ -140,19 +144,16 @@ public class FeatureService extends ServiceImpl<FeatureMapper, FeatureInfo> {
   }
 
   @Transactional
-  public String updateFeatureInfo(FeatureInfoDTO featureInfoDTO) {
+  public String updateFeatureInfo(FeatureInfoVo featureInfoDTO) {
     if (Objects.isNull(getFeatureById(featureInfoDTO.getFeatureId()))) {
       throw new ApiException(ErrorCode.FEATURE_NOT_FIND);
     }
 
-    FeatureInfo featureInfo = OrikaUtil.convert(featureInfoDTO, FeatureInfo.class);
-    featureInfo.setCreateTime(System.currentTimeMillis());
-    featureInfo.setUpdateTime(System.currentTimeMillis());
-    featureInfo.setFeatureId(featureInfoDTO.getFeatureId());
-    boolean result = updateByFeatureId(featureInfo);
+    FeatureInfoDto featureInfo = OrikaUtil.convert(featureInfoDTO, FeatureInfoDto.class);
+    boolean result = featureRepository.updateFeatureInfo(featureInfo);
 
-    List<ExecutePointDTO> executePoints = featureInfoDTO.getTestFeatures();
-    if (!CollectionUtils.isEmpty(executePoints)) {
+    List<ExecutePointVo> executePoints = featureInfoDTO.getTestFeatures();
+    if (CollectionUtils.isNotEmpty(executePoints)) {
       int featureResult = updateExecutePoint(executePoints);
       if (featureResult < 1) {
         throw new ApiException(ErrorCode.ERROR);
@@ -167,42 +168,41 @@ public class FeatureService extends ServiceImpl<FeatureMapper, FeatureInfo> {
     return featureInfo.getFeatureId();
   }
 
-  private int updateExecutePoint(List<ExecutePointDTO> executePointDTOS) {
+  private int updateExecutePoint(List<ExecutePointVo> executePointVos) {
     int result = 0;
-    if (CollectionUtils.isEmpty(executePointDTOS)) {
+    if (CollectionUtils.isEmpty(executePointVos)) {
       return result;
     }
 
-    return executePointDTOS.stream().mapToInt(executePointDTO -> {
-      if (Objects.isNull(executePointDTO.getPointId())) {
-        executePointDTO.setPointId(uniqueIdService.getUniqueId());
-        String pointId = executePointService.createExecutePoint(executePointDTO);
+    return executePointVos.stream().mapToInt(executePointVo -> {
+      if (Objects.isNull(executePointVo.getPointId())) {
+        executePointVo.setPointId(uniqueIdService.getUniqueId());
+        String pointId = executePointService.createExecutePoint(executePointVo);
         return StringUtils.isEmpty(pointId) ? 0 : 1;
       }
 
-      String pointId = executePointService.updateExecutePoint(executePointDTO);
+      String pointId = executePointService.updateExecutePoint(executePointVo);
       return StringUtils.isEmpty(pointId) ? 0 : 1;
     }).sum();
   }
 
   @Transactional
-  public Boolean copyFeatures(CopyFeatureDTO copyFeatureDTO) {
-    TestCaseDTO testCase = testCaseService.getTestCase(copyFeatureDTO.getTestCaseId());
+  public Boolean copyFeatures(CopyFeatureDto copyFeatureDTO) {
+    TestCaseDto testCase = testCaseService.getTestCase(copyFeatureDTO.getTestCaseId());
     testCase.setTestCaseName(testCase.getTestCaseName() + COPY_STRING);
     String newCaseId = testCaseService.createTestCase(testCase);
     log.info("new caseId={} old case Id={}", newCaseId, copyFeatureDTO.getTestCaseId());
 
-    List<FeatureInfo> featureList = list(Wrappers.lambdaQuery(FeatureInfo.class)
-        .in(FeatureInfo::getFeatureId, copyFeatureDTO.getFeatureIds()));
+    List<FeatureInfoDto> featureList = featureRepository.queryFeatureList(
+        copyFeatureDTO.getFeatureIds());
     log.info("get feature list ={}", JSON.toJSONString(featureList));
 
     //1 先复制用例
     Long currentTime = System.currentTimeMillis();
     Map<String, String> idRecordMap = new HashMap<>();
-    List<FeatureInfo> newList = featureList.stream().peek(feature -> {
+    List<FeatureInfoDto> newList = featureList.stream().peek(feature -> {
       String uniqueId = uniqueIdService.getUniqueId();
       idRecordMap.put(feature.getFeatureId(), uniqueId);
-      feature.setId(null);
       feature.setFeatureId(uniqueId);
       feature.setTestCaseId(newCaseId);
       feature.setCreateTime(currentTime);
@@ -214,19 +214,19 @@ public class FeatureService extends ServiceImpl<FeatureMapper, FeatureInfo> {
       String newParentId = idRecordMap.get(oldParentId);
       feature.setParentId(newParentId);
     });
-    saveBatch(newList);
+    featureRepository.saveBatch(newList);
     log.info("batch save features ={} idMap={}", JSON.toJSONString(newList), idRecordMap);
 
     //2 复制执行点
     List<String> featureIds = new ArrayList<>(idRecordMap.keySet());
-    List<ExecutePoint> executePointList = executePointService.getExecutePointByFeatureIds(
+    List<ExecutePointDto> executePointList = executePointService.getExecutePointByFeatureIds(
         featureIds);
-    Map<String, List<ExecutePoint>> pointGroupMap = executePointList.stream()
-        .collect(Collectors.groupingBy(ExecutePoint::getFeatureId, Collectors.toList()));
+    Map<String, List<ExecutePointDto>> pointGroupMap = executePointList.stream()
+        .collect(Collectors.groupingBy(ExecutePointDto::getFeatureId, Collectors.toList()));
     log.info("get groupBy points={}", JSON.toJSONString(pointGroupMap));
 
     //将获取到的执行点根据featureId映射关系重新设置一次
-    List<ExecutePoint> newExecutePoints = pointGroupMap.keySet().stream().map(oldId -> {
+    List<ExecutePointDto> newExecutePoints = pointGroupMap.keySet().stream().map(oldId -> {
       String newFeatureId = idRecordMap.get(oldId);
       pointGroupMap.get(oldId).forEach(executePoint -> {
         executePoint.setId(null);
@@ -240,7 +240,7 @@ public class FeatureService extends ServiceImpl<FeatureMapper, FeatureInfo> {
     log.info("batch save points={}", JSON.toJSONString(newExecutePoints));
 
     //3 复制全局变量
-    List<TestCaseConfigDTO> caseConfigs = testCaseConfigService.getTestCaseConfigs(
+    List<TestCaseConfigDto> caseConfigs = testCaseConfigService.getTestCaseConfigs(
         copyFeatureDTO.getTestCaseId());
     caseConfigs.forEach(configDTO -> configDTO.setUnionId(newCaseId));
     testCaseConfigService.addCaseConfigs(caseConfigs);
@@ -250,44 +250,65 @@ public class FeatureService extends ServiceImpl<FeatureMapper, FeatureInfo> {
 
   @Transactional
   public boolean deleteByFeatureId(String featureId) {
-    List<FeatureInfo> subFeatures = list(
-        Wrappers.lambdaQuery(FeatureInfo.class).eq(FeatureInfo::getParentId, featureId));
+    List<FeatureInfoDto> subFeatures = featureRepository.getSubFeatures(featureId);
     if (!CollectionUtils.isEmpty(subFeatures)) {
       throw new ApiException(ErrorCode.SUB_FEATURE_EXIST);
     }
     executePointService.deleteByFeatureId(featureId);
-    return remove(Wrappers.lambdaQuery(FeatureInfo.class).eq(FeatureInfo::getFeatureId, featureId));
+    return featureRepository.deleteByFeatureId(featureId);
   }
 
-  public Boolean batchDeleteByFeatureId(BatchDeleteDTO batchDeleteDTO) {
-    if (Objects.isNull(batchDeleteDTO) || CollectionUtils.isEmpty(batchDeleteDTO.getFeatures())) {
-      return false;
-    }
-
-    return remove(Wrappers.lambdaQuery(FeatureInfo.class)
-        .in(FeatureInfo::getFeatureId, batchDeleteDTO.getFeatures()));
+  public Boolean batchDeleteByFeatureId(BatchDeleteDto batchDeleteDto) {
+    return featureRepository.batchDeleteByFeatureId(batchDeleteDto);
   }
 
-  public List<FeatureNodeDTO> filterFeaturesByTag(TagFilterDTO tagFilterDTO) {
-    List<FeatureInfo> featuresByTag = getFeaturesByTag(tagFilterDTO);
-    FeatureNodeDTO featureNode = new FeatureNodeDTO();
+  public List<FeatureNodeDto> filterFeaturesByTag(TagFilterDto tagFilterDTO) {
+    List<FeatureInfoDto> featuresByTag = getFeaturesByTag(tagFilterDTO);
+    FeatureNodeDto featureNode = new FeatureNodeDto();
     featureNode = convertTree(featuresByTag, featureNode);
     return featureNode.getChildren();
   }
 
-  public List<FeatureInfo> getFeaturesByTag(TagFilterDTO filterDTO) {
-    List<FeatureInfo> featureList = list(Wrappers.lambdaQuery(FeatureInfo.class)
-        .eq(FeatureInfo::getTestCaseId, filterDTO.getTestCaseId())).stream().collect(Collectors.toList());
+  public List<FeatureInfoDto> getFeaturesByTag(TagFilterDto filterDto) {
+    List<FeatureInfoDto> featureList = featureRepository.queryFeatureList(
+        filterDto.getTestCaseId());
     if (CollectionUtils.isEmpty(featureList)) {
       return Collections.emptyList();
     }
 
-    List<String> featuresTags = featureTagService.getFeaturesByTag(filterDTO.getTags());
+    List<String> featuresTags = featureTagService.getFeaturesByTag(filterDto.getTags());
     if (CollectionUtils.isEmpty(featuresTags)) {
       return Collections.emptyList();
     }
 
     return featureList.stream().filter(feature -> featuresTags.contains(feature.getFeatureId()))
         .collect(Collectors.toList());
+  }
+
+  public Boolean executeFeature(String featureId) {
+    FeatureInfoVo feature = getFeatureById(featureId);
+    if (Objects.isNull(feature)) {
+      log.info("can not find feature={}", featureId);
+      return false;
+    }
+
+    DispatchModel dispatchModel = new DispatchModel();
+    dispatchModel.setType(LogType.FEATURE.getType());
+    dispatchModel.setSourceId(JSON.toJSONString(Collections.singletonList(featureId)));
+    dispatchModel.setSourceName(feature.getFeatureName());
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<DispatchModel> httpEntity = new HttpEntity<>(dispatchModel, headers);
+    try {
+      ResponseEntity<String> responseEntity = restTemplate.postForEntity(WINDY_MASTER_DISPATCH_URL,
+          httpEntity, String.class);
+      log.info("get test result code= {} result={}", responseEntity.getStatusCode(),
+          responseEntity.getBody());
+      return responseEntity.getStatusCode().is2xxSuccessful();
+    } catch (Exception e) {
+      log.error("request dispatch task error", e);
+    }
+    return false;
   }
 }

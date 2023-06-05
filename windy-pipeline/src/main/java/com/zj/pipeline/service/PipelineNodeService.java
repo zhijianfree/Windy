@@ -1,15 +1,39 @@
 package com.zj.pipeline.service;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.pipeline.entity.po.PipelineNode;
-import com.zj.pipeline.mapper.PipelineNodeMapper;
+import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
+import com.zj.domain.repository.pipeline.IPipelineNodeRepository;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/3/13
  */
 @Service
-public class PipelineNodeService extends ServiceImpl<PipelineNodeMapper, PipelineNode> {
+public class PipelineNodeService {
 
+  @Autowired
+  private IPipelineNodeRepository pipelineNodeRepository;
+
+
+  public void deleteNodeIds(List<String> nodeIds) {
+    pipelineNodeRepository.deleteNodeIds(nodeIds);
+  }
+
+  public void updateNode(PipelineNodeDto dto) {
+    pipelineNodeRepository.updateNode(dto);
+  }
+
+  public void deleteByPipeline(String pipelineId) {
+    pipelineNodeRepository.deleteByPipelineId(pipelineId);
+  }
+
+  public void saveNode(PipelineNodeDto pipelineNode) {
+    pipelineNodeRepository.saveNode(pipelineNode);
+  }
+
+  public List<PipelineNodeDto> getPipelineNodes(String pipelineId) {
+    return pipelineNodeRepository.getPipelineNodes(pipelineId);
+  }
 }

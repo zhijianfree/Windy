@@ -1,10 +1,10 @@
 package com.zj.feature.rest;
 
-import com.zj.common.ResponseMeta;
+import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
-import com.zj.feature.entity.dto.ExecuteTemplateDTO;
-import com.zj.common.PageSize;
-import com.zj.feature.service.FeatureConfigService;
+import com.zj.feature.entity.dto.ExecuteTemplateVo;
+import com.zj.common.model.PageSize;
+import com.zj.feature.service.TemplateService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,52 +23,57 @@ import org.springframework.web.bind.annotation.RestController;
 public class FeatureTemplateRest {
 
   @Autowired
-  private FeatureConfigService featureConfigService;
+  private TemplateService templateService;
 
   @ResponseBody
   @GetMapping("/templates/page")
-  public ResponseMeta<PageSize<ExecuteTemplateDTO>> getFeaturePage(
+  public ResponseMeta<PageSize<ExecuteTemplateVo>> getTemplatePage(
       @RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "size", defaultValue = "10") Integer size,
       @RequestParam(value = "name", defaultValue = "") String name) {
-    PageSize<ExecuteTemplateDTO> featureConfigs = featureConfigService.getFeaturePage(page, size, name);
+    PageSize<ExecuteTemplateVo> featureConfigs = templateService.getTemplatePage(page, size, name);
     return new ResponseMeta(ErrorCode.SUCCESS, featureConfigs);
   }
 
   @ResponseBody
   @GetMapping("/templates")
-  public ResponseMeta<List<ExecuteTemplateDTO>> getFeatureTemplates() {
-    List<ExecuteTemplateDTO> featureConfigs = featureConfigService.getFeatureList();
+  public ResponseMeta<List<ExecuteTemplateVo>> getFeatureTemplates() {
+    List<ExecuteTemplateVo> featureConfigs = templateService.getFeatureList();
     return new ResponseMeta(ErrorCode.SUCCESS, featureConfigs);
   }
 
   @ResponseBody
   @PostMapping("/template")
   public ResponseMeta<String> createFeatureTemplate(
-      @RequestBody ExecuteTemplateDTO executeTemplate) {
+      @RequestBody ExecuteTemplateVo executeTemplate) {
     return new ResponseMeta<String>(ErrorCode.SUCCESS,
-        featureConfigService.createTemplate(executeTemplate));
+        templateService.createTemplate(executeTemplate));
   }
 
   @ResponseBody
   @PutMapping("/template")
-  public ResponseMeta<String> updateFeatureTemplate(@RequestBody ExecuteTemplateDTO executeTemplate) {
+  public ResponseMeta<String> updateFeatureTemplate(@RequestBody ExecuteTemplateVo executeTemplate) {
     return new ResponseMeta<String>(ErrorCode.SUCCESS,
-        featureConfigService.updateTemplate(executeTemplate));
+        templateService.updateTemplate(executeTemplate));
   }
 
   @ResponseBody
   @GetMapping("/template/{templateId}")
-  public ResponseMeta<ExecuteTemplateDTO> getExecuteTemplate(
-      @PathVariable("templateId") String templateId) {
-    ExecuteTemplateDTO featureConfig = featureConfigService.getExecuteTemplate(templateId);
+  public ResponseMeta<ExecuteTemplateVo> getExecuteTemplate(@PathVariable("templateId") String templateId) {
+    ExecuteTemplateVo featureConfig = templateService.getExecuteTemplate(templateId);
     return new ResponseMeta(ErrorCode.SUCCESS, featureConfig);
   }
 
   @ResponseBody
   @DeleteMapping("/template/{templateId}")
-  public ResponseMeta<Boolean> updateExecuteTemplate(
-      @PathVariable("templateId") String templateId) {
-    Boolean result = featureConfigService.deleteExecuteTemplate(templateId);
+  public ResponseMeta<Boolean> updateExecuteTemplate(@PathVariable("templateId") String templateId) {
+    Boolean result = templateService.deleteExecuteTemplate(templateId);
+    return new ResponseMeta(ErrorCode.SUCCESS, result);
+  }
+
+  @ResponseBody
+  @PutMapping("/{templateId}/refresh")
+  public ResponseMeta<Boolean> refreshTemplate(@PathVariable("templateId") String templateId) {
+    Boolean result = templateService.refreshTemplate(templateId);
     return new ResponseMeta(ErrorCode.SUCCESS, result);
   }
 }

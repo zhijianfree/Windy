@@ -1,9 +1,9 @@
 package com.zj.pipeline.rest;
 
 import com.alibaba.fastjson.JSONObject;
-import com.zj.common.ResponseMeta;
+import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
-import com.zj.pipeline.entity.dto.GitBindDto;
+import com.zj.domain.entity.dto.pipeline.GitBindDto;
 import com.zj.pipeline.service.GitBindService;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2021/10/15
  */
 

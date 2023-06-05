@@ -5,13 +5,14 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.common.PageSize;
+import com.zj.common.model.PageSize;
 import com.zj.common.generate.UniqueIdService;
-import com.zj.pipeline.entity.dto.NodeBindDto;
-import com.zj.pipeline.entity.dto.PipelineActionDto;
-import com.zj.pipeline.entity.po.NodeBind;
-import com.zj.pipeline.entity.po.PipelineAction;
-import com.zj.pipeline.mapper.NodeBindMapper;
+import com.zj.domain.entity.dto.pipeline.NodeBindDto;
+import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
+import com.zj.domain.entity.po.pipeline.NodeBind;
+import com.zj.domain.entity.po.pipeline.PipelineAction;
+import com.zj.domain.mapper.pipeline.NodeBindMapper;
+import com.zj.domain.repository.pipeline.INodeBindRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -22,29 +23,28 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/3/28
  */
 @Slf4j
 @Service
-public class NodeBindService extends ServiceImpl<NodeBindMapper, NodeBind> {
+public class NodeBindService {
 
   @Autowired
   private PipelineActionService actionService;
+
+  @Autowired
+  private INodeBindRepository nodeBindRepository;
 
   @Autowired
   private UniqueIdService uniqueIdService;
 
   @Transactional
   public Boolean createNodes(NodeBindDto nodeBindDto) {
-    NodeBind nodeBind = nodeBindDto.toNodeBind();
-    nodeBind.setNodeId(uniqueIdService.getUniqueId());
-    nodeBind.setUserId("admin");
-    nodeBind.setCreateTime(System.currentTimeMillis());
-    nodeBind.setUpdateTime(System.currentTimeMillis());
-    boolean result = save(nodeBind);
+    nodeBindDto.setNodeId(uniqueIdService.getUniqueId());
+    boolean result = nodeBindRepository.saveNodeBind(nodeBindDto);
 
-    boolean updateAction = batchUpdateNodeId(nodeBindDto.getExecutors(), nodeBind.getNodeId());
+    boolean updateAction = batchUpdateNodeId(nodeBindDto.getExecutors(), nodeBindDto.getNodeId());
     log.info("update action node id result={}", updateAction);
     return result;
   }
@@ -52,13 +52,8 @@ public class NodeBindService extends ServiceImpl<NodeBindMapper, NodeBind> {
 
   @Transactional
   public Boolean updateNode(NodeBindDto nodeBindDto) {
-    NodeBind nodeBind = nodeBindDto.toNodeBind();
-    nodeBind.setUpdateTime(System.currentTimeMillis());
-    boolean result = update(nodeBind,
-        Wrappers.lambdaUpdate(NodeBind.class).eq(NodeBind::getNodeId, nodeBind.getNodeId()));
-
-    List<PipelineAction> actions = actionService.list(Wrappers.lambdaQuery(PipelineAction.class)
-        .eq(PipelineAction::getNodeId, nodeBind.getNodeId()));
+    boolean result = nodeBindRepository.updateNode(nodeBindDto);
+    List<PipelineAction> actions = actionService.getActionsByNodeId(nodeBindDto.getNodeId());
     if (!CollectionUtils.isEmpty(actions)) {
       List<String> oldList = actions.stream().map(PipelineAction::getActionId)
           .collect(Collectors.toList());
@@ -66,14 +61,13 @@ public class NodeBindService extends ServiceImpl<NodeBindMapper, NodeBind> {
       List<String> removeList = oldList.stream()
           .filter(actionId -> !nodeBindDto.getExecutors().contains(actionId))
           .collect(Collectors.toList());
-      if (!CollectionUtils.isEmpty(removeList)){
-        actionService.remove(
-            Wrappers.lambdaQuery(PipelineAction.class).in(PipelineAction::getActionId, removeList));
+      if (!CollectionUtils.isEmpty(removeList)) {
+        actionService.batchDelete(removeList);
       }
 
       List<String> newList = nodeBindDto.getExecutors().stream()
           .filter(actionId -> !oldList.contains(actionId)).collect(Collectors.toList());
-      batchUpdateNodeId(newList, nodeBind.getNodeId());
+      batchUpdateNodeId(newList, nodeBindDto.getNodeId());
     }
 
     return result;
@@ -84,43 +78,34 @@ public class NodeBindService extends ServiceImpl<NodeBindMapper, NodeBind> {
       return false;
     }
 
-    PipelineAction pipelineAction = new PipelineAction();
+    PipelineActionDto pipelineAction = new PipelineActionDto();
     pipelineAction.setNodeId(nodeId);
-    return actionService.update(pipelineAction,
-        Wrappers.lambdaUpdate(PipelineAction.class).in(PipelineAction::getActionId, actionIds));
+    return actionService.updateAction(pipelineAction);
   }
 
-  public NodeBind getNode(String nodeId) {
-    return getOne(Wrappers.lambdaUpdate(NodeBind.class).eq(NodeBind::getNodeId, nodeId));
+  public NodeBindDto getNode(String nodeId) {
+    return nodeBindRepository.getNode(nodeId);
   }
 
   public Boolean deleteNode(String nodeId) {
-    return remove(Wrappers.lambdaUpdate(NodeBind.class).eq(NodeBind::getNodeId, nodeId));
+    return nodeBindRepository.deleteNode(nodeId);
   }
 
-  public PageSize<NodeBind> getNodes(Integer page, Integer size, String name) {
-    LambdaQueryWrapper<NodeBind> queryWrapper = Wrappers.lambdaQuery(NodeBind.class)
-        .orderByDesc(NodeBind::getCreateTime);
-    if (!StringUtils.isEmpty(name)) {
-      queryWrapper.like(NodeBind::getNodeName, name);
-    }
-    IPage<NodeBind> actionIPage = new Page<>(page, size);
-    IPage<NodeBind> list = page(actionIPage, queryWrapper);
-    PageSize<NodeBind> pageSize = new PageSize<>();
-    pageSize.setTotal(list.getTotal());
-    pageSize.setData(list.getRecords());
+  public PageSize<NodeBindDto> getNodes(Integer page, Integer size, String name) {
+    IPage<NodeBindDto> pageList = nodeBindRepository.getPageNode(page, size, name);
+    PageSize<NodeBindDto> pageSize = new PageSize<>();
+    pageSize.setTotal(pageList.getTotal());
+    pageSize.setData(pageList.getRecords());
     return pageSize;
   }
 
   public List<PipelineActionDto> getNodeExecutors(String nodeId) {
-    List<PipelineAction> actions = actionService.list(
-        Wrappers.lambdaQuery(PipelineAction.class).eq(PipelineAction::getNodeId, nodeId));
-
-    return actions.stream().map(PipelineActionDto::toPipelineActionDto)
+    List<PipelineAction> actions = actionService.getActionsByNodeId(nodeId);
+    return actions.stream().map(PipelineActionService::toPipelineActionDto)
         .collect(Collectors.toList());
   }
 
-  public List<NodeBind> getAllNodes() {
-      return list();
+  public List<NodeBindDto> getAllNodes() {
+    return nodeBindRepository.getAllNodes();
   }
 }
