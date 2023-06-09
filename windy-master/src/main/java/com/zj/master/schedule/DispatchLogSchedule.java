@@ -60,18 +60,19 @@ public class DispatchLogSchedule {
     // 2 判断扫描到的任务执行的master节点是否还存在，不存在准备进入重选节点流程
     List<DispatchLogDto> needRunList = resolveNoMasterTaskLog(runningTaskLog);
 
-    // 3 但是节点重启后由于IP未变化，但是重启节点没有执行任务
+    // 3 如果当前节点重启后由于IP未变化，但是重启节点没有执行任务
     List<DispatchLogDto> localIpNoRun = resolveLocalIpTaskLog(runningTaskLog);
     needRunList.addAll(localIpNoRun);
     List<DispatchLogDto> logs = needRunList.stream().distinct().collect(Collectors.toList());
-
     log.info("start run no master task ={}", JSON.toJSONString(logs));
     // 4 筛选出来的任务开始切换到当前节点执行
     logs.forEach(taskLog -> dispatcher.resumeTask(taskLog));
   }
 
   private List<DispatchLogDto> resolveLocalIpTaskLog(List<DispatchLogDto> runningTaskLog) {
-    return runningTaskLog.stream().filter(log -> !dispatcher.isExitInJvm(log))
+    String localIP = IpUtils.getLocalIP();
+    return runningTaskLog.stream().filter(log -> Objects.equals(localIP, log.getNodeIp()))
+        .filter(log -> !dispatcher.isExitInJvm(log))
         .collect(Collectors.toList());
   }
 

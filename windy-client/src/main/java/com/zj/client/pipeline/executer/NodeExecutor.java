@@ -80,8 +80,9 @@ public class NodeExecutor {
       errorMsg = getErrorMsg(e);
     }
 
-    interceptors.forEach(interceptor -> interceptor.after(node, statusAtomic.get()));
     notifyNodeEvent(node, statusAtomic.get(), errorMsg);
+
+    interceptors.forEach(interceptor -> interceptor.after(node, statusAtomic.get()));
   }
 
   private void saveRecord(String historyId, TaskNode node, String recordId,

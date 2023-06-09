@@ -29,25 +29,39 @@ import org.springframework.stereotype.Component;
 @Component
 public class LocalPersistence implements DisposableBean {
 
+  public static final String PERSIST_LOG = "persist.log";
+  public static final String LINUX_PATH = "/opt/windy/persist/" + PERSIST_LOG;
+  public static final String WINDOWS_PATH = "C:\\\\windy\\\\persist\\\\" + PERSIST_LOG;
   private final CopyOnWriteArrayList<ResultEvent> unPersistEventList = new CopyOnWriteArrayList<>();
 
   private final Integer maxSaveSize = 0;
   private File file;
 
   public LocalPersistence() {
-//    String localPatch = "/opt/windy/persist/persist.log";
-    String localPatch = "/Users/falcon/persist/persist.log";
-    if (isWindowsSystem()) {
-      localPatch = "C:\\\\windy\\\\persist\\\\persist.txt";
-    }
-    file = new File(localPatch);
+    file = new File(getDefaultDir());
     if (!file.exists()) {
       try {
         Files.createParentDirs(file);
       } catch (IOException e) {
-        log.error("create dir error", e);
+        log.error("create target file error");
+
+        tryRuntimeDir();
       }
     }
+  }
+
+  private void tryRuntimeDir() {
+    try {
+      String path = new File("").getCanonicalPath();
+      file = new File(path + File.separator + PERSIST_LOG);
+      Files.touch(file);
+    } catch (IOException ex) {
+      log.error("create current file error");
+    }
+  }
+
+  private String getDefaultDir() {
+    return isWindowsSystem() ? WINDOWS_PATH : LINUX_PATH;
   }
 
   public void persistNotify(ResultEvent resultEvent) {
