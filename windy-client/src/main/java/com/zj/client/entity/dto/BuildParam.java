@@ -16,4 +16,6 @@ public class BuildParam {
   private String pomPath;
 
   private String branch;
+
+  private String deploy;
 }

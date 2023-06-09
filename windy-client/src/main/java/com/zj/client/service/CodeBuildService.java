@@ -2,6 +2,7 @@ package com.zj.client.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.zj.client.entity.dto.BuildParam;
+import com.zj.client.entity.dto.ResponseModel;
 import com.zj.client.pipeline.git.GitOperator;
 import com.zj.client.pipeline.maven.MavenOperator;
 import com.zj.common.enums.ProcessStatus;
@@ -40,13 +41,11 @@ public class CodeBuildService {
       new LinkedBlockingQueue<>(100), new CallerRunsPolicy());
 
   public Boolean buildCode(BuildParam buildParam) {
-    executorService.execute(() ->{
+    executorService.execute(() -> {
       try {
-        gitOperator.pullCode(buildParam.getGitUrl(), buildParam.getBranch());
-
-        String serviceName = GitOperator.getServiceFromUrl(buildParam.getGitUrl());
-        String pomPath =
-            workspace + File.separator + serviceName + File.separator + buildParam.getPomPath();
+        //从git服务端拉取代码
+        gitOperator.pullCodeFromGit(buildParam.getGitUrl(), buildParam.getBranch());
+        String pomPath = getTargetPomPath(buildParam.getGitUrl(), buildParam.getPomPath());
         Integer exitCode = mavenOperator.build(pomPath);
         log.info("get maven exit code={}", exitCode);
         statusMap.put(buildParam.getRecordId(), ProcessStatus.SUCCESS.getType());
@@ -60,10 +59,19 @@ public class CodeBuildService {
     return true;
   }
 
-  public Object getRecordStatus(String recordId) {
+  private String getTargetPomPath(String gitUrl, String configPath) {
+    String serviceName = GitOperator.getServiceFromUrl(gitUrl);
+    return workspace + File.separator + serviceName + File.separator + configPath;
+  }
+
+  public ResponseModel getRecordStatus(String recordId) {
     Integer status = statusMap.get(recordId);
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("status", status);
-    return jsonObject;
+    ResponseModel responseModel = new ResponseModel();
+    responseModel.setStatus(status);
+    responseModel.setMessage("构建状态查询");
+    responseModel.setData(jsonObject);
+    return responseModel;
   }
 }

@@ -1,5 +1,6 @@
 package com.zj.domain.repository.pipeline.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -45,6 +46,8 @@ public class PipelineActionRepository extends
   @Override
   public Boolean updateAction(PipelineActionDto actionDto) {
     PipelineAction pipelineAction = OrikaUtil.convert(actionDto, PipelineAction.class);
+    pipelineAction.setParamDetail(JSON.toJSONString(actionDto.getParamList()));
+    pipelineAction.setResult(JSON.toJSONString(actionDto.getCompareResults()));
     return update(pipelineAction, Wrappers.lambdaUpdate(PipelineAction.class)
         .eq(PipelineAction::getActionId, actionDto.getActionId()));
   }

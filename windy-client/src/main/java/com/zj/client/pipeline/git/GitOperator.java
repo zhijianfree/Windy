@@ -25,19 +25,19 @@ public class GitOperator {
   @Value("${windy.pipeline.git.workspace:/opt/windy/}")
   private String workspace;
 
-  public void pullCode(String gitUrl, String branch) throws Exception {
+  public void pullCodeFromGit(String gitUrl, String branch) throws Exception {
     String serviceName = getServiceFromUrl(gitUrl);
     // 判断本地目录是否存在
     String serviceDir = workspace + File.separator + serviceName;
     createIfNotExist(serviceDir);
 
+    // clone 仓库到指定目录
     // 提供用户名和密码的验证
     UsernamePasswordCredentialsProvider provider = new UsernamePasswordCredentialsProvider(user,
         password);
-
-    // clone 仓库到指定目录
     Git git = Git.cloneRepository().setURI(gitUrl).setDirectory(new File(serviceDir))
         .setBranch(branch).setCredentialsProvider(provider).call();
+    git.pull();
   }
 
   private void createIfNotExist(String serviceDir) {

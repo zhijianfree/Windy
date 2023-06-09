@@ -27,6 +27,6 @@ public class CodeBuildRest {
 
   @PostMapping("/build/status")
   public ResponseModel buildStatus(@RequestBody BuildParam buildParam) {
-    return new ResponseModel(codeBuildService.getRecordStatus(buildParam.getRecordId()),"查询结果");
+    return codeBuildService.getRecordStatus(buildParam.getRecordId());
   }
 }
