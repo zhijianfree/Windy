@@ -1,7 +1,7 @@
 package com.zj.client.service;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.client.entity.po.NodeRecord;
+import com.zj.client.entity.vo.NodeRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;

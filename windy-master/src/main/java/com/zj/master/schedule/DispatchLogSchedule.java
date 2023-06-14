@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 public class DispatchLogSchedule {
 
   public static final String WINDY_MASTER_NAME = "WindyMaster";
+  public static final int MAX_REDO_TIMEOUT = 1000 * 60 * 60;
   @Autowired
   private IDispatchLogRepository taskLogRepository;
 
@@ -64,7 +65,7 @@ public class DispatchLogSchedule {
     List<DispatchLogDto> localIpNoRun = resolveLocalIpTaskLog(runningTaskLog);
     needRunList.addAll(localIpNoRun);
     List<DispatchLogDto> logs = needRunList.stream().distinct().collect(Collectors.toList());
-    log.info("start run no master task ={}", JSON.toJSONString(logs));
+    log.info("start run no master task size={}", logs.size());
     // 4 筛选出来的任务开始切换到当前节点执行
     logs.forEach(taskLog -> dispatcher.resumeTask(taskLog));
   }
@@ -72,6 +73,7 @@ public class DispatchLogSchedule {
   private List<DispatchLogDto> resolveLocalIpTaskLog(List<DispatchLogDto> runningTaskLog) {
     String localIP = IpUtils.getLocalIP();
     return runningTaskLog.stream().filter(log -> Objects.equals(localIP, log.getNodeIp()))
+        .filter(log -> (System.currentTimeMillis() - log.getUpdateTime()) > MAX_REDO_TIMEOUT)
         .filter(log -> !dispatcher.isExitInJvm(log))
         .collect(Collectors.toList());
   }

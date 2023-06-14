@@ -2,8 +2,12 @@ package com.zj.client.pipeline.executer.notify;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.zj.client.feature.executor.compare.CompareDefine;
+import com.zj.client.feature.executor.compare.CompareOperator;
+import com.zj.client.feature.executor.compare.CompareResult;
+import com.zj.client.feature.executor.compare.operator.CompareFactory;
 import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
-import com.zj.client.pipeline.executer.vo.CompareResult;
+import com.zj.client.pipeline.executer.vo.CompareInfo;
 import com.zj.client.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.client.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.pipeline.executer.vo.TaskNode;
@@ -19,7 +23,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -36,18 +40,22 @@ public class NodeStatusQueryLooper implements Runnable {
   public static final String EXPECT_VALUE_FORMAT = "期待值:【%s】";
   public static final String RESULT_VALUE_FORMAT = "返回值:【%s】";
   public static final String OPERATOR_FORMAT = "操作符:【%s】";
+  public static final String QUERY_ERROR_TIPS = "loop query status error";
   private final Map<String, IRemoteInvoker> remoteInvokerMap;
 
-  private final Map<String, Long> stopRecordMap = new ConcurrentHashMap<>();
+  private final Map<String, Long> stopPipelineHistoryMap = new ConcurrentHashMap<>();
   private final LinkedBlockingQueue<TaskNode> queue = new LinkedBlockingQueue<TaskNode>();
-  @Autowired
-  @Qualifier("queryLooperExecutorPool")
-  private ExecutorService executorService;
+  private final ExecutorService executorService;
+  private final CompareFactory compareFactory;
 
 
-  public NodeStatusQueryLooper(List<IRemoteInvoker> remoteInvokers) {
+  public NodeStatusQueryLooper(List<IRemoteInvoker> remoteInvokers,
+      @Qualifier("queryLooperExecutorPool") ExecutorService executorService,
+      CompareFactory compareFactory) {
     remoteInvokerMap = remoteInvokers.stream()
         .collect(Collectors.toMap(invoker -> invoker.type().name(), invoker -> invoker));
+    this.executorService = executorService;
+    this.compareFactory = compareFactory;
 
     new Thread(this).start();
   }
@@ -58,28 +66,48 @@ public class NodeStatusQueryLooper implements Runnable {
 
   private void runNode(TaskNode node) {
     executorService.execute(() -> {
-      IRemoteInvoker remoteInvoker = remoteInvokerMap.get(node.getExecuteType());
-      String result = remoteInvoker.queryStatus(node.getRefreshContext(), node.getRecordId());
-      log.info("get query status result={}", result);
+      try {
+        IRemoteInvoker remoteInvoker = remoteInvokerMap.get(node.getExecuteType());
+        String result = remoteInvoker.queryStatus(node.getRefreshContext(), node.getRecordId());
+        log.info("get query status result={}", result);
+        if (StringUtils.isBlank(result)) {
+          handleDefaultError(node);
+          return;
+        }
 
-      if (stopRecordMap.containsKey(node.getRecordId())) {
-        log.info("record result ignore , because pipeline is stop recordId={}", node.getRecordId());
-        return;
-      }
+        Thread.sleep(20000);
 
-      QueryResponseModel queryResponse = JSON.parseObject(result, QueryResponseModel.class);
-      if (Objects.isNull(queryResponse.getStatus())) {
-        log.info("get task record status is empty. recordId={}", node.getRecordId());
+        if (stopPipelineHistoryMap.containsKey(node.getHistoryId())) {
+          log.info("record result ignore , because pipeline is stop historyId={} recordId={}",
+              node.getHistoryId(), node.getRecordId());
+          return;
+        }
+
+        QueryResponseModel queryResponse = JSON.parseObject(result, QueryResponseModel.class);
+        if (Objects.isNull(queryResponse.getStatus())) {
+          log.info("get task record status is empty. recordId={}", node.getRecordId());
+          cycleRunTask(node);
+          return;
+        }
+
+        if (!Objects.equals(ProcessStatus.RUNNING.getType(), queryResponse.getStatus())) {
+          handleRecordFinalStatus(node, queryResponse);
+          return;
+        }
         cycleRunTask(node);
-        return;
+      } catch (Exception e) {
+        log.info("loop query status error", e);
+        handleDefaultError(node);
       }
-
-      if (!Objects.equals(ProcessStatus.RUNNING.getType(), queryResponse.getStatus())) {
-        handleRecordFinalStatus(node, queryResponse);
-        return;
-      }
-      cycleRunTask(node);
     });
+  }
+
+  private void handleDefaultError(TaskNode node) {
+    QueryResponseModel queryResponse = new QueryResponseModel();
+    queryResponse.setStatus(ProcessStatus.FAIL.getType());
+    queryResponse.setData(new JSONObject());
+    queryResponse.setMessage(Collections.singletonList(QUERY_ERROR_TIPS));
+    handleRecordFinalStatus(node, queryResponse);
   }
 
   private void handleRecordFinalStatus(TaskNode node, QueryResponseModel response) {
@@ -96,25 +124,28 @@ public class NodeStatusQueryLooper implements Runnable {
     }
 
     JSONObject jsonObject = responseModel.getData();
-    List<CompareResult> compareConfigs = node.getRefreshContext().getCompareConfig();
-    for (CompareResult compareResult : compareConfigs) {
-      boolean isMatch = CompareUtils.isMatch(compareResult.getOperator(),
-          jsonObject.get(compareResult.getCompareKey()), compareResult.getValue());
-      if (!isMatch) {
+    List<CompareInfo> compareConfigs = node.getRefreshContext().getCompareConfig();
+    for (CompareInfo compareInfo : compareConfigs) {
+      CompareOperator compareOperator = compareFactory.getOperator(compareInfo.getOperator());
+      CompareDefine compareDefine = new CompareDefine();
+      compareDefine.setResponseValue(jsonObject.get(compareInfo.getCompareKey()));
+      compareDefine.setExpectValue(compareInfo.getValue());
+      CompareResult compareResult = compareOperator.compare(compareDefine);
+      if (!compareResult.getCompareStatus()) {
         responseModel.setStatus(ProcessStatus.FAIL.getType());
-        responseModel.setMessage(exchangeTips(jsonObject, compareResult));
+        responseModel.setMessage(exchangeTips(jsonObject, compareInfo));
         return;
       }
     }
   }
 
-  private List<String> exchangeTips(JSONObject jsonObject, CompareResult compareResult) {
-    String desc = String.format(DESCRIPTION_FORMAT, compareResult.getCompareKey(),
-        compareResult.getDescription());
-    String expectDesc = String.format(EXPECT_VALUE_FORMAT, compareResult.getValue());
-    String operatorDesc = String.format(OPERATOR_FORMAT, compareResult.getOperator());
+  private List<String> exchangeTips(JSONObject jsonObject, CompareInfo compareInfo) {
+    String desc = String.format(DESCRIPTION_FORMAT, compareInfo.getCompareKey(),
+        compareInfo.getDescription());
+    String expectDesc = String.format(EXPECT_VALUE_FORMAT, compareInfo.getValue());
+    String operatorDesc = String.format(OPERATOR_FORMAT, compareInfo.getOperator());
     String resultDesc = String.format(RESULT_VALUE_FORMAT,
-        jsonObject.get(compareResult.getCompareKey()));
+        jsonObject.get(compareInfo.getCompareKey()));
     return Arrays.asList(desc, resultDesc, operatorDesc, expectDesc);
   }
 
@@ -152,7 +183,8 @@ public class NodeStatusQueryLooper implements Runnable {
 
       try {
         Thread.sleep(5000);
-      } catch (InterruptedException e) {}
+      } catch (InterruptedException e) {
+      }
 
       if (Objects.nonNull(taskNode)) {
         runNode(taskNode);
@@ -161,25 +193,13 @@ public class NodeStatusQueryLooper implements Runnable {
   }
 
   public void stopPipeline(String historyId) {
-    queue.stream().filter(node -> Objects.equals(node.getHistoryId(), historyId)).forEach(node -> {
-      PipelineStatusEvent statusEvent = PipelineStatusEvent.builder().taskNode(node)
-          .processStatus(ProcessStatus.STOP)
-          .errorMsg(Collections.singletonList("user stop")).build();
-      PipelineEventFactory.sendNotifyEvent(statusEvent);
-      removeItem(node.getRecordId(), ProcessStatus.STOP.getType());
-    });
+    putAndCheckRecord(historyId);
   }
 
-  public void removeItem(String recordId, Integer status) {
-    log.info("receive pipeline stop recordId={} status={}", recordId, status);
-    queue.removeIf(taskNode -> Objects.equals(recordId, taskNode.getRecordId()));
-    putAndCheckRecord(recordId);
-  }
-
-  private void putAndCheckRecord(String recordId) {
+  private void putAndCheckRecord(String historyId) {
     Long dateNow = System.currentTimeMillis();
-    stopRecordMap.put(recordId, dateNow);
-    stopRecordMap.entrySet().removeIf(entity -> {
+    stopPipelineHistoryMap.put(historyId, dateNow);
+    stopPipelineHistoryMap.entrySet().removeIf(entity -> {
       long mills = entity.getValue() - dateNow;
       return mills > NodeStatusQueryLooper.MAX_REMOVE_TIME;
     });

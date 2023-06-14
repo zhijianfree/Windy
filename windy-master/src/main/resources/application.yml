@@ -10,6 +10,9 @@ spring:
     username: root
     password: zj137899
 
+ribbon:
+  MaxAutoRetries: 0
+
 eureka:
   instance:
     # 服务时效时间，默认90秒.当server 90秒内没有收到client的注册信息时，会将该节点剔除

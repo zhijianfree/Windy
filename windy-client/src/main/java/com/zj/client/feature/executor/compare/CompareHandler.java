@@ -2,6 +2,7 @@ package com.zj.client.feature.executor.compare;
 
 import com.zj.client.entity.vo.ExecuteDetailVo;
 import com.zj.client.feature.executor.compare.ognl.OgnlDataParser;
+import com.zj.client.feature.executor.compare.operator.CompareFactory;
 import com.zj.common.exception.ErrorCode;
 import java.util.List;
 import java.util.Map;
@@ -20,12 +21,11 @@ public class CompareHandler {
   public static final String RESPONSE_BODY = "$body";
   public static final String TIP_FORMAT = "compare key[%s] expect value is[%s] but find [%s]";
   private OgnlDataParser ognlDataParser = new OgnlDataParser();
-  private final Map<String, CompareOperator> compareOperators;
 
-  public CompareHandler(List<CompareOperator> compareOperators) {
-    this.compareOperators = compareOperators.stream().collect(Collectors.toMap(
-        compareOperator -> compareOperator.getType().getOperator(),
-        compareOperator -> compareOperator));
+  private final CompareFactory compareFactory;
+
+  public CompareHandler(CompareFactory compareFactory) {
+    this.compareFactory = compareFactory;
   }
 
   public CompareResult compare(ExecuteDetailVo executeDetailVo, List<CompareDefine> compareDefines) {
@@ -58,7 +58,7 @@ public class CompareHandler {
 
   private CompareResult compareOne(CompareDefine compareDefine) {
     CompareResult compareResult = new CompareResult();
-    CompareOperator compareOperator = compareOperators.get(compareDefine.getOperator());
+    CompareOperator compareOperator = compareFactory.getOperator(compareDefine.getOperator());
     if (Objects.isNull(compareOperator)) {
       compareResult.setCompareStatus(false);
       compareResult.setErrorMessage("not support operator [" + compareDefine.getOperator() + "]");

@@ -20,7 +20,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
 
 /**
- * Client 将通知失败的数据缓存到本地文件， 然后慢慢轮询通知master节点
+ * Client 将通知失败的数据缓存到本地文件， 然后慢慢轮询通知master节点 为了保证数据一致性
  *
  * @author falcon
  * @since 2023/5/24
@@ -34,7 +34,7 @@ public class LocalPersistence implements DisposableBean {
   public static final String WINDOWS_PATH = "C:\\\\windy\\\\persist\\\\" + PERSIST_LOG;
   private final CopyOnWriteArrayList<ResultEvent> unPersistEventList = new CopyOnWriteArrayList<>();
 
-  private final Integer maxSaveSize = 0;
+  private final Integer maxSaveSize = 10;
   private File file;
 
   public LocalPersistence() {
@@ -65,9 +65,17 @@ public class LocalPersistence implements DisposableBean {
   }
 
   public void persistNotify(ResultEvent resultEvent) {
+    boolean exist = unPersistEventList.stream()
+        .noneMatch(event -> Objects.equals(resultEvent.getExecuteId(), event.getExecuteId()));
+    if (exist) {
+      log.info("event is exist not notify logId={} executeId={}", resultEvent.getLogId(),
+          resultEvent.getExecuteId());
+      return;
+    }
+
     unPersistEventList.add(resultEvent);
     if (unPersistEventList.size() > maxSaveSize) {
-      saveEvent2File();
+      saveEventFile();
     }
   }
 
@@ -77,7 +85,7 @@ public class LocalPersistence implements DisposableBean {
     if (CollectionUtils.isEmpty(unPersistEventList)) {
       return;
     }
-    saveEvent2File();
+    saveEventFile();
   }
 
   public List<ResultEvent> readEventsFromFile() {
@@ -105,20 +113,33 @@ public class LocalPersistence implements DisposableBean {
     }
   }
 
-  private void saveEvent2File() {
+  private void saveEventFile() {
+    StringBuilder stringBuilder = new StringBuilder();
+    unPersistEventList.forEach(event -> {
+      stringBuilder.append(JSON.toJSONString(event)).append("\r\n");
+    });
+
     CharSink sink = Files.asCharSink(file, Charsets.UTF_8, FileWriteMode.APPEND);
-    while (unPersistEventList.size() > 0) {
-      ResultEvent event = unPersistEventList.remove(0);
-      try {
-        sink.write(JSON.toJSONString(event) + "\r\n");
-      } catch (IOException e) {
-        log.error("write event to file error", e);
-      }
+    try {
+      sink.write(stringBuilder.toString());
+    } catch (IOException e) {
+      log.error("write event to file error", e);
     }
   }
 
   public boolean isWindowsSystem() {
     String os = System.getProperty("os.name");
     return Objects.nonNull(os) && os.toLowerCase().startsWith("windows");
+  }
+
+  public List<ResultEvent> getCacheList() {
+    return unPersistEventList;
+  }
+
+  public void removeCache(List<ResultEvent> handledEvents) {
+    List<String> handledEventIds = handledEvents.stream().map(ResultEvent::getExecuteId)
+        .collect(Collectors.toList());
+    unPersistEventList.removeIf(event -> handledEventIds.contains(event.getExecuteId()));
+
   }
 }

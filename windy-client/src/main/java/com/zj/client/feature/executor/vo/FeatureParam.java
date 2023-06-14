@@ -1,6 +1,6 @@
 package com.zj.client.feature.executor.vo;
 
-import com.zj.client.entity.po.ExecutePoint;
+import com.zj.client.entity.vo.ExecutePoint;
 import java.util.List;
 import java.util.Map;
 import lombok.Data;

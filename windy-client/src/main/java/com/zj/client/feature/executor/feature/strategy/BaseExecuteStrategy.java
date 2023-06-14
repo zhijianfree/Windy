@@ -1,7 +1,7 @@
 package com.zj.client.feature.executor.feature.strategy;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.client.entity.po.ExecutePoint;
+import com.zj.client.entity.vo.ExecutePoint;
 import com.zj.client.entity.vo.ExecuteDetailVo;
 import com.zj.client.entity.vo.FeatureResponse;
 import com.zj.client.feature.executor.compare.CompareDefine;

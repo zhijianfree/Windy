@@ -7,6 +7,7 @@ import com.zj.client.pipeline.git.GitOperator;
 import com.zj.client.pipeline.maven.MavenOperator;
 import com.zj.common.enums.ProcessStatus;
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -15,8 +16,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 /**
@@ -27,36 +30,56 @@ import org.springframework.stereotype.Service;
 @Service
 public class CodeBuildService {
 
-  @Value("windy.pipeline.git.workspace:/opt/windy/")
-  private String workspace;
   @Autowired
   private GitOperator gitOperator;
-
   @Autowired
   private MavenOperator mavenOperator;
+  @Autowired
+  @Qualifier("gitOperateExecutor")
+  private ExecutorService executorService;
 
-  private Map<String, Integer> statusMap = new ConcurrentHashMap<>();
+  private final Map<String, ResponseModel> statusMap = new ConcurrentHashMap<>();
+  private final String workspace;
 
-  private ExecutorService executorService = new ThreadPoolExecutor(10, 20, 30, TimeUnit.MINUTES,
-      new LinkedBlockingQueue<>(100), new CallerRunsPolicy());
+  public CodeBuildService(Environment environment) {
+    workspace = getWorkSpace(environment);
+  }
+
+  private boolean isWorkspaceExist(String workspace) {
+    try {
+      File gitDir = new File(workspace);
+      if (gitDir.exists()) {
+        return true;
+      }
+      FileUtils.createParentDirectories(gitDir);
+      return true;
+    } catch (IOException e) {
+    }
+    return false;
+  }
 
   public Boolean buildCode(BuildParam buildParam) {
     executorService.execute(() -> {
       try {
         //从git服务端拉取代码
-        gitOperator.pullCodeFromGit(buildParam.getGitUrl(), buildParam.getBranch());
+        gitOperator.pullCodeFromGit(buildParam.getGitUrl(), buildParam.getBranch(), workspace);
+
+        //本地maven构建
         String pomPath = getTargetPomPath(buildParam.getGitUrl(), buildParam.getPomPath());
         Integer exitCode = mavenOperator.build(pomPath);
         log.info("get maven exit code={}", exitCode);
-        statusMap.put(buildParam.getRecordId(), ProcessStatus.SUCCESS.getType());
+        saveStatus(buildParam.getRecordId(), ProcessStatus.SUCCESS.getType(), "构建成功");
       } catch (Exception e) {
         log.error("buildCode error", e);
-        statusMap.put(buildParam.getRecordId(), ProcessStatus.FAIL.getType());
+        saveStatus(buildParam.getRecordId(), ProcessStatus.FAIL.getType(), e.toString());
       }
     });
-
-    statusMap.put(buildParam.getRecordId(), ProcessStatus.RUNNING.getType());
+    saveStatus(buildParam.getRecordId(), ProcessStatus.RUNNING.getType(), "构建中");
     return true;
+  }
+
+  private void saveStatus(String recordId, int status, String message) {
+    statusMap.put(recordId, new ResponseModel(status, message));
   }
 
   private String getTargetPomPath(String gitUrl, String configPath) {
@@ -65,13 +88,21 @@ public class CodeBuildService {
   }
 
   public ResponseModel getRecordStatus(String recordId) {
-    Integer status = statusMap.get(recordId);
+    ResponseModel responseModel = statusMap.get(recordId);
     JSONObject jsonObject = new JSONObject();
-    jsonObject.put("status", status);
-    ResponseModel responseModel = new ResponseModel();
-    responseModel.setStatus(status);
-    responseModel.setMessage("构建状态查询");
+    jsonObject.put("status", responseModel.getStatus());
     responseModel.setData(jsonObject);
     return responseModel;
+  }
+
+  private String getWorkSpace(Environment environment) {
+    String path = environment.getProperty("windy.pipeline.git.workspace", "/opt/windy");
+    if (!isWorkspaceExist(path)) {
+      try {
+        path = new File("").getCanonicalPath() + File.separator + "windy";
+      } catch (IOException ignore) {
+      }
+    }
+    return path;
   }
 }

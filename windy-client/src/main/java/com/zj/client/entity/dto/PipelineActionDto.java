@@ -1,7 +1,7 @@
 package com.zj.client.entity.dto;
 
 import com.zj.client.pipeline.executer.vo.ActionParam;
-import com.zj.client.pipeline.executer.vo.CompareResult;
+import com.zj.client.pipeline.executer.vo.CompareInfo;
 import java.util.List;
 import lombok.Data;
 
@@ -42,7 +42,7 @@ public class PipelineActionDto {
   private String actionUrl;
   private List<ActionParam> paramList;
   private String queryUrl;
-  private List<CompareResult> compareResults;
+  private List<CompareInfo> compareInfos;
 
   /**
    * 节点执行方式

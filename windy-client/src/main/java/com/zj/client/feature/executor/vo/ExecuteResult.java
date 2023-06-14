@@ -1,7 +1,7 @@
 package com.zj.client.feature.executor.vo;
 
-import com.zj.client.entity.po.ExecuteRecord;
-import com.zj.client.entity.po.FeatureHistory;
+import com.zj.client.entity.vo.ExecuteRecord;
+import com.zj.client.entity.vo.FeatureHistory;
 import java.util.List;
 import lombok.Data;
 

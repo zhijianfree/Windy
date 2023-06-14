@@ -1,4 +1,4 @@
-package com.zj.client.entity.po;
+package com.zj.client.entity.vo;
 
 import java.io.Serializable;
 import lombok.Data;

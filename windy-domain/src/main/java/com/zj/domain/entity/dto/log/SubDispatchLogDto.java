@@ -36,6 +36,11 @@ public class SubDispatchLogDto {
    * */
   private String logId;
 
+  /**
+   * 执行client的IP
+   * */
+  private String clientIp;
+
   private Integer sortIndex;
 
   private Integer status;

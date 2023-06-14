@@ -20,7 +20,6 @@ public class EqualCompare extends BaseCompare {
     public CompareResult compare(CompareDefine compareDefine) {
         CompareResult compareResult = createSuccessResult();
         try {
-
             if (!(Long.parseLong(String.valueOf(compareDefine.getResponseValue())) == Long.parseLong(compareDefine.getExpectValue()))) {
                 compareResult.setErrorType(ErrorCode.COMPARE_ERROR);
                 String message = String.format(NOT_MATCH_FORMAT, compareDefine.getExpectValue(),

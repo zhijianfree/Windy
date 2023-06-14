@@ -16,6 +16,11 @@ public class ResponseModel {
   public ResponseModel() {
   }
 
+  public ResponseModel(Integer status, String message) {
+    this.status = status;
+    this.message = message;
+  }
+
   public ResponseModel(Object data, String message) {
     this.data = data;
     this.message = message;

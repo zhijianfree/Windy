@@ -6,8 +6,8 @@ import com.zj.common.model.ResultEvent;
 public interface IResultEventNotify {
 
   /**
-   * 节点或者用例执行完成之后
+   * 节点或者用例执行完成之后执行
    */
-  void notifyEvent(ResultEvent resultEvent);
+  boolean notifyEvent(ResultEvent resultEvent);
 
 }

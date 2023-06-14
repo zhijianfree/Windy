@@ -20,5 +20,5 @@ public class ConfigDetail {
   /**
    * node执行的参数
    * */
-  private List<CompareResult> compareInfo;
+  private List<CompareInfo> compareInfo;
 }
