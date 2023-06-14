@@ -1,7 +1,7 @@
 package com.zj.client.pipeline.executer.Invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.client.entity.po.NodeRecord;
+import com.zj.client.entity.vo.NodeRecord;
 import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.client.pipeline.executer.vo.ExecuteType;
 import com.zj.client.pipeline.executer.vo.QueryResponseModel;

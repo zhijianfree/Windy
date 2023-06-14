@@ -45,10 +45,16 @@
     <guava.version>27.1-jre</guava.version>
     <orika.version>1.5.4</orika.version>
     <joda.version>2.9.8</joda.version>
+    <ssh.version>0.1.55</ssh.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>com.jcraft</groupId>
+        <artifactId>jsch</artifactId>
+        <version>${ssh.version}</version>
+      </dependency>
       <!--内部模块依赖开始-->
       <dependency>
         <groupId>com.zj</groupId>

@@ -1,9 +1,8 @@
 package com.zj.client.pipeline.executer;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.eventbus.Subscribe;
-import com.zj.client.entity.po.NodeRecord;
+import com.zj.client.entity.vo.NodeRecord;
 import com.zj.client.notify.IResultEventNotify;
 import com.zj.common.enums.NotifyType;
 import com.zj.common.model.ResultEvent;

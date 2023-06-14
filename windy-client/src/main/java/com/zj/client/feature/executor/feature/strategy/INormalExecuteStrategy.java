@@ -1,7 +1,7 @@
 package com.zj.client.feature.executor.feature.strategy;
 
 import com.zj.client.entity.enuns.ExecutePointType;
-import com.zj.client.entity.po.ExecutePoint;
+import com.zj.client.entity.vo.ExecutePoint;
 import com.zj.client.entity.vo.FeatureResponse;
 import com.zj.client.feature.executor.compare.CompareHandler;
 import com.zj.client.feature.executor.feature.IExecuteInvoker;

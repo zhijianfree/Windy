@@ -24,7 +24,11 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.apache.commons.lang.StringUtils;
+
+import org.apache.commons.lang.text.StrSubstitutor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 /**
@@ -35,16 +39,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class HttpExecutor implements IRemoteInvoker {
 
-  @Value("${server.port}")
-  private Integer serverPort;
+  private final StrSubstitutor strSubstitutor;
+
   private OgnlDataParser ognlDataParser = new OgnlDataParser();
-  private Map<String, String> ipMap = new HashMap<>();
   public static final MediaType MEDIA_TYPE = MediaType.parse("application/json;charset=utf-8");
   private OkHttpClient okHttpClient = new OkHttpClient.Builder().readTimeout(10, TimeUnit.SECONDS)
       .connectTimeout(5, TimeUnit.SECONDS).build();
 
-  public HttpExecutor() {
-    ipMap.put("executeIp", IpUtils.getLocalIP() + serverPort);
+  public HttpExecutor(Environment environment) {
+    String serverPort = environment.getProperty("server.port");
+    Map<String, String> ipMap = new HashMap<>();
+    ipMap.put("executeIp", IpUtils.getLocalIP() + ":" + serverPort);
+    strSubstitutor = new StrSubstitutor(ipMap);
   }
 
   @Override
@@ -93,7 +99,7 @@ public class HttpExecutor implements IRemoteInvoker {
     if (StringUtils.isBlank(url)) {
       return url;
     }
-    // http://
+
     String[] splits = url.split("//");
     if (splits.length < 2) {
       return url;
@@ -104,6 +110,6 @@ public class HttpExecutor implements IRemoteInvoker {
       return url;
     }
 
-    return String.valueOf(ognlDataParser.parserExpression(ipMap, url.replace("$","#")));
+    return strSubstitutor.replace(url);
   }
 }

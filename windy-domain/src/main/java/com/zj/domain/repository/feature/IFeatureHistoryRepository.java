@@ -10,6 +10,8 @@ import java.util.List;
  */
 public interface IFeatureHistoryRepository {
 
+  FeatureHistoryDto getFeatureHistory(String historyId);
+
   List<FeatureHistoryDto> featureHistories(String featureId);
 
   boolean saveHistory(FeatureHistoryDto featureHistory);

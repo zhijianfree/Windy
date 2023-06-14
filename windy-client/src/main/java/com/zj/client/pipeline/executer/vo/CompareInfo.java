@@ -7,7 +7,7 @@ import lombok.Data;
  * @since 2023/3/29
  */
 @Data
-public class CompareResult {
+public class CompareInfo {
 
   private String compareKey;
 

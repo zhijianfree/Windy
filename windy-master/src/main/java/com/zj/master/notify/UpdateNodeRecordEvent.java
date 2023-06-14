@@ -2,7 +2,9 @@ package com.zj.master.notify;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.NotifyType;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.common.model.ResultEvent;
+import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
 import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
@@ -37,6 +39,11 @@ public class UpdateNodeRecordEvent implements INotifyEvent{
   public boolean handle(ResultEvent resultEvent) {
     String string = JSON.toJSONString(resultEvent.getParams());
     log.info("receive node record create event id = {} event={}", resultEvent.getExecuteId(), string);
+    NodeRecordDto record = nodeRecordRepository.getRecordById(resultEvent.getExecuteId());
+    if (ProcessStatus.isCompleteStatus(record.getStatus())) {
+      log.info("node record status completed,not update recordId={}", record.getRecordId());
+      return true;
+    }
 
     NodeRecordDto nodeRecord = JSON.parseObject(string, NodeRecordDto.class);
     nodeRecord.setRecordId(resultEvent.getExecuteId());

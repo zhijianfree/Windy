@@ -1,8 +1,7 @@
 package com.zj.master.rest;
 
-import com.alibaba.fastjson.JSONObject;
-import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
+import com.zj.common.model.ResponseMeta;
 import com.zj.common.model.ResultEvent;
 import com.zj.master.service.ClientNotifyService;
 import org.springframework.beans.factory.annotation.Autowired;

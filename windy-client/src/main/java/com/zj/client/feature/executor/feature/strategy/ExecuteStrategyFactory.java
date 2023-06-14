@@ -1,6 +1,6 @@
 package com.zj.client.feature.executor.feature.strategy;
 
-import com.zj.client.entity.po.ExecutePoint;
+import com.zj.client.entity.vo.ExecutePoint;
 import com.zj.client.entity.vo.FeatureResponse;
 import com.zj.client.feature.executor.feature.IExecuteStrategy;
 import com.zj.client.feature.executor.vo.ExecuteContext;

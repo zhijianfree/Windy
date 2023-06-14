@@ -35,6 +35,14 @@ public class FeatureHistoryRepository extends
   private IExecuteRecordRepository executeRecordRepository;
 
   @Override
+  public FeatureHistoryDto getFeatureHistory(String historyId) {
+    FeatureHistory featureHistory = getOne(
+        Wrappers.lambdaQuery(FeatureHistory.class).eq(FeatureHistory::getHistoryId, historyId));
+
+    return OrikaUtil.convert(featureHistory, FeatureHistoryDto.class);
+  }
+
+  @Override
   public List<FeatureHistoryDto> featureHistories(String featureId) {
     List<FeatureHistory> featureHistories = list(
         Wrappers.lambdaQuery(FeatureHistory.class).eq(FeatureHistory::getFeatureId, featureId)

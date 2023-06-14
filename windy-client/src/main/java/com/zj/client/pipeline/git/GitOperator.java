@@ -6,7 +6,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,16 +16,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class GitOperator {
 
-  @Value("${windy.pipeline.git.user:windy}")
-  private String user;
+  public static final String GIT_USER = "windy.pipeline.git.user";
+  public static final String GIT_PASSWORD = "windy.pipeline.git.password";
+  public static final String DEFAULT_PWD = "windy!123";
+  public static final String DEFAULT_USER = "windy";
+  private final Environment environment;
 
-  @Value("${windy.pipeline.git.password:windy!123}")
-  private String password;
+  public GitOperator(Environment environment) {
+    this.environment = environment;
+  }
 
-  @Value("${windy.pipeline.git.workspace:/opt/windy/}")
-  private String workspace;
-
-  public void pullCodeFromGit(String gitUrl, String branch) throws Exception {
+  public void pullCodeFromGit(String gitUrl, String branch, String workspace) throws Exception {
     String serviceName = getServiceFromUrl(gitUrl);
     // 判断本地目录是否存在
     String serviceDir = workspace + File.separator + serviceName;
@@ -33,23 +34,23 @@ public class GitOperator {
 
     // clone 仓库到指定目录
     // 提供用户名和密码的验证
-    UsernamePasswordCredentialsProvider provider = new UsernamePasswordCredentialsProvider(user,
-        password);
+    String user = environment.getProperty(GIT_USER, DEFAULT_USER);
+    String pwd = environment.getProperty(GIT_PASSWORD, DEFAULT_PWD);
     Git git = Git.cloneRepository().setURI(gitUrl).setDirectory(new File(serviceDir))
-        .setBranch(branch).setCredentialsProvider(provider).call();
+        .setCredentialsProvider(new UsernamePasswordCredentialsProvider(user, pwd))
+        .setBranch(branch).call();
     git.pull();
   }
 
   private void createIfNotExist(String serviceDir) {
-    File dir = new File(serviceDir);
+    File gitDir = new File(serviceDir);
     try {
-      if (!dir.exists()) {
-        FileUtils.createParentDirectories(dir);
+      if (!gitDir.exists()) {
+        FileUtils.createParentDirectories(gitDir);
         return;
       }
-      FileUtils.cleanDirectory(dir);
+      FileUtils.cleanDirectory(gitDir);
     } catch (IOException e) {
-      throw new RuntimeException(e);
     }
   }
 

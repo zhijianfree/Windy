@@ -5,15 +5,6 @@ spring:
   application:
     name: WindyClient
 
-windy:
-  pipeline:
-    git:
-      user: guyuelan
-      password: zhijian137899
-      workspace: /Users/falcon/windy/
-    maven:
-      path: /Users/hiuielan/soft/apache-maven-3.6.3
-
 eureka:
   instance:
     # 服务时效时间，默认90秒.当server 90秒内没有收到client的注册信息时，会将该节点剔除

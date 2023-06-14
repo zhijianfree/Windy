@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -29,27 +30,27 @@ import org.springframework.web.client.RestTemplate;
  */
 @Slf4j
 @Component
-public class ResultEventNotify implements IResultEventNotify {
-
-  @Autowired
-  private DiscoveryClient discoveryClient;
-  @Autowired
-  private RestTemplate restTemplate;
-
-  @Autowired
-  private InstanceMonitor instanceMonitor;
-
-  @Autowired
-  private LocalPersistence localPersistence;
-
+public class ClientEventProcessor implements IResultEventNotify {
+  private final DiscoveryClient discoveryClient;
+  private final RestTemplate restTemplate;
+  private final InstanceMonitor instanceMonitor;
+  private final LocalPersistence localPersistence;
   public static final String WINDY_MASTER = "WindyMaster";
   public static final String NOTIFY_MASTER_URL = "http://WindyMaster/v1/devops/dispatch/notify";
   private final MediaType mediaType = MediaType.get("application/json; charset=utf-8");
   private final OkHttpClient okHttpClient = new OkHttpClient.Builder().connectTimeout(10,
       TimeUnit.SECONDS).connectTimeout(10, TimeUnit.SECONDS).build();
 
+  public ClientEventProcessor(DiscoveryClient discoveryClient, RestTemplate restTemplate,
+      InstanceMonitor instanceMonitor, LocalPersistence localPersistence) {
+    this.discoveryClient = discoveryClient;
+    this.restTemplate = restTemplate;
+    this.instanceMonitor = instanceMonitor;
+    this.localPersistence = localPersistence;
+  }
+
   @Override
-  public void notifyEvent(ResultEvent resultEvent) {
+  public boolean notifyEvent(ResultEvent resultEvent) {
     log.info("start notify result={} ", JSON.toJSONString(resultEvent));
     try {
       List<ServiceInstance> windyMaster = discoveryClient.getInstances(WINDY_MASTER);
@@ -58,8 +59,7 @@ public class ResultEventNotify implements IResultEventNotify {
           .findFirst();
       if (optional.isPresent()) {
         // 如果触发任务执行的master节点存在那么优先访问触发任务的master节点
-        notifyWithMasterIP(resultEvent, optional.get());
-        return;
+        return notifyWithMasterIP(resultEvent, optional.get());
       }
 
       //master节点不可达时，尝试使用其他的master节点
@@ -67,13 +67,15 @@ public class ResultEventNotify implements IResultEventNotify {
       ResponseEntity<String> response = restTemplate.postForEntity(NOTIFY_MASTER_URL, httpEntity,
           String.class);
       log.info("notify event code={} result={}", response.getStatusCode(), response.getBody());
+      return response.getStatusCode().is2xxSuccessful();
     } catch (Exception e) {
       log.error("notify event error save to file", e);
       localPersistence.persistNotify(resultEvent);
     }
+    return false;
   }
 
-  private void notifyWithMasterIP(ResultEvent resultEvent, ServiceInstance serviceInstance) {
+  private boolean notifyWithMasterIP(ResultEvent resultEvent, ServiceInstance serviceInstance) {
     String masterHost = serviceInstance.getHost() + ":" + serviceInstance.getPort();
     String url = NOTIFY_MASTER_URL.replace(WINDY_MASTER, masterHost);
     Request request = new Request.Builder().url(url)
@@ -82,22 +84,39 @@ public class ResultEventNotify implements IResultEventNotify {
       Response response = okHttpClient.newCall(request).execute();
       log.info("notify master ip status result code={} result={}", response.code(),
           response.body().string());
+      return response.isSuccessful();
     } catch (Exception e) {
       log.error("request master ip error", e);
     }
+    return false;
   }
 
-  @Scheduled(cron = "0/5 * * * * ? ")
+  /**
+   * 定时将未通知成功的状态同步到master
+   * */
+  @Scheduled(cron = "0/10 * * * * ? ")
   public void asyncNotifyPersist() {
     if (!instanceMonitor.isSuitable()){
       return;
     }
 
+    handleNotifyFromCache();
+    handleNotifyFromFile();
+  }
+
+  private void handleNotifyFromCache() {
+    List<ResultEvent> resultEvents = localPersistence.getCacheList();
+    List<ResultEvent> handledEvents = resultEvents.stream().filter(this::notifyEvent)
+        .collect(Collectors.toList());
+    localPersistence.removeCache(handledEvents);
+  }
+
+  private void handleNotifyFromFile() {
     List<ResultEvent> resultEvents = localPersistence.readEventsFromFile();
     if (CollectionUtils.isEmpty(resultEvents)) {
       return;
     }
-    resultEvents.forEach(this::notifyEvent);
     localPersistence.clearFileContent();
+    resultEvents.forEach(this::notifyEvent);
   }
 }

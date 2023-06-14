@@ -40,4 +40,16 @@ public class ThreadPoolConfig {
           log.info("discard old");
         });
   }
+
+  @Bean("gitOperateExecutor")
+  public ExecutorService gitOperateExecutor() {
+    return new ThreadPoolExecutor(10, 30, 10, TimeUnit.MINUTES, new LinkedBlockingQueue<>(50),
+        (r, executor) -> {
+          if (!executor.isShutdown()) {
+            executor.getQueue().poll();
+            executor.execute(r);
+          }
+          log.info("discard old");
+        });
+  }
 }

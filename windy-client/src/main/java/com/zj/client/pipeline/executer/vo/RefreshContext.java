@@ -2,7 +2,6 @@ package com.zj.client.pipeline.executer.vo;
 
 import java.util.List;
 import java.util.Map;
-import lombok.Builder;
 import lombok.Data;
 
 /**
@@ -16,13 +15,13 @@ public class RefreshContext {
 
   private Map<String, String> headers;
 
-  private List<CompareResult> compareConfig;
+  private List<CompareInfo> compareConfig;
 
   public RefreshContext() {
   }
 
   public RefreshContext(String url, Map<String, String> headers,
-      List<CompareResult> compareConfig) {
+      List<CompareInfo> compareConfig) {
     this.url = url;
     this.headers = headers;
     this.compareConfig = compareConfig;
