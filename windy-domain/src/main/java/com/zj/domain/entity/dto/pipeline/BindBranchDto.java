@@ -1,6 +1,5 @@
 package com.zj.domain.entity.dto.pipeline;
 
-import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
@@ -12,7 +11,7 @@ import javax.validation.constraints.NotNull;
  */
 
 @Data
-public class GitBindDto {
+public class BindBranchDto {
 
     /**
      * 绑定Id

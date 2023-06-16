@@ -8,7 +8,6 @@ import lombok.Data;
  * @since 2023/5/8
  */
 @Data
-@Builder
 public class WaitRequestContext{
 
   /**

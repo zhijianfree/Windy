@@ -12,7 +12,7 @@ import com.zj.domain.repository.feature.IFeatureHistoryRepository;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
 import com.zj.master.dispatch.ClientProxy;
 import com.zj.master.dispatch.feature.FeatureDispatch;
-import com.zj.master.dispatch.listener.IInnerEventListener;
+import com.zj.master.dispatch.listener.IStopEventListener;
 import com.zj.master.dispatch.listener.InnerEvent;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class FeatureExecuteProxy implements IInnerEventListener {
+public class FeatureExecuteProxy implements IStopEventListener {
 
   public static final String DISPATCH_FEATURE_TYPE = "FEATURE";
   @Autowired

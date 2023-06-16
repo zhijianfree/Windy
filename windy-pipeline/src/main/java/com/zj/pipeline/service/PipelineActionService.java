@@ -41,6 +41,10 @@ public class PipelineActionService {
     return pipelineActionRepository.updateAction(actionDto);
   }
 
+  public Boolean actionsBindNode(String nodeId, List<String> actionIds) {
+    return pipelineActionRepository.actionsBindNode(nodeId, actionIds);
+  }
+
   public Boolean deleteAction(String actionId) {
     return pipelineActionRepository.deleteAction(actionId);
   }

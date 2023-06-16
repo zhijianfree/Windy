@@ -1,9 +1,9 @@
 package com.zj.client.pipeline.executer.Invoker;
 
 
-import com.zj.client.pipeline.executer.vo.ExecuteType;
 import com.zj.client.pipeline.executer.vo.RefreshContext;
 import com.zj.client.pipeline.executer.vo.RequestContext;
+import com.zj.common.enums.ExecuteType;
 import java.io.IOException;
 
 /**

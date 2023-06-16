@@ -41,6 +41,11 @@ public class SubDispatchLogDto {
    * */
   private String clientIp;
 
+  /**
+   * 执行类型
+   * */
+  private String executeType;
+
   private Integer sortIndex;
 
   private Integer status;

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class TaskInnerEventFactory {
   private static EventBus eventBus = new EventBus();
 
-  public TaskInnerEventFactory(List<IInnerEventListener> notifyList) {
+  public TaskInnerEventFactory(List<IStopEventListener> notifyList) {
     notifyList.forEach(listener ->{
       eventBus.register(listener);
     });

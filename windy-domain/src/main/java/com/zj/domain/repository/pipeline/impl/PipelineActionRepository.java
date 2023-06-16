@@ -53,6 +53,14 @@ public class PipelineActionRepository extends
   }
 
   @Override
+  public Boolean actionsBindNode(String nodeId, List<String> actionIds) {
+    PipelineAction pipelineAction = new PipelineAction();
+    pipelineAction.setNodeId(nodeId);
+    return update(pipelineAction,
+        Wrappers.lambdaUpdate(PipelineAction.class).in(PipelineAction::getActionId, actionIds));
+  }
+
+  @Override
   public Boolean deleteAction(String actionId) {
     return remove(
         Wrappers.lambdaQuery(PipelineAction.class).eq(PipelineAction::getActionId, actionId));

@@ -17,8 +17,8 @@ public enum ErrorCode {
   DELETE_PIPELINE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"Pipeline.000008", "删除流水线错误"),
 
   BRANCH_ALREADY_BIND(HttpStatus.INTERNAL_SERVER_ERROR,"Pipeline.000009", "分支已经绑定"),
-
   CREATE_PIPELINE(HttpStatus.INTERNAL_SERVER_ERROR,"Pipeline.000010", "创建流水线失败"),
+  NOT_FIND_BRANCH(HttpStatus.BAD_REQUEST,"Pipeline.000011", "没有找到绑定分支，无法执行"),
 
   /*==================用例服务==================*/
   COMPARE_ERROR(HttpStatus.FORBIDDEN,"Feature.000002","feature compare error"),

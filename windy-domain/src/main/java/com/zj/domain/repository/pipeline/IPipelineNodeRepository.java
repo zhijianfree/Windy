@@ -13,6 +13,8 @@ public interface IPipelineNodeRepository {
 
   List<PipelineNodeDto> getPipelineNodes(String pipelineId);
 
+  List<PipelineNodeDto> getPipelineNodeByIds(List<String> nodeIds);
+
   boolean deleteNodeIds(List<String> nodeIds);
 
   void updateNode(PipelineNodeDto dto);

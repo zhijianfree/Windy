@@ -11,6 +11,7 @@ import com.zj.common.generate.UniqueIdService;
 import com.zj.common.model.DispatchModel;
 import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
+import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
 import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
 import com.zj.domain.entity.dto.pipeline.PipelineStageDto;
 import com.zj.domain.entity.po.pipeline.Pipeline;
@@ -53,7 +54,7 @@ public class PipelineService {
   private PipelineActionService pipelineActionService;
 
   @Autowired
-  private NodeRecordService nodeRecordService;
+  private PipelineHistoryService pipelineHistoryService;
 
   @Autowired
   private UniqueIdService uniqueIdService;
@@ -237,17 +238,14 @@ public class PipelineService {
   }
 
   public Boolean pause(String historyId) {
-    Optional<NodeRecordDto> optional = nodeRecordService.getNodeRecordsByHistory(historyId).stream()
-        .filter(record -> Objects.equals(ProcessStatus.RUNNING.getType(), record.getStatus()))
-        .findAny();
-    if (!optional.isPresent()) {
+    PipelineHistoryDto pipelineHistory = pipelineHistoryService.getPipelineHistory(historyId);
+    if (Objects.isNull(pipelineHistory)) {
       return false;
     }
 
     DispatchModel dispatchModel = new DispatchModel();
     dispatchModel.setSourceId(historyId);
     dispatchModel.setType(LogType.PIPELINE.getType());
-
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<DispatchModel> httpEntity = new HttpEntity<>(dispatchModel, headers);
