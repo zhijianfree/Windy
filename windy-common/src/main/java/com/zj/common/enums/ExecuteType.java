@@ -1,4 +1,4 @@
-package com.zj.master.entity.enums;
+package com.zj.common.enums;
 
 public enum ExecuteType {
   /**
@@ -16,5 +16,13 @@ public enum ExecuteType {
   /**
    * 执行测试用例任务
    * */
-  TEST
+  TEST,
+  /**
+   * 部署代码
+   * */
+  DEPLOY,
+  /**
+   * 构建代码
+   * */
+  BUILD
 }

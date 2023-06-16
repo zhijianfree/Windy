@@ -33,6 +33,13 @@ public class PipelineNodeRepository extends ServiceImpl<PipelineNodeMapper, Pipe
   }
 
   @Override
+  public List<PipelineNodeDto> getPipelineNodeByIds(List<String> nodeIds) {
+    List<PipelineNode> nodes = list(
+        Wrappers.lambdaQuery(PipelineNode.class).in(PipelineNode::getNodeId, nodeIds));
+    return OrikaUtil.convertList(nodes, PipelineNodeDto.class);
+  }
+
+  @Override
   public boolean deleteNodeIds(List<String> nodeIds) {
     return remove(Wrappers.lambdaQuery(PipelineNode.class).in(PipelineNode::getNodeId, nodeIds));
   }

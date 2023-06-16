@@ -1,9 +1,18 @@
 package com.zj.client.deploy.jar;
 
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 import com.zj.client.deploy.IDeployMode;
 import com.zj.client.entity.enuns.DeployType;
+import com.zj.common.enums.ProcessStatus;
+import java.util.HashMap;
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import com.jcraft.jsch.*;
 
 /**
  * jar包部署
@@ -11,9 +20,12 @@ import com.jcraft.jsch.*;
  * @author guyuelan
  * @since 2023/6/8
  */
-@Component("jar")
+@Slf4j
+@Component
 public class JarDeploy implements IDeployMode<JarDeployContext> {
   private final JSch jsch = new JSch();
+
+  private final Map<String, ProcessStatus> statusMap = new HashMap<>();
   @Override
   public String deployType() {
     return DeployType.JAR.name();
@@ -21,9 +33,9 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
 
   @Override
   public void deploy(JarDeployContext deployContext) {
+    bindStatus(deployContext.getRecordId(), ProcessStatus.RUNNING);
     Session session = null;
     ChannelSftp channelSftp = null;
-
     try {
       session = jsch.getSession(deployContext.getSshUser(), deployContext.getSshIp(),
           deployContext.getSshPort());
@@ -39,7 +51,7 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
 
       // 执行远程shell脚本
       ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
-      channelExec.setCommand("sh " + deployContext.getRemoteSHFile());
+      channelExec.setCommand("sh start.sh");
       channelExec.connect();
 
       // 等待shell脚本执行完成
@@ -53,11 +65,12 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
 
       // 获取shell脚本执行结果
       int exitStatus = channelExec.getExitStatus();
-      System.out.println("Shell脚本执行结果: " + exitStatus);
-
+      log.info("Shell脚本执行结果: {}", exitStatus);
+      bindStatus(deployContext.getRecordId(), ProcessStatus.SUCCESS);
       channelExec.disconnect();
     } catch (JSchException | SftpException e) {
       e.printStackTrace();
+      bindStatus(deployContext.getRecordId(), ProcessStatus.FAIL);
     } finally {
       if (channelSftp != null) {
         channelSftp.disconnect();
@@ -66,6 +79,15 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
         session.disconnect();
       }
     }
+  }
+
+  @Override
+  public ProcessStatus getDeployStatus(String recordId) {
+    return statusMap.get(recordId);
+  }
+
+  private void bindStatus(String recordId, ProcessStatus status) {
+    statusMap.put(recordId, status);
   }
 
 }

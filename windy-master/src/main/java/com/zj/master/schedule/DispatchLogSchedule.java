@@ -51,7 +51,7 @@ public class DispatchLogSchedule {
     if (!instanceMonitor.isSuitable()) {
       return;
     }
-    log.info("start scan log......");
+    log.debug("start scan log......");
     // 1 扫描任务日志，只获取正在执行中的日志
     List<DispatchLogDto> runningTaskLog = taskLogRepository.getRunningDispatchLog();
     if (CollectionUtils.isEmpty(runningTaskLog)) {
@@ -65,7 +65,7 @@ public class DispatchLogSchedule {
     List<DispatchLogDto> localIpNoRun = resolveLocalIpTaskLog(runningTaskLog);
     needRunList.addAll(localIpNoRun);
     List<DispatchLogDto> logs = needRunList.stream().distinct().collect(Collectors.toList());
-    log.info("start run no master task size={}", logs.size());
+    log.debug("start run no master task size={}", logs.size());
     // 4 筛选出来的任务开始切换到当前节点执行
     logs.forEach(taskLog -> dispatcher.resumeTask(taskLog));
   }

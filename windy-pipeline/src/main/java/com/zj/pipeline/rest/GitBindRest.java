@@ -3,7 +3,7 @@ package com.zj.pipeline.rest;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
-import com.zj.domain.entity.dto.pipeline.GitBindDto;
+import com.zj.domain.entity.dto.pipeline.BindBranchDto;
 import com.zj.pipeline.service.GitBindService;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -34,24 +34,24 @@ public class GitBindRest {
 
   @ResponseBody
   @PostMapping("/git/bind")
-  public ResponseMeta<String> createGitBind(@Validated @RequestBody GitBindDto gitBindDto) {
+  public ResponseMeta<String> createGitBind(@Validated @RequestBody BindBranchDto bindBranchDto) {
     return new ResponseMeta<String>(ErrorCode.SUCCESS,
-        gitBindService.createGitBind(gitBindDto));
+        gitBindService.createGitBind(bindBranchDto));
   }
 
   @ResponseBody
   @GetMapping("/{pipelineId}/git/binds")
-  public ResponseMeta<List<GitBindDto>> listGitBinds(
+  public ResponseMeta<List<BindBranchDto>> listGitBinds(
       @PathVariable("pipelineId") String pipelineId) {
-    return new ResponseMeta<List<GitBindDto>>(ErrorCode.SUCCESS,
+    return new ResponseMeta<List<BindBranchDto>>(ErrorCode.SUCCESS,
         gitBindService.listGitBinds(pipelineId));
   }
 
   @ResponseBody
   @PutMapping("/git/bind")
-  public ResponseMeta<Boolean> updatePipeline(@RequestBody GitBindDto gitBindDto) {
+  public ResponseMeta<Boolean> updatePipeline(@RequestBody BindBranchDto bindBranchDto) {
     return new ResponseMeta<Boolean>(ErrorCode.SUCCESS,
-        gitBindService.updateGitBind(gitBindDto));
+        gitBindService.updateGitBind(bindBranchDto));
   }
 
   @ResponseBody

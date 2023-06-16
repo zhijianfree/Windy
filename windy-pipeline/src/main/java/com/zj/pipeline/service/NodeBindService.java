@@ -44,7 +44,7 @@ public class NodeBindService {
     nodeBindDto.setNodeId(uniqueIdService.getUniqueId());
     boolean result = nodeBindRepository.saveNodeBind(nodeBindDto);
 
-    boolean updateAction = batchUpdateNodeId(nodeBindDto.getExecutors(), nodeBindDto.getNodeId());
+    boolean updateAction = batchUpdateNodeId(nodeBindDto.getNodeId(), nodeBindDto.getExecutors());
     log.info("update action node id result={}", updateAction);
     return result;
   }
@@ -54,33 +54,31 @@ public class NodeBindService {
   public Boolean updateNode(NodeBindDto nodeBindDto) {
     boolean result = nodeBindRepository.updateNode(nodeBindDto);
     List<PipelineAction> actions = actionService.getActionsByNodeId(nodeBindDto.getNodeId());
-    if (!CollectionUtils.isEmpty(actions)) {
-      List<String> oldList = actions.stream().map(PipelineAction::getActionId)
-          .collect(Collectors.toList());
-
-      List<String> removeList = oldList.stream()
-          .filter(actionId -> !nodeBindDto.getExecutors().contains(actionId))
-          .collect(Collectors.toList());
-      if (!CollectionUtils.isEmpty(removeList)) {
-        actionService.batchDelete(removeList);
-      }
-
-      List<String> newList = nodeBindDto.getExecutors().stream()
-          .filter(actionId -> !oldList.contains(actionId)).collect(Collectors.toList());
-      batchUpdateNodeId(newList, nodeBindDto.getNodeId());
+    if (CollectionUtils.isEmpty(actions)) {
+      return batchUpdateNodeId(nodeBindDto.getNodeId(), nodeBindDto.getExecutors());
     }
 
+    List<String> oldList = actions.stream().map(PipelineAction::getActionId)
+        .collect(Collectors.toList());
+
+    List<String> removeList = oldList.stream()
+        .filter(actionId -> !nodeBindDto.getExecutors().contains(actionId))
+        .collect(Collectors.toList());
+    if (!CollectionUtils.isEmpty(removeList)) {
+      actionService.batchDelete(removeList);
+    }
+
+    List<String> newList = nodeBindDto.getExecutors().stream()
+        .filter(actionId -> !oldList.contains(actionId)).collect(Collectors.toList());
+    batchUpdateNodeId(nodeBindDto.getNodeId(), newList);
     return result;
   }
 
-  private boolean batchUpdateNodeId(List<String> actionIds, String nodeId) {
+  private boolean batchUpdateNodeId(String nodeId, List<String> actionIds) {
     if (CollectionUtils.isEmpty(actionIds)) {
       return false;
     }
-
-    PipelineActionDto pipelineAction = new PipelineActionDto();
-    pipelineAction.setNodeId(nodeId);
-    return actionService.updateAction(pipelineAction);
+    return actionService.actionsBindNode(nodeId, actionIds);
   }
 
   public NodeBindDto getNode(String nodeId) {

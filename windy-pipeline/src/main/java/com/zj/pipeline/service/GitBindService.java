@@ -6,11 +6,10 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
-import com.zj.domain.entity.dto.pipeline.GitBindDto;
+import com.zj.domain.entity.dto.pipeline.BindBranchDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
-import com.zj.domain.repository.pipeline.IGitBindRepository;
+import com.zj.domain.repository.pipeline.IBindBranchRepository;
 import com.zj.pipeline.entity.enums.PipelineExecuteType;
-import com.zj.domain.entity.po.pipeline.Pipeline;
 import com.zj.pipeline.git.IRepositoryBranch;
 import com.zj.service.entity.po.Microservice;
 import com.zj.service.service.MicroserviceService;
@@ -51,45 +50,45 @@ public class GitBindService {
   private UniqueIdService uniqueIdService;
 
   @Autowired
-  private IGitBindRepository gitBindRepository;
+  private IBindBranchRepository gitBindRepository;
 
-  public String createGitBind(GitBindDto gitBindDto) {
-    List<GitBindDto> bindDtoList = listGitBinds(gitBindDto.getPipelineId());
-    Optional<GitBindDto> optional = bindDtoList.stream()
-        .filter(gitBind -> Objects.equals(gitBind.getGitBranch(), gitBindDto.getGitBranch()))
+  public String createGitBind(BindBranchDto bindBranchDto) {
+    List<BindBranchDto> bindDtoList = listGitBinds(bindBranchDto.getPipelineId());
+    Optional<BindBranchDto> optional = bindDtoList.stream()
+        .filter(gitBind -> Objects.equals(gitBind.getGitBranch(), bindBranchDto.getGitBranch()))
         .findAny();
     if (optional.isPresent()) {
       throw new ApiException(ErrorCode.BRANCH_ALREADY_BIND);
     }
 
-    gitBindDto.setBindId(uniqueIdService.getUniqueId());
-    boolean result = gitBindRepository.saveGitBind(gitBindDto);
-    return result ? gitBindDto.getBindId() : "";
+    bindBranchDto.setBindId(uniqueIdService.getUniqueId());
+    boolean result = gitBindRepository.saveGitBranch(bindBranchDto);
+    return result ? bindBranchDto.getBindId() : "";
   }
 
-  public List<GitBindDto> listGitBinds(String pipelineId) {
+  public List<BindBranchDto> listGitBinds(String pipelineId) {
     checkPipelineExist(pipelineId);
-    return gitBindRepository.getPipelineGitBinds(pipelineId);
+    return gitBindRepository.getPipelineRelatedBranches(pipelineId);
   }
 
-  public Boolean updateGitBind(GitBindDto gitBindDto) {
-    checkPipelineExist(gitBindDto.getPipelineId());
+  public Boolean updateGitBind(BindBranchDto bindBranchDto) {
+    checkPipelineExist(bindBranchDto.getPipelineId());
 
-    GitBindDto gitBind = getGitBind(gitBindDto.getBindId());
+    BindBranchDto gitBind = getGitBind(bindBranchDto.getBindId());
     if (Objects.isNull(gitBind)) {
       throw new ApiException(ErrorCode.NOT_FOUND_PIPELINE_GIT_BIND);
     }
 
-    return gitBindRepository.updateGitBind(gitBindDto);
+    return gitBindRepository.updateGitBranch(bindBranchDto);
   }
 
-  private GitBindDto getGitBind(String bindId) {
-    return gitBindRepository.getGitBind(bindId);
+  private BindBranchDto getGitBind(String bindId) {
+    return gitBindRepository.getGitBranch(bindId);
   }
 
   public Boolean deleteGitBind(String pipelineId, String bindId) {
     checkPipelineExist(pipelineId);
-    return gitBindRepository.deleteGitBind(bindId);
+    return gitBindRepository.deleteGitBranch(bindId);
   }
 
   private void checkPipelineExist(String pipelineId) {
@@ -123,9 +122,9 @@ public class GitBindService {
         .filter(pipeline -> Objects.equals(PipelineExecuteType.PUSH.getType(),
             pipeline.getExecuteType())).collect(Collectors.toList());
     pushPipelines.forEach(pipeline -> executorService.execute(() -> {
-      List<GitBindDto> gitBinds = listGitBinds(pipeline.getPipelineId());
-      Optional<GitBindDto> optional = gitBinds.stream()
-          .filter(GitBindDto::getIsChoose)
+      List<BindBranchDto> gitBinds = listGitBinds(pipeline.getPipelineId());
+      Optional<BindBranchDto> optional = gitBinds.stream()
+          .filter(BindBranchDto::getIsChoose)
           .filter(gitBind -> Objects.equals(gitBind.getGitBranch(), branch)).findAny();
       if (optional.isPresent()) {
         pipelineService.execute(pipeline.getPipelineId());

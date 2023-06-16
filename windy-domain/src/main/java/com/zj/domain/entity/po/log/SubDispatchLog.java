@@ -13,34 +13,36 @@ public class SubDispatchLog {
 
   /**
    * 子任务Id
-   * */
+   */
   private String subTaskId;
 
   /**
    * 子任务名称
-   * */
+   */
   private String subTaskName;
 
   /**
    * 执行Id
-   * */
+   */
   private String executeId;
 
   /**
    * 执行任务参数
-   * */
+   */
   private String executeParam;
 
   /**
    * 子任务状态
-   * */
+   */
   private Integer status;
 
   private String clientIp;
 
+  private String executeType;
+
   /**
    * 父任务Id
-   * */
+   */
   private String logId;
 
   private Long createTime;

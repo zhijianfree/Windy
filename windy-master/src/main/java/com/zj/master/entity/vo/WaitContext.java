@@ -1,6 +1,5 @@
 package com.zj.master.entity.vo;
 
-import lombok.Builder;
 import lombok.Data;
 
 /**
@@ -8,8 +7,7 @@ import lombok.Data;
  * @since 2023/5/8
  */
 @Data
-@Builder
-public class WaitRequestContext extends RequestContext{
+public class WaitContext extends RequestContext{
 
   /**
    * 等待时长，单位s

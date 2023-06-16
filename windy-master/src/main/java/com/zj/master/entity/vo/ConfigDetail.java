@@ -16,7 +16,7 @@ public class ConfigDetail {
    * */
   private String actionId;
 
-  private Map<String, String> requestContext;
+  private Map<String, String> paramList;
 
   /**
    * node执行的参数

@@ -9,7 +9,7 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class HttpRequestContext extends RequestContext {
+public class HttpContext extends RequestContext {
 
   private String url;
 

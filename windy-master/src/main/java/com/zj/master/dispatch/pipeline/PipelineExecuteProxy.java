@@ -6,16 +6,17 @@ import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.model.StopDispatch;
 import com.zj.common.utils.IpUtils;
-import com.zj.domain.entity.dto.log.DispatchLogDto;
 import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
 import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import com.zj.master.dispatch.ClientProxy;
-import com.zj.master.dispatch.listener.IInnerEventListener;
+import com.zj.master.dispatch.listener.IStopEventListener;
 import com.zj.master.dispatch.listener.InnerEvent;
+import com.zj.master.dispatch.pipeline.intercept.INodeExecuteInterceptor;
 import com.zj.master.entity.vo.TaskNode;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -34,43 +35,45 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class PipelineExecuteProxy implements IInnerEventListener {
+public class PipelineExecuteProxy implements IStopEventListener {
 
   public static final String TASK_DONE_TIPS = "no task need run";
   public static final String DISPATCH_PIPELINE_TYPE = "PIPELINE";
-  public static final String DISPATCH_TASK_STOP_URL = "http://%s/v1/devops/dispatch/stop";
   @Autowired
   private ClientProxy clientProxy;
-
   @Autowired
   @Qualifier("pipelineExecutorPool")
   private ExecutorService executorService;
   @Autowired
   private INodeRecordRepository nodeRecordRepository;
-
   @Autowired
   private IPipelineHistoryRepository pipelineHistoryRepository;
-
   @Autowired
   private PipelineEndProcessor pipelineEndProcessor;
-
   @Autowired
   private IDispatchLogRepository dispatchLogRepository;
+  @Autowired
+  private List<INodeExecuteInterceptor> interceptors;
 
   private final Map<String, PipelineTask> pipelineTaskMap = new ConcurrentHashMap<>();
 
   public void runTask(PipelineTask pipelineTask) {
     log.info("start run task ={}", JSON.toJSONString(pipelineTask));
-    CompletableFuture.supplyAsync(() -> {
-      TaskNode taskNode = pollAndCheckTask(pipelineTask);
-      if (Objects.isNull(taskNode)) {
-        return null;
-      }
+    pipelineTaskMap.put(pipelineTask.getHistoryId(), pipelineTask);
+    runTaskNodeFromPipeline(pipelineTask);
+  }
 
+  private void runTaskNodeFromPipeline(PipelineTask pipelineTask) {
+    TaskNode taskNode = pollAndCheckTask(pipelineTask);
+    if (Objects.isNull(taskNode)) {
+      return;
+    }
+    CompletableFuture.supplyAsync(() -> {
       String logId = pipelineTask.getLogId();
       taskNode.setLogId(logId);
       taskNode.setDispatchType(DISPATCH_PIPELINE_TYPE);
       taskNode.setMasterIp(IpUtils.getLocalIP());
+      interceptBefore(taskNode);
       boolean dispatchResult = clientProxy.sendDispatchTask(taskNode);
       if (!dispatchResult) {
         log.info("dispatch pipeline task to client fail ");
@@ -78,17 +81,23 @@ public class PipelineExecuteProxy implements IInnerEventListener {
         dispatchLogRepository.updateLogStatus(logId, ProcessStatus.FAIL.getType());
         return null;
       }
-
-      pipelineTaskMap.put(pipelineTask.getHistoryId(), pipelineTask);
       return taskNode;
     }, executorService).whenComplete((node, e) -> {
       String recordId = Optional.ofNullable(node).map(TaskNode::getRecordId).orElse(TASK_DONE_TIPS);
       log.info("complete trigger action recordId = {}", recordId);
     }).exceptionally((e) -> {
       log.error("handle task error", e);
+      pipelineHistoryRepository.updateStatus(taskNode.getHistoryId(), ProcessStatus.FAIL);
+      dispatchLogRepository.updateLogStatus(pipelineTask.getLogId(), ProcessStatus.FAIL.getType());
       return null;
     });
   }
+
+  private void interceptBefore(TaskNode taskNode) {
+    interceptors.forEach(interceptor -> interceptor.beforeExecute(taskNode));
+  }
+
+
 
   private TaskNode pollAndCheckTask(PipelineTask pipelineTask) {
     LinkedBlockingQueue<TaskNode> taskNodeQueue = pipelineTask.getTaskNodes();
@@ -133,7 +142,7 @@ public class PipelineExecuteProxy implements IInnerEventListener {
         ProcessStatus.exchange(nodeRecord.getStatus()), pipelineTask.getLogId());
 
     //3.1 继续递归执行下一个任务
-    runTask(pipelineTask);
+    runTaskNodeFromPipeline(pipelineTask);
   }
 
   @Override

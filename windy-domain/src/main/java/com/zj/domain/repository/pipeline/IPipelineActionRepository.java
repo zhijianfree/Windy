@@ -17,6 +17,8 @@ public interface IPipelineActionRepository {
 
   Boolean updateAction(PipelineActionDto actionDto);
 
+  Boolean actionsBindNode(String nodeId, List<String> actionIds);
+
   Boolean deleteAction(String actionId);
 
   IPage<PipelineAction>  getActions(Integer page, Integer size, String name);

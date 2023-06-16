@@ -2,11 +2,11 @@ package com.zj.client.pipeline.executer.Invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
-import com.zj.client.pipeline.executer.vo.ExecuteType;
 import com.zj.client.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.pipeline.executer.vo.RefreshContext;
 import com.zj.client.pipeline.executer.vo.RequestContext;
 import com.zj.client.pipeline.executer.vo.WaitRequestContext;
+import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.OrikaUtil;
 import java.io.IOException;
@@ -36,7 +36,8 @@ public class WaitInvoker implements IRemoteInvoker {
 
   @Override
   public boolean triggerRun(RequestContext requestContext, String recordId) throws IOException {
-    WaitRequestContext waitRequestContext = OrikaUtil.convert(requestContext.getData(), WaitRequestContext.class);
+    WaitRequestContext waitRequestContext = JSON.parseObject(
+        JSON.toJSONString(requestContext.getData()), WaitRequestContext.class);
     CompletableFuture.runAsync(() -> {
       try {
         CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -47,6 +48,9 @@ public class WaitInvoker implements IRemoteInvoker {
     }).whenComplete((consumer,ex) ->{
       CountDownLatch countDownLatch = countDownMap.get(recordId);
       countDownLatch.countDown();
+    }).exceptionally(ex ->{
+      log.error("run wait error", ex);
+      return null;
     });
     return true;
 

@@ -28,6 +28,7 @@ import com.zj.master.entity.vo.RequestContext;
 import com.zj.master.entity.vo.TaskNode;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
@@ -110,28 +111,29 @@ public class PipelineDispatch implements IDispatchExecutor {
     List<TaskNode> taskNodeList = pipelineNodes.stream().map(node -> buildTaskNode(node, historyId))
         .collect(Collectors.toList());
     pipelineTask.addAll(taskNodeList);
+    Map<String, String> executeTypeMap = taskNodeList.stream()
+        .collect(Collectors.toMap(TaskNode::getNodeId, TaskNode::getExecuteType));
 
-    createSubTaskLog(pipelineNodes, pipelineTask.getLogId());
+    createSubTaskLog(pipelineNodes, pipelineTask.getLogId(), executeTypeMap);
     pipelineExecuteProxy.runTask(pipelineTask);
     return historyId;
   }
 
-  private List<SubDispatchLogDto> createSubTaskLog(List<PipelineNodeDto> pipelineNodes, String logId) {
-    List<SubDispatchLogDto> logList = pipelineNodes.stream().map(taskNode -> {
+  private void createSubTaskLog(List<PipelineNodeDto> pipelineNodes, String logId, Map<String, String> executeTypeMap) {
+    List<SubDispatchLogDto> logList = pipelineNodes.stream().map(pipelineNode -> {
       SubDispatchLogDto subTaskLog = new SubDispatchLogDto();
       subTaskLog.setSubTaskId(uniqueIdService.getUniqueId());
-      subTaskLog.setSubTaskName(taskNode.getNodeName());
+      subTaskLog.setSubTaskName(pipelineNode.getNodeName());
       subTaskLog.setLogId(logId);
-      subTaskLog.setExecuteId(taskNode.getNodeId());
+      subTaskLog.setExecuteId(pipelineNode.getNodeId());
+      subTaskLog.setExecuteType(executeTypeMap.get(pipelineNode.getNodeId()));
       subTaskLog.setStatus(ProcessStatus.RUNNING.getType());
       long dateNow = System.currentTimeMillis();
       subTaskLog.setCreateTime(dateNow);
       subTaskLog.setUpdateTime(dateNow);
       return subTaskLog;
     }).collect(Collectors.toList());
-
     subDispatchLogRepository.batchSaveLogs(logList);
-    return logList;
   }
 
   private void saveHistory(String pipelineId, String historyId) {
@@ -178,7 +180,7 @@ public class PipelineDispatch implements IDispatchExecutor {
     String pipelineId = dispatchLog.getSourceId();
     PipelineDto pipeline = pipelineRepository.getPipeline(pipelineId);
     if (Objects.isNull(pipeline)) {
-      log.info("can not find pipeline name={} pipelineId={}", dispatchLog.getSourceName(),
+      log.info("resume task not find pipeline name={} pipelineId={}", dispatchLog.getSourceName(),
           pipelineId);
       return false;
     }
@@ -203,11 +205,6 @@ public class PipelineDispatch implements IDispatchExecutor {
     //过滤掉已经执行完成的任务
     List<SubDispatchLogDto> subLogs = subDispatchLogRepository.getSubLogByLogId(
         dispatchLog.getLogId());
-    if (CollectionUtils.isEmpty(subLogs)) {
-      //如果找不到子任务执行记录，那么就需要重新创建
-      subLogs = createSubTaskLog(pipelineNodes, dispatchLog.getLogId());
-    }
-
     List<String> subTasks = subLogs.stream()
         .filter(subTask -> !ProcessStatus.isCompleteStatus(subTask.getStatus()))
         .map(SubDispatchLogDto::getExecuteId).collect(
@@ -218,6 +215,13 @@ public class PipelineDispatch implements IDispatchExecutor {
         .collect(Collectors.toList());
     pipelineTask.setHistoryId(dispatchLog.getSourceRecordId());
     pipelineTask.addAll(taskNodeList);
+
+    if (CollectionUtils.isEmpty(subLogs)) {
+      //如果找不到子任务执行记录，那么就需要重新创建
+      Map<String, String> executeTypeMap = taskNodeList.stream()
+          .collect(Collectors.toMap(TaskNode::getNodeId, TaskNode::getExecuteType));
+      createSubTaskLog(pipelineNodes, dispatchLog.getLogId(), executeTypeMap);
+    }
     pipelineExecuteProxy.runTask(pipelineTask);
     return true;
   }

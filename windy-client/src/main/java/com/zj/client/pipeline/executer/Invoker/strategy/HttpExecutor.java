@@ -6,10 +6,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.zj.client.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.client.pipeline.executer.vo.BaseExecuteParam;
-import com.zj.client.pipeline.executer.vo.ExecuteType;
 import com.zj.client.pipeline.executer.vo.HttpRequestContext;
 import com.zj.client.pipeline.executer.vo.RefreshContext;
 import com.zj.client.pipeline.executer.vo.RequestContext;
+import com.zj.common.enums.ExecuteType;
 import com.zj.common.utils.IpUtils;
 import com.zj.common.utils.OrikaUtil;
 import java.io.IOException;
@@ -26,8 +26,6 @@ import okhttp3.Response;
 import org.apache.commons.lang.StringUtils;
 
 import org.apache.commons.lang.text.StrSubstitutor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -75,9 +73,8 @@ public class HttpExecutor implements IRemoteInvoker {
   public String queryStatus(RefreshContext refreshContext, String recordId) {
     BaseExecuteParam baseExecuteParam = new BaseExecuteParam();
     baseExecuteParam.setRecordId(recordId);
-    String url = exchangeExecuteIp(refreshContext.getUrl());
     RequestBody requestBody = RequestBody.create(MEDIA_TYPE, JSON.toJSONString(baseExecuteParam));
-    Request request = new Request.Builder().url(url).post(requestBody)
+    Request request = new Request.Builder().url(refreshContext.getUrl()).post(requestBody)
         .headers(Headers.of(refreshContext.getHeaders())).build();
     try {
       Response response = okHttpClient.newCall(request).execute();
@@ -90,26 +87,5 @@ public class HttpExecutor implements IRemoteInvoker {
       log.error("request http error", e);
     }
     return null;
-  }
-
-  /**
-   * 为了实现请求地址变量转换
-   */
-  private String exchangeExecuteIp(String url) {
-    if (StringUtils.isBlank(url)) {
-      return url;
-    }
-
-    String[] splits = url.split("//");
-    if (splits.length < 2) {
-      return url;
-    }
-
-    String domain = splits[1].split("/")[0];
-    if (!domain.contains("$")) {
-      return url;
-    }
-
-    return strSubstitutor.replace(url);
   }
 }

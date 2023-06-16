@@ -75,8 +75,6 @@ public class NodeStatusQueryLooper implements Runnable {
           return;
         }
 
-        Thread.sleep(20000);
-
         if (stopPipelineHistoryMap.containsKey(node.getHistoryId())) {
           log.info("record result ignore , because pipeline is stop historyId={} recordId={}",
               node.getHistoryId(), node.getRecordId());
