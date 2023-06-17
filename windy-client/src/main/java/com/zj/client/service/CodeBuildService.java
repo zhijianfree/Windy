@@ -30,6 +30,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class CodeBuildService {
 
+  public static final String GIT_WORKSPACE = "windy.pipeline.git.workspace";
+  public static final String DEFAULT_WORKSPACE = "/opt/windy";
+  public static final String WINDY = "windy";
   @Autowired
   private GitOperator gitOperator;
   @Autowired
@@ -43,19 +46,6 @@ public class CodeBuildService {
 
   public CodeBuildService(Environment environment) {
     workspace = getWorkSpace(environment);
-  }
-
-  private boolean isWorkspaceExist(String workspace) {
-    try {
-      File gitDir = new File(workspace);
-      if (gitDir.exists()) {
-        return true;
-      }
-      FileUtils.createParentDirectories(gitDir);
-      return true;
-    } catch (IOException e) {
-    }
-    return false;
   }
 
   public Boolean buildCode(BuildParam buildParam) {
@@ -96,13 +86,17 @@ public class CodeBuildService {
   }
 
   private String getWorkSpace(Environment environment) {
-    String path = environment.getProperty("windy.pipeline.git.workspace", "/opt/windy");
+    String path = environment.getProperty(GIT_WORKSPACE, DEFAULT_WORKSPACE);
     if (!isWorkspaceExist(path)) {
       try {
-        path = new File("").getCanonicalPath() + File.separator + "windy";
+        path = new File("").getCanonicalPath() + File.separator + WINDY;
       } catch (IOException ignore) {
       }
     }
     return path;
+  }
+
+  private boolean isWorkspaceExist(String workspace) {
+    return new File(workspace).exists();
   }
 }

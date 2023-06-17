@@ -1,6 +1,7 @@
 package com.zj.client.pipeline.executer.Invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.zj.client.deploy.DeployFactory;
 import com.zj.client.deploy.IDeployMode;
 import com.zj.client.deploy.jar.JarDeployContext;
@@ -24,6 +25,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class DeployInvoker implements IRemoteInvoker {
 
+  public static final String DEPLOY_SSH_USER = "deploy.ssh.user";
+  public static final String DEPLOY_SSH_PWD = "deploy.ssh.pwd";
+  public static final String DEFAULT_USER = "windy";
+  public static final String DEFAULT_PWD = "windy!123";
   private final DeployFactory deployFactory;
 
   private final Environment environment;
@@ -40,18 +45,21 @@ public class DeployInvoker implements IRemoteInvoker {
 
   @Override
   public boolean triggerRun(RequestContext requestContext, String recordId) throws IOException {
-    DeployRequest deployRequest = JSON.parseObject(JSON.toJSONString(requestContext),
+    DeployRequest deployRequest = JSON.parseObject(JSON.toJSONString(requestContext.getData()),
         DeployRequest.class);
     IDeployMode deployMode = deployFactory.getDeployMode(deployRequest.getDeployType());
 
-    String sshUser = environment.getProperty("deploy.ssh.user", "windy");
-    String pwd = environment.getProperty("deploy.ssh.pwd", "windy!123");
+    String sshUser = environment.getProperty(DEPLOY_SSH_USER, DEFAULT_USER);
+    String pwd = environment.getProperty(DEPLOY_SSH_PWD, DEFAULT_PWD);
+    String filePath = "/Users/guyuelan/IdeaProjects/Windy/windy/Windy/target/HelloWorld-1.0-SNAPSHOT.jar";
     JarDeployContext jarContext = JarDeployContext.builder().sshUser(sshUser)
         .sshPassword(pwd)
         .remotePath(deployRequest.getRemotePath())
         .sshIp(deployRequest.getSshIp())
         .sshPort(deployRequest.getSshPort())
+        .localPath(filePath)
         .build();
+    jarContext.setRecordId(recordId);
     deployMode.deploy(jarContext);
     return true;
   }
@@ -62,6 +70,9 @@ public class DeployInvoker implements IRemoteInvoker {
     ResponseModel responseModel = new ResponseModel();
     responseModel.setStatus(deployStatus.getType());
     responseModel.setMessage("代码部署");
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("status", deployStatus.getType());
+    responseModel.setData(jsonObject);
     return JSON.toJSONString(responseModel);
   }
 }
