@@ -40,7 +40,7 @@
     <commons-text.version>1.10.0</commons-text.version>
     <commons-lang.version>2.6</commons-lang.version>
     <maven-invoker.version>3.0.1</maven-invoker.version>
-    <git-client.version>6.5.0.202303070854-r</git-client.version>
+    <git-client.version>6.6.0.202305301015-r</git-client.version>
     <common-io.version>2.11.0</common-io.version>
     <guava.version>27.1-jre</guava.version>
     <orika.version>1.5.4</orika.version>
@@ -95,6 +95,12 @@
         <version>Hoxton.SR12</version>
         <type>pom</type>
         <scope>import</scope>
+        <exclusions>
+          <exclusion>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <dependency>
@@ -162,11 +168,11 @@
         <artifactId>commons-io</artifactId>
         <version>${common-io.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.eclipse.jgit</groupId>
-        <artifactId>org.eclipse.jgit</artifactId>
-        <version>${git-client.version}</version>
-      </dependency>
+<!--      <dependency>-->
+<!--        <groupId>org.eclipse.jgit</groupId>-->
+<!--        <artifactId>org.eclipse.jgit</artifactId>-->
+<!--        <version>${git-client.version}</version>-->
+<!--      </dependency>-->
       <dependency>
         <groupId>org.apache.maven.shared</groupId>
         <artifactId>maven-invoker</artifactId>

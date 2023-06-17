@@ -33,6 +33,6 @@ public class DeployFactory {
         return deployStatus;
       }
     }
-    return ProcessStatus.RUNNING;
+    return ProcessStatus.FAIL;
   }
 }

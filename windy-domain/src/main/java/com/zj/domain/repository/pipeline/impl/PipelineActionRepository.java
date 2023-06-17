@@ -30,6 +30,8 @@ public class PipelineActionRepository extends
     long dateNow = System.currentTimeMillis();
     pipelineAction.setCreateTime(dateNow);
     pipelineAction.setUpdateTime(dateNow);
+    pipelineAction.setResult(JSON.toJSONString(actionDto.getCompareResults()));
+    pipelineAction.setParamDetail(JSON.toJSONString(actionDto.getParamList()));
     return save(pipelineAction);
   }
 

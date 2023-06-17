@@ -51,17 +51,9 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
 
       // 执行远程shell脚本
       ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
-      channelExec.setCommand("sh start.sh");
+//      channelExec.setCommand("cd "+ deployContext.getRemotePath() + " && sh start.sh");
+      channelExec.setCommand("cd "+ deployContext.getRemotePath() + " && sh ./start.sh");
       channelExec.connect();
-
-      // 等待shell脚本执行完成
-      while (!channelExec.isClosed()) {
-        try {
-          Thread.sleep(1000);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-      }
 
       // 获取shell脚本执行结果
       int exitStatus = channelExec.getExitStatus();
