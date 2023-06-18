@@ -4,7 +4,6 @@ package com.zj.client.pipeline.executer.Invoker;
 import com.zj.client.pipeline.executer.vo.RefreshContext;
 import com.zj.client.pipeline.executer.vo.RequestContext;
 import com.zj.common.enums.ExecuteType;
-import java.io.IOException;
 
 /**
  * @author guyuelan
@@ -19,7 +18,7 @@ public interface IRemoteInvoker {
    * @param requestContext
    * @param recordId 任务Id
    * */
-  boolean triggerRun(RequestContext requestContext, String recordId) throws IOException;
+  boolean triggerRun(RequestContext requestContext, String recordId) throws Exception;
 
   /**
    * 查询节点任务执行状态
