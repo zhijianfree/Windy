@@ -1,6 +1,7 @@
 package com.zj.client.pipeline.maven;
 
 import com.google.common.base.Preconditions;
+import com.zj.client.config.GlobalEnvConfig;
 import java.io.File;
 import java.util.Arrays;
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
@@ -21,12 +22,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class MavenOperator {
 
-  public static final String MAVEN_PATH_KEY = "windy.pipeline.maven.path";
-  private final Environment environment;
-
-  public MavenOperator(Environment environment) {
-    this.environment = environment;
-  }
+  @Autowired
+  private GlobalEnvConfig globalEnvConfig;
 
   public Integer build(String pomPath) throws Exception {
     InvocationRequest ideaRequest = new DefaultInvocationRequest();
@@ -34,7 +31,7 @@ public class MavenOperator {
     ideaRequest.setAlsoMakeDependents(true);
     ideaRequest.setGoals(Arrays.asList("clean","package"));
 
-    String mavenDir = environment.getProperty(MAVEN_PATH_KEY);
+    String mavenDir = globalEnvConfig.getMavenPath();
     Preconditions.checkNotNull(mavenDir,"maven path can not find , consider to fix it");
     Invoker ideaInvoker = new DefaultInvoker();
     ideaInvoker.setMavenHome(new File(mavenDir));

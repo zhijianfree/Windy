@@ -24,5 +24,9 @@ public enum ExecuteType {
   /**
    * 构建代码
    * */
-  BUILD
+  BUILD,
+  /**
+   * 合并代码到master
+   * */
+  MERGE
 }

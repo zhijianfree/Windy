@@ -2,6 +2,7 @@ package com.zj.client.pipeline.executer.Invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.zj.client.config.GlobalEnvConfig;
 import com.zj.client.deploy.DeployFactory;
 import com.zj.client.deploy.IDeployMode;
 import com.zj.client.deploy.jar.JarDeployContext;
@@ -14,7 +15,7 @@ import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.ProcessStatus;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -24,18 +25,13 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class DeployInvoker implements IRemoteInvoker {
-
-  public static final String DEPLOY_SSH_USER = "deploy.ssh.user";
-  public static final String DEPLOY_SSH_PWD = "deploy.ssh.pwd";
-  public static final String DEFAULT_USER = "windy";
-  public static final String DEFAULT_PWD = "windy!123";
   private final DeployFactory deployFactory;
+  private final GlobalEnvConfig globalEnvConfig;
 
-  private final Environment environment;
-
-  public DeployInvoker(DeployFactory deployFactory, Environment environment) {
+  public DeployInvoker(DeployFactory deployFactory,
+      GlobalEnvConfig globalEnvConfig) {
     this.deployFactory = deployFactory;
-    this.environment = environment;
+    this.globalEnvConfig = globalEnvConfig;
   }
 
   @Override
@@ -49,8 +45,8 @@ public class DeployInvoker implements IRemoteInvoker {
         DeployRequest.class);
     IDeployMode deployMode = deployFactory.getDeployMode(deployRequest.getDeployType());
 
-    String sshUser = environment.getProperty(DEPLOY_SSH_USER, DEFAULT_USER);
-    String pwd = environment.getProperty(DEPLOY_SSH_PWD, DEFAULT_PWD);
+    String sshUser = globalEnvConfig.getSShUser();
+    String pwd = globalEnvConfig.getGitPassword();
     String filePath = "/Users/guyuelan/IdeaProjects/Windy/windy/Windy/target/HelloWorld-1.0-SNAPSHOT.jar";
     JarDeployContext jarContext = JarDeployContext.builder().sshUser(sshUser)
         .sshPassword(pwd)

@@ -37,19 +37,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class HttpExecutor implements IRemoteInvoker {
 
-  private final StrSubstitutor strSubstitutor;
-
-  private OgnlDataParser ognlDataParser = new OgnlDataParser();
   public static final MediaType MEDIA_TYPE = MediaType.parse("application/json;charset=utf-8");
-  private OkHttpClient okHttpClient = new OkHttpClient.Builder().readTimeout(10, TimeUnit.SECONDS)
+  private final OkHttpClient okHttpClient = new OkHttpClient.Builder()
+      .readTimeout(10, TimeUnit.SECONDS)
       .connectTimeout(5, TimeUnit.SECONDS).build();
-
-  public HttpExecutor(Environment environment) {
-    String serverPort = environment.getProperty("server.port");
-    Map<String, String> ipMap = new HashMap<>();
-    ipMap.put("executeIp", IpUtils.getLocalIP() + ":" + serverPort);
-    strSubstitutor = new StrSubstitutor(ipMap);
-  }
 
   @Override
   public ExecuteType type() {
