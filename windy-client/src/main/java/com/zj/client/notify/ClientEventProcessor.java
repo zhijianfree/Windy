@@ -3,6 +3,7 @@ package com.zj.client.notify;
 import com.alibaba.fastjson.JSON;
 import com.zj.common.model.ResultEvent;
 import com.zj.common.monitor.InstanceMonitor;
+import com.zj.common.monitor.RequestProxy;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -32,19 +33,14 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class ClientEventProcessor implements IResultEventNotify {
   private final DiscoveryClient discoveryClient;
-  private final RestTemplate restTemplate;
+  private final RequestProxy requestProxy;
   private final InstanceMonitor instanceMonitor;
   private final LocalPersistence localPersistence;
-  public static final String WINDY_MASTER = "WindyMaster";
-  public static final String NOTIFY_MASTER_URL = "http://WindyMaster/v1/devops/dispatch/notify";
-  private final MediaType mediaType = MediaType.get("application/json; charset=utf-8");
-  private final OkHttpClient okHttpClient = new OkHttpClient.Builder().connectTimeout(10,
-      TimeUnit.SECONDS).connectTimeout(10, TimeUnit.SECONDS).build();
 
-  public ClientEventProcessor(DiscoveryClient discoveryClient, RestTemplate restTemplate,
+  public ClientEventProcessor(DiscoveryClient discoveryClient, RequestProxy requestProxy,
       InstanceMonitor instanceMonitor, LocalPersistence localPersistence) {
     this.discoveryClient = discoveryClient;
-    this.restTemplate = restTemplate;
+    this.requestProxy = requestProxy;
     this.instanceMonitor = instanceMonitor;
     this.localPersistence = localPersistence;
   }
@@ -53,40 +49,10 @@ public class ClientEventProcessor implements IResultEventNotify {
   public boolean notifyEvent(ResultEvent resultEvent) {
     log.info("start notify result={} ", JSON.toJSONString(resultEvent));
     try {
-      List<ServiceInstance> windyMaster = discoveryClient.getInstances(WINDY_MASTER);
-      Optional<ServiceInstance> optional = windyMaster.stream().filter(
-              serviceInstance -> Objects.equals(serviceInstance.getHost(), resultEvent.getMasterIP()))
-          .findFirst();
-      if (optional.isPresent()) {
-        // 如果触发任务执行的master节点存在那么优先访问触发任务的master节点
-        return notifyWithMasterIP(resultEvent, optional.get());
-      }
-
-      //master节点不可达时，尝试使用其他的master节点
-      HttpEntity<ResultEvent> httpEntity = new HttpEntity<>(resultEvent);
-      ResponseEntity<String> response = restTemplate.postForEntity(NOTIFY_MASTER_URL, httpEntity,
-          String.class);
-      log.info("notify event code={} result={}", response.getStatusCode(), response.getBody());
-      return response.getStatusCode().is2xxSuccessful();
+      return requestProxy.clientNotifyEvent(resultEvent);
     } catch (Exception e) {
       log.error("notify event error save to file", e);
       localPersistence.persistNotify(resultEvent);
-    }
-    return false;
-  }
-
-  private boolean notifyWithMasterIP(ResultEvent resultEvent, ServiceInstance serviceInstance) {
-    String masterHost = serviceInstance.getHost() + ":" + serviceInstance.getPort();
-    String url = NOTIFY_MASTER_URL.replace(WINDY_MASTER, masterHost);
-    Request request = new Request.Builder().url(url)
-        .post(RequestBody.create(mediaType, JSON.toJSONString(resultEvent))).build();
-    try {
-      Response response = okHttpClient.newCall(request).execute();
-      log.info("notify master ip status result code={} result={}", response.code(),
-          response.body().string());
-      return response.isSuccessful();
-    } catch (Exception e) {
-      log.error("request master ip error", e);
     }
     return false;
   }

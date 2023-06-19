@@ -1,4 +1,4 @@
-package com.zj.master.entity.vo;
+package com.zj.common.monitor.discover;
 
 import lombok.Data;
 

@@ -3,6 +3,7 @@ package com.zj.master.dispatch.task;
 import com.google.common.eventbus.Subscribe;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.monitor.RequestProxy;
 import com.zj.common.utils.IpUtils;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
 import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
@@ -10,7 +11,6 @@ import com.zj.domain.entity.dto.feature.TaskRecordDto;
 import com.zj.domain.repository.feature.IExecutePointRepository;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
-import com.zj.master.dispatch.ClientProxy;
 import com.zj.master.dispatch.feature.FeatureDispatch;
 import com.zj.master.dispatch.listener.IStopEventListener;
 import com.zj.master.dispatch.listener.InnerEvent;
@@ -38,7 +38,7 @@ public class FeatureExecuteProxy implements IStopEventListener {
 
   public static final String DISPATCH_FEATURE_TYPE = "FEATURE";
   @Autowired
-  private ClientProxy clientProxy;
+  private RequestProxy requestProxy;
   @Autowired
   @Qualifier("featureExecutorPool")
   private ExecutorService executorService;
@@ -79,7 +79,7 @@ public class FeatureExecuteProxy implements IStopEventListener {
       FeatureExecuteParam featureExecuteParam = getFeatureExecuteParam(featureTask, featureId);
       featureExecuteParam.setDispatchType(DISPATCH_FEATURE_TYPE);
       featureExecuteParam.setMasterIp(IpUtils.getLocalIP());
-      clientProxy.sendDispatchTask(featureExecuteParam);
+      requestProxy.sendDispatchTask(featureExecuteParam);
       return featureId;
     }, executorService).whenComplete((featureId, e) -> {
       String recordId = Optional.ofNullable(featureId).orElse(TASK_FEATURE_TIPS);

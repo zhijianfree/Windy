@@ -1,6 +1,5 @@
-package com.zj.master.discover;
+package com.zj.common.monitor.discover;
 
-import com.zj.master.entity.vo.ServiceInstance;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;

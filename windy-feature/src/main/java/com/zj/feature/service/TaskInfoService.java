@@ -8,6 +8,7 @@ import com.zj.common.generate.UniqueIdService;
 import com.zj.common.model.DispatchModel;
 import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseStatusModel;
+import com.zj.common.monitor.RequestProxy;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
 import com.zj.domain.entity.dto.feature.TaskInfoDto;
@@ -37,9 +38,6 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class TaskInfoService {
 
-  public static final String FORMAT_TIPS = "任务执行状态: 成功数: %s 成功率百分比: %s";
-  public static final String WINDY_MASTER_DISPATCH_URL = "http://WindyMaster/v1/devops/dispatch/task";
-
   @Autowired
   private TaskRecordService taskRecordService;
 
@@ -53,7 +51,9 @@ public class TaskInfoService {
   private ITaskRepository taskRepository;
 
   @Autowired
-  private RestTemplate restTemplate;
+  private RequestProxy requestProxy;
+
+  public static final String FORMAT_TIPS = "任务执行状态: 成功数: %s 成功率百分比: %s";
 
   public PageSize<TaskInfoDto> getTaskList(String name, Integer pageNum, Integer size) {
     IPage<TaskInfo> taskInfoIPage = taskRepository.getTaskList(name, pageNum, size);
@@ -114,20 +114,7 @@ public class TaskInfoService {
     dispatchModel.setType(LogType.FEATURE_TASK.getType());
     dispatchModel.setSourceId(taskId);
     dispatchModel.setSourceName(taskDetail.getTaskName());
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    HttpEntity<DispatchModel> httpEntity = new HttpEntity<>(dispatchModel, headers);
-    try{
-      ResponseEntity<String> responseEntity = restTemplate.postForEntity(WINDY_MASTER_DISPATCH_URL,
-          httpEntity, String.class);
-      log.info("get test result code= {} result={}", responseEntity.getStatusCode(),
-          responseEntity.getBody());
-      return responseEntity.getStatusCode().is2xxSuccessful();
-    }catch (Exception e){
-      log.error("request dispatch task error", e);
-    }
-    return false;
+    return requestProxy.runTask(dispatchModel);
   }
 
   public ResponseStatusModel getTaskStatus(String taskId) {

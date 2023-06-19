@@ -6,8 +6,8 @@ import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.client.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.pipeline.executer.vo.RefreshContext;
 import com.zj.client.pipeline.executer.vo.RequestContext;
-import com.zj.client.service.NodeRecordService;
 import com.zj.common.enums.ExecuteType;
+import com.zj.common.monitor.RequestProxy;
 import java.io.IOException;
 import java.util.Collections;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class ApprovalInvoker implements IRemoteInvoker {
 
   public static final String MESSAGE_TIPS = "审批结果";
   @Autowired
-  private NodeRecordService recordService;
+  private RequestProxy requestProxy;
 
   @Override
   public ExecuteType type() {
@@ -39,7 +39,8 @@ public class ApprovalInvoker implements IRemoteInvoker {
   @Override
   public String queryStatus(RefreshContext refreshContext, String recordId) {
     //审批通过就直接根据数据库的状态即可，因为这个状态变化不在节点执行是用户在ui界面完成
-    NodeRecord record = recordService.getRecord(recordId);
+    String result = requestProxy.getApprovalRecord(recordId);
+    NodeRecord record = JSON.parseObject(result, NodeRecord.class);
     log.info("get approval record recordId ={} status={}", recordId, record.getStatus());
     QueryResponseModel responseModel = new QueryResponseModel();
     responseModel.setMessage(Collections.singletonList(MESSAGE_TIPS));
