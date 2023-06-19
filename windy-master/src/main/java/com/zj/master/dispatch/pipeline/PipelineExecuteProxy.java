@@ -15,6 +15,7 @@ import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import com.zj.master.dispatch.listener.IStopEventListener;
 import com.zj.master.dispatch.listener.InnerEvent;
 import com.zj.master.dispatch.pipeline.intercept.INodeExecuteInterceptor;
+import com.zj.master.entity.vo.RequestContext;
 import com.zj.master.entity.vo.TaskNode;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +75,9 @@ public class PipelineExecuteProxy implements IStopEventListener {
       taskNode.setDispatchType(DISPATCH_PIPELINE_TYPE);
       taskNode.setMasterIp(IpUtils.getLocalIP());
       interceptBefore(taskNode);
-      boolean dispatchResult = requestProxy.sendDispatchTask(taskNode);
+      RequestContext requestContext = taskNode.getRequestContext();
+      boolean dispatchResult = requestProxy.sendDispatchTask(taskNode, requestContext.isRequestSingle(),
+          requestContext.getSingleClientIp());
       if (!dispatchResult) {
         log.info("dispatch pipeline task to client fail ");
         pipelineHistoryRepository.updateStatus(taskNode.getHistoryId(), ProcessStatus.FAIL);

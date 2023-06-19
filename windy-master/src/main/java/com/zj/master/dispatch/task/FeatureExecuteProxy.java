@@ -79,7 +79,7 @@ public class FeatureExecuteProxy implements IStopEventListener {
       FeatureExecuteParam featureExecuteParam = getFeatureExecuteParam(featureTask, featureId);
       featureExecuteParam.setDispatchType(DISPATCH_FEATURE_TYPE);
       featureExecuteParam.setMasterIp(IpUtils.getLocalIP());
-      requestProxy.sendDispatchTask(featureExecuteParam);
+      requestProxy.sendDispatchTask(featureExecuteParam, false, null);
       return featureId;
     }, executorService).whenComplete((featureId, e) -> {
       String recordId = Optional.ofNullable(featureId).orElse(TASK_FEATURE_TIPS);
