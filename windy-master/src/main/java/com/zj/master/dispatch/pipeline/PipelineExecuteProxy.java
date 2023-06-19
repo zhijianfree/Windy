@@ -5,13 +5,13 @@ import com.google.common.eventbus.Subscribe;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.model.StopDispatch;
+import com.zj.common.monitor.RequestProxy;
 import com.zj.common.utils.IpUtils;
 import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
 import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
-import com.zj.master.dispatch.ClientProxy;
 import com.zj.master.dispatch.listener.IStopEventListener;
 import com.zj.master.dispatch.listener.InnerEvent;
 import com.zj.master.dispatch.pipeline.intercept.INodeExecuteInterceptor;
@@ -40,7 +40,7 @@ public class PipelineExecuteProxy implements IStopEventListener {
   public static final String TASK_DONE_TIPS = "no task need run";
   public static final String DISPATCH_PIPELINE_TYPE = "PIPELINE";
   @Autowired
-  private ClientProxy clientProxy;
+  private RequestProxy requestProxy;
   @Autowired
   @Qualifier("pipelineExecutorPool")
   private ExecutorService executorService;
@@ -74,7 +74,7 @@ public class PipelineExecuteProxy implements IStopEventListener {
       taskNode.setDispatchType(DISPATCH_PIPELINE_TYPE);
       taskNode.setMasterIp(IpUtils.getLocalIP());
       interceptBefore(taskNode);
-      boolean dispatchResult = clientProxy.sendDispatchTask(taskNode);
+      boolean dispatchResult = requestProxy.sendDispatchTask(taskNode);
       if (!dispatchResult) {
         log.info("dispatch pipeline task to client fail ");
         pipelineHistoryRepository.updateStatus(taskNode.getHistoryId(), ProcessStatus.FAIL);
@@ -166,7 +166,7 @@ public class PipelineExecuteProxy implements IStopEventListener {
     StopDispatch stopDispatch = new StopDispatch();
     stopDispatch.setLogType(event.getLogType());
     stopDispatch.setTargetId(historyId);
-    clientProxy.stopDispatchTask(stopDispatch);
+    requestProxy.stopDispatchTask(stopDispatch);
     log.info("stop pipeline task historyId={}", historyId);
   }
 

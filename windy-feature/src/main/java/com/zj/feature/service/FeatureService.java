@@ -7,6 +7,7 @@ import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.common.model.DispatchModel;
+import com.zj.common.monitor.RequestProxy;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.BatchDeleteDto;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
@@ -65,7 +66,7 @@ public class FeatureService {
   private IFeatureRepository featureRepository;
 
   @Autowired
-  private RestTemplate restTemplate;
+  private RequestProxy requestProxy;
 
   public static final String WINDY_MASTER_DISPATCH_URL = "http://WindyMaster/v1/devops/dispatch/task";
 
@@ -98,10 +99,6 @@ public class FeatureService {
     return parent;
   }
 
-  public boolean updateByFeatureId(FeatureInfoDto featureInfo) {
-    return featureRepository.deleteByFeatureId(featureInfo.getFeatureId());
-  }
-
   public FeatureInfoVo getFeatureById(String featureId) {
     FeatureInfoDto featureInfo = featureRepository.getFeatureById(featureId);
     if (Objects.isNull(featureInfo)) {
@@ -123,10 +120,6 @@ public class FeatureService {
 
   public List<FeatureInfoDto> queryFeatureList(String testCaseId) {
     return featureRepository.queryFeatureList(testCaseId);
-  }
-
-  public List<FeatureInfoDto> queryNotContainFolder(String testCaseId) {
-    return featureRepository.queryNotContainFolder(testCaseId);
   }
 
   @Transactional
@@ -296,19 +289,6 @@ public class FeatureService {
     dispatchModel.setType(LogType.FEATURE.getType());
     dispatchModel.setSourceId(JSON.toJSONString(Collections.singletonList(featureId)));
     dispatchModel.setSourceName(feature.getFeatureName());
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    HttpEntity<DispatchModel> httpEntity = new HttpEntity<>(dispatchModel, headers);
-    try {
-      ResponseEntity<String> responseEntity = restTemplate.postForEntity(WINDY_MASTER_DISPATCH_URL,
-          httpEntity, String.class);
-      log.info("get test result code= {} result={}", responseEntity.getStatusCode(),
-          responseEntity.getBody());
-      return responseEntity.getStatusCode().is2xxSuccessful();
-    } catch (Exception e) {
-      log.error("request dispatch task error", e);
-    }
-    return false;
+    return requestProxy.runTask(dispatchModel);
   }
 }

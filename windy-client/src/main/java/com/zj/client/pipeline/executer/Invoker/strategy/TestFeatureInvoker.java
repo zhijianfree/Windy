@@ -11,6 +11,7 @@ import com.zj.client.pipeline.executer.vo.TestRequestContext;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.monitor.RequestProxy;
 import com.zj.common.utils.OrikaUtil;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,14 +32,11 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 @Component
 public class TestFeatureInvoker implements IRemoteInvoker {
-
-  public static final String START_TASK_URL = "http://WindyMaster/v1/devops/dispatch/task";
-
   private static final String TASK_STATUS_URL = "http://WindyMaster/v1/devops/master/task/%s/status";
   public static final String TASK_TIPS = "pipeline feature task";
 
   @Autowired
-  private RestTemplate restTemplate;
+  private RequestProxy requestProxy;
 
   @Override
   public ExecuteType type() {
@@ -55,27 +53,17 @@ public class TestFeatureInvoker implements IRemoteInvoker {
     paramVo.setSourceName(TASK_TIPS);
     paramVo.setType(LogType.FEATURE_TASK.getType());
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    HttpEntity<TestFeatureParamVo> httpEntity = new HttpEntity<>(paramVo, headers);
-    try {
-      ResponseEntity<JSONObject> responseEntity = restTemplate.postForEntity(START_TASK_URL, httpEntity,
-          JSONObject.class);
+    ResponseEntity<JSONObject> responseEntity = requestProxy.startFeatureTask(paramVo);
+    JSONObject jsonObject = responseEntity.getBody();
+    log.info("get TestFeatureInvoker triggerRun code= {} result={}",
+        responseEntity.getStatusCode(), JSON.toJSONString(jsonObject));
 
-      JSONObject jsonObject = responseEntity.getBody();
-      log.info("get TestFeatureInvoker triggerRun code= {} result={}",
-          responseEntity.getStatusCode(), JSON.toJSONString(jsonObject));
-
-      //触发任务执行，将任务的记录Id传递给刷新动作
-      if (responseEntity.getStatusCode().is2xxSuccessful()) {
-        String url = String.format(TASK_STATUS_URL, jsonObject.getString("data"));
-        requestContext.getTaskNode().getRefreshContext().setUrl(url);
-      }
-      return responseEntity.getStatusCode().is2xxSuccessful();
-    } catch (Exception e) {
-      log.error("request dispatch task error", e);
+    //触发任务执行，将任务的记录Id传递给刷新动作
+    if (responseEntity.getStatusCode().is2xxSuccessful()) {
+      String url = String.format(TASK_STATUS_URL, jsonObject.getString("data"));
+      requestContext.getTaskNode().getRefreshContext().setUrl(url);
     }
-    return false;
+    return responseEntity.getStatusCode().is2xxSuccessful();
   }
 
   @Override
@@ -83,8 +71,8 @@ public class TestFeatureInvoker implements IRemoteInvoker {
     QueryResponseModel queryResponseModel = new QueryResponseModel();
     try {
       log.info("get refresh url ={}", refreshContext.getUrl());
-      ResponseEntity<JSONObject> responseEntity = restTemplate.getForEntity(refreshContext.getUrl(),
-          JSONObject.class);
+      ResponseEntity<JSONObject> responseEntity = requestProxy.getFeatureTaskStatus(
+          refreshContext.getUrl());
       log.info("get TestFeatureInvoker queryStatus code= {} result={}",
           responseEntity.getStatusCode(), JSON.toJSONString(responseEntity.getBody()));
       if (responseEntity.getStatusCode().isError()) {

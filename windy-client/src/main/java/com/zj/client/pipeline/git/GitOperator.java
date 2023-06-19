@@ -27,7 +27,7 @@ public class GitOperator {
   @Autowired
   private GlobalEnvConfig globalEnvConfig;
 
-  public void pullCodeFromGit(String gitUrl, String branch, String workspace) throws Exception {
+  public Git pullCodeFromGit(String gitUrl, String branch, String workspace) throws Exception {
     String serviceName = Utils.getServiceFromUrl(gitUrl);
     // 判断本地目录是否存在
     String serviceDir = workspace + File.separator + serviceName;
@@ -37,10 +37,9 @@ public class GitOperator {
     // 提供用户名和密码的验证
     String user = globalEnvConfig.getGitUser();
     String pwd = globalEnvConfig.getGitPassword();
-    Git git = Git.cloneRepository().setURI(gitUrl).setDirectory(new File(serviceDir))
+    return Git.cloneRepository().setURI(gitUrl).setDirectory(new File(serviceDir))
         .setCredentialsProvider(new UsernamePasswordCredentialsProvider(user, pwd))
         .setBranch(branch).call();
-    git.pull();
   }
 
   private void createIfNotExist(String serviceDir) {

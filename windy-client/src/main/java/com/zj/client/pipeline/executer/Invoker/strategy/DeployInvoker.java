@@ -45,11 +45,9 @@ public class DeployInvoker implements IRemoteInvoker {
         DeployRequest.class);
     IDeployMode deployMode = deployFactory.getDeployMode(deployRequest.getDeployType());
 
-    String sshUser = globalEnvConfig.getSShUser();
-    String pwd = globalEnvConfig.getGitPassword();
     String filePath = "/Users/guyuelan/IdeaProjects/Windy/windy/Windy/target/HelloWorld-1.0-SNAPSHOT.jar";
-    JarDeployContext jarContext = JarDeployContext.builder().sshUser(sshUser)
-        .sshPassword(pwd)
+    JarDeployContext jarContext = JarDeployContext.builder().sshUser(globalEnvConfig.getSShUser())
+        .sshPassword(globalEnvConfig.getSSHPassword())
         .remotePath(deployRequest.getRemotePath())
         .sshIp(deployRequest.getSshIp())
         .sshPort(deployRequest.getSshPort())

@@ -9,6 +9,7 @@ import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.common.model.DispatchModel;
+import com.zj.common.monitor.RequestProxy;
 import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
@@ -41,9 +42,6 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 @Service
 public class PipelineService {
-
-  public static final String WINDY_MASTER_DISPATCH_URL = "http://WindyMaster/v1/devops/dispatch/task";
-  public static final String WINDY_MASTER_STOP_URL = "http://WindyMaster/v1/devops/dispatch/stop";
   @Autowired
   private PipelineNodeService pipelineNodeService;
 
@@ -63,7 +61,7 @@ public class PipelineService {
   private IPipelineRepository pipelineRepository;
 
   @Autowired
-  private RestTemplate restTemplate;
+  private RequestProxy requestProxy;
 
   @Transactional
   public boolean updatePipeline(String service, String pipelineId, PipelineDto pipelineDTO) {
@@ -204,22 +202,7 @@ public class PipelineService {
     dispatchModel.setSourceId(pipelineId);
     dispatchModel.setSourceName(pipeline.getPipelineName());
     dispatchModel.setType(LogType.PIPELINE.getType());
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    HttpEntity<DispatchModel> httpEntity = new HttpEntity<>(dispatchModel, headers);
-    try {
-      ResponseEntity<JSONObject> responseEntity = restTemplate.postForEntity(WINDY_MASTER_DISPATCH_URL,
-          httpEntity, JSONObject.class);
-      JSONObject body = responseEntity.getBody();
-      log.info("get test result code= {} result={}", responseEntity.getStatusCode(),
-          JSON.toJSONString(body));
-      return body.getString("data");
-    } catch (Exception e) {
-      log.error("request dispatch pipeline task error", e);
-    }
-
-    return null;
+    return requestProxy.runPipeline(dispatchModel);
   }
 
   public PipelineDto getPipelineDetail(String pipelineId) {
@@ -246,19 +229,7 @@ public class PipelineService {
     DispatchModel dispatchModel = new DispatchModel();
     dispatchModel.setSourceId(historyId);
     dispatchModel.setType(LogType.PIPELINE.getType());
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    HttpEntity<DispatchModel> httpEntity = new HttpEntity<>(dispatchModel, headers);
-    try {
-      ResponseEntity<String> responseEntity = restTemplate.postForEntity(WINDY_MASTER_STOP_URL,
-          httpEntity, String.class);
-      log.info("get test result code= {} result={}", responseEntity.getStatusCode(),
-          responseEntity.getBody());
-      return responseEntity.getStatusCode().is2xxSuccessful();
-    } catch (Exception e) {
-      log.error("request dispatch pipeline task error", e);
-    }
-    return true;
+    return requestProxy.stopPipeline(dispatchModel);
   }
 
   public List<PipelineDto> getServicePipelines(String serviceId) {
