@@ -40,17 +40,19 @@ public class RequestProxy {
 
   @Autowired
   private DiscoverService discoverService;
+
   private static final String MASTER_DISPATCH_TASK = "http://WindyClient/v1/client/task";
   private static final String MASTER_NOTIFY_CLIENT_STOP = "http://%s/v1/client/task/stop";
   /**
    * client端执行流水线任务时使用
-   * */
+   */
   private static final String CLIENT_START_TASK = "http://WindyMaster/v1/devops/dispatch/task";
   private static final String CLIENT_NOTIFY_MASTER_URL = "http://WindyMaster/v1/devops/dispatch/notify";
   private static final String CLIENT_QUERY_APPROVAL_STATUS = "http://WindyMaster/v1/devops/master/record/";
   public static final String CONSOLE_RUN_TASK = "http://WindyMaster/v1/devops/dispatch/task";
   public static final String CONSOLE_STOP_TASK = "http://WindyMaster/v1/devops/dispatch/stop";
   private static final String WINDY_MASTER = "WindyMaster";
+  private static final String WINDY_CLIENT = "WindyClient";
   private final OkHttpClient okHttpClient = new OkHttpClient.Builder().connectTimeout(10,
       TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS).build();
   private final okhttp3.MediaType mediaType = okhttp3.MediaType.get(
@@ -59,18 +61,45 @@ public class RequestProxy {
   /**
    * master向client分发子任务
    */
-  public boolean sendDispatchTask(Object data) {
+  public boolean sendDispatchTask(Object data, boolean isRequestSingle, String singleIp) {
+    if (isRequestSingle) {
+      ServiceInstance serviceInstance = discoverService.getServiceInstances(
+              DiscoverService.WINDY_Client).stream()
+          .filter(service -> Objects.equals(service.getIp(), singleIp)).findAny().orElse(null);
+      return requestWithIp(data, serviceInstance);
+    }
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<Object> http = new HttpEntity<>(data, headers);
     log.info("request body={}", JSON.toJSONString(data));
     try {
-      ResponseEntity<String> responseEntity = restTemplate.postForEntity(MASTER_DISPATCH_TASK,
-          http, String.class);
-      log.info("get response status result ={}", responseEntity.getBody());
-      return responseEntity.getStatusCode().is2xxSuccessful();
+      ResponseEntity<String> response = restTemplate.postForEntity(MASTER_DISPATCH_TASK, http,
+          String.class);
+      log.info("get response status result ={}", response.getBody());
+      return response.getStatusCode().is2xxSuccessful();
     } catch (Exception e) {
       log.info("send dispatch task error", e);
+    }
+    return false;
+  }
+
+  private boolean requestWithIp(Object data, ServiceInstance serviceInstance) {
+    if (Objects.isNull(serviceInstance)) {
+      log.warn("can not find service instance");
+      return false;
+    }
+
+    String masterHost = serviceInstance.getHost() + ":" + serviceInstance.getPort();
+    String url = MASTER_DISPATCH_TASK.replace(WINDY_CLIENT, masterHost);
+    Request request = new Request.Builder().url(url)
+        .post(RequestBody.create(mediaType, JSON.toJSONString(data))).build();
+    try {
+      Response response = okHttpClient.newCall(request).execute();
+      log.info("notify master ip status result code={} result={}", response.code(),
+          response.body().string());
+      return response.isSuccessful();
+    } catch (Exception e) {
+      log.error("request master ip error", e);
     }
     return false;
   }
@@ -131,8 +160,8 @@ public class RequestProxy {
 
     //master节点不可达时，尝试使用其他的master节点
     HttpEntity<ResultEvent> httpEntity = new HttpEntity<>(resultEvent);
-    ResponseEntity<String> response = restTemplate.postForEntity(CLIENT_NOTIFY_MASTER_URL, httpEntity,
-        String.class);
+    ResponseEntity<String> response = restTemplate.postForEntity(CLIENT_NOTIFY_MASTER_URL,
+        httpEntity, String.class);
     log.info("notify event code={} result={}", response.getStatusCode(), response.getBody());
     return response.getStatusCode().is2xxSuccessful();
   }
@@ -169,8 +198,8 @@ public class RequestProxy {
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<Object> httpEntity = new HttpEntity<>(data, headers);
     try {
-      ResponseEntity<JSONObject> responseEntity = restTemplate.postForEntity(
-          CONSOLE_RUN_TASK, httpEntity, JSONObject.class);
+      ResponseEntity<JSONObject> responseEntity = restTemplate.postForEntity(CONSOLE_RUN_TASK,
+          httpEntity, JSONObject.class);
       JSONObject body = responseEntity.getBody();
       log.info("get test result code= {} result={}", responseEntity.getStatusCode(),
           JSON.toJSONString(body));

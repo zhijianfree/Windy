@@ -36,7 +36,8 @@ public class DeployNodeInterceptor implements INodeExecuteInterceptor{
         .findFirst();
     if (optional.isPresent()) {
       DeployContext requestContext = (DeployContext) taskNode.getRequestContext();
-      requestContext.setExecuteIp(optional.get().getClientIp());
+      requestContext.setSingleClientIp(optional.get().getClientIp());
+      requestContext.setRequestSingle(true);
       taskNode.setRequestContext(requestContext);
     }
   }
