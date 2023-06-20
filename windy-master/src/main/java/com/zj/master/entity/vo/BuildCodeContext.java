@@ -9,8 +9,6 @@ import lombok.Data;
 @Data
 public class BuildCodeContext extends RequestContext{
 
-  private String gitUrl;
-
   private String pomPath;
 
   private String branch;

@@ -1,9 +1,9 @@
-package com.zj.service.entity.dto;
+package com.zj.domain.entity.dto.service;
 
 import lombok.Data;
 
 @Data
-public class MicroserviceDTO {
+public class MicroserviceDto {
 
     /**
      * 服务Id

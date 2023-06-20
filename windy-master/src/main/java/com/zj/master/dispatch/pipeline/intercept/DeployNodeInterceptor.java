@@ -32,7 +32,7 @@ public class DeployNodeInterceptor implements INodeExecuteInterceptor{
     List<SubDispatchLogDto> subLogs = subDispatchLogRepository.getSubLogByLogId(
         taskNode.getLogId());
     Optional<SubDispatchLogDto> optional = subLogs.stream()
-        .filter(subLog -> Objects.equals(subLog.getExecuteType(), taskNode.getExecuteType()))
+        .filter(subLog -> Objects.equals(subLog.getExecuteType(), ExecuteType.BUILD.name()))
         .findFirst();
     if (optional.isPresent()) {
       DeployContext requestContext = (DeployContext) taskNode.getRequestContext();

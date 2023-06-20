@@ -74,12 +74,14 @@ public class PipelineExecuteProxy implements IStopEventListener {
       taskNode.setLogId(logId);
       taskNode.setDispatchType(DISPATCH_PIPELINE_TYPE);
       taskNode.setMasterIp(IpUtils.getLocalIP());
+
       interceptBefore(taskNode);
+
       RequestContext requestContext = taskNode.getRequestContext();
       boolean dispatchResult = requestProxy.sendDispatchTask(taskNode, requestContext.isRequestSingle(),
           requestContext.getSingleClientIp());
       if (!dispatchResult) {
-        log.info("dispatch pipeline task to client fail ");
+        log.info("dispatch pipeline task to client fail logId={}", logId);
         pipelineHistoryRepository.updateStatus(taskNode.getHistoryId(), ProcessStatus.FAIL);
         dispatchLogRepository.updateLogStatus(logId, ProcessStatus.FAIL.getType());
         return null;

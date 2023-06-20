@@ -9,9 +9,14 @@ import com.jcraft.jsch.SftpException;
 import com.zj.client.deploy.IDeployMode;
 import com.zj.client.entity.enuns.DeployType;
 import com.zj.common.enums.ProcessStatus;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,9 +28,11 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class JarDeploy implements IDeployMode<JarDeployContext> {
+
   private final JSch jsch = new JSch();
 
   private final Map<String, ProcessStatus> statusMap = new HashMap<>();
+
   @Override
   public String deployType() {
     return DeployType.JAR.name();
@@ -47,12 +54,19 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
       channelSftp.connect();
 
       // 上传本地JAR文件到远程服务器
-      channelSftp.put(deployContext.getLocalPath(), deployContext.getRemotePath());
+      Collection<File> files = FileUtils.listFiles(new File(deployContext.getLocalPath()),
+          TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+      for (File file : files) {
+        if (file.isFile()) {
+          FileInputStream fis = new FileInputStream(file);
+          channelSftp.put(fis, deployContext.getRemotePath() + File.separator + file.getName());
+          fis.close();
+        }
+      }
 
       // 执行远程shell脚本
       ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
-//      channelExec.setCommand("cd "+ deployContext.getRemotePath() + " && sh start.sh");
-      channelExec.setCommand("cd "+ deployContext.getRemotePath() + " && sh ./start.sh");
+      channelExec.setCommand("cd " + deployContext.getRemotePath() + " && sh ./start.sh");
       channelExec.connect();
 
       // 获取shell脚本执行结果
@@ -60,7 +74,7 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
       log.info("Shell脚本执行结果: {}", exitStatus);
       bindStatus(deployContext.getRecordId(), ProcessStatus.SUCCESS);
       channelExec.disconnect();
-    } catch (JSchException | SftpException e) {
+    } catch (Exception e) {
       e.printStackTrace();
       bindStatus(deployContext.getRecordId(), ProcessStatus.FAIL);
     } finally {

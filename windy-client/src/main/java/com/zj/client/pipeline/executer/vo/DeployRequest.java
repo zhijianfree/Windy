@@ -8,6 +8,9 @@ import lombok.Data;
  */
 @Data
 public class DeployRequest {
+
+  private String gitUrl;
+
   private String remotePath;
 
   private String sshIp;

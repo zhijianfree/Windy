@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class CodeBuildService {
+
   @Autowired
   private GitOperator gitOperator;
   @Autowired
@@ -47,11 +48,15 @@ public class CodeBuildService {
     executorService.execute(() -> {
       try {
         //从git服务端拉取代码
-        gitOperator.pullCodeFromGit(buildParam.getGitUrl(), buildParam.getBranch(), globalEnvConfig.getGitWorkspace());
+        gitOperator.pullCodeFromGit(buildParam.getGitUrl(), buildParam.getBranch(),
+            globalEnvConfig.getGitWorkspace());
 
         //本地maven构建
         String pomPath = getTargetPomPath(buildParam.getGitUrl(), buildParam.getPomPath());
-        Integer exitCode = mavenOperator.build(pomPath);
+        String servicePath =
+            globalEnvConfig.getGitWorkspace() + File.separator + Utils.getServiceFromUrl(
+                buildParam.getGitUrl());
+        Integer exitCode = mavenOperator.build(pomPath, servicePath);
         log.info("get maven exit code={}", exitCode);
         saveStatus(buildParam.getRecordId(), ProcessStatus.SUCCESS.getType(), "构建成功");
       } catch (Exception e) {
@@ -69,7 +74,8 @@ public class CodeBuildService {
 
   private String getTargetPomPath(String gitUrl, String configPath) {
     String serviceName = Utils.getServiceFromUrl(gitUrl);
-    return globalEnvConfig.getGitWorkspace() + File.separator + serviceName + File.separator + configPath;
+    return globalEnvConfig.getGitWorkspace() + File.separator + serviceName + File.separator
+        + configPath;
   }
 
   public ResponseModel getRecordStatus(String recordId) {
