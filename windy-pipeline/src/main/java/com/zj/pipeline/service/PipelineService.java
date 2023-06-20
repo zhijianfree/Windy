@@ -16,6 +16,7 @@ import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
 import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
 import com.zj.domain.entity.dto.pipeline.PipelineStageDto;
 import com.zj.domain.entity.po.pipeline.Pipeline;
+import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.pipeline.entity.enums.PipelineStatus;
 import java.util.Collection;
@@ -62,6 +63,9 @@ public class PipelineService {
 
   @Autowired
   private RequestProxy requestProxy;
+
+  @Autowired
+  private INodeRecordRepository nodeRecordRepository;
 
   @Transactional
   public boolean updatePipeline(String service, String pipelineId, PipelineDto pipelineDTO) {

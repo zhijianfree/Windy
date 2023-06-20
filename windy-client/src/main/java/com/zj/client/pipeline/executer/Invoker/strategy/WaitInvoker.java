@@ -5,6 +5,7 @@ import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.client.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.pipeline.executer.vo.RefreshContext;
 import com.zj.client.pipeline.executer.vo.RequestContext;
+import com.zj.client.pipeline.executer.vo.TaskNode;
 import com.zj.client.pipeline.executer.vo.WaitRequestContext;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.ProcessStatus;
@@ -35,18 +36,18 @@ public class WaitInvoker implements IRemoteInvoker {
   }
 
   @Override
-  public boolean triggerRun(RequestContext requestContext, String recordId) throws IOException {
+  public boolean triggerRun(RequestContext requestContext, TaskNode taskNode) throws IOException {
     WaitRequestContext waitRequestContext = JSON.parseObject(
         JSON.toJSONString(requestContext.getData()), WaitRequestContext.class);
     CompletableFuture.runAsync(() -> {
       try {
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        countDownMap.put(recordId, countDownLatch);
+        countDownMap.put(taskNode.getRecordId(), countDownLatch);
         countDownLatch.await(waitRequestContext.getWaitTime(), TimeUnit.SECONDS);
       } catch (InterruptedException ignore) {
       }
     }).whenComplete((consumer,ex) ->{
-      CountDownLatch countDownLatch = countDownMap.get(recordId);
+      CountDownLatch countDownLatch = countDownMap.get(taskNode.getRecordId());
       countDownLatch.countDown();
     }).exceptionally(ex ->{
       log.error("run wait error", ex);
@@ -57,8 +58,8 @@ public class WaitInvoker implements IRemoteInvoker {
   }
 
   @Override
-  public String queryStatus(RefreshContext refreshContext, String recordId) {
-    CountDownLatch countDownLatch = countDownMap.get(recordId);
+  public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
+    CountDownLatch countDownLatch = countDownMap.get(taskNode.getRecordId());
     long count = countDownLatch.getCount();
     QueryResponseModel responseModel = new QueryResponseModel();
     responseModel.setMessage(Collections.singletonList(MESSAGE_TIPS));
@@ -67,7 +68,7 @@ public class WaitInvoker implements IRemoteInvoker {
       return JSON.toJSONString(responseModel);
     }
 
-    log.info("wait task complete recordId={}", recordId);
+    log.info("wait task complete recordId={}", taskNode.getRecordId());
     responseModel.setStatus(ProcessStatus.SUCCESS.getType());
     return JSON.toJSONString(responseModel);
   }

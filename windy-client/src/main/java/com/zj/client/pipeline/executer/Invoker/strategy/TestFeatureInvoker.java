@@ -7,6 +7,7 @@ import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.client.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.pipeline.executer.vo.RefreshContext;
 import com.zj.client.pipeline.executer.vo.RequestContext;
+import com.zj.client.pipeline.executer.vo.TaskNode;
 import com.zj.client.pipeline.executer.vo.TestRequestContext;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.LogType;
@@ -44,7 +45,7 @@ public class TestFeatureInvoker implements IRemoteInvoker {
   }
 
   @Override
-  public boolean triggerRun(RequestContext requestContext, String recordId) {
+  public boolean triggerRun(RequestContext requestContext, TaskNode taskNode) {
     TestRequestContext context = OrikaUtil.convert(requestContext.getData(),
         TestRequestContext.class);
     String taskId = context.getTaskId();
@@ -67,7 +68,7 @@ public class TestFeatureInvoker implements IRemoteInvoker {
   }
 
   @Override
-  public String queryStatus(RefreshContext refreshContext, String recordId) {
+  public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
     QueryResponseModel queryResponseModel = new QueryResponseModel();
     try {
       log.info("get refresh url ={}", refreshContext.getUrl());

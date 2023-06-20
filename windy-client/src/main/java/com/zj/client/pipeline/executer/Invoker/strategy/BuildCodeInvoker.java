@@ -6,6 +6,7 @@ import com.zj.client.entity.dto.ResponseModel;
 import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.client.pipeline.executer.vo.RefreshContext;
 import com.zj.client.pipeline.executer.vo.RequestContext;
+import com.zj.client.pipeline.executer.vo.TaskNode;
 import com.zj.client.service.CodeBuildService;
 import com.zj.common.enums.ExecuteType;
 import java.io.IOException;
@@ -32,16 +33,16 @@ public class BuildCodeInvoker implements IRemoteInvoker {
   }
 
   @Override
-  public boolean triggerRun(RequestContext requestContext, String recordId) throws IOException {
+  public boolean triggerRun(RequestContext requestContext, TaskNode taskNode) throws IOException {
     BuildParam buildParam = JSON.parseObject(JSON.toJSONString(requestContext.getData()), BuildParam.class);
-    buildParam.setRecordId(recordId);
+    buildParam.setRecordId(taskNode.getRecordId());
     codeBuildService.buildCode(buildParam);
     return true;
   }
 
   @Override
-  public String queryStatus(RefreshContext refreshContext, String recordId) {
-    ResponseModel recordStatus = codeBuildService.getRecordStatus(recordId);
+  public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
+    ResponseModel recordStatus = codeBuildService.getRecordStatus(taskNode.getRecordId());
     return JSON.toJSONString(recordStatus);
   }
 }

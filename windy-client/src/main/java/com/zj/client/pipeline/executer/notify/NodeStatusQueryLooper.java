@@ -68,7 +68,7 @@ public class NodeStatusQueryLooper implements Runnable {
     executorService.execute(() -> {
       try {
         IRemoteInvoker remoteInvoker = remoteInvokerMap.get(node.getExecuteType());
-        String result = remoteInvoker.queryStatus(node.getRefreshContext(), node.getRecordId());
+        String result = remoteInvoker.queryStatus(node.getRefreshContext(), node);
         log.info("get query status result={}", result);
         if (StringUtils.isBlank(result)) {
           handleDefaultError(node);

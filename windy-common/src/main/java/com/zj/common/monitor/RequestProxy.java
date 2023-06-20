@@ -7,6 +7,7 @@ import com.zj.common.model.StopDispatch;
 import com.zj.common.monitor.discover.DiscoverService;
 import com.zj.common.monitor.discover.ServiceInstance;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -20,6 +21,7 @@ import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -35,11 +37,8 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class RequestProxy {
 
-  @Autowired
-  private RestTemplate restTemplate;
-
-  @Autowired
-  private DiscoverService discoverService;
+  private final RestTemplate restTemplate;
+  private final DiscoverService discoverService;
 
   private static final String MASTER_DISPATCH_TASK = "http://WindyClient/v1/client/task";
   private static final String MASTER_NOTIFY_CLIENT_STOP = "http://%s/v1/client/task/stop";
@@ -57,6 +56,16 @@ public class RequestProxy {
       TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS).build();
   private final okhttp3.MediaType mediaType = okhttp3.MediaType.get(
       "application/json; charset=utf-8");
+  private HttpHeaders headers;
+
+  public RequestProxy(RestTemplate restTemplate, DiscoverService discoverService) {
+    this.restTemplate = restTemplate;
+    this.discoverService = discoverService;
+    headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+  }
+
 
   /**
    * master向client分发子任务
@@ -68,8 +77,7 @@ public class RequestProxy {
           .filter(service -> Objects.equals(service.getIp(), singleIp)).findAny().orElse(null);
       return requestWithIp(data, serviceInstance);
     }
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
+
     HttpEntity<Object> http = new HttpEntity<>(data, headers);
     log.info("request body={}", JSON.toJSONString(data));
     try {
@@ -128,8 +136,6 @@ public class RequestProxy {
    * client触发用例任务执行
    */
   public ResponseEntity<JSONObject> startFeatureTask(Object data) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<Object> httpEntity = new HttpEntity<>(data, headers);
     try {
       return restTemplate.postForEntity(CLIENT_START_TASK, httpEntity, JSONObject.class);
@@ -187,15 +193,16 @@ public class RequestProxy {
    */
   public String getApprovalRecord(String recordId) {
     String url = CLIENT_QUERY_APPROVAL_STATUS + recordId;
-    return restTemplate.getForObject(url, String.class);
+    HttpEntity request = new HttpEntity(headers);
+    ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, request,
+        String.class);
+    return responseEntity.getBody();
   }
 
   /**
    * 控制台点击运行流水线
    */
   public String runPipeline(Object data) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<Object> httpEntity = new HttpEntity<>(data, headers);
     try {
       ResponseEntity<JSONObject> responseEntity = restTemplate.postForEntity(CONSOLE_RUN_TASK,
@@ -214,8 +221,6 @@ public class RequestProxy {
    * 控制台停止流水线
    */
   public boolean stopPipeline(Object data) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<Object> httpEntity = new HttpEntity<>(data, headers);
     try {
       ResponseEntity<String> responseEntity = restTemplate.postForEntity(CONSOLE_STOP_TASK,
@@ -230,8 +235,6 @@ public class RequestProxy {
   }
 
   public boolean runTask(Object data) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<Object> httpEntity = new HttpEntity<>(data, headers);
     try {
       ResponseEntity<String> responseEntity = restTemplate.postForEntity(CONSOLE_RUN_TASK,

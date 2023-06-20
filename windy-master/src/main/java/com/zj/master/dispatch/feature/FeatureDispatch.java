@@ -1,6 +1,7 @@
 package com.zj.master.dispatch.feature;
 
 import com.alibaba.fastjson.JSON;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.domain.entity.dto.feature.FeatureInfoDto;
 import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
@@ -8,6 +9,7 @@ import com.zj.domain.entity.dto.log.DispatchLogDto;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.domain.repository.feature.ITestCaseConfigRepository;
 import com.zj.domain.repository.feature.ITestCaseRepository;
+import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.master.dispatch.IDispatchExecutor;
 import com.zj.master.dispatch.task.FeatureExecuteProxy;
 import com.zj.master.dispatch.task.FeatureTask;
@@ -44,6 +46,9 @@ public class FeatureDispatch implements IDispatchExecutor {
   @Autowired
   private FeatureExecuteProxy featureExecuteProxy;
 
+  @Autowired
+  private IDispatchLogRepository dispatchLogRepository;
+
   @Override
   public Integer type() {
     return LogType.FEATURE.getType();
@@ -77,7 +82,8 @@ public class FeatureDispatch implements IDispatchExecutor {
 
   @Override
   public boolean resume(DispatchLogDto taskLog) {
-    log.info("临时任务不支持恢复");
+    log.info("not support resume temporary feature log={}", taskLog.getLogId());
+    dispatchLogRepository.updateLogStatus(taskLog.getLogId(), ProcessStatus.FAIL.getType());
     return false;
   }
 

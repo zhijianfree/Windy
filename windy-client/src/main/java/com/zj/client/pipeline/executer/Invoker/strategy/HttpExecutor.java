@@ -9,6 +9,7 @@ import com.zj.client.pipeline.executer.vo.BaseExecuteParam;
 import com.zj.client.pipeline.executer.vo.HttpRequestContext;
 import com.zj.client.pipeline.executer.vo.RefreshContext;
 import com.zj.client.pipeline.executer.vo.RequestContext;
+import com.zj.client.pipeline.executer.vo.TaskNode;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.utils.IpUtils;
 import com.zj.common.utils.OrikaUtil;
@@ -47,12 +48,12 @@ public class HttpExecutor implements IRemoteInvoker {
     return ExecuteType.HTTP;
   }
 
-  public boolean triggerRun(RequestContext requestContext, String recordId) throws IOException {
+  public boolean triggerRun(RequestContext requestContext, TaskNode taskNode) throws IOException {
     log.info("http executor is running");
     HttpRequestContext context = OrikaUtil.convert(requestContext.getData(),
         HttpRequestContext.class);
     JSONObject jsonObject = JSON.parseObject(context.getBody());
-    jsonObject.put("recordId", recordId);
+    jsonObject.put("recordId", taskNode.getRecordId());
 
     RequestBody requestBody = RequestBody.create(MEDIA_TYPE, JSON.toJSONString(jsonObject));
     Request request = new Request.Builder().url(context.getUrl()).post(requestBody).build();
@@ -61,9 +62,9 @@ public class HttpExecutor implements IRemoteInvoker {
   }
 
   @Override
-  public String queryStatus(RefreshContext refreshContext, String recordId) {
+  public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
     BaseExecuteParam baseExecuteParam = new BaseExecuteParam();
-    baseExecuteParam.setRecordId(recordId);
+    baseExecuteParam.setRecordId(taskNode.getRecordId());
     RequestBody requestBody = RequestBody.create(MEDIA_TYPE, JSON.toJSONString(baseExecuteParam));
     Request request = new Request.Builder().url(refreshContext.getUrl()).post(requestBody)
         .headers(Headers.of(refreshContext.getHeaders())).build();
