@@ -12,8 +12,10 @@ import com.zj.client.pipeline.executer.vo.DeployRequest;
 import com.zj.client.pipeline.executer.vo.RefreshContext;
 import com.zj.client.pipeline.executer.vo.RequestContext;
 import com.zj.client.pipeline.executer.vo.TaskNode;
+import com.zj.client.utils.Utils;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.ProcessStatus;
+import java.io.File;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class DeployInvoker implements IRemoteInvoker {
+
+  public static final String DEPLOY = "deploy";
   private final DeployFactory deployFactory;
   private final GlobalEnvConfig globalEnvConfig;
 
@@ -46,7 +50,10 @@ public class DeployInvoker implements IRemoteInvoker {
         DeployRequest.class);
     IDeployMode deployMode = deployFactory.getDeployMode(deployRequest.getDeployType());
 
-    String filePath = "/Users/guyuelan/IdeaProjects/Windy/windy/Windy/target/HelloWorld-1.0-SNAPSHOT.jar";
+    String gitWorkspace = globalEnvConfig.getGitWorkspace();
+    String filePath =
+        gitWorkspace + File.separator + Utils.getServiceFromUrl(deployRequest.getGitUrl())
+            + File.separator + DEPLOY;
     JarDeployContext jarContext = JarDeployContext.builder().sshUser(globalEnvConfig.getSShUser())
         .sshPassword(globalEnvConfig.getSSHPassword())
         .remotePath(deployRequest.getRemotePath())

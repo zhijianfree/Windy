@@ -97,8 +97,7 @@ public class RequestProxy {
       return false;
     }
 
-    String masterHost = serviceInstance.getHost() + ":" + serviceInstance.getPort();
-    String url = MASTER_DISPATCH_TASK.replace(WINDY_CLIENT, masterHost);
+    String url = MASTER_DISPATCH_TASK.replace(WINDY_CLIENT, serviceInstance.getHost());
     Request request = new Request.Builder().url(url)
         .post(RequestBody.create(mediaType, JSON.toJSONString(data))).build();
     try {
@@ -173,7 +172,7 @@ public class RequestProxy {
   }
 
   private boolean notifyWithMasterIP(ResultEvent resultEvent, ServiceInstance serviceInstance) {
-    String masterHost = serviceInstance.getHost() + ":" + serviceInstance.getPort();
+    String masterHost = serviceInstance.getHost();
     String url = CLIENT_NOTIFY_MASTER_URL.replace(WINDY_MASTER, masterHost);
     Request request = new Request.Builder().url(url)
         .post(RequestBody.create(mediaType, JSON.toJSONString(resultEvent))).build();

@@ -1,9 +1,10 @@
-package com.zj.domain.entity.dto.pipeline;
+package com.zj.domain.entity.po.service;
 
 import lombok.Data;
 
 @Data
-public class MicroserviceDto {
+public class Microservice {
+    private Long id;
 
     /**
      * 服务Id
@@ -26,6 +27,11 @@ public class MicroserviceDto {
     private String owner;
 
     /**
+     * 服务描述
+     * */
+    private String description;
+
+    /**
      * 创建时间
      * */
     private Long createTime;
@@ -34,5 +40,4 @@ public class MicroserviceDto {
      * 修改时间
      * */
     private Long updateTime;
-
 }

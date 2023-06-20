@@ -26,8 +26,10 @@ public enum ErrorCode {
   FEATURE_NOT_FIND(HttpStatus.NOT_FOUND,"Feature.000004","can not find feature"),
   SYSTEM_EXECUTE_ERROR(HttpStatus.BAD_REQUEST,"Feature.000101","unknown error occur when execute feature "),
   SUB_FEATURE_EXIST(HttpStatus.BAD_REQUEST, "Feature.000005", "存在子用例不能删除目录"),
-  ;
 
+  /*==================Client端构建运行==================*/
+  NOT_FIND_JAR(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000001", "构建时未发现JAR包"),
+  ;
   ErrorCode(HttpStatus httpStatus,String code, String message) {
     this.code = code;
     this.message = message;

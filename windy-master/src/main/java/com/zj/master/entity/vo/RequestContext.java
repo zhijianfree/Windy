@@ -18,4 +18,6 @@ public class RequestContext {
   private boolean requestSingle;
 
   private String singleClientIp;
+
+  private String gitUrl;
 }

@@ -26,6 +26,11 @@ public class PipelineTask {
   private String pipelineId;
 
   /**
+   * 流水线对应的git地址
+   * */
+  private String gitUrl;
+
+  /**
    * master节点执行记录的Id，恢复奔溃任务时使用
    * */
   private String logId;

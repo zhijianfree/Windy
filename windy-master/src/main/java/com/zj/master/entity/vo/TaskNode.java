@@ -14,6 +14,11 @@ public class TaskNode extends BaseDispatch{
   private String nodeId;
 
   /**
+   * 服务Id
+   * */
+  private String serviceId;
+
+  /**
    * 流水线节点名称
    * */
   private String name;

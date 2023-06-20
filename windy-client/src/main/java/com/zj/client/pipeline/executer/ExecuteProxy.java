@@ -10,6 +10,7 @@ import com.zj.client.pipeline.executer.notify.IStatusNotifyListener;
 import com.zj.client.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.client.pipeline.executer.vo.TaskNode;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.utils.IpUtils;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -73,6 +74,7 @@ public class ExecuteProxy implements IStatusNotifyListener {
         .logId(taskNode.getLogId())
         .executeType(taskNode.getExecuteType())
         .params(nodeRecord)
+        .clientIp(IpUtils.getLocalIP())
         .masterIP(taskNode.getMasterIp());
     resultEventNotify.notifyEvent(resultEvent);
   }

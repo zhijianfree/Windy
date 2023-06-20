@@ -1,27 +1,22 @@
 package com.zj.pipeline.service;
 
 import com.baomidou.mybatisplus.core.toolkit.Assert;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.domain.entity.dto.pipeline.CodeChangeDto;
 import com.zj.domain.entity.dto.pipeline.RelationDemandBug;
-import com.zj.domain.entity.po.pipeline.CodeChange;
+import com.zj.domain.entity.dto.service.MicroserviceDto;
 import com.zj.domain.repository.pipeline.ICodeChangeRepository;
 import com.zj.pipeline.git.IRepositoryBranch;
-import com.zj.domain.mapper.pipeline.CodeChangeMapper;
-import com.zj.service.entity.po.Microservice;
+import com.zj.domain.entity.po.service.Microservice;
 import com.zj.service.service.MicroserviceService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 /**
  * @author guyuelan
@@ -49,7 +44,7 @@ public class CodeChangeService {
   }
 
   public String createCodeChange(CodeChangeDto codeChange) {
-    Microservice service = checkServiceExist(codeChange.getServiceId());
+    MicroserviceDto service = checkServiceExist(codeChange.getServiceId());
     repositoryBranch.createBranch(service.getServiceName(), codeChange.getChangeBranch());
 
     codeChange.setChangeId(uniqueIdService.getUniqueId());
@@ -76,7 +71,7 @@ public class CodeChangeService {
   }
 
   public Boolean deleteCodeChange(String serviceId, String codeChangeId) {
-    Microservice service = checkServiceExist(serviceId);
+    MicroserviceDto service = checkServiceExist(serviceId);
     CodeChangeDto codeChange = getCodeChange(serviceId, codeChangeId);
     repositoryBranch.deleteBranch(service.getServiceName(), codeChange.getChangeBranch());
     return codeChangeRepository.deleteCodeChange(codeChangeId);
@@ -91,8 +86,8 @@ public class CodeChangeService {
     return Collections.singletonList(relationDemandBug);
   }
 
-  private Microservice checkServiceExist(String serviceId) {
-    Microservice serviceDetail = microservice.getServiceDetail(serviceId);
+  private MicroserviceDto checkServiceExist(String serviceId) {
+    MicroserviceDto serviceDetail = microservice.queryServiceDetail(serviceId);
     if (Objects.isNull(serviceDetail)) {
       log.warn("can not find serviceId ={}", serviceId);
       throw new ApiException(ErrorCode.NOT_FOUND_SERVICE);

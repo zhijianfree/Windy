@@ -14,8 +14,8 @@ public class GlobalEnvConfig {
   public static final String DEFAULT_GIT_PWD = "zhijian137899";
   public static final String DEFAULT_GIT_USER = "guyuelan";
 
-  public static final String DEPLOY_SSH_USER = "deploy.ssh.user";
-  public static final String DEPLOY_SSH_PWD = "deploy.ssh.pwd";
+  public static final String DEPLOY_SSH_USER = "windy.deploy.ssh.user";
+  public static final String DEPLOY_SSH_PWD = "windy.deploy.ssh.pwd";
   public static final String DEFAULT_SSH_USER = "windy";
   public static final String DEFAULT_SSH_PWD = "windy!123";
 

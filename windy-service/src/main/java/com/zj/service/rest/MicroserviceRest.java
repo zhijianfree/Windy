@@ -1,9 +1,9 @@
 package com.zj.service.rest;
 
+import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseMeta;
-import com.zj.common.exception.ErrorCode;
-import com.zj.service.entity.dto.MicroserviceDTO;
+import com.zj.domain.entity.dto.service.MicroserviceDto;
 import com.zj.service.service.MicroserviceService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,32 +27,32 @@ public class MicroserviceRest {
 
   @ResponseBody
   @GetMapping("/services")
-  public ResponseMeta<List<MicroserviceDTO>> queryServices() {
-    return new ResponseMeta<List<MicroserviceDTO>>(ErrorCode.SUCCESS, microservice.getServices());
+  public ResponseMeta<List<MicroserviceDto>> queryServices() {
+    return new ResponseMeta<List<MicroserviceDto>>(ErrorCode.SUCCESS, microservice.getServices());
   }
 
   @ResponseBody
   @GetMapping("/services/page")
-  public ResponseMeta<PageSize<MicroserviceDTO>> queryPageServices(@RequestParam(value = "page", defaultValue = "1") Integer page,
+  public ResponseMeta<PageSize<MicroserviceDto>> queryPageServices(@RequestParam(value = "page", defaultValue = "1") Integer page,
       @RequestParam(value = "size", defaultValue = "10") Integer size, @RequestParam(value = "name", defaultValue = "") String name) {
-    return new ResponseMeta<PageSize<MicroserviceDTO>>(ErrorCode.SUCCESS, microservice.getServices(page, size, name));
+    return new ResponseMeta<PageSize<MicroserviceDto>>(ErrorCode.SUCCESS, microservice.getServices(page, size, name));
   }
 
   @GetMapping("/service/{serviceId}/detail")
-  public ResponseMeta<MicroserviceDTO> queryServiceDetail(@PathVariable("serviceId") String serviceId) {
-    return new ResponseMeta<MicroserviceDTO>(ErrorCode.SUCCESS, microservice.queryServiceDetail(serviceId));
+  public ResponseMeta<MicroserviceDto> queryServiceDetail(@PathVariable("serviceId") String serviceId) {
+    return new ResponseMeta<MicroserviceDto>(ErrorCode.SUCCESS, microservice.queryServiceDetail(serviceId));
   }
 
   @ResponseBody
   @PostMapping("/services")
-  public ResponseMeta<String> createService(@RequestBody MicroserviceDTO microserviceDto) {
-    return new ResponseMeta<String>(ErrorCode.SUCCESS, microservice.createService(microserviceDto));
+  public ResponseMeta<String> createService(@RequestBody MicroserviceDto MicroserviceDto) {
+    return new ResponseMeta<String>(ErrorCode.SUCCESS, microservice.createService(MicroserviceDto));
   }
 
   @ResponseBody
   @PutMapping("/services")
-  public ResponseMeta<String> updateService(@RequestBody MicroserviceDTO microserviceDto) {
-    return new ResponseMeta<String>(ErrorCode.SUCCESS, microservice.updateService(microserviceDto));
+  public ResponseMeta<String> updateService(@RequestBody MicroserviceDto MicroserviceDto) {
+    return new ResponseMeta<String>(ErrorCode.SUCCESS, microservice.updateService(MicroserviceDto));
   }
 
   @ResponseBody

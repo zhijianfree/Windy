@@ -9,12 +9,14 @@ import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
 import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
+import com.zj.domain.entity.dto.service.MicroserviceDto;
 import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.domain.repository.pipeline.IPipelineActionRepository;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import com.zj.domain.repository.pipeline.IPipelineNodeRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
+import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.master.dispatch.IDispatchExecutor;
 import com.zj.master.dispatch.pipeline.builder.RefreshContextBuilder;
 import com.zj.master.dispatch.pipeline.builder.RequestContextBuilder;
@@ -79,6 +81,7 @@ public class PipelineDispatch implements IDispatchExecutor {
   public boolean isExitInJvm(DispatchLogDto taskLog) {
     return pipelineExecuteProxy.isExitTask(taskLog.getSourceRecordId());
   }
+
   @Override
   public String dispatch(TaskDetailDto task) {
     PipelineDto pipeline = pipelineRepository.getPipeline(task.getSourceId());
@@ -108,7 +111,8 @@ public class PipelineDispatch implements IDispatchExecutor {
     pipelineTask.setHistoryId(historyId);
     pipelineTask.setLogId(task.getTaskLogId());
 
-    List<TaskNode> taskNodeList = pipelineNodes.stream().map(node -> buildTaskNode(node, historyId))
+    List<TaskNode> taskNodeList = pipelineNodes.stream()
+        .map(node -> buildTaskNode(node, historyId, pipeline.getServiceId()))
         .collect(Collectors.toList());
     pipelineTask.addAll(taskNodeList);
     Map<String, String> executeTypeMap = taskNodeList.stream()
@@ -119,7 +123,8 @@ public class PipelineDispatch implements IDispatchExecutor {
     return historyId;
   }
 
-  private void createSubTaskLog(List<PipelineNodeDto> pipelineNodes, String logId, Map<String, String> executeTypeMap) {
+  private void createSubTaskLog(List<PipelineNodeDto> pipelineNodes, String logId,
+      Map<String, String> executeTypeMap) {
     List<SubDispatchLogDto> logList = pipelineNodes.stream().map(pipelineNode -> {
       SubDispatchLogDto subTaskLog = new SubDispatchLogDto();
       subTaskLog.setSubTaskId(uniqueIdService.getUniqueId());
@@ -150,13 +155,14 @@ public class PipelineDispatch implements IDispatchExecutor {
   }
 
 
-  private TaskNode buildTaskNode(PipelineNodeDto pipelineNode, String historyId) {
+  private TaskNode buildTaskNode(PipelineNodeDto pipelineNode, String historyId, String serviceId) {
     log.info("start build taskNode ={}", JSON.toJSONString(pipelineNode));
     TaskNode taskNode = new TaskNode();
     taskNode.setNodeId(pipelineNode.getNodeId());
     taskNode.setName(pipelineNode.getNodeName());
     taskNode.setExecuteTime(System.currentTimeMillis());
     taskNode.setHistoryId(historyId);
+    taskNode.setServiceId(serviceId);
 
     ConfigDetail configDetail = JSON.parseObject(pipelineNode.getConfigDetail(),
         ConfigDetail.class);
@@ -207,11 +213,10 @@ public class PipelineDispatch implements IDispatchExecutor {
         dispatchLog.getLogId());
     List<String> subTasks = subLogs.stream()
         .filter(subTask -> !ProcessStatus.isCompleteStatus(subTask.getStatus()))
-        .map(SubDispatchLogDto::getExecuteId).collect(
-            Collectors.toList());
+        .map(SubDispatchLogDto::getExecuteId).collect(Collectors.toList());
     List<TaskNode> taskNodeList = pipelineNodes.stream()
         .filter(node -> subTasks.contains(node.getNodeId()))
-        .map(node -> buildTaskNode(node, dispatchLog.getSourceRecordId()))
+        .map(node -> buildTaskNode(node, dispatchLog.getSourceRecordId(), pipeline.getServiceId()))
         .collect(Collectors.toList());
     pipelineTask.setHistoryId(dispatchLog.getSourceRecordId());
     pipelineTask.addAll(taskNodeList);
