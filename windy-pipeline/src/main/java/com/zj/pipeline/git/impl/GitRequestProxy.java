@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class RequestProxy {
+public class GitRequestProxy {
 
   public static final MediaType CONTENT_TYPE = MediaType.parse("application/json");
   public static final String AUTHORIZATION_KEY = "Authorization";

@@ -20,7 +20,7 @@ public class NodeRecordRest {
   @Autowired
   private NodeRecordService nodeRecordService;
 
-  @PutMapping("/node/record")
+  @PutMapping("/node/approval")
   public ResponseMeta<Boolean> approvalNode(@RequestParam("historyId") String historyId, @RequestParam("nodeId") String nodeId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, nodeRecordService.approval(historyId, nodeId));
   }

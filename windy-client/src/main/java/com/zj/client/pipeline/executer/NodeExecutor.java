@@ -66,7 +66,7 @@ public class NodeExecutor {
       }
       JSONObject context = node.getRequestContext();
       RequestContext requestContext = new RequestContext(context, node);
-      boolean executeFlag = remoteInvoker.triggerRun(requestContext, recordId);
+      boolean executeFlag = remoteInvoker.triggerRun(requestContext, node);
       if (!executeFlag) {
         statusAtomic.set(ProcessStatus.FAIL);
         notifyNodeEvent(node, statusAtomic.get(), errorMsg);

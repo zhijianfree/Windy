@@ -11,6 +11,7 @@ import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.client.pipeline.executer.vo.DeployRequest;
 import com.zj.client.pipeline.executer.vo.RefreshContext;
 import com.zj.client.pipeline.executer.vo.RequestContext;
+import com.zj.client.pipeline.executer.vo.TaskNode;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.ProcessStatus;
 import java.io.IOException;
@@ -40,7 +41,7 @@ public class DeployInvoker implements IRemoteInvoker {
   }
 
   @Override
-  public boolean triggerRun(RequestContext requestContext, String recordId) throws IOException {
+  public boolean triggerRun(RequestContext requestContext, TaskNode taskNode) throws IOException {
     DeployRequest deployRequest = JSON.parseObject(JSON.toJSONString(requestContext.getData()),
         DeployRequest.class);
     IDeployMode deployMode = deployFactory.getDeployMode(deployRequest.getDeployType());
@@ -53,14 +54,14 @@ public class DeployInvoker implements IRemoteInvoker {
         .sshPort(deployRequest.getSshPort())
         .localPath(filePath)
         .build();
-    jarContext.setRecordId(recordId);
+    jarContext.setRecordId(taskNode.getRecordId());
     deployMode.deploy(jarContext);
     return true;
   }
 
   @Override
-  public String queryStatus(RefreshContext refreshContext, String recordId) {
-    ProcessStatus deployStatus = deployFactory.getDeployStatus(recordId);
+  public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
+    ProcessStatus deployStatus = deployFactory.getDeployStatus(taskNode.getRecordId());
     ResponseModel responseModel = new ResponseModel();
     responseModel.setStatus(deployStatus.getType());
     responseModel.setMessage("代码部署");

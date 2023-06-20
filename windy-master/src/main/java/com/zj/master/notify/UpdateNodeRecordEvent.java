@@ -1,6 +1,7 @@
 package com.zj.master.notify;
 
 import com.alibaba.fastjson.JSON;
+import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.NotifyType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.model.ResultEvent;
@@ -9,6 +10,7 @@ import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.master.dispatch.pipeline.PipelineExecuteProxy;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +21,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class UpdateNodeRecordEvent implements INotifyEvent{
+public class UpdateNodeRecordEvent implements INotifyEvent {
 
   @Autowired
   private INodeRecordRepository nodeRecordRepository;
@@ -38,9 +40,11 @@ public class UpdateNodeRecordEvent implements INotifyEvent{
   @Override
   public boolean handle(ResultEvent resultEvent) {
     String string = JSON.toJSONString(resultEvent.getParams());
-    log.info("receive node record create event id = {} event={}", resultEvent.getExecuteId(), string);
+    log.info("receive node record create event id = {} event={}", resultEvent.getExecuteId(),
+        string);
     NodeRecordDto record = nodeRecordRepository.getRecordById(resultEvent.getExecuteId());
-    if (ProcessStatus.isCompleteStatus(record.getStatus())) {
+    if (ProcessStatus.isCompleteStatus(record.getStatus()) && !Objects.equals(
+        ExecuteType.APPROVAL.name(), resultEvent.getExecuteType())) {
       log.info("node record status completed,not update recordId={}", record.getRecordId());
       return true;
     }

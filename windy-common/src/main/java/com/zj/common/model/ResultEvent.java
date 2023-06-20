@@ -14,6 +14,7 @@ public class ResultEvent {
   private String logId;
   private String masterIP;
 
+  private String executeType;
   private String clientIp;
   private String executeId;
   private NotifyType notifyType;
@@ -32,6 +33,11 @@ public class ResultEvent {
 
   public ResultEvent notifyType(NotifyType notifyType) {
     this.notifyType = notifyType;
+    return this;
+  }
+
+  public ResultEvent executeType(String executeType) {
+    this.executeType = executeType;
     return this;
   }
 

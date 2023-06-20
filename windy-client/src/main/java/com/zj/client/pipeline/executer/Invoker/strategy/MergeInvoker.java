@@ -8,6 +8,7 @@ import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.client.pipeline.executer.vo.MergeRequest;
 import com.zj.client.pipeline.executer.vo.RefreshContext;
 import com.zj.client.pipeline.executer.vo.RequestContext;
+import com.zj.client.pipeline.executer.vo.TaskNode;
 import com.zj.client.pipeline.executer.vo.TempStatus;
 import com.zj.client.pipeline.git.GitOperator;
 import com.zj.client.utils.Utils;
@@ -60,10 +61,10 @@ public class MergeInvoker implements IRemoteInvoker {
   }
 
   @Override
-  public boolean triggerRun(RequestContext requestContext, String recordId) throws Exception {
+  public boolean triggerRun(RequestContext requestContext, TaskNode taskNode) throws Exception {
     TempStatus tempStatus = new TempStatus();
     tempStatus.setStatus(ProcessStatus.RUNNING.getType());
-    statusMap.put(recordId, tempStatus);
+    statusMap.put(taskNode.getRecordId(), tempStatus);
     MergeRequest mergeRequest = JSON
         .parseObject(JSON.toJSONString(requestContext.getData()), MergeRequest.class);
     //拉取远端代码到本地
@@ -90,7 +91,7 @@ public class MergeInvoker implements IRemoteInvoker {
       boolean result = push2Repository(repository, git);
       tempStatus = new TempStatus();
       tempStatus.setStatus(ProcessStatus.SUCCESS.getType());
-      statusMap.put(recordId, tempStatus);
+      statusMap.put(taskNode.getRecordId(), tempStatus);
       return result;
     }
 
@@ -104,7 +105,7 @@ public class MergeInvoker implements IRemoteInvoker {
     tempStatus = new TempStatus();
     tempStatus.setStatus(ProcessStatus.SUCCESS.getType());
     tempStatus.setMessage(fileNames);
-    statusMap.put(recordId, tempStatus);
+    statusMap.put(taskNode.getRecordId(), tempStatus);
     return false;
   }
 
@@ -134,8 +135,8 @@ public class MergeInvoker implements IRemoteInvoker {
   }
 
   @Override
-  public String queryStatus(RefreshContext refreshContext, String recordId) {
-    TempStatus tempStatus = statusMap.get(recordId);
+  public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
+    TempStatus tempStatus = statusMap.get(taskNode.getRecordId());
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("status", tempStatus.getStatus());
     ResponseModel responseModel = new ResponseModel();

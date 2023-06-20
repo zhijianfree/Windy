@@ -4,11 +4,13 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -57,11 +59,13 @@ public class RestTemplateConfig {
     }
     messageConverters.add(new StringHttpMessageConverter(StandardCharsets.UTF_8));
     FastJsonHttpMessageConverter fastJsonHttpMessageConverter = new FastJsonHttpMessageConverter();
+    fastJsonHttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_JSON));
     FastJsonConfig fastJsonConfig = new FastJsonConfig();
     fastJsonConfig.setSerializerFeatures(SerializerFeature.WriteNullNumberAsZero,
         SerializerFeature.WriteMapNullValue, SerializerFeature.WriteNullStringAsEmpty,
         SerializerFeature.WriteNullListAsEmpty, SerializerFeature.DisableCircularReferenceDetect);
     fastJsonHttpMessageConverter.setFastJsonConfig(fastJsonConfig);
+    fastJsonHttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_JSON));
     messageConverters.add(fastJsonHttpMessageConverter);
 
     restTemplate.getMessageConverters()
