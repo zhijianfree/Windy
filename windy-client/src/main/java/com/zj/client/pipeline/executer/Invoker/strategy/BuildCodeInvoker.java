@@ -36,8 +36,7 @@ public class BuildCodeInvoker implements IRemoteInvoker {
   public boolean triggerRun(RequestContext requestContext, TaskNode taskNode) throws IOException {
     BuildParam buildParam = JSON.parseObject(JSON.toJSONString(requestContext.getData()), BuildParam.class);
     buildParam.setRecordId(taskNode.getRecordId());
-    codeBuildService.buildCode(buildParam);
-    return true;
+    return codeBuildService.buildCode(buildParam);
   }
 
   @Override

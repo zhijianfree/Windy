@@ -45,19 +45,18 @@ public class GitOperator {
   private void createIfNotExist(String serviceDir) {
     File gitDir = new File(serviceDir);
     try {
-      if (!gitDir.exists()) {
-        FileUtils.createParentDirectories(gitDir);
+      if (gitDir.exists()) {
+        FileUtils.cleanDirectory(gitDir);
         return;
       }
-      FileUtils.cleanDirectory(gitDir);
-    } catch (IOException e) {
+      FileUtils.createParentDirectories(gitDir);
+    } catch (IOException ignore) {
     }
   }
 
   public MergeResult createTempBranch(String repositoryPath, String sourceBranch,
       String targetBranch) {
-    try (Repository repository = FileRepositoryBuilder
-        .create(new File(repositoryPath + "/.git"))) {
+    try (Repository repository = FileRepositoryBuilder.create(new File(repositoryPath + "/.git"))) {
       Git git = new Git(repository);
       String tempBranch = "temp";
       git.checkout().setName(tempBranch).call();

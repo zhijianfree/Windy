@@ -60,6 +60,7 @@ public class DeployInvoker implements IRemoteInvoker {
         .sshIp(deployRequest.getSshIp())
         .sshPort(deployRequest.getSshPort())
         .localPath(filePath)
+        .servicePort(deployRequest.getServerPort())
         .build();
     jarContext.setRecordId(taskNode.getRecordId());
     deployMode.deploy(jarContext);
