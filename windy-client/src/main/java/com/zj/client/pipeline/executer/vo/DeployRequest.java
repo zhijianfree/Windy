@@ -17,5 +17,7 @@ public class DeployRequest {
 
   private Integer sshPort;
 
+  private String serverPort;
+
   private String deployType;
 }

@@ -9,11 +9,15 @@ import com.zj.client.config.GlobalEnvConfig;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
@@ -23,6 +27,7 @@ import org.apache.maven.shared.invoker.InvocationResult;
 import org.apache.maven.shared.invoker.Invoker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
 
 /**
  * @author guyuelan
@@ -34,8 +39,19 @@ public class MavenOperator {
 
   public static final String DEPLOY = "deploy";
   public static final String SH_COMMAND_FORMAT = "nohup java -jar %s > app.log 2>&1 &";
-  @Autowired
-  private GlobalEnvConfig globalEnvConfig;
+  private final GlobalEnvConfig globalEnvConfig;
+  private List<String> templateShell;
+
+  public MavenOperator(GlobalEnvConfig globalEnvConfig) {
+    this.globalEnvConfig = globalEnvConfig;
+    try {
+      File templateFile = ResourceUtils.getFile("classpath:start.sh");
+      templateShell = FileUtils.readLines(templateFile, Charsets.UTF_8);
+    } catch (Exception e) {
+      log.warn("load template sh file error", e);
+    }
+
+  }
 
   public Integer build(String pomPath, String servicePath) throws Exception {
     File pomFile = new File(pomPath);
@@ -54,6 +70,9 @@ public class MavenOperator {
     return ideaResult.getExitCode();
   }
 
+  /**
+   * 将jar文件拷贝到部署目录
+   */
   private void copyJar2DeployDir(File pomFile, String servicePath) throws Exception {
     Collection<File> files = FileUtils.listFiles(pomFile.getParentFile(), TrueFileFilter.INSTANCE,
         TrueFileFilter.INSTANCE);
@@ -63,7 +82,6 @@ public class MavenOperator {
       throw new ApiException(ErrorCode.NOT_FIND_JAR);
     }
 
-
     String destDir = servicePath + File.separator + DEPLOY;
     File dir = new File(destDir);
     createSHFileIfNeed(jarFile.getName(), destDir, dir);
@@ -72,21 +90,26 @@ public class MavenOperator {
   }
 
   private void createSHFileIfNeed(String jarName, String destDir, File dir) {
+    if (!dir.exists()) {
+      dir.mkdirs();
+    }
+
     Collection<File> deployFiles = FileUtils.listFiles(dir, TrueFileFilter.INSTANCE,
         TrueFileFilter.INSTANCE);
-    File shFile = deployFiles.stream().filter(file -> file.isFile() && file.getName().endsWith(".sh"))
-        .findAny().orElse(null);
+    File shFile = deployFiles.stream()
+        .filter(file -> file.isFile() && file.getName().endsWith(".sh")).findAny().orElse(null);
     if (Objects.isNull(shFile) || !shFile.exists()) {
       createDefaultSHFile(destDir, jarName);
     }
   }
 
   private void createDefaultSHFile(String destDir, String name) {
-    CharSink sink = Files.asCharSink(new File(destDir + File.separator + "start.sh"),
-        Charsets.UTF_8, FileWriteMode.APPEND);
     try {
+      File destFile = new File(destDir + File.separator + "start.sh");
+      List<String> commands = new ArrayList<>(templateShell);
       String command = String.format(SH_COMMAND_FORMAT, name);
-      sink.write(command);
+      commands.add(command);
+      FileUtils.writeLines(destFile, Charsets.UTF_8.name(), commands, "\r\n", true);
     } catch (IOException e) {
       log.error("write event to file error", e);
     }

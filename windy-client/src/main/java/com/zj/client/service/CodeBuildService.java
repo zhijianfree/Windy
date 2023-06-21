@@ -11,6 +11,7 @@ import com.zj.common.enums.ProcessStatus;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -58,18 +59,20 @@ public class CodeBuildService {
                 buildParam.getGitUrl());
         Integer exitCode = mavenOperator.build(pomPath, servicePath);
         log.info("get maven exit code={}", exitCode);
-        saveStatus(buildParam.getRecordId(), ProcessStatus.SUCCESS.getType(), "构建成功");
+        ProcessStatus result =
+            Objects.equals(0, exitCode) ? ProcessStatus.SUCCESS : ProcessStatus.FAIL;
+        saveStatus(buildParam.getRecordId(), result, "构建成功");
       } catch (Exception e) {
         log.error("buildCode error", e);
-        saveStatus(buildParam.getRecordId(), ProcessStatus.FAIL.getType(), e.toString());
+        saveStatus(buildParam.getRecordId(), ProcessStatus.FAIL, e.toString());
       }
     });
-    saveStatus(buildParam.getRecordId(), ProcessStatus.RUNNING.getType(), "构建中");
+    saveStatus(buildParam.getRecordId(), ProcessStatus.RUNNING, "构建中");
     return true;
   }
 
-  private void saveStatus(String recordId, int status, String message) {
-    statusMap.put(recordId, new ResponseModel(status, message));
+  private void saveStatus(String recordId, ProcessStatus status, String message) {
+    statusMap.put(recordId, new ResponseModel(status.getType(), message));
   }
 
   private String getTargetPomPath(String gitUrl, String configPath) {

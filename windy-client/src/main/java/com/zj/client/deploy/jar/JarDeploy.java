@@ -9,12 +9,21 @@ import com.jcraft.jsch.SftpException;
 import com.zj.client.deploy.IDeployMode;
 import com.zj.client.entity.enuns.DeployType;
 import com.zj.common.enums.ProcessStatus;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.springframework.stereotype.Component;
@@ -54,24 +63,39 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
       channelSftp.connect();
 
       // 上传本地JAR文件到远程服务器
+      String shFileName = "";
       Collection<File> files = FileUtils.listFiles(new File(deployContext.getLocalPath()),
           TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
       for (File file : files) {
-        if (file.isFile()) {
-          FileInputStream fis = new FileInputStream(file);
-          channelSftp.put(fis, deployContext.getRemotePath() + File.separator + file.getName());
-          fis.close();
+        if (file.isDirectory()) {
+          continue;
         }
+        String remoteFile = deployContext.getRemotePath() + File.separator + file.getName();
+        if (isShFile(file)) {
+          shFileName = file.getName();
+          sendShFile(channelSftp, remoteFile, file);
+          continue;
+        }
+
+        FileInputStream fis = new FileInputStream(file);
+        channelSftp.put(fis, remoteFile, ChannelSftp.OVERWRITE);
+        fis.close();
       }
 
       // 执行远程shell脚本
       ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
-      channelExec.setCommand("cd " + deployContext.getRemotePath() + " && sh ./start.sh");
+      String shellCommand = "cd " + deployContext.getRemotePath() + " && sh " + shFileName + " "
+          + deployContext.getServicePort();
+      channelExec.setCommand(shellCommand);
       channelExec.connect();
+
+      while (!channelExec.isClosed()) {
+        Thread.sleep(1000);
+      }
 
       // 获取shell脚本执行结果
       int exitStatus = channelExec.getExitStatus();
-      log.info("Shell脚本执行结果: {}", exitStatus);
+      log.info("execute shell result = {}", exitStatus);
       bindStatus(deployContext.getRecordId(), ProcessStatus.SUCCESS);
       channelExec.disconnect();
     } catch (Exception e) {
@@ -87,6 +111,10 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
     }
   }
 
+  private boolean isShFile(File file) {
+    return file.getName().endsWith(".sh");
+  }
+
   @Override
   public ProcessStatus getDeployStatus(String recordId) {
     return statusMap.get(recordId);
@@ -94,6 +122,34 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
 
   private void bindStatus(String recordId, ProcessStatus status) {
     statusMap.put(recordId, status);
+  }
+
+  private void sendShFile(ChannelSftp channelSftp, String remoteFilePath, File localFile)
+      throws Exception {
+    // 本地文件输入流
+    FileInputStream fis = new FileInputStream(localFile);
+
+    // 远程服务器文件输出流
+    OutputStream outputStream = channelSftp.put(remoteFilePath);
+
+    // 使用指定的编码格式进行转换和传输
+    BufferedReader reader = new BufferedReader(new InputStreamReader(fis, Charsets.UTF_8));
+    BufferedWriter writer = new BufferedWriter(
+        new OutputStreamWriter(outputStream, Charsets.UTF_8));
+
+    String line;
+    while ((line = reader.readLine()) != null) {
+      writer.write(line);
+      writer.newLine();
+    }
+
+    writer.flush();
+
+    // 关闭流
+    writer.close();
+    reader.close();
+    outputStream.close();
+    fis.close();
   }
 
 }

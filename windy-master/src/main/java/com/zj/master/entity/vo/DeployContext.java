@@ -9,6 +9,8 @@ import lombok.Data;
 @Data
 public class DeployContext extends RequestContext{
 
+  private String serverPort;
+
   private String remotePath;
 
   private String sshIp;
