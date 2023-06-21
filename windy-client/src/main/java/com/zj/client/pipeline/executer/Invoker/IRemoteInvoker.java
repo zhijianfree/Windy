@@ -19,7 +19,7 @@ public interface IRemoteInvoker {
    * @param requestContext
    * @param taskNode 任务
    * */
-  boolean triggerRun(RequestContext requestContext, TaskNode taskNode) throws Exception;
+  void triggerRun(RequestContext requestContext, TaskNode taskNode) throws Exception;
 
   /**
    * 查询节点任务执行状态

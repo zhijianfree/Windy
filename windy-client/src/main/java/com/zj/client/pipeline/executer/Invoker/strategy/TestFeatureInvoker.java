@@ -12,6 +12,7 @@ import com.zj.client.pipeline.executer.vo.TestRequestContext;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.exception.ExecuteException;
 import com.zj.common.monitor.RequestProxy;
 import com.zj.common.utils.OrikaUtil;
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ public class TestFeatureInvoker implements IRemoteInvoker {
   }
 
   @Override
-  public boolean triggerRun(RequestContext requestContext, TaskNode taskNode) {
+  public void triggerRun(RequestContext requestContext, TaskNode taskNode) {
     TestRequestContext context = OrikaUtil.convert(requestContext.getData(),
         TestRequestContext.class);
     String taskId = context.getTaskId();
@@ -61,10 +62,10 @@ public class TestFeatureInvoker implements IRemoteInvoker {
 
     //触发任务执行，将任务的记录Id传递给刷新动作
     if (responseEntity.getStatusCode().is2xxSuccessful()) {
-      String url = String.format(TASK_STATUS_URL, jsonObject.getString("data"));
-      requestContext.getTaskNode().getRefreshContext().setUrl(url);
+      throw new ExecuteException(JSON.toJSONString(jsonObject));
     }
-    return responseEntity.getStatusCode().is2xxSuccessful();
+    String url = String.format(TASK_STATUS_URL, jsonObject.getString("data"));
+    requestContext.getTaskNode().getRefreshContext().setUrl(url);
   }
 
   @Override

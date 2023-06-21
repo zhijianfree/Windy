@@ -2,6 +2,8 @@ package com.zj.common.monitor;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.netflix.discovery.shared.Application;
+import com.netflix.eureka.EurekaServerContextHolder;
 import com.zj.common.model.ResultEvent;
 import com.zj.common.model.StopDispatch;
 import com.zj.common.monitor.discover.DiscoverService;

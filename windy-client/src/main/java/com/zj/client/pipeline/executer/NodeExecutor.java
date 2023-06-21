@@ -3,6 +3,9 @@ package com.zj.client.pipeline.executer;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.client.notify.IResultEventNotify;
 import com.zj.common.enums.NotifyType;
+import com.zj.common.exception.ApiException;
+import com.zj.common.exception.ErrorCode;
+import com.zj.common.exception.ExecuteException;
 import com.zj.common.model.ResultEvent;
 import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
 import com.zj.client.pipeline.executer.intercept.INodeExecuteInterceptor;
@@ -52,27 +55,25 @@ public class NodeExecutor {
    */
   public void runNodeTask(String historyId, TaskNode node) {
     log.info("start run task historyId={}", historyId);
-    interceptors.forEach(interceptor -> interceptor.before(node));
-
-    String recordId = uniqueIdService.getUniqueId();
-    node.setRecordId(recordId);
     AtomicReference<ProcessStatus> statusAtomic = new AtomicReference<>(ProcessStatus.RUNNING);
-    saveRecord(historyId, node, recordId, statusAtomic);
     List<String> errorMsg = Collections.singletonList(TRIGGER_TASK_ERROR);
+    String recordId = uniqueIdService.getUniqueId();
     try {
+      node.setRecordId(recordId);
+      interceptors.forEach(interceptor -> interceptor.before(node));
+
+      saveNodeRecord(historyId, node, recordId, statusAtomic);
+
       IRemoteInvoker remoteInvoker = invokerMap.get(node.getExecuteType());
       if (Objects.isNull(remoteInvoker)) {
-        throw new RuntimeException("can not find remote invoker");
+        throw new ApiException(ErrorCode.UNKNOWN_EXECUTE_TYPE);
       }
       JSONObject context = node.getRequestContext();
       RequestContext requestContext = new RequestContext(context, node);
-      boolean executeFlag = remoteInvoker.triggerRun(requestContext, node);
-      if (!executeFlag) {
-        statusAtomic.set(ProcessStatus.FAIL);
-        notifyNodeEvent(node, statusAtomic.get(), errorMsg);
-        return;
-      }
-      log.info("task node run complete result={}", executeFlag);
+      remoteInvoker.triggerRun(requestContext, node);
+    } catch (ExecuteException executeException) {
+      statusAtomic.set(ProcessStatus.FAIL);
+      errorMsg = Collections.singletonList(executeException.getMessage());
     } catch (Exception e) {
       log.error("execute pipeline node error recordId={}", recordId, e);
       //如果请求失败则直接流水线终止
@@ -85,7 +86,7 @@ public class NodeExecutor {
     interceptors.forEach(interceptor -> interceptor.after(node, statusAtomic.get()));
   }
 
-  private void saveRecord(String historyId, TaskNode node, String recordId,
+  private void saveNodeRecord(String historyId, TaskNode node, String recordId,
       AtomicReference<ProcessStatus> statusAtomic) {
     long currentTimeMillis = System.currentTimeMillis();
     TaskNodeRecord taskNodeRecord = TaskNodeRecord.builder().historyId(historyId).recordId(recordId)

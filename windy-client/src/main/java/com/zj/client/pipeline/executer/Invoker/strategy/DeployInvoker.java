@@ -45,7 +45,7 @@ public class DeployInvoker implements IRemoteInvoker {
   }
 
   @Override
-  public boolean triggerRun(RequestContext requestContext, TaskNode taskNode) throws IOException {
+  public void triggerRun(RequestContext requestContext, TaskNode taskNode) throws IOException {
     DeployRequest deployRequest = JSON.parseObject(JSON.toJSONString(requestContext.getData()),
         DeployRequest.class);
     IDeployMode deployMode = deployFactory.getDeployMode(deployRequest.getDeployType());
@@ -64,7 +64,6 @@ public class DeployInvoker implements IRemoteInvoker {
         .build();
     jarContext.setRecordId(taskNode.getRecordId());
     deployMode.deploy(jarContext);
-    return true;
   }
 
   @Override
@@ -72,7 +71,6 @@ public class DeployInvoker implements IRemoteInvoker {
     ProcessStatus deployStatus = deployFactory.getDeployStatus(taskNode.getRecordId());
     ResponseModel responseModel = new ResponseModel();
     responseModel.setStatus(deployStatus.getType());
-    responseModel.setMessage("代码部署");
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("status", deployStatus.getType());
     responseModel.setData(jsonObject);
