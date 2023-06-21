@@ -9,4 +9,6 @@ public class ApiException extends CommonException{
   public ApiException(ErrorCode errorCode) {
     super(errorCode);
   }
+
+
 }

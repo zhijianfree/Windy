@@ -34,8 +34,8 @@ public class ApprovalInvoker implements IRemoteInvoker {
   }
 
   @Override
-  public boolean triggerRun(RequestContext requestContext, TaskNode taskNode) throws IOException {
-    return true;
+  public void triggerRun(RequestContext requestContext, TaskNode taskNode) throws IOException {
+
   }
 
   @Override

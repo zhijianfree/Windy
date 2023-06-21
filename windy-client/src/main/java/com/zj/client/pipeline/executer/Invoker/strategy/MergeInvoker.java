@@ -14,6 +14,8 @@ import com.zj.client.pipeline.git.GitOperator;
 import com.zj.client.utils.Utils;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.exception.ErrorCode;
+import com.zj.common.exception.ExecuteException;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -61,55 +63,60 @@ public class MergeInvoker implements IRemoteInvoker {
   }
 
   @Override
-  public boolean triggerRun(RequestContext requestContext, TaskNode taskNode) throws Exception {
-    TempStatus tempStatus = new TempStatus();
-    tempStatus.setStatus(ProcessStatus.RUNNING.getType());
-    statusMap.put(taskNode.getRecordId(), tempStatus);
-    MergeRequest mergeRequest = JSON
-        .parseObject(JSON.toJSONString(requestContext.getData()), MergeRequest.class);
-    //拉取远端代码到本地
-    Git git = gitOperator.pullCodeFromGit(mergeRequest.getGitUrl(), mergeRequest.getSourceBranch(),
-        globalEnvConfig.getGitWorkspace());
+  public void triggerRun(RequestContext requestContext, TaskNode taskNode) throws Exception {
+    try {
+      TempStatus tempStatus = new TempStatus();
+      tempStatus.setStatus(ProcessStatus.RUNNING.getType());
+      statusMap.put(taskNode.getRecordId(), tempStatus);
+      MergeRequest mergeRequest = JSON
+          .parseObject(JSON.toJSONString(requestContext.getData()), MergeRequest.class);
+      //拉取远端代码到本地
+      Git git = gitOperator.pullCodeFromGit(mergeRequest.getGitUrl(),
+          mergeRequest.getSourceBranch(),
+          globalEnvConfig.getGitWorkspace());
 
-    //合并代码
-    Repository repository = git.getRepository();
-    git.checkout().setName(MASTER).call();
-    List<Ref> branches = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
-    Ref sourceRef = findBranchRef(mergeRequest.getSourceBranch(), branches);
-    MergeResult mergeResult = git.merge().include(sourceRef)
-        // 设置合并后同时提交
-        .setCommit(true)
-        // 分支合并策略，--ff代表快速合并， --no-ff代表普通合并
-        .setFastForward(FastForwardMode.NO_FF)
-        //设置提交信息
-        .setMessage(String.format(MERGE_COMMIT_TIPS, mergeRequest.getSourceBranch(), MASTER))
-        .call();
+      //合并代码
+      Repository repository = git.getRepository();
+      git.checkout().setName(MASTER).call();
+      List<Ref> branches = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
+      Ref sourceRef = findBranchRef(mergeRequest.getSourceBranch(), branches);
+      MergeResult mergeResult = git.merge().include(sourceRef)
+          // 设置合并后同时提交
+          .setCommit(true)
+          // 分支合并策略，--ff代表快速合并， --no-ff代表普通合并
+          .setFastForward(FastForwardMode.NO_FF)
+          //设置提交信息
+          .setMessage(String.format(MERGE_COMMIT_TIPS, mergeRequest.getSourceBranch(), MASTER))
+          .call();
 
-    //合并成功推送至远端master分支
-    if (mergeResult.getMergeStatus().isSuccessful()) {
-      log.info("merge success branch ={}", mergeRequest.getSourceBranch());
-      boolean result = push2Repository(repository, git);
+      //合并成功推送至远端master分支
+      if (mergeResult.getMergeStatus().isSuccessful()) {
+        log.info("merge success branch ={}", mergeRequest.getSourceBranch());
+        push2Repository(repository, git);
+        tempStatus = new TempStatus();
+        tempStatus.setStatus(ProcessStatus.SUCCESS.getType());
+        statusMap.put(taskNode.getRecordId(), tempStatus);
+        return;
+      }
+
+      //存在冲突则回退本地的merge状态
+      ObjectId objectId = repository.findRef(MASTER).getObjectId();
+      git.reset().setMode(ResetCommand.ResetType.HARD).setRef(objectId.getName()).call();
+
+      List<String> fileNames = mergeResult.getConflicts().keySet().stream()
+          .map(fileName -> "conflict file: " + fileName)
+          .collect(Collectors.toList());
       tempStatus = new TempStatus();
       tempStatus.setStatus(ProcessStatus.SUCCESS.getType());
+      tempStatus.setMessage(fileNames);
       statusMap.put(taskNode.getRecordId(), tempStatus);
-      return result;
+    } catch (Exception e) {
+      log.warn("merger code error", e);
+      throw new ExecuteException(ErrorCode.MERGE_CODE_ERROR);
     }
-
-    //存在冲突则回退本地的merge状态
-    ObjectId objectId = repository.findRef(MASTER).getObjectId();
-    git.reset().setMode(ResetCommand.ResetType.HARD).setRef(objectId.getName()).call();
-
-    List<String> fileNames = mergeResult.getConflicts().keySet().stream()
-        .map(fileName -> "conflict file: " + fileName)
-        .collect(Collectors.toList());
-    tempStatus = new TempStatus();
-    tempStatus.setStatus(ProcessStatus.SUCCESS.getType());
-    tempStatus.setMessage(fileNames);
-    statusMap.put(taskNode.getRecordId(), tempStatus);
-    return false;
   }
 
-  private boolean push2Repository(Repository repository, Git git)
+  private void push2Repository(Repository repository, Git git)
       throws IOException, GitAPIException {
     // 更新目标分支的引用
     Ref updatedRef = repository.findRef(MASTER);
@@ -127,11 +134,11 @@ public class MergeInvoker implements IRemoteInvoker {
     for (PushResult pushResult : results) {
       for (RemoteRefUpdate remoteRefUpdate : pushResult.getRemoteUpdates()) {
         if (remoteRefUpdate.getStatus() == RemoteRefUpdate.Status.OK) {
-          return true;
+          return;
         }
       }
     }
-    return false;
+    throw new ExecuteException(ErrorCode.MERGE_CODE_ERROR);
   }
 
   @Override

@@ -36,7 +36,7 @@ public class WaitInvoker implements IRemoteInvoker {
   }
 
   @Override
-  public boolean triggerRun(RequestContext requestContext, TaskNode taskNode) throws IOException {
+  public void triggerRun(RequestContext requestContext, TaskNode taskNode) throws IOException {
     WaitRequestContext waitRequestContext = JSON.parseObject(
         JSON.toJSONString(requestContext.getData()), WaitRequestContext.class);
     CompletableFuture.runAsync(() -> {
@@ -50,10 +50,11 @@ public class WaitInvoker implements IRemoteInvoker {
       CountDownLatch countDownLatch = countDownMap.get(taskNode.getRecordId());
       countDownLatch.countDown();
     }).exceptionally(ex ->{
+      CountDownLatch countDownLatch = countDownMap.get(taskNode.getRecordId());
+      countDownLatch.countDown();
       log.error("run wait error", ex);
       return null;
     });
-    return true;
 
   }
 

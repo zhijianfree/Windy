@@ -11,6 +11,9 @@ import com.zj.client.pipeline.executer.vo.RefreshContext;
 import com.zj.client.pipeline.executer.vo.RequestContext;
 import com.zj.client.pipeline.executer.vo.TaskNode;
 import com.zj.common.enums.ExecuteType;
+import com.zj.common.exception.ApiException;
+import com.zj.common.exception.ErrorCode;
+import com.zj.common.exception.ExecuteException;
 import com.zj.common.utils.IpUtils;
 import com.zj.common.utils.OrikaUtil;
 import java.io.IOException;
@@ -48,7 +51,7 @@ public class HttpExecutor implements IRemoteInvoker {
     return ExecuteType.HTTP;
   }
 
-  public boolean triggerRun(RequestContext requestContext, TaskNode taskNode) throws IOException {
+  public void triggerRun(RequestContext requestContext, TaskNode taskNode) throws IOException {
     log.info("http executor is running");
     HttpRequestContext context = OrikaUtil.convert(requestContext.getData(),
         HttpRequestContext.class);
@@ -58,7 +61,9 @@ public class HttpExecutor implements IRemoteInvoker {
     RequestBody requestBody = RequestBody.create(MEDIA_TYPE, JSON.toJSONString(jsonObject));
     Request request = new Request.Builder().url(context.getUrl()).post(requestBody).build();
     Response response = okHttpClient.newCall(request).execute();
-    return response.isSuccessful();
+    if (!response.isSuccessful()) {
+      throw new ExecuteException(response.body().string());
+    }
   }
 
   @Override

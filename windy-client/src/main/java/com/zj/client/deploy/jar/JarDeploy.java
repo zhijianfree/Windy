@@ -9,6 +9,9 @@ import com.jcraft.jsch.SftpException;
 import com.zj.client.deploy.IDeployMode;
 import com.zj.client.entity.enuns.DeployType;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.exception.ApiException;
+import com.zj.common.exception.ErrorCode;
+import com.zj.common.exception.ExecuteException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -88,6 +91,7 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
           + deployContext.getServicePort();
       channelExec.setCommand(shellCommand);
       channelExec.connect();
+      channelExec.setErrStream(System.err);
 
       while (!channelExec.isClosed()) {
         Thread.sleep(1000);
@@ -96,11 +100,14 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
       // 获取shell脚本执行结果
       int exitStatus = channelExec.getExitStatus();
       log.info("execute shell result = {}", exitStatus);
-      bindStatus(deployContext.getRecordId(), ProcessStatus.SUCCESS);
+      ProcessStatus status =
+          Objects.equals(exitStatus, 0) ? ProcessStatus.SUCCESS : ProcessStatus.FAIL;
+      bindStatus(deployContext.getRecordId(), status);
       channelExec.disconnect();
     } catch (Exception e) {
-      e.printStackTrace();
-      bindStatus(deployContext.getRecordId(), ProcessStatus.FAIL);
+      log.error("execute deploy jar error", e);
+      statusMap.remove(deployContext.getRecordId());
+      throw new ExecuteException(ErrorCode.RUN_DEPLOY_ERROR);
     } finally {
       if (channelSftp != null) {
         channelSftp.disconnect();

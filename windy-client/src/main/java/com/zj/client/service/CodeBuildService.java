@@ -45,7 +45,7 @@ public class CodeBuildService {
 
   private final Map<String, ResponseModel> statusMap = new ConcurrentHashMap<>();
 
-  public Boolean buildCode(BuildParam buildParam) {
+  public void buildCode(BuildParam buildParam) {
     executorService.execute(() -> {
       try {
         //从git服务端拉取代码
@@ -68,7 +68,6 @@ public class CodeBuildService {
       }
     });
     saveStatus(buildParam.getRecordId(), ProcessStatus.RUNNING, "构建中");
-    return true;
   }
 
   private void saveStatus(String recordId, ProcessStatus status, String message) {
