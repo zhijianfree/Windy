@@ -15,9 +15,8 @@ CREATE TABLE `code_change` (
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `code_change_change_id_IDX` (`change_id`) USING BTREE
+  UNIQUE KEY `unique_change_id` (`change_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `environment`
@@ -51,11 +50,15 @@ CREATE TABLE `execute_point` (
   `compare_define` text COMMENT '特性执行结果比较',
   `variables` varchar(1000) DEFAULT NULL COMMENT '执行响应结果参数',
   `test_stage` int(11) NOT NULL COMMENT '用例阶段',
-  `sort_order` int(11) DEFAULT NULL COMMENT '特性排序',
+  `sort_order` int(11) DEFAULT NULL COMMENT '排序',
+  `template_id` varchar(64) DEFAULT NULL COMMENT '模版Id',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
-  `update_time` varchar(100) DEFAULT NULL COMMENT '更新时间'
+  `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_feature_id` (`feature_id`),
+  KEY `idx_template_id` (`template_id`),
+  KEY `idx_point_id` (`point_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `execute_record`
@@ -66,16 +69,17 @@ CREATE TABLE `execute_record` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `execute_record_id` varchar(64) DEFAULT NULL COMMENT '执行点记录',
   `history_id` varchar(64) DEFAULT NULL COMMENT '历史记录ID',
-  `status` int(11) DEFAULT NULL COMMENT '执行点运行状态',
+  `status` int(2) DEFAULT NULL COMMENT '执行点运行状态',
   `execute_result` text COMMENT '执行结果',
   `execute_point_name` varchar(100) DEFAULT NULL COMMENT '执行点名称',
-  `execute_point_id` varchar(100) DEFAULT NULL COMMENT '执行点ID',
-  `execute_type` int(11) DEFAULT NULL COMMENT '执行类型',
-  `test_stage` int(11) DEFAULT NULL COMMENT '测试阶段',
+  `execute_point_id` varchar(64) DEFAULT NULL COMMENT '执行点ID',
+  `execute_type` int(2) DEFAULT NULL COMMENT '执行类型',
+  `test_stage` int(2) DEFAULT NULL COMMENT '测试阶段',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
-  PRIMARY KEY (`id`)
+  `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_history_id` (`history_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `execute_template`
@@ -85,7 +89,7 @@ DROP TABLE IF EXISTS `execute_template`;
 CREATE TABLE `execute_template` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `template_id` varchar(64) NOT NULL COMMENT '特性id',
-  `template_type` int(11) DEFAULT '1' COMMENT '模版类型',
+  `template_type` int(2) DEFAULT '1' COMMENT '模版类型',
   `service` varchar(500) DEFAULT NULL COMMENT '特性执行类名',
   `method` varchar(100) DEFAULT NULL COMMENT '特性执行方法名',
   `name` varchar(100) DEFAULT NULL COMMENT '特性执行名称',
@@ -93,11 +97,12 @@ CREATE TABLE `execute_template` (
   `description` varchar(100) DEFAULT NULL COMMENT '特性描述',
   `source` varchar(100) DEFAULT NULL COMMENT '特性原路径',
   `param` varchar(1000) DEFAULT NULL,
+  `invoke_type` int(2) DEFAULT NULL COMMENT '执行调用方式 1 本地方法  2 Http',
+  `header` text COMMENT 'invoke_type为http时，请求Header',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `feature_history`
@@ -111,11 +116,13 @@ CREATE TABLE `feature_history` (
   `feature_name` varchar(100) DEFAULT NULL COMMENT '用例名称',
   `record_id` varchar(100) DEFAULT NULL COMMENT '执行记录Id',
   `executor` varchar(100) DEFAULT NULL COMMENT '执行人',
-  `execute_status` int(11) DEFAULT NULL COMMENT '执行状态',
+  `execute_status` int(2) DEFAULT NULL COMMENT '执行状态',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
-  PRIMARY KEY (`id`)
+  `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_record_id` (`record_id`),
+  KEY `idx_history_id` (`history_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `feature_info`
@@ -131,13 +138,14 @@ CREATE TABLE `feature_info` (
   `modify` varchar(100) DEFAULT NULL COMMENT '修改人',
   `test_step` varchar(100) DEFAULT NULL COMMENT '测试步骤',
   `parent_id` varchar(100) DEFAULT NULL COMMENT '父节点Id',
-  `feature_type` int(11) DEFAULT '1' COMMENT '用例类型',
-  `status` int(11) DEFAULT NULL COMMENT '用例类型',
+  `feature_type` int(2) DEFAULT '1' COMMENT '用例类型',
+  `status` int(2) DEFAULT NULL COMMENT '用例状态',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_test_case_id` (`test_case_id`),
+  KEY `idx_feature_id` (`feature_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `feature_tag`
@@ -149,26 +157,24 @@ CREATE TABLE `feature_tag` (
   `tag_value` varchar(100) NOT NULL COMMENT '标签值',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `git_bind`
 --
 
 DROP TABLE IF EXISTS `git_bind`;
-CREATE TABLE `git_bind` (
+CREATE TABLE `bind_branch` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `bind_id` varchar(64) NOT NULL COMMENT '绑定Id',
   `git_branch` varchar(100) NOT NULL COMMENT '绑定分支',
   `git_url` varchar(2000) NOT NULL COMMENT 'git地址',
-  `pipeline_id` varchar(100) NOT NULL COMMENT '流水线Id',
-  `is_choose` int(11) NOT NULL COMMENT '是否被选中',
+  `pipeline_id` varchar(64) NOT NULL COMMENT '流水线Id',
+  `is_choose` int(2) NOT NULL COMMENT '是否被选中',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `git_bind_bind_id_IDX` (`bind_id`) USING BTREE
+  KEY `idx_pipeline_id` (`pipeline_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `microservice`
@@ -186,7 +192,6 @@ CREATE TABLE `microservice` (
   `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `node_bind`
@@ -203,7 +208,6 @@ CREATE TABLE `node_bind` (
   `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `node_config`
@@ -212,16 +216,15 @@ CREATE TABLE `node_bind` (
 DROP TABLE IF EXISTS `node_config`;
 CREATE TABLE `node_config` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `config_id` varchar(100) NOT NULL COMMENT '配置ID',
+  `config_id` varchar(64) NOT NULL COMMENT '配置ID',
   `config_name` varchar(100) NOT NULL COMMENT '配置名称',
-  `type` int(11) DEFAULT NULL COMMENT '配置类型',
+  `type` int(2) DEFAULT NULL COMMENT '配置类型',
   `config_detail` text COMMENT '配置详情',
-  `order` int(11) DEFAULT NULL COMMENT '排序',
+  `sort_order` int(2) DEFAULT NULL COMMENT '排序',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `node_record`
@@ -233,14 +236,15 @@ CREATE TABLE `node_record` (
   `node_id` varchar(64) NOT NULL COMMENT '节点Id',
   `record_id` varchar(64) NOT NULL COMMENT '记录Id',
   `history_id` varchar(64) NOT NULL COMMENT '历史流水线记录Id',
-  `code` int(11) DEFAULT NULL COMMENT '处理结果状态码',
+  `code` int(4) DEFAULT NULL COMMENT '处理结果状态码',
   `result` text COMMENT '任务处理结果',
-  `status` int(11) DEFAULT NULL COMMENT '任务状态',
+  `status` int(2) DEFAULT NULL COMMENT '任务状态',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_record_id` (`record_id`),
+  KEY `idx_history_id` (`history_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `pipeline`
@@ -254,23 +258,21 @@ CREATE TABLE `pipeline` (
   `service_id` varchar(100) NOT NULL COMMENT '服务Id',
   `pipeline_type` int(2) DEFAULT NULL COMMENT '流水线类型 1 发布流水线 2 每日构建流水线 3 个人流水线',
   `pipeline_config` text COMMENT '流水线配置信息',
-  `execute_type` int(11) DEFAULT NULL COMMENT '执行方式 1 手动执行 2push 3merge',
-  `pipeline_status` int(11) DEFAULT '1' COMMENT '流水线状态',
+  `execute_type` int(2) DEFAULT NULL COMMENT '执行方式 1 手动执行 2push 3merge',
+  `pipeline_status` int(2) DEFAULT '1' COMMENT '流水线状态',
   `creator` varchar(50) DEFAULT NULL COMMENT '流水线创建者',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `pipeline_pipeline_id_IDX` (`pipeline_id`) USING BTREE
+  UNIQUE KEY `unique_pipeline_id` (`pipeline_id`),
+  KEY `idx_service_id` (`service_id`),
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `pipeline_action`
 --
 
 DROP TABLE IF EXISTS `pipeline_action`;
-
-
 CREATE TABLE `pipeline_action` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `action_id` varchar(100) NOT NULL COMMENT '执行点ID',
@@ -281,20 +283,20 @@ CREATE TABLE `pipeline_action` (
   `param_detail` text COMMENT '配置详情',
   `query_url` varchar(100) NOT NULL COMMENT '请求地址',
   `result` varchar(256) DEFAULT NULL COMMENT '响应结果比较',
+  `description` varchar(256) DEFAULT NULL COMMENT '执行点描述',
+  `execute_type` varchar(10) NOT NULL COMMENT '执行类型',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
-  `description` varchar(256) DEFAULT NULL COMMENT '执行点描述',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_action_id` (`action_id`),
+  KEY `idx_node_id` (`node_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `pipeline_history`
 --
 
 DROP TABLE IF EXISTS `pipeline_history`;
-
-
 CREATE TABLE `pipeline_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `history_id` varchar(64) NOT NULL COMMENT '执行历史Id',
@@ -307,30 +309,27 @@ CREATE TABLE `pipeline_history` (
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `pipeline_history_history_id_IDX` (`history_id`) USING BTREE
+  UNIQUE KEY `idx_history_id` (`history_id`)
+  KEY `idx_pipeline_id` (`pipeline_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='流水线执行历史';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `pipeline_node`
 --
 
 DROP TABLE IF EXISTS `pipeline_node`;
-
-
 CREATE TABLE `pipeline_node` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `node_id` varchar(64) NOT NULL COMMENT 'nodeId',
   `stage_id` varchar(64) NOT NULL COMMENT '阶段Id',
   `pipeline_id` varchar(64) NOT NULL COMMENT '流水线Id',
   `node_name` varchar(100) NOT NULL COMMENT '节点名称',
-  `type` int(11) DEFAULT NULL COMMENT '节点类型',
+  `type` int(2) DEFAULT NULL COMMENT '节点类型',
   `config_detail` varchar(1000) DEFAULT NULL COMMENT '节点配置',
   `create_time` bigint(20) NOT NULL COMMENT '创建时间',
   `update_time` bigint(20) NOT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `pipeline_stage`
@@ -345,40 +344,35 @@ CREATE TABLE `pipeline_stage` (
   `pipeline_id` varchar(64) NOT NULL COMMENT '流水线Id',
   `config_id` varchar(100) DEFAULT NULL COMMENT '关联的配置Id',
   `stage_name` varchar(100) NOT NULL COMMENT '阶段名称',
-  `type` int(11) DEFAULT '1' COMMENT '阶段类型',
+  `type` int(2) DEFAULT '1' COMMENT '阶段类型',
   `create_time` bigint(20) NOT NULL COMMENT '创建时间',
-  `update_time` bigint(20) NOT NULL,
+  `update_time` bigint(20) NOT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `system_config`
 --
 
 DROP TABLE IF EXISTS `system_config`;
-
-
 CREATE TABLE `system_config` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `config_id` varchar(100) NOT NULL COMMENT '配置ID',
   `config_name` varchar(100) NOT NULL COMMENT '配置名称',
   `parent_id` varchar(100) DEFAULT NULL COMMENT '父节点Id',
-  `type` int(11) DEFAULT NULL COMMENT '配置类型',
+  `type` int(2) DEFAULT NULL COMMENT '配置类型',
   `config_detail` text COMMENT '配置详情',
-  `sort` int(11) DEFAULT NULL COMMENT '排序',
+  `sort` int(2) DEFAULT NULL COMMENT '排序',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `task_info`
 --
 
 DROP TABLE IF EXISTS `task_info`;
-
 CREATE TABLE `task_info` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `task_id` varchar(100) DEFAULT NULL COMMENT '任务ID',
@@ -391,74 +385,89 @@ CREATE TABLE `task_info` (
   `machines` varchar(100) DEFAULT NULL COMMENT '执行机器列表',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_task_id` (`task_id`),
+  KEY `idx_service_id` (`service_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `task_record`
 --
 
 DROP TABLE IF EXISTS `task_record`;
-
-
 CREATE TABLE `task_record` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `record_id` varchar(100) DEFAULT NULL COMMENT '任务记录ID',
-  `task_id` varchar(100) DEFAULT NULL COMMENT '任务ID',
-  `user_id` varchar(100) DEFAULT NULL COMMENT '执行者ID',
-  `test_case_id` varchar(100) DEFAULT NULL COMMENT '测试集Id',
-  `status` int(11) DEFAULT NULL COMMENT '执行状态',
+  `record_id` varchar(64) DEFAULT NULL COMMENT '任务记录ID',
+  `task_id` varchar(64) DEFAULT NULL COMMENT '任务ID',
+  `user_id` varchar(64) DEFAULT NULL COMMENT '执行者ID',
+  `test_case_id` varchar(64) DEFAULT NULL COMMENT '测试集Id',
+  `status` int(2) DEFAULT NULL COMMENT '执行状态',
   `task_name` varchar(100) NOT NULL COMMENT '任务名称',
   `task_config` varchar(2000) DEFAULT NULL COMMENT '任务执行参数',
   `machines` varchar(100) DEFAULT NULL COMMENT '执行机器列表',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_record_id` (`record_id`),
+  KEY `idx_task_id` (`task_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `test_case`
 --
 
 DROP TABLE IF EXISTS `test_case`;
-
-
 CREATE TABLE `test_case` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `test_case_id` varchar(64) NOT NULL COMMENT '用例集id',
   `author` varchar(100) DEFAULT NULL COMMENT '创建人',
-  `service_id` varchar(100) DEFAULT NULL COMMENT '服务Id',
+  `service_id` varchar(64) DEFAULT NULL COMMENT '服务Id',
   `test_case_name` varchar(100) DEFAULT NULL COMMENT '用例集名称',
   `description` varchar(100) DEFAULT NULL COMMENT '用例集描述',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_test_case_id` (`test_case_id`),
+  KEY `idx_service_id` (`service_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `test_case_config`
 --
 
 DROP TABLE IF EXISTS `test_case_config`;
-
-
 CREATE TABLE `test_case_config` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `config_id` varchar(100) DEFAULT NULL COMMENT '配置ID',
   `union_id` varchar(100) DEFAULT NULL COMMENT '关联Id',
   `parent_id` varchar(100) DEFAULT NULL COMMENT '父节点Id',
-  `type` int(11) DEFAULT NULL COMMENT '节点类型',
+  `type` int(2) DEFAULT NULL COMMENT '节点类型',
   `param_key` varchar(100) DEFAULT NULL COMMENT '参数key',
   `param_type` varchar(100) DEFAULT NULL COMMENT '参数类型',
   `value` varchar(100) DEFAULT NULL COMMENT '参数值',
-  `sort_order` varchar(500) DEFAULT NULL COMMENT '排序',
+  `sort_order` int(2) DEFAULT NULL COMMENT '排序',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE `dispatch_log` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `log_id` varchar(64) NOT NULL COMMENT '日志Id',
+  `log_type` int(11) NOT NULL COMMENT '任务类型 1 pipeline  2 feature',
+  `source_id` varchar(64) NOT NULL COMMENT '任务日志触发源',
+  `source_name` varchar(100) DEFAULT NULL COMMENT '触发源名称',
+  `node_ip` varchar(100) DEFAULT NULL COMMENT '任务执行master节点Ip',
+  `log_status` int(11) NOT NULL DEFAULT '1' COMMENT '任务日志状态',
+  `lock_version` int(11) DEFAULT NULL COMMENT '乐观锁版本号',
+  `source_record_id` varchar(100) DEFAULT NULL COMMENT '任务来源记录id',
+  `create_time` bigint(20) NOT NULL COMMENT '创建时间',
+  `update_time` bigint(20) NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_log_id` (`log_id`),
+  KEY `idx_source_id` (`source_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 
 ## 流水线默认配置
 INSERT INTO windy.system_config (config_id,config_name,parent_id,`type`,config_detail,sort,create_time,update_time) VALUES

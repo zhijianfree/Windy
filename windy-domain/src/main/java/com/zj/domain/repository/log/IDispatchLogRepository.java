@@ -21,5 +21,5 @@ public interface IDispatchLogRepository {
 
   void updateLogSourceRecord(String logId, String recordId);
 
-  DispatchLogDto getDispatchLogBySourceId(String targetId);
+  DispatchLogDto getDispatchLogBySourceId(String sourceId);
 }

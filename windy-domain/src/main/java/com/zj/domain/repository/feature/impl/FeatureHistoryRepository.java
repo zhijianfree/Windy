@@ -89,9 +89,9 @@ public class FeatureHistoryRepository extends
 
   @Override
   @Transactional
-  public boolean deleteByRecordId(String taskId) {
+  public boolean deleteByRecordId(String taskRecordId) {
     List<FeatureHistory> histories = list(
-        Wrappers.lambdaQuery(FeatureHistory.class).eq(FeatureHistory::getRecordId, taskId));
+        Wrappers.lambdaQuery(FeatureHistory.class).eq(FeatureHistory::getRecordId, taskRecordId));
     List<String> historyIds = histories.stream().map(FeatureHistory::getHistoryId)
         .collect(Collectors.toList());
     boolean deleteRecode = executeRecordRepository.batchDeleteByHistoryId(historyIds);
@@ -102,7 +102,7 @@ public class FeatureHistoryRepository extends
 
     boolean result = remove(
         Wrappers.lambdaQuery(FeatureHistory.class).in(FeatureHistory::getHistoryId, historyIds));
-    log.info("delete testCase history  testcaseId={} history={} recode={} delete ", taskId,
+    log.info("delete testCase history  testcaseId={} history={} recode={} delete ", taskRecordId,
         result, deleteRecode);
     return result && deleteRecode;
   }
