@@ -6,7 +6,7 @@ import com.zj.client.feature.executor.compare.CompareDefine;
 import com.zj.client.feature.executor.compare.CompareOperator;
 import com.zj.client.feature.executor.compare.CompareResult;
 import com.zj.client.feature.executor.compare.operator.CompareFactory;
-import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
+import com.zj.client.pipeline.executer.trigger.INodeTrigger;
 import com.zj.client.pipeline.executer.vo.CompareInfo;
 import com.zj.client.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.client.pipeline.executer.vo.QueryResponseModel;
@@ -41,7 +41,7 @@ public class NodeStatusQueryLooper implements Runnable {
   public static final String RESULT_VALUE_FORMAT = "返回值:【%s】";
   public static final String OPERATOR_FORMAT = "操作符:【%s】";
   public static final String QUERY_ERROR_TIPS = "loop query status error";
-  private final Map<String, IRemoteInvoker> remoteInvokerMap;
+  private final Map<String, INodeTrigger> remoteInvokerMap;
 
   private final Map<String, Long> stopPipelineHistoryMap = new ConcurrentHashMap<>();
   private final LinkedBlockingQueue<TaskNode> queue = new LinkedBlockingQueue<TaskNode>();
@@ -49,7 +49,7 @@ public class NodeStatusQueryLooper implements Runnable {
   private final CompareFactory compareFactory;
 
 
-  public NodeStatusQueryLooper(List<IRemoteInvoker> remoteInvokers,
+  public NodeStatusQueryLooper(List<INodeTrigger> remoteInvokers,
       @Qualifier("queryLooperExecutorPool") ExecutorService executorService,
       CompareFactory compareFactory) {
     remoteInvokerMap = remoteInvokers.stream()
@@ -67,7 +67,7 @@ public class NodeStatusQueryLooper implements Runnable {
   private void runNode(TaskNode node) {
     executorService.execute(() -> {
       try {
-        IRemoteInvoker remoteInvoker = remoteInvokerMap.get(node.getExecuteType());
+        INodeTrigger remoteInvoker = remoteInvokerMap.get(node.getExecuteType());
         String result = remoteInvoker.queryStatus(node.getRefreshContext(), node);
         log.info("get query status result={}", result);
         if (StringUtils.isBlank(result)) {

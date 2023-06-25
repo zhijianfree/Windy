@@ -9,6 +9,8 @@ import lombok.Data;
 @Data
 public class DeployRequest {
 
+  private String pipelineId;
+
   private String gitUrl;
 
   private String remotePath;

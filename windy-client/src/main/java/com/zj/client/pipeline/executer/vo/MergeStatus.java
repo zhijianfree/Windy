@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class TempStatus {
+public class MergeStatus {
 
   /**
    * 状态
@@ -15,4 +15,13 @@ public class TempStatus {
    * 运行过程消息列表
    * */
   private List<String> message;
+
+  public MergeStatus(Integer status) {
+    this.status = status;
+  }
+
+  public MergeStatus(Integer status, List<String> message) {
+    this.status = status;
+    this.message = message;
+  }
 }

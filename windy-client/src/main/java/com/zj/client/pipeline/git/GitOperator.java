@@ -27,17 +27,17 @@ public class GitOperator {
   @Autowired
   private GlobalEnvConfig globalEnvConfig;
 
-  public Git pullCodeFromGit(String gitUrl, String branch, String workspace) throws Exception {
-    String serviceName = Utils.getServiceFromUrl(gitUrl);
+  public Git pullCodeFromGit(String gitUrl, String branch, String workspace)
+      throws Exception {
+
     // 判断本地目录是否存在
-    String serviceDir = workspace + File.separator + serviceName;
-    createIfNotExist(serviceDir);
+    createIfNotExist(workspace);
 
     // clone 仓库到指定目录
     // 提供用户名和密码的验证
     String user = globalEnvConfig.getGitUser();
     String pwd = globalEnvConfig.getGitPassword();
-    return Git.cloneRepository().setURI(gitUrl).setDirectory(new File(serviceDir))
+    return Git.cloneRepository().setURI(gitUrl).setDirectory(new File(workspace))
         .setCredentialsProvider(new UsernamePasswordCredentialsProvider(user, pwd))
         .setBranch(branch).call();
   }

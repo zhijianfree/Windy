@@ -20,6 +20,7 @@ import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.eclipse.jgit.api.Git;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
@@ -33,6 +34,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class CodeBuildService {
 
+  public static final int BUILD_SUCCESS = 0;
+  public static final String BUILD_SUCCESS_TIPS = "构建成功";
   @Autowired
   private GitOperator gitOperator;
   @Autowired
@@ -49,19 +52,20 @@ public class CodeBuildService {
     executorService.execute(() -> {
       try {
         //从git服务端拉取代码
-        gitOperator.pullCodeFromGit(buildParam.getGitUrl(), buildParam.getBranch(),
-            globalEnvConfig.getGitWorkspace());
+        String gitUrl = buildParam.getGitUrl();
+        String serviceName = Utils.getServiceFromUrl(gitUrl);
+        String pipelineWorkspace = globalEnvConfig.getPipelineWorkspace(serviceName,
+            buildParam.getPipelineId());
+        Git git = gitOperator.pullCodeFromGit(gitUrl, buildParam.getBranch(), pipelineWorkspace);
+        git.fetch();
 
         //本地maven构建
-        String pomPath = getTargetPomPath(buildParam.getGitUrl(), buildParam.getPomPath());
-        String servicePath =
-            globalEnvConfig.getGitWorkspace() + File.separator + Utils.getServiceFromUrl(
-                buildParam.getGitUrl());
-        Integer exitCode = mavenOperator.build(pomPath, servicePath);
+        String pomPath = getTargetPomPath(pipelineWorkspace, buildParam.getPomPath());
+        Integer exitCode = mavenOperator.build(pomPath, pipelineWorkspace);
         log.info("get maven exit code={}", exitCode);
         ProcessStatus result =
-            Objects.equals(0, exitCode) ? ProcessStatus.SUCCESS : ProcessStatus.FAIL;
-        saveStatus(buildParam.getRecordId(), result, "构建成功");
+            Objects.equals(BUILD_SUCCESS, exitCode) ? ProcessStatus.SUCCESS : ProcessStatus.FAIL;
+        saveStatus(buildParam.getRecordId(), result, BUILD_SUCCESS_TIPS);
       } catch (Exception e) {
         log.error("buildCode error", e);
         saveStatus(buildParam.getRecordId(), ProcessStatus.FAIL, e.toString());
@@ -74,10 +78,8 @@ public class CodeBuildService {
     statusMap.put(recordId, new ResponseModel(status.getType(), message));
   }
 
-  private String getTargetPomPath(String gitUrl, String configPath) {
-    String serviceName = Utils.getServiceFromUrl(gitUrl);
-    return globalEnvConfig.getGitWorkspace() + File.separator + serviceName + File.separator
-        + configPath;
+  private String getTargetPomPath(String pipelineWorkspace, String configPath) {
+    return pipelineWorkspace + File.separator + configPath;
   }
 
   public ResponseModel getRecordStatus(String recordId) {
