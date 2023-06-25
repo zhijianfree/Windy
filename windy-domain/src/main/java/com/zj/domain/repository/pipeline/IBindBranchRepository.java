@@ -23,4 +23,6 @@ public interface IBindBranchRepository {
   Boolean updateGitBranch(BindBranchDto bindBranchDto);
 
   Boolean deleteGitBranch(String bindId);
+
+  void batchUnbindBranches(List<String> unbindBranches);
 }

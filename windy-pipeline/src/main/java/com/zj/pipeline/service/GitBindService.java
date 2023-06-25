@@ -18,10 +18,11 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 /**
@@ -70,14 +71,25 @@ public class GitBindService {
     return gitBindRepository.getPipelineRelatedBranches(pipelineId);
   }
 
+  @Transactional
   public Boolean updateGitBind(BindBranchDto bindBranchDto) {
     checkPipelineExist(bindBranchDto.getPipelineId());
+
+    //解绑其他分支
+    List<BindBranchDto> branches = gitBindRepository.getPipelineRelatedBranches(
+        bindBranchDto.getPipelineId());
+    List<String> unbindBranches = branches.stream().filter(
+            branch -> branch.getIsChoose() && !Objects.equals(branch.getGitBranch(),
+                bindBranchDto.getGitBranch())).map(BindBranchDto::getBindId)
+        .collect(Collectors.toList());
+    if (CollectionUtils.isNotEmpty(unbindBranches)) {
+      gitBindRepository.batchUnbindBranches(unbindBranches);
+    }
 
     BindBranchDto gitBind = getGitBind(bindBranchDto.getBindId());
     if (Objects.isNull(gitBind)) {
       throw new ApiException(ErrorCode.NOT_FOUND_PIPELINE_GIT_BIND);
     }
-
     return gitBindRepository.updateGitBranch(bindBranchDto);
   }
 
@@ -116,13 +128,12 @@ public class GitBindService {
       return;
     }
 
-    List<PipelineDto> pushPipelines = pipelines.stream()
-        .filter(pipeline -> Objects.equals(PipelineExecuteType.PUSH.getType(),
-            pipeline.getExecuteType())).collect(Collectors.toList());
+    List<PipelineDto> pushPipelines = pipelines.stream().filter(
+            pipeline -> Objects.equals(PipelineExecuteType.PUSH.getType(), pipeline.getExecuteType()))
+        .collect(Collectors.toList());
     pushPipelines.forEach(pipeline -> executorService.execute(() -> {
       List<BindBranchDto> gitBinds = listGitBinds(pipeline.getPipelineId());
-      Optional<BindBranchDto> optional = gitBinds.stream()
-          .filter(BindBranchDto::getIsChoose)
+      Optional<BindBranchDto> optional = gitBinds.stream().filter(BindBranchDto::getIsChoose)
           .filter(gitBind -> Objects.equals(gitBind.getGitBranch(), branch)).findAny();
       if (optional.isPresent()) {
         pipelineService.execute(pipeline.getPipelineId());
