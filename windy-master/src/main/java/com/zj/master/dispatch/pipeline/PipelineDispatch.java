@@ -167,6 +167,7 @@ public class PipelineDispatch implements IDispatchExecutor {
 
     ActionDetail actionDetail = new ActionDetail(configDetail, action);
     RequestContext requestContext = RequestContextBuilder.createContext(actionDetail);
+    requestContext.setPipelineId(pipelineNode.getPipelineId());
     taskNode.setRequestContext(requestContext);
 
     RefreshContext refreshContext = RefreshContextBuilder.createContext(actionDetail);

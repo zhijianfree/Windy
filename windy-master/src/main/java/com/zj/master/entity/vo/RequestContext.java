@@ -20,4 +20,6 @@ public class RequestContext {
   private String singleClientIp;
 
   private String gitUrl;
+
+  private String pipelineId;
 }
