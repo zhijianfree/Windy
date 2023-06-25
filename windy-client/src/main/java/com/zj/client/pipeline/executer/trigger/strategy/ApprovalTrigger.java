@@ -37,7 +37,7 @@ public class ApprovalTrigger implements INodeTrigger {
 
   @Override
   public void triggerRun(TriggerContext triggerContext, TaskNode taskNode) {
-
+    log.info("approval trigger run, no need to do");
   }
 
   @Override
