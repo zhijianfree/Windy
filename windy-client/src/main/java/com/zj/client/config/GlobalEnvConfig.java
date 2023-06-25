@@ -1,5 +1,6 @@
 package com.zj.client.config;
 
+import com.zj.client.utils.Utils;
 import java.io.File;
 import java.io.IOException;
 import org.springframework.core.env.Environment;
@@ -57,6 +58,13 @@ public class GlobalEnvConfig {
       }
     }
     return path;
+  }
+
+  /**
+   * 获取流水线构建过程中的工作路径
+   * */
+  public String getPipelineWorkspace(String service, String pipelineId) {
+    return getGitWorkspace() + File.separator + service + File.separator + pipelineId;
   }
 
   private boolean isWorkspaceExist(String workspace) {

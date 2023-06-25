@@ -1,28 +1,27 @@
-package com.zj.client.pipeline.executer.Invoker.strategy;
+package com.zj.client.pipeline.executer.trigger.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.client.config.GlobalEnvConfig;
 import com.zj.client.entity.dto.ResponseModel;
-import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
+import com.zj.client.pipeline.executer.trigger.INodeTrigger;
 import com.zj.client.pipeline.executer.vo.MergeRequest;
+import com.zj.client.pipeline.executer.vo.MergeStatus;
 import com.zj.client.pipeline.executer.vo.RefreshContext;
-import com.zj.client.pipeline.executer.vo.RequestContext;
 import com.zj.client.pipeline.executer.vo.TaskNode;
-import com.zj.client.pipeline.executer.vo.TempStatus;
+import com.zj.client.pipeline.executer.vo.TriggerContext;
 import com.zj.client.pipeline.git.GitOperator;
 import com.zj.client.utils.Utils;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.exception.ExecuteException;
-import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
@@ -34,7 +33,6 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
@@ -43,16 +41,17 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class MergeInvoker implements IRemoteInvoker {
+public class MergeMasterTrigger implements INodeTrigger {
 
   public static final String MASTER = "master";
   public static final String MERGE_COMMIT_TIPS = "Merge %s into %s.";
   public static final String ORIGIN = "origin";
+  public static final String MERGER_ERROR_TIPS = "merger error, find conflict files: ";
   private final GitOperator gitOperator;
   private final GlobalEnvConfig globalEnvConfig;
-  private final Map<String, TempStatus> statusMap = new ConcurrentHashMap<>();
+  private final Map<String, MergeStatus> statusMap = new ConcurrentHashMap<>();
 
-  public MergeInvoker(GitOperator gitOperator, GlobalEnvConfig globalEnvConfig) {
+  public MergeMasterTrigger(GitOperator gitOperator, GlobalEnvConfig globalEnvConfig) {
     this.gitOperator = gitOperator;
     this.globalEnvConfig = globalEnvConfig;
   }
@@ -63,17 +62,16 @@ public class MergeInvoker implements IRemoteInvoker {
   }
 
   @Override
-  public void triggerRun(RequestContext requestContext, TaskNode taskNode) throws Exception {
+  public void triggerRun(TriggerContext triggerContext, TaskNode taskNode) throws Exception {
     try {
-      TempStatus tempStatus = new TempStatus();
-      tempStatus.setStatus(ProcessStatus.RUNNING.getType());
-      statusMap.put(taskNode.getRecordId(), tempStatus);
+      statusMap.put(taskNode.getRecordId(), new MergeStatus(ProcessStatus.RUNNING.getType()));
       MergeRequest mergeRequest = JSON
-          .parseObject(JSON.toJSONString(requestContext.getData()), MergeRequest.class);
+          .parseObject(JSON.toJSONString(triggerContext.getData()), MergeRequest.class);
       //拉取远端代码到本地
+      String serviceName = Utils.getServiceFromUrl(mergeRequest.getGitUrl());
       Git git = gitOperator.pullCodeFromGit(mergeRequest.getGitUrl(),
           mergeRequest.getSourceBranch(),
-          globalEnvConfig.getGitWorkspace());
+          globalEnvConfig.getPipelineWorkspace(serviceName, mergeRequest.getPipelineId()));
 
       //合并代码
       Repository repository = git.getRepository();
@@ -81,11 +79,8 @@ public class MergeInvoker implements IRemoteInvoker {
       List<Ref> branches = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
       Ref sourceRef = findBranchRef(mergeRequest.getSourceBranch(), branches);
       MergeResult mergeResult = git.merge().include(sourceRef)
-          // 设置合并后同时提交
           .setCommit(true)
-          // 分支合并策略，--ff代表快速合并， --no-ff代表普通合并
           .setFastForward(FastForwardMode.NO_FF)
-          //设置提交信息
           .setMessage(String.format(MERGE_COMMIT_TIPS, mergeRequest.getSourceBranch(), MASTER))
           .call();
 
@@ -93,9 +88,7 @@ public class MergeInvoker implements IRemoteInvoker {
       if (mergeResult.getMergeStatus().isSuccessful()) {
         log.info("merge success branch ={}", mergeRequest.getSourceBranch());
         push2Repository(repository, git);
-        tempStatus = new TempStatus();
-        tempStatus.setStatus(ProcessStatus.SUCCESS.getType());
-        statusMap.put(taskNode.getRecordId(), tempStatus);
+        statusMap.put(taskNode.getRecordId(), new MergeStatus(ProcessStatus.SUCCESS.getType()));
         return;
       }
 
@@ -103,13 +96,10 @@ public class MergeInvoker implements IRemoteInvoker {
       ObjectId objectId = repository.findRef(MASTER).getObjectId();
       git.reset().setMode(ResetCommand.ResetType.HARD).setRef(objectId.getName()).call();
 
-      List<String> fileNames = mergeResult.getConflicts().keySet().stream()
-          .map(fileName -> "conflict file: " + fileName)
-          .collect(Collectors.toList());
-      tempStatus = new TempStatus();
-      tempStatus.setStatus(ProcessStatus.SUCCESS.getType());
-      tempStatus.setMessage(fileNames);
-      statusMap.put(taskNode.getRecordId(), tempStatus);
+      List<String> fileNames = new ArrayList<>();
+      fileNames.add(MERGER_ERROR_TIPS);
+      fileNames.addAll(mergeResult.getConflicts().keySet());
+      statusMap.put(taskNode.getRecordId(), new MergeStatus(ProcessStatus.FAIL.getType(), fileNames));
     } catch (Exception e) {
       log.warn("merger code error", e);
       throw new ExecuteException(ErrorCode.MERGE_CODE_ERROR);
@@ -143,13 +133,13 @@ public class MergeInvoker implements IRemoteInvoker {
 
   @Override
   public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
-    TempStatus tempStatus = statusMap.get(taskNode.getRecordId());
+    MergeStatus mergeStatus = statusMap.get(taskNode.getRecordId());
     JSONObject jsonObject = new JSONObject();
-    jsonObject.put("status", tempStatus.getStatus());
+    jsonObject.put("status", mergeStatus.getStatus());
     ResponseModel responseModel = new ResponseModel();
-    responseModel.setStatus(tempStatus.getStatus());
+    responseModel.setStatus(mergeStatus.getStatus());
     responseModel.setData(jsonObject);
-    responseModel.setMessage(JSON.toJSONString(tempStatus.getMessage()));
+    responseModel.setMessage(JSON.toJSONString(mergeStatus.getMessage()));
     return JSON.toJSONString(responseModel);
   }
 

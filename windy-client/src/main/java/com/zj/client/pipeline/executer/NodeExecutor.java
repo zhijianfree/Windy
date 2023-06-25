@@ -7,11 +7,11 @@ import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.exception.ExecuteException;
 import com.zj.common.model.ResultEvent;
-import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
+import com.zj.client.pipeline.executer.trigger.INodeTrigger;
 import com.zj.client.pipeline.executer.intercept.INodeExecuteInterceptor;
 import com.zj.client.pipeline.executer.notify.PipelineEventFactory;
 import com.zj.client.pipeline.executer.vo.PipelineStatusEvent;
-import com.zj.client.pipeline.executer.vo.RequestContext;
+import com.zj.client.pipeline.executer.vo.TriggerContext;
 import com.zj.client.pipeline.executer.vo.TaskNode;
 import com.zj.client.pipeline.executer.vo.TaskNodeRecord;
 import com.zj.common.enums.ProcessStatus;
@@ -37,14 +37,14 @@ public class NodeExecutor {
 
   public static final String TRIGGER_TASK_ERROR = "trigger task error";
   private final List<INodeExecuteInterceptor> interceptors;
-  private final Map<String, IRemoteInvoker> invokerMap;
+  private final Map<String, INodeTrigger> triggerMap;
   private final UniqueIdService uniqueIdService;
   private final IResultEventNotify resultEventNotify;
 
-  public NodeExecutor(List<INodeExecuteInterceptor> interceptors, List<IRemoteInvoker> invokers,
+  public NodeExecutor(List<INodeExecuteInterceptor> interceptors, List<INodeTrigger> invokers,
       UniqueIdService uniqueIdService, IResultEventNotify resultEventNotify) {
     this.interceptors = interceptors;
-    invokerMap = invokers.stream()
+    triggerMap = invokers.stream()
         .collect(Collectors.toMap(invoker -> invoker.type().name(), invoker -> invoker));
     this.uniqueIdService = uniqueIdService;
     this.resultEventNotify = resultEventNotify;
@@ -64,13 +64,13 @@ public class NodeExecutor {
 
       saveNodeRecord(historyId, node, recordId, statusAtomic);
 
-      IRemoteInvoker remoteInvoker = invokerMap.get(node.getExecuteType());
-      if (Objects.isNull(remoteInvoker)) {
+      INodeTrigger nodeTrigger = triggerMap.get(node.getExecuteType());
+      if (Objects.isNull(nodeTrigger)) {
         throw new ApiException(ErrorCode.UNKNOWN_EXECUTE_TYPE);
       }
       JSONObject context = node.getRequestContext();
-      RequestContext requestContext = new RequestContext(context, node);
-      remoteInvoker.triggerRun(requestContext, node);
+      TriggerContext triggerContext = new TriggerContext(context, node);
+      nodeTrigger.triggerRun(triggerContext, node);
     } catch (ExecuteException executeException) {
       statusAtomic.set(ProcessStatus.FAIL);
       errorMsg = Collections.singletonList(executeException.getMessage());

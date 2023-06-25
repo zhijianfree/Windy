@@ -1,15 +1,14 @@
-package com.zj.client.pipeline.executer.Invoker.strategy;
+package com.zj.client.pipeline.executer.trigger.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.dto.BuildParam;
 import com.zj.client.entity.dto.ResponseModel;
-import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
+import com.zj.client.pipeline.executer.trigger.INodeTrigger;
 import com.zj.client.pipeline.executer.vo.RefreshContext;
-import com.zj.client.pipeline.executer.vo.RequestContext;
+import com.zj.client.pipeline.executer.vo.TriggerContext;
 import com.zj.client.pipeline.executer.vo.TaskNode;
 import com.zj.client.service.CodeBuildService;
 import com.zj.common.enums.ExecuteType;
-import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -19,11 +18,11 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class BuildCodeInvoker implements IRemoteInvoker {
+public class BuildCodeTrigger implements INodeTrigger {
 
   private final CodeBuildService codeBuildService;
 
-  public BuildCodeInvoker(CodeBuildService codeBuildService) {
+  public BuildCodeTrigger(CodeBuildService codeBuildService) {
     this.codeBuildService = codeBuildService;
   }
 
@@ -33,8 +32,8 @@ public class BuildCodeInvoker implements IRemoteInvoker {
   }
 
   @Override
-  public void triggerRun(RequestContext requestContext, TaskNode taskNode) throws Exception {
-    BuildParam buildParam = JSON.parseObject(JSON.toJSONString(requestContext.getData()), BuildParam.class);
+  public void triggerRun(TriggerContext triggerContext, TaskNode taskNode) throws Exception {
+    BuildParam buildParam = JSON.parseObject(JSON.toJSONString(triggerContext.getData()), BuildParam.class);
     buildParam.setRecordId(taskNode.getRecordId());
     codeBuildService.buildCode(buildParam);
   }

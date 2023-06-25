@@ -1,12 +1,12 @@
-package com.zj.client.pipeline.executer.Invoker.strategy;
+package com.zj.client.pipeline.executer.trigger.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.client.entity.vo.TestFeatureParamVo;
-import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
+import com.zj.client.pipeline.executer.trigger.INodeTrigger;
 import com.zj.client.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.pipeline.executer.vo.RefreshContext;
-import com.zj.client.pipeline.executer.vo.RequestContext;
+import com.zj.client.pipeline.executer.vo.TriggerContext;
 import com.zj.client.pipeline.executer.vo.TaskNode;
 import com.zj.client.pipeline.executer.vo.TestRequestContext;
 import com.zj.common.enums.ExecuteType;
@@ -20,12 +20,8 @@ import java.util.Collections;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * @author guyuelan
@@ -33,7 +29,7 @@ import org.springframework.web.client.RestTemplate;
  */
 @Slf4j
 @Component
-public class TestFeatureInvoker implements IRemoteInvoker {
+public class FeatureTrigger implements INodeTrigger {
   private static final String TASK_STATUS_URL = "http://WindyMaster/v1/devops/master/task/%s/status";
   public static final String TASK_TIPS = "pipeline feature task";
 
@@ -46,8 +42,8 @@ public class TestFeatureInvoker implements IRemoteInvoker {
   }
 
   @Override
-  public void triggerRun(RequestContext requestContext, TaskNode taskNode) {
-    TestRequestContext context = OrikaUtil.convert(requestContext.getData(),
+  public void triggerRun(TriggerContext triggerContext, TaskNode taskNode) {
+    TestRequestContext context = OrikaUtil.convert(triggerContext.getData(),
         TestRequestContext.class);
     String taskId = context.getTaskId();
     TestFeatureParamVo paramVo = new TestFeatureParamVo();
@@ -65,7 +61,7 @@ public class TestFeatureInvoker implements IRemoteInvoker {
       throw new ExecuteException(JSON.toJSONString(jsonObject));
     }
     String url = String.format(TASK_STATUS_URL, jsonObject.getString("data"));
-    requestContext.getTaskNode().getRefreshContext().setUrl(url);
+    triggerContext.getTaskNode().getRefreshContext().setUrl(url);
   }
 
   @Override

@@ -11,6 +11,8 @@ public class BuildParam {
 
   private String recordId;
 
+  private String pipelineId;
+
   private String gitUrl;
 
   private String pomPath;

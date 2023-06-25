@@ -1,15 +1,14 @@
-package com.zj.client.pipeline.executer.Invoker.strategy;
+package com.zj.client.pipeline.executer.trigger.strategy;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.client.pipeline.executer.Invoker.IRemoteInvoker;
+import com.zj.client.pipeline.executer.trigger.INodeTrigger;
 import com.zj.client.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.pipeline.executer.vo.RefreshContext;
-import com.zj.client.pipeline.executer.vo.RequestContext;
+import com.zj.client.pipeline.executer.vo.TriggerContext;
 import com.zj.client.pipeline.executer.vo.TaskNode;
 import com.zj.client.pipeline.executer.vo.WaitRequestContext;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.utils.OrikaUtil;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
@@ -25,7 +24,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class WaitInvoker implements IRemoteInvoker {
+public class WaitTrigger implements INodeTrigger {
 
   public static final String MESSAGE_TIPS = "等待执行结果";
   private final ConcurrentHashMap<String, CountDownLatch> countDownMap = new ConcurrentHashMap<>();
@@ -36,9 +35,9 @@ public class WaitInvoker implements IRemoteInvoker {
   }
 
   @Override
-  public void triggerRun(RequestContext requestContext, TaskNode taskNode) throws IOException {
+  public void triggerRun(TriggerContext triggerContext, TaskNode taskNode) throws IOException {
     WaitRequestContext waitRequestContext = JSON.parseObject(
-        JSON.toJSONString(requestContext.getData()), WaitRequestContext.class);
+        JSON.toJSONString(triggerContext.getData()), WaitRequestContext.class);
     CompletableFuture.runAsync(() -> {
       try {
         CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -49,28 +48,23 @@ public class WaitInvoker implements IRemoteInvoker {
     }).whenComplete((consumer,ex) ->{
       CountDownLatch countDownLatch = countDownMap.get(taskNode.getRecordId());
       countDownLatch.countDown();
-    }).exceptionally(ex ->{
-      CountDownLatch countDownLatch = countDownMap.get(taskNode.getRecordId());
-      countDownLatch.countDown();
-      log.error("run wait error", ex);
-      return null;
     });
-
   }
 
   @Override
   public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
-    CountDownLatch countDownLatch = countDownMap.get(taskNode.getRecordId());
-    long count = countDownLatch.getCount();
     QueryResponseModel responseModel = new QueryResponseModel();
     responseModel.setMessage(Collections.singletonList(MESSAGE_TIPS));
     responseModel.setStatus(ProcessStatus.RUNNING.getType());
+    CountDownLatch countDownLatch = countDownMap.get(taskNode.getRecordId());
+    long count = countDownLatch.getCount();
     if (count > 0) {
       return JSON.toJSONString(responseModel);
     }
 
     log.info("wait task complete recordId={}", taskNode.getRecordId());
     responseModel.setStatus(ProcessStatus.SUCCESS.getType());
+    countDownMap.remove(taskNode.getRecordId());
     return JSON.toJSONString(responseModel);
   }
 }
