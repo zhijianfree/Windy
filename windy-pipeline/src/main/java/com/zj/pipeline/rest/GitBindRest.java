@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -68,7 +69,7 @@ public class GitBindRest {
   }
 
   @PostMapping("/web/hook")
-  public void codeWebHook(@RequestBody JSONObject data) {
-    gitBindService.notifyHook(data);
+  public void codeWebHook(@RequestBody Object data, @RequestParam("platform") String platform) {
+    gitBindService.notifyHook(data, platform);
   }
 }

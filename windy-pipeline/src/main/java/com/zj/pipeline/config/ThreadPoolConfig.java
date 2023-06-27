@@ -1,5 +1,7 @@
 package com.zj.pipeline.config;
 
+import com.zj.common.monitor.pool.WindyThreadPool;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -18,14 +20,14 @@ import org.springframework.context.annotation.Configuration;
 public class ThreadPoolConfig {
 
   @Bean("webHookExecutorPool")
-  public ExecutorService getWebHookExecutor() {
-    return new ThreadPoolExecutor(5, 20, 10, TimeUnit.MINUTES, new LinkedBlockingQueue<>(100),
-        (r, executor) -> {
-          if (!executor.isShutdown()) {
-            executor.getQueue().poll();
-            executor.execute(r);
-          }
-          log.info("discard old");
-        });
+  public Executor getWebHookExecutor() {
+    WindyThreadPool windyThreadPool = new WindyThreadPool();
+    windyThreadPool.setCorePoolSize(5);
+    windyThreadPool.setMaxPoolSize(20);
+    windyThreadPool.setTimeout(600L);
+    windyThreadPool.setAllowCoreThreadTimeOut(false);
+    windyThreadPool.setQueueSize(100);
+    windyThreadPool.setThreadNamePrefix("web-hook-thread-");
+    return windyThreadPool;
   }
 }

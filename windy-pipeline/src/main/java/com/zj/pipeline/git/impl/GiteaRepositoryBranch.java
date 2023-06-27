@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.zj.pipeline.git.BaseRepository;
 import com.zj.pipeline.git.GitConstants;
 import com.zj.pipeline.git.IRepositoryBranch;
-import com.zj.pipeline.git.entity.CreateBranchVO;
+import com.zj.pipeline.entity.vo.CreateBranchVo;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,7 +31,7 @@ public class GiteaRepositoryBranch extends BaseRepository implements IRepository
   @Override
   public boolean createBranch(String serviceName, String branchName) {
     String gitPath = String.format(GitConstants.CREATE_BRANCH, getGitUser(), serviceName);
-    CreateBranchVO createBranchVO = new CreateBranchVO();
+    CreateBranchVo createBranchVO = new CreateBranchVo();
     createBranchVO.setBranchName(branchName);
     String result = gitRequestProxy.post(gitPath, JSON.toJSONString(createBranchVO));
     log.info("request create branch result = {}", result);
