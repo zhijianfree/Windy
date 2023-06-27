@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +42,7 @@ public class FeatureExecuteProxy implements IStopEventListener {
   private RequestProxy requestProxy;
   @Autowired
   @Qualifier("featureExecutorPool")
-  private ExecutorService executorService;
+  private Executor executorService;
 
   @Autowired
   private TaskEndProcessor taskEndProcessor;

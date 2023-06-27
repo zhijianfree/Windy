@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.impl.StaticLoggerBinder;
-import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -17,7 +16,6 @@ import org.springframework.util.CollectionUtils;
  * @since 2021/11/5
  */
 @Slf4j
-@Component
 public class LogHandler {
 
   public static final String SERVICE_LOG_LEVEL_CONFIG = "service.log.level";
