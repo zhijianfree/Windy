@@ -1,4 +1,4 @@
-package com.zj.pipeline.git.entity;
+package com.zj.pipeline.entity.vo;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
@@ -8,7 +8,7 @@ import lombok.Data;
  * @since 2023/3/10
  */
 @Data
-public class CreateBranchVO {
+public class CreateBranchVo {
 
   /**
    * 新分支名称

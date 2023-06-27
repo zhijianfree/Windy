@@ -11,10 +11,13 @@ import com.zj.domain.entity.dto.service.MicroserviceDto;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
 import com.zj.pipeline.entity.enums.PipelineExecuteType;
 import com.zj.pipeline.git.IRepositoryBranch;
+import com.zj.pipeline.git.hook.IGitWebhook;
 import com.zj.service.service.MicroserviceService;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -33,24 +36,25 @@ import org.springframework.util.StringUtils;
 @Service
 public class GitBindService {
 
-  @Autowired
   private MicroserviceService microserviceService;
-
-  @Autowired
   private PipelineService pipelineService;
 
-  @Autowired
-  @Qualifier("webHookExecutorPool")
-  private ExecutorService executorService;
-
-  @Autowired
   private IRepositoryBranch repositoryBranch;
-
-  @Autowired
   private UniqueIdService uniqueIdService;
-
-  @Autowired
   private IBindBranchRepository gitBindRepository;
+
+  private Map<String, IGitWebhook> webhookMap;
+
+  public GitBindService(MicroserviceService microserviceService, PipelineService pipelineService,
+      IRepositoryBranch repositoryBranch,
+      UniqueIdService uniqueIdService, IBindBranchRepository gitBindRepository, List<IGitWebhook> webhooks) {
+    this.microserviceService = microserviceService;
+    this.pipelineService = pipelineService;
+    this.repositoryBranch = repositoryBranch;
+    this.uniqueIdService = uniqueIdService;
+    this.gitBindRepository = gitBindRepository;
+    webhookMap = webhooks.stream().collect(Collectors.toMap(IGitWebhook::platform, webhook -> webhook));
+  }
 
   public String createGitBind(BindBranchDto bindBranchDto) {
     List<BindBranchDto> bindDtoList = listGitBinds(bindBranchDto.getPipelineId());
@@ -109,44 +113,12 @@ public class GitBindService {
     }
   }
 
-  public void notifyHook(JSONObject data) {
-    log.info("get notify hook param={}", JSON.toJSONString(data));
-    JSONObject repository = data.getJSONObject("repository");
-    String name = repository.getString("name");
-    String branch = getBranchFromHookData(data);
-    log.info("get repository name={} branch name={}", name, branch);
-    if (StringUtils.isEmpty(branch) || StringUtils.isEmpty(name)) {
-      log.info("can not get service name or branch not trigger pipeline ={}",
-          JSON.toJSONString(data));
-      return;
-    }
-
-    MicroserviceDto microservice = microserviceService.queryServiceByName(name);
-    List<PipelineDto> pipelines = pipelineService.getServicePipelines(microservice.getServiceId());
-    if (CollectionUtils.isEmpty(pipelines)) {
-      log.info("can not find pipelines service={}", name);
-      return;
-    }
-
-    List<PipelineDto> pushPipelines = pipelines.stream().filter(
-            pipeline -> Objects.equals(PipelineExecuteType.PUSH.getType(), pipeline.getExecuteType()))
-        .collect(Collectors.toList());
-    pushPipelines.forEach(pipeline -> executorService.execute(() -> {
-      List<BindBranchDto> gitBinds = listGitBinds(pipeline.getPipelineId());
-      Optional<BindBranchDto> optional = gitBinds.stream().filter(BindBranchDto::getIsChoose)
-          .filter(gitBind -> Objects.equals(gitBind.getGitBranch(), branch)).findAny();
-      if (optional.isPresent()) {
-        pipelineService.execute(pipeline.getPipelineId());
-        log.info("web hook trigger pipeline execute pipeline={}", pipeline.getPipelineId());
-      }
-    }));
+  public void notifyHook(Object data, String platform) {
+    IGitWebhook gitWebhook = webhookMap.get(platform);
+    gitWebhook.webhook(data);
   }
 
-  private static String getBranchFromHookData(JSONObject data) {
-    String ref = data.getString("ref");
-    int index = ref.lastIndexOf("/");
-    return ref.substring(index + 1);
-  }
+
 
   public List<String> getServiceBranch(String serviceId) {
     MicroserviceDto serviceDetail = microserviceService.queryServiceDetail(serviceId);
