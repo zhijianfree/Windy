@@ -5,25 +5,12 @@ import com.zj.common.model.ResultEvent;
 import com.zj.common.monitor.InstanceMonitor;
 import com.zj.common.monitor.RequestProxy;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * @author guyuelan
@@ -35,14 +22,14 @@ public class ClientEventProcessor implements IResultEventNotify {
   private final DiscoveryClient discoveryClient;
   private final RequestProxy requestProxy;
   private final InstanceMonitor instanceMonitor;
-  private final LocalPersistence localPersistence;
+  private final OptimizePersistLocal optimizePersistLocal;
 
   public ClientEventProcessor(DiscoveryClient discoveryClient, RequestProxy requestProxy,
-      InstanceMonitor instanceMonitor, LocalPersistence localPersistence) {
+      InstanceMonitor instanceMonitor, OptimizePersistLocal optimizePersistLocal) {
     this.discoveryClient = discoveryClient;
     this.requestProxy = requestProxy;
     this.instanceMonitor = instanceMonitor;
-    this.localPersistence = localPersistence;
+    this.optimizePersistLocal = optimizePersistLocal;
   }
 
   @Override
@@ -52,7 +39,7 @@ public class ClientEventProcessor implements IResultEventNotify {
       return requestProxy.clientNotifyEvent(resultEvent);
     } catch (Exception e) {
       log.error("notify event error save to file", e);
-      localPersistence.persistNotify(resultEvent);
+      optimizePersistLocal.persistNotify(resultEvent);
     }
     return false;
   }
@@ -71,18 +58,20 @@ public class ClientEventProcessor implements IResultEventNotify {
   }
 
   private void handleNotifyFromCache() {
-    List<ResultEvent> resultEvents = localPersistence.getCacheList();
+    List<ResultEvent> resultEvents = optimizePersistLocal.getCacheList();
     List<ResultEvent> handledEvents = resultEvents.stream().filter(this::notifyEvent)
         .collect(Collectors.toList());
-    localPersistence.removeCache(handledEvents);
+    optimizePersistLocal.removeCache(handledEvents);
   }
 
   private void handleNotifyFromFile() {
-    List<ResultEvent> resultEvents = localPersistence.readEventsFromFile();
+    List<ResultEvent> resultEvents = optimizePersistLocal.readEventsFromFile();
     if (CollectionUtils.isEmpty(resultEvents)) {
       return;
     }
-    localPersistence.clearFileContent();
+
+    //从文件读取到所有的数据后直接全部清清除
+    optimizePersistLocal.clearFileContent();
     resultEvents.forEach(this::notifyEvent);
   }
 }
