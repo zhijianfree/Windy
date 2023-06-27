@@ -1,5 +1,7 @@
 package com.zj.master.config;
 
+import com.zj.common.monitor.pool.WindyThreadPool;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -18,14 +20,26 @@ import org.springframework.context.annotation.Configuration;
 public class ThreadPoolConfig {
 
   @Bean("pipelineExecutorPool")
-  public ExecutorService getPipelineExecutor() {
-    return new ThreadPoolExecutor(20, 40, 3, TimeUnit.HOURS, new LinkedBlockingQueue<>(100),
-        new CallerRunsPolicy());
+  public Executor getPipelineExecutor() {
+    WindyThreadPool windyThreadPool = new WindyThreadPool();
+    windyThreadPool.setCorePoolSize(20);
+    windyThreadPool.setMaxPoolSize(40);
+    windyThreadPool.setTimeout(3600 * 3L);
+    windyThreadPool.setAllowCoreThreadTimeOut(false);
+    windyThreadPool.setQueueSize(100);
+    windyThreadPool.setThreadNamePrefix("master-pipeline-thread-");
+    return windyThreadPool;
   }
 
   @Bean("featureExecutorPool")
-  public ExecutorService getFeatureExecutor() {
-    return new ThreadPoolExecutor(20, 40, 3, TimeUnit.HOURS, new LinkedBlockingQueue<>(100),
-        new CallerRunsPolicy());
+  public Executor getFeatureExecutor() {
+    WindyThreadPool windyThreadPool = new WindyThreadPool();
+    windyThreadPool.setCorePoolSize(20);
+    windyThreadPool.setMaxPoolSize(40);
+    windyThreadPool.setTimeout(3600 * 3L);
+    windyThreadPool.setAllowCoreThreadTimeOut(false);
+    windyThreadPool.setQueueSize(100);
+    windyThreadPool.setThreadNamePrefix("master-feature-thread-");
+    return windyThreadPool;
   }
 }

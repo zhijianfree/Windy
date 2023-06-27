@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -21,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
@@ -42,15 +44,17 @@ public class CodeBuildService {
   private MavenOperator mavenOperator;
   @Autowired
   @Qualifier("gitOperateExecutor")
-  private ExecutorService executorService;
+  private Executor executorService;
   @Autowired
   private GlobalEnvConfig globalEnvConfig;
 
   private final Map<String, ResponseModel> statusMap = new ConcurrentHashMap<>();
 
   public void buildCode(BuildParam buildParam) {
+    log.info("before mdc map={}", MDC.getCopyOfContextMap());
     executorService.execute(() -> {
       try {
+        log.info("start build code ........ mdc={}", MDC.getCopyOfContextMap());
         //从git服务端拉取代码
         String gitUrl = buildParam.getGitUrl();
         String serviceName = Utils.getServiceFromUrl(gitUrl);

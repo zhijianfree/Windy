@@ -13,8 +13,10 @@ import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.IpUtils;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -35,13 +37,15 @@ public class ExecuteProxy implements IStatusNotifyListener {
 
   @Autowired
   @Qualifier("pipelineExecutorPool")
-  private ExecutorService executorService;
+  private Executor executorService;
 
   /**
    * 流水线的执行应该是每个节点做为一个任务，这样就可以充分使用client的扩展性
    */
   public void runNode(TaskNode taskNode) {
+    MDC.getCopyOfContextMap();
     CompletableFuture.supplyAsync(() -> {
+      log.info("wwwwwww={}", MDC.getCopyOfContextMap());
       if (Objects.isNull(taskNode)) {
         return null;
       }

@@ -4,7 +4,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.logging.MDC;
+import org.slf4j.MDC;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -14,7 +14,7 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public class TidInterceptor implements HandlerInterceptor {
 
-  private static final String MDC_TID_KEY = "tid";
+  public static final String MDC_TID_KEY = "tid";
   public static final String HTTP_HEADER_TRACE_ID = "REQUEST-TRACE-ID";
 
   @Override

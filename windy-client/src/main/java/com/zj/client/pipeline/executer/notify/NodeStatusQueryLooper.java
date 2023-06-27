@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -45,12 +46,12 @@ public class NodeStatusQueryLooper implements Runnable {
 
   private final Map<String, Long> stopPipelineHistoryMap = new ConcurrentHashMap<>();
   private final LinkedBlockingQueue<TaskNode> queue = new LinkedBlockingQueue<TaskNode>();
-  private final ExecutorService executorService;
+  private final Executor executorService;
   private final CompareFactory compareFactory;
 
 
   public NodeStatusQueryLooper(List<INodeTrigger> remoteInvokers,
-      @Qualifier("queryLooperExecutorPool") ExecutorService executorService,
+      @Qualifier("queryLooperExecutorPool") Executor executorService,
       CompareFactory compareFactory) {
     remoteInvokerMap = remoteInvokers.stream()
         .collect(Collectors.toMap(invoker -> invoker.type().name(), invoker -> invoker));
