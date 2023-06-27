@@ -3,7 +3,7 @@ package com.zj.client.pipeline.executer.vo;
 import lombok.Data;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/6/15
  */
 @Data

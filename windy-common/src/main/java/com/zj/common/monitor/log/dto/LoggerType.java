@@ -1,7 +1,7 @@
 package com.zj.common.monitor.log.dto;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2021/11/5
  */
 public enum LoggerType {

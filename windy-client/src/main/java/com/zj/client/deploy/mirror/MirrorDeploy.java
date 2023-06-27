@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * k8s镜像部署
- * @author falcon
+ * @author guyuelan
  * @since 2023/6/8
  */
 @Component

@@ -34,7 +34,7 @@ import org.springframework.web.client.RestTemplate;
 /**
  * 请求代理类，后续可以在此类做扩展，对于master与client交互可以自定义策略 来执行调度哪个节点
  *
- * @author falcon
+ * @author guyuelan
  * @since 2023/6/19
  */
 @Slf4j

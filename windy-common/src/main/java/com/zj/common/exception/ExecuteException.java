@@ -3,7 +3,7 @@ package com.zj.common.exception;
 import java.util.Objects;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/6/21
  */
 public class ExecuteException extends CommonException {

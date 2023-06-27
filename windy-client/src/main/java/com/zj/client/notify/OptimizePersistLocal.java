@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 /**
  * Client 将通知失败的数据缓存到本地文件， 然后慢慢轮询通知master节点 为了保证数据一致性
  * 尽最大努力将未通知的结果持久化到本地文件中
- * @author falcon
+ * @author guyuelan
  * @since 2023/5/24
  */
 @Slf4j

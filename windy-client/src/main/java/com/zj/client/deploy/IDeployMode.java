@@ -3,7 +3,7 @@ package com.zj.client.deploy;
 import com.zj.common.enums.ProcessStatus;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/6/8
  */
 public interface IDeployMode<T extends DeployContext> {
