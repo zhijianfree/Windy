@@ -3,7 +3,7 @@ package com.zj.common.monitor.log.dto;
 import lombok.Data;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2021/11/5
  */
 @Data

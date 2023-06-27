@@ -5,7 +5,7 @@ import com.zj.common.monitor.log.dto.UpdateLevel;
 import java.util.List;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2021/11/5
  */
 public interface ILogger {
