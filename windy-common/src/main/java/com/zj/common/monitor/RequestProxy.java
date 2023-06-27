@@ -8,6 +8,7 @@ import com.zj.common.model.ResultEvent;
 import com.zj.common.model.StopDispatch;
 import com.zj.common.monitor.discover.DiscoverService;
 import com.zj.common.monitor.discover.ServiceInstance;
+import com.zj.common.monitor.trace.TidInterceptor;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +21,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -80,6 +82,7 @@ public class RequestProxy {
       return requestWithIp(data, serviceInstance);
     }
 
+    wrapTraceHeader();
     HttpEntity<Object> http = new HttpEntity<>(data, headers);
     log.info("request body={}", JSON.toJSONString(data));
     try {
@@ -93,14 +96,21 @@ public class RequestProxy {
     return false;
   }
 
+  private void wrapTraceHeader() {
+    String traceId = MDC.get(TidInterceptor.MDC_TID_KEY);
+    headers.add(TidInterceptor.HTTP_HEADER_TRACE_ID, traceId);
+  }
+
   private boolean requestWithIp(Object data, ServiceInstance serviceInstance) {
     if (Objects.isNull(serviceInstance)) {
       log.warn("can not find service instance");
       return false;
     }
 
+    String traceId = MDC.get(TidInterceptor.MDC_TID_KEY);
     String url = MASTER_DISPATCH_TASK.replace(WINDY_CLIENT, serviceInstance.getHost());
     Request request = new Request.Builder().url(url)
+        .header(TidInterceptor.HTTP_HEADER_TRACE_ID, traceId)
         .post(RequestBody.create(mediaType, JSON.toJSONString(data))).build();
     try {
       Response response = okHttpClient.newCall(request).execute();
@@ -121,7 +131,9 @@ public class RequestProxy {
       List<ServiceInstance> windyClientInstances = discoverService.getWindyClientInstances();
       windyClientInstances.forEach(serviceInstance -> {
         String url = String.format(MASTER_NOTIFY_CLIENT_STOP, serviceInstance.getHost());
+        String traceId = MDC.get(TidInterceptor.MDC_TID_KEY);
         Request request = new Request.Builder().url(url)
+            .header(TidInterceptor.HTTP_HEADER_TRACE_ID, traceId)
             .put(RequestBody.create(mediaType, JSON.toJSONString(stopDispatch))).build();
         try {
           Response response = okHttpClient.newCall(request).execute();
@@ -137,6 +149,7 @@ public class RequestProxy {
    * client触发用例任务执行
    */
   public ResponseEntity<JSONObject> startFeatureTask(Object data) {
+    wrapTraceHeader();
     HttpEntity<Object> httpEntity = new HttpEntity<>(data, headers);
     try {
       return restTemplate.postForEntity(CLIENT_START_TASK, httpEntity, JSONObject.class);
@@ -149,7 +162,9 @@ public class RequestProxy {
    * client查询任务执行状态
    */
   public ResponseEntity<JSONObject> getFeatureTaskStatus(String url) {
-    return restTemplate.getForEntity(url, JSONObject.class);
+    wrapTraceHeader();
+    HttpEntity request = new HttpEntity(headers);
+    return restTemplate.exchange(url, HttpMethod.GET, request, JSONObject.class);
   }
 
   /**
@@ -166,7 +181,8 @@ public class RequestProxy {
     }
 
     //master节点不可达时，尝试使用其他的master节点
-    HttpEntity<ResultEvent> httpEntity = new HttpEntity<>(resultEvent);
+    wrapTraceHeader();
+    HttpEntity<ResultEvent> httpEntity = new HttpEntity<>(resultEvent, headers);
     ResponseEntity<String> response = restTemplate.postForEntity(CLIENT_NOTIFY_MASTER_URL,
         httpEntity, String.class);
     log.info("notify event code={} result={}", response.getStatusCode(), response.getBody());
@@ -176,7 +192,9 @@ public class RequestProxy {
   private boolean notifyWithMasterIP(ResultEvent resultEvent, ServiceInstance serviceInstance) {
     String masterHost = serviceInstance.getHost();
     String url = CLIENT_NOTIFY_MASTER_URL.replace(WINDY_MASTER, masterHost);
+    String traceId = MDC.get(TidInterceptor.MDC_TID_KEY);
     Request request = new Request.Builder().url(url)
+        .header(TidInterceptor.HTTP_HEADER_TRACE_ID, traceId)
         .post(RequestBody.create(mediaType, JSON.toJSONString(resultEvent))).build();
     try {
       Response response = okHttpClient.newCall(request).execute();
@@ -193,8 +211,9 @@ public class RequestProxy {
    * client审批节点查询审批的状态
    */
   public String getApprovalRecord(String recordId) {
-    String url = CLIENT_QUERY_APPROVAL_STATUS + recordId;
+    wrapTraceHeader();
     HttpEntity request = new HttpEntity(headers);
+    String url = CLIENT_QUERY_APPROVAL_STATUS + recordId;
     ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, request,
         String.class);
     return responseEntity.getBody();
@@ -204,6 +223,7 @@ public class RequestProxy {
    * 控制台点击运行流水线
    */
   public String runPipeline(Object data) {
+    wrapTraceHeader();
     HttpEntity<Object> httpEntity = new HttpEntity<>(data, headers);
     try {
       ResponseEntity<JSONObject> responseEntity = restTemplate.postForEntity(CONSOLE_RUN_TASK,
@@ -222,6 +242,7 @@ public class RequestProxy {
    * 控制台停止流水线
    */
   public boolean stopPipeline(Object data) {
+    wrapTraceHeader();
     HttpEntity<Object> httpEntity = new HttpEntity<>(data, headers);
     try {
       ResponseEntity<String> responseEntity = restTemplate.postForEntity(CONSOLE_STOP_TASK,
@@ -236,6 +257,7 @@ public class RequestProxy {
   }
 
   public boolean runTask(Object data) {
+    wrapTraceHeader();
     HttpEntity<Object> httpEntity = new HttpEntity<>(data, headers);
     try {
       ResponseEntity<String> responseEntity = restTemplate.postForEntity(CONSOLE_RUN_TASK,

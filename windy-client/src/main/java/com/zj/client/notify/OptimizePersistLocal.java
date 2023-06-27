@@ -21,23 +21,23 @@ import org.springframework.stereotype.Component;
 
 /**
  * Client 将通知失败的数据缓存到本地文件， 然后慢慢轮询通知master节点 为了保证数据一致性
- *
+ * 尽最大努力将未通知的结果持久化到本地文件中
  * @author falcon
  * @since 2023/5/24
  */
 @Slf4j
 @Component
-public class LocalPersistence implements DisposableBean {
+public class OptimizePersistLocal implements DisposableBean {
 
   public static final String PERSIST_LOG = "persist.log";
   public static final String LINUX_PATH = "/opt/windy/persist/" + PERSIST_LOG;
   public static final String WINDOWS_PATH = "C:\\\\windy\\\\persist\\\\" + PERSIST_LOG;
   private final CopyOnWriteArrayList<ResultEvent> unPersistEventList = new CopyOnWriteArrayList<>();
 
-  private final Integer maxSaveSize = 10;
+  private final Integer maxSaveSize = 50;
   private File file;
 
-  public LocalPersistence() {
+  public OptimizePersistLocal() {
     file = new File(getDefaultDir());
     if (!file.exists()) {
       try {
@@ -65,9 +65,10 @@ public class LocalPersistence implements DisposableBean {
   }
 
   public void persistNotify(ResultEvent resultEvent) {
-    boolean exist = unPersistEventList.stream()
-        .noneMatch(event -> Objects.equals(resultEvent.getExecuteId(), event.getExecuteId()));
-    if (exist) {
+    boolean notExist = unPersistEventList.stream()
+        .noneMatch(event -> Objects.equals(resultEvent.getExecuteId(), event.getExecuteId())
+            && Objects.equals(resultEvent.getLogId(), event.getLogId()));
+    if (!notExist) {
       log.info("event is exist not notify logId={} executeId={}", resultEvent.getLogId(),
           resultEvent.getExecuteId());
       return;

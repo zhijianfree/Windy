@@ -51,10 +51,8 @@ public class CodeBuildService {
   private final Map<String, ResponseModel> statusMap = new ConcurrentHashMap<>();
 
   public void buildCode(BuildParam buildParam) {
-    log.info("before mdc map={}", MDC.getCopyOfContextMap());
     executorService.execute(() -> {
       try {
-        log.info("start build code ........ mdc={}", MDC.getCopyOfContextMap());
         //从git服务端拉取代码
         String gitUrl = buildParam.getGitUrl();
         String serviceName = Utils.getServiceFromUrl(gitUrl);

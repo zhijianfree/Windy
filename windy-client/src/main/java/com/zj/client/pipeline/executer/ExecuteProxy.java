@@ -10,6 +10,7 @@ import com.zj.client.pipeline.executer.notify.IStatusNotifyListener;
 import com.zj.client.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.client.pipeline.executer.vo.TaskNode;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.monitor.trace.TidInterceptor;
 import com.zj.common.utils.IpUtils;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -43,16 +44,15 @@ public class ExecuteProxy implements IStatusNotifyListener {
    * 流水线的执行应该是每个节点做为一个任务，这样就可以充分使用client的扩展性
    */
   public void runNode(TaskNode taskNode) {
-    MDC.getCopyOfContextMap();
+    String traceId = MDC.get(TidInterceptor.MDC_TID_KEY);
     CompletableFuture.supplyAsync(() -> {
-      log.info("wwwwwww={}", MDC.getCopyOfContextMap());
       if (Objects.isNull(taskNode)) {
         return null;
       }
       nodeExecutor.runNodeTask(taskNode.getHistoryId(), taskNode);
       return taskNode.getRecordId();
     }, executorService).whenComplete((node, e) -> {
-      log.info("complete trigger action recordId = {}", JSON.toJSONString(node));
+      log.info("complete trigger action recordId = {} traceId={}", JSON.toJSONString(node), traceId);
     });
   }
 
