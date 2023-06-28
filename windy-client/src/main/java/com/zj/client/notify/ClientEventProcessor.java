@@ -49,7 +49,7 @@ public class ClientEventProcessor implements IResultEventNotify {
    * */
   @Scheduled(cron = "0/10 * * * * ? ")
   public void asyncNotifyPersist() {
-    if (!instanceMonitor.isSuitable()){
+    if (instanceMonitor.isUnStable()){
       return;
     }
 

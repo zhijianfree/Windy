@@ -1,6 +1,5 @@
 package com.zj.master.schedule;
 
-import com.alibaba.fastjson.JSON;
 import com.zj.common.monitor.InstanceMonitor;
 import com.zj.common.utils.IpUtils;
 import com.zj.domain.entity.dto.log.DispatchLogDto;
@@ -14,7 +13,6 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -48,7 +46,7 @@ public class DispatchLogSchedule {
   //  @Scheduled(cron = "0 0 0/1 * * ? ")
   @Scheduled(cron = "0/5 * * * * ? ")
   public void scanTaskLog() {
-    if (!instanceMonitor.isSuitable()) {
+    if (instanceMonitor.isUnStable()) {
       return;
     }
     log.debug("start scan log......");

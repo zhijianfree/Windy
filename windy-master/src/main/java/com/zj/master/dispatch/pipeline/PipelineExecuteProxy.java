@@ -131,13 +131,11 @@ public class PipelineExecuteProxy implements IStopEventListener {
 //      processStatus = ProcessStatus.IGNORE_FAIL;
 //    }
 
-    //1 更新节点状态
-    nodeRecordRepository.updateNodeRecord(nodeRecord);
 
-    //2 根据节点状态判断整个流水线状态
+    //1 根据节点状态判断整个流水线状态
     NodeRecordDto record = nodeRecordRepository.getRecordById(nodeRecord.getRecordId());
 
-    //3 根据historyId关联的任务来执行下一个任务
+    //2 根据historyId关联的任务来执行下一个任务
     PipelineTask pipelineTask = pipelineTaskMap.get(nodeRecord.getHistoryId());
     if (Objects.isNull(pipelineTask)) {
       log.info("not find Pipeline task historyId={}", nodeRecord.getHistoryId());

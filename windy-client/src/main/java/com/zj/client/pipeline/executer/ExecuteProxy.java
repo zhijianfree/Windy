@@ -68,6 +68,8 @@ public class ExecuteProxy implements IStatusNotifyListener {
     }
 
     NodeRecord nodeRecord = new NodeRecord();
+    nodeRecord.setRecordId(taskNode.getRecordId());
+    nodeRecord.setNodeId(taskNode.getNodeId());
     nodeRecord.setHistoryId(taskNode.getHistoryId());
     String message = JSON.toJSONString(event.getErrorMsg());
     nodeRecord.setResult(message);

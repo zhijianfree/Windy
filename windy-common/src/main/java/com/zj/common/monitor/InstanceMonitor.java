@@ -10,25 +10,18 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class InstanceMonitor implements CommandLineRunner {
+public class InstanceMonitor{
 
-  private Long serviceStartTime;
-
-  private boolean isSuitable;
-
-  @Override
-  public void run(String... args) throws Exception {
-    serviceStartTime = System.currentTimeMillis();
-  }
+  private final Long serviceStartTime = System.currentTimeMillis();
+  private boolean isUnStable = true;
 
   /**
    * 服务启动后，需要一定的时间达到稳定性，所以这里配置一个delay时间
    */
-  public boolean isSuitable() {
-    if (!isSuitable){
-      isSuitable = (System.currentTimeMillis() - serviceStartTime) > 30000;
+  public boolean isUnStable() {
+    if (isUnStable){
+      isUnStable = (System.currentTimeMillis() - serviceStartTime) < 30000;
     }
-    return isSuitable;
-
+    return isUnStable;
   }
 }

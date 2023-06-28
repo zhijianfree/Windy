@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 /**
@@ -32,12 +33,17 @@ public class OptimizePersistLocal implements DisposableBean {
   public static final String PERSIST_LOG = "persist.log";
   public static final String LINUX_PATH = "/opt/windy/persist/" + PERSIST_LOG;
   public static final String WINDOWS_PATH = "C:\\\\windy\\\\persist\\\\" + PERSIST_LOG;
+  public static final String NOTIFY_ERROR_MAX_SIZE = "notify.error.max.size";
+  public static final String DEFAULT_SIZE = "10";
   private final CopyOnWriteArrayList<ResultEvent> unPersistEventList = new CopyOnWriteArrayList<>();
 
   private final Integer maxSaveSize = 50;
   private File file;
 
-  public OptimizePersistLocal() {
+  private Environment environment;
+
+  public OptimizePersistLocal(Environment environment) {
+    this.environment = environment;
     file = new File(getDefaultDir());
     if (!file.exists()) {
       try {
@@ -75,9 +81,14 @@ public class OptimizePersistLocal implements DisposableBean {
     }
 
     unPersistEventList.add(resultEvent);
-    if (unPersistEventList.size() > maxSaveSize) {
+    if (unPersistEventList.size() >= getMaxCacheSize()) {
       saveEventFile();
     }
+  }
+
+  private int getMaxCacheSize() {
+    String maxsize = environment.getProperty(NOTIFY_ERROR_MAX_SIZE, DEFAULT_SIZE);
+    return Integer.parseInt(maxsize);
   }
 
   @Override
