@@ -16,7 +16,7 @@ public class PipelineEventFactory {
 
   private static EventBus eventBus = new EventBus();
 
-  public PipelineEventFactory(List<IStatusNotifyListener> notifyList) {
+  public PipelineEventFactory(List<IPipelineStatusListener> notifyList) {
     notifyList.forEach(listener ->{
       eventBus.register(listener);
     });

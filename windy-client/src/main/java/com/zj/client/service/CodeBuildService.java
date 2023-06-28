@@ -58,9 +58,13 @@ public class CodeBuildService {
         String serviceName = Utils.getServiceFromUrl(gitUrl);
         String pipelineWorkspace = globalEnvConfig.getPipelineWorkspace(serviceName,
             buildParam.getPipelineId());
-        Git git = gitOperator.pullCodeFromGit(gitUrl, buildParam.getBranch(), pipelineWorkspace);
-        git.fetch();
 
+        if (buildParam.getIsPublish()) {
+          gitOperator.createTempBranch(gitUrl, buildParam.getBranches(), pipelineWorkspace);
+        } else {
+          String branch = buildParam.getBranches().get(0);
+          gitOperator.pullCodeFromGit(gitUrl, branch, pipelineWorkspace);
+        }
         //本地maven构建
         String pomPath = getTargetPomPath(pipelineWorkspace, buildParam.getPomPath());
         Integer exitCode = mavenOperator.build(pomPath, pipelineWorkspace);

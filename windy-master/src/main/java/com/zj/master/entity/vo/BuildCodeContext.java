@@ -1,5 +1,6 @@
 package com.zj.master.entity.vo;
 
+import java.util.List;
 import lombok.Data;
 
 /**
@@ -11,5 +12,7 @@ public class BuildCodeContext extends RequestContext{
 
   private String pomPath;
 
-  private String branch;
+  private Boolean isPublish;
+
+  private List<String> branches;
 }

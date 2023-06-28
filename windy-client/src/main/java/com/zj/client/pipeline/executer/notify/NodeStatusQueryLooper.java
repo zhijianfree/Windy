@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -61,7 +60,7 @@ public class NodeStatusQueryLooper implements Runnable {
     new Thread(this).start();
   }
 
-  public void addQuestTask(TaskNode node) {
+  public void addQueryTask(TaskNode node) {
     queue.add(node);
   }
 

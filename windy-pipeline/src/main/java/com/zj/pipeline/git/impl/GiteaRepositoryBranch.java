@@ -9,6 +9,7 @@ import com.zj.pipeline.git.IRepositoryBranch;
 import com.zj.pipeline.entity.vo.CreateBranchVo;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -57,6 +58,7 @@ public class GiteaRepositoryBranch extends BaseRepository implements IRepository
     }
 
     log.info("get list={}", result);
-    return branches.stream().map(json -> json.getString("name")).collect(Collectors.toList());
+    return branches.stream().map(json -> json.getString("name"))
+        .filter(branch -> !Objects.equals(branch, "master")).collect(Collectors.toList());
   }
 }

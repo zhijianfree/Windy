@@ -6,7 +6,7 @@ import com.zj.client.entity.vo.NodeRecord;
 import com.zj.client.notify.IResultEventNotify;
 import com.zj.common.enums.NotifyType;
 import com.zj.common.model.ResultEvent;
-import com.zj.client.pipeline.executer.notify.IStatusNotifyListener;
+import com.zj.client.pipeline.executer.notify.IPipelineStatusListener;
 import com.zj.client.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.client.pipeline.executer.vo.TaskNode;
 import com.zj.common.enums.ProcessStatus;
@@ -15,7 +15,6 @@ import com.zj.common.utils.IpUtils;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +27,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class ExecuteProxy implements IStatusNotifyListener {
+public class ExecuteProxy implements IPipelineStatusListener {
 
   @Autowired
   private NodeExecutor nodeExecutor;

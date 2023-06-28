@@ -43,6 +43,7 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 @Service
 public class PipelineService {
+
   @Autowired
   private PipelineNodeService pipelineNodeService;
 
@@ -146,9 +147,13 @@ public class PipelineService {
 
   @Transactional
   public Boolean deletePipeline(String service, String pipelineId) {
-    pipelineStageService.deleteStagesByPipelineId(pipelineId);
-    pipelineNodeService.deleteByPipeline(pipelineId);
-    return pipelineRepository.deletePipeline(pipelineId);
+    try {
+      pipelineStageService.deleteStagesByPipelineId(pipelineId);
+      pipelineNodeService.deleteByPipeline(pipelineId);
+      return pipelineRepository.deletePipeline(pipelineId);
+    } catch (Exception e) {
+      throw new ApiException(ErrorCode.DELETE_PIPELINE_ERROR);
+    }
   }
 
   @Transactional

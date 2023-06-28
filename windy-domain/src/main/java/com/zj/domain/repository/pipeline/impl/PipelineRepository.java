@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
+import com.zj.domain.entity.enums.PipelineType;
 import com.zj.domain.entity.po.pipeline.Pipeline;
 import com.zj.domain.mapper.pipeline.PipelineMapper;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
@@ -71,5 +72,12 @@ public class PipelineRepository extends ServiceImpl<PipelineMapper, Pipeline> im
     List<Pipeline> pipelines = list(
         Wrappers.<Pipeline>lambdaQuery().eq(Pipeline::getServiceId, serviceId));
     return OrikaUtil.convertList(pipelines, PipelineDto.class);
+  }
+
+  @Override
+  public PipelineDto getPublishPipeline(String serviceId) {
+    Pipeline pipeline = getOne(Wrappers.<Pipeline>lambdaQuery().eq(Pipeline::getServiceId, serviceId)
+        .eq(Pipeline::getPipelineType, PipelineType.PUBLISH.getType()));
+    return OrikaUtil.convert(pipeline, PipelineDto.class);
   }
 }

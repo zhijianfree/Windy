@@ -1,11 +1,14 @@
 package com.zj.client.pipeline.git;
 
 import com.zj.client.config.GlobalEnvConfig;
-import com.zj.client.utils.Utils;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeCommand;
 import org.eclipse.jgit.api.MergeCommand.FastForwardMode;
@@ -24,12 +27,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class GitOperator {
 
+  public static final String MASTER = "master";
   @Autowired
   private GlobalEnvConfig globalEnvConfig;
 
   public Git pullCodeFromGit(String gitUrl, String branch, String workspace)
       throws Exception {
-
     // 判断本地目录是否存在
     createIfNotExist(workspace);
 
@@ -37,9 +40,11 @@ public class GitOperator {
     // 提供用户名和密码的验证
     String user = globalEnvConfig.getGitUser();
     String pwd = globalEnvConfig.getGitPassword();
-    return Git.cloneRepository().setURI(gitUrl).setDirectory(new File(workspace))
+    Git git = Git.cloneRepository().setURI(gitUrl).setDirectory(new File(workspace))
         .setCredentialsProvider(new UsernamePasswordCredentialsProvider(user, pwd))
         .setBranch(branch).call();
+    git.fetch();
+    return git;
   }
 
   private void createIfNotExist(String serviceDir) {
@@ -54,28 +59,45 @@ public class GitOperator {
     }
   }
 
-  public MergeResult createTempBranch(String repositoryPath, String sourceBranch,
-      String targetBranch) {
-    try (Repository repository = FileRepositoryBuilder.create(new File(repositoryPath + "/.git"))) {
-      Git git = new Git(repository);
-      String tempBranch = "temp";
-      git.checkout().setName(tempBranch).call();
-      git.branchCreate().setName(tempBranch).call();
-      git.checkout().setName(tempBranch).call();
-      git.push().setCredentialsProvider(
-          new UsernamePasswordCredentialsProvider("guyuelan", "zhijian137899")).call();
-      Ref sourceRef = repository.findRef(sourceBranch);
-      Ref targetRef = repository.findRef(targetBranch);
+  public MergeResult createTempBranch(String gitUrl, List<String> branches, String workspace) {
+    try {
+      Git git = pullCodeFromGit(gitUrl, MASTER, workspace);
+      String tempBranch = getTempBranchName();
+      git.checkout().setCreateBranch(true).setName(tempBranch).call();
 
-      // 获取分支的ObjectId
-      return git.merge().include(sourceRef).include(targetRef) // 合并源头分支到目标分支
-          .setCommit(true)           // 设置合并后同时提交
-          .setFastForward(FastForwardMode.NO_FF)// 分支合并策略，--ff代表快速合并， --no-ff代表普通合并
-          .setMessage("Merge sourceBranchName into targetBranchName.")     //设置提交信息
-          .call();
+      Map<String, Ref> allRefs = git.getRepository().getAllRefs();
+      MergeCommand mergeCommand = git.merge()
+          .setCommit(true)
+          .setFastForward(FastForwardMode.NO_FF)
+          .setMessage("Merge temp Branches.");
+
+      allRefs.keySet().stream().filter(refName -> {
+        String branch = parseBranchFromRef(refName);
+        return branches.contains(branch);
+      }).map(allRefs::get).collect(Collectors.toList()).forEach(mergeCommand::include);
+      MergeResult mergeResult = mergeCommand.call();
+
+      if (mergeResult.getMergeStatus().isSuccessful()) {
+        Ref repositoryRef = git.getRepository().findRef(tempBranch);
+        String user = globalEnvConfig.getGitUser();
+        String pwd = globalEnvConfig.getGitPassword();
+        git.push().add(repositoryRef).setCredentialsProvider(
+            new UsernamePasswordCredentialsProvider(user, pwd)).call();
+      }
+      return mergeResult;
     } catch (Exception e) {
       e.printStackTrace();
     }
     return null;
+  }
+
+  private static String getTempBranchName() {
+    String timeNow = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+    return "temp_" + timeNow;
+  }
+
+  protected String parseBranchFromRef(String ref) {
+    int index = ref.lastIndexOf("/");
+    return ref.substring(index + 1);
   }
 }

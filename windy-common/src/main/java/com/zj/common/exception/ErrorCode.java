@@ -20,6 +20,9 @@ public enum ErrorCode {
   CREATE_PIPELINE(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000010", "创建流水线失败"),
   NOT_FIND_BRANCH(HttpStatus.BAD_REQUEST, "Pipeline.000011", "没有找到绑定分支，无法执行"),
 
+  PIPELINE_NOT_BIND(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000012", "流水线未绑定分支，无法发布"),
+  SERVICE_BRANCH_PUBLISH_EXIST(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000013", "当前分支已推送发布，请查看发布列表"),
+
   /*==================用例服务==================*/
   COMPARE_ERROR(HttpStatus.FORBIDDEN, "Feature.000002", "feature compare error"),
   EXECUTE_POINT_NOT_FIND(HttpStatus.NOT_FOUND, "Feature.000003", "can not find execute point"),

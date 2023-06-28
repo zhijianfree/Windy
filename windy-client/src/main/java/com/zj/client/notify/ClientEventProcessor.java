@@ -19,14 +19,13 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class ClientEventProcessor implements IResultEventNotify {
-  private final DiscoveryClient discoveryClient;
+
   private final RequestProxy requestProxy;
   private final InstanceMonitor instanceMonitor;
   private final OptimizePersistLocal optimizePersistLocal;
 
-  public ClientEventProcessor(DiscoveryClient discoveryClient, RequestProxy requestProxy,
-      InstanceMonitor instanceMonitor, OptimizePersistLocal optimizePersistLocal) {
-    this.discoveryClient = discoveryClient;
+  public ClientEventProcessor(RequestProxy requestProxy, InstanceMonitor instanceMonitor,
+      OptimizePersistLocal optimizePersistLocal) {
     this.requestProxy = requestProxy;
     this.instanceMonitor = instanceMonitor;
     this.optimizePersistLocal = optimizePersistLocal;
@@ -46,10 +45,10 @@ public class ClientEventProcessor implements IResultEventNotify {
 
   /**
    * 定时将未通知成功的状态同步到master
-   * */
+   */
   @Scheduled(cron = "0/10 * * * * ? ")
   public void asyncNotifyPersist() {
-    if (instanceMonitor.isUnStable()){
+    if (instanceMonitor.isUnStable()) {
       return;
     }
 

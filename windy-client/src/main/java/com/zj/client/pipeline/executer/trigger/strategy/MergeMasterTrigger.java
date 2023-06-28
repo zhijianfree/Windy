@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
+import org.eclipse.jgit.api.MergeCommand;
 import org.eclipse.jgit.api.MergeCommand.FastForwardMode;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PushCommand;
@@ -44,7 +45,7 @@ import org.springframework.stereotype.Component;
 public class MergeMasterTrigger implements INodeTrigger {
 
   public static final String MASTER = "master";
-  public static final String MERGE_COMMIT_TIPS = "Merge %s into %s.";
+  public static final String MERGE_COMMIT_TIPS = "Merge master";
   public static final String ORIGIN = "origin";
   public static final String MERGER_ERROR_TIPS = "merger error, find conflict files: ";
   private final GitOperator gitOperator;
@@ -63,30 +64,28 @@ public class MergeMasterTrigger implements INodeTrigger {
 
   @Override
   public void triggerRun(TriggerContext triggerContext, TaskNode taskNode) throws Exception {
+    statusMap.put(taskNode.getRecordId(), new MergeStatus(ProcessStatus.RUNNING.getType()));
     try {
-      statusMap.put(taskNode.getRecordId(), new MergeStatus(ProcessStatus.RUNNING.getType()));
-      MergeRequest mergeRequest = JSON
-          .parseObject(JSON.toJSONString(triggerContext.getData()), MergeRequest.class);
+      MergeRequest mergeRequest = JSON.parseObject(JSON.toJSONString(triggerContext.getData()),
+          MergeRequest.class);
       //拉取远端代码到本地
       String serviceName = Utils.getServiceFromUrl(mergeRequest.getGitUrl());
-      Git git = gitOperator.pullCodeFromGit(mergeRequest.getGitUrl(),
-          mergeRequest.getSourceBranch(),
+      Git git = gitOperator.pullCodeFromGit(mergeRequest.getGitUrl(), MASTER,
           globalEnvConfig.getPipelineWorkspace(serviceName, mergeRequest.getPipelineId()));
 
+      MergeCommand mergeCommand = git.merge().setCommit(true).setFastForward(FastForwardMode.NO_FF)
+          .setMessage(MERGE_COMMIT_TIPS);
       //合并代码
       Repository repository = git.getRepository();
-      git.checkout().setName(MASTER).call();
-      List<Ref> branches = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
-      Ref sourceRef = findBranchRef(mergeRequest.getSourceBranch(), branches);
-      MergeResult mergeResult = git.merge().include(sourceRef)
-          .setCommit(true)
-          .setFastForward(FastForwardMode.NO_FF)
-          .setMessage(String.format(MERGE_COMMIT_TIPS, mergeRequest.getSourceBranch(), MASTER))
-          .call();
+      for (String branch : mergeRequest.getBranches()) {
+        Ref repositoryRef = repository.findRef(branch);
+        mergeCommand.include(repositoryRef);
+      }
+      MergeResult mergeResult = mergeCommand.call();
 
       //合并成功推送至远端master分支
       if (mergeResult.getMergeStatus().isSuccessful()) {
-        log.info("merge success branch ={}", mergeRequest.getSourceBranch());
+        log.info("merge success branches ={}", mergeRequest.getBranches());
         push2Repository(repository, git);
         statusMap.put(taskNode.getRecordId(), new MergeStatus(ProcessStatus.SUCCESS.getType()));
         return;
@@ -99,28 +98,22 @@ public class MergeMasterTrigger implements INodeTrigger {
       List<String> fileNames = new ArrayList<>();
       fileNames.add(MERGER_ERROR_TIPS);
       fileNames.addAll(mergeResult.getConflicts().keySet());
-      statusMap.put(taskNode.getRecordId(), new MergeStatus(ProcessStatus.FAIL.getType(), fileNames));
+      statusMap.put(taskNode.getRecordId(),
+          new MergeStatus(ProcessStatus.FAIL.getType(), fileNames));
     } catch (Exception e) {
       log.warn("merger code error", e);
       throw new ExecuteException(ErrorCode.MERGE_CODE_ERROR);
     }
   }
 
-  private void push2Repository(Repository repository, Git git)
-      throws IOException, GitAPIException {
-    // 更新目标分支的引用
+  private void push2Repository(Repository repository, Git git) throws IOException, GitAPIException {
+    // 查找master分支的引用
     Ref updatedRef = repository.findRef(MASTER);
-    repository.updateRef(updatedRef.getName());
 
     // 推送合并后的代码到远程仓库的目标分支
-    PushCommand pushCommand = git.push();
-    pushCommand.setCredentialsProvider(
+    Iterable<PushResult> results = git.push().add(updatedRef).setCredentialsProvider(
         new UsernamePasswordCredentialsProvider(globalEnvConfig.getGitUser(),
-            globalEnvConfig.getGitPassword()));
-    pushCommand.setRemote(ORIGIN);
-    pushCommand.setRefSpecs(new RefSpec(MASTER));
-    Iterable<PushResult> results = pushCommand.call();
-
+            globalEnvConfig.getGitPassword())).setRemote(ORIGIN).call();
     for (PushResult pushResult : results) {
       for (RemoteRefUpdate remoteRefUpdate : pushResult.getRemoteUpdates()) {
         if (remoteRefUpdate.getStatus() == RemoteRefUpdate.Status.OK) {
@@ -141,14 +134,5 @@ public class MergeMasterTrigger implements INodeTrigger {
     responseModel.setData(jsonObject);
     responseModel.setMessage(JSON.toJSONString(mergeStatus.getMessage()));
     return JSON.toJSONString(responseModel);
-  }
-
-  private Ref findBranchRef(String sourceBranch, List<Ref> branches) {
-    return branches.stream()
-        .filter(ref -> {
-          String[] split = ref.getName().split("/");
-          return Objects.equals(split[split.length - 1], sourceBranch);
-        }).findFirst()
-        .orElse(null);
   }
 }
