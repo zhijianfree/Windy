@@ -58,4 +58,9 @@ public class PublishBindRepository extends ServiceImpl<PublishBindMapper, Publis
     }
     return OrikaUtil.convert(publishBind, PublishBindDto.class);
   }
+
+  @Override
+  public boolean deletePublishLine(String masterLineId) {
+    return remove( Wrappers.lambdaQuery(PublishBind.class).eq(PublishBind::getPublishLine, masterLineId));
+  }
 }

@@ -31,6 +31,8 @@ public class PipelineNode {
    * */
   private Integer type;
 
+  private Integer sortOrder;
+
   /**
    * 流水线Id
    * */

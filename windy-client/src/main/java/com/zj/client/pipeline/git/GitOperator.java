@@ -25,14 +25,13 @@ import org.springframework.stereotype.Component;
  * @since 2023/3/29
  */
 @Component
-public class GitOperator {
+public class GitOperator implements IGitProcessor {
 
   public static final String MASTER = "master";
   @Autowired
   private GlobalEnvConfig globalEnvConfig;
 
-  public Git pullCodeFromGit(String gitUrl, String branch, String workspace)
-      throws Exception {
+  public Git pullCodeFromGit(String gitUrl, String branch, String workspace) throws Exception {
     // 判断本地目录是否存在
     createIfNotExist(workspace);
 
@@ -59,44 +58,41 @@ public class GitOperator {
     }
   }
 
-  public MergeResult createTempBranch(String gitUrl, List<String> branches, String workspace) {
-    try {
-      Git git = pullCodeFromGit(gitUrl, MASTER, workspace);
-      String tempBranch = getTempBranchName();
-      git.checkout().setCreateBranch(true).setName(tempBranch).call();
+  public MergeResult createTempBranch(String gitUrl, List<String> branches, String workspace)
+      throws Exception {
+    Git git = pullCodeFromGit(gitUrl, MASTER, workspace);
+    String tempBranch = getTempBranchName();
+    git.checkout().setCreateBranch(true).setName(tempBranch).call();
 
-      Map<String, Ref> allRefs = git.getRepository().getAllRefs();
-      MergeCommand mergeCommand = git.merge()
-          .setCommit(true)
-          .setFastForward(FastForwardMode.NO_FF)
-          .setMessage("Merge temp Branches.");
-
-      allRefs.keySet().stream().filter(refName -> {
-        String branch = parseBranchFromRef(refName);
-        return branches.contains(branch);
-      }).map(allRefs::get).collect(Collectors.toList()).forEach(mergeCommand::include);
-      MergeResult mergeResult = mergeCommand.call();
-
-      if (mergeResult.getMergeStatus().isSuccessful()) {
-        Ref repositoryRef = git.getRepository().findRef(tempBranch);
-        String user = globalEnvConfig.getGitUser();
-        String pwd = globalEnvConfig.getGitPassword();
-        git.push().add(repositoryRef).setCredentialsProvider(
-            new UsernamePasswordCredentialsProvider(user, pwd)).call();
-      }
-      return mergeResult;
-    } catch (Exception e) {
-      e.printStackTrace();
+    MergeCommand mergeCommand = git.merge().setCommit(true).setFastForward(FastForwardMode.NO_FF)
+        .setMessage("Merge temp Branches.");
+    getBranchesRef(git, branches).forEach(mergeCommand::include);
+    MergeResult mergeResult = mergeCommand.call();
+    if (mergeResult.getMergeStatus().isSuccessful()) {
+      Ref repositoryRef = git.getRepository().findRef(tempBranch);
+      String user = globalEnvConfig.getGitUser();
+      String pwd = globalEnvConfig.getGitPassword();
+      git.push().add(repositoryRef)
+          .setCredentialsProvider(new UsernamePasswordCredentialsProvider(user, pwd)).call();
     }
-    return null;
+    return mergeResult;
   }
 
-  private static String getTempBranchName() {
+  @Override
+  public List<Ref> getBranchesRef(Git git, List<String> branches) {
+    Map<String, Ref> allRefs = git.getRepository().getAllRefs();
+    return allRefs.keySet().stream().filter(refName -> {
+      String branch = parseBranchFromRef(refName);
+      return branches.contains(branch);
+    }).map(allRefs::get).collect(Collectors.toList());
+  }
+
+  private String getTempBranchName() {
     String timeNow = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
     return "temp_" + timeNow;
   }
 
-  protected String parseBranchFromRef(String ref) {
+  private String parseBranchFromRef(String ref) {
     int index = ref.lastIndexOf("/");
     return ref.substring(index + 1);
   }

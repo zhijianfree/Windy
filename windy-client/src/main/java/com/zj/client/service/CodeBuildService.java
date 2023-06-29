@@ -4,28 +4,18 @@ import com.alibaba.fastjson.JSONObject;
 import com.zj.client.config.GlobalEnvConfig;
 import com.zj.client.entity.dto.BuildParam;
 import com.zj.client.entity.dto.ResponseModel;
-import com.zj.client.pipeline.git.GitOperator;
+import com.zj.client.pipeline.git.IGitProcessor;
 import com.zj.client.pipeline.maven.MavenOperator;
 import com.zj.client.utils.Utils;
 import com.zj.common.enums.ProcessStatus;
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
-import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.eclipse.jgit.api.Git;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 /**
@@ -39,7 +29,7 @@ public class CodeBuildService {
   public static final int BUILD_SUCCESS = 0;
   public static final String BUILD_SUCCESS_TIPS = "构建成功";
   @Autowired
-  private GitOperator gitOperator;
+  private IGitProcessor gitProcessor;
   @Autowired
   private MavenOperator mavenOperator;
   @Autowired
@@ -60,10 +50,10 @@ public class CodeBuildService {
             buildParam.getPipelineId());
 
         if (buildParam.getIsPublish()) {
-          gitOperator.createTempBranch(gitUrl, buildParam.getBranches(), pipelineWorkspace);
+          gitProcessor.createTempBranch(gitUrl, buildParam.getBranches(), pipelineWorkspace);
         } else {
           String branch = buildParam.getBranches().get(0);
-          gitOperator.pullCodeFromGit(gitUrl, branch, pipelineWorkspace);
+          gitProcessor.pullCodeFromGit(gitUrl, branch, pipelineWorkspace);
         }
         //本地maven构建
         String pomPath = getTargetPomPath(pipelineWorkspace, buildParam.getPomPath());

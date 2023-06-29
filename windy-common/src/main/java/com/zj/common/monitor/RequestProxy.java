@@ -98,7 +98,11 @@ public class RequestProxy {
 
   private void wrapTraceHeader() {
     String traceId = MDC.get(TidInterceptor.MDC_TID_KEY);
-    headers.add(TidInterceptor.HTTP_HEADER_TRACE_ID, traceId);
+    boolean existTrace = headers.toSingleValueMap().keySet()
+        .contains(TidInterceptor.HTTP_HEADER_TRACE_ID);
+    if(!existTrace){
+      headers.add(TidInterceptor.HTTP_HEADER_TRACE_ID, traceId);
+    }
   }
 
   private boolean requestWithIp(Object data, ServiceInstance serviceInstance) {

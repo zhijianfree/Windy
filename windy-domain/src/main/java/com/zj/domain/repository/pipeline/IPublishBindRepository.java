@@ -18,4 +18,6 @@ public interface IPublishBindRepository {
   List<PublishBindDto> getServicePublishes(String serviceId);
 
   PublishBindDto getServiceBranch(String serviceId, String gitBranch);
+
+  boolean deletePublishLine(String masterLineId);
 }

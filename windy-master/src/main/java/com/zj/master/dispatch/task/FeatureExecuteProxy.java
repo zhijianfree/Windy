@@ -131,7 +131,7 @@ public class FeatureExecuteProxy implements IStopEventListener {
 
   @Override
   @Subscribe
-  public void handle(InnerEvent event) {
+  public void stopEvent(InnerEvent event) {
     if (!Objects.equals(event.getLogType().getType(), LogType.FEATURE_TASK.getType())) {
       return;
     }

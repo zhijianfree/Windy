@@ -20,6 +20,8 @@ public class PipelineStageDto {
 
   private String pipelineId;
 
+  private Integer sortOrder;
+
   /**
    * 关联的配置Id
    * */

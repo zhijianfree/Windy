@@ -107,7 +107,7 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
     } catch (Exception e) {
       log.error("execute deploy jar error", e);
       statusMap.remove(deployContext.getRecordId());
-      throw new ExecuteException(ErrorCode.RUN_DEPLOY_ERROR);
+      throw new ExecuteException(e.toString());
     } finally {
       if (channelSftp != null) {
         channelSftp.disconnect();

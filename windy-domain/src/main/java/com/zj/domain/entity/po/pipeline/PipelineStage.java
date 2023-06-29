@@ -22,9 +22,11 @@ public class PipelineStage {
   private String stageName;
 
   /**
-   * 节点类型，排序时使用
+   * 节点类型
    * */
   private Integer type;
+
+  private Integer sortOrder;
 
   /**
    * 关联的配置Id

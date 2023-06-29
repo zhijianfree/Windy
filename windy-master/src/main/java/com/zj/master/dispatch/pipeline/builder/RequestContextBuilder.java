@@ -10,6 +10,7 @@ import com.zj.master.entity.vo.ConfigDetail;
 import com.zj.master.entity.vo.DeployContext;
 import com.zj.master.entity.vo.FeatureContext;
 import com.zj.master.entity.vo.HttpContext;
+import com.zj.master.entity.vo.MergeMasterContext;
 import com.zj.master.entity.vo.RequestContext;
 import com.zj.master.entity.vo.WaitContext;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ public class RequestContextBuilder {
     factoryMap.put(ExecuteType.DEPLOY.name(), RequestContextBuilder::buildDeployContext);
     factoryMap.put(ExecuteType.APPROVAL.name(), RequestContextBuilder::buildApprovalContext);
     factoryMap.put(ExecuteType.BUILD.name(), RequestContextBuilder::buildCodeContext);
+    factoryMap.put(ExecuteType.MERGE.name(), RequestContextBuilder::buildMergeContext);
   }
 
   public static RequestContext createContext(ActionDetail actionDetail) {
@@ -82,4 +84,12 @@ public class RequestContextBuilder {
     return JSON.parseObject(JSON.toJSONString(configDetail.getParamList()),
         BuildCodeContext.class);
   }
+
+  private static RequestContext buildMergeContext(ActionDetail actionDetail) {
+    ConfigDetail configDetail = actionDetail.getConfigDetail();
+    return JSON.parseObject(JSON.toJSONString(configDetail.getParamList()),
+        MergeMasterContext.class);
+  }
+
+
 }

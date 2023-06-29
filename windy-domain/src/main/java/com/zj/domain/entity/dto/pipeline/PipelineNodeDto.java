@@ -30,6 +30,8 @@ public class PipelineNodeDto {
    * */
   private Integer type;
 
+  private Integer sortOrder;
+
   /**
    * 流水线Id
    * */

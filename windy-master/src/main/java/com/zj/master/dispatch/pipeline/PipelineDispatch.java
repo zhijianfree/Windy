@@ -26,6 +26,8 @@ import com.zj.master.entity.vo.NodeConfig;
 import com.zj.master.entity.vo.RefreshContext;
 import com.zj.master.entity.vo.RequestContext;
 import com.zj.master.entity.vo.TaskNode;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -108,6 +110,7 @@ public class PipelineDispatch implements IDispatchExecutor {
     pipelineTask.setLogId(task.getTaskLogId());
 
     List<TaskNode> taskNodeList = pipelineNodes.stream()
+        .sorted(Comparator.comparing(PipelineNodeDto::getSortOrder))
         .map(node -> buildTaskNode(node, historyId, pipeline.getServiceId()))
         .collect(Collectors.toList());
     pipelineTask.addAll(taskNodeList);
