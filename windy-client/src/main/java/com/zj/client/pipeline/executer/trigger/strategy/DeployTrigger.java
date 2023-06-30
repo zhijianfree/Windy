@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
+ * Jar部署处理
  * @author guyuelan
  * @since 2023/5/8
  */

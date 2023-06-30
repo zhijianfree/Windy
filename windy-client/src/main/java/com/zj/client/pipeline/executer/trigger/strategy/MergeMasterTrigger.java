@@ -40,6 +40,9 @@ import org.eclipse.jgit.transport.RemoteRefUpdate.Status;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.stereotype.Component;
 
+/**
+ * 合并master
+ * */
 @Slf4j
 @Component
 public class MergeMasterTrigger implements INodeTrigger {

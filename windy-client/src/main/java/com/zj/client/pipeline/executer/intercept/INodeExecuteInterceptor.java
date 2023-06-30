@@ -10,8 +10,13 @@ import com.zj.common.enums.ProcessStatus;
  */
 public interface INodeExecuteInterceptor {
 
-
+  /**
+   * 节点运行之前执行
+   * */
   void before(TaskNode node);
 
+  /**
+   * 节点运行之后执行
+   * */
   void after(TaskNode node, ProcessStatus status);
 }

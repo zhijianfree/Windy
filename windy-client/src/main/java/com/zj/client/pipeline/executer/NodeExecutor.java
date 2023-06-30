@@ -2,6 +2,7 @@ package com.zj.client.pipeline.executer;
 
 import com.alibaba.fastjson.JSONObject;
 import com.zj.client.notify.IResultEventNotify;
+import com.zj.client.utils.ExceptionUtils;
 import com.zj.common.enums.NotifyType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
@@ -66,8 +67,9 @@ public class NodeExecutor {
 
       INodeTrigger nodeTrigger = triggerMap.get(node.getExecuteType());
       if (Objects.isNull(nodeTrigger)) {
-        throw new ApiException(ErrorCode.UNKNOWN_EXECUTE_TYPE);
+        throw new ExecuteException(ErrorCode.UNKNOWN_EXECUTE_TYPE);
       }
+
       JSONObject context = node.getRequestContext();
       TriggerContext triggerContext = new TriggerContext(context, node);
       nodeTrigger.triggerRun(triggerContext, node);
@@ -78,7 +80,7 @@ public class NodeExecutor {
       log.error("execute pipeline node error recordId={}", recordId, e);
       //如果请求失败则直接流水线终止
       statusAtomic.set(ProcessStatus.FAIL);
-      errorMsg = getErrorMsg(e);
+      errorMsg = ExceptionUtils.getErrorMsg(e);
     }
 
     notifyNodeEvent(node, statusAtomic.get(), errorMsg);
@@ -101,15 +103,6 @@ public class NodeExecutor {
         .clientIp(IpUtils.getLocalIP())
         .logId(node.getLogId());
     resultEventNotify.notifyEvent(resultEvent);
-  }
-
-  private List<String> getErrorMsg(Exception exception) {
-    List<String> msg = new ArrayList<>();
-    msg.add("trigger node task error: " + exception.toString());
-    for (StackTraceElement element : exception.getStackTrace()) {
-      msg.add(element.toString());
-    }
-    return msg;
   }
 
 

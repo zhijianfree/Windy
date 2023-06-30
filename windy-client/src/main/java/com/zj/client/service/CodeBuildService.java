@@ -33,7 +33,7 @@ public class CodeBuildService {
   @Autowired
   private MavenOperator mavenOperator;
   @Autowired
-  @Qualifier("gitOperateExecutor")
+  @Qualifier("gitOperatePool")
   private Executor executorService;
   @Autowired
   private GlobalEnvConfig globalEnvConfig;

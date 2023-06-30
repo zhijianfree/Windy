@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 /**
@@ -41,21 +42,24 @@ public class NodeStatusQueryLooper implements Runnable {
   public static final String RESULT_VALUE_FORMAT = "返回值:【%s】";
   public static final String OPERATOR_FORMAT = "操作符:【%s】";
   public static final String QUERY_ERROR_TIPS = "loop query status error";
+  public static final String LOOP_QUERY_TIMEOUT = "windy.loop.query.timeout";
   private final Map<String, INodeTrigger> remoteInvokerMap;
 
   private final Map<String, Long> stopPipelineHistoryMap = new ConcurrentHashMap<>();
   private final LinkedBlockingQueue<TaskNode> queue = new LinkedBlockingQueue<TaskNode>();
   private final Executor executorService;
   private final CompareFactory compareFactory;
+  private final Environment environment;
 
 
   public NodeStatusQueryLooper(List<INodeTrigger> remoteInvokers,
-      @Qualifier("queryLooperExecutorPool") Executor executorService,
-      CompareFactory compareFactory) {
+      @Qualifier("loopQueryPool") Executor executorService, CompareFactory compareFactory,
+      Environment environment) {
     remoteInvokerMap = remoteInvokers.stream()
         .collect(Collectors.toMap(invoker -> invoker.type().name(), invoker -> invoker));
     this.executorService = executorService;
     this.compareFactory = compareFactory;
+    this.environment = environment;
 
     new Thread(this).start();
   }
@@ -124,17 +128,21 @@ public class NodeStatusQueryLooper implements Runnable {
     JSONObject jsonObject = responseModel.getData();
     List<CompareInfo> compareConfigs = node.getRefreshContext().getCompareConfig();
     for (CompareInfo compareInfo : compareConfigs) {
-      CompareOperator compareOperator = compareFactory.getOperator(compareInfo.getOperator());
-      CompareDefine compareDefine = new CompareDefine();
-      compareDefine.setResponseValue(jsonObject.get(compareInfo.getCompareKey()));
-      compareDefine.setExpectValue(compareInfo.getValue());
-      CompareResult compareResult = compareOperator.compare(compareDefine);
+      CompareResult compareResult = handleCompare(jsonObject, compareInfo);
       if (!compareResult.getCompareStatus()) {
         responseModel.setStatus(ProcessStatus.FAIL.getType());
         responseModel.setMessage(exchangeTips(jsonObject, compareInfo));
         return;
       }
     }
+  }
+
+  private CompareResult handleCompare(JSONObject jsonObject, CompareInfo compareInfo) {
+    CompareOperator compareOperator = compareFactory.getOperator(compareInfo.getOperator());
+    CompareDefine compareDefine = new CompareDefine();
+    compareDefine.setResponseValue(jsonObject.get(compareInfo.getCompareKey()));
+    compareDefine.setExpectValue(compareInfo.getValue());
+    return compareOperator.compare(compareDefine);
   }
 
   private List<String> exchangeTips(JSONObject jsonObject, CompareInfo compareInfo) {
@@ -155,19 +163,26 @@ public class NodeStatusQueryLooper implements Runnable {
   }
 
   private void cycleRunTask(TaskNode node) {
-    Long dateNow = System.currentTimeMillis();
-    long mills = dateNow - node.getExecuteTime();
-    if (mills > MAX_REMOVE_TIME) {
+    if (checkRunTimeout(node.getExecuteTime())) {
       log.info("node record run timeout recordId={}", node.getRecordId());
-
       QueryResponseModel queryResponseModel = new QueryResponseModel();
       queryResponseModel.setStatus(ProcessStatus.TIMEOUT.getType());
-      queryResponseModel.setMessage(Collections.singletonList(ProcessStatus.TIMEOUT.getDesc()));
+      queryResponseModel.addMessage(ProcessStatus.TIMEOUT.getDesc());
       handleRecordFinalStatus(node, queryResponseModel);
       putAndCheckRecord(node.getRecordId());
       return;
     }
     queue.add(node);
+  }
+
+  /**
+   * 任务执行超过最大超时时间退出循环查询
+   */
+  private boolean checkRunTimeout(long executeTime) {
+    long dateNow = System.currentTimeMillis();
+    long mills = dateNow - executeTime;
+    String timeout = environment.getProperty(LOOP_QUERY_TIMEOUT, String.valueOf(MAX_REMOVE_TIME));
+    return mills >= Integer.parseInt(timeout);
   }
 
   public void run() {

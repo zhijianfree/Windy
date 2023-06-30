@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * 节点开始执行之后，需要轮询结果。
- * 方法{@link StatusQueryInterceptor#after(TaskNode, ProcessStatus)}中将查询任务添加到
+ * 方法{@link StatusQueryInterceptor#after(TaskNode, ProcessStatus)}将循环查询执行状态的任务添加到
  * {@link NodeStatusQueryLooper#addQueryTask(TaskNode)}
  *
  * @author guyuelan
@@ -30,10 +30,11 @@ public class StatusQueryInterceptor implements INodeExecuteInterceptor {
 
   @Override
   public void after(TaskNode node, ProcessStatus status) {
-    log.info("start run query recordId={} status={}", node.getRecordId(), status);
     //只有正在执行的状态才需要轮询状态
-    if (Objects.equals(status.getType(), ProcessStatus.RUNNING.getType())) {
-      nodeStatusQueryLooper.addQueryTask(node);
+    if (!Objects.equals(status.getType(), ProcessStatus.RUNNING.getType())) {
+      return;
     }
+    log.info("start run query recordId={} status={}", node.getRecordId(), status);
+    nodeStatusQueryLooper.addQueryTask(node);
   }
 }

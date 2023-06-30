@@ -1,6 +1,7 @@
 package com.zj.client.pipeline.executer;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import com.zj.client.entity.vo.NodeRecord;
 import com.zj.client.notify.IResultEventNotify;
@@ -36,7 +37,7 @@ public class ExecuteProxy implements IPipelineStatusListener {
   private IResultEventNotify resultEventNotify;
 
   @Autowired
-  @Qualifier("pipelineExecutorPool")
+  @Qualifier("pipelinePool")
   private Executor executorService;
 
   /**
@@ -57,6 +58,7 @@ public class ExecuteProxy implements IPipelineStatusListener {
 
   @Override
   @Subscribe
+  @AllowConcurrentEvents
   public void statusChange(PipelineStatusEvent event) {
     log.info("receive event bus notify ={}", JSON.toJSONString(event));
     TaskNode taskNode = event.getTaskNode();

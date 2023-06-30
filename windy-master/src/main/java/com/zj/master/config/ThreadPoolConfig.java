@@ -27,7 +27,7 @@ public class ThreadPoolConfig {
     windyThreadPool.setTimeout(3600 * 3L);
     windyThreadPool.setAllowCoreThreadTimeOut(false);
     windyThreadPool.setQueueSize(100);
-    windyThreadPool.setThreadNamePrefix("master-pipeline-thread-");
+    windyThreadPool.setThreadNamePrefix("master-pipeline-");
     return windyThreadPool;
   }
 
@@ -39,7 +39,18 @@ public class ThreadPoolConfig {
     windyThreadPool.setTimeout(3600 * 3L);
     windyThreadPool.setAllowCoreThreadTimeOut(false);
     windyThreadPool.setQueueSize(100);
-    windyThreadPool.setThreadNamePrefix("master-feature-thread-");
+    windyThreadPool.setThreadNamePrefix("master-feature-");
+    return windyThreadPool;
+  }
+
+  @Bean("eventBusPool")
+  public Executor getEventBusPool() {
+    WindyThreadPool windyThreadPool = new WindyThreadPool();
+    windyThreadPool.setCorePoolSize(10);
+    windyThreadPool.setMaxPoolSize(20);
+    windyThreadPool.setAllowCoreThreadTimeOut(false);
+    windyThreadPool.setQueueSize(20);
+    windyThreadPool.setThreadNamePrefix("event-bus-");
     return windyThreadPool;
   }
 }

@@ -85,7 +85,6 @@ public class MavenOperator {
     String destDir = servicePath + File.separator + DEPLOY;
     File dir = new File(destDir);
     createSHFileIfNeed(jarFile.getName(), destDir, dir);
-
     FileUtils.copyToDirectory(jarFile, dir);
   }
 

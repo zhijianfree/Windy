@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ThreadPoolConfig {
 
-  @Bean("pipelineExecutorPool")
+  @Bean("pipelinePool")
   public Executor getPipelineExecutor() {
     WindyThreadPool windyThreadPool = new WindyThreadPool();
     windyThreadPool.setCorePoolSize(10);
@@ -30,18 +30,18 @@ public class ThreadPoolConfig {
     return windyThreadPool;
   }
 
-  @Bean("queryLooperExecutorPool")
+  @Bean("loopQueryPool")
   public Executor getQueryLooperExecutor() {
     WindyThreadPool windyThreadPool = new WindyThreadPool();
     windyThreadPool.setCorePoolSize(20);
-    windyThreadPool.setMaxPoolSize(60);
+    windyThreadPool.setMaxPoolSize(80);
     windyThreadPool.setAllowCoreThreadTimeOut(false);
     windyThreadPool.setQueueSize(100);
     windyThreadPool.setThreadNamePrefix("query-loop-thread-");
     return windyThreadPool;
   }
 
-  @Bean("gitOperateExecutor")
+  @Bean("gitOperatePool")
   public Executor gitOperateExecutor() {
     WindyThreadPool windyThreadPool = new WindyThreadPool();
     windyThreadPool.setCorePoolSize(10);
@@ -49,6 +49,17 @@ public class ThreadPoolConfig {
     windyThreadPool.setAllowCoreThreadTimeOut(false);
     windyThreadPool.setQueueSize(100);
     windyThreadPool.setThreadNamePrefix("buildCode-thread-");
+    return windyThreadPool;
+  }
+
+  @Bean("eventBusPool")
+  public Executor getEventBusPool() {
+    WindyThreadPool windyThreadPool = new WindyThreadPool();
+    windyThreadPool.setCorePoolSize(10);
+    windyThreadPool.setMaxPoolSize(20);
+    windyThreadPool.setAllowCoreThreadTimeOut(false);
+    windyThreadPool.setQueueSize(100);
+    windyThreadPool.setThreadNamePrefix("event-bus-");
     return windyThreadPool;
   }
 }

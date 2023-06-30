@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
+ * 等待执行处理
  * @author guyuelan
  * @since 2023/5/8
  */

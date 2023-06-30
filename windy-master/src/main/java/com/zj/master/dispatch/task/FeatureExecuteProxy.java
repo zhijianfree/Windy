@@ -1,5 +1,6 @@
 package com.zj.master.dispatch.task;
 
+import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
@@ -131,6 +132,7 @@ public class FeatureExecuteProxy implements IStopEventListener {
 
   @Override
   @Subscribe
+  @AllowConcurrentEvents
   public void stopEvent(InnerEvent event) {
     if (!Objects.equals(event.getLogType().getType(), LogType.FEATURE_TASK.getType())) {
       return;
