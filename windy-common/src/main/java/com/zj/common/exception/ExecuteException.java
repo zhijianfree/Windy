@@ -19,7 +19,8 @@ public class ExecuteException extends CommonException {
     this.message = "execute error: " + message;
   }
 
-  public String getErrorMessage() {
+  @Override
+  public String getMessage() {
     if (Objects.isNull(getErrorCode())) {
       return message;
     }

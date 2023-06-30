@@ -49,13 +49,10 @@ public class CodeBuildService {
         String pipelineWorkspace = globalEnvConfig.getPipelineWorkspace(serviceName,
             buildParam.getPipelineId());
 
-        if (buildParam.getIsPublish()) {
-          gitProcessor.createTempBranch(gitUrl, buildParam.getBranches(), pipelineWorkspace);
-        } else {
-          String branch = buildParam.getBranches().get(0);
-          gitProcessor.pullCodeFromGit(gitUrl, branch, pipelineWorkspace);
-        }
-        //本地maven构建
+        //1 拉取代码到本地
+        pullCodeFrmGit(buildParam, gitUrl, pipelineWorkspace);
+
+        //2 本地maven构建
         String pomPath = getTargetPomPath(pipelineWorkspace, buildParam.getPomPath());
         Integer exitCode = mavenOperator.build(pomPath, pipelineWorkspace);
         log.info("get maven exit code={}", exitCode);
@@ -64,10 +61,20 @@ public class CodeBuildService {
         saveStatus(buildParam.getRecordId(), result, BUILD_SUCCESS_TIPS);
       } catch (Exception e) {
         log.error("buildCode error", e);
-        saveStatus(buildParam.getRecordId(), ProcessStatus.FAIL, e.toString());
+        saveStatus(buildParam.getRecordId(), ProcessStatus.FAIL, e.getMessage());
       }
     });
     saveStatus(buildParam.getRecordId(), ProcessStatus.RUNNING, "构建中");
+  }
+
+  private void pullCodeFrmGit(BuildParam buildParam, String gitUrl, String pipelineWorkspace)
+      throws Exception {
+    if (buildParam.getIsPublish()) {
+      gitProcessor.createTempBranch(gitUrl, buildParam.getBranches(), pipelineWorkspace);
+    } else {
+      String branch = buildParam.getBranches().get(0);
+      gitProcessor.pullCodeFromGit(gitUrl, branch, pipelineWorkspace);
+    }
   }
 
   private void saveStatus(String recordId, ProcessStatus status, String message) {

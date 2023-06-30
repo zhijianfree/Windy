@@ -1,6 +1,8 @@
 package com.zj.client.pipeline.git;
 
 import com.zj.client.config.GlobalEnvConfig;
+import com.zj.common.exception.ErrorCode;
+import com.zj.common.exception.ExecuteException;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -13,10 +15,16 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeCommand;
 import org.eclipse.jgit.api.MergeCommand.FastForwardMode;
 import org.eclipse.jgit.api.MergeResult;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.eclipse.jgit.treewalk.AbstractTreeIterator;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +36,7 @@ import org.springframework.stereotype.Component;
 public class GitOperator implements IGitProcessor {
 
   public static final String MASTER = "master";
+  public static final String ORIGIN = "origin";
   @Autowired
   private GlobalEnvConfig globalEnvConfig;
 
@@ -41,8 +50,9 @@ public class GitOperator implements IGitProcessor {
     String pwd = globalEnvConfig.getGitPassword();
     Git git = Git.cloneRepository().setURI(gitUrl).setDirectory(new File(workspace))
         .setCredentialsProvider(new UsernamePasswordCredentialsProvider(user, pwd))
+        .setRemote(ORIGIN)
         .setBranch(branch).call();
-    git.fetch();
+    git.fetch().setRemote(ORIGIN).call();
     return git;
   }
 
@@ -61,6 +71,8 @@ public class GitOperator implements IGitProcessor {
   public MergeResult createTempBranch(String gitUrl, List<String> branches, String workspace)
       throws Exception {
     Git git = pullCodeFromGit(gitUrl, MASTER, workspace);
+    hasDifferencesWithMaster(branches, git);
+
     String tempBranch = getTempBranchName();
     git.checkout().setCreateBranch(true).setName(tempBranch).call();
 
@@ -76,6 +88,27 @@ public class GitOperator implements IGitProcessor {
           .setCredentialsProvider(new UsernamePasswordCredentialsProvider(user, pwd)).call();
     }
     return mergeResult;
+  }
+
+  /**
+   * 如果合并的分支与master无差异不支持发布
+   */
+  private void hasDifferencesWithMaster(List<String> branches, Git git) throws Exception {
+    for (String branch : branches) {
+      ObjectId branchHead = git.getRepository().resolve(ORIGIN + "/" + branch);
+      ObjectId masterHead = git.getRepository().resolve(ORIGIN + "/" + MASTER);
+
+      // 比较两个分支的差异
+      boolean hasDifferences = git.diff()
+          .setOldTree(prepareTreeParser(git.getRepository(), masterHead))
+          .setNewTree(prepareTreeParser(git.getRepository(), branchHead)).call().iterator()
+          .hasNext();
+
+      if (!hasDifferences) {
+        String msg = String.format(ErrorCode.BRANCH_NOT_DIFF.getMessage(), branch);
+        throw new ExecuteException(msg);
+      }
+    }
   }
 
   @Override
@@ -95,5 +128,21 @@ public class GitOperator implements IGitProcessor {
   private String parseBranchFromRef(String ref) {
     int index = ref.lastIndexOf("/");
     return ref.substring(index + 1);
+  }
+
+  private static AbstractTreeIterator prepareTreeParser(Repository repository, ObjectId objectId)
+      throws IOException {
+    try (RevWalk walk = new RevWalk(repository)) {
+      RevCommit commit = walk.parseCommit(objectId);
+      RevTree tree = walk.parseTree(commit.getTree().getId());
+
+      CanonicalTreeParser treeParser = new CanonicalTreeParser();
+      try (ObjectReader objectReader = repository.newObjectReader()) {
+        treeParser.reset(objectReader, tree.getId());
+      }
+
+      walk.dispose();
+      return treeParser;
+    }
   }
 }
