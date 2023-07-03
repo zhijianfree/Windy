@@ -8,7 +8,9 @@ import com.zj.pipeline.git.GitConstants;
 import com.zj.pipeline.git.IRepositoryBranch;
 import com.zj.pipeline.entity.vo.CreateBranchVo;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +26,13 @@ import org.springframework.stereotype.Service;
 public class GiteaRepositoryBranch implements IRepositoryBranch {
 
   private final GitRequestProxy gitRequestProxy;
+  private Map<String, String> headers;
 
   public GiteaRepositoryBranch(GitRequestProxy gitRequestProxy) {
     this.gitRequestProxy = gitRequestProxy;
+    String accessToken = gitRequestProxy.getGitAccess().getAccessToken();
+    headers = new HashMap<>();
+    headers.put("Authorization", accessToken);
   }
 
   @Override
@@ -35,29 +41,29 @@ public class GiteaRepositoryBranch implements IRepositoryBranch {
   }
 
   @Override
-  public boolean createBranch(String serviceName, String branchName) {
+  public void createBranch(String serviceName, String branchName) {
     String owner = gitRequestProxy.getGitAccess().getOwner();
     String gitPath = String.format(GitConstants.CREATE_BRANCH, owner, serviceName);
     CreateBranchVo createBranchVO = new CreateBranchVo();
     createBranchVO.setBranchName(branchName);
-    String result = gitRequestProxy.post(gitPath, JSON.toJSONString(createBranchVO));
-    return StringUtils.isNotBlank(result);
+    String result = gitRequestProxy.post(gitPath, JSON.toJSONString(createBranchVO), headers);
+    log.info("gitea create branch result = {}", result);
   }
 
   @Override
-  public boolean deleteBranch(String serviceName, String branchName) {
+  public void deleteBranch(String serviceName, String branchName) {
     String owner = gitRequestProxy.getGitAccess().getOwner();
     String gitPath = String.format(GitConstants.DELETE_BRANCH, owner, serviceName,
         branchName);
-    String result = gitRequestProxy.delete(gitPath);
-    return false;
+    String result = gitRequestProxy.delete(gitPath, headers);
+    log.info("gitea delete branch result = {}", result);
   }
 
   @Override
   public List<String> listBranch(String serviceName) {
     String owner = gitRequestProxy.getGitAccess().getOwner();
     String gitPath = String.format(GitConstants.LIST_BRANCH, owner, serviceName);
-    String result = gitRequestProxy.get(gitPath);
+    String result = gitRequestProxy.get(gitPath, headers);
     List<JSONObject> branches = JSON.parseArray(result, JSONObject.class);
     if (CollectionUtils.isEmpty(branches)) {
       return Collections.emptyList();
