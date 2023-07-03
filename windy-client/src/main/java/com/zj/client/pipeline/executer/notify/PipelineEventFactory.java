@@ -1,13 +1,9 @@
 package com.zj.client.pipeline.executer.notify;
 
-import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import com.zj.client.pipeline.executer.vo.PipelineStatusEvent;
 import java.util.List;
-import java.util.concurrent.Executor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -18,14 +14,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class PipelineEventFactory {
-
-  private Executor executor;
-  private static AsyncEventBus eventBus;
-
-  public PipelineEventFactory(@Qualifier("eventBusPool") Executor executor) {
-    this.executor = executor;
-    eventBus = new AsyncEventBus(executor);
-  }
+  private static EventBus eventBus = new EventBus();
 
   public PipelineEventFactory(List<IPipelineStatusListener> notifyList) {
     notifyList.forEach(listener ->{

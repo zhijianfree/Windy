@@ -10,6 +10,7 @@ import com.zj.domain.entity.dto.service.MicroserviceDto;
 import com.zj.domain.repository.pipeline.ICodeChangeRepository;
 import com.zj.pipeline.git.IRepositoryBranch;
 import com.zj.domain.entity.po.service.Microservice;
+import com.zj.pipeline.git.RepositoryFactory;
 import com.zj.service.service.MicroserviceService;
 import java.util.Collections;
 import java.util.List;
@@ -27,7 +28,7 @@ import org.springframework.stereotype.Service;
 public class CodeChangeService {
 
   @Autowired
-  private IRepositoryBranch repositoryBranch;
+  private RepositoryFactory repositoryFactory;
 
   @Autowired
   private MicroserviceService microservice;
@@ -45,7 +46,8 @@ public class CodeChangeService {
 
   public String createCodeChange(CodeChangeDto codeChange) {
     MicroserviceDto service = checkServiceExist(codeChange.getServiceId());
-    repositoryBranch.createBranch(service.getServiceName(), codeChange.getChangeBranch());
+    IRepositoryBranch repository = repositoryFactory.getRepository(service.getGitType());
+    repository.createBranch(service.getServiceName(), codeChange.getChangeBranch());
 
     codeChange.setChangeId(uniqueIdService.getUniqueId());
     codeChange.setUpdateTime(System.currentTimeMillis());
@@ -73,7 +75,8 @@ public class CodeChangeService {
   public Boolean deleteCodeChange(String serviceId, String codeChangeId) {
     MicroserviceDto service = checkServiceExist(serviceId);
     CodeChangeDto codeChange = getCodeChange(serviceId, codeChangeId);
-    repositoryBranch.deleteBranch(service.getServiceName(), codeChange.getChangeBranch());
+    IRepositoryBranch repository = repositoryFactory.getRepository(service.getGitType());
+    repository.deleteBranch(service.getServiceName(), codeChange.getChangeBranch());
     return codeChangeRepository.deleteCodeChange(codeChangeId);
   }
 

@@ -1,10 +1,7 @@
 package com.zj.master.dispatch.listener;
 
-import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import java.util.List;
-import java.util.concurrent.Executor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,13 +10,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class TaskInnerEventFactory {
-  private Executor executor;
-  private static AsyncEventBus eventBus;
-
-  public TaskInnerEventFactory(@Qualifier("eventBusPool") Executor executor) {
-    this.executor = executor;
-    eventBus = new AsyncEventBus(executor);
-  }
+  private static EventBus eventBus = new EventBus();
 
   public TaskInnerEventFactory(List<IStopEventListener> notifyList) {
     notifyList.forEach(listener ->{

@@ -8,6 +8,8 @@ import java.util.List;
  */
 public interface IRepositoryBranch {
 
+  String gitType();
+
   /**
    * 创建分支
    */

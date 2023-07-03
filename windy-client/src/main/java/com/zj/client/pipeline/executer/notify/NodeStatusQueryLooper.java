@@ -2,6 +2,7 @@ package com.zj.client.pipeline.executer.notify;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.zj.client.config.GlobalEnvConfig;
 import com.zj.client.feature.executor.compare.CompareDefine;
 import com.zj.client.feature.executor.compare.CompareOperator;
 import com.zj.client.feature.executor.compare.CompareResult;
@@ -36,30 +37,27 @@ import org.springframework.stereotype.Component;
 @Component
 public class NodeStatusQueryLooper implements Runnable {
 
-  public static final int MAX_REMOVE_TIME = 2 * 60 * 60 * 1000;
   public static final String DESCRIPTION_FORMAT = "比较响应字段:【%s】- 描述信息:%s";
   public static final String EXPECT_VALUE_FORMAT = "期待值:【%s】";
   public static final String RESULT_VALUE_FORMAT = "返回值:【%s】";
   public static final String OPERATOR_FORMAT = "操作符:【%s】";
   public static final String QUERY_ERROR_TIPS = "loop query status error";
-  public static final String LOOP_QUERY_TIMEOUT = "windy.loop.query.timeout";
   private final Map<String, INodeTrigger> remoteInvokerMap;
-
   private final Map<String, Long> stopPipelineHistoryMap = new ConcurrentHashMap<>();
   private final LinkedBlockingQueue<TaskNode> queue = new LinkedBlockingQueue<TaskNode>();
   private final Executor executorService;
   private final CompareFactory compareFactory;
-  private final Environment environment;
+  private final GlobalEnvConfig globalEnvConfig;
 
 
   public NodeStatusQueryLooper(List<INodeTrigger> remoteInvokers,
       @Qualifier("loopQueryPool") Executor executorService, CompareFactory compareFactory,
-      Environment environment) {
+      GlobalEnvConfig globalEnvConfig) {
     remoteInvokerMap = remoteInvokers.stream()
         .collect(Collectors.toMap(invoker -> invoker.type().name(), invoker -> invoker));
     this.executorService = executorService;
     this.compareFactory = compareFactory;
-    this.environment = environment;
+    this.globalEnvConfig = globalEnvConfig;
 
     new Thread(this).start();
   }
@@ -181,8 +179,8 @@ public class NodeStatusQueryLooper implements Runnable {
   private boolean checkRunTimeout(long executeTime) {
     long dateNow = System.currentTimeMillis();
     long mills = dateNow - executeTime;
-    String timeout = environment.getProperty(LOOP_QUERY_TIMEOUT, String.valueOf(MAX_REMOVE_TIME));
-    return mills >= Integer.parseInt(timeout);
+    Integer timeout = globalEnvConfig.getLoopQueryTimeout();
+    return mills >= timeout;
   }
 
   public void run() {
@@ -214,7 +212,7 @@ public class NodeStatusQueryLooper implements Runnable {
     stopPipelineHistoryMap.put(historyId, dateNow);
     stopPipelineHistoryMap.entrySet().removeIf(entity -> {
       long mills = entity.getValue() - dateNow;
-      return mills > NodeStatusQueryLooper.MAX_REMOVE_TIME;
+      return mills > globalEnvConfig.getLoopQueryTimeout();
     });
   }
 }

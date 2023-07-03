@@ -42,15 +42,4 @@ public class ThreadPoolConfig {
     windyThreadPool.setThreadNamePrefix("master-feature-");
     return windyThreadPool;
   }
-
-  @Bean("eventBusPool")
-  public Executor getEventBusPool() {
-    WindyThreadPool windyThreadPool = new WindyThreadPool();
-    windyThreadPool.setCorePoolSize(10);
-    windyThreadPool.setMaxPoolSize(20);
-    windyThreadPool.setAllowCoreThreadTimeOut(false);
-    windyThreadPool.setQueueSize(20);
-    windyThreadPool.setThreadNamePrefix("event-bus-");
-    return windyThreadPool;
-  }
 }
