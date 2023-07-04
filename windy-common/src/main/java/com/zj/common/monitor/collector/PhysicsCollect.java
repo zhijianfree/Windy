@@ -16,10 +16,6 @@ public class PhysicsCollect {
 
   private String heap;
 
-  private String noHeap;
-
-  private String physicsCache;
-
   private Integer threads;
 
   private List<GarbageHistory> histories;
