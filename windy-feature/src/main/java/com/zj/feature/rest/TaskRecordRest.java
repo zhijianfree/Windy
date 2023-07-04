@@ -7,7 +7,6 @@ import com.zj.common.model.PageSize;
 import com.zj.domain.entity.dto.feature.TaskRecordDto;
 import com.zj.feature.service.TaskRecordService;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,9 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/devops/feature")
 public class TaskRecordRest {
-
-  @Autowired
   private TaskRecordService taskRecordService;
+
+  public TaskRecordRest(TaskRecordService taskRecordService) {
+    this.taskRecordService = taskRecordService;
+  }
 
   @GetMapping("/task/records")
   public ResponseMeta<PageSize<TaskRecordDto>> getTaskRecordList(

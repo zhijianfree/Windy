@@ -11,7 +11,6 @@ import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,18 +20,16 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class PipelineHistoryService {
-
-  @Autowired
-  private PipelineService pipelineService;
-
-  @Autowired
   private NodeRecordService recordService;
-
-  @Autowired
   private UniqueIdService uniqueIdService;
-
-  @Autowired
   private IPipelineHistoryRepository pipelineHistoryRepository;
+
+  public PipelineHistoryService(NodeRecordService recordService, UniqueIdService uniqueIdService,
+      IPipelineHistoryRepository pipelineHistoryRepository) {
+    this.recordService = recordService;
+    this.uniqueIdService = uniqueIdService;
+    this.pipelineHistoryRepository = pipelineHistoryRepository;
+  }
 
   public PipelineHistoryDto getPipelineHistory(String historyId) {
     return pipelineHistoryRepository.getPipelineHistory(historyId);

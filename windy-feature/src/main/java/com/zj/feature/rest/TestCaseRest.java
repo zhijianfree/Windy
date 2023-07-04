@@ -8,7 +8,6 @@ import com.zj.domain.entity.dto.feature.TestCaseDto;
 import com.zj.feature.service.TestCaseConfigService;
 import com.zj.feature.service.TestCaseService;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,11 +26,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TestCaseRest {
 
-  @Autowired
   private TestCaseService testCaseService;
-
-  @Autowired
   private TestCaseConfigService testCaseConfigService;
+
+  public TestCaseRest(TestCaseService testCaseService, TestCaseConfigService testCaseConfigService) {
+    this.testCaseService = testCaseService;
+    this.testCaseConfigService = testCaseConfigService;
+  }
 
   @RequestMapping("/{serviceId}/cases")
   public ResponseMeta<PageSize<TestCaseDto>> getTestCases(@PathVariable("serviceId") String serviceId, @RequestParam("page") Integer page,

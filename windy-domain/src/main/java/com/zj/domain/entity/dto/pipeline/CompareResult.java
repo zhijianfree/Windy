@@ -18,4 +18,6 @@ public class CompareResult {
   private String valueType;
 
   private String value;
+
+  private boolean showCompare;
 }

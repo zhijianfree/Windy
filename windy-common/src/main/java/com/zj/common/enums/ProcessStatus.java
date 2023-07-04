@@ -22,10 +22,18 @@ public enum ProcessStatus {
     return !Objects.equals(status, ProcessStatus.RUNNING.getType());
   }
 
+  public static boolean isSuccess(Integer status) {
+    return Objects.equals(status, ProcessStatus.SUCCESS.getType());
+  }
+
   public boolean isFailStatus() {
     List<Integer> list = Arrays.asList(ProcessStatus.FAIL.getType(),
         ProcessStatus.TIMEOUT.getType(), ProcessStatus.STOP.getType());
     return list.contains(this.getType());
+  }
+
+  public boolean isSuccess() {
+    return Objects.equals(this.type, ProcessStatus.SUCCESS.getType());
   }
 
   public static ProcessStatus exchange(Integer type) {

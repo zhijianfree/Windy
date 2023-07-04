@@ -11,7 +11,6 @@ import com.zj.domain.repository.feature.ITaskRecordRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import java.util.List;
 import java.util.Objects;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,16 +20,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class RecordQueryService {
 
-  @Autowired
   private INodeRecordRepository nodeRecordRepository;
-
-  @Autowired
   private ITaskRecordRepository taskRecordRepository;
-
-  @Autowired
   private IFeatureHistoryRepository featureHistoryRepository;
 
   public static final String FORMAT_TIPS = "任务执行状态: 成功数: %s 成功率百分比: %s";
+
+  public RecordQueryService(INodeRecordRepository nodeRecordRepository,
+      ITaskRecordRepository taskRecordRepository,
+      IFeatureHistoryRepository featureHistoryRepository) {
+    this.nodeRecordRepository = nodeRecordRepository;
+    this.taskRecordRepository = taskRecordRepository;
+    this.featureHistoryRepository = featureHistoryRepository;
+  }
 
   public ResponseStatusModel getTaskStatus(String taskRecordId) {
     TaskRecordDto taskRecord = taskRecordRepository.getTaskRecord(taskRecordId);

@@ -20,6 +20,13 @@ public enum ErrorCode {
   CREATE_PIPELINE(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000010", "创建流水线失败"),
   NOT_FIND_BRANCH(HttpStatus.BAD_REQUEST, "Pipeline.000011", "没有找到绑定分支，无法执行"),
 
+  PIPELINE_NOT_BIND(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000012",
+      "流水线未绑定分支，无法发布"),
+  SERVICE_BRANCH_PUBLISH_EXIST(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000013",
+      "当前分支已推送发布，请查看发布列表"),
+  PUBLISH_PIPELINE_EXIST(HttpStatus.BAD_REQUEST, "Pipeline.000014",
+      "当前服务已存在发布流水线,无法创建"),
+
   /*==================用例服务==================*/
   COMPARE_ERROR(HttpStatus.FORBIDDEN, "Feature.000002", "feature compare error"),
   EXECUTE_POINT_NOT_FIND(HttpStatus.NOT_FOUND, "Feature.000003", "can not find execute point"),
@@ -33,6 +40,8 @@ public enum ErrorCode {
   UNKNOWN_EXECUTE_TYPE(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000002", "未找到节点执行类型"),
   RUN_DEPLOY_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000003", "部署节点失败"),
   MERGE_CODE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000004", "合并代码失败"),
+
+  BRANCH_NOT_DIFF(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000005", "合并分支%s与master不存在差异，不能发布"),
   ;
 
   ErrorCode(HttpStatus httpStatus, String code, String message) {

@@ -6,7 +6,6 @@ import com.zj.common.model.ResponseMeta;
 import com.zj.domain.entity.dto.service.MicroserviceDto;
 import com.zj.service.service.MicroserviceService;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,8 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MicroserviceRest {
 
-  @Autowired
   private MicroserviceService microservice;
+
+  public MicroserviceRest(MicroserviceService microservice) {
+    this.microservice = microservice;
+  }
 
   @ResponseBody
   @GetMapping("/services")

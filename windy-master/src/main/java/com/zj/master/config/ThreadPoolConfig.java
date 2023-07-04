@@ -27,7 +27,7 @@ public class ThreadPoolConfig {
     windyThreadPool.setTimeout(3600 * 3L);
     windyThreadPool.setAllowCoreThreadTimeOut(false);
     windyThreadPool.setQueueSize(100);
-    windyThreadPool.setThreadNamePrefix("master-pipeline-thread-");
+    windyThreadPool.setThreadNamePrefix("master-pipeline-");
     return windyThreadPool;
   }
 
@@ -39,7 +39,7 @@ public class ThreadPoolConfig {
     windyThreadPool.setTimeout(3600 * 3L);
     windyThreadPool.setAllowCoreThreadTimeOut(false);
     windyThreadPool.setQueueSize(100);
-    windyThreadPool.setThreadNamePrefix("master-feature-thread-");
+    windyThreadPool.setThreadNamePrefix("master-feature-");
     return windyThreadPool;
   }
 }

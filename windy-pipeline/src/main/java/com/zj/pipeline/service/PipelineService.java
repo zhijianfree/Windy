@@ -1,40 +1,30 @@
 package com.zj.pipeline.service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.zj.common.enums.LogType;
-import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.common.model.DispatchModel;
 import com.zj.common.monitor.RequestProxy;
-import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
 import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
 import com.zj.domain.entity.dto.pipeline.PipelineStageDto;
-import com.zj.domain.entity.po.pipeline.Pipeline;
-import com.zj.domain.repository.pipeline.INodeRecordRepository;
+import com.zj.domain.entity.enums.PipelineType;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.pipeline.entity.enums.PipelineStatus;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * @author guyuelan
@@ -43,29 +33,25 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 @Service
 public class PipelineService {
-  @Autowired
+
   private PipelineNodeService pipelineNodeService;
-
-  @Autowired
   private PipelineStageService pipelineStageService;
-
-  @Autowired
-  private PipelineActionService pipelineActionService;
-
-  @Autowired
   private PipelineHistoryService pipelineHistoryService;
-
-  @Autowired
   private UniqueIdService uniqueIdService;
-
-  @Autowired
   private IPipelineRepository pipelineRepository;
-
-  @Autowired
   private RequestProxy requestProxy;
 
-  @Autowired
-  private INodeRecordRepository nodeRecordRepository;
+  public PipelineService(PipelineNodeService pipelineNodeService,
+      PipelineStageService pipelineStageService, PipelineHistoryService pipelineHistoryService,
+      UniqueIdService uniqueIdService, IPipelineRepository pipelineRepository,
+      RequestProxy requestProxy) {
+    this.pipelineNodeService = pipelineNodeService;
+    this.pipelineStageService = pipelineStageService;
+    this.pipelineHistoryService = pipelineHistoryService;
+    this.uniqueIdService = uniqueIdService;
+    this.pipelineRepository = pipelineRepository;
+    this.requestProxy = requestProxy;
+  }
 
   @Transactional
   public boolean updatePipeline(String service, String pipelineId, PipelineDto pipelineDTO) {
@@ -121,20 +107,25 @@ public class PipelineService {
       return;
     }
 
+    AtomicInteger sortOrder = new AtomicInteger(0);
     stageList.forEach(stageDto -> {
       PipelineStageDto stage = pipelineStageService.getPipelineStage(stageDto.getStageId());
       if (Objects.isNull(stage)) {
-        createNewStage(pipelineId, stageDto);
+        createNewStage(pipelineId, stageDto,sortOrder);
         return;
       }
 
       //修改stage节点
+      stageDto.setSortOrder(sortOrder.incrementAndGet());
       pipelineStageService.updateStage(stageDto);
 
       //修改node节点
       List<PipelineNodeDto> stageDtoNodes = stageDto.getNodes();
       if (CollectionUtils.isNotEmpty(stageDtoNodes)) {
-        stageDtoNodes.forEach(dto -> pipelineNodeService.updateNode(dto));
+        stageDtoNodes.forEach(dto -> {
+          dto.setSortOrder(sortOrder.incrementAndGet());
+          pipelineNodeService.updateNode(dto);
+        });
       }
     });
   }
@@ -146,9 +137,13 @@ public class PipelineService {
 
   @Transactional
   public Boolean deletePipeline(String service, String pipelineId) {
-    pipelineStageService.deleteStagesByPipelineId(pipelineId);
-    pipelineNodeService.deleteByPipeline(pipelineId);
-    return pipelineRepository.deletePipeline(pipelineId);
+    try {
+      pipelineStageService.deleteStagesByPipelineId(pipelineId);
+      pipelineNodeService.deleteByPipeline(pipelineId);
+      return pipelineRepository.deletePipeline(pipelineId);
+    } catch (Exception e) {
+      throw new ApiException(ErrorCode.DELETE_PIPELINE_ERROR);
+    }
   }
 
   @Transactional
@@ -156,6 +151,8 @@ public class PipelineService {
     if (Objects.isNull(pipelineDTO)) {
       return "";
     }
+
+    checkPipelineType(pipelineDTO);
 
     String pipelineId = uniqueIdService.getUniqueId();
     pipelineDTO.setPipelineId(pipelineId);
@@ -165,12 +162,25 @@ public class PipelineService {
       throw new ApiException(ErrorCode.CREATE_PIPELINE);
     }
 
-    pipelineDTO.getStageList().forEach(stageDto -> createNewStage(pipelineId, stageDto));
+    AtomicInteger atomicInteger = new AtomicInteger(0);
+    pipelineDTO.getStageList().forEach(stageDto -> {
+      createNewStage(pipelineId, stageDto, atomicInteger);
+    });
     return pipelineId;
   }
 
-  private void createNewStage(String pipelineId, PipelineStageDto stageDto) {
+  private void checkPipelineType(PipelineDto pipelineDTO) {
+    if (!Objects.equals(pipelineDTO.getPipelineType(), PipelineType.PUBLISH.getType())) {
+      return;
+    }
+    PipelineDto publishPipeline = pipelineRepository.getPublishPipeline(
+        pipelineDTO.getServiceId());
+    if (Objects.nonNull(publishPipeline)) {
+      throw new ApiException(ErrorCode.PUBLISH_PIPELINE_EXIST);
+    }
+  }
 
+  private Integer createNewStage(String pipelineId, PipelineStageDto stageDto, AtomicInteger atomicOrder) {
     String stageId = uniqueIdService.getUniqueId();
     PipelineStageDto pipelineStage = new PipelineStageDto();
     pipelineStage.setPipelineId(pipelineId);
@@ -178,6 +188,7 @@ public class PipelineService {
     pipelineStage.setStageId(stageId);
     pipelineStage.setConfigId(stageDto.getConfigId());
     pipelineStage.setType(stageDto.getType());
+    pipelineStage.setSortOrder(atomicOrder.incrementAndGet());
     pipelineStageService.saveStage(pipelineStage);
 
     stageDto.getNodes().forEach(nodeDto -> {
@@ -188,8 +199,10 @@ public class PipelineService {
       pipelineNode.setType(nodeDto.getType());
       pipelineNode.setNodeName(nodeDto.getNodeName());
       pipelineNode.setConfigDetail(nodeDto.getConfigDetail());
+      pipelineNode.setSortOrder(atomicOrder.incrementAndGet());
       pipelineNodeService.saveNode(pipelineNode);
     });
+    return atomicOrder.get();
   }
 
   public PipelineDto getPipeline(String pipelineId) {

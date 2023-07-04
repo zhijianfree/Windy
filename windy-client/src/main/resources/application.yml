@@ -39,7 +39,19 @@ eureka:
     service-url:
       defaultZone: http://windy-master:9768/eureka/
 
-#logging:
-#  level:
-#    root: debug
+windy:
+  pipeline:
+    git:
+      user: windy
+      password: windy!123
+      workspace: /opt/windy
+  deploy:
+    ssh:
+      user: guyuelan
+      pwd: ZJguyuelan!12345
+  loop:
+    query:
+      timeout: 7200000
+
+
 

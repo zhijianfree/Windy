@@ -5,7 +5,6 @@ import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
 import com.zj.common.exception.ErrorCode;
 import com.zj.domain.entity.dto.pipeline.PipelineExecuteInfo;
 import com.zj.pipeline.service.PipelineHistoryService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,8 +20,11 @@ import java.util.List;
 @RestController
 public class PipelineHistoryRest {
 
-  @Autowired
   private PipelineHistoryService historyService;
+
+  public PipelineHistoryRest(PipelineHistoryService historyService) {
+    this.historyService = historyService;
+  }
 
   @ResponseBody
   @GetMapping("/history/{historyId}")

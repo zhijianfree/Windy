@@ -1,0 +1,30 @@
+package com.zj.master.service;
+
+import com.zj.common.model.MasterCollect;
+import com.zj.common.monitor.collector.InstanceCollector;
+import com.zj.common.monitor.collector.PhysicsCollect;
+import com.zj.master.dispatch.IDispatchExecutor;
+import java.util.List;
+import org.springframework.stereotype.Service;
+
+/**
+ * @author guyuelan
+ * @since 2023/7/4
+ */
+@Service
+public class MasterMonitor {
+  private List<IDispatchExecutor> dispatchExecutors;
+
+  public MasterMonitor(List<IDispatchExecutor> dispatchExecutors) {
+    this.dispatchExecutors = dispatchExecutors;
+  }
+
+  public MasterCollect getInstanceInfo() {
+    MasterCollect masterCollect = new MasterCollect();
+    PhysicsCollect physics = InstanceCollector.collectPhysics();
+    masterCollect.setPhysics(physics);
+    int count = dispatchExecutors.stream().mapToInt(IDispatchExecutor::getExecuteCount).sum();
+    masterCollect.setTaskCount(count);
+    return masterCollect;
+  }
+}

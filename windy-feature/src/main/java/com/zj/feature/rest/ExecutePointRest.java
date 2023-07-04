@@ -7,7 +7,6 @@ import com.zj.common.model.PageSize;
 import com.zj.feature.service.ExecutePointService;
 import java.util.List;
 import javax.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,8 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/devops/feature")
 @RestController
 public class ExecutePointRest {
-    @Autowired
     private ExecutePointService executePointService;
+
+    public ExecutePointRest(ExecutePointService executePointService) {
+        this.executePointService = executePointService;
+    }
 
     @PostMapping("/batch/execute/point")
     public ResponseMeta<Void> batchAddExecutePoint(@Valid @RequestBody List<ExecutePointVo> executePointDtos){

@@ -9,6 +9,13 @@ import lombok.Data;
  */
 @Data
 public class StopDispatch {
+  /**
+   * 用例、任务、流水线记录Id
+   * */
   private String targetId;
+
+  /**
+   * 任务类型
+   * */
   private LogType logType;
 }

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -21,11 +20,14 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class ExecutePointService{
 
-  @Autowired
   private UniqueIdService uniqueIdService;
-
-  @Autowired
   private IExecutePointRepository executePointRepository;
+
+  public ExecutePointService(UniqueIdService uniqueIdService,
+      IExecutePointRepository executePointRepository) {
+    this.uniqueIdService = uniqueIdService;
+    this.executePointRepository = executePointRepository;
+  }
 
   public boolean updateByPointId(ExecutePointDto executePoint) {
     return executePointRepository.updateExecutePoint(executePoint);

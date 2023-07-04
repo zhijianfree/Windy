@@ -20,15 +20,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * @author guyuelan
@@ -38,22 +31,23 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class TaskInfoService {
 
-  @Autowired
   private TaskRecordService taskRecordService;
-
-  @Autowired
   private FeatureHistoryService featureHistoryService;
-
-  @Autowired
   private UniqueIdService uniqueIdService;
-
-  @Autowired
   private ITaskRepository taskRepository;
-
-  @Autowired
   private RequestProxy requestProxy;
 
   public static final String FORMAT_TIPS = "任务执行状态: 成功数: %s 成功率百分比: %s";
+
+  public TaskInfoService(TaskRecordService taskRecordService,
+      FeatureHistoryService featureHistoryService, UniqueIdService uniqueIdService,
+      ITaskRepository taskRepository, RequestProxy requestProxy) {
+    this.taskRecordService = taskRecordService;
+    this.featureHistoryService = featureHistoryService;
+    this.uniqueIdService = uniqueIdService;
+    this.taskRepository = taskRepository;
+    this.requestProxy = requestProxy;
+  }
 
   public PageSize<TaskInfoDto> getTaskList(String name, Integer pageNum, Integer size) {
     IPage<TaskInfo> taskInfoIPage = taskRepository.getTaskList(name, pageNum, size);

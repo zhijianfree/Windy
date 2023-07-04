@@ -26,6 +26,7 @@ import com.zj.master.entity.vo.NodeConfig;
 import com.zj.master.entity.vo.RefreshContext;
 import com.zj.master.entity.vo.RequestContext;
 import com.zj.master.entity.vo.TaskNode;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -44,29 +45,30 @@ import org.springframework.stereotype.Component;
 @Component
 public class PipelineDispatch implements IDispatchExecutor {
 
-  @Autowired
   private IPipelineRepository pipelineRepository;
-
-  @Autowired
   private IPipelineNodeRepository pipelineNodeRepository;
-
-  @Autowired
   private IPipelineHistoryRepository pipelineHistoryRepository;
-
-  @Autowired
   private IPipelineActionRepository pipelineActionRepository;
-
-  @Autowired
   private UniqueIdService uniqueIdService;
-
-  @Autowired
   private PipelineExecuteProxy pipelineExecuteProxy;
-
-  @Autowired
   private ISubDispatchLogRepository subDispatchLogRepository;
-
-  @Autowired
   private IDispatchLogRepository dispatchLogRepository;
+
+  public PipelineDispatch(IPipelineRepository pipelineRepository,
+      IPipelineNodeRepository pipelineNodeRepository,
+      IPipelineHistoryRepository pipelineHistoryRepository,
+      IPipelineActionRepository pipelineActionRepository, UniqueIdService uniqueIdService,
+      PipelineExecuteProxy pipelineExecuteProxy, ISubDispatchLogRepository subDispatchLogRepository,
+      IDispatchLogRepository dispatchLogRepository) {
+    this.pipelineRepository = pipelineRepository;
+    this.pipelineNodeRepository = pipelineNodeRepository;
+    this.pipelineHistoryRepository = pipelineHistoryRepository;
+    this.pipelineActionRepository = pipelineActionRepository;
+    this.uniqueIdService = uniqueIdService;
+    this.pipelineExecuteProxy = pipelineExecuteProxy;
+    this.subDispatchLogRepository = subDispatchLogRepository;
+    this.dispatchLogRepository = dispatchLogRepository;
+  }
 
   @Override
   public Integer type() {
@@ -108,6 +110,7 @@ public class PipelineDispatch implements IDispatchExecutor {
     pipelineTask.setLogId(task.getTaskLogId());
 
     List<TaskNode> taskNodeList = pipelineNodes.stream()
+        .sorted(Comparator.comparing(PipelineNodeDto::getSortOrder))
         .map(node -> buildTaskNode(node, historyId, pipeline.getServiceId()))
         .collect(Collectors.toList());
     pipelineTask.addAll(taskNodeList);
@@ -226,5 +229,10 @@ public class PipelineDispatch implements IDispatchExecutor {
     }
     pipelineExecuteProxy.runTask(pipelineTask);
     return true;
+  }
+
+  @Override
+  public Integer getExecuteCount() {
+    return pipelineExecuteProxy.getTaskSize();
   }
 }

@@ -9,7 +9,6 @@ import com.zj.domain.repository.feature.IFeatureHistoryRepository;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.master.dispatch.task.FeatureExecuteProxy;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,14 +19,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class UpdateFeatureHistoryEvent implements INotifyEvent {
 
-  @Autowired
   private IFeatureHistoryRepository featureHistoryRepository;
-
-  @Autowired
   private FeatureExecuteProxy featureExecuteProxy;
-
-  @Autowired
   private ISubDispatchLogRepository subTaskLogRepository;
+
+  public UpdateFeatureHistoryEvent(IFeatureHistoryRepository featureHistoryRepository,
+      FeatureExecuteProxy featureExecuteProxy, ISubDispatchLogRepository subTaskLogRepository) {
+    this.featureHistoryRepository = featureHistoryRepository;
+    this.featureExecuteProxy = featureExecuteProxy;
+    this.subTaskLogRepository = subTaskLogRepository;
+  }
 
   @Override
   public NotifyType type() {

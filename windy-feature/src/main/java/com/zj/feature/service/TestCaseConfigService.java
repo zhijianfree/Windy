@@ -6,7 +6,6 @@ import com.zj.domain.repository.feature.ITestCaseConfigRepository;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -17,11 +16,14 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class TestCaseConfigService {
 
-  @Autowired
   private UniqueIdService uniqueIdService;
-
-  @Autowired
   private ITestCaseConfigRepository testCaseConfigRepository;
+
+  public TestCaseConfigService(UniqueIdService uniqueIdService,
+      ITestCaseConfigRepository testCaseConfigRepository) {
+    this.uniqueIdService = uniqueIdService;
+    this.testCaseConfigRepository = testCaseConfigRepository;
+  }
 
   public List<TestCaseConfigDto> getTestCaseConfigs(String caseId) {
     return testCaseConfigRepository.getCaseConfigs(caseId);

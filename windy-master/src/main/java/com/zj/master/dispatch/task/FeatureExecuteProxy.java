@@ -1,5 +1,6 @@
 package com.zj.master.dispatch.task;
 
+import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
@@ -21,11 +22,9 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -38,26 +37,28 @@ import org.springframework.stereotype.Component;
 public class FeatureExecuteProxy implements IStopEventListener {
 
   public static final String DISPATCH_FEATURE_TYPE = "FEATURE";
-  @Autowired
+
   private RequestProxy requestProxy;
-  @Autowired
-  @Qualifier("featureExecutorPool")
   private Executor executorService;
-
-  @Autowired
   private TaskEndProcessor taskEndProcessor;
-
-  @Autowired
   private IExecutePointRepository executePointRepository;
-
-  @Autowired
   private ITaskRecordRepository taskRecordRepository;
-
-  @Autowired
   private IFeatureHistoryRepository featureHistoryRepository;
 
   public static final String TASK_FEATURE_TIPS = "no task need run";
   private final Map<String, FeatureTask> featureTaskMap = new ConcurrentHashMap<>();
+
+  public FeatureExecuteProxy(RequestProxy requestProxy,
+      @Qualifier("featureExecutorPool") Executor executorService, TaskEndProcessor taskEndProcessor,
+      IExecutePointRepository executePointRepository, ITaskRecordRepository taskRecordRepository,
+      IFeatureHistoryRepository featureHistoryRepository) {
+    this.requestProxy = requestProxy;
+    this.executorService = executorService;
+    this.taskEndProcessor = taskEndProcessor;
+    this.executePointRepository = executePointRepository;
+    this.taskRecordRepository = taskRecordRepository;
+    this.featureHistoryRepository = featureHistoryRepository;
+  }
 
   public void execute(FeatureTask featureTask) {
     featureTaskMap.put(featureTask.getTaskRecordId(), featureTask);
@@ -131,7 +132,8 @@ public class FeatureExecuteProxy implements IStopEventListener {
 
   @Override
   @Subscribe
-  public void handle(InnerEvent event) {
+  @AllowConcurrentEvents
+  public void stopEvent(InnerEvent event) {
     if (!Objects.equals(event.getLogType().getType(), LogType.FEATURE_TASK.getType())) {
       return;
     }
@@ -146,5 +148,9 @@ public class FeatureExecuteProxy implements IStopEventListener {
         featureTask.getTaskRecordId());
     taskRecordRepository.updateRecordStatus(taskRecordId, ProcessStatus.STOP.getType());
     featureHistoryRepository.stopTaskFeatures(taskRecordId, ProcessStatus.STOP);
+  }
+
+  public Integer getTaskSize() {
+    return featureTaskMap.values().stream().mapToInt(task -> task.getFeatureIds().size()).sum();
   }
 }

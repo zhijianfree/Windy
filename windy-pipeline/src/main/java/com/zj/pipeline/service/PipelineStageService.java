@@ -3,7 +3,6 @@ package com.zj.pipeline.service;
 import com.zj.domain.entity.dto.pipeline.PipelineStageDto;
 import com.zj.domain.repository.pipeline.IPipelineStageRepository;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -13,8 +12,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class PipelineStageService{
 
-  @Autowired
   private IPipelineStageRepository pipelineStageRepository;
+
+  public PipelineStageService(IPipelineStageRepository pipelineStageRepository) {
+    this.pipelineStageRepository = pipelineStageRepository;
+  }
 
   public void deletePipelineStages(List<String> notExistStages) {
     pipelineStageRepository.deletePipelineStages(notExistStages);

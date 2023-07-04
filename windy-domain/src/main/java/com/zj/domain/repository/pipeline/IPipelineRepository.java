@@ -35,4 +35,6 @@ public interface IPipelineRepository {
   List<PipelineDto> listPipelines(String serviceId);
 
   List<PipelineDto> getServicePipelines(String serviceId);
+
+  PipelineDto getPublishPipeline(String serviceId);
 }

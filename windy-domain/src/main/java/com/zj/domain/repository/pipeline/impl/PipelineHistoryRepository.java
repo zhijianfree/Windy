@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
@@ -29,8 +28,13 @@ public class PipelineHistoryRepository extends
     ServiceImpl<PipelineHistoryMapper, PipelineHistory> implements IPipelineHistoryRepository {
 
   public static final String LAST_SQL = "limit 1";
-  @Autowired
+
   private IPipelineRepository pipelineRepository;
+
+  public PipelineHistoryRepository(IPipelineRepository pipelineRepository) {
+    this.pipelineRepository = pipelineRepository;
+  }
+
   @Override
   public PipelineHistoryDto getPipelineHistory(String historyId) {
     PipelineHistory pipelineHistory = getOne(

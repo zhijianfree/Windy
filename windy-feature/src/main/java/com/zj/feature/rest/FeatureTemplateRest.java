@@ -6,7 +6,6 @@ import com.zj.feature.entity.dto.ExecuteTemplateVo;
 import com.zj.common.model.PageSize;
 import com.zj.feature.service.TemplateService;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,8 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class FeatureTemplateRest {
 
-  @Autowired
   private TemplateService templateService;
+
+  public FeatureTemplateRest(TemplateService templateService) {
+    this.templateService = templateService;
+  }
 
   @ResponseBody
   @GetMapping("/templates/page")

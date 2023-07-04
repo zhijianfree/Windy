@@ -4,7 +4,6 @@ import com.zj.domain.entity.dto.service.MicroserviceDto;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.master.entity.vo.TaskNode;
 import java.util.Objects;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,9 +12,11 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class PresetInterceptor implements INodeExecuteInterceptor {
-
-  @Autowired
   private IMicroServiceRepository microServiceRepository;
+
+  public PresetInterceptor(IMicroServiceRepository microServiceRepository) {
+    this.microServiceRepository = microServiceRepository;
+  }
 
   @Override
   public void beforeExecute(TaskNode taskNode) {

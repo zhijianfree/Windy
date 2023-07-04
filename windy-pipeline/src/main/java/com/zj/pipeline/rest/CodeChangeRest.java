@@ -5,7 +5,6 @@ import com.zj.domain.entity.dto.pipeline.CodeChangeDto;
 import com.zj.common.exception.ErrorCode;
 import com.zj.domain.entity.dto.pipeline.RelationDemandBug;
 import com.zj.pipeline.service.CodeChangeService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,8 +20,11 @@ import java.util.List;
 @RestController
 public class CodeChangeRest {
 
-  @Autowired
   private CodeChangeService codeChangeService;
+
+  public CodeChangeRest(CodeChangeService codeChangeService) {
+    this.codeChangeService = codeChangeService;
+  }
 
   @ResponseBody
   @GetMapping("/{serviceId}/change/{codeChangeId}")

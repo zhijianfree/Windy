@@ -8,18 +8,20 @@ import com.zj.domain.entity.dto.service.MicroserviceDto;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
 public class MicroserviceService {
 
-  @Autowired
   private IMicroServiceRepository microServiceRepository;
-  
-  @Autowired
   private UniqueIdService uniqueIdService;
+
+  public MicroserviceService(IMicroServiceRepository microServiceRepository,
+      UniqueIdService uniqueIdService) {
+    this.microServiceRepository = microServiceRepository;
+    this.uniqueIdService = uniqueIdService;
+  }
 
   public PageSize<MicroserviceDto> getServices(Integer pageNo, Integer size, String name) {
     IPage<MicroserviceDto> page = microServiceRepository.getServices(pageNo, size, name);

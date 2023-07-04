@@ -5,14 +5,12 @@ import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.NotifyType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.model.ResultEvent;
-import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
 import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.master.dispatch.pipeline.PipelineExecuteProxy;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -23,14 +21,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class UpdateNodeRecordEvent implements INotifyEvent {
 
-  @Autowired
   private INodeRecordRepository nodeRecordRepository;
-
-  @Autowired
   private PipelineExecuteProxy pipelineExecuteProxy;
-
-  @Autowired
   private ISubDispatchLogRepository subTaskLogRepository;
+
+  public UpdateNodeRecordEvent(INodeRecordRepository nodeRecordRepository,
+      PipelineExecuteProxy pipelineExecuteProxy, ISubDispatchLogRepository subTaskLogRepository) {
+    this.nodeRecordRepository = nodeRecordRepository;
+    this.pipelineExecuteProxy = pipelineExecuteProxy;
+    this.subTaskLogRepository = subTaskLogRepository;
+  }
 
   @Override
   public NotifyType type() {

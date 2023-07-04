@@ -7,7 +7,6 @@ import com.zj.common.model.PageSize;
 import com.zj.domain.entity.dto.feature.TaskInfoDto;
 import com.zj.feature.service.TaskInfoService;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,8 +25,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/devops/feature")
 public class TaskInfoRest {
 
-  @Autowired
   private TaskInfoService taskInfoService;
+
+  public TaskInfoRest(TaskInfoService taskInfoService) {
+    this.taskInfoService = taskInfoService;
+  }
 
   @GetMapping("/tasks")
   public ResponseMeta<PageSize<TaskInfoDto>> getTaskList(@RequestParam(value = "page", defaultValue = "1") Integer page,

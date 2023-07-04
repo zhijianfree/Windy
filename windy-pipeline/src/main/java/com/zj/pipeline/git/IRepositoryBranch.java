@@ -8,15 +8,17 @@ import java.util.List;
  */
 public interface IRepositoryBranch {
 
+  String gitType();
+
   /**
    * 创建分支
    */
-  boolean createBranch(String serviceName, String branchName);
+  void createBranch(String serviceName, String branchName);
 
   /**
    * 删除分支
    */
-  boolean deleteBranch(String serviceName, String branchName);
+  void deleteBranch(String serviceName, String branchName);
 
   /**
    * 查看分支列表

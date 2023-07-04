@@ -2,8 +2,9 @@ package com.zj.common.monitor;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.netflix.discovery.shared.Application;
-import com.netflix.eureka.EurekaServerContextHolder;
+import com.zj.common.model.ClientCollect;
+import com.zj.common.model.MasterCollect;
+import com.zj.common.model.ResponseMeta;
 import com.zj.common.model.ResultEvent;
 import com.zj.common.model.StopDispatch;
 import com.zj.common.monitor.discover.DiscoverService;
@@ -16,13 +17,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -54,6 +55,10 @@ public class RequestProxy {
   private static final String CLIENT_QUERY_APPROVAL_STATUS = "http://WindyMaster/v1/devops/master/record/";
   public static final String CONSOLE_RUN_TASK = "http://WindyMaster/v1/devops/dispatch/task";
   public static final String CONSOLE_STOP_TASK = "http://WindyMaster/v1/devops/dispatch/stop";
+
+  public static final String CLIENT_MONITOR_URL = "http://%s/v1/devops/client/instance";
+
+  public static final String MASTER_MONITOR_URL = "http://%s/v1/devops/master/instance";
   private static final String WINDY_MASTER = "WindyMaster";
   private static final String WINDY_CLIENT = "WindyClient";
   private final OkHttpClient okHttpClient = new OkHttpClient.Builder().connectTimeout(10,
@@ -98,7 +103,11 @@ public class RequestProxy {
 
   private void wrapTraceHeader() {
     String traceId = MDC.get(TidInterceptor.MDC_TID_KEY);
-    headers.add(TidInterceptor.HTTP_HEADER_TRACE_ID, traceId);
+    boolean existTrace = headers.toSingleValueMap().keySet()
+        .contains(TidInterceptor.HTTP_HEADER_TRACE_ID);
+    if (!existTrace) {
+      headers.add(TidInterceptor.HTTP_HEADER_TRACE_ID, traceId);
+    }
   }
 
   private boolean requestWithIp(Object data, ServiceInstance serviceInstance) {
@@ -270,5 +279,45 @@ public class RequestProxy {
       log.error("request dispatch pipeline task error", e);
     }
     return false;
+  }
+
+  public List<ClientCollect> requestClientMonitor() {
+    List<ServiceInstance> serviceInstances = discoverService.getServiceInstances(WINDY_CLIENT);
+    return serviceInstances.stream().map(service -> {
+      String url = String.format(CLIENT_MONITOR_URL, service.getHost());
+      String traceId = MDC.get(TidInterceptor.MDC_TID_KEY);
+      Request request = new Request.Builder().url(url)
+          .header(TidInterceptor.HTTP_HEADER_TRACE_ID, traceId).get().build();
+      try {
+        Response response = okHttpClient.newCall(request).execute();
+        String string = response.body().string();
+        log.info("request client monitor ={}", string);
+        ResponseMeta result = JSON.parseObject(string, ResponseMeta.class);
+        return JSON.parseObject(JSON.toJSONString(result.getData()), ClientCollect.class);
+      } catch (Exception e) {
+        log.error("request client ip error", e);
+      }
+      return null;
+    }).collect(Collectors.toList());
+  }
+
+  public List<MasterCollect> requestMasterMonitor() {
+    List<ServiceInstance> serviceInstances = discoverService.getServiceInstances(WINDY_MASTER);
+    return serviceInstances.stream().map(service -> {
+      String url = String.format(MASTER_MONITOR_URL, service.getHost());
+      String traceId = MDC.get(TidInterceptor.MDC_TID_KEY);
+      Request request = new Request.Builder().url(url)
+          .header(TidInterceptor.HTTP_HEADER_TRACE_ID, traceId).get().build();
+      try {
+        Response response = okHttpClient.newCall(request).execute();
+        String string = response.body().string();
+        log.info("request master monitor result={}", string);
+        ResponseMeta result = JSON.parseObject(string, ResponseMeta.class);
+        return JSON.parseObject(JSON.toJSONString(result.getData()), MasterCollect.class);
+      } catch (Exception e) {
+        log.error("request master ip error", e);
+      }
+      return null;
+    }).collect(Collectors.toList());
   }
 }

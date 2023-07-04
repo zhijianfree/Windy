@@ -4,28 +4,17 @@ import com.alibaba.fastjson.JSONObject;
 import com.zj.client.config.GlobalEnvConfig;
 import com.zj.client.entity.dto.BuildParam;
 import com.zj.client.entity.dto.ResponseModel;
-import com.zj.client.pipeline.git.GitOperator;
-import com.zj.client.pipeline.maven.MavenOperator;
+import com.zj.client.handler.pipeline.git.IGitProcessor;
+import com.zj.client.handler.pipeline.maven.MavenOperator;
 import com.zj.client.utils.Utils;
 import com.zj.common.enums.ProcessStatus;
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
-import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.eclipse.jgit.api.Git;
-import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 /**
@@ -38,17 +27,21 @@ public class CodeBuildService {
 
   public static final int BUILD_SUCCESS = 0;
   public static final String BUILD_SUCCESS_TIPS = "构建成功";
-  @Autowired
-  private GitOperator gitOperator;
-  @Autowired
+
+  private IGitProcessor gitProcessor;
   private MavenOperator mavenOperator;
-  @Autowired
-  @Qualifier("gitOperateExecutor")
   private Executor executorService;
-  @Autowired
   private GlobalEnvConfig globalEnvConfig;
 
   private final Map<String, ResponseModel> statusMap = new ConcurrentHashMap<>();
+
+  public CodeBuildService(IGitProcessor gitProcessor, MavenOperator mavenOperator,
+      @Qualifier("gitOperatePool") Executor executorService, GlobalEnvConfig globalEnvConfig) {
+    this.gitProcessor = gitProcessor;
+    this.mavenOperator = mavenOperator;
+    this.executorService = executorService;
+    this.globalEnvConfig = globalEnvConfig;
+  }
 
   public void buildCode(BuildParam buildParam) {
     executorService.execute(() -> {
@@ -58,10 +51,11 @@ public class CodeBuildService {
         String serviceName = Utils.getServiceFromUrl(gitUrl);
         String pipelineWorkspace = globalEnvConfig.getPipelineWorkspace(serviceName,
             buildParam.getPipelineId());
-        Git git = gitOperator.pullCodeFromGit(gitUrl, buildParam.getBranch(), pipelineWorkspace);
-        git.fetch();
 
-        //本地maven构建
+        //1 拉取代码到本地
+        pullCodeFrmGit(buildParam, gitUrl, pipelineWorkspace);
+
+        //2 本地maven构建
         String pomPath = getTargetPomPath(pipelineWorkspace, buildParam.getPomPath());
         Integer exitCode = mavenOperator.build(pomPath, pipelineWorkspace);
         log.info("get maven exit code={}", exitCode);
@@ -70,10 +64,20 @@ public class CodeBuildService {
         saveStatus(buildParam.getRecordId(), result, BUILD_SUCCESS_TIPS);
       } catch (Exception e) {
         log.error("buildCode error", e);
-        saveStatus(buildParam.getRecordId(), ProcessStatus.FAIL, e.toString());
+        saveStatus(buildParam.getRecordId(), ProcessStatus.FAIL, e.getMessage());
       }
     });
     saveStatus(buildParam.getRecordId(), ProcessStatus.RUNNING, "构建中");
+  }
+
+  private void pullCodeFrmGit(BuildParam buildParam, String gitUrl, String pipelineWorkspace)
+      throws Exception {
+    if (buildParam.getIsPublish()) {
+      gitProcessor.createTempBranch(gitUrl, buildParam.getBranches(), pipelineWorkspace);
+    } else {
+      String branch = buildParam.getBranches().get(0);
+      gitProcessor.pullCodeFromGit(gitUrl, branch, pipelineWorkspace);
+    }
   }
 
   private void saveStatus(String recordId, ProcessStatus status, String message) {

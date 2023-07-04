@@ -469,6 +469,21 @@ CREATE TABLE `dispatch_log` (
   KEY `idx_source_id` (`source_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 
+CREATE TABLE `publish_bind` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `branch` varchar(100) NOT NULL COMMENT '分支名称',
+  `service_id` varchar(64) NOT NULL COMMENT '服务id',
+  `pipeline_id` varchar(64) NOT NULL COMMENT '流水线id',
+  `user_id` varchar(64) DEFAULT NULL COMMENT '发布人',
+  `publish_id` varchar(64) NOT NULL COMMENT '发布Id',
+  `publish_line` varchar(64) NOT NULL COMMENT '关联的发布流水线id',
+  `status` int(2) NOT NULL DEFAULT '1' COMMENT '发布状态 1 待发布  2 发布中',
+  `create_time` bigint(20) DEFAULT NULL,
+  `update_time` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_service_id_branch` (`service_id`,`branch`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+
 ## 流水线默认配置
 INSERT INTO windy.system_config (config_id,config_name,parent_id,`type`,config_detail,sort,create_time,update_time) VALUES
 	 ('1','流水线默认配置',NULL,1,'[{"id":"0","name":"开始","status":"success","root":true,"group":"0","disable":true,"next":[{"index":1,"weight":0}]},{"id":"1","name":"结束","disable":true,"status":"success","group":"1","root":true}]',1,1,1);

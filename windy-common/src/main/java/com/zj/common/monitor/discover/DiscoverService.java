@@ -3,7 +3,6 @@ package com.zj.common.monitor.discover;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +15,12 @@ public class DiscoverService {
 
   public static final String WINDY_MASTER = "WindyMaster";
   public static final String WINDY_Client = "WindyClient";
-  @Autowired
+
   private DiscoveryClient discoveryClient;
+
+  public DiscoverService(DiscoveryClient discoveryClient) {
+    this.discoveryClient = discoveryClient;
+  }
 
   public ServiceInstance getWindyMasterByIp( String ip) {
     List<ServiceInstance> serviceInstances = getServiceInstances(WINDY_MASTER);
