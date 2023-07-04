@@ -9,12 +9,10 @@ import com.zj.domain.entity.po.feature.FeatureHistory;
 import com.zj.domain.mapper.feeature.FeatureHistoryMapper;
 import com.zj.domain.repository.feature.IExecuteRecordRepository;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
-import com.zj.domain.repository.feature.ITestCaseRepository;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -28,11 +26,11 @@ import org.springframework.util.CollectionUtils;
 public class FeatureHistoryRepository extends
     ServiceImpl<FeatureHistoryMapper, FeatureHistory> implements IFeatureHistoryRepository {
 
-  @Autowired
-  private ITestCaseRepository testCaseRepository;
-
-  @Autowired
   private IExecuteRecordRepository executeRecordRepository;
+
+  public FeatureHistoryRepository(IExecuteRecordRepository executeRecordRepository) {
+    this.executeRecordRepository = executeRecordRepository;
+  }
 
   @Override
   public FeatureHistoryDto getFeatureHistory(String historyId) {

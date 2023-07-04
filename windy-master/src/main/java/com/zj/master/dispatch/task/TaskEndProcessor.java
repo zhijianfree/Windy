@@ -23,17 +23,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class TaskEndProcessor {
 
-  @Autowired
   private ITaskRecordRepository taskRecordRepository;
-
-  @Autowired
   private IFeatureHistoryRepository featureHistoryRepository;
-
-  @Autowired
   private IFeatureRepository featureRepository;
-
-  @Autowired
   private IDispatchLogRepository taskLogRepository;
+
+  public TaskEndProcessor(ITaskRecordRepository taskRecordRepository,
+      IFeatureHistoryRepository featureHistoryRepository, IFeatureRepository featureRepository,
+      IDispatchLogRepository taskLogRepository) {
+    this.taskRecordRepository = taskRecordRepository;
+    this.featureHistoryRepository = featureHistoryRepository;
+    this.featureRepository = featureRepository;
+    this.taskLogRepository = taskLogRepository;
+  }
 
   public boolean process(String taskRecordId, ProcessStatus status, String logId) {
     TaskRecordDto taskRecord = taskRecordRepository.getTaskRecord(taskRecordId);

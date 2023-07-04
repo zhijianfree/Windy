@@ -7,7 +7,6 @@ import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,11 +17,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class CreateNodeRecordEvent implements INotifyEvent {
 
-  @Autowired
   private INodeRecordRepository nodeRecordRepository;
-
-  @Autowired
   private ISubDispatchLogRepository subDispatchLogRepository;
+
+  public CreateNodeRecordEvent(INodeRecordRepository nodeRecordRepository,
+      ISubDispatchLogRepository subDispatchLogRepository) {
+    this.nodeRecordRepository = nodeRecordRepository;
+    this.subDispatchLogRepository = subDispatchLogRepository;
+  }
 
   @Override
   public NotifyType type() {

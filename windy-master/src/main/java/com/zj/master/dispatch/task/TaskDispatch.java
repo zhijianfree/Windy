@@ -36,26 +36,26 @@ import org.springframework.util.CollectionUtils;
 @Component
 public class TaskDispatch implements IDispatchExecutor {
 
-  @Autowired
   private ITaskRepository taskRepository;
-
-  @Autowired
   private IFeatureRepository featureRepository;
-
-  @Autowired
   private ITaskRecordRepository taskRecordRepository;
-
-  @Autowired
   private FeatureExecuteProxy featureExecuteProxy;
-
-  @Autowired
   private ISubDispatchLogRepository subTaskLogRepository;
-
-  @Autowired
   private IDispatchLogRepository dispatchLogRepository;
-
-  @Autowired
   private UniqueIdService uniqueIdService;
+
+  public TaskDispatch(ITaskRepository taskRepository, IFeatureRepository featureRepository,
+      ITaskRecordRepository taskRecordRepository, FeatureExecuteProxy featureExecuteProxy,
+      ISubDispatchLogRepository subTaskLogRepository, IDispatchLogRepository dispatchLogRepository,
+      UniqueIdService uniqueIdService) {
+    this.taskRepository = taskRepository;
+    this.featureRepository = featureRepository;
+    this.taskRecordRepository = taskRecordRepository;
+    this.featureExecuteProxy = featureExecuteProxy;
+    this.subTaskLogRepository = subTaskLogRepository;
+    this.dispatchLogRepository = dispatchLogRepository;
+    this.uniqueIdService = uniqueIdService;
+  }
 
   @Override
   public Integer type() {
@@ -211,5 +211,10 @@ public class TaskDispatch implements IDispatchExecutor {
     featureTask.setTaskId(taskLog.getSourceId());
     featureTask.setLogId(taskLog.getLogId());
     return featureTask;
+  }
+
+  @Override
+  public Integer getExecuteCount() {
+    return 0;
   }
 }

@@ -13,7 +13,6 @@ import com.zj.master.dispatch.listener.TaskInnerEventFactory;
 import com.zj.master.entity.dto.TaskDetailDto;
 import com.zj.master.entity.enums.EventType;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,14 +23,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class TaskLogService {
 
-  @Autowired
   private UniqueIdService uniqueIdService;
-
-  @Autowired
   private IDispatchLogRepository taskLogRepository;
-
-  @Autowired
   private Dispatcher dispatcher;
+
+  public TaskLogService(UniqueIdService uniqueIdService, IDispatchLogRepository taskLogRepository,
+      Dispatcher dispatcher) {
+    this.uniqueIdService = uniqueIdService;
+    this.taskLogRepository = taskLogRepository;
+    this.dispatcher = dispatcher;
+  }
 
   public String createTask(TaskDetailDto task) {
     log.info("receive task detail ={}", JSON.toJSONString(task));

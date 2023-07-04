@@ -31,23 +31,24 @@ import org.springframework.stereotype.Component;
 public class FeatureDispatch implements IDispatchExecutor {
 
   public static final String TEMP_KEY = "temp_";
-  @Autowired
   private IFeatureRepository featureRepository;
-
-  @Autowired
   private ITestCaseRepository testCaseRepository;
-
-  @Autowired
   private ITestCaseConfigRepository testCaseConfigRepository;
-
-  @Autowired
   private UniqueIdService uniqueIdService;
-
-  @Autowired
   private FeatureExecuteProxy featureExecuteProxy;
-
-  @Autowired
   private IDispatchLogRepository dispatchLogRepository;
+
+  public FeatureDispatch(IFeatureRepository featureRepository,
+      ITestCaseRepository testCaseRepository, ITestCaseConfigRepository testCaseConfigRepository,
+      UniqueIdService uniqueIdService, FeatureExecuteProxy featureExecuteProxy,
+      IDispatchLogRepository dispatchLogRepository) {
+    this.featureRepository = featureRepository;
+    this.testCaseRepository = testCaseRepository;
+    this.testCaseConfigRepository = testCaseConfigRepository;
+    this.uniqueIdService = uniqueIdService;
+    this.featureExecuteProxy = featureExecuteProxy;
+    this.dispatchLogRepository = dispatchLogRepository;
+  }
 
   @Override
   public Integer type() {
@@ -97,5 +98,10 @@ public class FeatureDispatch implements IDispatchExecutor {
       executeContext.set(config.getParamKey(), config.getValue());
     }
     return executeContext;
+  }
+
+  @Override
+  public Integer getExecuteCount() {
+    return featureExecuteProxy.getTaskSize();
   }
 }

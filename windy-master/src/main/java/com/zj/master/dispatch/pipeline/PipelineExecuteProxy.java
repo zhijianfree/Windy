@@ -26,7 +26,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,23 +42,31 @@ public class PipelineExecuteProxy implements IStopEventListener {
 
   public static final String TASK_DONE_TIPS = "no task need run";
   public static final String DISPATCH_PIPELINE_TYPE = "PIPELINE";
-  @Autowired
+
   private RequestProxy requestProxy;
-  @Autowired
-  @Qualifier("pipelineExecutorPool")
   private Executor executorService;
-  @Autowired
   private INodeRecordRepository nodeRecordRepository;
-  @Autowired
   private IPipelineHistoryRepository pipelineHistoryRepository;
-  @Autowired
   private PipelineEndProcessor pipelineEndProcessor;
-  @Autowired
   private IDispatchLogRepository dispatchLogRepository;
-  @Autowired
   private List<INodeExecuteInterceptor> interceptors;
 
   private final Map<String, PipelineTask> pipelineTaskMap = new ConcurrentHashMap<>();
+
+  public PipelineExecuteProxy(RequestProxy requestProxy,
+      @Qualifier("pipelineExecutorPool") Executor executorService,
+      INodeRecordRepository nodeRecordRepository,
+      IPipelineHistoryRepository pipelineHistoryRepository,
+      PipelineEndProcessor pipelineEndProcessor, IDispatchLogRepository dispatchLogRepository,
+      List<INodeExecuteInterceptor> interceptors) {
+    this.requestProxy = requestProxy;
+    this.executorService = executorService;
+    this.nodeRecordRepository = nodeRecordRepository;
+    this.pipelineHistoryRepository = pipelineHistoryRepository;
+    this.pipelineEndProcessor = pipelineEndProcessor;
+    this.dispatchLogRepository = dispatchLogRepository;
+    this.interceptors = interceptors;
+  }
 
   public void runTask(PipelineTask pipelineTask) {
     log.info("start run task ={}", JSON.toJSONString(pipelineTask));
@@ -183,8 +190,11 @@ public class PipelineExecuteProxy implements IStopEventListener {
 
   private NodeStatusChange buildStatusChange(PipelineTask pipelineTask, String historyId,
       String nodeId, ProcessStatus status) {
-    return NodeStatusChange.builder().historyId(historyId).nodeId(nodeId)
-        .processStatus(status).logId(pipelineTask.getLogId())
-        .pipelineId(pipelineTask.getPipelineId()).build();
+    return NodeStatusChange.builder().historyId(historyId).nodeId(nodeId).processStatus(status)
+        .logId(pipelineTask.getLogId()).pipelineId(pipelineTask.getPipelineId()).build();
+  }
+
+  public Integer getTaskSize() {
+    return pipelineTaskMap.values().stream().mapToInt(task -> task.getTaskNodes().size()).sum();
   }
 }

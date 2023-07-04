@@ -7,21 +7,20 @@ import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.common.model.DispatchModel;
+import com.zj.common.model.PageSize;
 import com.zj.common.monitor.RequestProxy;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.BatchDeleteDto;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
 import com.zj.domain.entity.dto.feature.FeatureInfoDto;
-import com.zj.domain.entity.dto.feature.TaskInfoDto;
+import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
+import com.zj.domain.entity.dto.feature.TestCaseDto;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.feature.entity.dto.CopyFeatureDto;
 import com.zj.feature.entity.dto.ExecutePointVo;
 import com.zj.feature.entity.dto.FeatureInfoVo;
 import com.zj.feature.entity.dto.FeatureNodeDto;
-import com.zj.common.model.PageSize;
 import com.zj.feature.entity.dto.TagFilterDto;
-import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
-import com.zj.domain.entity.dto.feature.TestCaseDto;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,42 +32,35 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @Service
 public class FeatureService {
 
   public static final String COPY_STRING = " copy";
-  @Autowired
+
   private ExecutePointService executePointService;
-
-  @Autowired
   private TestCaseService testCaseService;
-
-  @Autowired
   private TestCaseConfigService testCaseConfigService;
-
-  @Autowired
   private FeatureTagService featureTagService;
-
-  @Autowired
   private UniqueIdService uniqueIdService;
-
-  @Autowired
   private IFeatureRepository featureRepository;
-
-  @Autowired
   private RequestProxy requestProxy;
 
-  public static final String WINDY_MASTER_DISPATCH_URL = "http://WindyMaster/v1/devops/dispatch/task";
+  public FeatureService(ExecutePointService executePointService, TestCaseService testCaseService,
+      TestCaseConfigService testCaseConfigService, FeatureTagService featureTagService,
+      UniqueIdService uniqueIdService, IFeatureRepository featureRepository,
+      RequestProxy requestProxy) {
+    this.executePointService = executePointService;
+    this.testCaseService = testCaseService;
+    this.testCaseConfigService = testCaseConfigService;
+    this.featureTagService = featureTagService;
+    this.uniqueIdService = uniqueIdService;
+    this.featureRepository = featureRepository;
+    this.requestProxy = requestProxy;
+  }
 
   public List<FeatureNodeDto> getFeatureTreeList(String testCaseId) {
     List<FeatureInfoDto> featureList = featureRepository.queryFeatureList(testCaseId);

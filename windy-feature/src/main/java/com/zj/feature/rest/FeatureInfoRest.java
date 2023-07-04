@@ -12,7 +12,6 @@ import com.zj.feature.entity.dto.TagFilterDto;
 import com.zj.feature.service.FeatureService;
 import java.util.List;
 import javax.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,8 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class FeatureInfoRest {
 
-  @Autowired
   private FeatureService featureService;
+
+  public FeatureInfoRest(FeatureService featureService) {
+    this.featureService = featureService;
+  }
 
   @GetMapping("/{caseId}/tree/features")
   public ResponseMeta<List<FeatureInfo>> getFeatureTreeList(

@@ -1,13 +1,10 @@
 package com.zj.feature.service;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.zj.domain.entity.dto.feature.FeatureTagDto;
-import com.zj.domain.entity.po.feature.FeatureTag;
 import com.zj.domain.repository.feature.IFeatureTagRepository;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -18,8 +15,11 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class FeatureTagService{
 
-  @Autowired
   private IFeatureTagRepository featureTagRepository;
+
+  public FeatureTagService(IFeatureTagRepository featureTagRepository) {
+    this.featureTagRepository = featureTagRepository;
+  }
 
   public void batchAddTag(String featureId, List<String> tags) {
     long currentTime = System.currentTimeMillis();

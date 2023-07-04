@@ -1,0 +1,25 @@
+package com.zj.client.handler.pipeline.executer.vo;
+
+import lombok.Data;
+
+/**
+ * @author guyuelan
+ * @since 2023/6/15
+ */
+@Data
+public class DeployRequest {
+
+  private String pipelineId;
+
+  private String gitUrl;
+
+  private String remotePath;
+
+  private String sshIp;
+
+  private Integer sshPort;
+
+  private String serverPort;
+
+  private String deployType;
+}

@@ -9,21 +9,22 @@ import com.zj.feature.entity.dto.FeatureInfoVo;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 public class FeatureHistoryService {
 
-  @Autowired
   private ExecuteRecordService executeRecordService;
-
-  @Autowired
   private FeatureService featureService;
-
-  @Autowired
   private IFeatureHistoryRepository featureHistoryRepository;
+
+  public FeatureHistoryService(ExecuteRecordService executeRecordService,
+      FeatureService featureService, IFeatureHistoryRepository featureHistoryRepository) {
+    this.executeRecordService = executeRecordService;
+    this.featureService = featureService;
+    this.featureHistoryRepository = featureHistoryRepository;
+  }
 
   public List<FeatureHistoryDto> featureHistories(String featureId) {
     return featureHistoryRepository.featureHistories(featureId);

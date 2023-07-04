@@ -2,9 +2,9 @@ package com.zj.client.entity.dto;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.vo.ExecutePoint;
-import com.zj.client.feature.executor.compare.CompareDefine;
-import com.zj.client.feature.executor.vo.ExecutorUnit;
-import com.zj.client.feature.executor.vo.VariableDefine;
+import com.zj.client.handler.feature.executor.compare.CompareDefine;
+import com.zj.client.handler.feature.executor.vo.ExecutorUnit;
+import com.zj.client.handler.feature.executor.vo.VariableDefine;
 import java.util.List;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;

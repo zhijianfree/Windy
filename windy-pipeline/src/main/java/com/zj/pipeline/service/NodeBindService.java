@@ -1,26 +1,18 @@
 package com.zj.pipeline.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.common.model.PageSize;
 import com.zj.common.generate.UniqueIdService;
+import com.zj.common.model.PageSize;
 import com.zj.domain.entity.dto.pipeline.NodeBindDto;
 import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
-import com.zj.domain.entity.po.pipeline.NodeBind;
 import com.zj.domain.entity.po.pipeline.PipelineAction;
-import com.zj.domain.mapper.pipeline.NodeBindMapper;
 import com.zj.domain.repository.pipeline.INodeBindRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * @author guyuelan
@@ -30,14 +22,16 @@ import org.springframework.util.StringUtils;
 @Service
 public class NodeBindService {
 
-  @Autowired
   private PipelineActionService actionService;
-
-  @Autowired
   private INodeBindRepository nodeBindRepository;
-
-  @Autowired
   private UniqueIdService uniqueIdService;
+
+  public NodeBindService(PipelineActionService actionService,
+      INodeBindRepository nodeBindRepository, UniqueIdService uniqueIdService) {
+    this.actionService = actionService;
+    this.nodeBindRepository = nodeBindRepository;
+    this.uniqueIdService = uniqueIdService;
+  }
 
   @Transactional
   public Boolean createNodes(NodeBindDto nodeBindDto) {

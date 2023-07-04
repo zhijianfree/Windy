@@ -28,20 +28,22 @@ public class DispatchLogSchedule {
 
   public static final String WINDY_MASTER_NAME = "WindyMaster";
   public static final int MAX_REDO_TIMEOUT = 1000 * 60 * 60;
-  @Autowired
+
   private IDispatchLogRepository taskLogRepository;
-
-  @Autowired
   private ISubDispatchLogRepository subDispatchLogRepository;
-
-  @Autowired
   private DiscoveryClient discoveryClient;
-
-  @Autowired
   private InstanceMonitor instanceMonitor;
-
-  @Autowired
   private Dispatcher dispatcher;
+
+  public DispatchLogSchedule(IDispatchLogRepository taskLogRepository,
+      ISubDispatchLogRepository subDispatchLogRepository, DiscoveryClient discoveryClient,
+      InstanceMonitor instanceMonitor, Dispatcher dispatcher) {
+    this.taskLogRepository = taskLogRepository;
+    this.subDispatchLogRepository = subDispatchLogRepository;
+    this.discoveryClient = discoveryClient;
+    this.instanceMonitor = instanceMonitor;
+    this.dispatcher = dispatcher;
+  }
 
   //  @Scheduled(cron = "0 0 0/1 * * ? ")
   @Scheduled(cron = "0/5 * * * * ? ")

@@ -14,4 +14,6 @@ public class GitAccessVo {
 
   private String owner;
 
+  private String gitType;
+
 }

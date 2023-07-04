@@ -16,22 +16,23 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.kafka.common.protocol.types.Field.Str;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 public class TemplateService {
 
-  @Autowired
   private UniqueIdService uniqueIdService;
-
-  @Autowired
   private IExecuteTemplateRepository executeTemplateRepository;
-
-  @Autowired
   private IExecutePointRepository executePointRepository;
+
+  public TemplateService(UniqueIdService uniqueIdService,
+      IExecuteTemplateRepository executeTemplateRepository,
+      IExecutePointRepository executePointRepository) {
+    this.uniqueIdService = uniqueIdService;
+    this.executeTemplateRepository = executeTemplateRepository;
+    this.executePointRepository = executePointRepository;
+  }
 
   public PageSize<ExecuteTemplateVo> getTemplatePage(Integer pageNo, Integer size, String name) {
     IPage<ExecuteTemplateDto> templateIPage = executeTemplateRepository.getPage(pageNo, size, name);

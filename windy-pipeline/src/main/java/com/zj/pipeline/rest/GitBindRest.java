@@ -1,13 +1,11 @@
 package com.zj.pipeline.rest;
 
-import com.alibaba.fastjson.JSONObject;
 import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
 import com.zj.domain.entity.dto.pipeline.BindBranchDto;
 import com.zj.pipeline.service.GitBindService;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,8 +28,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class GitBindRest {
 
-  @Autowired
   private GitBindService gitBindService;
+
+  public GitBindRest(GitBindService gitBindService) {
+    this.gitBindService = gitBindService;
+  }
 
   @ResponseBody
   @PostMapping("/git/bind")

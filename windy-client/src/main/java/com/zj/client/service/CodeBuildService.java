@@ -4,8 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.zj.client.config.GlobalEnvConfig;
 import com.zj.client.entity.dto.BuildParam;
 import com.zj.client.entity.dto.ResponseModel;
-import com.zj.client.pipeline.git.IGitProcessor;
-import com.zj.client.pipeline.maven.MavenOperator;
+import com.zj.client.handler.pipeline.git.IGitProcessor;
+import com.zj.client.handler.pipeline.maven.MavenOperator;
 import com.zj.client.utils.Utils;
 import com.zj.common.enums.ProcessStatus;
 import java.io.File;
@@ -14,7 +14,6 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -28,17 +27,21 @@ public class CodeBuildService {
 
   public static final int BUILD_SUCCESS = 0;
   public static final String BUILD_SUCCESS_TIPS = "构建成功";
-  @Autowired
+
   private IGitProcessor gitProcessor;
-  @Autowired
   private MavenOperator mavenOperator;
-  @Autowired
-  @Qualifier("gitOperatePool")
   private Executor executorService;
-  @Autowired
   private GlobalEnvConfig globalEnvConfig;
 
   private final Map<String, ResponseModel> statusMap = new ConcurrentHashMap<>();
+
+  public CodeBuildService(IGitProcessor gitProcessor, MavenOperator mavenOperator,
+      @Qualifier("gitOperatePool") Executor executorService, GlobalEnvConfig globalEnvConfig) {
+    this.gitProcessor = gitProcessor;
+    this.mavenOperator = mavenOperator;
+    this.executorService = executorService;
+    this.globalEnvConfig = globalEnvConfig;
+  }
 
   public void buildCode(BuildParam buildParam) {
     executorService.execute(() -> {

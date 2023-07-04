@@ -12,24 +12,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
 public class TaskRecordService {
 
-  @Autowired
   private FeatureHistoryService featureHistoryService;
-
-  @Autowired
   private FeatureService featureService;
-
-  @Autowired
-  private TestCaseService testCaseService;
-
-  @Autowired
   private ITaskRecordRepository taskRecordRepository;
+
+  public TaskRecordService(FeatureHistoryService featureHistoryService,
+      FeatureService featureService, ITaskRecordRepository taskRecordRepository) {
+    this.featureHistoryService = featureHistoryService;
+    this.featureService = featureService;
+    this.taskRecordRepository = taskRecordRepository;
+  }
 
   public boolean insert(TaskRecordDto taskRecordDto) {
     return taskRecordRepository.save(taskRecordDto);

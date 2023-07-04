@@ -1,11 +1,10 @@
 package com.zj.pipeline.rest;
 
+import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseMeta;
-import com.zj.common.exception.ErrorCode;
 import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
 import com.zj.pipeline.service.PipelineActionService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,8 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/devops/pipeline")
 public class PipelineActionRest {
 
-  @Autowired
   private PipelineActionService service;
+
+  public PipelineActionRest(PipelineActionService service) {
+    this.service = service;
+  }
 
   @PostMapping("/actions")
   public ResponseMeta<Boolean> createAction(@RequestBody PipelineActionDto actionDto) {

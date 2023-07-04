@@ -4,7 +4,6 @@ import com.zj.common.model.ResponseMeta;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.common.exception.ErrorCode;
 import com.zj.pipeline.service.PipelineService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,8 +17,11 @@ import java.util.List;
 @RestController
 public class PipelineRest {
 
-  @Autowired
   private PipelineService pipelineService;
+
+  public PipelineRest(PipelineService pipelineService) {
+    this.pipelineService = pipelineService;
+  }
 
   @ResponseBody
   @GetMapping("/detail/{pipelineId}")

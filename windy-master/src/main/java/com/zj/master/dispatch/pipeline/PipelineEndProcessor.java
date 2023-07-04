@@ -13,7 +13,6 @@ import com.zj.master.entity.vo.NodeStatusChange;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -26,9 +25,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class PipelineEndProcessor {
 
-  @Autowired
   private IPipelineNodeRepository pipelineNodeRepository;
-
   private INodeRecordRepository nodeRecordRepository;
   private IPipelineRepository pipelineRepository;
   private IDispatchLogRepository dispatchLogRepository;

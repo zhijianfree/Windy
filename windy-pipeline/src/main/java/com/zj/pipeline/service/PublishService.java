@@ -11,7 +11,6 @@ import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.domain.repository.pipeline.IPublishBindRepository;
 import java.util.List;
 import java.util.Objects;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,17 +20,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class PublishService {
 
-  @Autowired
   private IPublishBindRepository publishBindRepository;
-
-  @Autowired
   private IBindBranchRepository bindBranchRepository;
-
-  @Autowired
   private IPipelineRepository pipelineRepository;
-
-  @Autowired
   private UniqueIdService uniqueIdService;
+
+  public PublishService(IPublishBindRepository publishBindRepository,
+      IBindBranchRepository bindBranchRepository, IPipelineRepository pipelineRepository,
+      UniqueIdService uniqueIdService) {
+    this.publishBindRepository = publishBindRepository;
+    this.bindBranchRepository = bindBranchRepository;
+    this.pipelineRepository = pipelineRepository;
+    this.uniqueIdService = uniqueIdService;
+  }
 
   public Boolean createPublish(PublishBindDto publishBindDto) {
     BindBranchDto bindBranch = bindBranchRepository.getPipelineBindBranch(

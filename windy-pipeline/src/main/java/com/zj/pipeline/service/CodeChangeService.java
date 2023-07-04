@@ -9,14 +9,12 @@ import com.zj.domain.entity.dto.pipeline.RelationDemandBug;
 import com.zj.domain.entity.dto.service.MicroserviceDto;
 import com.zj.domain.repository.pipeline.ICodeChangeRepository;
 import com.zj.pipeline.git.IRepositoryBranch;
-import com.zj.domain.entity.po.service.Microservice;
 import com.zj.pipeline.git.RepositoryFactory;
 import com.zj.service.service.MicroserviceService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -27,17 +25,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class CodeChangeService {
 
-  @Autowired
   private RepositoryFactory repositoryFactory;
-
-  @Autowired
   private MicroserviceService microservice;
-
-  @Autowired
   private UniqueIdService uniqueIdService;
-
-  @Autowired
   private ICodeChangeRepository codeChangeRepository;
+
+  public CodeChangeService(RepositoryFactory repositoryFactory, MicroserviceService microservice,
+      UniqueIdService uniqueIdService, ICodeChangeRepository codeChangeRepository) {
+    this.repositoryFactory = repositoryFactory;
+    this.microservice = microservice;
+    this.uniqueIdService = uniqueIdService;
+    this.codeChangeRepository = codeChangeRepository;
+  }
 
   public CodeChangeDto getCodeChange(String serviceId, String codeChangeId) {
     Assert.notEmpty(serviceId, "serviceId can not be null");
@@ -46,7 +45,7 @@ public class CodeChangeService {
 
   public String createCodeChange(CodeChangeDto codeChange) {
     MicroserviceDto service = checkServiceExist(codeChange.getServiceId());
-    IRepositoryBranch repository = repositoryFactory.getRepository(service.getGitType());
+    IRepositoryBranch repository = repositoryFactory.getRepository();
     repository.createBranch(service.getServiceName(), codeChange.getChangeBranch());
 
     codeChange.setChangeId(uniqueIdService.getUniqueId());
@@ -55,8 +54,7 @@ public class CodeChangeService {
     return codeChangeRepository.saveCodeChange(codeChange) ? codeChange.getChangeId() : "";
   }
 
-  public boolean updateCodeChange(String serviceId, String codeChangeId,
-      CodeChangeDto codeChange) {
+  public boolean updateCodeChange(String serviceId, String codeChangeId, CodeChangeDto codeChange) {
     CodeChangeDto changeDto = getCodeChange(serviceId, codeChangeId);
     if (Objects.isNull(changeDto)) {
       throw new ApiException(ErrorCode.NOT_FOUND_CODE_CHANGE);
@@ -75,7 +73,7 @@ public class CodeChangeService {
   public Boolean deleteCodeChange(String serviceId, String codeChangeId) {
     MicroserviceDto service = checkServiceExist(serviceId);
     CodeChangeDto codeChange = getCodeChange(serviceId, codeChangeId);
-    IRepositoryBranch repository = repositoryFactory.getRepository(service.getGitType());
+    IRepositoryBranch repository = repositoryFactory.getRepository();
     repository.deleteBranch(service.getServiceName(), codeChange.getChangeBranch());
     return codeChangeRepository.deleteCodeChange(codeChangeId);
   }

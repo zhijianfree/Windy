@@ -1,7 +1,7 @@
 package com.zj.client.entity.dto;
 
-import com.zj.client.pipeline.executer.vo.ActionParam;
-import com.zj.client.pipeline.executer.vo.CompareInfo;
+import com.zj.client.handler.pipeline.executer.vo.ActionParam;
+import com.zj.client.handler.pipeline.executer.vo.CompareInfo;
 import java.util.List;
 import lombok.Data;
 

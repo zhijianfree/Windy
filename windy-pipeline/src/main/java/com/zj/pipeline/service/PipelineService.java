@@ -1,42 +1,30 @@
 package com.zj.pipeline.service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.zj.common.enums.LogType;
-import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.common.model.DispatchModel;
 import com.zj.common.monitor.RequestProxy;
-import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
 import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
 import com.zj.domain.entity.dto.pipeline.PipelineStageDto;
 import com.zj.domain.entity.enums.PipelineType;
-import com.zj.domain.entity.po.pipeline.Pipeline;
-import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.pipeline.entity.enums.PipelineStatus;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * @author guyuelan
@@ -46,29 +34,24 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class PipelineService {
 
-  @Autowired
   private PipelineNodeService pipelineNodeService;
-
-  @Autowired
   private PipelineStageService pipelineStageService;
-
-  @Autowired
-  private PipelineActionService pipelineActionService;
-
-  @Autowired
   private PipelineHistoryService pipelineHistoryService;
-
-  @Autowired
   private UniqueIdService uniqueIdService;
-
-  @Autowired
   private IPipelineRepository pipelineRepository;
-
-  @Autowired
   private RequestProxy requestProxy;
 
-  @Autowired
-  private INodeRecordRepository nodeRecordRepository;
+  public PipelineService(PipelineNodeService pipelineNodeService,
+      PipelineStageService pipelineStageService, PipelineHistoryService pipelineHistoryService,
+      UniqueIdService uniqueIdService, IPipelineRepository pipelineRepository,
+      RequestProxy requestProxy) {
+    this.pipelineNodeService = pipelineNodeService;
+    this.pipelineStageService = pipelineStageService;
+    this.pipelineHistoryService = pipelineHistoryService;
+    this.uniqueIdService = uniqueIdService;
+    this.pipelineRepository = pipelineRepository;
+    this.requestProxy = requestProxy;
+  }
 
   @Transactional
   public boolean updatePipeline(String service, String pipelineId, PipelineDto pipelineDTO) {

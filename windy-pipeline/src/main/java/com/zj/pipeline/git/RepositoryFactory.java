@@ -1,7 +1,14 @@
 package com.zj.pipeline.git;
 
+import com.alibaba.fastjson.JSON;
+import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
+import com.zj.domain.repository.pipeline.ISystemConfigRepository;
+import com.zj.pipeline.entity.enums.GitType;
+import com.zj.pipeline.entity.vo.GitAccessVo;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
@@ -12,14 +19,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class RepositoryFactory {
 
-  private Map<String, IRepositoryBranch> repositoryMap;
+  private IRepositoryBranch repositoryBranch;
 
-  public RepositoryFactory(List<IRepositoryBranch> branches) {
-    repositoryMap = branches.stream()
-        .collect(Collectors.toMap(IRepositoryBranch::gitType, repository -> repository));
+  public RepositoryFactory(List<IRepositoryBranch> repositories, ISystemConfigRepository systemConfig) {
+    SystemConfigDto config = systemConfig.getSystemConfig("2");
+    GitAccessVo gitAccessVo = JSON.parseObject(config.getConfigDetail(), GitAccessVo.class);
+    String gitType = Optional.ofNullable(gitAccessVo).map(GitAccessVo::getGitType)
+        .orElse(GitType.Gitlab.name());
+    repositoryBranch = repositories.stream().filter(repository -> Objects.equals(repository.gitType(), gitType))
+        .findAny().orElse(null);
   }
 
-  public IRepositoryBranch getRepository(String gitType) {
-    return repositoryMap.get(gitType);
+  public IRepositoryBranch getRepository() {
+    return repositoryBranch;
   }
 }

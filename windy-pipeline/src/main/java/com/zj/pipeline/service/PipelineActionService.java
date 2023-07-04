@@ -12,7 +12,6 @@ import com.zj.domain.entity.po.pipeline.PipelineAction;
 import com.zj.domain.repository.pipeline.IPipelineActionRepository;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -22,11 +21,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class PipelineActionService {
 
-  @Autowired
   private UniqueIdService uniqueIdService;
-
-  @Autowired
   private IPipelineActionRepository pipelineActionRepository;
+
+  public PipelineActionService(UniqueIdService uniqueIdService,
+      IPipelineActionRepository pipelineActionRepository) {
+    this.uniqueIdService = uniqueIdService;
+    this.pipelineActionRepository = pipelineActionRepository;
+  }
 
   public Boolean createAction(PipelineActionDto actionDto) {
     actionDto.setActionId(uniqueIdService.getUniqueId());

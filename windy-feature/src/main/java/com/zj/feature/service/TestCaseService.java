@@ -6,7 +6,6 @@ import com.zj.common.model.PageSize;
 import com.zj.domain.entity.dto.feature.TestCaseDto;
 import com.zj.domain.repository.feature.ITestCaseRepository;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -17,11 +16,13 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class TestCaseService {
 
-  @Autowired
   private UniqueIdService uniqueIdService;
-
-  @Autowired
   private ITestCaseRepository testCaseRepository;
+
+  public TestCaseService(UniqueIdService uniqueIdService, ITestCaseRepository testCaseRepository) {
+    this.uniqueIdService = uniqueIdService;
+    this.testCaseRepository = testCaseRepository;
+  }
 
   public PageSize<TestCaseDto> getTestCaseList(String serviceId, Integer page, Integer pageSize) {
     IPage<TestCaseDto> pageObj = testCaseRepository.getCasePage(serviceId, page, pageSize);

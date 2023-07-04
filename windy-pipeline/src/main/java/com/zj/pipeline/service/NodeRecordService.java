@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,10 +20,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class NodeRecordService {
 
-  @Autowired
   private INodeRecordRepository nodeRecordRepository;
 
   public static final String APPROVAL_TIPS = "审核通过";
+
+  public NodeRecordService(INodeRecordRepository nodeRecordRepository) {
+    this.nodeRecordRepository = nodeRecordRepository;
+  }
 
   public void updateNodeRecordStatus(String recordId, Integer type, String message) {
     boolean update = nodeRecordRepository.updateNodeRecordStatus(recordId, type, message);

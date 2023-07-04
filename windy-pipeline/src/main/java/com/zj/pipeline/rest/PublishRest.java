@@ -5,7 +5,6 @@ import com.zj.common.model.ResponseMeta;
 import com.zj.domain.entity.dto.pipeline.PublishBindDto;
 import com.zj.pipeline.service.PublishService;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,8 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/devops/pipeline")
 public class PublishRest {
 
-  @Autowired
   private PublishService publishService;
+
+  public PublishRest(PublishService publishService) {
+    this.publishService = publishService;
+  }
 
   @PostMapping("/publish")
   public ResponseMeta<Boolean> createPublish(@Validated @RequestBody PublishBindDto publishBind) {

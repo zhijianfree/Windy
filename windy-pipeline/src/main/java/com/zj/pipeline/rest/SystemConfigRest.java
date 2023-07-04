@@ -1,20 +1,29 @@
 package com.zj.pipeline.rest;
 
+import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.ResponseMeta;
 import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
-import com.zj.common.exception.ErrorCode;
 import com.zj.pipeline.service.SystemConfigService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @RequestMapping("/v1/devops/pipeline")
 @RestController
 public class SystemConfigRest {
 
-    @Autowired
     private SystemConfigService systemConfigService;
+
+    public SystemConfigRest(SystemConfigService systemConfigService) {
+        this.systemConfigService = systemConfigService;
+    }
 
     @ResponseBody
     @GetMapping("/system/configs")
@@ -32,8 +41,8 @@ public class SystemConfigRest {
 
     @ResponseBody
     @PutMapping("/system/config")
-    public ResponseMeta<String> updateSystemConfig( @RequestBody SystemConfigDto systemConfigDto) {
-        return new ResponseMeta<String>(ErrorCode.SUCCESS,
+    public ResponseMeta<Boolean> updateSystemConfig( @RequestBody SystemConfigDto systemConfigDto) {
+        return new ResponseMeta<Boolean>(ErrorCode.SUCCESS,
                 systemConfigService.updateSystemConfig(systemConfigDto));
     }
 
@@ -49,5 +58,12 @@ public class SystemConfigRest {
     public ResponseMeta<SystemConfigDto> getSystemConfig( @PathVariable("configId") String configId) {
         return new ResponseMeta<SystemConfigDto>(ErrorCode.SUCCESS,
                 systemConfigService.getSystemConfig(configId));
+    }
+
+    @ResponseBody
+    @GetMapping("/system/monitor")
+    public ResponseMeta<Object> getMonitorInfo() {
+        return new ResponseMeta<Object>(ErrorCode.SUCCESS,
+            systemConfigService.getSystemMonitor());
     }
 }

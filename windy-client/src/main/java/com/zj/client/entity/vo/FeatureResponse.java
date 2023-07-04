@@ -1,6 +1,6 @@
 package com.zj.client.entity.vo;
 
-import com.zj.client.feature.executor.compare.CompareResult;
+import com.zj.client.handler.feature.executor.compare.CompareResult;
 import java.util.Objects;
 import lombok.Builder;
 import lombok.Data;

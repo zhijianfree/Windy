@@ -6,9 +6,7 @@ import com.zj.common.model.ResultEvent;
 import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
-import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,11 +17,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class CreateFeatureHistoryEvent implements INotifyEvent {
 
-  @Autowired
   private IFeatureHistoryRepository featureHistoryRepository;
-
-  @Autowired
   private ISubDispatchLogRepository subDispatchLogRepository;
+
+  public CreateFeatureHistoryEvent(IFeatureHistoryRepository featureHistoryRepository,
+      ISubDispatchLogRepository subDispatchLogRepository) {
+    this.featureHistoryRepository = featureHistoryRepository;
+    this.subDispatchLogRepository = subDispatchLogRepository;
+  }
 
   @Override
   public NotifyType type() {

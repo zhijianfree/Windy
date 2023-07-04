@@ -9,6 +9,8 @@ import com.zj.pipeline.entity.vo.GitAccessVo;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
 import okhttp3.MediaType;
@@ -27,7 +29,7 @@ import org.springframework.stereotype.Component;
 public class GitRequestProxy {
 
   public static final MediaType CONTENT_TYPE = MediaType.parse("application/json");
-  public static final String AUTHORIZATION_KEY = "Authorization";
+
   public static final String GIT_CONFIG_ID = "2";
   OkHttpClient okHttpClient = new OkHttpClient.Builder().readTimeout(Duration.ofMinutes(1))
       .connectTimeout(Duration.ofSeconds(30)).build();
@@ -35,14 +37,14 @@ public class GitRequestProxy {
 
   public GitRequestProxy(ISystemConfigRepository systemRepository) {
     SystemConfigDto systemConfig = systemRepository.getSystemConfig(GIT_CONFIG_ID);
-    gitAccess = JSON.parseObject(systemConfig.getConfigDetail(), GitAccessVo.class);
+    String detail = Optional.ofNullable(systemConfig).map(SystemConfigDto::getConfigDetail)
+        .orElse("{}");
+    gitAccess = JSON.parseObject(detail, GitAccessVo.class);
   }
 
   public String get(String path, Map<String, String> headers) {
     Request request = new Request.Builder().url(gitAccess.getGitDomain() + path)
-        .headers(Headers.of(headers))
-        .header(AUTHORIZATION_KEY, gitAccess.getAccessToken())
-        .get().build();
+        .headers(Headers.of(headers)).get().build();
     try {
       Response execute = okHttpClient.newCall(request).execute();
       if (!execute.isSuccessful()) {
@@ -60,9 +62,7 @@ public class GitRequestProxy {
     RequestBody requestBody = RequestBody.create(CONTENT_TYPE, body);
 
     Request request = new Request.Builder().url(gitAccess.getGitDomain() + path)
-        .headers(Headers.of(headers))
-        .header(AUTHORIZATION_KEY, gitAccess.getAccessToken())
-        .post(requestBody).build();
+        .headers(Headers.of(headers)).post(requestBody).build();
     try {
       Response execute = okHttpClient.newCall(request).execute();
       if (!execute.isSuccessful()) {
@@ -80,9 +80,8 @@ public class GitRequestProxy {
   public String put(String path, String body) {
     RequestBody requestBody = RequestBody.create(CONTENT_TYPE, body);
 
-    Request request = new Request.Builder().url(gitAccess.getGitDomain() + path)
-        .header(AUTHORIZATION_KEY, gitAccess.getAccessToken())
-        .put(requestBody).build();
+    Request request = new Request.Builder().url(gitAccess.getGitDomain() + path).put(requestBody)
+        .build();
     try {
       Response execute = okHttpClient.newCall(request).execute();
       if (!execute.isSuccessful()) {
@@ -98,9 +97,7 @@ public class GitRequestProxy {
 
   public String delete(String path, Map<String, String> headers) {
     Request request = new Request.Builder().url(gitAccess.getGitDomain() + path)
-        .headers(Headers.of(headers))
-        .header(AUTHORIZATION_KEY, gitAccess.getAccessToken())
-        .delete().build();
+        .headers(Headers.of(headers)).delete().build();
     try {
       Response execute = okHttpClient.newCall(request).execute();
       if (!execute.isSuccessful()) {
