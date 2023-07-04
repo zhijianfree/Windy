@@ -4,7 +4,7 @@ import com.zj.common.monitor.collector.PhysicsCollect;
 import lombok.Data;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/7/4
  */
 @Data

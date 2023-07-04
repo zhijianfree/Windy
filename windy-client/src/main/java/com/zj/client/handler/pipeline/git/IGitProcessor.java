@@ -6,7 +6,7 @@ import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.lib.Ref;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/6/29
  */
 public interface IGitProcessor {

@@ -4,7 +4,7 @@ import com.zj.domain.entity.dto.pipeline.PublishBindDto;
 import java.util.List;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/6/28
  */
 public interface IPublishBindRepository {
