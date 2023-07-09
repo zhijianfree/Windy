@@ -16,12 +16,14 @@ public class EnvironmentRepository extends
     ServiceImpl<EnvironmentMapper, DeployEnvironment> implements IEnvironmentRepository {
 
   @Override
-  public IPage<DeployEnvironmentDto> getEnvPage(Integer page, Integer size) {
-    Page<DeployEnvironment> environmentPage = page(new Page<>(page, size));
+  public IPage<DeployEnvironmentDto> getEnvPage(Integer page, Integer size, String name) {
+    Page<DeployEnvironment> environmentPage = page(new Page<>(page, size),
+        Wrappers.lambdaQuery(DeployEnvironment.class).like(DeployEnvironment::getEnvName, name));
 
     IPage<DeployEnvironmentDto> envPage = new Page<>();
     envPage.setTotal(environmentPage.getTotal());
-    envPage.setRecords(OrikaUtil.convertList(environmentPage.getRecords(), DeployEnvironmentDto.class));
+    envPage.setRecords(
+        OrikaUtil.convertList(environmentPage.getRecords(), DeployEnvironmentDto.class));
     return envPage;
   }
 

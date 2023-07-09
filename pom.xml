@@ -46,11 +46,18 @@
     <orika.version>1.5.4</orika.version>
     <joda.version>2.9.8</joda.version>
     <ssh.version>0.1.55</ssh.version>
+    <k8s.version>5.3.0</k8s.version>
     <transmittable-thread.version>2.14.2</transmittable-thread.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>io.fabric8</groupId>
+        <artifactId>kubernetes-client</artifactId>
+        <version>${k8s.version}</version>
+      </dependency>
+
       <dependency>
         <groupId>com.alibaba</groupId>
         <artifactId>transmittable-thread-local</artifactId>

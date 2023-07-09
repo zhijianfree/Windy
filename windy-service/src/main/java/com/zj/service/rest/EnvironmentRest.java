@@ -27,9 +27,9 @@ public class EnvironmentRest {
   }
 
   @GetMapping("/environments")
-  public ResponseMeta<PageSize<DeployEnvironmentDto>> getAllEnvironments(@RequestParam("page") Integer page,
-      @RequestParam("size") Integer size) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, environmentService.getEnvironments(page, size));
+  public ResponseMeta<PageSize<DeployEnvironmentDto>> getAllEnvironments(@RequestParam(value = "page", defaultValue = "1") Integer page,
+      @RequestParam(value = "size", defaultValue = "10") Integer size, @RequestParam(value = "name", defaultValue = "") String name) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, environmentService.getEnvironments(page, size, name));
   }
 
   @PostMapping("/environments")
@@ -50,5 +50,10 @@ public class EnvironmentRest {
   @GetMapping("/environments/{envId}")
   public ResponseMeta<DeployEnvironmentDto> getEnvironment(@PathVariable("envId") String envId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, environmentService.getEnvironment(envId));
+  }
+
+  @PostMapping("/environment/check")
+  public ResponseMeta<Boolean> checkStatus(@RequestBody String data, @RequestParam("checkType") Integer checkType) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, environmentService.checkStatus(checkType, data));
   }
 }

@@ -38,5 +38,13 @@
       <groupId>com.zj</groupId>
       <artifactId>windy-domain</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.jcraft</groupId>
+      <artifactId>jsch</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.fabric8</groupId>
+      <artifactId>kubernetes-client</artifactId>
+    </dependency>
   </dependencies>
 </project>

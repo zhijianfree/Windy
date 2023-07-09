@@ -5,7 +5,7 @@ import com.zj.domain.entity.dto.service.DeployEnvironmentDto;
 
 public interface IEnvironmentRepository {
 
-  IPage<DeployEnvironmentDto> getEnvPage(Integer page, Integer size);
+  IPage<DeployEnvironmentDto> getEnvPage(Integer page, Integer size, String name);
 
   Boolean createEnvironment(DeployEnvironmentDto deployEnvironment);
 
