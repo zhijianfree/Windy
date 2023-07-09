@@ -24,16 +24,16 @@ CREATE TABLE `code_change` (
 
 DROP TABLE IF EXISTS `environment`;
 CREATE TABLE `environment` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `env_id` varchar(64) NOT NULL COMMENT '环境Id',
   `env_name` varchar(50) NOT NULL COMMENT '环境名称',
-  `env_host` varchar(50) DEFAULT NULL COMMENT '环境的IP',
-  `env_port` varchar(6) DEFAULT NULL COMMENT '环境端口',
-  `env_status` int(11) DEFAULT NULL COMMENT '环境状态 1 正常 2 暂停 3 已删除',
-  `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
-  `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
+  `env_status` int DEFAULT NULL COMMENT '环境状态 1 正常 2 暂停 3 已删除',
+  `env_type` int NOT NULL DEFAULT '1' COMMENT '1 ssh 2 k8s 3 docker',
+  `env_params` varchar(1000) DEFAULT NULL COMMENT '环境相关配置',
+  `create_time` bigint DEFAULT NULL COMMENT '创建时间',
+  `update_time` bigint DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4
 
 --
 -- Table structure for table `execute_point`
