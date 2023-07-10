@@ -2,6 +2,7 @@ package com.zj.domain.repository.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.domain.entity.dto.service.DeployEnvironmentDto;
+import java.util.List;
 
 public interface IEnvironmentRepository {
 
@@ -14,4 +15,6 @@ public interface IEnvironmentRepository {
   Boolean deleteEnvironment(String envId);
 
   DeployEnvironmentDto getEnvironment(String envId);
+
+  List<DeployEnvironmentDto> getAvailableEnvs();
 }

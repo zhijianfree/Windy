@@ -2,7 +2,9 @@ package com.zj.master.dispatch.pipeline.intercept;
 
 import com.zj.common.enums.ExecuteType;
 import com.zj.domain.entity.dto.log.SubDispatchLogDto;
+import com.zj.domain.entity.dto.service.DeployEnvironmentDto;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
+import com.zj.domain.repository.service.IEnvironmentRepository;
 import com.zj.master.entity.vo.DeployContext;
 import com.zj.master.entity.vo.TaskNode;
 import java.util.List;
@@ -18,9 +20,12 @@ import org.springframework.stereotype.Component;
 public class DeployNodeInterceptor implements INodeExecuteInterceptor{
 
   private final ISubDispatchLogRepository subDispatchLogRepository;
+  private final IEnvironmentRepository environmentRepository;
 
-  public DeployNodeInterceptor(ISubDispatchLogRepository subDispatchLogRepository) {
+  public DeployNodeInterceptor(ISubDispatchLogRepository subDispatchLogRepository,
+      IEnvironmentRepository environmentRepository) {
     this.subDispatchLogRepository = subDispatchLogRepository;
+    this.environmentRepository = environmentRepository;
   }
 
   @Override
@@ -39,6 +44,12 @@ public class DeployNodeInterceptor implements INodeExecuteInterceptor{
       requestContext.setSingleClientIp(optional.get().getClientIp());
       requestContext.setRequestSingle(true);
       taskNode.setRequestContext(requestContext);
+
+      DeployEnvironmentDto deployEnvironment = environmentRepository.getEnvironment(
+          requestContext.getEnvId());
+      deployEnvironment.getEnvParams();
     }
+
+
   }
 }

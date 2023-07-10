@@ -27,9 +27,14 @@ public class EnvironmentRest {
   }
 
   @GetMapping("/environments")
-  public ResponseMeta<PageSize<DeployEnvironmentDto>> getAllEnvironments(@RequestParam(value = "page", defaultValue = "1") Integer page,
+  public ResponseMeta<PageSize<DeployEnvironmentDto>> getEnvironments(@RequestParam(value = "page", defaultValue = "1") Integer page,
       @RequestParam(value = "size", defaultValue = "10") Integer size, @RequestParam(value = "name", defaultValue = "") String name) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, environmentService.getEnvironments(page, size, name));
+  }
+
+  @GetMapping("/environments/all")
+  public ResponseMeta<List<DeployEnvironmentDto>> getAllEnvironments() {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, environmentService.getAvailableEnvs());
   }
 
   @PostMapping("/environments")

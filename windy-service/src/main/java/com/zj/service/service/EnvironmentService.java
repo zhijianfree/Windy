@@ -119,4 +119,8 @@ public class EnvironmentService {
     }
     return false;
   }
+
+  public List<DeployEnvironmentDto> getAvailableEnvs() {
+    return repository.getAvailableEnvs();
+  }
 }

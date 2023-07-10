@@ -20,19 +20,17 @@ public enum ErrorCode {
   CREATE_PIPELINE(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000010", "创建流水线失败"),
   NOT_FIND_BRANCH(HttpStatus.BAD_REQUEST, "Pipeline.000011", "没有找到绑定分支，无法执行"),
 
-  PIPELINE_NOT_BIND(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000012",
-      "流水线未绑定分支，无法发布"),
-  SERVICE_BRANCH_PUBLISH_EXIST(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000013",
-      "当前分支已推送发布，请查看发布列表"),
-  PUBLISH_PIPELINE_EXIST(HttpStatus.BAD_REQUEST, "Pipeline.000014",
-      "当前服务已存在发布流水线,无法创建"),
+  PIPELINE_NOT_BIND(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000012", "流水线未绑定分支，无法发布"),
+  SERVICE_BRANCH_PUBLISH_EXIST(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000013", "当前分支已推送发布，请查看发布列表"),
+  PUBLISH_PIPELINE_EXIST(HttpStatus.BAD_REQUEST, "Pipeline.000014", "当前服务已存在发布流水线,无法创建"),
+
+  NOT_FIND_PIPELINE(HttpStatus.BAD_REQUEST, "Pipeline.000015", "当前流水线不存在"),
 
   /*==================用例服务==================*/
   COMPARE_ERROR(HttpStatus.FORBIDDEN, "Feature.000002", "feature compare error"),
   EXECUTE_POINT_NOT_FIND(HttpStatus.NOT_FOUND, "Feature.000003", "can not find execute point"),
   FEATURE_NOT_FIND(HttpStatus.NOT_FOUND, "Feature.000004", "can not find feature"),
-  SYSTEM_EXECUTE_ERROR(HttpStatus.BAD_REQUEST, "Feature.000101",
-      "unknown error occur when execute feature "),
+  SYSTEM_EXECUTE_ERROR(HttpStatus.BAD_REQUEST, "Feature.000101", "unknown error occur when execute feature "),
   SUB_FEATURE_EXIST(HttpStatus.BAD_REQUEST, "Feature.000005", "存在子用例不能删除目录"),
 
   /*==================Client端构建运行==================*/

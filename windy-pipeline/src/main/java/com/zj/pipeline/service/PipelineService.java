@@ -223,6 +223,11 @@ public class PipelineService {
   }
 
   public PipelineDto getPipelineDetail(String pipelineId) {
+    PipelineDto pipeline = getPipeline(pipelineId);
+    if (Objects.isNull(pipeline)) {
+      throw new ApiException(ErrorCode.NOT_FIND_PIPELINE);
+    }
+
     List<PipelineNodeDto> pipelineNodes = pipelineNodeService.getPipelineNodes(pipelineId);
     Map<String, List<PipelineNodeDto>> stageNodeMap = pipelineNodes.stream()
         .collect(Collectors.groupingBy(PipelineNodeDto::getStageId));
@@ -232,7 +237,6 @@ public class PipelineService {
       stage.setNodes(stageNodeMap.get(stage.getStageId()));
     }).collect(Collectors.toList());
 
-    PipelineDto pipeline = getPipeline(pipelineId);
     pipeline.setStageList(stageDTOList);
     return pipeline;
   }

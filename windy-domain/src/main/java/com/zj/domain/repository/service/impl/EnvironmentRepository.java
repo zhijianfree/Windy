@@ -6,9 +6,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.service.DeployEnvironmentDto;
+import com.zj.domain.entity.enums.EnvStatus;
 import com.zj.domain.entity.po.service.DeployEnvironment;
 import com.zj.domain.mapper.service.EnvironmentMapper;
 import com.zj.domain.repository.service.IEnvironmentRepository;
+import java.util.List;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -55,5 +57,13 @@ public class EnvironmentRepository extends
     DeployEnvironment environment = getOne(
         Wrappers.lambdaQuery(DeployEnvironment.class).eq(DeployEnvironment::getEnvId, envId));
     return OrikaUtil.convert(environment, DeployEnvironmentDto.class);
+  }
+
+  @Override
+  public List<DeployEnvironmentDto> getAvailableEnvs() {
+    List<DeployEnvironment> environments = list(
+        Wrappers.lambdaQuery(DeployEnvironment.class).eq(DeployEnvironment::getEnvStatus,
+            EnvStatus.AVAILABLE.getType()));
+    return OrikaUtil.convertList(environments, DeployEnvironmentDto.class);
   }
 }
