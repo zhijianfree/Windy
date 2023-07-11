@@ -40,8 +40,8 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
   private final Map<String, ProcessStatus> statusMap = new HashMap<>();
 
   @Override
-  public String deployType() {
-    return DeployType.JAR.name();
+  public Integer deployType() {
+    return DeployType.SSH.getType();
   }
 
   @Override

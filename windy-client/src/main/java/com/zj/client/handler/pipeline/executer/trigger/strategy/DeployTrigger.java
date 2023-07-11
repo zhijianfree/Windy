@@ -9,6 +9,7 @@ import com.zj.client.handler.deploy.jar.JarDeployContext;
 import com.zj.client.entity.dto.ResponseModel;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
 import com.zj.client.handler.pipeline.executer.vo.DeployRequest;
+import com.zj.client.handler.pipeline.executer.vo.DeployRequest.SSHParams;
 import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
 import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
@@ -52,11 +53,12 @@ public class DeployTrigger implements INodeTrigger {
     String filePath =
         globalEnvConfig.getPipelineWorkspace(serviceName, deployRequest.getPipelineId())
             + File.separator + DEPLOY;
-    JarDeployContext jarContext = JarDeployContext.builder().sshUser(globalEnvConfig.getSShUser())
-        .sshPassword(globalEnvConfig.getSSHPassword())
-        .remotePath(deployRequest.getRemotePath())
-        .sshIp(deployRequest.getSshIp())
-        .sshPort(deployRequest.getSshPort())
+    SSHParams sshParams = deployRequest.getParams();
+    JarDeployContext jarContext = JarDeployContext.builder().sshUser(sshParams.getUser())
+        .sshPassword(sshParams.getPassword())
+        .remotePath(sshParams.getRemotePath())
+        .sshIp(sshParams.getSshIp())
+        .sshPort(sshParams.getSshPort())
         .localPath(filePath)
         .servicePort(deployRequest.getServerPort())
         .build();

@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component;
 public class MirrorDeploy implements IDeployMode<MirrorDeployContext> {
 
   @Override
-  public String deployType() {
-    return DeployType.MIRROR.name();
+  public Integer deployType() {
+    return DeployType.DOCKER.getType();
   }
 
   @Override

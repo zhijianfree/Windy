@@ -11,13 +11,7 @@ public class DeployContext extends RequestContext{
 
   private String envId;
 
-  private String serverPort;
+  private Object params;
 
-  private String remotePath;
-
-  private String sshIp;
-
-  private Integer sshPort;
-
-  private String deployType;
+  private Integer deployType;
 }

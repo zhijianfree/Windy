@@ -1,5 +1,6 @@
 package com.zj.master.dispatch.pipeline.intercept;
 
+import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.ExecuteType;
 import com.zj.domain.entity.dto.log.SubDispatchLogDto;
 import com.zj.domain.entity.dto.service.DeployEnvironmentDto;
@@ -47,7 +48,8 @@ public class DeployNodeInterceptor implements INodeExecuteInterceptor{
 
       DeployEnvironmentDto deployEnvironment = environmentRepository.getEnvironment(
           requestContext.getEnvId());
-      deployEnvironment.getEnvParams();
+      requestContext.setParams(JSON.parse(deployEnvironment.getEnvParams()));
+      requestContext.setDeployType(deployEnvironment.getEnvType());
     }
 
 

@@ -13,13 +13,22 @@ public class DeployRequest {
 
   private String gitUrl;
 
-  private String remotePath;
-
-  private String sshIp;
-
-  private Integer sshPort;
+  private SSHParams params;
 
   private String serverPort;
 
-  private String deployType;
+  private Integer deployType;
+
+  @Data
+  public static class SSHParams{
+    private String remotePath;
+
+    private String sshIp;
+
+    private Integer sshPort;
+
+    private String user;
+
+    private String password;
+  }
 }

@@ -14,14 +14,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class DeployFactory {
 
-  private Map<String, IDeployMode> deployModeMap;
+  private Map<Integer, IDeployMode> deployModeMap;
 
   public DeployFactory(List<IDeployMode> deployModes) {
     deployModeMap = deployModes.stream()
         .collect(Collectors.toMap(IDeployMode::deployType, deployMode -> deployMode));
   }
 
-  public IDeployMode getDeployMode(String mode) {
+  public IDeployMode getDeployMode(Integer mode) {
     return deployModeMap.get(mode);
   }
 
