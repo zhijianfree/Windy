@@ -1,13 +1,16 @@
 package com.zj.domain.repository.pipeline.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
 import com.zj.domain.entity.po.pipeline.SystemConfig;
+import com.zj.domain.entity.vo.GitAccessVo;
 import com.zj.domain.mapper.pipeline.SystemConfigMapper;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -53,4 +56,13 @@ public class SystemConfigRepository extends ServiceImpl<SystemConfigMapper, Syst
     return OrikaUtil.convert(systemConfig, SystemConfigDto.class);
   }
 
+  @Override
+  public GitAccessVo getGitAccess() {
+    SystemConfig systemConfig = getOne(
+        Wrappers.lambdaQuery(SystemConfig.class).eq(SystemConfig::getConfigId, "2"));
+    if (Objects.isNull(systemConfig)) {
+      return new GitAccessVo();
+    }
+    return JSON.parseObject(systemConfig.getConfigDetail(), GitAccessVo.class);
+  }
 }

@@ -2,8 +2,7 @@ package com.zj.pipeline.git.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.zj.pipeline.entity.enums.GitType;
+import com.zj.common.enums.GitType;
 import com.zj.pipeline.git.GitConstants;
 import com.zj.pipeline.git.IRepositoryBranch;
 import com.zj.pipeline.entity.vo.CreateBranchVo;
@@ -32,7 +31,7 @@ public class GiteaRepositoryBranch implements IRepositoryBranch {
     this.gitRequestProxy = gitRequestProxy;
     String accessToken = gitRequestProxy.getGitAccess().getAccessToken();
     headers = new HashMap<>();
-    headers.put("Authorization", accessToken);
+    headers.put("Authorization", "token " + accessToken);
   }
 
   @Override

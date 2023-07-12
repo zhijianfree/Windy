@@ -41,7 +41,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * 合并master
- * */
+ */
 @Slf4j
 @Component
 public class MergeMasterTrigger implements INodeTrigger {
@@ -72,7 +72,7 @@ public class MergeMasterTrigger implements INodeTrigger {
       MergeRequest mergeRequest = JSON.parseObject(JSON.toJSONString(triggerContext.getData()),
           MergeRequest.class);
       String serviceName = Utils.getServiceFromUrl(mergeRequest.getGitUrl());
-      Git git = gitProcessor.pullCodeFromGit(mergeRequest.getGitUrl(), MASTER,
+      Git git = gitProcessor.pullCodeFromGit(mergeRequest, MASTER,
           globalEnvConfig.getPipelineWorkspace(serviceName, mergeRequest.getPipelineId()));
 
       //2 合并代码
@@ -84,8 +84,8 @@ public class MergeMasterTrigger implements INodeTrigger {
       //合并成功推送至远端master分支
       if (mergeResult.getMergeStatus().isSuccessful()) {
         log.info("merge success branches ={}", mergeRequest.getBranches());
-        push2Repository(git);
-        deleteBranch(mergeRequest, branchesRef, git);
+        push2Repository(mergeRequest, git);
+        deleteBranch(mergeRequest, git);
         statusMap.put(taskNode.getRecordId(), new MergeStatus(ProcessStatus.SUCCESS.getType()));
         return;
       }
@@ -106,8 +106,7 @@ public class MergeMasterTrigger implements INodeTrigger {
     }
   }
 
-  private void deleteBranch(MergeRequest mergeRequest, List<Ref> branchesRef, Git git)
-      throws GitAPIException {
+  private void deleteBranch(MergeRequest mergeRequest, Git git) throws GitAPIException {
     if (!mergeRequest.isDeleteBranch()) {
       return;
     }
@@ -120,14 +119,17 @@ public class MergeMasterTrigger implements INodeTrigger {
         branch -> new RefSpec().setSource(null).setForceUpdate(true)
             .setDestination(REFS_HEADS + branch)).collect(Collectors.toList());
     git.push().setRefSpecs(refSpecs).setRemote(ORIGIN)
-        .setCredentialsProvider(getCredentialsProvider()).call();
+        .setCredentialsProvider(getCredentialsProvider(mergeRequest.getTokenName(),
+            mergeRequest.getToken())).call();
     log.info("delete branches remoteRefNames={} result={}", remoteRefNames, strings);
   }
 
-  private void push2Repository(Git git) throws IOException, GitAPIException {
+  private void push2Repository(MergeRequest mergeRequest, Git git)
+      throws IOException, GitAPIException {
     // 推送合并后的代码到远程仓库的目标分支
     Iterable<PushResult> results = git.push().setRemote(ORIGIN).setRefSpecs(new RefSpec(MASTER))
-        .setCredentialsProvider(getCredentialsProvider()).call();
+        .setCredentialsProvider(
+            getCredentialsProvider(mergeRequest.getTokenName(), mergeRequest.getToken())).call();
     boolean pushStatus = StreamSupport.stream(results.spliterator(), false).anyMatch(
         pushResult -> pushResult.getRemoteUpdates().stream()
             .anyMatch(remoteRefUpdate -> Objects.equals(remoteRefUpdate.getStatus(), Status.OK)));
@@ -136,9 +138,9 @@ public class MergeMasterTrigger implements INodeTrigger {
     }
   }
 
-  private UsernamePasswordCredentialsProvider getCredentialsProvider() {
-    return new UsernamePasswordCredentialsProvider(globalEnvConfig.getGitUser(),
-        globalEnvConfig.getGitPassword());
+  private UsernamePasswordCredentialsProvider getCredentialsProvider(String tokenName,
+      String token) {
+    return new UsernamePasswordCredentialsProvider(tokenName, token);
   }
 
   @Override

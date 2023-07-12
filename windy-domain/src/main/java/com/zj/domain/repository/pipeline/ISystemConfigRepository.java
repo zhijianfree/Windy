@@ -1,6 +1,7 @@
 package com.zj.domain.repository.pipeline;
 
 import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
+import com.zj.domain.entity.vo.GitAccessVo;
 import java.util.List;
 
 /**
@@ -18,4 +19,6 @@ public interface ISystemConfigRepository {
   boolean deleteConfig(String configId);
 
   SystemConfigDto getSystemConfig(String configId);
+
+  GitAccessVo getGitAccess();
 }

@@ -19,7 +19,11 @@ public class RequestContext {
 
   private String singleClientIp;
 
+  private String pipelineId;
+
   private String gitUrl;
 
-  private String pipelineId;
+  private String tokenName;
+
+  private String token;
 }

@@ -73,10 +73,10 @@ public class CodeBuildService {
   private void pullCodeFrmGit(BuildParam buildParam, String gitUrl, String pipelineWorkspace)
       throws Exception {
     if (buildParam.getIsPublish()) {
-      gitProcessor.createTempBranch(gitUrl, buildParam.getBranches(), pipelineWorkspace);
+      gitProcessor.createTempBranch(buildParam, buildParam.getBranches(), pipelineWorkspace);
     } else {
       String branch = buildParam.getBranches().get(0);
-      gitProcessor.pullCodeFromGit(gitUrl, branch, pipelineWorkspace);
+      gitProcessor.pullCodeFromGit(buildParam, branch, pipelineWorkspace);
     }
   }
 

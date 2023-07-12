@@ -8,12 +8,12 @@ public class SSHParams {
   /**
    * ssh的IP
    * */
-  private String host;
+  private String sshIp;
 
   /**
    * ssh 端口
    * */
-  private Integer port;
+  private Integer sshPort;
 
   /**
    * ssh 用户

@@ -1,4 +1,4 @@
-package com.zj.pipeline.entity.vo;
+package com.zj.domain.entity.vo;
 
 import lombok.Data;
 

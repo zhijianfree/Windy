@@ -106,7 +106,7 @@ public class EnvironmentService {
     JSch jsch = new JSch();
     Session session = null;
     try {
-      session = jsch.getSession(sshParams.getUser(), sshParams.getHost(), sshParams.getPort());
+      session = jsch.getSession(sshParams.getUser(), sshParams.getSshIp(), sshParams.getSshPort());
       session.setPassword(sshParams.getPassword());
       // 配置SSH连接时不进行主机密钥检查
       session.setConfig("StrictHostKeyChecking", "no");

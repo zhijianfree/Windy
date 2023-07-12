@@ -5,15 +5,13 @@ import java.util.Objects;
 import lombok.Data;
 
 @Data
-public class MergeRequest {
+public class MergeRequest extends GitMeta{
 
   private String pipelineId;
 
   private List<String> branches;
 
   private String deleteBranch;
-
-  private String gitUrl;
 
   public boolean isDeleteBranch() {
     return Objects.equals(deleteBranch, "1");

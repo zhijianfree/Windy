@@ -1,5 +1,6 @@
 package com.zj.client.entity.dto;
 
+import com.zj.client.handler.pipeline.executer.vo.GitMeta;
 import java.util.List;
 import lombok.Data;
 
@@ -8,7 +9,7 @@ import lombok.Data;
  * @since 2023/3/29
  */
 @Data
-public class BuildParam {
+public class BuildParam extends GitMeta {
 
   /**
    * 节点记录Id
@@ -19,11 +20,6 @@ public class BuildParam {
    * 流水线Id
    * */
   private String pipelineId;
-
-  /**
-   * git地址
-   * */
-  private String gitUrl;
 
   /**
    * 代码pom地址

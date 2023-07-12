@@ -5,11 +5,10 @@ import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
-import com.zj.pipeline.entity.vo.GitAccessVo;
+import com.zj.domain.entity.vo.GitAccessVo;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
@@ -36,10 +35,7 @@ public class GitRequestProxy {
   private GitAccessVo gitAccess;
 
   public GitRequestProxy(ISystemConfigRepository systemRepository) {
-    SystemConfigDto systemConfig = systemRepository.getSystemConfig(GIT_CONFIG_ID);
-    String detail = Optional.ofNullable(systemConfig).map(SystemConfigDto::getConfigDetail)
-        .orElse("{}");
-    gitAccess = JSON.parseObject(detail, GitAccessVo.class);
+    gitAccess = systemRepository.getGitAccess();
   }
 
   public String get(String path, Map<String, String> headers) {

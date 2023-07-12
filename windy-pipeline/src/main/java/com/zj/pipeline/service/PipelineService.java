@@ -111,7 +111,7 @@ public class PipelineService {
     stageList.forEach(stageDto -> {
       PipelineStageDto stage = pipelineStageService.getPipelineStage(stageDto.getStageId());
       if (Objects.isNull(stage)) {
-        createNewStage(pipelineId, stageDto,sortOrder);
+        createNewStage(pipelineId, stageDto, sortOrder);
         return;
       }
 
@@ -152,7 +152,7 @@ public class PipelineService {
       return "";
     }
 
-    checkPipelineType(pipelineDTO);
+    checkPublishPipelineExist(pipelineDTO);
 
     String pipelineId = uniqueIdService.getUniqueId();
     pipelineDTO.setPipelineId(pipelineId);
@@ -169,18 +169,18 @@ public class PipelineService {
     return pipelineId;
   }
 
-  private void checkPipelineType(PipelineDto pipelineDTO) {
-    if (!Objects.equals(pipelineDTO.getPipelineType(), PipelineType.PUBLISH.getType())) {
+  private void checkPublishPipelineExist(PipelineDto pipeline) {
+    if (!Objects.equals(pipeline.getPipelineType(), PipelineType.PUBLISH.getType())) {
       return;
     }
-    PipelineDto publishPipeline = pipelineRepository.getPublishPipeline(
-        pipelineDTO.getServiceId());
+    PipelineDto publishPipeline = pipelineRepository.getPublishPipeline(pipeline.getServiceId());
     if (Objects.nonNull(publishPipeline)) {
       throw new ApiException(ErrorCode.PUBLISH_PIPELINE_EXIST);
     }
   }
 
-  private Integer createNewStage(String pipelineId, PipelineStageDto stageDto, AtomicInteger atomicOrder) {
+  private Integer createNewStage(String pipelineId, PipelineStageDto stageDto,
+      AtomicInteger atomicOrder) {
     String stageId = uniqueIdService.getUniqueId();
     PipelineStageDto pipelineStage = new PipelineStageDto();
     pipelineStage.setPipelineId(pipelineId);

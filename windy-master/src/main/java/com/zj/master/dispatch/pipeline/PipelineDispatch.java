@@ -112,6 +112,7 @@ public class PipelineDispatch implements IDispatchExecutor {
     List<TaskNode> taskNodeList = pipelineNodes.stream()
         .sorted(Comparator.comparing(PipelineNodeDto::getSortOrder))
         .map(node -> buildTaskNode(node, historyId, pipeline.getServiceId()))
+        .filter(Objects::nonNull)
         .collect(Collectors.toList());
     pipelineTask.addAll(taskNodeList);
     Map<String, String> executeTypeMap = taskNodeList.stream()
@@ -166,6 +167,9 @@ public class PipelineDispatch implements IDispatchExecutor {
     ConfigDetail configDetail = JSON.parseObject(pipelineNode.getConfigDetail(),
         ConfigDetail.class);
     PipelineActionDto action = pipelineActionRepository.getAction(configDetail.getActionId());
+    if (Objects.isNull(action)) {
+      return null;
+    }
     taskNode.setExecuteType(action.getExecuteType());
 
     ActionDetail actionDetail = new ActionDetail(configDetail, action);
@@ -217,6 +221,7 @@ public class PipelineDispatch implements IDispatchExecutor {
     List<TaskNode> taskNodeList = pipelineNodes.stream()
         .filter(node -> subTasks.contains(node.getNodeId()))
         .map(node -> buildTaskNode(node, dispatchLog.getSourceRecordId(), pipeline.getServiceId()))
+        .filter(Objects::nonNull)
         .collect(Collectors.toList());
     pipelineTask.setHistoryId(dispatchLog.getSourceRecordId());
     pipelineTask.addAll(taskNodeList);

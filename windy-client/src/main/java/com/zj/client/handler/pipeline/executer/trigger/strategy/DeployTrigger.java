@@ -18,6 +18,7 @@ import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.ProcessStatus;
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -54,13 +55,14 @@ public class DeployTrigger implements INodeTrigger {
         globalEnvConfig.getPipelineWorkspace(serviceName, deployRequest.getPipelineId())
             + File.separator + DEPLOY;
     SSHParams sshParams = deployRequest.getParams();
+    String serverPort = Optional.ofNullable(deployRequest.getServerPort()).orElse("");
     JarDeployContext jarContext = JarDeployContext.builder().sshUser(sshParams.getUser())
         .sshPassword(sshParams.getPassword())
         .remotePath(sshParams.getRemotePath())
         .sshIp(sshParams.getSshIp())
         .sshPort(sshParams.getSshPort())
         .localPath(filePath)
-        .servicePort(deployRequest.getServerPort())
+        .servicePort(serverPort)
         .build();
     jarContext.setRecordId(taskNode.getRecordId());
 

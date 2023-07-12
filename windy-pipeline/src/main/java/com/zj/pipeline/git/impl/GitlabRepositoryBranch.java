@@ -2,7 +2,7 @@ package com.zj.pipeline.git.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.zj.pipeline.entity.enums.GitType;
+import com.zj.common.enums.GitType;
 import com.zj.pipeline.git.IRepositoryBranch;
 import java.io.IOException;
 import java.time.Duration;

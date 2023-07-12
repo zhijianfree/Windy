@@ -14,11 +14,6 @@ public class GlobalEnvConfig {
   public static final String DEFAULT_GIT_PWD = "windy!123";
   public static final String DEFAULT_GIT_USER = "windy";
 
-  public static final String DEPLOY_SSH_USER = "windy.deploy.ssh.user";
-  public static final String DEPLOY_SSH_PWD = "windy.deploy.ssh.pwd";
-  public static final String DEFAULT_SSH_USER = "windy";
-  public static final String DEFAULT_SSH_PWD = "windy!123";
-
   public static final String MAVEN_PATH_KEY = "windy.pipeline.maven.path";
   public static final String GIT_WORKSPACE = "windy.pipeline.git.workspace";
   public static final String DEFAULT_GIT_WORKSPACE = "/opt/windy";
@@ -28,22 +23,6 @@ public class GlobalEnvConfig {
 
   public GlobalEnvConfig(Environment environment) {
     this.environment = environment;
-  }
-
-  public String getSShUser() {
-    return environment.getProperty(DEPLOY_SSH_USER, DEFAULT_SSH_USER);
-  }
-
-  public String getSSHPassword() {
-    return environment.getProperty(DEPLOY_SSH_PWD, DEFAULT_SSH_PWD);
-  }
-
-  public String getGitUser() {
-    return environment.getProperty(GIT_USER, DEFAULT_GIT_USER);
-  }
-
-  public String getGitPassword() {
-    return environment.getProperty(GIT_PASSWORD, DEFAULT_GIT_PWD);
   }
 
   public String getMavenPath() {
