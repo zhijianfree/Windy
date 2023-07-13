@@ -6,21 +6,47 @@ import com.zj.client.entity.dto.ParamDefine;
 import com.zj.client.entity.enuns.ParamTypeEnum;
 import com.zj.client.entity.vo.ExecuteDetailVo;
 import com.zj.client.handler.feature.executor.feature.IExecuteInvoker;
+import com.zj.client.handler.feature.executor.feature.loader.PluginManager;
 import com.zj.client.handler.feature.executor.vo.ExecutorUnit;
+import com.zj.client.loader.Feature;
+import com.zj.client.loader.FeatureDefine;
 import com.zj.client.utils.ExceptionUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Component
 public class MethodInvoke implements IExecuteInvoker {
+
+  private Map<String, Object> instanceMap = new HashMap<>();
+
+  private PluginManager pluginManager;
+
+  public MethodInvoke(PluginManager pluginManager) {
+    this.pluginManager = pluginManager;
+    new Thread(() -> {
+      List<Feature> features = pluginManager.loadPlugins();
+      features.forEach(feature -> {
+        List<FeatureDefine> featureDefines = feature.scanFeatureDefines();
+        if (CollectionUtils.isEmpty(featureDefines)) {
+          return;
+        }
+
+        featureDefines.forEach(featureDefine -> {
+          instanceMap.put(featureDefine.getName(), featureDefine);
+        });
+
+      });
+    }).start();
+
+  }
 
   @Override
   public InvokerType type() {
@@ -40,27 +66,27 @@ public class MethodInvoke implements IExecuteInvoker {
         }
       }
 
-      Class<?> cls = Class.forName(executorUnit.getService());
-      return MethodUtils.invokeMethod(ConstructorUtils.invokeConstructor(cls),
-          executorUnit.getMethod(), objects);
+      Object instance = instanceMap.get(executorUnit.getService());
+      if (Objects.isNull(instance)) {
+        Class<?> cls = Class.forName(executorUnit.getService());
+        instance = ConstructorUtils.invokeConstructor(cls);
+        instanceMap.put(executorUnit.getName(), instance);
+      }
+
+      return MethodUtils.invokeMethod(instance, executorUnit.getMethod(), objects);
     } catch (Exception e) {
       log.error("invoke method error", e);
-      StringBuilder stringBuilder = new StringBuilder();
-      stringBuilder.append("invoke[ ")
-          .append(executorUnit.getService())
-          .append(" ] method [ ")
-          .append(executorUnit.getMethod())
-          .append(" ]\r\n").append("\tat").append(ExceptionUtils.getSimplifyError(e));
+      String stringBuilder = "invoke[ " + executorUnit.getService() + " ] method [ " + executorUnit.getMethod() + " ]\r\n" + "\tat" + ExceptionUtils.getSimplifyError(e);
       ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
       executeDetailVo.setStatus(false);
-      executeDetailVo.setErrorMessage(stringBuilder.toString());
+      executeDetailVo.setErrorMessage(stringBuilder);
       return executeDetailVo;
     }
   }
 
   public static Object convertDataToType(ParamDefine paramDefine) {
     if (Objects.equals(ParamTypeEnum.MAP.getType(), paramDefine.getType())) {
-      if (Objects.isNull(paramDefine.getValue())){
+      if (Objects.isNull(paramDefine.getValue())) {
         return new HashMap<>();
       }
       return (Map<String, Object>) JSONObject.parse(JSON.toJSONString(paramDefine.getValue()));
@@ -91,7 +117,7 @@ public class MethodInvoke implements IExecuteInvoker {
   }
 
   public static void main(String[] args) {
-    MethodInvoke methodInvoke = new MethodInvoke();
+    MethodInvoke methodInvoke = new MethodInvoke(null);
 
     ExecutorUnit executorUnit = new ExecutorUnit();
     executorUnit.setMethod("startHttp");

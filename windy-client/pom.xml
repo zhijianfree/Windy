@@ -10,6 +10,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>windy-client</artifactId>
+  <packaging>pom</packaging>
+  <modules>
+    <module>client-loader</module>
+  </modules>
 
   <properties>
     <maven.compiler.source>8</maven.compiler.source>
@@ -22,6 +26,12 @@
       <groupId>com.zj</groupId>
       <artifactId>windy-common</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.zj</groupId>
+      <artifactId>client-loader</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+
     <!--    内部引用结束-->
 
     <!--    外部依赖开始-->

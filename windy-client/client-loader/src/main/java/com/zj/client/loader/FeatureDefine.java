@@ -1,4 +1,4 @@
-package com.zj.client.handler.feature.ability;
+package com.zj.client.loader;
 
 import java.util.List;
 import lombok.Data;

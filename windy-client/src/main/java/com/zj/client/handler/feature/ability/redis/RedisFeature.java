@@ -2,8 +2,8 @@ package com.zj.client.handler.feature.ability.redis;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.vo.ExecuteDetailVo;
-import com.zj.client.handler.feature.ability.Feature;
-import com.zj.client.handler.feature.ability.FeatureDefine;
+import com.zj.client.loader.Feature;
+import com.zj.client.loader.FeatureDefine;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;

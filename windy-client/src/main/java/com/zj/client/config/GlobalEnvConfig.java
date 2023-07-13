@@ -9,14 +9,9 @@ import org.springframework.stereotype.Component;
 public class GlobalEnvConfig {
 
   public static final String WINDY = "windy";
-  public static final String GIT_USER = "windy.pipeline.git.user";
-  public static final String GIT_PASSWORD = "windy.pipeline.git.password";
-  public static final String DEFAULT_GIT_PWD = "windy!123";
-  public static final String DEFAULT_GIT_USER = "windy";
-
   public static final String MAVEN_PATH_KEY = "windy.pipeline.maven.path";
-  public static final String GIT_WORKSPACE = "windy.pipeline.git.workspace";
-  public static final String DEFAULT_GIT_WORKSPACE = "/opt/windy";
+  public static final String WORKSPACE = "windy.pipeline.workspace";
+  public static final String DEFAULT_WORKSPACE = "/opt/windy";
   public static final String LOOP_QUERY_TIMEOUT = "windy.loop.query.timeout";
   public static final int MAX_REMOVE_TIME = 2 * 60 * 60 * 1000;
   private final Environment environment;
@@ -29,8 +24,8 @@ public class GlobalEnvConfig {
     return environment.getProperty(MAVEN_PATH_KEY);
   }
 
-  public String getGitWorkspace() {
-    String path = environment.getProperty(GIT_WORKSPACE, DEFAULT_GIT_WORKSPACE);
+  public String getWorkspace() {
+    String path = environment.getProperty(WORKSPACE, DEFAULT_WORKSPACE);
     if (!isWorkspaceExist(path)) {
       try {
         path = new File("").getCanonicalPath() + File.separator + WINDY;
@@ -44,7 +39,7 @@ public class GlobalEnvConfig {
    * 获取流水线构建过程中的工作路径
    * */
   public String getPipelineWorkspace(String service, String pipelineId) {
-    return getGitWorkspace() + File.separator + service + File.separator + pipelineId;
+    return getWorkspace() + File.separator + service + File.separator + pipelineId;
   }
 
   private boolean isWorkspaceExist(String workspace) {

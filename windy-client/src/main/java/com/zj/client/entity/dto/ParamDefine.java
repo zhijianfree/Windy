@@ -1,6 +1,5 @@
 package com.zj.client.entity.dto;
 
-import com.zj.client.handler.feature.ability.ParameterDefine;
 import lombok.Data;
 
 @Data
