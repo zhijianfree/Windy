@@ -1,4 +1,4 @@
-package com.zj.client.handler.feature.executor.feature.strategy;
+package com.zj.client.handler.feature.executor.invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.dto.ExecutePointDTO;
@@ -6,12 +6,11 @@ import com.zj.client.entity.enuns.ExecutePointType;
 import com.zj.client.entity.vo.ExecutePoint;
 import com.zj.client.entity.vo.FeatureResponse;
 import com.zj.client.handler.feature.executor.compare.CompareHandler;
-import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
-import com.zj.client.handler.feature.executor.feature.IExecuteInvoker;
+import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
 import com.zj.client.handler.feature.executor.interceptor.InterceptorProxy;
 import com.zj.client.handler.feature.executor.vo.ExecuteContext;
 import com.zj.client.handler.feature.executor.vo.ExecutorUnit;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -23,11 +22,9 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class IFExecuteStrategy extends BaseExecuteStrategy {
+public class ForExecuteStrategy extends BaseExecuteStrategy{
 
-  private OgnlDataParser ognlDataParser = new OgnlDataParser();
-
-  public IFExecuteStrategy(InterceptorProxy interceptorProxy,
+  public ForExecuteStrategy(InterceptorProxy interceptorProxy,
       List<IExecuteInvoker> executeInvokers,
       CompareHandler compareHandler) {
     super(interceptorProxy, executeInvokers, compareHandler);
@@ -35,24 +32,27 @@ public class IFExecuteStrategy extends BaseExecuteStrategy {
 
   @Override
   public ExecutePointType getType() {
-    return ExecutePointType.IF;
+    return ExecutePointType.FOR;
   }
 
   @Override
   public List<FeatureResponse> execute(ExecutePoint executePoint, ExecuteContext executeContext) {
-    log.info("start execute IFExecuteStrategy");
+    log.info("start execute ForExecuteStrategy");
     ExecutorUnit executorUnit = JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit
         .class);
-    String ongl = executorUnit.getMethod();
-    Boolean result = (Boolean) ognlDataParser.parserExpression(executeContext.toMap(), ongl, null);
-    if (!result) {
-      return Collections.emptyList();
-    }
-
+    List<FeatureResponse> responses = new ArrayList<>();
     List<ExecutePointDTO> executePoints = executorUnit.getExecutePoints();
-    return executePoints.stream().map(executePointDTO -> {
-      ExecutePoint point = ExecutePointDTO.toExecutePoint(executePointDTO);
-      return executeFeature(executeContext, point);
-    }).collect(Collectors.toList());
+    int size = Integer.parseInt(executorUnit.getMethod());
+    for (int i = 0; i < size; i++) {
+      executeContext.set("$item", i);
+      List<FeatureResponse> responseList = executePoints.stream().map(executePointDTO -> {
+        ExecutePoint point = ExecutePointDTO.toExecutePoint(executePointDTO);
+        return executeFeature(executeContext, point);
+      }).collect(Collectors.toList());
+
+      executeContext.remove("$item");
+      responses.addAll(responseList);
+    }
+    return responses;
   }
 }

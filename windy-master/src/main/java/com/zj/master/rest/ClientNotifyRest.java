@@ -27,4 +27,5 @@ public class ClientNotifyRest {
   public ResponseMeta<Boolean> notifyEvent(@RequestBody ResultEvent resultEvent) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, clientNotifyService.notifyEvent(resultEvent));
   }
+
 }

@@ -52,22 +52,6 @@
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>io.fabric8</groupId>
-        <artifactId>kubernetes-client</artifactId>
-        <version>${k8s.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.alibaba</groupId>
-        <artifactId>transmittable-thread-local</artifactId>
-        <version>${transmittable-thread.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.jcraft</groupId>
-        <artifactId>jsch</artifactId>
-        <version>${ssh.version}</version>
-      </dependency>
       <!--内部模块依赖开始-->
       <dependency>
         <groupId>com.zj</groupId>
@@ -94,9 +78,30 @@
         <artifactId>windy-common</artifactId>
         <version>${windy.version}</version>
       </dependency>
+      <dependency>
+        <groupId>com.zj</groupId>
+        <artifactId>client-loader</artifactId>
+        <version>${windy.version}</version>
+      </dependency>
       <!--内部模块结束-->
 
       <!--外部模块开始-->
+      <dependency>
+        <groupId>io.fabric8</groupId>
+        <artifactId>kubernetes-client</artifactId>
+        <version>${k8s.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.alibaba</groupId>
+        <artifactId>transmittable-thread-local</artifactId>
+        <version>${transmittable-thread.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.jcraft</groupId>
+        <artifactId>jsch</artifactId>
+        <version>${ssh.version}</version>
+      </dependency>
       <dependency>
         <groupId>joda-time</groupId>
         <artifactId>joda-time</artifactId>

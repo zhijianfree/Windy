@@ -4,8 +4,12 @@ import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
 import com.zj.feature.entity.dto.ExecuteTemplateVo;
 import com.zj.common.model.PageSize;
+import com.zj.feature.entity.dto.UploadResultDto;
 import com.zj.feature.service.TemplateService;
+import java.util.Arrays;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,8 +18,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 @RequestMapping("/v1/devops/feature")
 @RestController
@@ -77,5 +84,10 @@ public class FeatureTemplateRest {
   public ResponseMeta<Boolean> refreshTemplate(@PathVariable("templateId") String templateId) {
     Boolean result = templateService.refreshTemplate(templateId);
     return new ResponseMeta(ErrorCode.SUCCESS, result);
+  }
+
+  @PostMapping(value = "/template/upload")
+  public ResponseMeta<UploadResultDto> uploadTemplate(StandardMultipartHttpServletRequest request, @RequestPart("file") MultipartFile file) {
+    return new ResponseMeta(ErrorCode.SUCCESS, templateService.uploadTemplate(file));
   }
 }

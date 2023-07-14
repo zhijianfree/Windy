@@ -26,4 +26,5 @@ public class ClientMonitorRest {
   public ResponseMeta<ClientCollect> getInstance() {
     return new ResponseMeta<>(ErrorCode.SUCCESS, clientMonitor.getInstanceInfo());
   }
+
 }

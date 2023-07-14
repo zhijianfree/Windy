@@ -2,6 +2,10 @@ package com.zj.feature.service;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.zj.client.loader.Feature;
+import com.zj.client.loader.FeatureDefine;
+import com.zj.common.exception.ApiException;
+import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.common.model.PageSize;
 import com.zj.common.utils.OrikaUtil;
@@ -10,18 +14,30 @@ import com.zj.domain.entity.dto.feature.ExecuteTemplateDto;
 import com.zj.domain.repository.feature.IExecutePointRepository;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import com.zj.feature.entity.dto.ExecuteTemplateVo;
+import com.zj.feature.entity.dto.UploadResultDto;
 import com.zj.feature.entity.vo.ExecutorUnit;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
 public class TemplateService {
 
+  public static final String PLUGINS_PATH = "plugins";
   private UniqueIdService uniqueIdService;
   private IExecuteTemplateRepository executeTemplateRepository;
   private IExecutePointRepository executePointRepository;
@@ -83,7 +99,7 @@ public class TemplateService {
   }
 
   public List<ExecuteTemplateVo> getFeatureList() {
-    List<ExecuteTemplateDto> executeTemplates =  executeTemplateRepository.getAllTemplates();
+    List<ExecuteTemplateDto> executeTemplates = executeTemplateRepository.getAllTemplates();
     return executeTemplates.stream().map(ExecuteTemplateVo::toExecuteTemplateDTO)
         .collect(Collectors.toList());
   }
@@ -109,5 +125,58 @@ public class TemplateService {
     }).collect(Collectors.toList());
 
     return executePointRepository.updateBatch(updatePoints);
+  }
+
+  public UploadResultDto uploadTemplate(MultipartFile file) {
+    UploadResultDto uploadResult = new UploadResultDto();
+    try {
+      uploadResult.setFileName(file.getOriginalFilename());
+      String currentPath =
+          new File("").getCanonicalPath() + File.separator + PLUGINS_PATH + File.separator;
+      String filePath = currentPath + file.getOriginalFilename();
+      createIfNotExist(filePath);
+      FileUtils.writeByteArrayToFile(new File(filePath), file.getBytes());
+      List<Feature> features = loadPlugins(currentPath);
+      List<List<FeatureDefine>> templates = features.stream().map(Feature::scanFeatureDefines)
+          .collect(Collectors.toList());
+      uploadResult.setTemplateDefines(templates);
+    } catch (Exception e) {
+      log.error("save file error", e);
+      throw new ApiException(ErrorCode.PARSE_PLUGIN_ERROR);
+    }
+    return uploadResult;
+  }
+
+  private void createIfNotExist(String filePath) {
+    File fileDir = new File(filePath);
+    try {
+      if (!fileDir.exists()) {
+        FileUtils.createParentDirectories(fileDir);
+      }
+    } catch (IOException ignore) {
+    }
+  }
+
+  public List<Feature> loadPlugins(String path) {
+    List<Feature> features = new ArrayList<>();
+    try {
+      PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+      Resource[] resources = resolver.getResources(path);
+      URL[] urls = new URL[resources.length];
+      for (int i = 0; i < resources.length; i++) {
+        urls[i] = resources[i].getURL();
+      }
+
+      URLClassLoader urlClassLoader = new URLClassLoader(urls,
+          Thread.currentThread().getContextClassLoader());
+      ServiceLoader<Feature> serviceLoader = ServiceLoader.load(Feature.class, urlClassLoader);
+      for (Feature feature : serviceLoader) {
+        features.add(feature);
+      }
+      return features;
+    } catch (Exception e) {
+      log.error("load class error", e);
+    }
+    return features;
   }
 }

@@ -1,4 +1,4 @@
-package com.zj.client.handler.feature.executor.feature.invoke;
+package com.zj.client.handler.feature.executor.invoker.invoke;
 
 public enum InvokerType {
   METHOD(1, "本地方法调用"),
