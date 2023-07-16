@@ -2,8 +2,8 @@ package com.zj.client.handler.feature.executor.invoker.invoke;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.zj.client.entity.vo.ExecuteDetailVo;
-import com.zj.client.entity.vo.RequestDetailVo;
+import com.zj.client.loader.ExecuteDetailVo;
+import com.zj.client.loader.RequestDetailVo;
 import com.zj.client.handler.feature.ability.http.HttpFeature;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
 import com.zj.client.handler.feature.executor.vo.ExecutorUnit;

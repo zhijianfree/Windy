@@ -1,7 +1,7 @@
 package com.zj.client.handler.feature.ability.kafka;
 
 import com.zj.client.entity.enuns.ParamTypeEnum;
-import com.zj.client.entity.vo.ExecuteDetailVo;
+import com.zj.client.loader.ExecuteDetailVo;
 import com.zj.client.loader.Feature;
 import com.zj.client.loader.FeatureDefine;
 import com.zj.client.loader.ParameterDefine;
@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;

@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 public class UploadResultDto {
 
-  private String fileName;
+  private String pluginId;
 
-  private List<List<FeatureDefine>> templateDefines;
+  private List<FeatureDefine> templateDefines;
 }

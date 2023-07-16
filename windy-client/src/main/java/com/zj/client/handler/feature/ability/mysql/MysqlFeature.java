@@ -3,7 +3,7 @@ package com.zj.client.handler.feature.ability.mysql;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.zj.client.entity.vo.ExecuteDetailVo;
+import com.zj.client.loader.ExecuteDetailVo;
 import com.zj.client.loader.Feature;
 import com.zj.client.handler.feature.executor.compare.ParamValueType;
 import com.zj.client.loader.FeatureDefine;

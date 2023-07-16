@@ -13,5 +13,7 @@ public interface IPluginRepository {
 
   boolean addPlugin(PluginInfoDto pluginInfo);
 
-  boolean deletePlugin();
+  PluginInfoDto getPlugin(String pluginId);
+
+  boolean deletePlugin(String pluginId);
 }

@@ -1,15 +1,13 @@
 package com.zj.client.handler.feature.ability.redis;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.client.entity.vo.ExecuteDetailVo;
-import com.zj.client.handler.feature.ability.mysql.MysqlFeature;
+import com.zj.client.loader.ExecuteDetailVo;
 import com.zj.client.handler.feature.executor.compare.ParamValueType;
 import com.zj.client.loader.Feature;
 import com.zj.client.loader.FeatureDefine;
 import com.zj.client.loader.ParameterDefine;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;

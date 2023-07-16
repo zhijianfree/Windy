@@ -1,6 +1,6 @@
 package com.zj.client.handler.feature.executor.compare;
 
-import com.zj.client.entity.vo.ExecuteDetailVo;
+import com.zj.client.loader.ExecuteDetailVo;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.client.handler.feature.executor.compare.operator.CompareFactory;
 import com.zj.common.exception.ErrorCode;

@@ -1,13 +1,13 @@
 package com.zj.client.handler.feature.executor.interceptor;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.client.entity.dto.ParamDefine;
 import com.zj.client.entity.vo.ExecutePoint;
-import com.zj.client.entity.vo.ExecuteDetailVo;
+import com.zj.client.loader.ExecuteDetailVo;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.client.handler.feature.executor.vo.ExecuteContext;
 import com.zj.client.handler.feature.executor.vo.ExecutorUnit;
 import com.zj.client.handler.feature.executor.vo.VariableDefine;
+import com.zj.client.loader.ParameterDefine;
 import java.util.List;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
@@ -56,7 +56,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
    * 执行点在执行之前将变量值替换为全局配置值
    */
   private void filterVariable(ExecutorUnit executorUnit, ExecuteContext executeContext) {
-    List<ParamDefine> params = executorUnit.getParams();
+    List<ParameterDefine> params = executorUnit.getParams();
     if (CollectionUtils.isEmpty(params)) {
       return;
     }

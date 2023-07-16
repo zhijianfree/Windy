@@ -1,8 +1,5 @@
-package com.zj.client.entity.vo;
+package com.zj.client.loader;
 
-import lombok.Data;
-
-@Data
 public class ExecuteDetailVo {
 
   /**
@@ -41,5 +38,21 @@ public class ExecuteDetailVo {
 
   public Object responseBody() {
     return responseDetailVo.getResponseBody();
+  }
+
+  public RequestDetailVo getRequestDetailVo() {
+    return requestDetailVo;
+  }
+
+  public void setRequestDetailVo(RequestDetailVo requestDetailVo) {
+    this.requestDetailVo = requestDetailVo;
+  }
+
+  public ResponseDetailVo getResponseDetailVo() {
+    return responseDetailVo;
+  }
+
+  public void setResponseDetailVo(ResponseDetailVo responseDetailVo) {
+    this.responseDetailVo = responseDetailVo;
   }
 }

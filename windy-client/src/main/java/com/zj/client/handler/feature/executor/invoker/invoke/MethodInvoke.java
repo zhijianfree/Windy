@@ -2,14 +2,14 @@ package com.zj.client.handler.feature.executor.invoker.invoke;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.zj.client.entity.dto.ParamDefine;
 import com.zj.client.entity.enuns.ParamTypeEnum;
-import com.zj.client.entity.vo.ExecuteDetailVo;
+import com.zj.client.loader.ExecuteDetailVo;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
 import com.zj.client.handler.feature.executor.invoker.loader.PluginManager;
 import com.zj.client.handler.feature.executor.vo.ExecutorUnit;
 import com.zj.client.loader.Feature;
 import com.zj.client.loader.FeatureDefine;
+import com.zj.client.loader.ParameterDefine;
 import com.zj.client.utils.ExceptionUtils;
 import java.util.HashMap;
 import java.util.List;
@@ -56,11 +56,11 @@ public class MethodInvoke implements IExecuteInvoker {
   public Object invoke(ExecutorUnit executorUnit) {
     try {
       Object[] objects = null;
-      List<ParamDefine> paramDefines = executorUnit.getParams();
+      List<ParameterDefine> paramDefines = executorUnit.getParams();
       if (!CollectionUtils.isEmpty(paramDefines)) {
         int i = 0;
         objects = new Object[paramDefines.size()];
-        for (ParamDefine paramDefine : paramDefines) {
+        for (ParameterDefine paramDefine : paramDefines) {
           objects[i] = convertDataToType(paramDefine);
           i++;
         }
@@ -84,7 +84,7 @@ public class MethodInvoke implements IExecuteInvoker {
     }
   }
 
-  public static Object convertDataToType(ParamDefine paramDefine) {
+  public static Object convertDataToType(ParameterDefine paramDefine) {
     if (Objects.equals(ParamTypeEnum.MAP.getType(), paramDefine.getType())) {
       if (Objects.isNull(paramDefine.getValue())) {
         return new HashMap<>();
@@ -124,7 +124,7 @@ public class MethodInvoke implements IExecuteInvoker {
     executorUnit.setService("com.zj.feature.ability.http.HttpFeature");
     executorUnit.setParams(JSON.parseArray(
         "[{\"paramKey\":\"url\",\"value\":\"http://10.58.239.162:8079/v5/iot/11111111111111111/devices/1234567890111w1qw\"},{\"paramKey\":\"method\",\"value\":\"delete\"},{\"paramKey\":\"headers\",\"type\":1,\"value\":{\"X_USER_INFO\":\"{\\\"domainId\\\": \\\"gyl\\\"}\",\"domainId\":\"huhuhu11111223\"}},{\"paramKey\":\"body\",\"value\":\"\"}]",
-        ParamDefine.class));
+        ParameterDefine.class));
     System.out.println(JSON.toJSONString(methodInvoke.invoke(executorUnit)));
     ;
   }

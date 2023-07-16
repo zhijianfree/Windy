@@ -3,7 +3,7 @@ package com.zj.client.handler.feature.ability.http;
 import com.alibaba.fastjson.JSON;
 
 import com.zj.client.entity.enuns.ParamTypeEnum;
-import com.zj.client.entity.vo.ExecuteDetailVo;
+import com.zj.client.loader.ExecuteDetailVo;
 import com.zj.client.loader.Feature;
 import com.zj.client.loader.FeatureDefine;
 import com.zj.client.loader.ParameterDefine;
