@@ -1,6 +1,6 @@
 package com.zj.feature.entity.vo;
 
-import com.zj.client.loader.ParameterDefine;
+import com.zj.plugin.loader.ParameterDefine;
 import com.zj.feature.entity.dto.ExecutePointVo;
 import java.util.List;
 import java.util.Map;

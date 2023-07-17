@@ -1,11 +1,11 @@
 package com.zj.client.handler.feature.ability.redis;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.client.loader.ExecuteDetailVo;
-import com.zj.client.loader.ParamValueType;
-import com.zj.client.loader.Feature;
-import com.zj.client.loader.FeatureDefine;
-import com.zj.client.loader.ParameterDefine;
+import com.zj.plugin.loader.ExecuteDetailVo;
+import com.zj.plugin.loader.ParamValueType;
+import com.zj.plugin.loader.Feature;
+import com.zj.plugin.loader.FeatureDefine;
+import com.zj.plugin.loader.ParameterDefine;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

@@ -41,14 +41,7 @@ eureka:
 
 windy:
   pipeline:
-    git:
-      user: windy
-      password: windy!123
       workspace: /opt/windy
-  deploy:
-    ssh:
-      user: guyuelan
-      pwd: ZJguyuelan!12345
   loop:
     query:
       timeout: 7200000

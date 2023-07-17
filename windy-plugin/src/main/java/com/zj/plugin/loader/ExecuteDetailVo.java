@@ -1,4 +1,5 @@
-package com.zj.client.loader;
+package com.zj.plugin.loader;
+
 
 public class ExecuteDetailVo {
 
@@ -12,8 +13,8 @@ public class ExecuteDetailVo {
    */
   private ResponseDetailVo responseDetailVo = new ResponseDetailVo();
 
-  public void setStatus(Boolean code) {
-    responseDetailVo.setResponseStatus(code);
+  public void setStatus(Boolean status) {
+    responseDetailVo.setResponseStatus(status);
   }
 
   public void setResBody(Object responseBody) {

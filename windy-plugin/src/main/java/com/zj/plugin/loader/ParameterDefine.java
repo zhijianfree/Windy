@@ -1,4 +1,4 @@
-package com.zj.client.loader;
+package com.zj.plugin.loader;
 
 
 public class ParameterDefine {

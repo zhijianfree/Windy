@@ -24,6 +24,7 @@
     <module>windy-client</module>
     <module>windy-master</module>
     <module>windy-domain</module>
+    <module>windy-plugin</module>
   </modules>
 
 
@@ -80,7 +81,7 @@
       </dependency>
       <dependency>
         <groupId>com.zj</groupId>
-        <artifactId>client-loader</artifactId>
+        <artifactId>windy-plugin</artifactId>
         <version>${windy.version}</version>
       </dependency>
       <!--内部模块结束-->

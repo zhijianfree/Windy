@@ -2,12 +2,12 @@ package com.zj.client.handler.feature.executor.interceptor;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.vo.ExecutePoint;
-import com.zj.client.loader.ExecuteDetailVo;
+import com.zj.plugin.loader.ExecuteDetailVo;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.client.handler.feature.executor.vo.ExecuteContext;
 import com.zj.client.handler.feature.executor.vo.ExecutorUnit;
 import com.zj.client.handler.feature.executor.vo.VariableDefine;
-import com.zj.client.loader.ParameterDefine;
+import com.zj.plugin.loader.ParameterDefine;
 import java.util.List;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;

@@ -19,7 +19,7 @@
     </dependency>
     <dependency>
       <groupId>com.zj</groupId>
-      <artifactId>client-loader</artifactId>
+      <artifactId>windy-plugin</artifactId>
     </dependency>
     <dependency>
       <groupId>com.zj</groupId>

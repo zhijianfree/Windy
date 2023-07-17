@@ -1,10 +1,10 @@
 package com.zj.client.handler.feature.ability.kafka;
 
 import com.zj.client.entity.enuns.ParamTypeEnum;
-import com.zj.client.loader.ExecuteDetailVo;
-import com.zj.client.loader.Feature;
-import com.zj.client.loader.FeatureDefine;
-import com.zj.client.loader.ParameterDefine;
+import com.zj.plugin.loader.ExecuteDetailVo;
+import com.zj.plugin.loader.Feature;
+import com.zj.plugin.loader.FeatureDefine;
+import com.zj.plugin.loader.ParameterDefine;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;

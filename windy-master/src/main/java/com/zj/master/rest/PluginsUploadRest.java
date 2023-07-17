@@ -6,12 +6,8 @@ import com.zj.domain.entity.dto.feature.PluginInfoDto;
 import com.zj.master.service.PluginsService;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 /**
  * @author guyuelan
@@ -22,6 +18,10 @@ import org.springframework.web.multipart.support.StandardMultipartHttpServletReq
 public class PluginsUploadRest {
 
   private PluginsService pluginsService;
+
+  public PluginsUploadRest(PluginsService pluginsService) {
+    this.pluginsService = pluginsService;
+  }
 
   @GetMapping(value = "/plugins")
   public ResponseMeta<List<PluginInfoDto>> getPlugins() {

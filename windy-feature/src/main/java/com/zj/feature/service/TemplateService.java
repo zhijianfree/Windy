@@ -2,8 +2,8 @@ package com.zj.feature.service;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.zj.client.loader.Feature;
-import com.zj.client.loader.FeatureDefine;
+import com.zj.plugin.loader.Feature;
+import com.zj.plugin.loader.FeatureDefine;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;

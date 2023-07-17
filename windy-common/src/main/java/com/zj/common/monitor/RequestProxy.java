@@ -323,17 +323,14 @@ public class RequestProxy {
   }
 
   public List<PluginInfo> getAvailablePlugins() {
-    String traceId = MDC.get(TidInterceptor.MDC_TID_KEY);
-    Request request = new Request.Builder().url(CLIENT_PLUGIN_LIST)
-        .header(TidInterceptor.HTTP_HEADER_TRACE_ID, traceId).get().build();
     try {
-      Response response = okHttpClient.newCall(request).execute();
-      String string = response.body().string();
-      log.info("request client monitor ={}", string);
-      ResponseMeta result = JSON.parseObject(string, ResponseMeta.class);
-      return JSON.parseArray(JSON.toJSONString(result.getData()), PluginInfo.class);
+      wrapTraceHeader();
+      HttpEntity request = new HttpEntity(headers);
+      ResponseEntity<ResponseMeta> resp = restTemplate.exchange(CLIENT_PLUGIN_LIST,
+          HttpMethod.GET, request, ResponseMeta.class);
+      return JSON.parseArray(JSON.toJSONString(resp.getBody().getData()), PluginInfo.class);
     } catch (Exception e) {
-      log.error("request client ip error", e);
+      log.error("request available plugins error", e);
     }
     return null;
   }

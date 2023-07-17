@@ -1,7 +1,7 @@
 package com.zj.client.handler.feature.executor.invoker.loader;
 
 import com.zj.client.config.GlobalEnvConfig;
-import com.zj.client.loader.Feature;
+import com.zj.plugin.loader.Feature;
 import com.zj.common.model.PluginInfo;
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +25,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class PluginManager {
 
-  public static final String PLUGINS_PATH_FORMAT = "file:%s/plugins/*.jar";
+  public static final String PLUGIN_PATH = "plugins";
+  public static final String PLUGINS_PATH_FORMAT = "file:%s/" + PLUGIN_PATH + "/*.jar";
+
   private GlobalEnvConfig globalEnvConfig;
 
   public PluginManager(GlobalEnvConfig globalEnvConfig) {
@@ -63,7 +65,8 @@ public class PluginManager {
 
   public void saveJarPlugin(PluginInfo plugin) {
     try {
-      String path = globalEnvConfig.getWorkspace() + File.separator + plugin.getPluginName();
+      String path = globalEnvConfig.getWorkspace() + File.separator + PLUGIN_PATH + File.separator
+          + plugin.getPluginName();
       File jarPath = new File(path);
       FileUtils.createParentDirectories(jarPath);
       FileUtils.writeByteArrayToFile(jarPath, plugin.getFileData());

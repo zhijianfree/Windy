@@ -3,17 +3,18 @@ package com.zj.client.schedule;
 import com.zj.client.handler.feature.executor.invoker.invoke.MethodInvoke;
 import com.zj.client.handler.feature.executor.invoker.loader.PluginManager;
 import com.zj.common.model.PluginInfo;
+import com.zj.common.monitor.InstanceMonitor;
 import com.zj.common.monitor.RequestProxy;
-import java.io.IOException;
+import com.zj.common.monitor.trace.TidInterceptor;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.slf4j.MDC;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -27,18 +28,24 @@ public class PluginLoadSchedule {
 
   private RequestProxy requestProxy;
   private PluginManager pluginManager;
-
+  private InstanceMonitor instanceMonitor;
   private MethodInvoke methodInvoke;
 
   public PluginLoadSchedule(RequestProxy requestProxy, PluginManager pluginManager,
-      MethodInvoke methodInvoke) {
+      InstanceMonitor instanceMonitor, MethodInvoke methodInvoke) {
     this.requestProxy = requestProxy;
     this.pluginManager = pluginManager;
+    this.instanceMonitor = instanceMonitor;
     this.methodInvoke = methodInvoke;
   }
 
   @Scheduled(cron = "0/5 * * * * ? ")
   public void loadSchedule() {
+    if (instanceMonitor.isUnStable()) {
+      return;
+    }
+
+    initMDC();
     List<PluginInfo> plugins = requestProxy.getAvailablePlugins();
     if (CollectionUtils.isEmpty(plugins)) {
       return;
@@ -56,6 +63,10 @@ public class PluginLoadSchedule {
         Collectors.toList()));
     needLoad.forEach(pluginInfo -> pluginManager.saveJarPlugin(pluginInfo));
     methodInvoke.loadPluginFromDisk();
+  }
+
+  private static void initMDC() {
+    MDC.put(TidInterceptor.MDC_TID_KEY, UUID.randomUUID().toString().replace("-",""));
   }
 
   private List<String> loadLocalJarFiles() {

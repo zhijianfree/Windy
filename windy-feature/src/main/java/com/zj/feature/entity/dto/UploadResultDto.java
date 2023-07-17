@@ -1,6 +1,5 @@
 package com.zj.feature.entity.dto;
 
-import com.zj.client.loader.FeatureDefine;
 import java.util.List;
 import lombok.Data;
 

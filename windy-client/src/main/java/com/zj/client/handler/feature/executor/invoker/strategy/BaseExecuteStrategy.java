@@ -2,7 +2,7 @@ package com.zj.client.handler.feature.executor.invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.vo.ExecutePoint;
-import com.zj.client.loader.ExecuteDetailVo;
+import com.zj.plugin.loader.ExecuteDetailVo;
 import com.zj.client.entity.vo.FeatureResponse;
 import com.zj.client.handler.feature.executor.compare.CompareDefine;
 import com.zj.client.handler.feature.executor.compare.CompareHandler;

@@ -3,10 +3,10 @@ package com.zj.client.handler.feature.ability.http;
 import com.alibaba.fastjson.JSON;
 
 import com.zj.client.entity.enuns.ParamTypeEnum;
-import com.zj.client.loader.ExecuteDetailVo;
-import com.zj.client.loader.Feature;
-import com.zj.client.loader.FeatureDefine;
-import com.zj.client.loader.ParameterDefine;
+import com.zj.plugin.loader.ExecuteDetailVo;
+import com.zj.plugin.loader.Feature;
+import com.zj.plugin.loader.FeatureDefine;
+import com.zj.plugin.loader.ParameterDefine;
 import com.zj.client.utils.ExceptionUtils;
 import java.io.IOException;
 import java.util.ArrayList;
