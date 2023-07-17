@@ -31,21 +31,21 @@ public class MethodInvoke implements IExecuteInvoker {
 
   public MethodInvoke(PluginManager pluginManager) {
     this.pluginManager = pluginManager;
-    new Thread(() -> {
-      List<Feature> features = pluginManager.loadPlugins();
-      features.forEach(feature -> {
-        List<FeatureDefine> featureDefines = feature.scanFeatureDefines();
-        if (CollectionUtils.isEmpty(featureDefines)) {
-          return;
-        }
+    new Thread(this::loadPluginFromDisk).start();
+  }
 
-        featureDefines.forEach(featureDefine -> {
-          instanceMap.put(featureDefine.getName(), featureDefine);
-        });
+  public void loadPluginFromDisk() {
+    List<Feature> features = pluginManager.loadPlugins();
+    features.forEach(feature -> {
+      List<FeatureDefine> featureDefines = feature.scanFeatureDefines();
+      if (CollectionUtils.isEmpty(featureDefines)) {
+        return;
+      }
 
+      featureDefines.forEach(featureDefine -> {
+        instanceMap.put(featureDefine.getName(), featureDefine);
       });
-    }).start();
-
+    });
   }
 
   @Override

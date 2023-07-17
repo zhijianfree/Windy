@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.common.model.ClientCollect;
 import com.zj.common.model.MasterCollect;
+import com.zj.common.model.PluginInfo;
 import com.zj.common.model.ResponseMeta;
 import com.zj.common.model.ResultEvent;
 import com.zj.common.model.StopDispatch;
@@ -55,9 +56,9 @@ public class RequestProxy {
   private static final String CLIENT_QUERY_APPROVAL_STATUS = "http://WindyMaster/v1/devops/master/record/";
   public static final String CONSOLE_RUN_TASK = "http://WindyMaster/v1/devops/dispatch/task";
   public static final String CONSOLE_STOP_TASK = "http://WindyMaster/v1/devops/dispatch/stop";
-
   public static final String CLIENT_MONITOR_URL = "http://%s/v1/devops/client/instance";
 
+  public static final String CLIENT_PLUGIN_LIST = "http://WindyMaster/v1/devops/master/plugins";
   public static final String MASTER_MONITOR_URL = "http://%s/v1/devops/master/instance";
   private static final String WINDY_MASTER = "WindyMaster";
   private static final String WINDY_CLIENT = "WindyClient";
@@ -319,5 +320,21 @@ public class RequestProxy {
       }
       return null;
     }).collect(Collectors.toList());
+  }
+
+  public List<PluginInfo> getAvailablePlugins() {
+    String traceId = MDC.get(TidInterceptor.MDC_TID_KEY);
+    Request request = new Request.Builder().url(CLIENT_PLUGIN_LIST)
+        .header(TidInterceptor.HTTP_HEADER_TRACE_ID, traceId).get().build();
+    try {
+      Response response = okHttpClient.newCall(request).execute();
+      String string = response.body().string();
+      log.info("request client monitor ={}", string);
+      ResponseMeta result = JSON.parseObject(string, ResponseMeta.class);
+      return JSON.parseArray(JSON.toJSONString(result.getData()), PluginInfo.class);
+    } catch (Exception e) {
+      log.error("request client ip error", e);
+    }
+    return null;
   }
 }

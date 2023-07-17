@@ -4,7 +4,7 @@ import com.zj.domain.entity.dto.feature.PluginInfoDto;
 import java.util.List;
 
 /**
- * @author falcon
+ * @author guyuelan
  * @since 2023/7/14
  */
 public interface IPluginRepository {
@@ -16,4 +16,6 @@ public interface IPluginRepository {
   PluginInfoDto getPlugin(String pluginId);
 
   boolean deletePlugin(String pluginId);
+
+  void updatePluginStatus(String pluginId);
 }

@@ -22,4 +22,6 @@ public interface IExecuteTemplateRepository {
   List<ExecuteTemplateDto> getAllTemplates();
 
   IPage<ExecuteTemplateDto> getPage(Integer pageNo, Integer size, String name);
+
+  Boolean batchAddTemplates(List<ExecuteTemplateDto> templates);
 }

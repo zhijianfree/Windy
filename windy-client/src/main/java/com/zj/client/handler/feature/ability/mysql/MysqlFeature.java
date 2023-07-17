@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.client.loader.ExecuteDetailVo;
 import com.zj.client.loader.Feature;
-import com.zj.client.handler.feature.executor.compare.ParamValueType;
+import com.zj.client.loader.ParamValueType;
 import com.zj.client.loader.FeatureDefine;
 import com.zj.client.loader.ParameterDefine;
 import com.zj.client.utils.ExceptionUtils;

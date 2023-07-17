@@ -45,8 +45,7 @@ public class DispatchLogSchedule {
     this.dispatcher = dispatcher;
   }
 
-  //  @Scheduled(cron = "0 0 0/1 * * ? ")
-  @Scheduled(cron = "0/5 * * * * ? ")
+  @Scheduled(cron = "0 0 0/1 * * ? ")
   public void scanTaskLog() {
     if (instanceMonitor.isUnStable()) {
       return;
@@ -74,8 +73,7 @@ public class DispatchLogSchedule {
     String localIP = IpUtils.getLocalIP();
     return runningTaskLog.stream().filter(log -> Objects.equals(localIP, log.getNodeIp()))
         .filter(log -> (System.currentTimeMillis() - log.getUpdateTime()) > MAX_REDO_TIMEOUT)
-        .filter(log -> !dispatcher.isExitInJvm(log))
-        .collect(Collectors.toList());
+        .filter(log -> !dispatcher.isExitInJvm(log)).collect(Collectors.toList());
   }
 
 
