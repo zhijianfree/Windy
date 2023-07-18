@@ -1,4 +1,4 @@
-package com.zj.pipeline.git.impl;
+package com.zj.pipeline.git;
 
 /**
  * @author guyuelan

@@ -5,14 +5,14 @@ public class ParameterDefine {
     private String paramKey;
     private int type;
     private String description;
-    private String value;
+    private Object value;
     private DefaultValue defaultValue;
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(Object value) {
         this.value = value;
     }
 

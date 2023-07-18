@@ -1,9 +1,9 @@
-package com.zj.pipeline.git.impl;
+package com.zj.pipeline.git;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.common.enums.GitType;
-import com.zj.pipeline.git.IRepositoryBranch;
+import com.zj.common.git.IRepositoryBranch;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
@@ -16,8 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 /**
  * @author guyuelan
@@ -72,6 +72,11 @@ public class GitlabRepositoryBranch implements IRepositoryBranch {
     log.info("get list={}", result);
     return branches.stream().map(json -> json.getString("name"))
         .filter(branch -> !Objects.equals(branch, "master")).collect(Collectors.toList());
+  }
+
+  @Override
+  public void checkRepository(String serviceName) {
+
   }
 
   public static void main(String[] args) {

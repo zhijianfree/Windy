@@ -1,5 +1,6 @@
 package com.zj.pipeline.git;
 
+import com.zj.common.git.IRepositoryBranch;
 import com.zj.domain.entity.vo.GitAccessVo;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.common.enums.GitType;

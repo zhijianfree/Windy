@@ -25,7 +25,13 @@ public enum ErrorCode {
   PUBLISH_PIPELINE_EXIST(HttpStatus.BAD_REQUEST, "Pipeline.000014", "当前服务已存在发布流水线,无法创建"),
 
   NOT_FIND_PIPELINE(HttpStatus.BAD_REQUEST, "Pipeline.000015", "当前流水线不存在"),
+  CREATE_BRANCH_ERROR(HttpStatus.BAD_REQUEST, "Pipeline.000016", "创建分支失败"),
 
+  /*==================Service服务==================*/
+  NOT_FIND_REPO_CONFIG(HttpStatus.BAD_REQUEST, "Service.000001", "git访问失败，请检查系统配置"),
+  REPO_NOT_EXIST(HttpStatus.BAD_REQUEST, "Service.000002", "未找到服务名对应的git仓库"),
+  SERVICE_EXIST_PIPELINE(HttpStatus.BAD_REQUEST, "Service.000003", "服务下存在流水线无法删除"),
+  SERVICE_EXIST_FEATURE(HttpStatus.BAD_REQUEST, "Service.000004", "服务下存在测试集无法删除"),
   /*==================用例服务==================*/
   COMPARE_ERROR(HttpStatus.FORBIDDEN, "Feature.000002", "feature compare error"),
   EXECUTE_POINT_NOT_FIND(HttpStatus.NOT_FOUND, "Feature.000003", "can not find execute point"),

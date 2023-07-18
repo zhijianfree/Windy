@@ -1,15 +1,12 @@
-package com.zj.pipeline.git.impl;
+package com.zj.pipeline.git;
 
-import com.alibaba.fastjson.JSON;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.entity.vo.GitAccessVo;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
 import okhttp3.MediaType;
@@ -28,8 +25,6 @@ import org.springframework.stereotype.Component;
 public class GitRequestProxy {
 
   public static final MediaType CONTENT_TYPE = MediaType.parse("application/json");
-
-  public static final String GIT_CONFIG_ID = "2";
   OkHttpClient okHttpClient = new OkHttpClient.Builder().readTimeout(Duration.ofMinutes(1))
       .connectTimeout(Duration.ofSeconds(30)).build();
   private GitAccessVo gitAccess;

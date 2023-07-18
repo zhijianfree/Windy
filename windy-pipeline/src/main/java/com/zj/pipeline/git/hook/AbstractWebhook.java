@@ -7,10 +7,10 @@ import com.zj.domain.entity.dto.pipeline.BindBranchDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.service.MicroserviceDto;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
+import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.pipeline.entity.enums.PipelineExecuteType;
 import com.zj.pipeline.entity.vo.GitParseResult;
 import com.zj.pipeline.service.PipelineService;
-import com.zj.service.service.MicroserviceService;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -18,7 +18,6 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.StringUtils;
 
 /**
@@ -28,14 +27,14 @@ import org.springframework.util.StringUtils;
 @Slf4j
 public abstract class AbstractWebhook implements IGitWebhook {
 
-  private MicroserviceService microserviceService;
+  private IMicroServiceRepository serviceRepository;
   private PipelineService pipelineService;
   private IBindBranchRepository gitBindRepository;
   private Executor executorService;
 
-  public AbstractWebhook(MicroserviceService microserviceService, PipelineService pipelineService,
+  public AbstractWebhook(IMicroServiceRepository serviceRepository, PipelineService pipelineService,
       Executor executorService, IBindBranchRepository gitBindRepository) {
-    this.microserviceService = microserviceService;
+    this.serviceRepository = serviceRepository;
     this.pipelineService = pipelineService;
     this.gitBindRepository = gitBindRepository;
     this.executorService = executorService;
@@ -51,7 +50,7 @@ public abstract class AbstractWebhook implements IGitWebhook {
       return;
     }
 
-    MicroserviceDto microservice = microserviceService.queryServiceByName(
+    MicroserviceDto microservice = serviceRepository.queryServiceByName(
         parseResult.getRepository());
     List<PipelineDto> pipelines = pipelineService.getServicePipelines(microservice.getServiceId());
     if (CollectionUtils.isEmpty(pipelines)) {

@@ -1,11 +1,14 @@
-package com.zj.pipeline.git.impl;
+package com.zj.pipeline.git;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.common.enums.GitType;
-import com.zj.pipeline.git.GitConstants;
-import com.zj.pipeline.git.IRepositoryBranch;
+import com.zj.common.exception.ApiException;
+import com.zj.common.exception.ErrorCode;
+import com.zj.common.git.IRepositoryBranch;
+import com.zj.pipeline.entity.vo.BranchInfo;
 import com.zj.pipeline.entity.vo.CreateBranchVo;
+import com.zj.pipeline.entity.vo.RepositoryInfo;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +17,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
 /**
@@ -42,34 +46,54 @@ public class GiteaRepositoryBranch implements IRepositoryBranch {
   @Override
   public void createBranch(String serviceName, String branchName) {
     String owner = gitRequestProxy.getGitAccess().getOwner();
-    String gitPath = String.format(GitConstants.CREATE_BRANCH, owner, serviceName);
+    String gitPath = String.format("/api/v1/repos/%s/%s/branches", owner, serviceName);
     CreateBranchVo createBranchVO = new CreateBranchVo();
     createBranchVO.setBranchName(branchName);
     String result = gitRequestProxy.post(gitPath, JSON.toJSONString(createBranchVO), headers);
     log.info("gitea create branch result = {}", result);
+    BranchInfo branchInfo = JSON.parseObject(result, BranchInfo.class);
+    if (!Objects.equals(branchInfo.getName(), branchName)){
+      throw new ApiException(ErrorCode.CREATE_BRANCH_ERROR);
+    }
+
   }
 
   @Override
   public void deleteBranch(String serviceName, String branchName) {
     String owner = gitRequestProxy.getGitAccess().getOwner();
-    String gitPath = String.format(GitConstants.DELETE_BRANCH, owner, serviceName,
+    String gitPath = String.format("/api/v1/repos/%s/%s/branches/%s", owner, serviceName,
         branchName);
-    String result = gitRequestProxy.delete(gitPath, headers);
-    log.info("gitea delete branch result = {}", result);
+    gitRequestProxy.delete(gitPath, headers);
+  }
+
+  @Override
+  public void checkRepository(String serviceName) {
+    String result = gitRequestProxy.get("/api/v1/user/repos", headers);
+    log.info("query repository result ={}", result);
+    List<RepositoryInfo> repositories = JSON.parseArray(result, RepositoryInfo.class);
+    if (CollectionUtils.isEmpty(repositories)) {
+      throw new ApiException(ErrorCode.REPO_NOT_EXIST);
+    }
+    boolean existRepo = repositories.stream()
+        .noneMatch(repo -> Objects.equals(repo.getName(), serviceName));
+    if (existRepo) {
+      throw new ApiException(ErrorCode.REPO_NOT_EXIST);
+    }
   }
 
   @Override
   public List<String> listBranch(String serviceName) {
     String owner = gitRequestProxy.getGitAccess().getOwner();
-    String gitPath = String.format(GitConstants.LIST_BRANCH, owner, serviceName);
+    String gitPath = String.format("/api/v1/repos/%s/%s/branches", owner, serviceName);
     String result = gitRequestProxy.get(gitPath, headers);
-    List<JSONObject> branches = JSON.parseArray(result, JSONObject.class);
+    List<BranchInfo> branches = JSON.parseArray(result, BranchInfo.class);
     if (CollectionUtils.isEmpty(branches)) {
       return Collections.emptyList();
     }
 
     log.info("get list={}", result);
-    return branches.stream().map(json -> json.getString("name"))
-        .filter(branch -> !Objects.equals(branch, "master")).collect(Collectors.toList());
+    return branches.stream().map(BranchInfo::getName)
+        .filter(branch -> !Objects.equals(branch, "master") && !branch.startsWith("temp_"))
+        .collect(Collectors.toList());
   }
 }

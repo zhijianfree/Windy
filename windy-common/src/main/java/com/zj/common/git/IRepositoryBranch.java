@@ -1,4 +1,4 @@
-package com.zj.pipeline.git;
+package com.zj.common.git;
 
 import java.util.List;
 
@@ -24,4 +24,9 @@ public interface IRepositoryBranch {
    * 查看分支列表
    */
   List<String> listBranch(String serviceName);
+
+  /**
+   * 查询仓库列表
+   */
+  void checkRepository(String serviceName);
 }
