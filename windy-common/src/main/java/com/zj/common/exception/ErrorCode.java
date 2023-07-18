@@ -29,10 +29,11 @@ public enum ErrorCode {
 
   /*==================Service服务==================*/
   NOT_FIND_REPO_CONFIG(HttpStatus.BAD_REQUEST, "Service.000001", "git访问失败，请检查系统配置"),
-  REPO_NOT_EXIST(HttpStatus.BAD_REQUEST, "Service.000002", "未找到服务名对应的git仓库"),
+  REPO_NOT_EXIST(HttpStatus.BAD_REQUEST, "Service.000002", "未发现用户可访问的仓库列表"),
   SERVICE_EXIST_PIPELINE(HttpStatus.BAD_REQUEST, "Service.000003", "服务下存在流水线无法删除"),
   SERVICE_EXIST_FEATURE(HttpStatus.BAD_REQUEST, "Service.000004", "服务下存在测试集无法删除"),
   GIT_NO_PERMISSION(HttpStatus.BAD_REQUEST, "Service.000005", "配置的用户token无权限访问"),
+  USER_NO_PERMISSION(HttpStatus.BAD_REQUEST, "Service.000006", "用户未被授权访问当前git地址"),
   /*==================用例服务==================*/
   COMPARE_ERROR(HttpStatus.FORBIDDEN, "Feature.000002", "feature compare error"),
   EXECUTE_POINT_NOT_FIND(HttpStatus.NOT_FOUND, "Feature.000003", "can not find execute point"),

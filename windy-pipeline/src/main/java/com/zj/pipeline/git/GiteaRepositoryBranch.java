@@ -7,7 +7,7 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.git.IRepositoryBranch;
 import com.zj.pipeline.entity.vo.BranchInfo;
 import com.zj.pipeline.entity.vo.CreateBranchVo;
-import com.zj.pipeline.entity.vo.RepositoryInfo;
+import com.zj.pipeline.entity.vo.GiteaRepository;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +51,7 @@ public class GiteaRepositoryBranch implements IRepositoryBranch {
     String result = gitRequestProxy.post(gitPath, JSON.toJSONString(createBranchVO), headers);
     log.info("gitea create branch result = {}", result);
     BranchInfo branchInfo = JSON.parseObject(result, BranchInfo.class);
-    if (!Objects.equals(branchInfo.getName(), branchName)){
+    if (Objects.isNull(branchInfo) || !Objects.equals(branchInfo.getName(), branchName)){
       throw new ApiException(ErrorCode.CREATE_BRANCH_ERROR);
     }
 
@@ -69,21 +69,20 @@ public class GiteaRepositoryBranch implements IRepositoryBranch {
   public void checkRepository(String serviceName) {
     String result = gitRequestProxy.get("/api/v1/user/repos", headers);
     log.info("query repository result ={}", result);
-    List<RepositoryInfo> repositories = JSON.parseArray(result, RepositoryInfo.class);
+    List<GiteaRepository> repositories = JSON.parseArray(result, GiteaRepository.class);
     if (CollectionUtils.isEmpty(repositories)) {
       throw new ApiException(ErrorCode.REPO_NOT_EXIST);
     }
-    Optional<RepositoryInfo> optional = repositories.stream()
+    Optional<GiteaRepository> optional = repositories.stream()
         .filter(repo -> Objects.equals(repo.getName(), serviceName)).findAny();
     if (!optional.isPresent()) {
-      throw new ApiException(ErrorCode.REPO_NOT_EXIST);
+      throw new ApiException(ErrorCode.USER_NO_PERMISSION);
     }
 
     boolean permission = optional.get().getPermissions().checkPermission();
     if (!permission) {
       throw new ApiException(ErrorCode.GIT_NO_PERMISSION);
     }
-
   }
 
   @Override
