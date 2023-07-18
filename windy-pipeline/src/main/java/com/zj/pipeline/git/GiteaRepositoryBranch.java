@@ -1,7 +1,6 @@
 package com.zj.pipeline.git;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.zj.common.enums.GitType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
@@ -14,10 +13,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
 /**
@@ -74,11 +73,17 @@ public class GiteaRepositoryBranch implements IRepositoryBranch {
     if (CollectionUtils.isEmpty(repositories)) {
       throw new ApiException(ErrorCode.REPO_NOT_EXIST);
     }
-    boolean existRepo = repositories.stream()
-        .noneMatch(repo -> Objects.equals(repo.getName(), serviceName));
-    if (existRepo) {
+    Optional<RepositoryInfo> optional = repositories.stream()
+        .filter(repo -> Objects.equals(repo.getName(), serviceName)).findAny();
+    if (!optional.isPresent()) {
       throw new ApiException(ErrorCode.REPO_NOT_EXIST);
     }
+
+    boolean permission = optional.get().getPermissions().checkPermission();
+    if (!permission) {
+      throw new ApiException(ErrorCode.GIT_NO_PERMISSION);
+    }
+
   }
 
   @Override
