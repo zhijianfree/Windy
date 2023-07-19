@@ -1,13 +1,11 @@
 package com.zj.pipeline.git;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.zj.common.enums.GitType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.git.IRepositoryBranch;
 import com.zj.pipeline.entity.vo.BranchInfo;
-import com.zj.pipeline.entity.vo.GiteaRepository;
 import com.zj.pipeline.entity.vo.GitlabRepository;
 import java.io.IOException;
 import java.time.Duration;
@@ -22,8 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.springframework.stereotype.Component;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Component;
 
 /**
  * @author guyuelan
@@ -36,17 +34,22 @@ public class GitlabRepositoryBranch implements IRepositoryBranch {
   private Map<String, String> headers;
   private GitRequestProxy gitRequestProxy;
 
-  private Map<String, Integer> serviceIdMap;
+  private Map<String, Integer> serviceIdMap = new HashMap<>();
 
   public GitlabRepositoryBranch(GitRequestProxy gitRequestProxy) {
     this.gitRequestProxy = gitRequestProxy;
     this.headers = new HashMap<>();
     String accessToken = gitRequestProxy.getGitAccess().getAccessToken();
     headers.put("Private-Token", accessToken);
+    new Thread(this::loadGitRepositories).start();
+  }
 
-    List<GitlabRepository> gitlabRepositories = getGitlabRepositories();
-    serviceIdMap = gitlabRepositories.stream()
-        .collect(Collectors.toMap(repo -> repo.getName().toLowerCase(), GitlabRepository::getId));
+  private void loadGitRepositories() {
+    try {
+      List<GitlabRepository> gitlabRepositories = getGitlabRepositories();
+      serviceIdMap = gitlabRepositories.stream()
+          .collect(Collectors.toMap(repo -> repo.getName().toLowerCase(), GitlabRepository::getId));
+    } catch (Exception ignore) {}
   }
 
   @Override
@@ -60,11 +63,12 @@ public class GitlabRepositoryBranch implements IRepositoryBranch {
     String path = String.format("/api/v4/projects/%s/repository/branches?branch=%s&ref=master",
         projectId, branchName);
     String result = gitRequestProxy.post(path, "", headers);
+    log.info("gitea create branch result = {}", result);
     BranchInfo branchInfo = JSON.parseObject(result, BranchInfo.class);
     if (Objects.isNull(branchInfo) || !Objects.equals(branchInfo.getName(), branchName)) {
       throw new ApiException(ErrorCode.CREATE_BRANCH_ERROR);
     }
-    log.info("gitea create branch result = {}", result);
+
   }
 
   @Override
@@ -95,9 +99,7 @@ public class GitlabRepositoryBranch implements IRepositoryBranch {
   private Integer transformProjectId(String serviceName) {
     Integer projectId = serviceIdMap.get(serviceName.toLowerCase());
     if (Objects.isNull(projectId)) {
-      List<GitlabRepository> gitlabRepositories = getGitlabRepositories();
-      serviceIdMap = gitlabRepositories.stream()
-          .collect(Collectors.toMap(repo -> repo.getName().toLowerCase(), GitlabRepository::getId));
+      loadGitRepositories();
     }
     return serviceIdMap.get(serviceName.toLowerCase());
   }

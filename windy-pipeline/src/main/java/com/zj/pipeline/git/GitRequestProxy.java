@@ -38,13 +38,8 @@ public class GitRequestProxy {
         .headers(Headers.of(headers)).get().build();
     try {
       Response execute = okHttpClient.newCall(request).execute();
-      if (!execute.isSuccessful()) {
-        log.info("request result = {}", execute.body().string());
-        throw new ApiException(ErrorCode.REQUEST_GIT_SERVER_FAILED);
-      }
       return execute.body().string();
     } catch (IOException e) {
-      log.error("request git serve error", e);
       throw new ApiException(ErrorCode.REQUEST_GIT_SERVER_FAILED);
     }
   }
@@ -56,14 +51,8 @@ public class GitRequestProxy {
         .headers(Headers.of(headers)).post(requestBody).build();
     try {
       Response execute = okHttpClient.newCall(request).execute();
-      if (!execute.isSuccessful()) {
-        log.info("request result = {}", execute.body().string());
-        throw new ApiException(ErrorCode.REQUEST_GIT_SERVER_FAILED);
-      }
-
       return execute.body().string();
     } catch (IOException e) {
-      log.error("request git serve error", e);
       throw new ApiException(ErrorCode.REQUEST_GIT_SERVER_FAILED);
     }
   }
@@ -75,13 +64,8 @@ public class GitRequestProxy {
         .build();
     try {
       Response execute = okHttpClient.newCall(request).execute();
-      if (!execute.isSuccessful()) {
-        log.info("request result = {}", execute.body().string());
-        throw new ApiException(ErrorCode.REQUEST_GIT_SERVER_FAILED);
-      }
       return execute.body().string();
     } catch (IOException e) {
-      log.error("request git serve error", e);
       throw new ApiException(ErrorCode.REQUEST_GIT_SERVER_FAILED);
     }
   }
@@ -91,10 +75,6 @@ public class GitRequestProxy {
         .headers(Headers.of(headers)).delete().build();
     try {
       Response execute = okHttpClient.newCall(request).execute();
-      if (!execute.isSuccessful()) {
-        log.info("request result = {}", execute.body().string());
-        throw new ApiException(ErrorCode.REQUEST_GIT_SERVER_FAILED);
-      }
       return execute.body().string();
     } catch (IOException e) {
       log.error("request git serve error", e);

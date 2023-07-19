@@ -484,6 +484,30 @@ CREATE TABLE `publish_bind` (
   UNIQUE KEY `unique_service_id_branch` (`service_id`,`branch`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 
+CREATE TABLE `plugin_info` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `plugin_name` varchar(64) NOT NULL COMMENT '插件名称',
+  `plugin_type` int(11) NOT NULL DEFAULT '1' COMMENT '插件类型 1 模版插件',
+  `file_data` blob NOT NULL COMMENT '文件内容',
+  `plugin_id` varchar(64) DEFAULT NULL COMMENT '插件Id',
+  `status` int(11) NOT NULL DEFAULT '2' COMMENT '是否可用 1可用 2 不可用',
+  `create_time` bigint(20) NOT NULL,
+  `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+
+CREATE TABLE `optimistic_lock` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `biz_code` varchar(60) NOT NULL COMMENT '定时业务类型',
+  `node_name` varchar(100) DEFAULT NULL COMMENT '实例节点名称',
+  `ip` varchar(20) DEFAULT NULL COMMENT '节点ip',
+  `start_time` bigint(20) DEFAULT NULL COMMENT '持有锁开始时间',
+  `end_time` bigint(20) DEFAULT NULL COMMENT '持有锁结束时间',
+  `version` bigint(20) DEFAULT NULL COMMENT '乐观锁版本',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_biz_code` (`biz_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='分布式乐观锁'
+
 ## 流水线默认配置
 INSERT INTO windy.system_config (config_id,config_name,parent_id,`type`,config_detail,sort,create_time,update_time) VALUES
 	 ('1','流水线默认配置',NULL,1,'[{"id":"0","name":"开始","status":"success","root":true,"group":"0","disable":true,"next":[{"index":1,"weight":0}]},{"id":"1","name":"结束","disable":true,"status":"success","group":"1","root":true}]',1,1,1);

@@ -25,9 +25,20 @@ import org.springframework.cloud.commons.util.InetUtils.HostInfo;
 public class IpUtils {
 
   public static String getLocalIP(){
+//    return "123.13.98.111";
     try {
       InetAddress inetAddress = findFirstNonLoopbackAddress();
       return inetAddress.getHostAddress();
+    } catch (Exception e) {
+      log.info("error get local ip", e);
+    }
+    return "unknown";
+  }
+
+  public static String getHostName(){
+    try {
+      InetAddress inetAddress = findFirstNonLoopbackAddress();
+      return inetAddress.getHostName();
     } catch (Exception e) {
       log.info("error get local ip", e);
     }

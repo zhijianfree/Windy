@@ -80,4 +80,11 @@ public class PipelineRepository extends ServiceImpl<PipelineMapper, Pipeline> im
         .eq(Pipeline::getPipelineType, PipelineType.PUBLISH.getType()));
     return OrikaUtil.convert(pipeline, PipelineDto.class);
   }
+
+  @Override
+  public List<PipelineDto> getSchedulePipelines() {
+    List<Pipeline> pipelines = list(Wrappers.<Pipeline>lambdaQuery()
+        .eq(Pipeline::getPipelineType, PipelineType.SCHEDULE.getType()));
+    return OrikaUtil.convertList(pipelines, PipelineDto.class);
+  }
 }
