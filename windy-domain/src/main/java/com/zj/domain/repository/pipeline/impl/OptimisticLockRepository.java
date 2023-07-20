@@ -2,6 +2,7 @@ package com.zj.domain.repository.pipeline.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.netflix.discovery.DiscoveryClient;
 import com.zj.common.utils.IpUtils;
 import com.zj.domain.entity.po.pipeline.OptimisticLock;
 import com.zj.domain.mapper.pipeline.OptimisticLockMapper;
@@ -15,6 +16,9 @@ import javax.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.cloud.netflix.eureka.serviceregistry.EurekaServiceRegistry;
+import org.springframework.context.annotation.Scope;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
@@ -26,13 +30,15 @@ import org.springframework.stereotype.Repository;
  */
 @Slf4j
 @Repository
+@Scope(value = "singleton")
 public class OptimisticLockRepository extends
-    ServiceImpl<OptimisticLockMapper, OptimisticLock> implements IOptimisticLockRepository {
+    ServiceImpl<OptimisticLockMapper, OptimisticLock> implements IOptimisticLockRepository,
+    DisposableBean {
 
   private TaskScheduler taskScheduler;
 
-  private Integer periodTime = 1;
-  private Integer beforePeriod = 10 * 1000;
+  private Integer PERIOD_TIME = 1;
+  private Integer BEFORE_PERIOD = 10 * 1000;
   private Map<String, OptimisticLock> lockMap = new HashMap<>();
 
   public OptimisticLockRepository(TaskScheduler taskScheduler) {
@@ -68,13 +74,13 @@ public class OptimisticLockRepository extends
       //锁如果存在那么就判断是否需要持有锁
       DateTime dateNow = new DateTime();
       long delta = lock.getEndTime() - dateNow.getMillis();
-      if (delta > beforePeriod) {
+      if (delta > BEFORE_PERIOD) {
         return false;
       }
 
       Long lockVersion = lock.getVersion();
       lock.setStartTime(dateNow.getMillis());
-      lock.setEndTime(dateNow.plusHours(periodTime).getMillis());
+      lock.setEndTime(dateNow.plusHours(PERIOD_TIME).getMillis());
       lock.setIp(IpUtils.getLocalIP());
       lock.setNodeName(IpUtils.getHostName());
       lock.setVersion(lockVersion + 1);
@@ -124,15 +130,16 @@ public class OptimisticLockRepository extends
     Trigger trigger = triggerContext -> {
       OptimisticLock optimisticLock = lockMap.get(bizCode);
       //结束时间的前10秒可以发起竞争
-      long schedule = optimisticLock.getEndTime() - beforePeriod;
+      long schedule = optimisticLock.getEndTime() - BEFORE_PERIOD;
       DateTime dateTime = new DateTime(schedule);
       return dateTime.toDate();
     };
     taskScheduler.schedule(() -> tryLock(bizCode), trigger);
   }
 
-  @PreDestroy
-  public void clearBizCodes() {
+  @Override
+  public void destroy() throws Exception {
+    log.info("xxxx fuck ={}", lockMap.keySet());
     List<String> lockKeys = lockMap.keySet().stream().filter(this::hasLock)
         .collect(Collectors.toList());
     if (CollectionUtils.isEmpty(lockKeys)) {

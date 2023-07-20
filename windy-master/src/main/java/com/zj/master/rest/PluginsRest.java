@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/v1/devops/master")
-public class PluginsUploadRest {
+public class PluginsRest {
 
   private PluginsService pluginsService;
 
-  public PluginsUploadRest(PluginsService pluginsService) {
+  public PluginsRest(PluginsService pluginsService) {
     this.pluginsService = pluginsService;
   }
 
