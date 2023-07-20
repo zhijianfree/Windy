@@ -1,13 +1,12 @@
 package com.zj.client.handler.feature.executor.invoker.invoke;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.zj.plugin.loader.ExecuteDetailVo;
-import com.zj.plugin.loader.RequestDetailVo;
 import com.zj.client.handler.feature.ability.http.HttpFeature;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
 import com.zj.client.handler.feature.executor.vo.ExecutorUnit;
 import com.zj.client.utils.ExceptionUtils;
+import com.zj.plugin.loader.ExecuteDetailVo;
+import com.zj.plugin.loader.RequestDetailVo;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +38,7 @@ public class HttpInvoker implements IExecuteInvoker {
     assemblyUrlParam(executorUnit, bodyMap);
     String url = executorUnit.getService();
     String method = executorUnit.getMethod();
-    String body = JSONObject.toJSONString(bodyMap);
+    String body = JSON.toJSONString(bodyMap);
     Map<String, String> headers = Optional.ofNullable(executorUnit.getHeaders()).orElse(new HashMap<>());
     Request request = HttpFeature.requestFactory(url, method, headers, body);
 

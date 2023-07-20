@@ -1,7 +1,6 @@
 package com.zj.common.monitor;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.zj.common.model.ClientCollect;
 import com.zj.common.model.MasterCollect;
 import com.zj.common.model.PluginInfo;
@@ -158,11 +157,16 @@ public class RequestProxy {
   /**
    * client触发用例任务执行
    */
-  public ResponseEntity<JSONObject> startFeatureTask(Object data) {
+  public String startFeatureTask(Object data) {
     wrapTraceHeader();
     HttpEntity<Object> httpEntity = new HttpEntity<>(data, headers);
     try {
-      return restTemplate.postForEntity(CLIENT_START_TASK, httpEntity, JSONObject.class);
+
+      ResponseEntity<ResponseMeta> response = restTemplate.postForEntity(CLIENT_START_TASK, httpEntity, ResponseMeta.class);
+      if (response.getStatusCode().is2xxSuccessful()){
+        return String.valueOf(response.getBody().getData());
+      }
+      return null;
     } catch (Exception e) {
       return null;
     }
@@ -171,10 +175,10 @@ public class RequestProxy {
   /**
    * client查询任务执行状态
    */
-  public ResponseEntity<JSONObject> getFeatureTaskStatus(String url) {
+  public ResponseEntity<Object> getFeatureTaskStatus(String url) {
     wrapTraceHeader();
     HttpEntity request = new HttpEntity(headers);
-    return restTemplate.exchange(url, HttpMethod.GET, request, JSONObject.class);
+    return restTemplate.exchange(url, HttpMethod.GET, request, Object.class);
   }
 
   /**
@@ -236,12 +240,12 @@ public class RequestProxy {
     wrapTraceHeader();
     HttpEntity<Object> httpEntity = new HttpEntity<>(data, headers);
     try {
-      ResponseEntity<JSONObject> responseEntity = restTemplate.postForEntity(CONSOLE_RUN_TASK,
-          httpEntity, JSONObject.class);
-      JSONObject body = responseEntity.getBody();
+      ResponseEntity<ResponseMeta> responseEntity = restTemplate.postForEntity(CONSOLE_RUN_TASK,
+          httpEntity, ResponseMeta.class);
+      ResponseMeta body = responseEntity.getBody();
       log.info("get test result code= {} result={}", responseEntity.getStatusCode(),
           JSON.toJSONString(body));
-      return body.getString("data");
+      return String.valueOf(body.getData());
     } catch (Exception e) {
       log.error("request dispatch pipeline task error", e);
     }

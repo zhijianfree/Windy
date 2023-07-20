@@ -108,7 +108,7 @@ public class NodeStatusQueryLooper implements Runnable {
   private void handleDefaultError(TaskNode node) {
     QueryResponseModel queryResponse = new QueryResponseModel();
     queryResponse.setStatus(ProcessStatus.FAIL.getType());
-    queryResponse.setData(new JSONObject());
+    queryResponse.setData(new Object());
     queryResponse.setMessage(Collections.singletonList(QUERY_ERROR_TIPS));
     handleRecordFinalStatus(node, queryResponse);
   }
@@ -126,33 +126,33 @@ public class NodeStatusQueryLooper implements Runnable {
       return;
     }
 
-    JSONObject jsonObject = responseModel.getData();
+    Map<String, Object> map = JSONObject.parseObject(JSON.toJSONString(responseModel.getData()), Map.class);
     List<CompareInfo> compareConfigs = node.getRefreshContext().getCompareConfig();
     for (CompareInfo compareInfo : compareConfigs) {
-      CompareResult compareResult = handleCompare(jsonObject, compareInfo);
+      CompareResult compareResult = handleCompare(map, compareInfo);
       if (!compareResult.getCompareStatus()) {
         responseModel.setStatus(ProcessStatus.FAIL.getType());
-        responseModel.setMessage(exchangeTips(jsonObject, compareInfo));
+        responseModel.setMessage(exchangeTips(map, compareInfo));
         return;
       }
     }
   }
 
-  private CompareResult handleCompare(JSONObject jsonObject, CompareInfo compareInfo) {
+  private CompareResult handleCompare(Map<String, Object> response, CompareInfo compareInfo) {
     CompareOperator compareOperator = compareFactory.getOperator(compareInfo.getOperator());
     CompareDefine compareDefine = new CompareDefine();
-    compareDefine.setResponseValue(jsonObject.get(compareInfo.getCompareKey()));
+    compareDefine.setResponseValue(response.get(compareInfo.getCompareKey()));
     compareDefine.setExpectValue(compareInfo.getValue());
     return compareOperator.compare(compareDefine);
   }
 
-  private List<String> exchangeTips(JSONObject jsonObject, CompareInfo compareInfo) {
+  private List<String> exchangeTips(Map<String, Object> response, CompareInfo compareInfo) {
     String desc = String.format(DESCRIPTION_FORMAT, compareInfo.getCompareKey(),
         compareInfo.getDescription());
     String expectDesc = String.format(EXPECT_VALUE_FORMAT, compareInfo.getValue());
     String operatorDesc = String.format(OPERATOR_FORMAT, compareInfo.getOperator());
     String resultDesc = String.format(RESULT_VALUE_FORMAT,
-        jsonObject.get(compareInfo.getCompareKey()));
+        response.get(compareInfo.getCompareKey()));
     return Arrays.asList(desc, resultDesc, operatorDesc, expectDesc);
   }
 

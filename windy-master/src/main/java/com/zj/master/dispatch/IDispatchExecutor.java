@@ -1,7 +1,7 @@
 package com.zj.master.dispatch;
 
+import com.zj.common.model.DispatchTaskModel;
 import com.zj.domain.entity.dto.log.DispatchLogDto;
-import com.zj.master.entity.dto.TaskDetailDto;
 
 /**
  * @author guyuelan
@@ -18,8 +18,10 @@ public interface IDispatchExecutor {
 
   /**
    * 分配任务给子节点
+   * @param task 任务内容
+   * @param logId 分发任务的记录Id
    * */
-  String dispatch(TaskDetailDto task);
+  String dispatch(DispatchTaskModel task, String logId);
 
   /**
    * 恢复执行任务

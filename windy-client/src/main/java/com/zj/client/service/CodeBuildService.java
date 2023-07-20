@@ -3,7 +3,8 @@ package com.zj.client.service;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.client.config.GlobalEnvConfig;
 import com.zj.client.entity.dto.BuildParam;
-import com.zj.client.entity.dto.ResponseModel;
+import com.zj.client.entity.dto.LoopQueryResponse;
+import com.zj.client.entity.dto.LoopQueryResponse.ResponseStatus;
 import com.zj.client.handler.pipeline.git.IGitProcessor;
 import com.zj.client.handler.pipeline.maven.MavenOperator;
 import com.zj.client.utils.Utils;
@@ -33,7 +34,7 @@ public class CodeBuildService {
   private Executor executorService;
   private GlobalEnvConfig globalEnvConfig;
 
-  private final Map<String, ResponseModel> statusMap = new ConcurrentHashMap<>();
+  private final Map<String, LoopQueryResponse> statusMap = new ConcurrentHashMap<>();
 
   public CodeBuildService(IGitProcessor gitProcessor, MavenOperator mavenOperator,
       @Qualifier("gitOperatePool") Executor executorService, GlobalEnvConfig globalEnvConfig) {
@@ -81,18 +82,18 @@ public class CodeBuildService {
   }
 
   private void saveStatus(String recordId, ProcessStatus status, String message) {
-    statusMap.put(recordId, new ResponseModel(status.getType(), message));
+    statusMap.put(recordId, new LoopQueryResponse(status.getType(), message));
   }
 
   private String getTargetPomPath(String pipelineWorkspace, String configPath) {
     return pipelineWorkspace + File.separator + configPath;
   }
 
-  public ResponseModel getRecordStatus(String recordId) {
-    ResponseModel responseModel = statusMap.get(recordId);
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("status", responseModel.getStatus());
-    responseModel.setData(jsonObject);
-    return responseModel;
+  public LoopQueryResponse getRecordStatus(String recordId) {
+    LoopQueryResponse loopQueryResponse = statusMap.get(recordId);
+    ResponseStatus responseStatus = new ResponseStatus();
+    responseStatus.setStatus(loopQueryResponse.getStatus());
+    loopQueryResponse.setData(responseStatus);
+    return loopQueryResponse;
   }
 }

@@ -1,14 +1,15 @@
-package com.zj.client.entity.vo;
+package com.zj.common.model;
 
 import com.zj.common.enums.LogType;
 import lombok.Data;
 
 /**
  * @author guyuelan
- * @since 2023/5/23
+ * @since 2023/5/18
  */
 @Data
-public class TestFeatureParamVo {
+public class DispatchTaskModel {
+
   /**
    * 执行任务来源Id(测试集合Id，流水线Id，用例任务Id)
    * 如果是测试集那么sourceId就是用例Id列表
@@ -24,4 +25,13 @@ public class TestFeatureParamVo {
    * 任务类型{@link LogType}
    * */
   private Integer type;
+
+  public DispatchTaskModel() {
+  }
+
+  public DispatchTaskModel(String sourceId, String sourceName, Integer type) {
+    this.sourceId = sourceId;
+    this.sourceName = sourceName;
+    this.type = type;
+  }
 }

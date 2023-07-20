@@ -1,8 +1,8 @@
 package com.zj.master.service;
 
-import com.alibaba.fastjson.JSONObject;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.model.ResponseStatusModel;
+import com.zj.common.model.ResponseStatusModel.PercentStatics;
 import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
 import com.zj.domain.entity.dto.feature.TaskRecordDto;
 import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
@@ -46,10 +46,10 @@ public class RecordQueryService {
             history -> Objects.equals(history.getExecuteStatus(), ProcessStatus.SUCCESS.getType()))
         .count();
 
-    JSONObject jsonObject = new JSONObject();
+    PercentStatics percentStatics = new PercentStatics();
     Float percent = (successCount * 1F / histories.size()) * 100;
-    jsonObject.put("percent", percent.intValue());
-    responseStatusModel.setData(jsonObject);
+    percentStatics.setPercent(percent.intValue());
+    responseStatusModel.setData(percentStatics);
     String msg = String.format(FORMAT_TIPS, successCount, percent);
     responseStatusModel.setMessage(msg);
     return responseStatusModel;

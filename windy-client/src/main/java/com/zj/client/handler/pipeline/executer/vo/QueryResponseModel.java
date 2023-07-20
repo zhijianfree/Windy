@@ -1,6 +1,5 @@
 package com.zj.client.handler.pipeline.executer.vo;
 
-import com.alibaba.fastjson.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
@@ -16,7 +15,7 @@ public class QueryResponseModel {
 
   private List<String> message;
 
-  private JSONObject data;
+  private Object data;
 
   public void addMessage(String msg) {
     if (CollectionUtils.isEmpty(message)) {

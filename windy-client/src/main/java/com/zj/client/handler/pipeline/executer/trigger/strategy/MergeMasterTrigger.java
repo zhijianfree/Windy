@@ -3,7 +3,8 @@ package com.zj.client.handler.pipeline.executer.trigger.strategy;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.client.config.GlobalEnvConfig;
-import com.zj.client.entity.dto.ResponseModel;
+import com.zj.client.entity.dto.LoopQueryResponse;
+import com.zj.client.entity.dto.LoopQueryResponse.ResponseStatus;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
 import com.zj.client.handler.pipeline.executer.vo.MergeStatus;
 import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
@@ -146,12 +147,12 @@ public class MergeMasterTrigger implements INodeTrigger {
   @Override
   public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
     MergeStatus mergeStatus = statusMap.get(taskNode.getRecordId());
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("status", mergeStatus.getStatus());
-    ResponseModel responseModel = new ResponseModel();
-    responseModel.setStatus(mergeStatus.getStatus());
-    responseModel.setData(jsonObject);
-    responseModel.setMessage(JSON.toJSONString(mergeStatus.getMessage()));
-    return JSON.toJSONString(responseModel);
+    LoopQueryResponse loopQueryResponse = new LoopQueryResponse();
+    loopQueryResponse.setStatus(mergeStatus.getStatus());
+    ResponseStatus responseStatus = new ResponseStatus();
+    responseStatus.setStatus(loopQueryResponse.getStatus());
+    loopQueryResponse.setData(responseStatus);
+    loopQueryResponse.setMessage(JSON.toJSONString(mergeStatus.getMessage()));
+    return JSON.toJSONString(loopQueryResponse);
   }
 }

@@ -141,6 +141,6 @@ public class OptimisticLockRepository extends
 
     boolean clearResult = remove(
         Wrappers.lambdaQuery(OptimisticLock.class).in(OptimisticLock::getBizCode, lockKeys));
-    log.info("clear biz code keys ={}", lockKeys);
+    log.info("clear biz code keys ={} result={}", lockKeys, clearResult);
   }
 }

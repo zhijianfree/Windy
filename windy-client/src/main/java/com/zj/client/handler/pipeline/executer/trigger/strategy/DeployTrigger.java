@@ -3,10 +3,11 @@ package com.zj.client.handler.pipeline.executer.trigger.strategy;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.client.config.GlobalEnvConfig;
+import com.zj.client.entity.dto.LoopQueryResponse.ResponseStatus;
 import com.zj.client.handler.deploy.DeployFactory;
 import com.zj.client.handler.deploy.IDeployMode;
 import com.zj.client.handler.deploy.jar.JarDeployContext;
-import com.zj.client.entity.dto.ResponseModel;
+import com.zj.client.entity.dto.LoopQueryResponse;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
 import com.zj.client.handler.pipeline.executer.vo.DeployRequest;
 import com.zj.client.handler.pipeline.executer.vo.DeployRequest.SSHParams;
@@ -73,11 +74,12 @@ public class DeployTrigger implements INodeTrigger {
   @Override
   public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
     ProcessStatus deployStatus = deployFactory.getDeployStatus(taskNode.getRecordId());
-    ResponseModel responseModel = new ResponseModel();
-    responseModel.setStatus(deployStatus.getType());
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("status", deployStatus.getType());
-    responseModel.setData(jsonObject);
-    return JSON.toJSONString(responseModel);
+    LoopQueryResponse loopQueryResponse = new LoopQueryResponse();
+    loopQueryResponse.setStatus(deployStatus.getType());
+
+    ResponseStatus responseStatus = new ResponseStatus();
+    responseStatus.setStatus(loopQueryResponse.getStatus());
+    loopQueryResponse.setData(responseStatus);
+    return JSON.toJSONString(loopQueryResponse);
   }
 }

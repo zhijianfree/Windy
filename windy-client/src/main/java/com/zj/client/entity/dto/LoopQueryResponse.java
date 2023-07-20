@@ -7,22 +7,28 @@ import lombok.Data;
  * @since 2023/3/29
  */
 @Data
-public class ResponseModel {
+public class LoopQueryResponse {
 
   private Integer status;
   private Object data;
   private String message;
 
-  public ResponseModel() {
+  public LoopQueryResponse() {
   }
 
-  public ResponseModel(Integer status, String message) {
+  public LoopQueryResponse(Integer status, String message) {
     this.status = status;
     this.message = message;
   }
 
-  public ResponseModel(Object data, String message) {
+  public LoopQueryResponse(Object data, String message) {
     this.data = data;
     this.message = message;
+  }
+
+  @Data
+  public static class ResponseStatus{
+
+    private Integer status;
   }
 }

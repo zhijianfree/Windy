@@ -25,7 +25,6 @@ import org.springframework.cloud.commons.util.InetUtils.HostInfo;
 public class IpUtils {
 
   public static String getLocalIP(){
-//    return "123.13.98.111";
     try {
       InetAddress inetAddress = findFirstNonLoopbackAddress();
       return inetAddress.getHostAddress();

@@ -1,7 +1,6 @@
 package com.zj.master.service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.zj.common.model.ResultEvent;
 import com.zj.master.notify.INotifyEvent;
 import java.util.List;

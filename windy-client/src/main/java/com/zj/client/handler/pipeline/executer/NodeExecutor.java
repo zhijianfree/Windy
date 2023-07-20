@@ -1,6 +1,6 @@
 package com.zj.client.handler.pipeline.executer;
 
-import com.alibaba.fastjson.JSONObject;
+import com.zj.client.handler.notify.IResultEventNotify;
 import com.zj.client.handler.pipeline.executer.intercept.INodeExecuteInterceptor;
 import com.zj.client.handler.pipeline.executer.notify.PipelineEventFactory;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
@@ -8,14 +8,13 @@ import com.zj.client.handler.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.client.handler.pipeline.executer.vo.TaskNodeRecord;
 import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
-import com.zj.client.handler.notify.IResultEventNotify;
 import com.zj.client.utils.ExceptionUtils;
 import com.zj.common.enums.NotifyType;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.exception.ExecuteException;
-import com.zj.common.model.ResultEvent;
-import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
+import com.zj.common.model.ResultEvent;
 import com.zj.common.utils.IpUtils;
 import java.util.Collections;
 import java.util.List;
@@ -68,7 +67,7 @@ public class NodeExecutor {
         throw new ExecuteException(ErrorCode.UNKNOWN_EXECUTE_TYPE);
       }
 
-      JSONObject context = node.getRequestContext();
+      Object context = node.getRequestContext();
       TriggerContext triggerContext = new TriggerContext(context, node);
       nodeTrigger.triggerRun(triggerContext, node);
     } catch (ExecuteException executeException) {

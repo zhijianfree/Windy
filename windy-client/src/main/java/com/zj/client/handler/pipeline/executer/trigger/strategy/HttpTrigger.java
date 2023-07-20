@@ -13,6 +13,7 @@ import com.zj.common.enums.ExecuteType;
 import com.zj.common.exception.ExecuteException;
 import com.zj.common.utils.OrikaUtil;
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
@@ -34,6 +35,7 @@ import org.springframework.stereotype.Component;
 public class HttpTrigger implements INodeTrigger {
 
   public static final MediaType MEDIA_TYPE = MediaType.parse("application/json;charset=utf-8");
+  public static final String RECORD_ID = "recordId";
   private final OkHttpClient okHttpClient = new OkHttpClient.Builder()
       .readTimeout(10, TimeUnit.SECONDS)
       .connectTimeout(5, TimeUnit.SECONDS).build();
@@ -47,10 +49,9 @@ public class HttpTrigger implements INodeTrigger {
     log.info("http executor is running");
     HttpRequestContext context = OrikaUtil.convert(triggerContext.getData(),
         HttpRequestContext.class);
-    JSONObject jsonObject = JSON.parseObject(context.getBody());
-    jsonObject.put("recordId", taskNode.getRecordId());
-
-    RequestBody requestBody = RequestBody.create(MEDIA_TYPE, JSON.toJSONString(jsonObject));
+    Map<String, Object> param = JSON.parseObject(context.getBody(), Map.class);
+    param.put(RECORD_ID, taskNode.getRecordId());
+    RequestBody requestBody = RequestBody.create(MEDIA_TYPE, JSON.toJSONString(param));
     Request request = new Request.Builder().url(context.getUrl()).post(requestBody).build();
     Response response = okHttpClient.newCall(request).execute();
     if (!response.isSuccessful()) {

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
+import com.zj.common.model.DispatchTaskModel;
 import com.zj.domain.entity.dto.log.DispatchLogDto;
 import com.zj.domain.entity.dto.log.SubDispatchLogDto;
 import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
@@ -19,7 +20,6 @@ import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.master.dispatch.IDispatchExecutor;
 import com.zj.master.dispatch.pipeline.builder.RefreshContextBuilder;
 import com.zj.master.dispatch.pipeline.builder.RequestContextBuilder;
-import com.zj.master.entity.dto.TaskDetailDto;
 import com.zj.master.entity.vo.ActionDetail;
 import com.zj.master.entity.vo.ConfigDetail;
 import com.zj.master.entity.vo.NodeConfig;
@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -81,7 +80,7 @@ public class PipelineDispatch implements IDispatchExecutor {
   }
 
   @Override
-  public String dispatch(TaskDetailDto task) {
+  public String dispatch(DispatchTaskModel task, String logId) {
     PipelineDto pipeline = pipelineRepository.getPipeline(task.getSourceId());
     if (Objects.isNull(pipeline)) {
       log.info("can not find pipeline name={} pipelineId={}", task.getSourceName(),
@@ -102,12 +101,12 @@ public class PipelineDispatch implements IDispatchExecutor {
     log.info("start run pipeline={} name={} historyId={}", task.getSourceId(), task.getSourceName(),
         historyId);
 
-    dispatchLogRepository.updateLogSourceRecord(task.getTaskLogId(), historyId);
+    dispatchLogRepository.updateLogSourceRecord(logId, historyId);
 
     PipelineTask pipelineTask = new PipelineTask();
     pipelineTask.setPipelineId(pipeline.getPipelineId());
     pipelineTask.setHistoryId(historyId);
-    pipelineTask.setLogId(task.getTaskLogId());
+    pipelineTask.setLogId(logId);
 
     List<TaskNode> taskNodeList = pipelineNodes.stream()
         .sorted(Comparator.comparing(PipelineNodeDto::getSortOrder))

@@ -6,7 +6,7 @@ import com.zj.common.enums.LogType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
-import com.zj.common.model.DispatchModel;
+import com.zj.common.model.DispatchTaskModel;
 import com.zj.common.monitor.RequestProxy;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
@@ -215,11 +215,11 @@ public class PipelineService {
       return null;
     }
 
-    DispatchModel dispatchModel = new DispatchModel();
-    dispatchModel.setSourceId(pipelineId);
-    dispatchModel.setSourceName(pipeline.getPipelineName());
-    dispatchModel.setType(LogType.PIPELINE.getType());
-    return requestProxy.runPipeline(dispatchModel);
+    DispatchTaskModel dispatchTaskModel = new DispatchTaskModel();
+    dispatchTaskModel.setSourceId(pipelineId);
+    dispatchTaskModel.setSourceName(pipeline.getPipelineName());
+    dispatchTaskModel.setType(LogType.PIPELINE.getType());
+    return requestProxy.runPipeline(dispatchTaskModel);
   }
 
   public PipelineDto getPipelineDetail(String pipelineId) {
@@ -247,10 +247,10 @@ public class PipelineService {
       return false;
     }
 
-    DispatchModel dispatchModel = new DispatchModel();
-    dispatchModel.setSourceId(historyId);
-    dispatchModel.setType(LogType.PIPELINE.getType());
-    return requestProxy.stopPipeline(dispatchModel);
+    DispatchTaskModel dispatchTaskModel = new DispatchTaskModel();
+    dispatchTaskModel.setSourceId(historyId);
+    dispatchTaskModel.setType(LogType.PIPELINE.getType());
+    return requestProxy.stopPipeline(dispatchTaskModel);
   }
 
   public List<PipelineDto> getServicePipelines(String serviceId) {
