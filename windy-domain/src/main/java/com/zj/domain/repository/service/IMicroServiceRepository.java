@@ -24,4 +24,6 @@ public interface IMicroServiceRepository {
   IPage<MicroserviceDto> getServices(Integer pageNo, Integer size, String name);
 
   MicroserviceDto queryServiceByName(String serviceName);
+
+  Integer countAll();
 }

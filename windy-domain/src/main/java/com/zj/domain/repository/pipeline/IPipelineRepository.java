@@ -39,4 +39,6 @@ public interface IPipelineRepository {
   PipelineDto getPublishPipeline(String serviceId);
 
   List<PipelineDto> getSchedulePipelines();
+
+  Integer countAll();
 }
