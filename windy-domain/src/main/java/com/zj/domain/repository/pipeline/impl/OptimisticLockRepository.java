@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Repository;
  */
 @Slf4j
 @Repository
+@EnableScheduling
 @Scope(value = "singleton")
 public class OptimisticLockRepository extends
     ServiceImpl<OptimisticLockMapper, OptimisticLock> implements IOptimisticLockRepository,
