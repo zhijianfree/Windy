@@ -48,6 +48,7 @@
     <joda.version>2.9.8</joda.version>
     <ssh.version>0.1.55</ssh.version>
     <k8s.version>5.3.0</k8s.version>
+    <docker.version>3.3.2</docker.version>
     <transmittable-thread.version>2.14.2</transmittable-thread.version>
   </properties>
 
@@ -92,7 +93,11 @@
         <artifactId>kubernetes-client</artifactId>
         <version>${k8s.version}</version>
       </dependency>
-
+      <dependency>
+        <groupId>com.github.docker-java</groupId>
+        <artifactId>docker-java</artifactId>
+        <version>${docker.version}</version>
+      </dependency>
       <dependency>
         <groupId>com.alibaba</groupId>
         <artifactId>transmittable-thread-local</artifactId>

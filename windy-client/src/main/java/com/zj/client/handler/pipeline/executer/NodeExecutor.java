@@ -68,7 +68,7 @@ public class NodeExecutor {
       }
 
       Object context = node.getRequestContext();
-      TriggerContext triggerContext = new TriggerContext(context, node);
+      TriggerContext triggerContext = new TriggerContext(context);
       nodeTrigger.triggerRun(triggerContext, node);
     } catch (ExecuteException executeException) {
       statusAtomic.set(ProcessStatus.FAIL);

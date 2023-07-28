@@ -1,4 +1,4 @@
-package com.zj.client.handler.deploy.mirror;
+package com.zj.client.handler.deploy.docker;
 
 import com.zj.client.handler.deploy.DeployContext;
 
@@ -6,6 +6,6 @@ import com.zj.client.handler.deploy.DeployContext;
  * @author guyuelan
  * @since 2023/6/15
  */
-public class MirrorDeployContext extends DeployContext {
+public class DockerDeployContext extends DeployContext {
 
 }

@@ -63,7 +63,7 @@ public class FeatureTrigger implements INodeTrigger {
       throw new ExecuteException("pipeline trigger feature task error");
     }
     String url = String.format(TASK_STATUS_URL, recordId);
-    triggerContext.getTaskNode().getRefreshContext().setUrl(url);
+    taskNode.getRefreshContext().setUrl(url);
   }
 
   @Override

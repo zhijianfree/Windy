@@ -13,11 +13,15 @@ public class DeployRequest {
 
   private String gitUrl;
 
-  private SSHParams params;
+  private Object params;
 
   private String serverPort;
 
   private Integer deployType;
+
+  private String imageName;
+
+  private Integer replicas = 1;
 
   @Data
   public static class SSHParams{
@@ -30,5 +34,16 @@ public class DeployRequest {
     private String user;
 
     private String password;
+  }
+
+  @Data
+  public static class K8SParams{
+    private String apiService;
+
+    private String token;
+
+    private String repository;
+
+    private String namespace;
   }
 }

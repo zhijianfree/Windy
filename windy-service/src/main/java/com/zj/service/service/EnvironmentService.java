@@ -17,6 +17,7 @@ import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.VersionInfo;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -86,17 +87,16 @@ public class EnvironmentService {
     // 创建Config对象并设置访问配置
     Config config = new ConfigBuilder()
         .withMasterUrl(k8SParams.getUrl())
+        .withNamespace(k8SParams.getNamespace())
         .withOauthToken(k8SParams.getToken())
+        .withTrustCerts(true)
         .build();
     try (KubernetesClient client = new DefaultKubernetesClient(config)) {
-      // 获取Namespace列表
-      List<Namespace> namespaces = client.namespaces().list().getItems();
-
-      // 打印Namespace列表
-      return namespaces.stream().anyMatch(
-          namespace -> Objects.equals(k8SParams.getNamespace(), namespace.getSpec().toString()));
+      String gitVersion = client.getApiVersion();
+      log.info("get git version = {}", gitVersion);
+      return true;
     } catch (Exception e) {
-      log.info("test k8s connect error");
+      log.info("test k8s connect error", e);
     }
     return false;
   }

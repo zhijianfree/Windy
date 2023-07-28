@@ -1,4 +1,4 @@
-package com.zj.client.handler.deploy.mirror;
+package com.zj.client.handler.deploy.docker;
 
 import com.zj.client.handler.deploy.IDeployMode;
 import com.zj.client.entity.enuns.DeployType;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * @since 2023/6/8
  */
 @Component
-public class MirrorDeploy implements IDeployMode<MirrorDeployContext> {
+public class DockerDeploy implements IDeployMode<DockerDeployContext> {
 
   @Override
   public Integer deployType() {
@@ -19,7 +19,7 @@ public class MirrorDeploy implements IDeployMode<MirrorDeployContext> {
   }
 
   @Override
-  public void deploy(MirrorDeployContext deployContext) {
+  public void deploy(DockerDeployContext deployContext) {
 
   }
 
