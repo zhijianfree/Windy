@@ -5,6 +5,9 @@ import com.zj.common.model.ClientCollect;
 import com.zj.common.model.MasterCollect;
 import com.zj.common.monitor.RequestProxy;
 import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
+import com.zj.domain.entity.vo.DefaultPipeline;
+import com.zj.domain.entity.vo.GitAccessVo;
+import com.zj.domain.entity.vo.ImageRepository;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.pipeline.entity.dto.SystemMonitorDto;
 import java.util.List;
@@ -54,5 +57,25 @@ public class SystemConfigService {
     List<MasterCollect> masterMonitor = requestProxy.requestMasterMonitor();
     systemMonitorDto.setMasters(masterMonitor);
     return systemMonitorDto;
+  }
+
+  public GitAccessVo getGitConfig() {
+    return systemConfigRepository.getGitAccess();
+  }
+
+  public boolean updateGitConfig(GitAccessVo gitAccessVo) {
+    return systemConfigRepository.updateGitAccess(gitAccessVo);
+  }
+
+  public ImageRepository getImageRepository() {
+    return systemConfigRepository.getRepository();
+  }
+
+  public boolean updateRepository(ImageRepository repository) {
+    return systemConfigRepository.updateRepository(repository);
+  }
+
+  public DefaultPipeline getDefaultPipeline() {
+    return systemConfigRepository.getDefaultPipeline();
   }
 }

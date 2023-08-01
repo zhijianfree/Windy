@@ -1,7 +1,9 @@
 package com.zj.domain.repository.pipeline;
 
 import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
+import com.zj.domain.entity.vo.DefaultPipeline;
 import com.zj.domain.entity.vo.GitAccessVo;
+import com.zj.domain.entity.vo.ImageRepository;
 import java.util.List;
 
 /**
@@ -21,4 +23,11 @@ public interface ISystemConfigRepository {
   SystemConfigDto getSystemConfig(String configId);
 
   GitAccessVo getGitAccess();
+  boolean updateGitAccess(GitAccessVo gitAccess);
+
+  ImageRepository getRepository();
+
+  boolean updateRepository(ImageRepository imageRepository);
+
+  DefaultPipeline getDefaultPipeline();
 }

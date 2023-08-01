@@ -141,7 +141,6 @@ public class OptimisticLockRepository extends
 
   @Override
   public void destroy() throws Exception {
-    log.info("xxxx fuck ={}", lockMap.keySet());
     List<String> lockKeys = lockMap.keySet().stream().filter(this::hasLock)
         .collect(Collectors.toList());
     if (CollectionUtils.isEmpty(lockKeys)) {

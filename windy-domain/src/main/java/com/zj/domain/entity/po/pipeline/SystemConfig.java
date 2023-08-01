@@ -25,7 +25,7 @@ public class SystemConfig {
   /**
    * 配置类型
    * */
-  private String type;
+  private Integer type;
 
   /**
    * 配置信息

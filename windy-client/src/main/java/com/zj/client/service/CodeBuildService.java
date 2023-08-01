@@ -1,13 +1,10 @@
 package com.zj.client.service;
 
-import com.alibaba.fastjson.JSONObject;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.BuildImageResultCallback;
+import com.github.dockerjava.api.model.AuthConfig;
 import com.github.dockerjava.api.model.BuildResponseItem;
-import com.github.dockerjava.core.DefaultDockerClientConfig;
-import com.github.dockerjava.core.DefaultDockerClientConfig.Builder;
 import com.github.dockerjava.core.DockerClientBuilder;
-import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.command.PushImageResultCallback;
 import com.zj.client.config.GlobalEnvConfig;
 import com.zj.client.entity.dto.BuildParam;
@@ -18,9 +15,9 @@ import com.zj.client.handler.pipeline.maven.MavenOperator;
 import com.zj.client.utils.Utils;
 import com.zj.common.enums.ProcessStatus;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,6 +36,9 @@ public class CodeBuildService {
 
   public static final int BUILD_SUCCESS = 0;
   public static final String BUILD_SUCCESS_TIPS = "构建成功";
+  public static final String SUFFIX = "/";
+  public static final String SPLIT_STRING = ":";
+  public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmmss");
 
   private IGitProcessor gitProcessor;
   private MavenOperator mavenOperator;
@@ -73,7 +73,7 @@ public class CodeBuildService {
         log.info("get maven exit code={}", exitCode);
 
         //3 构建docker镜像
-
+        startBuildDocker(serviceName, pipelineWorkspace, buildParam);
         ProcessStatus result =
             Objects.equals(BUILD_SUCCESS, exitCode) ? ProcessStatus.SUCCESS : ProcessStatus.FAIL;
         saveStatus(buildParam.getRecordId(), result, BUILD_SUCCESS_TIPS);
@@ -83,6 +83,15 @@ public class CodeBuildService {
       }
     });
     saveStatus(buildParam.getRecordId(), ProcessStatus.RUNNING, "构建中");
+  }
+
+  private void startBuildDocker(String serviceName, String pipelineWorkspace,
+      BuildParam buildParam) {
+    String dateNow = DATE_FORMAT.format(new Date());
+    String dockerFile =
+        pipelineWorkspace + File.separator + "docker" + File.separator + "Dockerfile";
+    buildDocker(serviceName, dateNow, dockerFile, buildParam.getRepository(), buildParam.getUser(),
+        buildParam.getPassword());
   }
 
   private void pullCodeFrmGit(BuildParam buildParam, String gitUrl, String pipelineWorkspace)
@@ -111,27 +120,15 @@ public class CodeBuildService {
     return loopQueryResponse;
   }
 
-  public static void main(String[] args) throws IOException {
-    String imageName = "edge-daemon";
-    String tag = "v1.0.4";
-    String dirPath = "/Users/falcon/IdeaProjects/EdgeDaemon/docker";
-    String dockerfilePath = "/Users/falcon/IdeaProjects/EdgeDaemon/docker/Dockerfile"; // Dockerfile 的路径
-    String remoteRepository = "your-registry.example.com/your-namespace/your-image-name";
-
-    Builder configBuilder = DefaultDockerClientConfig.createDefaultConfigBuilder();
-    DockerClientConfig config = configBuilder
-        .withRegistryUsername("smartdo")
-        .withRegistryPassword("vee9Niozahyo")
-        .withRegistryUrl("https://smartdo-registry-cn.tuya-inc.com:7799")
-        .build();
-    DockerClient dockerClient = DockerClientBuilder.getInstance(config).build();
-
-    Path dockerContext = Paths.get(dirPath);
+  public void buildDocker(String imageName, String version, String dockerFilePath,
+      String repository, String user, String password) {
+    DockerClient dockerClient = DockerClientBuilder.getInstance().build();
     BuildImageResultCallback callback = new BuildImageResultCallback() {
       @Override
       public void onNext(BuildResponseItem item) {
+
         // 可以根据需要处理构建的输出
-        System.out.println(item.getStream());
+        System.out.println("推送镜像: " + item.getImageId() + "  status: " + item.getStatus());
         super.onNext(item);
       }
 
@@ -142,34 +139,22 @@ public class CodeBuildService {
         throwable.printStackTrace();
       }
     };
+    File dockerfile = new File(dockerFilePath);
+    String image = imageName + SPLIT_STRING + version;
+    String imageId = dockerClient.buildImageCmd().withDockerfile(dockerfile)
+        .withTags(Collections.singleton(image)).exec(callback).awaitImageId();
 
-    // 构建镜像
-    File dockerfile = new File(dockerfilePath);
-    String imageId = dockerClient.buildImageCmd(dockerContext.toFile()).withDockerfile(dockerfile)
-        .withTag(imageName + ":" + tag)
-        .exec(callback).awaitImageId();
+    String imageUrl = repository.endsWith(SUFFIX) ? repository : SUFFIX + repository;
+    String tagName = imageUrl + imageName;
+    dockerClient.tagImageCmd(imageId, tagName, version).exec();
 
-    // 标记镜像
-    dockerClient.tagImageCmd(imageId, remoteRepository, tag).exec();
+    // 设置登陆远程仓库的用户信息
+    AuthConfig authConfig = new AuthConfig().withRegistryAddress(repository).withUsername(user)
+        .withPassword(password);
 
-    // 推送镜像到远程仓库
-    dockerClient.pushImageCmd(remoteRepository).withTag(tag).exec(new PushImageResultCallback() {
-          @Override
-          public void onComplete() {
-            System.out.println("推送结束");
-            super.onComplete();
-          }
-
-          @Override
-          public void onError(Throwable throwable) {
-            System.out.println("推送错误");
-            throwable.printStackTrace();
-          }
-        })
-        .awaitSuccess();
-
-    dockerClient.close();
-
-    System.out.println("Docker image build and push successful!");
+    // 将镜像推送到远程镜像仓库
+    dockerClient.pushImageCmd(tagName + SPLIT_STRING + version).withAuthConfig(authConfig)
+        .exec(new PushImageResultCallback()).awaitSuccess();
   }
+
 }

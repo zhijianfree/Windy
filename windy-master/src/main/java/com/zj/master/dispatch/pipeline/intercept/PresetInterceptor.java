@@ -35,7 +35,7 @@ public class PresetInterceptor implements INodeExecuteInterceptor {
     taskNode.getRequestContext().setGitUrl(service.getGitUrl());
     GitAccessVo gitAccess = systemConfigRepository.getGitAccess();
     GitType gitType = GitType.exchange(gitAccess.getGitType());
-    taskNode.getRequestContext().setTokenName(gitType.getTokenName());
+    taskNode.getRequestContext().setTokenName(gitAccess.getOwner());
     taskNode.getRequestContext().setToken(gitAccess.getAccessToken());
   }
 }

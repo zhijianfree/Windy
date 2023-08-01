@@ -35,4 +35,19 @@ public class BuildParam extends GitMeta {
    * 构建的分支列表
    * */
   private List<String> branches;
+
+  /**
+   * 镜像仓库地址
+   * */
+  private String repository;
+
+  /**
+   * 推送仓库用户
+   * */
+  private String user;
+
+  /**
+   * 推送仓库密码
+   * */
+  private String password;
 }

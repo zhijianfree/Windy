@@ -146,4 +146,11 @@ public class GitOperator implements IGitProcessor {
       return treeParser;
     }
   }
+
+  public static void main(String[] args) throws GitAPIException {
+    Git git = Git.cloneRepository().setURI("https://registry.code.tuya-inc.top/tuyaka_cloud/edgedaemon.git").setDirectory(new File("/Users/falcon/windy/test"))
+        .setCredentialsProvider(
+            new UsernamePasswordCredentialsProvider("falcon@tuya.com", "ZJguyuelan!1234"))
+        .setRemote(ORIGIN).setBranch("master").call();
+  }
 }
