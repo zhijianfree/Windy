@@ -29,7 +29,7 @@ public class BuildParam extends GitMeta {
   /**
    * 是否是发布流水线构建
    * */
-  private Boolean isPublish;
+  private boolean publish;
 
   /**
    * 构建的分支列表

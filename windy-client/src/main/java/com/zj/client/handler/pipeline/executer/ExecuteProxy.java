@@ -82,7 +82,8 @@ public class ExecuteProxy implements IPipelineStatusListener {
         .executeType(taskNode.getExecuteType())
         .params(nodeRecord)
         .clientIp(IpUtils.getLocalIP())
-        .masterIP(taskNode.getMasterIp());
+        .masterIP(taskNode.getMasterIp())
+        .context(event.getContext());
     resultEventNotify.notifyEvent(resultEvent);
   }
 }

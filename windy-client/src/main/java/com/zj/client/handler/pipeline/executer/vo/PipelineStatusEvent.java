@@ -1,7 +1,9 @@
 package com.zj.client.handler.pipeline.executer.vo;
 
 import com.zj.common.enums.ProcessStatus;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.Builder;
 import lombok.Data;
 
@@ -29,4 +31,6 @@ public class PipelineStatusEvent {
    * 节点执行信息详情
    */
   private TaskNode taskNode;
+
+  private Map<String, Object> context;
 }

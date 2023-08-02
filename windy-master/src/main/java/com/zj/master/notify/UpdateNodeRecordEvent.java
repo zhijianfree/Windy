@@ -10,6 +10,7 @@ import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.master.dispatch.pipeline.PipelineExecuteProxy;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -42,18 +43,20 @@ public class UpdateNodeRecordEvent implements INotifyEvent {
     String string = JSON.toJSONString(resultEvent.getParams());
     log.info("receive node record create event id = {} event={}", resultEvent.getExecuteId(),
         string);
-    NodeRecordDto record = nodeRecordRepository.getRecordById(resultEvent.getExecuteId());
-    if (ProcessStatus.isCompleteStatus(record.getStatus()) && !Objects.equals(
+    NodeRecordDto oldNodeRecord = nodeRecordRepository.getRecordById(resultEvent.getExecuteId());
+    if (ProcessStatus.isCompleteStatus(oldNodeRecord.getStatus()) && !Objects.equals(
         ExecuteType.APPROVAL.name(), resultEvent.getExecuteType())) {
-      log.info("node record status completed,not update recordId={}", record.getRecordId());
+      log.info("node record status completed,not update recordId={}", oldNodeRecord.getRecordId());
       return true;
     }
 
     NodeRecordDto nodeRecord = JSON.parseObject(string, NodeRecordDto.class);
     nodeRecord.setRecordId(resultEvent.getExecuteId());
     nodeRecord.setStatus(resultEvent.getStatus().getType());
-    boolean updateStatus = nodeRecordRepository.updateNodeRecord(nodeRecord);
+    Optional.ofNullable(resultEvent.getContext()).ifPresent(
+        context -> nodeRecord.setPipelineContext(JSON.toJSONString(resultEvent.getContext())));
 
+    boolean updateStatus = nodeRecordRepository.updateNodeRecord(nodeRecord);
     subTaskLogRepository.updateLogStatus(resultEvent.getLogId(), nodeRecord.getNodeId(),
         nodeRecord.getStatus());
     //单个节点状态变化要通知给执行者，然后执行一下节点的任务

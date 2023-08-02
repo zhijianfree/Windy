@@ -1,7 +1,9 @@
 package com.zj.client.handler.pipeline.executer.vo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -11,7 +13,10 @@ import org.apache.commons.collections4.CollectionUtils;
  */
 @Data
 public class QueryResponseModel {
+
   private Integer status;
+
+  private Map<String, Object> context;
 
   private List<String> message;
 
@@ -22,5 +27,11 @@ public class QueryResponseModel {
       message = new ArrayList<>();
     }
     message.add(msg);
+  }
+
+  @Data
+  public static class ResponseStatus{
+
+    private Integer status;
   }
 }

@@ -2,22 +2,22 @@ package com.zj.client.handler.pipeline.executer.trigger.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.client.config.GlobalEnvConfig;
-import com.zj.client.entity.dto.LoopQueryResponse.ResponseStatus;
-import com.zj.client.entity.enuns.DeployType;
 import com.zj.client.handler.deploy.DeployContext;
 import com.zj.client.handler.deploy.DeployFactory;
 import com.zj.client.handler.deploy.IDeployMode;
 import com.zj.client.handler.deploy.jar.JarDeployContext;
-import com.zj.client.entity.dto.LoopQueryResponse;
 import com.zj.client.handler.deploy.k8s.K8sDeployContext;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
 import com.zj.client.handler.pipeline.executer.vo.DeployRequest;
 import com.zj.client.handler.pipeline.executer.vo.DeployRequest.K8SParams;
 import com.zj.client.handler.pipeline.executer.vo.DeployRequest.SSHParams;
+import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
+import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel.ResponseStatus;
 import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
-import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
+import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
 import com.zj.client.utils.Utils;
+import com.zj.common.enums.DeployType;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ExecuteException;
@@ -78,9 +78,8 @@ public class DeployTrigger implements INodeTrigger {
   @Override
   public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
     ProcessStatus deployStatus = deployFactory.getDeployStatus(taskNode.getRecordId());
-    LoopQueryResponse loopQueryResponse = new LoopQueryResponse();
+    QueryResponseModel loopQueryResponse = new QueryResponseModel();
     loopQueryResponse.setStatus(deployStatus.getType());
-
     ResponseStatus responseStatus = new ResponseStatus();
     responseStatus.setStatus(loopQueryResponse.getStatus());
     loopQueryResponse.setData(responseStatus);

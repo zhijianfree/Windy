@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeCommand;
@@ -33,28 +34,21 @@ import org.springframework.stereotype.Component;
  * @author guyuelan
  * @since 2023/3/29
  */
+@Slf4j
 @Component
 public class GitOperator implements IGitProcessor {
-
   public static final String MASTER = "master";
   public static final String ORIGIN = "origin";
-  private GlobalEnvConfig globalEnvConfig;
-
-  public GitOperator(GlobalEnvConfig globalEnvConfig) {
-    this.globalEnvConfig = globalEnvConfig;
-  }
 
   public Git pullCodeFromGit(GitMeta gitMeta, String branch, String workspace) throws Exception {
     // 判断本地目录是否存在
     createIfNotExist(workspace);
 
     // clone 仓库到指定目录
-    Git git = Git.cloneRepository().setURI(gitMeta.getGitUrl()).setDirectory(new File(workspace))
+    return Git.cloneRepository().setURI(gitMeta.getGitUrl()).setDirectory(new File(workspace))
         .setCredentialsProvider(
             new UsernamePasswordCredentialsProvider(gitMeta.getTokenName(), gitMeta.getToken()))
         .setRemote(ORIGIN).setBranch(branch).call();
-    git.fetch().setRemote(ORIGIN).call();
-    return git;
   }
 
   private void createIfNotExist(String serviceDir) {
@@ -65,7 +59,8 @@ public class GitOperator implements IGitProcessor {
         return;
       }
       FileUtils.createParentDirectories(gitDir);
-    } catch (IOException ignore) {
+    } catch (IOException e) {
+      log.error("create file error", e);
     }
   }
 
@@ -145,12 +140,5 @@ public class GitOperator implements IGitProcessor {
       walk.dispose();
       return treeParser;
     }
-  }
-
-  public static void main(String[] args) throws GitAPIException {
-    Git git = Git.cloneRepository().setURI("https://registry.code.tuya-inc.top/tuyaka_cloud/edgedaemon.git").setDirectory(new File("/Users/falcon/windy/test"))
-        .setCredentialsProvider(
-            new UsernamePasswordCredentialsProvider("falcon@tuya.com", "ZJguyuelan!1234"))
-        .setRemote(ORIGIN).setBranch("master").call();
   }
 }

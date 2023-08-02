@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
+ * 只处理代码合并的节点
  * @author guyuelan
  * @since 2023/6/29
  */
@@ -33,6 +34,11 @@ public class MergeNodeInterceptor implements INodeExecuteInterceptor{
     this.pipelineNodeRepository = pipelineNodeRepository;
     this.publishBindRepository = publishBindRepository;
     this.pipelineRepository = pipelineRepository;
+  }
+
+  @Override
+  public int sort() {
+    return 3;
   }
 
   @Override

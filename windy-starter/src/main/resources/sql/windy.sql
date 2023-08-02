@@ -238,6 +238,7 @@ CREATE TABLE `node_record` (
   `history_id` varchar(64) NOT NULL COMMENT '历史流水线记录Id',
   `code` int(4) DEFAULT NULL COMMENT '处理结果状态码',
   `result` text COMMENT '任务处理结果',
+  `pipeline_context` varchar(256) COMMENT '任务执行上下文,作用域整个流水线',
   `status` int(2) DEFAULT NULL COMMENT '任务状态',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',

@@ -44,7 +44,7 @@ public class CompareHandler {
 
     for (CompareDefine compareDefine : compareDefines) {
       compareResult = compareOne(compareDefine);
-      if (!compareResult.getCompareStatus()) {
+      if (!compareResult.isCompareStatus()) {
         compareResult.setDescription(
             String.format(TIP_FORMAT, compareDefine.getCompareKey(), compareDefine.getExpectValue(),
                 compareDefine.getResponseValue()));

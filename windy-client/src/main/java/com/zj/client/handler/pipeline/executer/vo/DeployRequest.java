@@ -21,7 +21,7 @@ public class DeployRequest {
 
   private String imageName;
 
-  private Integer replicas = 1;
+  private Integer replicas;
 
   @Data
   public static class SSHParams{

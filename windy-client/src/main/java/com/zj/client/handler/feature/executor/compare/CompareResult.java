@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class CompareResult {
-    private Boolean compareStatus;
+    private boolean compareStatus;
     private String errorMessage;
     private String description;
 

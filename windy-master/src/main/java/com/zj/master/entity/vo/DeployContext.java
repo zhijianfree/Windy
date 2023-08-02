@@ -14,4 +14,8 @@ public class DeployContext extends RequestContext{
   private Object params;
 
   private Integer deployType;
+
+  private String imageName;
+
+
 }

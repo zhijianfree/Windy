@@ -20,6 +20,5 @@ public interface IDispatchLogRepository {
   boolean updateLogMasterIp(String logId, String localIP, Integer lockVersion);
 
   void updateLogSourceRecord(String logId, String recordId);
-
-  DispatchLogDto getDispatchLogBySourceId(String sourceId);
+  DispatchLogDto getDispatchLog(String logId);
 }

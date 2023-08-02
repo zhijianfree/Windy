@@ -1,4 +1,4 @@
-package com.zj.client.entity.enuns;
+package com.zj.common.enums;
 
 public enum DeployType {
   SSH(1, "二进制ssh部署"),

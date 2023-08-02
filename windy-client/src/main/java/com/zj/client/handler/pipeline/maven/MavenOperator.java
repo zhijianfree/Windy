@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,7 @@ public class MavenOperator {
 
   public static final String DEPLOY = "deploy";
   public static final String SH_COMMAND_FORMAT = "nohup java -jar %s > app.log 2>&1 &";
+  public static final String DOCKER = "docker";
   private final GlobalEnvConfig globalEnvConfig;
   private List<String> templateShell;
 
@@ -58,7 +60,7 @@ public class MavenOperator {
     InvocationRequest ideaRequest = new DefaultInvocationRequest();
     ideaRequest.setBaseDirectory(pomFile);
     ideaRequest.setAlsoMakeDependents(true);
-    ideaRequest.setGoals(Arrays.asList("clean", "package"));
+    ideaRequest.setGoals(Collections.singletonList("package"));
 
     String mavenDir = globalEnvConfig.getMavenPath();
     Preconditions.checkNotNull(mavenDir, "maven path can not find , consider to fix it");
@@ -82,10 +84,17 @@ public class MavenOperator {
       throw new ApiException(ErrorCode.NOT_FIND_JAR);
     }
 
+    //ssh镜像部署
     String destDir = servicePath + File.separator + DEPLOY;
     File dir = new File(destDir);
     createSHFileIfNeed(jarFile.getName(), destDir, dir);
     FileUtils.copyToDirectory(jarFile, dir);
+
+    //docker镜像部署
+    String dockerDir = servicePath + File.separator + DOCKER;
+    File dockerDirFile = new File(dockerDir);
+    createSHFileIfNeed(jarFile.getName(), dockerDir, dockerDirFile);
+    FileUtils.copyToDirectory(jarFile, dockerDirFile);
   }
 
   private void createSHFileIfNeed(String jarName, String destDir, File dir) {

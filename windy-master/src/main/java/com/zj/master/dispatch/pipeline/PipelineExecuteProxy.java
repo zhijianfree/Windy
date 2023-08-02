@@ -19,6 +19,7 @@ import com.zj.master.dispatch.pipeline.intercept.INodeExecuteInterceptor;
 import com.zj.master.entity.vo.NodeStatusChange;
 import com.zj.master.entity.vo.RequestContext;
 import com.zj.master.entity.vo.TaskNode;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,6 +28,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -65,7 +67,8 @@ public class PipelineExecuteProxy implements IStopEventListener {
     this.pipelineHistoryRepository = pipelineHistoryRepository;
     this.pipelineEndProcessor = pipelineEndProcessor;
     this.dispatchLogRepository = dispatchLogRepository;
-    this.interceptors = interceptors;
+    this.interceptors = interceptors.stream()
+        .sorted(Comparator.comparing(INodeExecuteInterceptor::sort)).collect(Collectors.toList());
   }
 
   public void runTask(PipelineTask pipelineTask) {
@@ -111,7 +114,13 @@ public class PipelineExecuteProxy implements IStopEventListener {
   }
 
   private void interceptBefore(TaskNode taskNode) {
-    interceptors.forEach(interceptor -> interceptor.beforeExecute(taskNode));
+    interceptors.forEach(interceptor -> {
+      try {
+        interceptor.beforeExecute(taskNode);
+      }catch (Exception e){
+        log.error("intercept before", e);
+      }
+    });
   }
 
 

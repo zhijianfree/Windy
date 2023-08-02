@@ -46,6 +46,11 @@ public class BuildNodeInterceptor implements INodeExecuteInterceptor {
   }
 
   @Override
+  public int sort() {
+    return 2;
+  }
+
+  @Override
   public void beforeExecute(TaskNode taskNode) {
     if (!Objects.equals(taskNode.getExecuteType(), ExecuteType.BUILD.name())) {
       return;

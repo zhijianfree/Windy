@@ -1,7 +1,7 @@
 package com.zj.client.handler.deploy.docker;
 
 import com.zj.client.handler.deploy.IDeployMode;
-import com.zj.client.entity.enuns.DeployType;
+import com.zj.common.enums.DeployType;
 import com.zj.common.enums.ProcessStatus;
 import org.springframework.stereotype.Component;
 

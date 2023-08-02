@@ -86,7 +86,7 @@ public class EnvironmentService {
     K8SParams k8SParams = JSON.parseObject(data, K8SParams.class);
     // 创建Config对象并设置访问配置
     Config config = new ConfigBuilder()
-        .withMasterUrl(k8SParams.getUrl())
+        .withMasterUrl(k8SParams.getApiService())
         .withNamespace(k8SParams.getNamespace())
         .withOauthToken(k8SParams.getToken())
         .withTrustCerts(true)

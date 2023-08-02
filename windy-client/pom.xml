@@ -48,14 +48,9 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
-<!--    <dependency>-->
-<!--      <groupId>org.eclipse.jgit</groupId>-->
-<!--      <artifactId>org.eclipse.jgit</artifactId>-->
-<!--    </dependency>-->
     <dependency>
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit</artifactId>
-      <version>6.6.0.202305301015-r</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
@@ -76,7 +71,13 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+      <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.ws.rs</groupId>
+          <artifactId>jsr311-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>ognl</groupId>
@@ -109,12 +110,6 @@
     <dependency>
       <groupId>com.github.docker-java</groupId>
       <artifactId>docker-java</artifactId>
-      <exclusions>
-        <exclusion>
-          <artifactId>jersey-client</artifactId>
-          <groupId>org.glassfish.jersey.core</groupId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.mariadb.jdbc</groupId>

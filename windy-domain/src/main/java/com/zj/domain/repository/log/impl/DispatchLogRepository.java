@@ -87,9 +87,9 @@ public class DispatchLogRepository extends ServiceImpl<DispatchLogMapper, Dispat
   }
 
   @Override
-  public DispatchLogDto getDispatchLogBySourceId(String sourceId) {
+  public DispatchLogDto getDispatchLog(String logId) {
     DispatchLog dispatchLog = getOne(
-        Wrappers.lambdaQuery(DispatchLog.class).eq(DispatchLog::getSourceId, sourceId));
+        Wrappers.lambdaQuery(DispatchLog.class).eq(DispatchLog::getLogId, logId));
     return OrikaUtil.convert(dispatchLog, DispatchLogDto.class);
   }
 }

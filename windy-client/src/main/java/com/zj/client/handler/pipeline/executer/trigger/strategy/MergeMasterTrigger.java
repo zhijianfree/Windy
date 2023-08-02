@@ -1,23 +1,21 @@
 package com.zj.client.handler.pipeline.executer.trigger.strategy;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.zj.client.config.GlobalEnvConfig;
-import com.zj.client.entity.dto.LoopQueryResponse;
-import com.zj.client.entity.dto.LoopQueryResponse.ResponseStatus;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
+import com.zj.client.handler.pipeline.executer.vo.MergeRequest;
 import com.zj.client.handler.pipeline.executer.vo.MergeStatus;
+import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
+import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel.ResponseStatus;
 import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
 import com.zj.client.handler.pipeline.git.IGitProcessor;
-import com.zj.client.handler.pipeline.executer.vo.MergeRequest;
 import com.zj.client.utils.Utils;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.exception.ExecuteException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -126,7 +124,7 @@ public class MergeMasterTrigger implements INodeTrigger {
   }
 
   private void push2Repository(MergeRequest mergeRequest, Git git)
-      throws IOException, GitAPIException {
+      throws GitAPIException {
     // 推送合并后的代码到远程仓库的目标分支
     Iterable<PushResult> results = git.push().setRemote(ORIGIN).setRefSpecs(new RefSpec(MASTER))
         .setCredentialsProvider(
@@ -147,12 +145,12 @@ public class MergeMasterTrigger implements INodeTrigger {
   @Override
   public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
     MergeStatus mergeStatus = statusMap.get(taskNode.getRecordId());
-    LoopQueryResponse loopQueryResponse = new LoopQueryResponse();
+    QueryResponseModel loopQueryResponse = new QueryResponseModel();
     loopQueryResponse.setStatus(mergeStatus.getStatus());
     ResponseStatus responseStatus = new ResponseStatus();
     responseStatus.setStatus(loopQueryResponse.getStatus());
     loopQueryResponse.setData(responseStatus);
-    loopQueryResponse.setMessage(JSON.toJSONString(mergeStatus.getMessage()));
+    loopQueryResponse.setMessage(mergeStatus.getMessage());
     return JSON.toJSONString(loopQueryResponse);
   }
 }

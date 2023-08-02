@@ -1,6 +1,5 @@
 package com.zj.master.dispatch.pipeline.listener;
 
-import com.zj.common.enums.ProcessStatus;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.enums.PipelineType;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
@@ -10,6 +9,7 @@ import java.util.Objects;
 import org.springframework.stereotype.Component;
 
 /**
+ * 流水线成功过完成之后删除发布绑定的分支
  * @author guyuelan
  * @since 2023/6/29
  */

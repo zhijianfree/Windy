@@ -8,7 +8,7 @@ public class K8SParams {
   /**
    * k8s访问地址
    * */
-  private String url;
+  private String apiService;
 
   /**
    * k8s访问token

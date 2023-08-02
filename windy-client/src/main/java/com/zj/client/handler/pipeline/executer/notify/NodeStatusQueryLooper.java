@@ -126,11 +126,11 @@ public class NodeStatusQueryLooper implements Runnable {
       return;
     }
 
-    Map<String, Object> map = JSONObject.parseObject(JSON.toJSONString(responseModel.getData()), Map.class);
+    Map<String, Object> map = JSON.parseObject(JSON.toJSONString(responseModel.getData()));
     List<CompareInfo> compareConfigs = node.getRefreshContext().getCompareConfig();
     for (CompareInfo compareInfo : compareConfigs) {
       CompareResult compareResult = handleCompare(map, compareInfo);
-      if (!compareResult.getCompareStatus()) {
+      if (!compareResult.isCompareStatus()) {
         responseModel.setStatus(ProcessStatus.FAIL.getType());
         responseModel.setMessage(exchangeTips(map, compareInfo));
         return;
@@ -157,9 +157,12 @@ public class NodeStatusQueryLooper implements Runnable {
   }
 
   private static void notifyStatus(TaskNode node, QueryResponseModel responseModel) {
-    PipelineStatusEvent statusEvent = PipelineStatusEvent.builder().taskNode(node)
+    PipelineStatusEvent statusEvent = PipelineStatusEvent.builder()
+        .taskNode(node)
         .processStatus(ProcessStatus.exchange(responseModel.getStatus()))
-        .errorMsg(responseModel.getMessage()).build();
+        .errorMsg(responseModel.getMessage())
+        .context(responseModel.getContext())
+        .build();
     PipelineEventFactory.sendNotifyEvent(statusEvent);
   }
 
