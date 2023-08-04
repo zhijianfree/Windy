@@ -31,7 +31,6 @@ public class FeatureDispatch implements IDispatchExecutor {
 
   public static final String TEMP_KEY = "temp_";
   private IFeatureRepository featureRepository;
-  private ITestCaseRepository testCaseRepository;
   private ITestCaseConfigRepository testCaseConfigRepository;
   private UniqueIdService uniqueIdService;
   private FeatureExecuteProxy featureExecuteProxy;
@@ -42,7 +41,6 @@ public class FeatureDispatch implements IDispatchExecutor {
       UniqueIdService uniqueIdService, FeatureExecuteProxy featureExecuteProxy,
       IDispatchLogRepository dispatchLogRepository) {
     this.featureRepository = featureRepository;
-    this.testCaseRepository = testCaseRepository;
     this.testCaseConfigRepository = testCaseConfigRepository;
     this.uniqueIdService = uniqueIdService;
     this.featureExecuteProxy = featureExecuteProxy;

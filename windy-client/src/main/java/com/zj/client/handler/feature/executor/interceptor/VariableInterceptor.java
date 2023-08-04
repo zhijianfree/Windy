@@ -9,6 +9,8 @@ import com.zj.client.handler.feature.executor.vo.ExecutorUnit;
 import com.zj.client.handler.feature.executor.vo.VariableDefine;
 import com.zj.plugin.loader.ParameterDefine;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -69,6 +71,14 @@ public class VariableInterceptor implements IExecuteInterceptor {
         String stringValue = String.valueOf(paramValue);
         String replaceResult = strSubstitutor.replace(stringValue);
         param.setValue(replaceResult);
+      }
+
+      if (paramValue instanceof Map) {
+        Map<String, String> map = (Map<String, String>) paramValue;
+        Map<String, String> result = map.keySet().stream().collect(
+            Collectors.toMap(strSubstitutor::replace,
+                key -> strSubstitutor.replace(map.get(key))));
+        param.setValue(result);
       }
     });
   }

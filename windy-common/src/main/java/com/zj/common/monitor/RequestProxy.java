@@ -96,7 +96,7 @@ public class RequestProxy {
       log.info("get response status result ={}", response.getBody());
       return response.getStatusCode().is2xxSuccessful();
     } catch (Exception e) {
-      log.info("send dispatch task error", e);
+      log.info("send dispatch task error ={}", e.toString());
     }
     return false;
   }
@@ -127,7 +127,7 @@ public class RequestProxy {
           response.body().string());
       return response.isSuccessful();
     } catch (Exception e) {
-      log.error("request master ip error", e);
+      log.error("request master ip error ={}", e.toString());
     }
     return false;
   }
@@ -148,7 +148,7 @@ public class RequestProxy {
           Response response = okHttpClient.newCall(request).execute();
           log.info("notify client stop result={}", response.body().string());
         } catch (IOException e) {
-          log.error("notify client error");
+          log.error("notify client error ={}", e.toString());
         }
       });
     });
@@ -162,12 +162,14 @@ public class RequestProxy {
     HttpEntity<Object> httpEntity = new HttpEntity<>(data, headers);
     try {
 
-      ResponseEntity<ResponseMeta> response = restTemplate.postForEntity(CLIENT_START_TASK, httpEntity, ResponseMeta.class);
-      if (response.getStatusCode().is2xxSuccessful()){
+      ResponseEntity<ResponseMeta> response = restTemplate.postForEntity(CLIENT_START_TASK,
+          httpEntity, ResponseMeta.class);
+      if (response.getStatusCode().is2xxSuccessful()) {
         return String.valueOf(response.getBody().getData());
       }
       return null;
     } catch (Exception e) {
+      log.error("start feature task error={}", e.toString());
       return null;
     }
   }
@@ -216,7 +218,7 @@ public class RequestProxy {
           response.body().string());
       return response.isSuccessful();
     } catch (Exception e) {
-      log.error("request master ip error", e);
+      log.error("request master ip error ={}", e.toString());
     }
     return false;
   }
@@ -243,11 +245,9 @@ public class RequestProxy {
       ResponseEntity<ResponseMeta> responseEntity = restTemplate.postForEntity(CONSOLE_RUN_TASK,
           httpEntity, ResponseMeta.class);
       ResponseMeta body = responseEntity.getBody();
-      log.info("get test result code= {} result={}", responseEntity.getStatusCode(),
-          JSON.toJSONString(body));
       return String.valueOf(body.getData());
     } catch (Exception e) {
-      log.error("request dispatch pipeline task error", e);
+      log.error("request dispatch pipeline task error ={}", e.toString());
     }
     return null;
   }
@@ -265,7 +265,7 @@ public class RequestProxy {
           responseEntity.getBody());
       return responseEntity.getStatusCode().is2xxSuccessful();
     } catch (Exception e) {
-      log.error("request dispatch pipeline task error", e);
+      log.error("request stop pipeline error ={}", e.toString());
     }
     return false;
   }
@@ -281,7 +281,7 @@ public class RequestProxy {
           responseEntity.getBody());
       return responseEntity.getStatusCode().is2xxSuccessful();
     } catch (Exception e) {
-      log.error("request dispatch pipeline task error", e);
+      log.error("request start pipeline task error ={}", e.toString());
     }
     return false;
   }
@@ -320,7 +320,7 @@ public class RequestProxy {
         ResponseMeta result = JSON.parseObject(string, ResponseMeta.class);
         return JSON.parseObject(JSON.toJSONString(result.getData()), MasterCollect.class);
       } catch (Exception e) {
-        log.error("request master ip error", e);
+        log.error("request master ip error ={}", e.toString());
       }
       return null;
     }).collect(Collectors.toList());
@@ -330,12 +330,12 @@ public class RequestProxy {
     try {
       wrapTraceHeader();
       HttpEntity request = new HttpEntity(headers);
-      ResponseEntity<ResponseMeta> resp = restTemplate.exchange(CLIENT_PLUGIN_LIST,
-          HttpMethod.GET, request, ResponseMeta.class);
+      ResponseEntity<ResponseMeta> resp = restTemplate.exchange(CLIENT_PLUGIN_LIST, HttpMethod.GET,
+          request, ResponseMeta.class);
       return JSON.parseArray(JSON.toJSONString(resp.getBody().getData()), PluginInfo.class);
     } catch (Exception e) {
-      log.error("request available plugins error", e);
+      log.error("request available plugins error ={}", e.toString());
     }
-    return null;
+    return Collections.emptyList();
   }
 }

@@ -11,6 +11,9 @@ import com.zj.common.exception.ErrorCode;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,6 +23,7 @@ import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
 import org.apache.maven.shared.invoker.DefaultInvoker;
@@ -47,12 +51,13 @@ public class MavenOperator {
   public MavenOperator(GlobalEnvConfig globalEnvConfig) {
     this.globalEnvConfig = globalEnvConfig;
     try {
-      File templateFile = ResourceUtils.getFile("classpath:start.sh");
-      templateShell = FileUtils.readLines(templateFile, Charsets.UTF_8);
+      URL resourceURL = ResourceUtils.getURL("classpath:start.sh");
+      InputStream inputStream = resourceURL.openStream();
+      templateShell = IOUtils.readLines(inputStream, StandardCharsets.UTF_8);
+      inputStream.close();
     } catch (Exception e) {
       log.warn("load template sh file error", e);
     }
-
   }
 
   public Integer build(String pomPath, String servicePath) throws Exception {

@@ -11,8 +11,10 @@ import com.zj.client.utils.ExceptionUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
@@ -31,8 +33,16 @@ public class HttpFeature implements Feature {
 
   public ExecuteDetailVo startHttp(String url, String method, Map<String, String> headers,
       String body) {
+    boolean emptyHeader = headers.keySet().stream().anyMatch(this::isEmpty);
+    if (emptyHeader) {
+      headers = new HashMap<>();
+    }
     Request request = requestFactory(url, method, headers, body);
     return startRequest(request, body);
+  }
+
+  private boolean isEmpty(String headerKey) {
+    return Objects.isNull(headerKey) || Objects.equals(headerKey, "");
   }
 
   private ExecuteDetailVo startRequest(Request request, String body) {

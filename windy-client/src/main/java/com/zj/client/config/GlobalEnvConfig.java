@@ -14,6 +14,7 @@ public class GlobalEnvConfig {
   public static final String DEFAULT_WORKSPACE = "/opt/windy";
   public static final String LOOP_QUERY_TIMEOUT = "windy.loop.query.timeout";
   public static final int MAX_REMOVE_TIME = 2 * 60 * 60 * 1000;
+  public static final String SERVICES = "services";
   private final Environment environment;
 
   public GlobalEnvConfig(Environment environment) {
@@ -39,7 +40,7 @@ public class GlobalEnvConfig {
    * 获取流水线构建过程中的工作路径
    * */
   public String getPipelineWorkspace(String service, String pipelineId) {
-    return getWorkspace() + File.separator + service + File.separator + pipelineId;
+    return getWorkspace() + File.separator + SERVICES + File.separator + service + File.separator + pipelineId;
   }
 
   private boolean isWorkspaceExist(String workspace) {

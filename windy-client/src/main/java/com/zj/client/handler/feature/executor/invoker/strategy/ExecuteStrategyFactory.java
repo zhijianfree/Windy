@@ -24,14 +24,11 @@ public class ExecuteStrategyFactory {
         .collect(Collectors.toMap(strategy -> strategy.getType().getType(), strategy -> strategy));
   }
 
-  public List<FeatureResponse> execute(ExecutePoint executePoint, Map<String, Object> mapContext){
+  public List<FeatureResponse> execute(ExecutePoint executePoint, ExecuteContext executeContext){
     IExecuteStrategy executeStrategy = executeStrategyMap.get(executePoint.getExecuteType());
     if (Objects.isNull(executeStrategy)) {
       throw new RuntimeException("can not find strategy, not execute");
     }
-
-    ExecuteContext executeContext = new ExecuteContext();
-    executeContext.bindMap(mapContext);
     return executeStrategy.execute(executePoint, executeContext);
   }
 }

@@ -48,9 +48,9 @@ public class OptimizePersistLocal implements DisposableBean {
     if (!file.exists()) {
       try {
         Files.createParentDirs(file);
+        Files.touch(file);
       } catch (IOException e) {
         log.error("create target file error");
-
         tryRuntimeDir();
       }
     }
