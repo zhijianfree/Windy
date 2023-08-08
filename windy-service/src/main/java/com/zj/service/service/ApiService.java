@@ -1,0 +1,44 @@
+package com.zj.service.service;
+
+import com.zj.common.generate.UniqueIdService;
+import com.zj.domain.entity.dto.service.ServiceApiDto;
+import com.zj.domain.repository.service.IServiceApiRepository;
+import java.util.List;
+import org.springframework.stereotype.Service;
+
+/**
+ * @author falcon
+ * @since 2023/8/8
+ */
+@Service
+public class ApiService {
+
+  private UniqueIdService uniqueIdService;
+  private IServiceApiRepository apiRepository;
+
+  public ApiService(UniqueIdService uniqueIdService, IServiceApiRepository apiRepository) {
+    this.uniqueIdService = uniqueIdService;
+    this.apiRepository = apiRepository;
+  }
+
+  public ServiceApiDto getServiceApi(String apiId) {
+    return apiRepository.getServiceApi(apiId);
+  }
+
+  public List<ServiceApiDto> getServiceApis(String serviceId) {
+    return apiRepository.getApiByService(serviceId);
+  }
+
+  public boolean createServiceApi(ServiceApiDto serviceApi) {
+    serviceApi.setApiId(uniqueIdService.getUniqueId());
+    return apiRepository.saveApi(serviceApi);
+  }
+
+  public boolean updateServiceApi(ServiceApiDto serviceApi) {
+    return apiRepository.updateApi(serviceApi);
+  }
+
+  public boolean deleteServiceApi(String apiId) {
+    return apiRepository.deleteApi(apiId);
+  }
+}
