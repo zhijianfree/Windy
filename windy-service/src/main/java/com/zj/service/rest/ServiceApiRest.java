@@ -1,10 +1,9 @@
 package com.zj.service.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseMeta;
-import com.zj.domain.entity.dto.service.DeployEnvironmentDto;
 import com.zj.domain.entity.dto.service.ServiceApiDto;
+import com.zj.service.entity.ApiModel;
 import com.zj.service.service.ApiService;
 import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,13 +40,13 @@ public class ServiceApiRest {
   }
 
   @PostMapping("/service/resources")
-  public ResponseMeta<Boolean> createServiceApi(@RequestBody ServiceApiDto serviceApi) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.createServiceApi(serviceApi));
+  public ResponseMeta<Boolean> createServiceApi(@RequestBody ApiModel apiModel) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.createServiceApi(apiModel));
   }
 
   @PutMapping("/service/resources")
-  public ResponseMeta<Boolean> updateServiceApi(@RequestBody ServiceApiDto serviceApi) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.updateServiceApi(serviceApi));
+  public ResponseMeta<Boolean> updateServiceApi(@RequestBody ApiModel apiModel) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.updateServiceApi(apiModel));
   }
 
   @DeleteMapping("/service/resources/{apiId}")

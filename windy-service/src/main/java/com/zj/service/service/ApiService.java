@@ -1,8 +1,11 @@
 package com.zj.service.service;
 
+import com.alibaba.fastjson.JSON;
 import com.zj.common.generate.UniqueIdService;
+import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.service.ServiceApiDto;
 import com.zj.domain.repository.service.IServiceApiRepository;
+import com.zj.service.entity.ApiModel;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
@@ -29,12 +32,18 @@ public class ApiService {
     return apiRepository.getApiByService(serviceId);
   }
 
-  public boolean createServiceApi(ServiceApiDto serviceApi) {
+  public boolean createServiceApi(ApiModel apiModel) {
+    ServiceApiDto serviceApi = OrikaUtil.convert(apiModel, ServiceApiDto.class);
+    serviceApi.setRequestParams(JSON.toJSONString(apiModel.getRequestParams()));
+    serviceApi.setResponseParams(JSON.toJSONString(apiModel.getResponseParams()));
     serviceApi.setApiId(uniqueIdService.getUniqueId());
     return apiRepository.saveApi(serviceApi);
   }
 
-  public boolean updateServiceApi(ServiceApiDto serviceApi) {
+  public boolean updateServiceApi(ApiModel apiModel) {
+    ServiceApiDto serviceApi = OrikaUtil.convert(apiModel, ServiceApiDto.class);
+    serviceApi.setRequestParams(JSON.toJSONString(apiModel.getRequestParams()));
+    serviceApi.setResponseParams(JSON.toJSONString(apiModel.getResponseParams()));
     return apiRepository.updateApi(serviceApi);
   }
 
