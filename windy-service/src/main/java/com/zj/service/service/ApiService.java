@@ -50,4 +50,8 @@ public class ApiService {
   public boolean deleteServiceApi(String apiId) {
     return apiRepository.deleteApi(apiId);
   }
+
+  public boolean batchDeleteApi(List<String> apiIds) {
+    return apiRepository.batchDeleteApi(apiIds);
+  }
 }

@@ -63,7 +63,7 @@ public class MavenOperator {
   public Integer build(String pomPath, String servicePath) throws Exception {
     File pomFile = new File(pomPath);
     InvocationRequest ideaRequest = new DefaultInvocationRequest();
-    ideaRequest.setBaseDirectory(pomFile);
+    ideaRequest.setBaseDirectory(new File(servicePath));
     ideaRequest.setAlsoMakeDependents(true);
     ideaRequest.setGoals(Collections.singletonList("package"));
 
@@ -122,7 +122,7 @@ public class MavenOperator {
       List<String> commands = new ArrayList<>(templateShell);
       String command = String.format(SH_COMMAND_FORMAT, name);
       commands.add(command);
-      FileUtils.writeLines(destFile, Charsets.UTF_8.name(), commands, "\r\n", true);
+      FileUtils.writeLines(destFile, StandardCharsets.UTF_8.name(), commands, "\r\n", true);
     } catch (IOException e) {
       log.error("write event to file error", e);
     }

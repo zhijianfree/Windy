@@ -15,6 +15,8 @@ public interface IServiceApiRepository {
 
   boolean deleteApi(String apiId);
 
+  boolean batchDeleteApi(List<String> apiIds);
+
   ServiceApiDto getServiceApi(String apiId);
 
   List<ServiceApiDto> getApiByService(String serviceId);

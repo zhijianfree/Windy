@@ -32,6 +32,8 @@ public class ApiModel {
    */
   private String type;
 
+  private Boolean isApi;
+
   /**
    * http方法
    */

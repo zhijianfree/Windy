@@ -29,6 +29,11 @@ public class ServiceApi {
   private String method;
 
   /**
+   * 父节点ID
+   * */
+  private String parentId;
+
+  /**
    * api信息
    * type = http时api内容为uri
    * type = http时api内容为service#method
@@ -44,6 +49,11 @@ public class ServiceApi {
    * api描述
    * */
   private String description;
+
+  /**
+   * 是否是API
+   * */
+  private Boolean isApi;
 
   /**
    * 请求参数

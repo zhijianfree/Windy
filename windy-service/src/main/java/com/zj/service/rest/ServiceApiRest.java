@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -35,7 +36,8 @@ public class ServiceApiRest {
   }
 
   @GetMapping("/service/{serviceId}/resources")
-  public ResponseMeta<List<ServiceApiDto>> getServiceApis(@PathVariable("serviceId") String serviceId) {
+  public ResponseMeta<List<ServiceApiDto>> getServiceApis(
+      @PathVariable("serviceId") String serviceId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.getServiceApis(serviceId));
   }
 
@@ -52,5 +54,10 @@ public class ServiceApiRest {
   @DeleteMapping("/service/resources/{apiId}")
   public ResponseMeta<Boolean> deleteServiceApi(@PathVariable("apiId") String apiId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.deleteServiceApi(apiId));
+  }
+
+  @DeleteMapping("/service/resources")
+  public ResponseMeta<Boolean> batchDeleteApi(@RequestParam("apis") List<String> apis) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.batchDeleteApi(apis));
   }
 }

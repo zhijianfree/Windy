@@ -43,6 +43,14 @@ public class ServiceApiRepository extends ServiceImpl<IServiceApiMapper, Service
   }
 
   @Override
+  public boolean batchDeleteApi(List<String> apiIds) {
+    if (CollectionUtils.isEmpty(apiIds)) {
+      return false;
+    }
+    return remove(Wrappers.lambdaUpdate(ServiceApi.class).in(ServiceApi::getApiId, apiIds));
+  }
+
+  @Override
   public ServiceApiDto getServiceApi(String apiId) {
     ServiceApi api = getOne(
         Wrappers.lambdaUpdate(ServiceApi.class).eq(ServiceApi::getApiId, apiId));

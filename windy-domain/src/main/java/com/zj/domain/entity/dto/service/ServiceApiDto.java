@@ -32,6 +32,11 @@ public class ServiceApiDto {
   private String type;
 
   /**
+   * 是否是API
+   * */
+  private Boolean isApi;
+
+  /**
    * http方法
    * */
   private String method;
