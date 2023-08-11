@@ -7,6 +7,7 @@ import com.zj.domain.entity.dto.service.ServiceApiDto;
 import com.zj.domain.repository.service.IServiceApiRepository;
 import com.zj.service.entity.ApiModel;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 /**
@@ -34,8 +35,13 @@ public class ApiService {
 
   public boolean createServiceApi(ApiModel apiModel) {
     ServiceApiDto serviceApi = OrikaUtil.convert(apiModel, ServiceApiDto.class);
-    serviceApi.setRequestParams(JSON.toJSONString(apiModel.getRequestParams()));
-    serviceApi.setResponseParams(JSON.toJSONString(apiModel.getResponseParams()));
+    String requestParams = Optional.ofNullable(apiModel.getRequestParams())
+        .map(JSON::toJSONString).orElse(null);
+    serviceApi.setRequestParams(requestParams);
+
+    String responseParams = Optional.ofNullable(apiModel.getResponseParams())
+        .map(JSON::toJSONString).orElse(null);
+    serviceApi.setResponseParams(responseParams);
     serviceApi.setApiId(uniqueIdService.getUniqueId());
     return apiRepository.saveApi(serviceApi);
   }

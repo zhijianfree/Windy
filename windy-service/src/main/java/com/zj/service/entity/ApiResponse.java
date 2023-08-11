@@ -9,11 +9,14 @@ import lombok.Data;
  */
 @Data
 public class ApiResponse {
+
   private String paramKey;
 
   private String type;
 
   private String description;
+
+  private boolean required;
 
   private List<ApiResponse> children;
 }

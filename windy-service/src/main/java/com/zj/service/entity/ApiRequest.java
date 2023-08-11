@@ -18,5 +18,7 @@ public class ApiRequest {
 
   private String description;
 
+  private boolean isRequired;
+
   private List<ApiRequest> children;
 }
