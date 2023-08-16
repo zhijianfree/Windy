@@ -6,16 +6,17 @@ import com.zj.client.entity.vo.NodeRecord;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
 import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
-import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
+import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.model.ResponseMeta;
 import com.zj.common.monitor.RequestProxy;
-import java.util.Collections;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.Objects;
 
 /**
  * 审批节点处理
@@ -28,7 +29,7 @@ public class ApprovalTrigger implements INodeTrigger {
 
   public static final String MESSAGE_SUCCESS_TIPS = "审批通过";
   public static final String MESSAGE_WAIT_TIPS = "审批通过";
-  private RequestProxy requestProxy;
+  private final RequestProxy requestProxy;
 
   public ApprovalTrigger(RequestProxy requestProxy) {
     this.requestProxy = requestProxy;

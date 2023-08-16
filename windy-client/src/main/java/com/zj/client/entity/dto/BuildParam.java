@@ -3,12 +3,14 @@ package com.zj.client.entity.dto;
 import com.zj.client.handler.pipeline.executer.vo.GitMeta;
 import java.util.List;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author guyuelan
  * @since 2023/3/29
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class BuildParam extends GitMeta {
 
   /**

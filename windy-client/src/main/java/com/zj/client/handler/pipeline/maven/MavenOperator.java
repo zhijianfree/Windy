@@ -1,38 +1,23 @@
 package com.zj.client.handler.pipeline.maven;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
-import com.google.common.io.CharSink;
-import com.google.common.io.FileWriteMode;
-import com.google.common.io.Files;
 import com.zj.client.config.GlobalEnvConfig;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.apache.maven.shared.invoker.*;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
+
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.filefilter.TrueFileFilter;
-import org.apache.maven.shared.invoker.DefaultInvocationRequest;
-import org.apache.maven.shared.invoker.DefaultInvoker;
-import org.apache.maven.shared.invoker.InvocationRequest;
-import org.apache.maven.shared.invoker.InvocationResult;
-import org.apache.maven.shared.invoker.Invoker;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
+import java.util.*;
 
 /**
  * @author guyuelan
@@ -104,7 +89,9 @@ public class MavenOperator {
 
   private void createSHFileIfNeed(String jarName, String destDir, File dir) {
     if (!dir.exists()) {
-      dir.mkdirs();
+      if(!dir.mkdirs()){
+        dir.mkdirs();
+      }
     }
 
     Collection<File> deployFiles = FileUtils.listFiles(dir, TrueFileFilter.INSTANCE,

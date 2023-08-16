@@ -16,14 +16,15 @@ import com.zj.common.exception.ExecuteException;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.common.model.ResultEvent;
 import com.zj.common.utils.IpUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /**
  * @author guyuelan

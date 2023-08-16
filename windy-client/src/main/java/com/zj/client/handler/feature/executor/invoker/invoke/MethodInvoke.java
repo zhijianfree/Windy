@@ -25,9 +25,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class MethodInvoke implements IExecuteInvoker {
 
-  private Map<String, Object> instanceMap = new HashMap<>();
+  private final Map<String, Object> instanceMap = new HashMap<>();
 
-  private PluginManager pluginManager;
+  private final PluginManager pluginManager;
 
   public MethodInvoke(PluginManager pluginManager) {
     this.pluginManager = pluginManager;

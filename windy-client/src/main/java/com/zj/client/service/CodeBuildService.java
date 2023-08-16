@@ -14,19 +14,16 @@ import com.zj.client.handler.pipeline.git.IGitProcessor;
 import com.zj.client.handler.pipeline.maven.MavenOperator;
 import com.zj.client.utils.Utils;
 import com.zj.common.enums.ProcessStatus;
-import java.io.Closeable;
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import java.io.Closeable;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 
 /**
  * @author guyuelan
@@ -44,10 +41,10 @@ public class CodeBuildService {
   public static final String[] JAR_FILTER = {".jar"};
   public static final String IMAGE_NAME = "imageName";
 
-  private IGitProcessor gitProcessor;
-  private MavenOperator mavenOperator;
-  private Executor executorService;
-  private GlobalEnvConfig globalEnvConfig;
+  private final IGitProcessor gitProcessor;
+  private final MavenOperator mavenOperator;
+  private final Executor executorService;
+  private final GlobalEnvConfig globalEnvConfig;
 
   private final Map<String, QueryResponseModel> statusMap = new ConcurrentHashMap<>();
 

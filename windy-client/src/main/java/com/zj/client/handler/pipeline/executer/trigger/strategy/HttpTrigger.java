@@ -2,28 +2,18 @@ package com.zj.client.handler.pipeline.executer.trigger.strategy;
 
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
-import com.zj.client.handler.pipeline.executer.vo.BaseExecuteParam;
-import com.zj.client.handler.pipeline.executer.vo.HttpRequestContext;
-import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
-import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
-import com.zj.client.handler.pipeline.executer.vo.TaskNode;
+import com.zj.client.handler.pipeline.executer.vo.*;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.exception.ExecuteException;
 import com.zj.common.utils.OrikaUtil;
+import lombok.extern.slf4j.Slf4j;
+import okhttp3.*;
+import org.springframework.stereotype.Component;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import lombok.extern.slf4j.Slf4j;
-import okhttp3.Headers;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-
-import org.springframework.stereotype.Component;
 
 /**
  * Http请求处理

@@ -9,10 +9,11 @@ import com.zj.client.handler.pipeline.executer.ExecuteProxy;
 import com.zj.client.handler.pipeline.executer.notify.NodeStatusQueryLooper;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.common.model.StopDispatch;
+import org.springframework.stereotype.Service;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import org.springframework.stereotype.Service;
 
 /**
  * @author guyuelan
@@ -22,9 +23,9 @@ import org.springframework.stereotype.Service;
 public class TaskDispatchService {
 
   public static final String DISPATCH_TYPE_KEY = "dispatchType";
-  private IFeatureExecutor featureExecutor;
-  private ExecuteProxy executeProxy;
-  private NodeStatusQueryLooper nodeStatusQueryLooper;
+  private final IFeatureExecutor featureExecutor;
+  private final ExecuteProxy executeProxy;
+  private final NodeStatusQueryLooper nodeStatusQueryLooper;
 
   private final Map<String, Function<JSONObject, Boolean>> funcMap = new HashMap<>();
 

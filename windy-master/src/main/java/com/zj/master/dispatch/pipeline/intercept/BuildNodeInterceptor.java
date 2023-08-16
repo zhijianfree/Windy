@@ -8,7 +8,7 @@ import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
 import com.zj.domain.entity.dto.pipeline.PublishBindDto;
 import com.zj.domain.entity.enums.PipelineType;
-import com.zj.domain.entity.vo.ImageRepository;
+import com.zj.domain.entity.vo.ImageRepositoryVo;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
 import com.zj.domain.repository.pipeline.IPipelineNodeRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
@@ -56,7 +56,7 @@ public class BuildNodeInterceptor implements INodeExecuteInterceptor {
       return;
     }
 
-    ImageRepository repository = configRepository.getRepository();
+    ImageRepositoryVo repository = configRepository.getRepository();
     PipelineNodeDto pipelineNode = pipelineNodeRepository.getPipelineNode(taskNode.getNodeId());
     PipelineDto pipeline = pipelineRepository.getPipeline(pipelineNode.getPipelineId());
     if (Objects.equals(pipeline.getPipelineType(), PipelineType.PUBLISH.getType())) {
@@ -79,7 +79,7 @@ public class BuildNodeInterceptor implements INodeExecuteInterceptor {
   }
 
   private void rebuildRequestContext(TaskNode taskNode, List<String> branches,
-      ImageRepository repository, boolean isPublish) {
+                                     ImageRepositoryVo repository, boolean isPublish) {
     BuildCodeContext requestContext = (BuildCodeContext) taskNode.getRequestContext();
     requestContext.setBranches(branches);
     requestContext.setIsPublish(isPublish);

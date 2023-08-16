@@ -1,9 +1,10 @@
 package com.zj.client.handler.pipeline.executer.vo;
 
-import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
+
+import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * 标记队列用来将同一个流水线的任务打标并放到一起

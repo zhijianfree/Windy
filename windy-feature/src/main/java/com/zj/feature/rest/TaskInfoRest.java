@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/devops/feature")
 public class TaskInfoRest {
 
-  private TaskInfoService taskInfoService;
+  private final TaskInfoService taskInfoService;
 
   public TaskInfoRest(TaskInfoService taskInfoService) {
     this.taskInfoService = taskInfoService;
@@ -33,7 +33,7 @@ public class TaskInfoRest {
 
   @GetMapping("/tasks")
   public ResponseMeta<PageSize<TaskInfoDto>> getTaskList(@RequestParam(value = "page", defaultValue = "1") Integer page,
-      @RequestParam(value = "size", defaultValue = "10") Integer size, @RequestParam(value = "name") String name) {
+      @RequestParam(value = "size", defaultValue = "10") Integer size, @RequestParam(value = "name", defaultValue = "") String name) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, taskInfoService.getTaskList(name, page, size));
   }
 

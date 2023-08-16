@@ -1,10 +1,11 @@
 package com.zj.client.handler.pipeline.git;
 
 import com.zj.client.handler.pipeline.executer.vo.GitMeta;
-import java.util.List;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.lib.Ref;
+
+import java.util.List;
 
 /**
  * @author guyuelan

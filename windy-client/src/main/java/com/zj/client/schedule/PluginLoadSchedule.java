@@ -26,10 +26,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class PluginLoadSchedule {
 
-  private RequestProxy requestProxy;
-  private PluginManager pluginManager;
-  private InstanceMonitor instanceMonitor;
-  private MethodInvoke methodInvoke;
+  private final RequestProxy requestProxy;
+  private final PluginManager pluginManager;
+  private final InstanceMonitor instanceMonitor;
+  private final MethodInvoke methodInvoke;
 
   public PluginLoadSchedule(RequestProxy requestProxy, PluginManager pluginManager,
       InstanceMonitor instanceMonitor, MethodInvoke methodInvoke) {
@@ -61,7 +61,7 @@ public class PluginLoadSchedule {
 
     log.info("find plugin to load={}", needLoad.stream().map(PluginInfo::getPluginName).collect(
         Collectors.toList()));
-    needLoad.forEach(pluginInfo -> pluginManager.saveJarPlugin(pluginInfo));
+    needLoad.forEach(pluginManager::saveJarPlugin);
     methodInvoke.loadPluginFromDisk();
   }
 

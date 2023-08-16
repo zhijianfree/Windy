@@ -1,9 +1,10 @@
 package com.zj.client.handler.feature.executor.vo;
 
 import com.zj.client.entity.vo.ExecutePoint;
+import lombok.Data;
+
 import java.util.List;
 import java.util.Map;
-import lombok.Data;
 
 /**
  * @author guyuelan

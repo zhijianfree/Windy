@@ -10,9 +10,6 @@ spring:
     username: root
     password: zj137899
 
-ribbon:
-  MaxAutoRetries: 0
-
 eureka:
   instance:
     # 服务时效时间，默认90秒.当server 90秒内没有收到client的注册信息时，会将该节点剔除
@@ -45,4 +42,4 @@ eureka:
     # client每隔30秒，向server请求可用服务清单。对于API网关类应用，可以适当降低时间间隔
     registry-fetch-interval-seconds: 90
     service-url:
-      defaultZone: http://windy-master:9768/eureka/
+      defaultZone: http://windy-cluster:9768/eureka/

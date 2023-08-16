@@ -1,15 +1,16 @@
 package com.zj.client.service;
 
-import com.zj.common.model.ClientCollect;
 import com.zj.client.handler.pipeline.executer.notify.NodeStatusQueryLooper;
+import com.zj.common.model.ClientCollect;
 import com.zj.common.monitor.collector.InstanceCollector;
 import com.zj.common.monitor.collector.PhysicsCollect;
-import java.io.File;
-import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * @author guyuelan
@@ -20,7 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ClientMonitor {
 
   public static final String PLUGINS_PATH = "plugins";
-  private NodeStatusQueryLooper nodeStatusQueryLooper;
+  private final NodeStatusQueryLooper nodeStatusQueryLooper;
 
   public ClientMonitor(NodeStatusQueryLooper nodeStatusQueryLooper) {
     this.nodeStatusQueryLooper = nodeStatusQueryLooper;

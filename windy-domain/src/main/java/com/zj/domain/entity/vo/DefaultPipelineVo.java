@@ -7,7 +7,7 @@ import lombok.Data;
  * @since 2023/8/1
  */
 @Data
-public class DefaultPipeline {
+public class DefaultPipelineVo {
 
   private String configDetail;
 }

@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ExecuteStrategyFactory {
 
-  private Map<Integer, IExecuteStrategy> executeStrategyMap;
+  private final Map<Integer, IExecuteStrategy> executeStrategyMap;
 
   public ExecuteStrategyFactory(List<IExecuteStrategy> strategies) {
     executeStrategyMap = strategies.stream()

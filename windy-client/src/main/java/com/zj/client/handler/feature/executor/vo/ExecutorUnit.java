@@ -2,9 +2,10 @@ package com.zj.client.handler.feature.executor.vo;
 
 import com.zj.client.entity.dto.ExecutePointDTO;
 import com.zj.plugin.loader.ParameterDefine;
+import lombok.Data;
+
 import java.util.List;
 import java.util.Map;
-import lombok.Data;
 
 @Data
 public class ExecutorUnit {

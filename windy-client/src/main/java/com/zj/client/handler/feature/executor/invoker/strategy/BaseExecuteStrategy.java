@@ -22,9 +22,9 @@ import java.util.stream.Collectors;
  */
 public abstract class BaseExecuteStrategy implements IExecuteStrategy {
 
-  private InterceptorProxy interceptorProxy;
+  private final InterceptorProxy interceptorProxy;
 
-  private Map<Integer, IExecuteInvoker> executeInvokerMap;
+  private final Map<Integer, IExecuteInvoker> executeInvokerMap;
 
   private final CompareHandler compareHandler;
 

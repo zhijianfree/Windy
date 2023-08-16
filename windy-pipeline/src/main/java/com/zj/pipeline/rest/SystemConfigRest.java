@@ -3,9 +3,10 @@ package com.zj.pipeline.rest;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.ResponseMeta;
 import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
-import com.zj.domain.entity.vo.DefaultPipeline;
+import com.zj.domain.entity.vo.DefaultPipelineVo;
 import com.zj.domain.entity.vo.GitAccessVo;
-import com.zj.domain.entity.vo.ImageRepository;
+import com.zj.domain.entity.vo.ImageRepositoryVo;
+import com.zj.domain.entity.vo.MavenConfigVo;
 import com.zj.pipeline.service.SystemConfigService;
 import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class SystemConfigRest {
 
-  private SystemConfigService systemConfigService;
+  private final SystemConfigService systemConfigService;
 
   public SystemConfigRest(SystemConfigService systemConfigService) {
     this.systemConfigService = systemConfigService;
@@ -71,20 +72,32 @@ public class SystemConfigRest {
   }
 
   @ResponseBody
+  @PutMapping("/system/config/maven")
+  public ResponseMeta<Boolean> updateMaven(@RequestBody MavenConfigVo mavenConfig) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, systemConfigService.updateMavenConfig(mavenConfig));
+  }
+
+  @ResponseBody
+  @GetMapping("/system/config/maven")
+  public ResponseMeta<MavenConfigVo> getMavenConfig() {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, systemConfigService.getMavenConfig());
+  }
+
+  @ResponseBody
   @GetMapping("/system/config/repository")
-  public ResponseMeta<ImageRepository> getRepositoryConfig() {
+  public ResponseMeta<ImageRepositoryVo> getRepositoryConfig() {
     return new ResponseMeta<>(ErrorCode.SUCCESS, systemConfigService.getImageRepository());
   }
 
   @ResponseBody
   @PutMapping("/system/config/repository")
-  public ResponseMeta<Boolean> updateRepository(@RequestBody ImageRepository repository) {
+  public ResponseMeta<Boolean> updateRepository(@RequestBody ImageRepositoryVo repository) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, systemConfigService.updateRepository(repository));
   }
 
   @ResponseBody
   @GetMapping("/system/config/pipe")
-  public ResponseMeta<DefaultPipeline> getDefaultPipeline() {
+  public ResponseMeta<DefaultPipelineVo> getDefaultPipeline() {
     return new ResponseMeta<>(ErrorCode.SUCCESS, systemConfigService.getDefaultPipeline());
   }
 

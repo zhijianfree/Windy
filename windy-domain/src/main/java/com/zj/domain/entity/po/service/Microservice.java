@@ -32,6 +32,11 @@ public class Microservice {
     private String description;
 
     /**
+     * 服务优先级，用来服务列表排序
+     * */
+    private Integer priority;
+
+    /**
      * 创建时间
      * */
     private Long createTime;

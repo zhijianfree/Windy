@@ -8,19 +8,18 @@ import com.zj.client.handler.deploy.IDeployMode;
 import com.zj.client.handler.deploy.jar.JarDeployContext;
 import com.zj.client.handler.deploy.k8s.K8sDeployContext;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
-import com.zj.client.handler.pipeline.executer.vo.DeployRequest;
+import com.zj.client.handler.pipeline.executer.vo.*;
 import com.zj.client.handler.pipeline.executer.vo.DeployRequest.K8SParams;
 import com.zj.client.handler.pipeline.executer.vo.DeployRequest.SSHParams;
-import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel.ResponseStatus;
-import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
-import com.zj.client.handler.pipeline.executer.vo.TaskNode;
-import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
 import com.zj.client.utils.Utils;
 import com.zj.common.enums.DeployType;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ExecuteException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -28,8 +27,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /**
  * Jar部署处理

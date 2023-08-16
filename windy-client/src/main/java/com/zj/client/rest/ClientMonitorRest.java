@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/devops/client")
 public class ClientMonitorRest {
 
-  private ClientMonitor clientMonitor;
+  private final ClientMonitor clientMonitor;
 
   public ClientMonitorRest(ClientMonitor clientMonitor) {
     this.clientMonitor = clientMonitor;

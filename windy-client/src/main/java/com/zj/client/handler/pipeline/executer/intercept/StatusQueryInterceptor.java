@@ -3,9 +3,10 @@ package com.zj.client.handler.pipeline.executer.intercept;
 import com.zj.client.handler.pipeline.executer.notify.NodeStatusQueryLooper;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.common.enums.ProcessStatus;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 /**
  * 节点开始执行之后，需要轮询结果。
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class StatusQueryInterceptor implements INodeExecuteInterceptor {
 
-  private NodeStatusQueryLooper nodeStatusQueryLooper;
+  private final NodeStatusQueryLooper nodeStatusQueryLooper;
 
   public StatusQueryInterceptor(NodeStatusQueryLooper nodeStatusQueryLooper) {
     this.nodeStatusQueryLooper = nodeStatusQueryLooper;

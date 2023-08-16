@@ -15,6 +15,7 @@ import com.zj.domain.repository.feature.ITestCaseRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -24,12 +25,12 @@ import org.apache.commons.collections4.CollectionUtils;
 @Service
 public class MicroserviceService {
 
-  private IMicroServiceRepository microServiceRepository;
-  private UniqueIdService uniqueIdService;
-  private IPipelineRepository pipelineRepository;
+  private final IMicroServiceRepository microServiceRepository;
+  private final UniqueIdService uniqueIdService;
+  private final IPipelineRepository pipelineRepository;
 
-  private ITestCaseRepository testCaseRepository;
-  private IRepositoryBranch repositoryBranch;
+  private final ITestCaseRepository testCaseRepository;
+  private final IRepositoryBranch repositoryBranch;
 
   public MicroserviceService(IMicroServiceRepository microServiceRepository,
       UniqueIdService uniqueIdService, List<IRepositoryBranch> gitRepositories,
@@ -53,11 +54,11 @@ public class MicroserviceService {
       return pageSize;
     }
 
-    List<MicroserviceDto> MicroserviceDtoS = page.getRecords().stream()
+    List<MicroserviceDto> microservices = page.getRecords().stream()
         .map(microservice -> OrikaUtil.convert(microservice, MicroserviceDto.class))
         .collect(Collectors.toList());
 
-    pageSize.setData(MicroserviceDtoS);
+    pageSize.setData(microservices);
     pageSize.setTotal(page.getTotal());
     return pageSize;
   }
@@ -99,6 +100,8 @@ public class MicroserviceService {
   }
 
   public List<MicroserviceDto> getServices() {
-    return microServiceRepository.getServices();
+    return microServiceRepository.getServices().stream()
+        .sorted(Comparator.comparing(MicroserviceDto::getPriority).reversed()).collect(
+            Collectors.toList());
   }
 }

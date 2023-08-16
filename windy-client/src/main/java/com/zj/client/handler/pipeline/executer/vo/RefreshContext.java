@@ -1,8 +1,9 @@
 package com.zj.client.handler.pipeline.executer.vo;
 
+import lombok.Data;
+
 import java.util.List;
 import java.util.Map;
-import lombok.Data;
 
 /**
  * @author guyuelan

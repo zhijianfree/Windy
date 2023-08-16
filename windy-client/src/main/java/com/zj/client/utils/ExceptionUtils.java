@@ -18,10 +18,10 @@ public class ExceptionUtils {
   }
 
   public static String getSimplifyError(Throwable e) {
-    return getExceptionStackTrace(e, 15);
+    return getExceptionStackTrace(e);
   }
 
-  private static String getExceptionStackTrace(Throwable e, int line) {
+  private static String getExceptionStackTrace(Throwable e) {
     if (Objects.isNull(e)) {
       return "";
     }

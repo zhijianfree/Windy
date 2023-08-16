@@ -1,6 +1,5 @@
 package com.zj.client.handler.pipeline.executer.vo;
 
-import lombok.Builder;
 import lombok.Data;
 
 /**

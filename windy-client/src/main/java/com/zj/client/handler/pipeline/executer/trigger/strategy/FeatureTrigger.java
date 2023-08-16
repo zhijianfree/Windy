@@ -1,28 +1,23 @@
 package com.zj.client.handler.pipeline.executer.trigger.strategy;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
-import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
-import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
-import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
-import com.zj.client.handler.pipeline.executer.vo.TaskNode;
-import com.zj.client.handler.pipeline.executer.vo.TestRequestContext;
+import com.zj.client.handler.pipeline.executer.vo.*;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ExecuteException;
 import com.zj.common.model.DispatchTaskModel;
-import com.zj.common.model.ResponseMeta;
 import com.zj.common.monitor.RequestProxy;
 import com.zj.common.utils.OrikaUtil;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * 用例执行处理
@@ -35,7 +30,7 @@ public class FeatureTrigger implements INodeTrigger {
   private static final String TASK_STATUS_URL = "http://WindyMaster/v1/devops/master/task/%s/status";
   public static final String TASK_TIPS = "pipeline feature task";
 
-  private RequestProxy requestProxy;
+  private final RequestProxy requestProxy;
 
   public FeatureTrigger(RequestProxy requestProxy) {
     this.requestProxy = requestProxy;

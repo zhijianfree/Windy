@@ -2,8 +2,8 @@ package com.zj.client.handler.pipeline.executer.trigger;
 
 
 import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
-import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
+import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
 import com.zj.common.enums.ExecuteType;
 
 /**

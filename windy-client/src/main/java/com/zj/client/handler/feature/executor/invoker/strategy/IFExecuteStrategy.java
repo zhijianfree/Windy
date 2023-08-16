@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class IFExecuteStrategy extends BaseExecuteStrategy {
 
-  private OgnlDataParser ognlDataParser = new OgnlDataParser();
+  private final OgnlDataParser ognlDataParser = new OgnlDataParser();
 
   public IFExecuteStrategy(InterceptorProxy interceptorProxy,
       List<IExecuteInvoker> executeInvokers,

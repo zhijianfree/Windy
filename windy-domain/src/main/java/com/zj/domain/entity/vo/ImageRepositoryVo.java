@@ -7,7 +7,7 @@ import lombok.Data;
  * @since 2023/8/1
  */
 @Data
-public class ImageRepository {
+public class ImageRepositoryVo {
 
   /**
    * 推送的镜像仓库地址

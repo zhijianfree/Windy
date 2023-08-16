@@ -1,11 +1,11 @@
 package com.zj.client.handler.pipeline.executer.vo;
 
 import com.zj.common.enums.ProcessStatus;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 流水线状态扭转事件

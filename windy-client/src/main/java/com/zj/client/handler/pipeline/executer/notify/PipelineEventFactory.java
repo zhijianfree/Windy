@@ -2,9 +2,10 @@ package com.zj.client.handler.pipeline.executer.notify;
 
 import com.google.common.eventbus.EventBus;
 import com.zj.client.handler.pipeline.executer.vo.PipelineStatusEvent;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * 使用eventBus结偶调用
@@ -14,12 +15,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class PipelineEventFactory {
-  private static EventBus eventBus = new EventBus();
+  private static final EventBus eventBus = new EventBus();
 
   public PipelineEventFactory(List<IPipelineStatusListener> notifyList) {
-    notifyList.forEach(listener ->{
-      eventBus.register(listener);
-    });
+    notifyList.forEach(eventBus::register);
   }
 
   public static void sendNotifyEvent(PipelineStatusEvent event) {

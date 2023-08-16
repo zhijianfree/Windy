@@ -5,9 +5,10 @@ import com.zj.common.model.ClientCollect;
 import com.zj.common.model.MasterCollect;
 import com.zj.common.monitor.RequestProxy;
 import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
-import com.zj.domain.entity.vo.DefaultPipeline;
+import com.zj.domain.entity.vo.DefaultPipelineVo;
 import com.zj.domain.entity.vo.GitAccessVo;
-import com.zj.domain.entity.vo.ImageRepository;
+import com.zj.domain.entity.vo.ImageRepositoryVo;
+import com.zj.domain.entity.vo.MavenConfigVo;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.pipeline.entity.dto.SystemMonitorDto;
 import java.util.List;
@@ -16,9 +17,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class SystemConfigService {
 
-  private ISystemConfigRepository systemConfigRepository;
-  private UniqueIdService uniqueIdService;
-  private RequestProxy requestProxy;
+  private final ISystemConfigRepository systemConfigRepository;
+  private final UniqueIdService uniqueIdService;
+  private final RequestProxy requestProxy;
 
   public SystemConfigService(ISystemConfigRepository systemConfigRepository,
       UniqueIdService uniqueIdService, RequestProxy requestProxy) {
@@ -67,15 +68,23 @@ public class SystemConfigService {
     return systemConfigRepository.updateGitAccess(gitAccessVo);
   }
 
-  public ImageRepository getImageRepository() {
+  public ImageRepositoryVo getImageRepository() {
     return systemConfigRepository.getRepository();
   }
 
-  public boolean updateRepository(ImageRepository repository) {
+  public boolean updateRepository(ImageRepositoryVo repository) {
     return systemConfigRepository.updateRepository(repository);
   }
 
-  public DefaultPipeline getDefaultPipeline() {
+  public DefaultPipelineVo getDefaultPipeline() {
     return systemConfigRepository.getDefaultPipeline();
+  }
+
+  public Boolean updateMavenConfig(MavenConfigVo mavenConfig) {
+    return systemConfigRepository.updateMavenConfig(mavenConfig);
+  }
+
+  public MavenConfigVo getMavenConfig() {
+    return systemConfigRepository.getMavenConfig();
   }
 }

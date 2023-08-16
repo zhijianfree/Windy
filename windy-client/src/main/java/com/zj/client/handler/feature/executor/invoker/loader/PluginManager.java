@@ -1,8 +1,14 @@
 package com.zj.client.handler.feature.executor.invoker.loader;
 
 import com.zj.client.config.GlobalEnvConfig;
-import com.zj.plugin.loader.Feature;
 import com.zj.common.model.PluginInfo;
+import com.zj.plugin.loader.Feature;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.stereotype.Component;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -10,12 +16,6 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.jar.JarFile;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.stereotype.Component;
 
 /**
  * @author guyuelan
@@ -28,7 +28,7 @@ public class PluginManager {
   public static final String PLUGIN_PATH = "plugins";
   public static final String PLUGINS_PATH_FORMAT = "file:%s/" + PLUGIN_PATH + "/*.jar";
 
-  private GlobalEnvConfig globalEnvConfig;
+  private final GlobalEnvConfig globalEnvConfig;
 
   public PluginManager(GlobalEnvConfig globalEnvConfig) {
     this.globalEnvConfig = globalEnvConfig;
