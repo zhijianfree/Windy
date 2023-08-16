@@ -2,14 +2,10 @@ package com.zj.client.rest;
 
 import com.alibaba.fastjson.JSONObject;
 import com.zj.client.service.TaskDispatchService;
-import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
+import com.zj.common.model.ResponseMeta;
 import com.zj.common.model.StopDispatch;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author guyuelan
@@ -19,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/client/task")
 public class TaskDispatchRest {
 
-  private TaskDispatchService taskDispatchService;
+  private final TaskDispatchService taskDispatchService;
 
   public TaskDispatchRest(TaskDispatchService taskDispatchService) {
     this.taskDispatchService = taskDispatchService;

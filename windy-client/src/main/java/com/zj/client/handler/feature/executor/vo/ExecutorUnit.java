@@ -1,10 +1,11 @@
 package com.zj.client.handler.feature.executor.vo;
 
 import com.zj.client.entity.dto.ExecutePointDTO;
-import com.zj.client.entity.dto.ParamDefine;
+import com.zj.plugin.loader.ParameterDefine;
+import lombok.Data;
+
 import java.util.List;
 import java.util.Map;
-import lombok.Data;
 
 @Data
 public class ExecutorUnit {
@@ -33,7 +34,7 @@ public class ExecutorUnit {
     /**
      * 方法参数
      * */
-    private List<ParamDefine> params;
+    private List<ParameterDefine> params;
 
     /**
      * 针对for循环的需要特殊处理

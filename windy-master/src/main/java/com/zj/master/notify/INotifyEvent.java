@@ -1,6 +1,5 @@
 package com.zj.master.notify;
 
-import com.alibaba.fastjson.JSONObject;
 import com.zj.common.enums.NotifyType;
 import com.zj.common.model.ResultEvent;
 

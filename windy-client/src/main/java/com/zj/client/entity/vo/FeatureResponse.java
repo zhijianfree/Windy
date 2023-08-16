@@ -1,6 +1,7 @@
 package com.zj.client.entity.vo;
 
 import com.zj.client.handler.feature.executor.compare.CompareResult;
+import com.zj.plugin.loader.ExecuteDetailVo;
 import java.util.Objects;
 import lombok.Builder;
 import lombok.Data;
@@ -33,7 +34,7 @@ public class FeatureResponse {
 
         boolean compareStatus = true;
         if (Objects.nonNull(compareResult)){
-            compareStatus = compareResult.getCompareStatus();
+            compareStatus = compareResult.isCompareStatus();
         }
 
         return invokeStatus && compareStatus;

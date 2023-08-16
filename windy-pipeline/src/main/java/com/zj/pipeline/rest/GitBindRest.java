@@ -1,10 +1,9 @@
 package com.zj.pipeline.rest;
 
-import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
+import com.zj.common.model.ResponseMeta;
 import com.zj.domain.entity.dto.pipeline.BindBranchDto;
 import com.zj.pipeline.service.GitBindService;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * @author guyuelan
  * @since 2021/10/15
@@ -28,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class GitBindRest {
 
-  private GitBindService gitBindService;
+  private final GitBindService gitBindService;
 
   public GitBindRest(GitBindService gitBindService) {
     this.gitBindService = gitBindService;

@@ -8,9 +8,9 @@ import com.zj.domain.entity.dto.pipeline.CodeChangeDto;
 import com.zj.domain.entity.dto.pipeline.RelationDemandBug;
 import com.zj.domain.entity.dto.service.MicroserviceDto;
 import com.zj.domain.repository.pipeline.ICodeChangeRepository;
-import com.zj.pipeline.git.IRepositoryBranch;
+import com.zj.common.git.IRepositoryBranch;
+import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.pipeline.git.RepositoryFactory;
-import com.zj.service.service.MicroserviceService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -25,15 +25,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class CodeChangeService {
 
-  private RepositoryFactory repositoryFactory;
-  private MicroserviceService microservice;
-  private UniqueIdService uniqueIdService;
-  private ICodeChangeRepository codeChangeRepository;
+  private final RepositoryFactory repositoryFactory;
+  private final IMicroServiceRepository serviceRepository;
+  private final UniqueIdService uniqueIdService;
+  private final ICodeChangeRepository codeChangeRepository;
 
-  public CodeChangeService(RepositoryFactory repositoryFactory, MicroserviceService microservice,
+  public CodeChangeService(RepositoryFactory repositoryFactory, IMicroServiceRepository serviceRepository,
       UniqueIdService uniqueIdService, ICodeChangeRepository codeChangeRepository) {
     this.repositoryFactory = repositoryFactory;
-    this.microservice = microservice;
+    this.serviceRepository = serviceRepository;
     this.uniqueIdService = uniqueIdService;
     this.codeChangeRepository = codeChangeRepository;
   }
@@ -88,7 +88,7 @@ public class CodeChangeService {
   }
 
   private MicroserviceDto checkServiceExist(String serviceId) {
-    MicroserviceDto serviceDetail = microservice.queryServiceDetail(serviceId);
+    MicroserviceDto serviceDetail = serviceRepository.queryServiceDetail(serviceId);
     if (Objects.isNull(serviceDetail)) {
       log.warn("can not find serviceId ={}", serviceId);
       throw new ApiException(ErrorCode.NOT_FOUND_SERVICE);

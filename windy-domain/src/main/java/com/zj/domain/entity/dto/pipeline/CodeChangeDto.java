@@ -1,10 +1,8 @@
 package com.zj.domain.entity.dto.pipeline;
 
-import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.po.pipeline.CodeChange;
-import java.util.Objects;
-import javax.validation.constraints.NotEmpty;
 import lombok.Data;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author guyuelan

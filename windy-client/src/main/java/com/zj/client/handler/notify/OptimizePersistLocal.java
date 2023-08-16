@@ -6,6 +6,12 @@ import com.google.common.io.CharSink;
 import com.google.common.io.FileWriteMode;
 import com.google.common.io.Files;
 import com.zj.common.model.ResultEvent;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -14,11 +20,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 
 /**
  * Client 将通知失败的数据缓存到本地文件， 然后慢慢轮询通知master节点 为了保证数据一致性
@@ -48,9 +49,9 @@ public class OptimizePersistLocal implements DisposableBean {
     if (!file.exists()) {
       try {
         Files.createParentDirs(file);
+        Files.touch(file);
       } catch (IOException e) {
         log.error("create target file error");
-
         tryRuntimeDir();
       }
     }

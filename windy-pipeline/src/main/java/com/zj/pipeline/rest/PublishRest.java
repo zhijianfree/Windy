@@ -4,7 +4,6 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.ResponseMeta;
 import com.zj.domain.entity.dto.pipeline.PublishBindDto;
 import com.zj.pipeline.service.PublishService;
-import java.util.List;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * @author guyuelan
  * @since 2023/6/28
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/devops/pipeline")
 public class PublishRest {
 
-  private PublishService publishService;
+  private final PublishService publishService;
 
   public PublishRest(PublishService publishService) {
     this.publishService = publishService;

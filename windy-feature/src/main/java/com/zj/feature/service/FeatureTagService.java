@@ -15,7 +15,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class FeatureTagService{
 
-  private IFeatureTagRepository featureTagRepository;
+  private final IFeatureTagRepository featureTagRepository;
 
   public FeatureTagService(IFeatureTagRepository featureTagRepository) {
     this.featureTagRepository = featureTagRepository;

@@ -1,7 +1,8 @@
 package com.zj.common.model;
 
-import java.util.List;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class PageSize<T> {

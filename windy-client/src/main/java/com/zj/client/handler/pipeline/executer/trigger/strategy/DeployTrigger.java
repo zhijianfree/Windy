@@ -1,24 +1,32 @@
 package com.zj.client.handler.pipeline.executer.trigger.strategy;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.zj.client.config.GlobalEnvConfig;
+import com.zj.client.handler.deploy.DeployContext;
 import com.zj.client.handler.deploy.DeployFactory;
 import com.zj.client.handler.deploy.IDeployMode;
 import com.zj.client.handler.deploy.jar.JarDeployContext;
-import com.zj.client.entity.dto.ResponseModel;
+import com.zj.client.handler.deploy.k8s.K8sDeployContext;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
-import com.zj.client.handler.pipeline.executer.vo.DeployRequest;
-import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
-import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
-import com.zj.client.handler.pipeline.executer.vo.TaskNode;
+import com.zj.client.handler.pipeline.executer.vo.*;
+import com.zj.client.handler.pipeline.executer.vo.DeployRequest.K8SParams;
+import com.zj.client.handler.pipeline.executer.vo.DeployRequest.SSHParams;
+import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel.ResponseStatus;
 import com.zj.client.utils.Utils;
+import com.zj.common.enums.DeployType;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.ProcessStatus;
-import java.io.File;
-import java.io.IOException;
+import com.zj.common.exception.ExecuteException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Jar部署处理
@@ -33,10 +41,14 @@ public class DeployTrigger implements INodeTrigger {
   private final DeployFactory deployFactory;
   private final GlobalEnvConfig globalEnvConfig;
 
+  private final Map<Integer, Function<DeployRequest, DeployContext>> functionMap = new HashMap<>();
+
   public DeployTrigger(DeployFactory deployFactory,
       GlobalEnvConfig globalEnvConfig) {
     this.deployFactory = deployFactory;
     this.globalEnvConfig = globalEnvConfig;
+    functionMap.put(DeployType.SSH.getType(), this::buildSSHContext);
+    functionMap.put(DeployType.K8S.getType(), this::buildK8SContext);
   }
 
   @Override
@@ -48,32 +60,56 @@ public class DeployTrigger implements INodeTrigger {
   public void triggerRun(TriggerContext triggerContext, TaskNode taskNode) throws IOException {
     DeployRequest deployRequest = JSON.parseObject(JSON.toJSONString(triggerContext.getData()),
         DeployRequest.class);
-    String serviceName = Utils.getServiceFromUrl(deployRequest.getGitUrl());
-    String filePath =
-        globalEnvConfig.getPipelineWorkspace(serviceName, deployRequest.getPipelineId())
-            + File.separator + DEPLOY;
-    JarDeployContext jarContext = JarDeployContext.builder().sshUser(globalEnvConfig.getSShUser())
-        .sshPassword(globalEnvConfig.getSSHPassword())
-        .remotePath(deployRequest.getRemotePath())
-        .sshIp(deployRequest.getSshIp())
-        .sshPort(deployRequest.getSshPort())
-        .localPath(filePath)
-        .servicePort(deployRequest.getServerPort())
-        .build();
-    jarContext.setRecordId(taskNode.getRecordId());
+    Function<DeployRequest, DeployContext> function = functionMap.get(
+        deployRequest.getDeployType());
+    if (Objects.isNull(function)) {
+      throw new ExecuteException("can not find deploy type");
+    }
+    DeployContext deployContext = function.apply(deployRequest);
+    deployContext.setRecordId(taskNode.getRecordId());
 
     IDeployMode deployMode = deployFactory.getDeployMode(deployRequest.getDeployType());
-    deployMode.deploy(jarContext);
+    deployMode.deploy(deployContext);
   }
 
   @Override
   public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
     ProcessStatus deployStatus = deployFactory.getDeployStatus(taskNode.getRecordId());
-    ResponseModel responseModel = new ResponseModel();
-    responseModel.setStatus(deployStatus.getType());
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("status", deployStatus.getType());
-    responseModel.setData(jsonObject);
-    return JSON.toJSONString(responseModel);
+    QueryResponseModel loopQueryResponse = new QueryResponseModel();
+    loopQueryResponse.setStatus(deployStatus.getType());
+    ResponseStatus responseStatus = new ResponseStatus();
+    responseStatus.setStatus(loopQueryResponse.getStatus());
+    loopQueryResponse.setData(responseStatus);
+    return JSON.toJSONString(loopQueryResponse);
+  }
+
+  private JarDeployContext buildSSHContext(DeployRequest deployRequest) {
+    String serviceName = Utils.getServiceFromUrl(deployRequest.getGitUrl());
+    String filePath =
+        globalEnvConfig.getPipelineWorkspace(serviceName, deployRequest.getPipelineId())
+            + File.separator + DEPLOY;
+    SSHParams sshParams = JSON.parseObject(JSON.toJSONString(deployRequest.getParams()), SSHParams.class);
+    String serverPort = Optional.ofNullable(deployRequest.getServerPort()).orElse("");
+    return JarDeployContext.builder().sshUser(sshParams.getUser())
+        .sshPassword(sshParams.getPassword())
+        .remotePath(sshParams.getRemotePath())
+        .sshIp(sshParams.getSshIp())
+        .sshPort(sshParams.getSshPort())
+        .localPath(filePath)
+        .servicePort(serverPort)
+        .build();
+  }
+
+  private K8sDeployContext buildK8SContext(DeployRequest deployRequest) {
+    String serviceName = Utils.getServiceFromUrl(deployRequest.getGitUrl());
+    K8SParams k8SParams = JSON.parseObject(JSON.toJSONString(deployRequest.getParams()), K8SParams.class);
+    return K8sDeployContext.builder()
+        .apiService(k8SParams.getApiService())
+        .token(k8SParams.getToken())
+        .imageName(deployRequest.getImageName())
+        .namespace(k8SParams.getNamespace())
+        .replicas(deployRequest.getReplicas())
+        .serviceName(serviceName)
+        .build();
   }
 }

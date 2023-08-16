@@ -9,13 +9,13 @@ import lombok.Data;
 @Data
 public class DeployContext extends RequestContext{
 
-  private String serverPort;
+  private String envId;
 
-  private String remotePath;
+  private Object params;
 
-  private String sshIp;
+  private Integer deployType;
 
-  private Integer sshPort;
+  private String imageName;
 
-  private String deployType;
+
 }

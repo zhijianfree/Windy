@@ -16,8 +16,8 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class TestCaseConfigService {
 
-  private UniqueIdService uniqueIdService;
-  private ITestCaseConfigRepository testCaseConfigRepository;
+  private final UniqueIdService uniqueIdService;
+  private final ITestCaseConfigRepository testCaseConfigRepository;
 
   public TestCaseConfigService(UniqueIdService uniqueIdService,
       ITestCaseConfigRepository testCaseConfigRepository) {

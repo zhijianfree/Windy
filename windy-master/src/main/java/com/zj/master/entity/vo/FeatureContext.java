@@ -1,6 +1,5 @@
 package com.zj.master.entity.vo;
 
-import lombok.Builder;
 import lombok.Data;
 
 /**

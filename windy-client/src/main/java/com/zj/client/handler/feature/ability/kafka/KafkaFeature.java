@@ -1,8 +1,10 @@
 package com.zj.client.handler.feature.ability.kafka;
 
-import com.zj.client.entity.vo.ExecuteDetailVo;
-import com.zj.client.handler.feature.ability.Feature;
-import com.zj.client.handler.feature.ability.FeatureDefine;
+import com.zj.client.entity.enuns.ParamTypeEnum;
+import com.zj.plugin.loader.ExecuteDetailVo;
+import com.zj.plugin.loader.Feature;
+import com.zj.plugin.loader.FeatureDefine;
+import com.zj.plugin.loader.ParameterDefine;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -110,7 +112,77 @@ public class KafkaFeature implements Feature {
 
   @Override
   public List<FeatureDefine> scanFeatureDefines() {
-    return null;
+    FeatureDefine sendDefine = getSendKafakDefine();
+    FeatureDefine consumeDefine = getConsumeKafakDefine();
+    return Arrays.asList(sendDefine, consumeDefine);
+  }
+
+  private FeatureDefine getConsumeKafakDefine() {
+    FeatureDefine featureDefine = new FeatureDefine();
+    featureDefine.setName("ConsumeKafka");
+    featureDefine.setSource("com.zj.client.handler.feature.ability.kafka.KafkaFeature");
+    featureDefine.setMethod("startConsume");
+    featureDefine.setDescription("消费kafka消息");
+    List<ParameterDefine> params = new ArrayList<>();
+    ParameterDefine topic = new ParameterDefine();
+    topic.setParamKey("topic");
+    topic.setType(ParamTypeEnum.STRING.getType());
+    topic.setDescription("topic");
+    params.add(topic);
+
+    ParameterDefine group = new ParameterDefine();
+    group.setParamKey("group");
+    group.setType(ParamTypeEnum.STRING.getType());
+    group.setDescription("消费组");
+    params.add(group);
+
+    ParameterDefine address = new ParameterDefine();
+    address.setParamKey("address");
+    address.setType(ParamTypeEnum.STRING.getType());
+    address.setDescription("kafka地址");
+    params.add(address);
+    featureDefine.setParams(params);
+    return featureDefine;
+  }
+
+  private FeatureDefine getSendKafakDefine() {
+    FeatureDefine featureDefine = new FeatureDefine();
+    featureDefine.setName("SendKafka");
+    featureDefine.setSource("com.zj.client.handler.feature.ability.kafka.KafkaFeature");
+    featureDefine.setMethod("produceMessage");
+    featureDefine.setDescription("发送kafka消息");
+    List<ParameterDefine> params = new ArrayList<>();
+    ParameterDefine topic = new ParameterDefine();
+    topic.setParamKey("topic");
+    topic.setType(ParamTypeEnum.STRING.getType());
+    topic.setDescription("topic");
+    params.add(topic);
+
+    ParameterDefine key = new ParameterDefine();
+    key.setParamKey("key");
+    key.setType(ParamTypeEnum.STRING.getType());
+    key.setDescription("key");
+    params.add(key);
+
+    ParameterDefine value = new ParameterDefine();
+    value.setParamKey("value");
+    value.setType(ParamTypeEnum.STRING.getType());
+    value.setDescription("消息内容");
+    params.add(value);
+
+    ParameterDefine timeout = new ParameterDefine();
+    timeout.setParamKey("timeout");
+    timeout.setType(ParamTypeEnum.INTEGER.getType());
+    timeout.setDescription("发送超时时间");
+    params.add(timeout);
+
+    ParameterDefine address = new ParameterDefine();
+    address.setParamKey("address");
+    address.setType(ParamTypeEnum.STRING.getType());
+    address.setDescription("kafka地址");
+    params.add(address);
+    featureDefine.setParams(params);
+    return featureDefine;
   }
 
   public static void main(String[] args) throws InterruptedException {

@@ -1,6 +1,5 @@
 package com.zj.domain.entity.dto.pipeline;
 
-import javax.validation.constraints.NotEmpty;
 import lombok.Data;
 
 /**

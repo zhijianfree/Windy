@@ -1,16 +1,15 @@
 package com.zj.pipeline.git;
 
-import com.alibaba.fastjson.JSON;
-import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
+import com.zj.common.enums.GitType;
+import com.zj.common.git.IRepositoryBranch;
+import com.zj.domain.entity.vo.GitAccessVo;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
-import com.zj.pipeline.entity.enums.GitType;
-import com.zj.pipeline.entity.vo.GitAccessVo;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import org.springframework.stereotype.Component;
 
 /**
  * @author guyuelan
@@ -19,15 +18,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class RepositoryFactory {
 
-  private IRepositoryBranch repositoryBranch;
+  private final IRepositoryBranch repositoryBranch;
 
-  public RepositoryFactory(List<IRepositoryBranch> repositories, ISystemConfigRepository systemConfig) {
-    SystemConfigDto config = systemConfig.getSystemConfig("2");
-    GitAccessVo gitAccessVo = JSON.parseObject(config.getConfigDetail(), GitAccessVo.class);
+  public RepositoryFactory(List<IRepositoryBranch> repositories,
+      ISystemConfigRepository systemConfig) {
+    GitAccessVo gitAccessVo = systemConfig.getGitAccess();
     String gitType = Optional.ofNullable(gitAccessVo).map(GitAccessVo::getGitType)
-        .orElse(GitType.Gitlab.name());
-    repositoryBranch = repositories.stream().filter(repository -> Objects.equals(repository.gitType(), gitType))
-        .findAny().orElse(null);
+        .filter(StringUtils::isNotBlank).orElse(GitType.Gitlab.name());
+    repositoryBranch = repositories.stream()
+        .filter(repository -> Objects.equals(repository.gitType(), gitType)).findAny().orElse(null);
   }
 
   public IRepositoryBranch getRepository() {

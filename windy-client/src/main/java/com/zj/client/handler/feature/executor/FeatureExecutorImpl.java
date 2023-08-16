@@ -4,16 +4,20 @@ import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.vo.ExecutePoint;
 import com.zj.client.entity.vo.ExecuteRecord;
 import com.zj.client.entity.vo.FeatureHistory;
-import com.zj.client.entity.vo.ExecuteDetailVo;
 import com.zj.client.entity.vo.FeatureResponse;
-import com.zj.client.handler.feature.executor.feature.strategy.ExecuteStrategyFactory;
+import com.zj.client.handler.feature.executor.invoker.strategy.ExecuteStrategyFactory;
+import com.zj.client.handler.feature.executor.vo.ExecuteContext;
 import com.zj.client.handler.feature.executor.vo.FeatureParam;
 import com.zj.client.handler.notify.IResultEventNotify;
 import com.zj.common.enums.NotifyType;
-import com.zj.common.model.ResultEvent;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
+import com.zj.common.model.ResultEvent;
 import com.zj.common.utils.IpUtils;
+import com.zj.plugin.loader.ExecuteDetailVo;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -23,8 +27,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -58,13 +60,14 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
           .sorted(Comparator.comparing(ExecutePoint::getSortOrder)).collect(Collectors.toList());
 
       AtomicInteger status = new AtomicInteger(ProcessStatus.SUCCESS.getType());
+      ExecuteContext executeContext = new ExecuteContext();
+      executeContext.bindMap(featureParam.getExecuteContext());
       for (ExecutePoint executePoint : executePoints) {
         ExecuteRecord executeRecord = new ExecuteRecord();
         executeRecord.setHistoryId(historyId);
         try {
           //2 使用策略类执行用例
-          List<FeatureResponse> responses = executeStrategyFactory.execute(executePoint,
-              featureParam.getExecuteContext());
+          List<FeatureResponse> responses = executeStrategyFactory.execute(executePoint, executeContext);
 
           boolean allSuccess = responses.stream().allMatch(FeatureResponse::isSuccess);
           executeRecord.setStatus(allSuccess ? ProcessStatus.SUCCESS.getType()

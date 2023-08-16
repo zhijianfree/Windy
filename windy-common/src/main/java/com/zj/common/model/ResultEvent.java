@@ -4,6 +4,8 @@ import com.zj.common.enums.NotifyType;
 import com.zj.common.enums.ProcessStatus;
 import lombok.Data;
 
+import java.util.Map;
+
 /**
  * @author guyuelan
  * @since 2023/5/16
@@ -13,12 +15,13 @@ public class ResultEvent {
 
   private String logId;
   private String masterIP;
-
   private String executeType;
   private String clientIp;
   private String executeId;
   private NotifyType notifyType;
   private ProcessStatus status;
+
+  private Map<String, Object> context;
   private Object params;
 
   public ResultEvent masterIP(String masterIP) {
@@ -58,6 +61,11 @@ public class ResultEvent {
 
   public ResultEvent clientIp(String clientIp) {
     this.clientIp = clientIp;
+    return this;
+  }
+
+  public ResultEvent context(Map<String, Object> context) {
+    this.context = context;
     return this;
   }
 }

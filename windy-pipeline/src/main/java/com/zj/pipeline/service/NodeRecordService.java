@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class NodeRecordService {
 
-  private INodeRecordRepository nodeRecordRepository;
+  private final INodeRecordRepository nodeRecordRepository;
 
   public static final String APPROVAL_TIPS = "审核通过";
 

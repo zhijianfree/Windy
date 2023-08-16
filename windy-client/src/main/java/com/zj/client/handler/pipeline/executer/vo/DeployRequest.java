@@ -13,13 +13,37 @@ public class DeployRequest {
 
   private String gitUrl;
 
-  private String remotePath;
-
-  private String sshIp;
-
-  private Integer sshPort;
+  private Object params;
 
   private String serverPort;
 
-  private String deployType;
+  private Integer deployType;
+
+  private String imageName;
+
+  private Integer replicas;
+
+  @Data
+  public static class SSHParams{
+    private String remotePath;
+
+    private String sshIp;
+
+    private Integer sshPort;
+
+    private String user;
+
+    private String password;
+  }
+
+  @Data
+  public static class K8SParams{
+    private String apiService;
+
+    private String token;
+
+    private String repository;
+
+    private String namespace;
+  }
 }

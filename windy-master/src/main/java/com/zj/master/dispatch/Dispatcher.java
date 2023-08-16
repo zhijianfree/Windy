@@ -1,13 +1,14 @@
 package com.zj.master.dispatch;
 
+import com.zj.common.model.DispatchTaskModel;
 import com.zj.domain.entity.dto.log.DispatchLogDto;
-import com.zj.master.entity.dto.TaskDetailDto;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /**
  * @author guyuelan
@@ -24,7 +25,7 @@ public class Dispatcher {
         .collect(Collectors.toMap(IDispatchExecutor::type, dispatchExecutor -> dispatchExecutor));
   }
 
-  public String dispatch(TaskDetailDto task) {
+  public String dispatch(DispatchTaskModel task, String logId) {
     log.info("go into dispatch name={}", task.getSourceName());
     IDispatchExecutor dispatchExecutor = dispatchExecutorMap.get(task.getType());
     if (Objects.isNull(dispatchExecutor)) {
@@ -32,7 +33,7 @@ public class Dispatcher {
       return null;
     }
     log.info("start dispatch name={}", task.getSourceName());
-    return dispatchExecutor.dispatch(task);
+    return dispatchExecutor.dispatch(task, logId);
   }
 
   public boolean resumeTask(DispatchLogDto taskLog) {

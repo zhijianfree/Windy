@@ -15,13 +15,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class FeatureHistoryService {
 
-  private ExecuteRecordService executeRecordService;
-  private FeatureService featureService;
-  private IFeatureHistoryRepository featureHistoryRepository;
+  private final FeatureService featureService;
+  private final IFeatureHistoryRepository featureHistoryRepository;
 
-  public FeatureHistoryService(ExecuteRecordService executeRecordService,
-      FeatureService featureService, IFeatureHistoryRepository featureHistoryRepository) {
-    this.executeRecordService = executeRecordService;
+  public FeatureHistoryService(FeatureService featureService, IFeatureHistoryRepository featureHistoryRepository) {
     this.featureService = featureService;
     this.featureHistoryRepository = featureHistoryRepository;
   }

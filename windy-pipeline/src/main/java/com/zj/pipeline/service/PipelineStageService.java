@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class PipelineStageService{
 
-  private IPipelineStageRepository pipelineStageRepository;
+  private final IPipelineStageRepository pipelineStageRepository;
 
   public PipelineStageService(IPipelineStageRepository pipelineStageRepository) {
     this.pipelineStageRepository = pipelineStageRepository;

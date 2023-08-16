@@ -4,8 +4,9 @@ import com.zj.common.model.MasterCollect;
 import com.zj.common.monitor.collector.InstanceCollector;
 import com.zj.common.monitor.collector.PhysicsCollect;
 import com.zj.master.dispatch.IDispatchExecutor;
-import java.util.List;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author guyuelan
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class MasterMonitor {
-  private List<IDispatchExecutor> dispatchExecutors;
+  private final List<IDispatchExecutor> dispatchExecutors;
 
   public MasterMonitor(List<IDispatchExecutor> dispatchExecutors) {
     this.dispatchExecutors = dispatchExecutors;

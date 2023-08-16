@@ -1,7 +1,6 @@
 package com.zj.client.utils;
 
 public class Utils {
-
   public static String getServiceFromUrl(String gitUrl) {
     if (org.apache.commons.lang.StringUtils.isBlank(gitUrl)) {
       return null;

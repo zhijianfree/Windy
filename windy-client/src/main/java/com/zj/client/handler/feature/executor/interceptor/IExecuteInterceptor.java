@@ -2,7 +2,7 @@ package com.zj.client.handler.feature.executor.interceptor;
 
 
 import com.zj.client.entity.vo.ExecutePoint;
-import com.zj.client.entity.vo.ExecuteDetailVo;
+import com.zj.plugin.loader.ExecuteDetailVo;
 import com.zj.client.handler.feature.executor.vo.ExecuteContext;
 import com.zj.client.handler.feature.executor.vo.ExecutorUnit;
 

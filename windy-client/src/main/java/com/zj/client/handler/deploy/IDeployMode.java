@@ -8,7 +8,7 @@ import com.zj.common.enums.ProcessStatus;
  */
 public interface IDeployMode<T extends DeployContext> {
 
-  String deployType();
+  Integer deployType();
 
   void deploy(T deployContext);
 

@@ -4,22 +4,23 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import com.zj.client.entity.vo.NodeRecord;
+import com.zj.client.handler.notify.IResultEventNotify;
 import com.zj.client.handler.pipeline.executer.notify.IPipelineStatusListener;
 import com.zj.client.handler.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
-import com.zj.client.handler.notify.IResultEventNotify;
 import com.zj.common.enums.NotifyType;
-import com.zj.common.model.ResultEvent;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.model.ResultEvent;
 import com.zj.common.monitor.trace.TidInterceptor;
 import com.zj.common.utils.IpUtils;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 /**
  * @author guyuelan
@@ -29,9 +30,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExecuteProxy implements IPipelineStatusListener {
 
-  private NodeExecutor nodeExecutor;
-  private IResultEventNotify resultEventNotify;
-  private Executor executorService;
+  private final NodeExecutor nodeExecutor;
+  private final IResultEventNotify resultEventNotify;
+  private final Executor executorService;
 
   public ExecuteProxy(NodeExecutor nodeExecutor, IResultEventNotify resultEventNotify,
       @Qualifier("pipelinePool") Executor executorService) {
@@ -82,7 +83,8 @@ public class ExecuteProxy implements IPipelineStatusListener {
         .executeType(taskNode.getExecuteType())
         .params(nodeRecord)
         .clientIp(IpUtils.getLocalIP())
-        .masterIP(taskNode.getMasterIp());
+        .masterIP(taskNode.getMasterIp())
+        .context(event.getContext());
     resultEventNotify.notifyEvent(resultEvent);
   }
 }

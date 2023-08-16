@@ -17,9 +17,31 @@ public class RequestContext {
    * */
   private boolean requestSingle;
 
+  /**
+   * 和requestSingle一起使用，singleClientIp用来指定具体是哪一个client节点
+   * */
   private String singleClientIp;
 
+  private String pipelineId;
+
+  /**
+   * 当前流水线所属服务的git地址
+   * */
   private String gitUrl;
 
-  private String pipelineId;
+  /**
+   * 全局git类型
+   * */
+  private String gitType;
+  /**
+   * git访问的凭据
+   * gitlab场景： oauth2
+   * gitea场景： 任意
+   * */
+  private String tokenName;
+
+  /**
+   * 访问git的token
+   * */
+  private String token;
 }

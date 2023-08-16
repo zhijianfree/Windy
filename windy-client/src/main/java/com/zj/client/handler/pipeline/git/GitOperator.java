@@ -1,15 +1,9 @@
 package com.zj.client.handler.pipeline.git;
 
-import com.zj.client.config.GlobalEnvConfig;
+import com.zj.client.handler.pipeline.executer.vo.GitMeta;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.exception.ExecuteException;
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeCommand;
@@ -27,35 +21,33 @@ import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 /**
  * @author guyuelan
  * @since 2023/3/29
  */
+@Slf4j
 @Component
 public class GitOperator implements IGitProcessor {
-
   public static final String MASTER = "master";
   public static final String ORIGIN = "origin";
-  private GlobalEnvConfig globalEnvConfig;
 
-  public GitOperator(GlobalEnvConfig globalEnvConfig) {
-    this.globalEnvConfig = globalEnvConfig;
-  }
-
-  public Git pullCodeFromGit(String gitUrl, String branch, String workspace) throws Exception {
+  public Git pullCodeFromGit(GitMeta gitMeta, String branch, String workspace) throws Exception {
     // 判断本地目录是否存在
     createIfNotExist(workspace);
 
     // clone 仓库到指定目录
-    // 提供用户名和密码的验证
-    String user = globalEnvConfig.getGitUser();
-    String pwd = globalEnvConfig.getGitPassword();
-    Git git = Git.cloneRepository().setURI(gitUrl).setDirectory(new File(workspace))
-        .setCredentialsProvider(new UsernamePasswordCredentialsProvider(user, pwd))
-        .setRemote(ORIGIN)
-        .setBranch(branch).call();
-    git.fetch().setRemote(ORIGIN).call();
-    return git;
+    return Git.cloneRepository().setURI(gitMeta.getGitUrl()).setDirectory(new File(workspace))
+        .setCredentialsProvider(
+            new UsernamePasswordCredentialsProvider(gitMeta.getTokenName(), gitMeta.getToken()))
+        .setRemote(ORIGIN).setBranch(branch).call();
   }
 
   private void createIfNotExist(String serviceDir) {
@@ -66,13 +58,14 @@ public class GitOperator implements IGitProcessor {
         return;
       }
       FileUtils.createParentDirectories(gitDir);
-    } catch (IOException ignore) {
+    } catch (IOException e) {
+      log.error("create file error", e);
     }
   }
 
-  public MergeResult createTempBranch(String gitUrl, List<String> branches, String workspace)
+  public MergeResult createTempBranch(GitMeta gitMeta, List<String> branches, String workspace)
       throws Exception {
-    Git git = pullCodeFromGit(gitUrl, MASTER, workspace);
+    Git git = pullCodeFromGit(gitMeta, MASTER, workspace);
     hasDifferencesWithMaster(branches, git);
 
     String tempBranch = getTempBranchName();
@@ -84,10 +77,10 @@ public class GitOperator implements IGitProcessor {
     MergeResult mergeResult = mergeCommand.call();
     if (mergeResult.getMergeStatus().isSuccessful()) {
       Ref repositoryRef = git.getRepository().findRef(tempBranch);
-      String user = globalEnvConfig.getGitUser();
-      String pwd = globalEnvConfig.getGitPassword();
       git.push().add(repositoryRef)
-          .setCredentialsProvider(new UsernamePasswordCredentialsProvider(user, pwd)).call();
+          .setCredentialsProvider(
+              new UsernamePasswordCredentialsProvider(gitMeta.getTokenName(), gitMeta.getToken()))
+          .call();
     }
     return mergeResult;
   }

@@ -1,6 +1,7 @@
 package com.zj.client.handler.feature.executor.vo;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -9,9 +10,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ExecuteContext {
 
-  private final ConcurrentHashMap<String, Object> contextMap = new ConcurrentHashMap<>();
+  private final Map<String, Object> contextMap = new ConcurrentHashMap<>();
 
   public void set(String key, Object value) {
+    if (Objects.isNull(key) || Objects.isNull(value)) {
+      return;
+    }
     contextMap.put(key, value);
   }
 

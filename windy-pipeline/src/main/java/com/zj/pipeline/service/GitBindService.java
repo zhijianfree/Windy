@@ -7,10 +7,10 @@ import com.zj.domain.entity.dto.pipeline.BindBranchDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.service.MicroserviceDto;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
-import com.zj.pipeline.git.IRepositoryBranch;
-import com.zj.pipeline.git.RepositoryFactory;
+import com.zj.common.git.IRepositoryBranch;
 import com.zj.pipeline.git.hook.IGitWebhook;
-import com.zj.service.service.MicroserviceService;
+import com.zj.domain.repository.service.IMicroServiceRepository;
+import com.zj.pipeline.git.RepositoryFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,19 +29,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class GitBindService {
 
-  private MicroserviceService microserviceService;
-  private PipelineService pipelineService;
+  private final IMicroServiceRepository microServiceRepository;
+  private final PipelineService pipelineService;
+  private final RepositoryFactory repositoryFactory;
+  private final UniqueIdService uniqueIdService;
+  private final IBindBranchRepository gitBindRepository;
+  private final Map<String, IGitWebhook> webhookMap;
 
-  private RepositoryFactory repositoryFactory;
-  private UniqueIdService uniqueIdService;
-  private IBindBranchRepository gitBindRepository;
-
-  private Map<String, IGitWebhook> webhookMap;
-
-  public GitBindService(MicroserviceService microserviceService, PipelineService pipelineService,
+  public GitBindService(IMicroServiceRepository microServiceRepository, PipelineService pipelineService,
       RepositoryFactory repositoryFactory,
       UniqueIdService uniqueIdService, IBindBranchRepository gitBindRepository, List<IGitWebhook> webhooks) {
-    this.microserviceService = microserviceService;
+    this.microServiceRepository = microServiceRepository;
     this.pipelineService = pipelineService;
     this.repositoryFactory = repositoryFactory;
     this.uniqueIdService = uniqueIdService;
@@ -114,7 +112,7 @@ public class GitBindService {
 
 
   public List<String> getServiceBranch(String serviceId) {
-    MicroserviceDto serviceDetail = microserviceService.queryServiceDetail(serviceId);
+    MicroserviceDto serviceDetail = microServiceRepository.queryServiceDetail(serviceId);
     IRepositoryBranch repository = repositoryFactory.getRepository();
     return repository.listBranch(serviceDetail.getServiceName());
   }

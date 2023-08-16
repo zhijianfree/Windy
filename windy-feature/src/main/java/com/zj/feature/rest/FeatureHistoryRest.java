@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class FeatureHistoryRest {
 
-    private FeatureHistoryService featureHistoryService;
+    private final FeatureHistoryService featureHistoryService;
 
     public FeatureHistoryRest(FeatureHistoryService featureHistoryService) {
         this.featureHistoryService = featureHistoryService;

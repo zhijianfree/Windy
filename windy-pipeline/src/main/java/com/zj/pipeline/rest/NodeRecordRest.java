@@ -1,7 +1,7 @@
 package com.zj.pipeline.rest;
 
-import com.zj.common.model.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
+import com.zj.common.model.ResponseMeta;
 import com.zj.pipeline.service.NodeRecordService;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/devops/pipeline")
 public class NodeRecordRest {
-  private NodeRecordService nodeRecordService;
+  private final NodeRecordService nodeRecordService;
 
   public NodeRecordRest(NodeRecordService nodeRecordService) {
     this.nodeRecordService = nodeRecordService;

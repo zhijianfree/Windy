@@ -10,5 +10,7 @@ import com.zj.master.entity.vo.TaskNode;
  */
 public interface INodeExecuteInterceptor {
 
+  int sort();
+
   void beforeExecute(TaskNode taskNode);
 }

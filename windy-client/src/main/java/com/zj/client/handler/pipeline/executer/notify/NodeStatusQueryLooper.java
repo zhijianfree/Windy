@@ -1,7 +1,6 @@
 package com.zj.client.handler.pipeline.executer.notify;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.zj.client.config.GlobalEnvConfig;
 import com.zj.client.handler.feature.executor.compare.CompareDefine;
 import com.zj.client.handler.feature.executor.compare.CompareOperator;
@@ -13,20 +12,17 @@ import com.zj.client.handler.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.common.enums.ProcessStatus;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 
 /**
  * @author guyuelan
@@ -108,7 +104,7 @@ public class NodeStatusQueryLooper implements Runnable {
   private void handleDefaultError(TaskNode node) {
     QueryResponseModel queryResponse = new QueryResponseModel();
     queryResponse.setStatus(ProcessStatus.FAIL.getType());
-    queryResponse.setData(new JSONObject());
+    queryResponse.setData(new Object());
     queryResponse.setMessage(Collections.singletonList(QUERY_ERROR_TIPS));
     handleRecordFinalStatus(node, queryResponse);
   }
@@ -126,40 +122,43 @@ public class NodeStatusQueryLooper implements Runnable {
       return;
     }
 
-    JSONObject jsonObject = responseModel.getData();
+    Map<String, Object> map = JSON.parseObject(JSON.toJSONString(responseModel.getData()));
     List<CompareInfo> compareConfigs = node.getRefreshContext().getCompareConfig();
     for (CompareInfo compareInfo : compareConfigs) {
-      CompareResult compareResult = handleCompare(jsonObject, compareInfo);
-      if (!compareResult.getCompareStatus()) {
+      CompareResult compareResult = handleCompare(map, compareInfo);
+      if (!compareResult.isCompareStatus()) {
         responseModel.setStatus(ProcessStatus.FAIL.getType());
-        responseModel.setMessage(exchangeTips(jsonObject, compareInfo));
+        responseModel.setMessage(exchangeTips(map, compareInfo));
         return;
       }
     }
   }
 
-  private CompareResult handleCompare(JSONObject jsonObject, CompareInfo compareInfo) {
+  private CompareResult handleCompare(Map<String, Object> response, CompareInfo compareInfo) {
     CompareOperator compareOperator = compareFactory.getOperator(compareInfo.getOperator());
     CompareDefine compareDefine = new CompareDefine();
-    compareDefine.setResponseValue(jsonObject.get(compareInfo.getCompareKey()));
+    compareDefine.setResponseValue(response.get(compareInfo.getCompareKey()));
     compareDefine.setExpectValue(compareInfo.getValue());
     return compareOperator.compare(compareDefine);
   }
 
-  private List<String> exchangeTips(JSONObject jsonObject, CompareInfo compareInfo) {
+  private List<String> exchangeTips(Map<String, Object> response, CompareInfo compareInfo) {
     String desc = String.format(DESCRIPTION_FORMAT, compareInfo.getCompareKey(),
         compareInfo.getDescription());
     String expectDesc = String.format(EXPECT_VALUE_FORMAT, compareInfo.getValue());
     String operatorDesc = String.format(OPERATOR_FORMAT, compareInfo.getOperator());
     String resultDesc = String.format(RESULT_VALUE_FORMAT,
-        jsonObject.get(compareInfo.getCompareKey()));
+        response.get(compareInfo.getCompareKey()));
     return Arrays.asList(desc, resultDesc, operatorDesc, expectDesc);
   }
 
   private static void notifyStatus(TaskNode node, QueryResponseModel responseModel) {
-    PipelineStatusEvent statusEvent = PipelineStatusEvent.builder().taskNode(node)
+    PipelineStatusEvent statusEvent = PipelineStatusEvent.builder()
+        .taskNode(node)
         .processStatus(ProcessStatus.exchange(responseModel.getStatus()))
-        .errorMsg(responseModel.getMessage()).build();
+        .errorMsg(responseModel.getMessage())
+        .context(responseModel.getContext())
+        .build();
     PipelineEventFactory.sendNotifyEvent(statusEvent);
   }
 

@@ -5,7 +5,7 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.zj.client.handler.deploy.IDeployMode;
-import com.zj.client.entity.enuns.DeployType;
+import com.zj.common.enums.DeployType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ExecuteException;
 import java.io.BufferedReader;
@@ -40,8 +40,8 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
   private final Map<String, ProcessStatus> statusMap = new HashMap<>();
 
   @Override
-  public String deployType() {
-    return DeployType.JAR.name();
+  public Integer deployType() {
+    return DeployType.SSH.getType();
   }
 
   @Override
@@ -127,30 +127,19 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
 
   private void sendShFile(ChannelSftp channelSftp, String remoteFilePath, File localFile)
       throws Exception {
-    // 本地文件输入流
-    FileInputStream fis = new FileInputStream(localFile);
+    try (FileInputStream fis = new FileInputStream(
+        localFile); OutputStream outputStream = channelSftp.put(
+        remoteFilePath); BufferedReader reader = new BufferedReader(
+        new InputStreamReader(fis, Charsets.UTF_8))) {
+      BufferedWriter writer = new BufferedWriter(
+          new OutputStreamWriter(outputStream, Charsets.UTF_8));
 
-    // 远程服务器文件输出流
-    OutputStream outputStream = channelSftp.put(remoteFilePath);
-
-    // 使用指定的编码格式进行转换和传输
-    BufferedReader reader = new BufferedReader(new InputStreamReader(fis, Charsets.UTF_8));
-    BufferedWriter writer = new BufferedWriter(
-        new OutputStreamWriter(outputStream, Charsets.UTF_8));
-
-    String line;
-    while ((line = reader.readLine()) != null) {
-      writer.write(line);
-      writer.newLine();
+      String line;
+      while ((line = reader.readLine()) != null) {
+        writer.write(line);
+        writer.newLine();
+      }
+      writer.flush();
     }
-
-    writer.flush();
-
-    // 关闭流
-    writer.close();
-    reader.close();
-    outputStream.close();
-    fis.close();
   }
-
 }

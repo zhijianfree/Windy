@@ -4,13 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
+import com.zj.common.model.DispatchTaskModel;
 import com.zj.common.utils.IpUtils;
 import com.zj.domain.entity.dto.log.DispatchLogDto;
 import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.master.dispatch.Dispatcher;
 import com.zj.master.dispatch.listener.InnerEvent;
 import com.zj.master.dispatch.listener.TaskInnerEventFactory;
-import com.zj.master.entity.dto.TaskDetailDto;
 import com.zj.master.entity.enums.EventType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,9 +23,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class TaskLogService {
 
-  private UniqueIdService uniqueIdService;
-  private IDispatchLogRepository taskLogRepository;
-  private Dispatcher dispatcher;
+  private final UniqueIdService uniqueIdService;
+  private final IDispatchLogRepository taskLogRepository;
+  private final Dispatcher dispatcher;
 
   public TaskLogService(UniqueIdService uniqueIdService, IDispatchLogRepository taskLogRepository,
       Dispatcher dispatcher) {
@@ -34,14 +34,13 @@ public class TaskLogService {
     this.dispatcher = dispatcher;
   }
 
-  public String createTask(TaskDetailDto task) {
+  public String createTask(DispatchTaskModel task) {
     log.info("receive task detail ={}", JSON.toJSONString(task));
     DispatchLogDto taskLog = saveLog(task);
-    task.setTaskLogId(taskLog.getLogId());
-    return dispatcher.dispatch(task);
+    return dispatcher.dispatch(task, taskLog.getLogId());
   }
 
-  private DispatchLogDto saveLog(TaskDetailDto task) {
+  private DispatchLogDto saveLog(DispatchTaskModel task) {
     DispatchLogDto taskLog = new DispatchLogDto();
     taskLog.setLogId(uniqueIdService.getUniqueId());
     taskLog.setSourceId(task.getSourceId());
@@ -54,11 +53,11 @@ public class TaskLogService {
     return taskLog;
   }
 
-  public Boolean pauseTask(TaskDetailDto taskDetailDto) {
+  public Boolean pauseTask(DispatchTaskModel task) {
     InnerEvent event = new InnerEvent();
     event.setEventType(EventType.STOP);
-    event.setLogType(LogType.exchange(taskDetailDto.getType()));
-    event.setTargetId(taskDetailDto.getSourceId());
+    event.setLogType(LogType.exchange(task.getType()));
+    event.setTargetId(task.getSourceId());
     TaskInnerEventFactory.sendNotifyEvent(event);
     return true;
   }

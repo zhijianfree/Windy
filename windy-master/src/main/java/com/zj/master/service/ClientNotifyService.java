@@ -1,15 +1,15 @@
 package com.zj.master.service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.zj.common.model.ResultEvent;
 import com.zj.master.notify.INotifyEvent;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 /**
  * @author guyuelan
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ClientNotifyService {
 
-  private Map<String, INotifyEvent> notifyEventMap;
+  private final Map<String, INotifyEvent> notifyEventMap;
 
   public ClientNotifyService(List<INotifyEvent> notifyEventList) {
     this.notifyEventMap = notifyEventList.stream()

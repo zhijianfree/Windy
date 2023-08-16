@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/devops/feature")
 @RestController
 public class ExecutePointRest {
-    private ExecutePointService executePointService;
+    private final ExecutePointService executePointService;
 
     public ExecutePointRest(ExecutePointService executePointService) {
         this.executePointService = executePointService;

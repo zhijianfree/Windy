@@ -2,21 +2,21 @@ package com.zj.master.dispatch.task;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
+import com.zj.common.model.DispatchTaskModel;
 import com.zj.domain.entity.dto.feature.FeatureInfoDto;
 import com.zj.domain.entity.dto.feature.TaskInfoDto;
 import com.zj.domain.entity.dto.feature.TaskRecordDto;
-import com.zj.domain.entity.dto.log.SubDispatchLogDto;
 import com.zj.domain.entity.dto.log.DispatchLogDto;
+import com.zj.domain.entity.dto.log.SubDispatchLogDto;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
 import com.zj.domain.repository.feature.ITaskRepository;
-import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.domain.repository.log.IDispatchLogRepository;
+import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.master.dispatch.IDispatchExecutor;
-import com.zj.master.entity.dto.TaskDetailDto;
-import com.zj.common.enums.LogType;
 import com.zj.master.entity.vo.ExecuteContext;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +24,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -36,13 +35,13 @@ import org.springframework.util.CollectionUtils;
 @Component
 public class TaskDispatch implements IDispatchExecutor {
 
-  private ITaskRepository taskRepository;
-  private IFeatureRepository featureRepository;
-  private ITaskRecordRepository taskRecordRepository;
-  private FeatureExecuteProxy featureExecuteProxy;
-  private ISubDispatchLogRepository subTaskLogRepository;
-  private IDispatchLogRepository dispatchLogRepository;
-  private UniqueIdService uniqueIdService;
+  private final ITaskRepository taskRepository;
+  private final IFeatureRepository featureRepository;
+  private final ITaskRecordRepository taskRecordRepository;
+  private final FeatureExecuteProxy featureExecuteProxy;
+  private final ISubDispatchLogRepository subTaskLogRepository;
+  private final IDispatchLogRepository dispatchLogRepository;
+  private final UniqueIdService uniqueIdService;
 
   public TaskDispatch(ITaskRepository taskRepository, IFeatureRepository featureRepository,
       ITaskRecordRepository taskRecordRepository, FeatureExecuteProxy featureExecuteProxy,
@@ -68,7 +67,7 @@ public class TaskDispatch implements IDispatchExecutor {
   }
 
   @Override
-  public String dispatch(TaskDetailDto task) {
+  public String dispatch(DispatchTaskModel task, String logId) {
     TaskInfoDto taskDetail = taskRepository.getTaskDetail(task.getSourceId());
     if (Objects.isNull(taskDetail)) {
       log.info("can not find task={}", task.getSourceId());
@@ -85,11 +84,11 @@ public class TaskDispatch implements IDispatchExecutor {
     TaskRecordDto taskRecordDto = buildTaskRecordDTO(taskDetail);
     taskRecordRepository.save(taskRecordDto);
 
-    dispatchLogRepository.updateLogSourceRecord(task.getTaskLogId(), taskRecordDto.getRecordId());
+    dispatchLogRepository.updateLogSourceRecord(logId, taskRecordDto.getRecordId());
 
     List<String> featureIds = featureList.stream().map(FeatureInfoDto::getFeatureId)
         .collect(Collectors.toList());
-    FeatureTask featureTask = buildFeatureTask(task, featureIds, taskRecordDto);
+    FeatureTask featureTask = buildFeatureTask(task, logId, featureIds, taskRecordDto);
     saveSubTaskLog(featureIds, featureTask.getLogId());
     featureExecuteProxy.execute(featureTask);
     return taskRecordDto.getRecordId();
@@ -114,7 +113,7 @@ public class TaskDispatch implements IDispatchExecutor {
     return subDispatchLogDto;
   }
 
-  private FeatureTask buildFeatureTask(TaskDetailDto task, List<String> featureIds,
+  private FeatureTask buildFeatureTask(DispatchTaskModel task, String logId, List<String> featureIds,
       TaskRecordDto taskRecordDto) {
     FeatureTask featureTask = new FeatureTask();
     ExecuteContext executeContext = buildTaskConfig(taskRecordDto.getTaskConfig());
@@ -123,7 +122,7 @@ public class TaskDispatch implements IDispatchExecutor {
 
     featureTask.setTaskRecordId(taskRecordDto.getRecordId());
     featureTask.setTaskId(task.getSourceId());
-    featureTask.setLogId(task.getTaskLogId());
+    featureTask.setLogId(logId);
     return featureTask;
   }
 

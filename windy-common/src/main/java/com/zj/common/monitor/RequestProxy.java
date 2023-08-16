@@ -1,15 +1,20 @@
 package com.zj.common.monitor;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.zj.common.model.ClientCollect;
-import com.zj.common.model.MasterCollect;
-import com.zj.common.model.ResponseMeta;
-import com.zj.common.model.ResultEvent;
-import com.zj.common.model.StopDispatch;
+import com.zj.common.model.*;
 import com.zj.common.monitor.discover.DiscoverService;
 import com.zj.common.monitor.discover.ServiceInstance;
 import com.zj.common.monitor.trace.TidInterceptor;
+import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import org.slf4j.MDC;
+import org.springframework.http.*;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -18,19 +23,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import org.slf4j.MDC;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * 请求代理类，后续可以在此类做扩展，对于master与client交互可以自定义策略 来执行调度哪个节点
@@ -55,9 +47,9 @@ public class RequestProxy {
   private static final String CLIENT_QUERY_APPROVAL_STATUS = "http://WindyMaster/v1/devops/master/record/";
   public static final String CONSOLE_RUN_TASK = "http://WindyMaster/v1/devops/dispatch/task";
   public static final String CONSOLE_STOP_TASK = "http://WindyMaster/v1/devops/dispatch/stop";
-
   public static final String CLIENT_MONITOR_URL = "http://%s/v1/devops/client/instance";
 
+  public static final String CLIENT_PLUGIN_LIST = "http://WindyMaster/v1/devops/master/plugins";
   public static final String MASTER_MONITOR_URL = "http://%s/v1/devops/master/instance";
   private static final String WINDY_MASTER = "WindyMaster";
   private static final String WINDY_CLIENT = "WindyClient";
@@ -96,7 +88,7 @@ public class RequestProxy {
       log.info("get response status result ={}", response.getBody());
       return response.getStatusCode().is2xxSuccessful();
     } catch (Exception e) {
-      log.info("send dispatch task error", e);
+      log.info("send dispatch task error ={}", e.toString());
     }
     return false;
   }
@@ -127,7 +119,7 @@ public class RequestProxy {
           response.body().string());
       return response.isSuccessful();
     } catch (Exception e) {
-      log.error("request master ip error", e);
+      log.error("request master ip error ={}", e.toString());
     }
     return false;
   }
@@ -148,7 +140,7 @@ public class RequestProxy {
           Response response = okHttpClient.newCall(request).execute();
           log.info("notify client stop result={}", response.body().string());
         } catch (IOException e) {
-          log.error("notify client error");
+          log.error("notify client error ={}", e.toString());
         }
       });
     });
@@ -157,12 +149,19 @@ public class RequestProxy {
   /**
    * client触发用例任务执行
    */
-  public ResponseEntity<JSONObject> startFeatureTask(Object data) {
+  public String startFeatureTask(Object data) {
     wrapTraceHeader();
     HttpEntity<Object> httpEntity = new HttpEntity<>(data, headers);
     try {
-      return restTemplate.postForEntity(CLIENT_START_TASK, httpEntity, JSONObject.class);
+
+      ResponseEntity<ResponseMeta> response = restTemplate.postForEntity(CLIENT_START_TASK,
+          httpEntity, ResponseMeta.class);
+      if (response.getStatusCode().is2xxSuccessful()) {
+        return String.valueOf(response.getBody().getData());
+      }
+      return null;
     } catch (Exception e) {
+      log.error("start feature task error={}", e.toString());
       return null;
     }
   }
@@ -170,10 +169,10 @@ public class RequestProxy {
   /**
    * client查询任务执行状态
    */
-  public ResponseEntity<JSONObject> getFeatureTaskStatus(String url) {
+  public ResponseEntity<Object> getFeatureTaskStatus(String url) {
     wrapTraceHeader();
     HttpEntity request = new HttpEntity(headers);
-    return restTemplate.exchange(url, HttpMethod.GET, request, JSONObject.class);
+    return restTemplate.exchange(url, HttpMethod.GET, request, Object.class);
   }
 
   /**
@@ -211,7 +210,7 @@ public class RequestProxy {
           response.body().string());
       return response.isSuccessful();
     } catch (Exception e) {
-      log.error("request master ip error", e);
+      log.error("request master ip error ={}", e.toString());
     }
     return false;
   }
@@ -235,14 +234,12 @@ public class RequestProxy {
     wrapTraceHeader();
     HttpEntity<Object> httpEntity = new HttpEntity<>(data, headers);
     try {
-      ResponseEntity<JSONObject> responseEntity = restTemplate.postForEntity(CONSOLE_RUN_TASK,
-          httpEntity, JSONObject.class);
-      JSONObject body = responseEntity.getBody();
-      log.info("get test result code= {} result={}", responseEntity.getStatusCode(),
-          JSON.toJSONString(body));
-      return body.getString("data");
+      ResponseEntity<ResponseMeta> responseEntity = restTemplate.postForEntity(CONSOLE_RUN_TASK,
+          httpEntity, ResponseMeta.class);
+      ResponseMeta body = responseEntity.getBody();
+      return String.valueOf(body.getData());
     } catch (Exception e) {
-      log.error("request dispatch pipeline task error", e);
+      log.error("request dispatch pipeline task error ={}", e.toString());
     }
     return null;
   }
@@ -260,7 +257,7 @@ public class RequestProxy {
           responseEntity.getBody());
       return responseEntity.getStatusCode().is2xxSuccessful();
     } catch (Exception e) {
-      log.error("request dispatch pipeline task error", e);
+      log.error("request stop pipeline error ={}", e.toString());
     }
     return false;
   }
@@ -276,7 +273,7 @@ public class RequestProxy {
           responseEntity.getBody());
       return responseEntity.getStatusCode().is2xxSuccessful();
     } catch (Exception e) {
-      log.error("request dispatch pipeline task error", e);
+      log.error("request start pipeline task error ={}", e.toString());
     }
     return false;
   }
@@ -315,9 +312,22 @@ public class RequestProxy {
         ResponseMeta result = JSON.parseObject(string, ResponseMeta.class);
         return JSON.parseObject(JSON.toJSONString(result.getData()), MasterCollect.class);
       } catch (Exception e) {
-        log.error("request master ip error", e);
+        log.error("request master ip error ={}", e.toString());
       }
       return null;
     }).collect(Collectors.toList());
+  }
+
+  public List<PluginInfo> getAvailablePlugins() {
+    try {
+      wrapTraceHeader();
+      HttpEntity request = new HttpEntity(headers);
+      ResponseEntity<ResponseMeta> resp = restTemplate.exchange(CLIENT_PLUGIN_LIST, HttpMethod.GET,
+          request, ResponseMeta.class);
+      return JSON.parseArray(JSON.toJSONString(resp.getBody().getData()), PluginInfo.class);
+    } catch (Exception e) {
+      log.error("request available plugins error ={}", e.toString());
+    }
+    return Collections.emptyList();
   }
 }

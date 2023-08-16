@@ -38,12 +38,12 @@ public class FeatureExecuteProxy implements IStopEventListener {
 
   public static final String DISPATCH_FEATURE_TYPE = "FEATURE";
 
-  private RequestProxy requestProxy;
-  private Executor executorService;
-  private TaskEndProcessor taskEndProcessor;
-  private IExecutePointRepository executePointRepository;
-  private ITaskRecordRepository taskRecordRepository;
-  private IFeatureHistoryRepository featureHistoryRepository;
+  private final RequestProxy requestProxy;
+  private final Executor executorService;
+  private final TaskEndProcessor taskEndProcessor;
+  private final IExecutePointRepository executePointRepository;
+  private final ITaskRecordRepository taskRecordRepository;
+  private final IFeatureHistoryRepository featureHistoryRepository;
 
   public static final String TASK_FEATURE_TIPS = "no task need run";
   private final Map<String, FeatureTask> featureTaskMap = new ConcurrentHashMap<>();

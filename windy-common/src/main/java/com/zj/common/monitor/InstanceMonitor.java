@@ -1,7 +1,6 @@
 package com.zj.common.monitor;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,13 +12,13 @@ import org.springframework.stereotype.Component;
 public class InstanceMonitor{
 
   private final Long serviceStartTime = System.currentTimeMillis();
-  private boolean isUnStable = true;
+  private boolean isUnStable = false;
 
   /**
    * 服务启动后，需要一定的时间达到稳定性，所以这里配置一个delay时间
    */
   public boolean isUnStable() {
-    if (isUnStable){
+    if (!isUnStable){
       isUnStable = (System.currentTimeMillis() - serviceStartTime) < 30000;
     }
     return isUnStable;

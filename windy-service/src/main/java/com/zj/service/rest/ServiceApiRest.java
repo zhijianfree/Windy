@@ -1,0 +1,63 @@
+package com.zj.service.rest;
+
+import com.zj.common.exception.ErrorCode;
+import com.zj.common.model.ResponseMeta;
+import com.zj.domain.entity.dto.service.ServiceApiDto;
+import com.zj.service.entity.ApiModel;
+import com.zj.service.service.ApiService;
+import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * @author falcon
+ * @since 2023/8/8
+ */
+@RestController
+@RequestMapping("/v1/devops")
+public class ServiceApiRest {
+
+  private final ApiService apiService;
+
+  public ServiceApiRest(ApiService apiService) {
+    this.apiService = apiService;
+  }
+
+  @GetMapping("/service/resources/{apiId}")
+  public ResponseMeta<ServiceApiDto> getServiceApi(@PathVariable("apiId") String apiId) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.getServiceApi(apiId));
+  }
+
+  @GetMapping("/service/{serviceId}/resources")
+  public ResponseMeta<List<ServiceApiDto>> getServiceApis(
+      @PathVariable("serviceId") String serviceId) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.getServiceApis(serviceId));
+  }
+
+  @PostMapping("/service/resources")
+  public ResponseMeta<Boolean> createServiceApi(@RequestBody ApiModel apiModel) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.createServiceApi(apiModel));
+  }
+
+  @PutMapping("/service/resources")
+  public ResponseMeta<Boolean> updateServiceApi(@RequestBody ApiModel apiModel) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.updateServiceApi(apiModel));
+  }
+
+  @DeleteMapping("/service/resources/{apiId}")
+  public ResponseMeta<Boolean> deleteServiceApi(@PathVariable("apiId") String apiId) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.deleteServiceApi(apiId));
+  }
+
+  @DeleteMapping("/service/resources")
+  public ResponseMeta<Boolean> batchDeleteApi(@RequestParam("apis") List<String> apis) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.batchDeleteApi(apis));
+  }
+}

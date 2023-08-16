@@ -24,16 +24,16 @@ CREATE TABLE `code_change` (
 
 DROP TABLE IF EXISTS `environment`;
 CREATE TABLE `environment` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `env_id` varchar(64) NOT NULL COMMENT '环境Id',
   `env_name` varchar(50) NOT NULL COMMENT '环境名称',
-  `env_host` varchar(50) DEFAULT NULL COMMENT '环境的IP',
-  `env_port` varchar(6) DEFAULT NULL COMMENT '环境端口',
-  `env_status` int(11) DEFAULT NULL COMMENT '环境状态 1 正常 2 暂停 3 已删除',
-  `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
-  `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
+  `env_status` int DEFAULT NULL COMMENT '环境状态 1 正常 2 暂停 3 已删除',
+  `env_type` int NOT NULL DEFAULT '1' COMMENT '1 ssh 2 k8s 3 docker',
+  `env_params` varchar(1000) DEFAULT NULL COMMENT '环境相关配置',
+  `create_time` bigint DEFAULT NULL COMMENT '创建时间',
+  `update_time` bigint DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4
 
 --
 -- Table structure for table `execute_point`
@@ -188,6 +188,7 @@ CREATE TABLE `microservice` (
   `service_name` varchar(100) NOT NULL COMMENT '服务名称',
   `description` varchar(300) NOT NULL COMMENT '服务描述',
   `owner` varchar(100) NOT NULL COMMENT '服务拥有者',
+  `priority` int(4) DEFAULT NULL COMMENT '服务优先级',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
@@ -238,6 +239,7 @@ CREATE TABLE `node_record` (
   `history_id` varchar(64) NOT NULL COMMENT '历史流水线记录Id',
   `code` int(4) DEFAULT NULL COMMENT '处理结果状态码',
   `result` text COMMENT '任务处理结果',
+  `pipeline_context` varchar(256) COMMENT '任务执行上下文,作用域整个流水线',
   `status` int(2) DEFAULT NULL COMMENT '任务状态',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
@@ -482,6 +484,48 @@ CREATE TABLE `publish_bind` (
   `update_time` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_service_id_branch` (`service_id`,`branch`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+
+CREATE TABLE `plugin_info` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `plugin_name` varchar(64) NOT NULL COMMENT '插件名称',
+  `plugin_type` int(11) NOT NULL DEFAULT '1' COMMENT '插件类型 1 模版插件',
+  `file_data` blob NOT NULL COMMENT '文件内容',
+  `plugin_id` varchar(64) DEFAULT NULL COMMENT '插件Id',
+  `status` int(11) NOT NULL DEFAULT '2' COMMENT '是否可用 1可用 2 不可用',
+  `create_time` bigint(20) NOT NULL,
+  `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+
+CREATE TABLE `optimistic_lock` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `biz_code` varchar(60) NOT NULL COMMENT '定时业务类型',
+  `node_name` varchar(100) DEFAULT NULL COMMENT '实例节点名称',
+  `ip` varchar(20) DEFAULT NULL COMMENT '节点ip',
+  `start_time` bigint(20) DEFAULT NULL COMMENT '持有锁开始时间',
+  `end_time` bigint(20) DEFAULT NULL COMMENT '持有锁结束时间',
+  `version` bigint(20) DEFAULT NULL COMMENT '乐观锁版本',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_biz_code` (`biz_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='分布式乐观锁'
+
+CREATE TABLE `service_api` (
+  `id` bigint(20) NOT NULL,
+  `api_id` varchar(64) DEFAULT NULL COMMENT 'apiId',
+  `api_name` varchar(100) NOT NULL COMMENT 'api名称',
+  `service_id` varchar(64) NOT NULL COMMENT '所属服务Id',
+  `parent_id` varchar(64) DEFAULT NULL COMMENT '父节点Id',
+  `type` varchar(10) DEFAULT NULL COMMENT 'api类型 http dubbo',
+  `method` varchar(100) DEFAULT NULL COMMENT 'api对应的方法 http对应方法名 dubbo对应接口方法名',
+  `api` varchar(256) DEFAULT NULL COMMENT 'api信息http对应的url dubbo对应服务名',
+  `description` varchar(256) DEFAULT NULL COMMENT '接口描述',
+  `is_api` int(1) DEFAULT '1' COMMENT '是否是api',
+  `request_params` text COMMENT '请求参数',
+  `response_params` text COMMENT '响应参数',
+  `create_time` bigint(20) DEFAULT NULL,
+  `update_time` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 
 ## 流水线默认配置

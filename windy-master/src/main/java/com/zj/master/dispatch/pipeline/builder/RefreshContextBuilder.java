@@ -16,8 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RefreshContextBuilder {
 
-  private static final String TASK_ID = "taskId";
-
   public static RefreshContext createContext(ActionDetail actionDetail) {
     PipelineActionDto action = actionDetail.getAction();
     if (Objects.equals(action.getExecuteType(), ExecuteType.TEST.name())) {

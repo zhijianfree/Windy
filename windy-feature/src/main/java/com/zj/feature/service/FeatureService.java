@@ -6,7 +6,7 @@ import com.zj.common.enums.LogType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
-import com.zj.common.model.DispatchModel;
+import com.zj.common.model.DispatchTaskModel;
 import com.zj.common.model.PageSize;
 import com.zj.common.monitor.RequestProxy;
 import com.zj.common.utils.OrikaUtil;
@@ -41,13 +41,13 @@ public class FeatureService {
 
   public static final String COPY_STRING = " copy";
 
-  private ExecutePointService executePointService;
-  private TestCaseService testCaseService;
-  private TestCaseConfigService testCaseConfigService;
-  private FeatureTagService featureTagService;
-  private UniqueIdService uniqueIdService;
-  private IFeatureRepository featureRepository;
-  private RequestProxy requestProxy;
+  private final ExecutePointService executePointService;
+  private final TestCaseService testCaseService;
+  private final TestCaseConfigService testCaseConfigService;
+  private final FeatureTagService featureTagService;
+  private final UniqueIdService uniqueIdService;
+  private final IFeatureRepository featureRepository;
+  private final RequestProxy requestProxy;
 
   public FeatureService(ExecutePointService executePointService, TestCaseService testCaseService,
       TestCaseConfigService testCaseConfigService, FeatureTagService featureTagService,
@@ -277,10 +277,10 @@ public class FeatureService {
       return false;
     }
 
-    DispatchModel dispatchModel = new DispatchModel();
-    dispatchModel.setType(LogType.FEATURE.getType());
-    dispatchModel.setSourceId(JSON.toJSONString(Collections.singletonList(featureId)));
-    dispatchModel.setSourceName(feature.getFeatureName());
-    return requestProxy.runTask(dispatchModel);
+    DispatchTaskModel dispatchTaskModel = new DispatchTaskModel();
+    dispatchTaskModel.setType(LogType.FEATURE.getType());
+    dispatchTaskModel.setSourceId(JSON.toJSONString(Collections.singletonList(featureId)));
+    dispatchTaskModel.setSourceName(feature.getFeatureName());
+    return requestProxy.runTask(dispatchTaskModel);
   }
 }

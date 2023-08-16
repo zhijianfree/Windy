@@ -4,12 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.zj.common.model.ResultEvent;
 import com.zj.common.monitor.InstanceMonitor;
 import com.zj.common.monitor.RequestProxy;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author guyuelan

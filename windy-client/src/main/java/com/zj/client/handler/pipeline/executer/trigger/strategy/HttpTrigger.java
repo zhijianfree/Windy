@@ -2,27 +2,18 @@ package com.zj.client.handler.pipeline.executer.trigger.strategy;
 
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
-import com.zj.client.handler.pipeline.executer.vo.BaseExecuteParam;
-import com.zj.client.handler.pipeline.executer.vo.HttpRequestContext;
-import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
-import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
-import com.zj.client.handler.pipeline.executer.vo.TaskNode;
+import com.zj.client.handler.pipeline.executer.vo.*;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.exception.ExecuteException;
 import com.zj.common.utils.OrikaUtil;
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.Headers;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-
+import okhttp3.*;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Http请求处理
@@ -34,6 +25,7 @@ import org.springframework.stereotype.Component;
 public class HttpTrigger implements INodeTrigger {
 
   public static final MediaType MEDIA_TYPE = MediaType.parse("application/json;charset=utf-8");
+  public static final String RECORD_ID = "recordId";
   private final OkHttpClient okHttpClient = new OkHttpClient.Builder()
       .readTimeout(10, TimeUnit.SECONDS)
       .connectTimeout(5, TimeUnit.SECONDS).build();
@@ -47,10 +39,9 @@ public class HttpTrigger implements INodeTrigger {
     log.info("http executor is running");
     HttpRequestContext context = OrikaUtil.convert(triggerContext.getData(),
         HttpRequestContext.class);
-    JSONObject jsonObject = JSON.parseObject(context.getBody());
-    jsonObject.put("recordId", taskNode.getRecordId());
-
-    RequestBody requestBody = RequestBody.create(MEDIA_TYPE, JSON.toJSONString(jsonObject));
+    Map<String, Object> param = JSON.parseObject(context.getBody(), Map.class);
+    param.put(RECORD_ID, taskNode.getRecordId());
+    RequestBody requestBody = RequestBody.create(MEDIA_TYPE, JSON.toJSONString(param));
     Request request = new Request.Builder().url(context.getUrl()).post(requestBody).build();
     Response response = okHttpClient.newCall(request).execute();
     if (!response.isSuccessful()) {

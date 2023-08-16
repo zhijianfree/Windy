@@ -12,7 +12,7 @@ eureka:
     # 服务续约任务调用间隔时间，默认30秒.client每隔30秒向server上报自己状态，避免被server剔除
     lease-renewal-interval-in-seconds: 30
     # 注册服务时是否使用IP注册，默认false
-    prefer-ip-address: false
+    prefer-ip-address: true
 
   client:
     # 是否注册
@@ -37,18 +37,11 @@ eureka:
     # client每隔30秒，向server请求可用服务清单。对于API网关类应用，可以适当降低时间间隔
     registry-fetch-interval-seconds: 30
     service-url:
-      defaultZone: http://windy-master:9768/eureka/
+      defaultZone: http://windy-cluster:9768/eureka/
 
 windy:
   pipeline:
-    git:
-      user: windy
-      password: windy!123
       workspace: /opt/windy
-  deploy:
-    ssh:
-      user: guyuelan
-      pwd: ZJguyuelan!12345
   loop:
     query:
       timeout: 7200000

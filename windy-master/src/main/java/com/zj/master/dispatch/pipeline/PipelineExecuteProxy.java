@@ -10,7 +10,6 @@ import com.zj.common.monitor.RequestProxy;
 import com.zj.common.utils.IpUtils;
 import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
-import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import com.zj.master.dispatch.listener.IStopEventListener;
@@ -19,18 +18,16 @@ import com.zj.master.dispatch.pipeline.intercept.INodeExecuteInterceptor;
 import com.zj.master.entity.vo.NodeStatusChange;
 import com.zj.master.entity.vo.RequestContext;
 import com.zj.master.entity.vo.TaskNode;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
+import java.util.stream.Collectors;
 
 /**
  * @author guyuelan
@@ -43,13 +40,12 @@ public class PipelineExecuteProxy implements IStopEventListener {
   public static final String TASK_DONE_TIPS = "no task need run";
   public static final String DISPATCH_PIPELINE_TYPE = "PIPELINE";
 
-  private RequestProxy requestProxy;
-  private Executor executorService;
-  private INodeRecordRepository nodeRecordRepository;
-  private IPipelineHistoryRepository pipelineHistoryRepository;
-  private PipelineEndProcessor pipelineEndProcessor;
-  private IDispatchLogRepository dispatchLogRepository;
-  private List<INodeExecuteInterceptor> interceptors;
+  private final RequestProxy requestProxy;
+  private final Executor executorService;
+  private final INodeRecordRepository nodeRecordRepository;
+  private final IPipelineHistoryRepository pipelineHistoryRepository;
+  private final PipelineEndProcessor pipelineEndProcessor;
+  private final List<INodeExecuteInterceptor> interceptors;
 
   private final Map<String, PipelineTask> pipelineTaskMap = new ConcurrentHashMap<>();
 
@@ -57,15 +53,14 @@ public class PipelineExecuteProxy implements IStopEventListener {
       @Qualifier("pipelineExecutorPool") Executor executorService,
       INodeRecordRepository nodeRecordRepository,
       IPipelineHistoryRepository pipelineHistoryRepository,
-      PipelineEndProcessor pipelineEndProcessor, IDispatchLogRepository dispatchLogRepository,
-      List<INodeExecuteInterceptor> interceptors) {
+      PipelineEndProcessor pipelineEndProcessor, List<INodeExecuteInterceptor> interceptors) {
     this.requestProxy = requestProxy;
     this.executorService = executorService;
     this.nodeRecordRepository = nodeRecordRepository;
     this.pipelineHistoryRepository = pipelineHistoryRepository;
     this.pipelineEndProcessor = pipelineEndProcessor;
-    this.dispatchLogRepository = dispatchLogRepository;
-    this.interceptors = interceptors;
+    this.interceptors = interceptors.stream()
+        .sorted(Comparator.comparing(INodeExecuteInterceptor::sort)).collect(Collectors.toList());
   }
 
   public void runTask(PipelineTask pipelineTask) {
@@ -111,7 +106,13 @@ public class PipelineExecuteProxy implements IStopEventListener {
   }
 
   private void interceptBefore(TaskNode taskNode) {
-    interceptors.forEach(interceptor -> interceptor.beforeExecute(taskNode));
+    interceptors.forEach(interceptor -> {
+      try {
+        interceptor.beforeExecute(taskNode);
+      }catch (Exception e){
+        log.error("intercept before", e);
+      }
+    });
   }
 
 

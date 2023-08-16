@@ -11,6 +11,8 @@ import com.zj.domain.entity.po.feature.ExecuteTemplate;
 import com.zj.domain.mapper.feeature.ExecuteTemplateMapper;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
@@ -69,8 +71,19 @@ public class ExecuteTemplateRepository extends
 
     IPage<ExecuteTemplateDto> templateDtoIPage = new Page<>();
     templateDtoIPage.setTotal(templateIPage.getTotal());
-    templateDtoIPage.setRecords(OrikaUtil.convertList(templateIPage.getRecords(),
-        ExecuteTemplateDto.class));
+    templateDtoIPage.setRecords(
+        OrikaUtil.convertList(templateIPage.getRecords(), ExecuteTemplateDto.class));
     return templateDtoIPage;
+  }
+
+  @Override
+  public Boolean batchAddTemplates(List<ExecuteTemplateDto> templates) {
+    List<ExecuteTemplate> templateList = templates.stream().map(dto -> {
+      ExecuteTemplate executeTemplate = OrikaUtil.convert(dto, ExecuteTemplate.class);
+      executeTemplate.setCreateTime(System.currentTimeMillis());
+      executeTemplate.setUpdateTime(System.currentTimeMillis());
+      return executeTemplate;
+    }).collect(Collectors.toList());
+    return saveBatch(templateList);
   }
 }

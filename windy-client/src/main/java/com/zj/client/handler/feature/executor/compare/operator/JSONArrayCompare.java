@@ -1,12 +1,11 @@
 package com.zj.client.handler.feature.executor.compare.operator;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.zj.client.utils.CompareJsonUtils;
-import com.zj.common.exception.ErrorCode;
 import com.zj.client.handler.feature.executor.compare.CompareDefine;
 import com.zj.client.handler.feature.executor.compare.CompareResult;
 import com.zj.client.handler.feature.executor.compare.CompareType;
+import com.zj.client.utils.CompareJsonUtils;
+import com.zj.common.exception.ErrorCode;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
@@ -26,10 +25,10 @@ public class JSONArrayCompare extends BaseCompare {
   @Override
   public CompareResult compare(CompareDefine compareDefine) {
     CompareResult compareResult = createSuccessResult();
-    List<JSONObject> resList = JSON.parseArray(JSON.toJSONString(compareDefine.getResponseValue()),
-        JSONObject.class);
-    List<JSONObject> expectList = JSON.parseArray(compareDefine.getExpectValue(),
-        JSONObject.class);
+    List<Object> resList = JSON.parseArray(JSON.toJSONString(compareDefine.getResponseValue()),
+        Object.class);
+    List<Object> expectList = JSON.parseArray(compareDefine.getExpectValue(),
+        Object.class);
 
     for (int i = 0; i < expectList.size(); i++) {
       Map<String, Object> result = CompareJsonUtils.compareJsonObject(

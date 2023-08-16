@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/devops/pipeline")
 public class PipelineActionRest {
 
-  private PipelineActionService service;
+  private final PipelineActionService service;
 
   public PipelineActionRest(PipelineActionService service) {
     this.service = service;

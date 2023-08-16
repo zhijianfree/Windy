@@ -2,8 +2,8 @@ package com.zj.client.handler.pipeline.executer.trigger.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.dto.BuildParam;
-import com.zj.client.entity.dto.ResponseModel;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
+import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
@@ -41,7 +41,7 @@ public class BuildCodeTrigger implements INodeTrigger {
 
   @Override
   public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
-    ResponseModel recordStatus = codeBuildService.getRecordStatus(taskNode.getRecordId());
+    QueryResponseModel recordStatus = codeBuildService.getRecordStatus(taskNode.getRecordId());
     return JSON.toJSONString(recordStatus);
   }
 }

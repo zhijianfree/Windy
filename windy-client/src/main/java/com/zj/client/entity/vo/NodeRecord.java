@@ -19,8 +19,4 @@ public class NodeRecord {
 
   private Integer status;
 
-  private Long createTime;
-
-  private Long updateTime;
-
 }

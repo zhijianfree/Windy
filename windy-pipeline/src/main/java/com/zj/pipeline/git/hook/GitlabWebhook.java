@@ -2,16 +2,16 @@ package com.zj.pipeline.git.hook;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
+import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.pipeline.entity.enums.PlatformEnum;
 import com.zj.pipeline.entity.vo.GitParseResult;
-import com.zj.pipeline.entity.vo.GithubHookVo;
 import com.zj.pipeline.entity.vo.GitlabHookVo;
 import com.zj.pipeline.service.PipelineService;
-import com.zj.service.service.MicroserviceService;
-import java.util.concurrent.Executor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.Executor;
 
 /**
  * @author guyuelan
@@ -21,10 +21,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class GitlabWebhook extends AbstractWebhook {
 
-  public GitlabWebhook(MicroserviceService microserviceService, PipelineService pipelineService,
+  public GitlabWebhook(IMicroServiceRepository serviceRepository, PipelineService pipelineService,
       @Qualifier("webHookExecutorPool") Executor executorService,
       IBindBranchRepository gitBindRepository) {
-    super(microserviceService, pipelineService, executorService, gitBindRepository);
+    super(serviceRepository, pipelineService, executorService, gitBindRepository);
   }
 
   @Override

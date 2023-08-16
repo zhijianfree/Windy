@@ -32,4 +32,6 @@ public interface IFeatureRepository {
   void saveBatch(List<FeatureInfoDto> infoList);
 
   List<FeatureInfoDto> getSubFeatures(String featureId);
+
+  Integer countAll();
 }

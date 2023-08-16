@@ -6,7 +6,7 @@ import com.zj.common.enums.LogType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.generate.UniqueIdService;
-import com.zj.common.model.DispatchModel;
+import com.zj.common.model.DispatchTaskModel;
 import com.zj.common.monitor.RequestProxy;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
@@ -34,12 +34,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PipelineService {
 
-  private PipelineNodeService pipelineNodeService;
-  private PipelineStageService pipelineStageService;
-  private PipelineHistoryService pipelineHistoryService;
-  private UniqueIdService uniqueIdService;
-  private IPipelineRepository pipelineRepository;
-  private RequestProxy requestProxy;
+  private final PipelineNodeService pipelineNodeService;
+  private final PipelineStageService pipelineStageService;
+  private final PipelineHistoryService pipelineHistoryService;
+  private final UniqueIdService uniqueIdService;
+  private final IPipelineRepository pipelineRepository;
+  private final RequestProxy requestProxy;
 
   public PipelineService(PipelineNodeService pipelineNodeService,
       PipelineStageService pipelineStageService, PipelineHistoryService pipelineHistoryService,
@@ -111,7 +111,7 @@ public class PipelineService {
     stageList.forEach(stageDto -> {
       PipelineStageDto stage = pipelineStageService.getPipelineStage(stageDto.getStageId());
       if (Objects.isNull(stage)) {
-        createNewStage(pipelineId, stageDto,sortOrder);
+        createNewStage(pipelineId, stageDto, sortOrder);
         return;
       }
 
@@ -152,7 +152,7 @@ public class PipelineService {
       return "";
     }
 
-    checkPipelineType(pipelineDTO);
+    checkPublishPipelineExist(pipelineDTO);
 
     String pipelineId = uniqueIdService.getUniqueId();
     pipelineDTO.setPipelineId(pipelineId);
@@ -169,18 +169,18 @@ public class PipelineService {
     return pipelineId;
   }
 
-  private void checkPipelineType(PipelineDto pipelineDTO) {
-    if (!Objects.equals(pipelineDTO.getPipelineType(), PipelineType.PUBLISH.getType())) {
+  private void checkPublishPipelineExist(PipelineDto pipeline) {
+    if (!Objects.equals(pipeline.getPipelineType(), PipelineType.PUBLISH.getType())) {
       return;
     }
-    PipelineDto publishPipeline = pipelineRepository.getPublishPipeline(
-        pipelineDTO.getServiceId());
+    PipelineDto publishPipeline = pipelineRepository.getPublishPipeline(pipeline.getServiceId());
     if (Objects.nonNull(publishPipeline)) {
       throw new ApiException(ErrorCode.PUBLISH_PIPELINE_EXIST);
     }
   }
 
-  private Integer createNewStage(String pipelineId, PipelineStageDto stageDto, AtomicInteger atomicOrder) {
+  private Integer createNewStage(String pipelineId, PipelineStageDto stageDto,
+      AtomicInteger atomicOrder) {
     String stageId = uniqueIdService.getUniqueId();
     PipelineStageDto pipelineStage = new PipelineStageDto();
     pipelineStage.setPipelineId(pipelineId);
@@ -215,14 +215,19 @@ public class PipelineService {
       return null;
     }
 
-    DispatchModel dispatchModel = new DispatchModel();
-    dispatchModel.setSourceId(pipelineId);
-    dispatchModel.setSourceName(pipeline.getPipelineName());
-    dispatchModel.setType(LogType.PIPELINE.getType());
-    return requestProxy.runPipeline(dispatchModel);
+    DispatchTaskModel dispatchTaskModel = new DispatchTaskModel();
+    dispatchTaskModel.setSourceId(pipelineId);
+    dispatchTaskModel.setSourceName(pipeline.getPipelineName());
+    dispatchTaskModel.setType(LogType.PIPELINE.getType());
+    return requestProxy.runPipeline(dispatchTaskModel);
   }
 
   public PipelineDto getPipelineDetail(String pipelineId) {
+    PipelineDto pipeline = getPipeline(pipelineId);
+    if (Objects.isNull(pipeline)) {
+      throw new ApiException(ErrorCode.NOT_FIND_PIPELINE);
+    }
+
     List<PipelineNodeDto> pipelineNodes = pipelineNodeService.getPipelineNodes(pipelineId);
     Map<String, List<PipelineNodeDto>> stageNodeMap = pipelineNodes.stream()
         .collect(Collectors.groupingBy(PipelineNodeDto::getStageId));
@@ -232,7 +237,6 @@ public class PipelineService {
       stage.setNodes(stageNodeMap.get(stage.getStageId()));
     }).collect(Collectors.toList());
 
-    PipelineDto pipeline = getPipeline(pipelineId);
     pipeline.setStageList(stageDTOList);
     return pipeline;
   }
@@ -243,10 +247,10 @@ public class PipelineService {
       return false;
     }
 
-    DispatchModel dispatchModel = new DispatchModel();
-    dispatchModel.setSourceId(historyId);
-    dispatchModel.setType(LogType.PIPELINE.getType());
-    return requestProxy.stopPipeline(dispatchModel);
+    DispatchTaskModel dispatchTaskModel = new DispatchTaskModel();
+    dispatchTaskModel.setSourceId(historyId);
+    dispatchTaskModel.setType(LogType.PIPELINE.getType());
+    return requestProxy.stopPipeline(dispatchTaskModel);
   }
 
   public List<PipelineDto> getServicePipelines(String serviceId) {

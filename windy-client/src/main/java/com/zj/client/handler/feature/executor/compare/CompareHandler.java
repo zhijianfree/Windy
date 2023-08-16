@@ -1,6 +1,6 @@
 package com.zj.client.handler.feature.executor.compare;
 
-import com.zj.client.entity.vo.ExecuteDetailVo;
+import com.zj.plugin.loader.ExecuteDetailVo;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.client.handler.feature.executor.compare.operator.CompareFactory;
 import com.zj.common.exception.ErrorCode;
@@ -44,7 +44,7 @@ public class CompareHandler {
 
     for (CompareDefine compareDefine : compareDefines) {
       compareResult = compareOne(compareDefine);
-      if (!compareResult.getCompareStatus()) {
+      if (!compareResult.isCompareStatus()) {
         compareResult.setDescription(
             String.format(TIP_FORMAT, compareDefine.getCompareKey(), compareDefine.getExpectValue(),
                 compareDefine.getResponseValue()));

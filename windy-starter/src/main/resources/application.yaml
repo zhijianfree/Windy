@@ -9,6 +9,11 @@ spring:
     url: jdbc:mariadb://localhost:33060/windy?serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
     password: zj137899
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB  # 设置最大文件大小
+      max-request-size: 10MB  # 设置最大请求大小
 
 eureka:
   server:
@@ -34,7 +39,7 @@ eureka:
     register-with-eureka: false #false表示不向注册中心注册自己。
     fetch-registry: true #false表示自己端就是注册中心，我的职责就是维护服务实例，并不需要去检索服务
     service-url:
-      defaultZone: http://windy-master:9768/eureka/
+      defaultZone: http://windy-cluster:9768/eureka/
 
 logging:
   level:

@@ -115,4 +115,9 @@ public class FeatureRepository extends ServiceImpl<FeatureMapper, FeatureInfo> i
     return remove(Wrappers.lambdaQuery(FeatureInfo.class)
         .in(FeatureInfo::getFeatureId, batchDeleteDto.getFeatures()));
   }
+
+  @Override
+  public Integer countAll() {
+    return count();
+  }
 }

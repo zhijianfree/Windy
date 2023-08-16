@@ -1,21 +1,14 @@
 package com.zj.common.utils;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.commons.util.InetUtils;
-import org.springframework.cloud.commons.util.InetUtils.HostInfo;
 
 /**
  * @author guyuelan
@@ -28,6 +21,16 @@ public class IpUtils {
     try {
       InetAddress inetAddress = findFirstNonLoopbackAddress();
       return inetAddress.getHostAddress();
+    } catch (Exception e) {
+      log.info("error get local ip", e);
+    }
+    return "unknown";
+  }
+
+  public static String getHostName(){
+    try {
+      InetAddress inetAddress = findFirstNonLoopbackAddress();
+      return inetAddress.getHostName();
     } catch (Exception e) {
       log.info("error get local ip", e);
     }

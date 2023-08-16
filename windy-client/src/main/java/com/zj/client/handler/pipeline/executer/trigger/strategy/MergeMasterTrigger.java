@@ -1,30 +1,16 @@
 package com.zj.client.handler.pipeline.executer.trigger.strategy;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.zj.client.config.GlobalEnvConfig;
-import com.zj.client.entity.dto.ResponseModel;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
-import com.zj.client.handler.pipeline.executer.vo.MergeStatus;
-import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
-import com.zj.client.handler.pipeline.executer.vo.TaskNode;
-import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
+import com.zj.client.handler.pipeline.executer.vo.*;
+import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel.ResponseStatus;
 import com.zj.client.handler.pipeline.git.IGitProcessor;
-import com.zj.client.handler.pipeline.executer.vo.MergeRequest;
 import com.zj.client.utils.Utils;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.exception.ExecuteException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeCommand;
@@ -39,9 +25,14 @@ import org.eclipse.jgit.transport.RemoteRefUpdate.Status;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.stereotype.Component;
 
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 /**
  * 合并master
- * */
+ */
 @Slf4j
 @Component
 public class MergeMasterTrigger implements INodeTrigger {
@@ -72,7 +63,7 @@ public class MergeMasterTrigger implements INodeTrigger {
       MergeRequest mergeRequest = JSON.parseObject(JSON.toJSONString(triggerContext.getData()),
           MergeRequest.class);
       String serviceName = Utils.getServiceFromUrl(mergeRequest.getGitUrl());
-      Git git = gitProcessor.pullCodeFromGit(mergeRequest.getGitUrl(), MASTER,
+      Git git = gitProcessor.pullCodeFromGit(mergeRequest, MASTER,
           globalEnvConfig.getPipelineWorkspace(serviceName, mergeRequest.getPipelineId()));
 
       //2 合并代码
@@ -84,8 +75,8 @@ public class MergeMasterTrigger implements INodeTrigger {
       //合并成功推送至远端master分支
       if (mergeResult.getMergeStatus().isSuccessful()) {
         log.info("merge success branches ={}", mergeRequest.getBranches());
-        push2Repository(git);
-        deleteBranch(mergeRequest, branchesRef, git);
+        push2Repository(mergeRequest, git);
+        deleteBranch(mergeRequest, git);
         statusMap.put(taskNode.getRecordId(), new MergeStatus(ProcessStatus.SUCCESS.getType()));
         return;
       }
@@ -106,8 +97,7 @@ public class MergeMasterTrigger implements INodeTrigger {
     }
   }
 
-  private void deleteBranch(MergeRequest mergeRequest, List<Ref> branchesRef, Git git)
-      throws GitAPIException {
+  private void deleteBranch(MergeRequest mergeRequest, Git git) throws GitAPIException {
     if (!mergeRequest.isDeleteBranch()) {
       return;
     }
@@ -120,14 +110,17 @@ public class MergeMasterTrigger implements INodeTrigger {
         branch -> new RefSpec().setSource(null).setForceUpdate(true)
             .setDestination(REFS_HEADS + branch)).collect(Collectors.toList());
     git.push().setRefSpecs(refSpecs).setRemote(ORIGIN)
-        .setCredentialsProvider(getCredentialsProvider()).call();
+        .setCredentialsProvider(getCredentialsProvider(mergeRequest.getTokenName(),
+            mergeRequest.getToken())).call();
     log.info("delete branches remoteRefNames={} result={}", remoteRefNames, strings);
   }
 
-  private void push2Repository(Git git) throws IOException, GitAPIException {
+  private void push2Repository(MergeRequest mergeRequest, Git git)
+      throws GitAPIException {
     // 推送合并后的代码到远程仓库的目标分支
     Iterable<PushResult> results = git.push().setRemote(ORIGIN).setRefSpecs(new RefSpec(MASTER))
-        .setCredentialsProvider(getCredentialsProvider()).call();
+        .setCredentialsProvider(
+            getCredentialsProvider(mergeRequest.getTokenName(), mergeRequest.getToken())).call();
     boolean pushStatus = StreamSupport.stream(results.spliterator(), false).anyMatch(
         pushResult -> pushResult.getRemoteUpdates().stream()
             .anyMatch(remoteRefUpdate -> Objects.equals(remoteRefUpdate.getStatus(), Status.OK)));
@@ -136,20 +129,20 @@ public class MergeMasterTrigger implements INodeTrigger {
     }
   }
 
-  private UsernamePasswordCredentialsProvider getCredentialsProvider() {
-    return new UsernamePasswordCredentialsProvider(globalEnvConfig.getGitUser(),
-        globalEnvConfig.getGitPassword());
+  private UsernamePasswordCredentialsProvider getCredentialsProvider(String tokenName,
+      String token) {
+    return new UsernamePasswordCredentialsProvider(tokenName, token);
   }
 
   @Override
   public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
     MergeStatus mergeStatus = statusMap.get(taskNode.getRecordId());
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("status", mergeStatus.getStatus());
-    ResponseModel responseModel = new ResponseModel();
-    responseModel.setStatus(mergeStatus.getStatus());
-    responseModel.setData(jsonObject);
-    responseModel.setMessage(JSON.toJSONString(mergeStatus.getMessage()));
-    return JSON.toJSONString(responseModel);
+    QueryResponseModel loopQueryResponse = new QueryResponseModel();
+    loopQueryResponse.setStatus(mergeStatus.getStatus());
+    ResponseStatus responseStatus = new ResponseStatus();
+    responseStatus.setStatus(loopQueryResponse.getStatus());
+    loopQueryResponse.setData(responseStatus);
+    loopQueryResponse.setMessage(mergeStatus.getMessage());
+    return JSON.toJSONString(loopQueryResponse);
   }
 }

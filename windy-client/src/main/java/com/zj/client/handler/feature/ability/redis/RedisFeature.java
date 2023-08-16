@@ -1,9 +1,13 @@
 package com.zj.client.handler.feature.ability.redis;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.client.entity.vo.ExecuteDetailVo;
-import com.zj.client.handler.feature.ability.Feature;
-import com.zj.client.handler.feature.ability.FeatureDefine;
+import com.zj.plugin.loader.ExecuteDetailVo;
+import com.zj.plugin.loader.ParamValueType;
+import com.zj.plugin.loader.Feature;
+import com.zj.plugin.loader.FeatureDefine;
+import com.zj.plugin.loader.ParameterDefine;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;
@@ -66,7 +70,71 @@ public class RedisFeature implements Feature {
 
   @Override
   public List<FeatureDefine> scanFeatureDefines() {
-    return null;
+    FeatureDefine setDefine = getRedisSetDefine();
+    FeatureDefine queryDefine = getRedisQueryDefine();
+    return Arrays.asList(setDefine, queryDefine);
+  }
+
+  private FeatureDefine getRedisQueryDefine() {
+    List<ParameterDefine> parameterDefines = new ArrayList<>();
+    ParameterDefine ip = new ParameterDefine();
+    ip.setParamKey("ip");
+    ip.setType(ParamValueType.String.getType());
+    parameterDefines.add(ip);
+
+    ParameterDefine port = new ParameterDefine();
+    port.setParamKey("port");
+    port.setType(ParamValueType.Integer.getType());
+    parameterDefines.add(port);
+
+    ParameterDefine key = new ParameterDefine();
+    key.setParamKey("key");
+    key.setType(ParamValueType.String.getType());
+    parameterDefines.add(key);
+
+    FeatureDefine featureDefine = new FeatureDefine();
+    featureDefine.setSource(RedisFeature.class.getName());
+    featureDefine.setDescription("Redis读操作");
+    featureDefine.setMethod("getValue");
+    featureDefine.setName("Redis-Query");
+    featureDefine.setParams(parameterDefines);
+    return featureDefine;
+  }
+
+  private FeatureDefine getRedisSetDefine() {
+    List<ParameterDefine> parameterDefines = new ArrayList<>();
+    ParameterDefine ip = new ParameterDefine();
+    ip.setParamKey("ip");
+    ip.setType(ParamValueType.String.getType());
+    parameterDefines.add(ip);
+
+    ParameterDefine port = new ParameterDefine();
+    port.setParamKey("port");
+    port.setType(ParamValueType.Integer.getType());
+    parameterDefines.add(port);
+
+    ParameterDefine key = new ParameterDefine();
+    key.setParamKey("key");
+    key.setType(ParamValueType.String.getType());
+    parameterDefines.add(key);
+
+    ParameterDefine value = new ParameterDefine();
+    value.setParamKey("value");
+    value.setType(ParamValueType.String.getType());
+    parameterDefines.add(value);
+
+    ParameterDefine timeout = new ParameterDefine();
+    timeout.setParamKey("timeout");
+    timeout.setType(ParamValueType.Integer.getType());
+    parameterDefines.add(timeout);
+
+    FeatureDefine featureDefine = new FeatureDefine();
+    featureDefine.setSource(RedisFeature.class.getName());
+    featureDefine.setDescription("Redis写操作");
+    featureDefine.setMethod("setValue");
+    featureDefine.setName("Redis-Set");
+    featureDefine.setParams(parameterDefines);
+    return featureDefine;
   }
 
   public static void main(String[] args) {

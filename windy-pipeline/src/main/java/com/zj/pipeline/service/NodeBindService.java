@@ -21,10 +21,9 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 @Service
 public class NodeBindService {
-
-  private PipelineActionService actionService;
-  private INodeBindRepository nodeBindRepository;
-  private UniqueIdService uniqueIdService;
+  private final PipelineActionService actionService;
+  private final INodeBindRepository nodeBindRepository;
+  private final UniqueIdService uniqueIdService;
 
   public NodeBindService(PipelineActionService actionService,
       INodeBindRepository nodeBindRepository, UniqueIdService uniqueIdService) {

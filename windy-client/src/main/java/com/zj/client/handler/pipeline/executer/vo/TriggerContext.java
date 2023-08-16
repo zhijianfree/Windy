@@ -8,22 +8,12 @@ public class TriggerContext {
 
   private Object data;
 
-  private TaskNode taskNode;
-
   public TriggerContext(Object data) {
     this.data = data;
-  }
-
-  public TriggerContext(Object data, TaskNode taskNode) {
-    this.data = data;
-    this.taskNode = taskNode;
   }
 
   public Object getData() {
     return data;
   }
 
-  public TaskNode getTaskNode() {
-    return taskNode;
-  }
 }

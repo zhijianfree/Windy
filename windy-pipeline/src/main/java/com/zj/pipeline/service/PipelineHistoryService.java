@@ -20,9 +20,9 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class PipelineHistoryService {
-  private NodeRecordService recordService;
-  private UniqueIdService uniqueIdService;
-  private IPipelineHistoryRepository pipelineHistoryRepository;
+  private final NodeRecordService recordService;
+  private final UniqueIdService uniqueIdService;
+  private final IPipelineHistoryRepository pipelineHistoryRepository;
 
   public PipelineHistoryService(NodeRecordService recordService, UniqueIdService uniqueIdService,
       IPipelineHistoryRepository pipelineHistoryRepository) {

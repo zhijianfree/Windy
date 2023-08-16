@@ -1,13 +1,13 @@
 package com.zj.feature.service;
 
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
-import com.zj.common.model.DispatchModel;
+import com.zj.common.model.DispatchTaskModel;
 import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseStatusModel;
+import com.zj.common.model.ResponseStatusModel.PercentStatics;
 import com.zj.common.monitor.RequestProxy;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
@@ -31,11 +31,11 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class TaskInfoService {
 
-  private TaskRecordService taskRecordService;
-  private FeatureHistoryService featureHistoryService;
-  private UniqueIdService uniqueIdService;
-  private ITaskRepository taskRepository;
-  private RequestProxy requestProxy;
+  private final TaskRecordService taskRecordService;
+  private final FeatureHistoryService featureHistoryService;
+  private final UniqueIdService uniqueIdService;
+  private final ITaskRepository taskRepository;
+  private final RequestProxy requestProxy;
 
   public static final String FORMAT_TIPS = "任务执行状态: 成功数: %s 成功率百分比: %s";
 
@@ -104,11 +104,11 @@ public class TaskInfoService {
       return false;
     }
 
-    DispatchModel dispatchModel = new DispatchModel();
-    dispatchModel.setType(LogType.FEATURE_TASK.getType());
-    dispatchModel.setSourceId(taskId);
-    dispatchModel.setSourceName(taskDetail.getTaskName());
-    return requestProxy.runTask(dispatchModel);
+    DispatchTaskModel dispatchTaskModel = new DispatchTaskModel();
+    dispatchTaskModel.setType(LogType.FEATURE_TASK.getType());
+    dispatchTaskModel.setSourceId(taskId);
+    dispatchTaskModel.setSourceName(taskDetail.getTaskName());
+    return requestProxy.runTask(dispatchTaskModel);
   }
 
   public ResponseStatusModel getTaskStatus(String taskId) {
@@ -124,10 +124,11 @@ public class TaskInfoService {
             history -> Objects.equals(history.getExecuteStatus(), ProcessStatus.SUCCESS.getType()))
         .count();
 
-    JSONObject jsonObject = new JSONObject();
+    PercentStatics percentStatics = new PercentStatics();
     Float percent = (successCount * 1F / histories.size()) * 100;
-    jsonObject.put("percent", percent.intValue());
-    responseStatusModel.setData(jsonObject);
+    percentStatics.setPercent(percent.intValue());
+    responseStatusModel.setData(percentStatics);
+
     String msg = String.format(FORMAT_TIPS, successCount, percent);
     responseStatusModel.setMessage(msg);
     return responseStatusModel;

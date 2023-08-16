@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class CreateFeatureHistoryEvent implements INotifyEvent {
 
-  private IFeatureHistoryRepository featureHistoryRepository;
-  private ISubDispatchLogRepository subDispatchLogRepository;
+  private final IFeatureHistoryRepository featureHistoryRepository;
+  private final ISubDispatchLogRepository subDispatchLogRepository;
 
   public CreateFeatureHistoryEvent(IFeatureHistoryRepository featureHistoryRepository,
       ISubDispatchLogRepository subDispatchLogRepository) {

@@ -9,6 +9,7 @@ import com.zj.domain.entity.dto.feature.TestCaseDto;
 import com.zj.domain.entity.po.feature.TestCase;
 import com.zj.domain.mapper.feeature.TestCaseMapper;
 import com.zj.domain.repository.feature.ITestCaseRepository;
+import java.util.List;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -46,6 +47,13 @@ public class TestCaseRepository extends ServiceImpl<TestCaseMapper, TestCase> im
   @Override
   public Boolean deleteTestCase(String caseId) {
     return remove(Wrappers.lambdaQuery(TestCase.class).eq(TestCase::getTestCaseId, caseId));
+  }
+
+  @Override
+  public List<TestCaseDto> getServiceCases(String serviceId) {
+    List<TestCase> testCases = list(
+        Wrappers.lambdaQuery(TestCase.class).eq(TestCase::getServiceId, serviceId));
+    return OrikaUtil.convertList(testCases, TestCaseDto.class);
   }
 
   @Override

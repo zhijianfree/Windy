@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.generate.UniqueIdService;
+import com.zj.common.model.DispatchTaskModel;
 import com.zj.domain.entity.dto.log.DispatchLogDto;
 import com.zj.domain.entity.dto.log.SubDispatchLogDto;
 import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
@@ -19,23 +20,17 @@ import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.master.dispatch.IDispatchExecutor;
 import com.zj.master.dispatch.pipeline.builder.RefreshContextBuilder;
 import com.zj.master.dispatch.pipeline.builder.RequestContextBuilder;
-import com.zj.master.entity.dto.TaskDetailDto;
-import com.zj.master.entity.vo.ActionDetail;
-import com.zj.master.entity.vo.ConfigDetail;
-import com.zj.master.entity.vo.NodeConfig;
-import com.zj.master.entity.vo.RefreshContext;
-import com.zj.master.entity.vo.RequestContext;
-import com.zj.master.entity.vo.TaskNode;
+import com.zj.master.entity.vo.*;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Component;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * @author guyuelan
@@ -45,14 +40,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class PipelineDispatch implements IDispatchExecutor {
 
-  private IPipelineRepository pipelineRepository;
-  private IPipelineNodeRepository pipelineNodeRepository;
-  private IPipelineHistoryRepository pipelineHistoryRepository;
-  private IPipelineActionRepository pipelineActionRepository;
-  private UniqueIdService uniqueIdService;
-  private PipelineExecuteProxy pipelineExecuteProxy;
-  private ISubDispatchLogRepository subDispatchLogRepository;
-  private IDispatchLogRepository dispatchLogRepository;
+  private final IPipelineRepository pipelineRepository;
+  private final IPipelineNodeRepository pipelineNodeRepository;
+  private final IPipelineHistoryRepository pipelineHistoryRepository;
+  private final IPipelineActionRepository pipelineActionRepository;
+  private final UniqueIdService uniqueIdService;
+  private final PipelineExecuteProxy pipelineExecuteProxy;
+  private final ISubDispatchLogRepository subDispatchLogRepository;
+  private final IDispatchLogRepository dispatchLogRepository;
 
   public PipelineDispatch(IPipelineRepository pipelineRepository,
       IPipelineNodeRepository pipelineNodeRepository,
@@ -81,7 +76,7 @@ public class PipelineDispatch implements IDispatchExecutor {
   }
 
   @Override
-  public String dispatch(TaskDetailDto task) {
+  public String dispatch(DispatchTaskModel task, String logId) {
     PipelineDto pipeline = pipelineRepository.getPipeline(task.getSourceId());
     if (Objects.isNull(pipeline)) {
       log.info("can not find pipeline name={} pipelineId={}", task.getSourceName(),
@@ -102,16 +97,17 @@ public class PipelineDispatch implements IDispatchExecutor {
     log.info("start run pipeline={} name={} historyId={}", task.getSourceId(), task.getSourceName(),
         historyId);
 
-    dispatchLogRepository.updateLogSourceRecord(task.getTaskLogId(), historyId);
+    dispatchLogRepository.updateLogSourceRecord(logId, historyId);
 
     PipelineTask pipelineTask = new PipelineTask();
     pipelineTask.setPipelineId(pipeline.getPipelineId());
     pipelineTask.setHistoryId(historyId);
-    pipelineTask.setLogId(task.getTaskLogId());
+    pipelineTask.setLogId(logId);
 
     List<TaskNode> taskNodeList = pipelineNodes.stream()
         .sorted(Comparator.comparing(PipelineNodeDto::getSortOrder))
         .map(node -> buildTaskNode(node, historyId, pipeline.getServiceId()))
+        .filter(Objects::nonNull)
         .collect(Collectors.toList());
     pipelineTask.addAll(taskNodeList);
     Map<String, String> executeTypeMap = taskNodeList.stream()
@@ -166,6 +162,9 @@ public class PipelineDispatch implements IDispatchExecutor {
     ConfigDetail configDetail = JSON.parseObject(pipelineNode.getConfigDetail(),
         ConfigDetail.class);
     PipelineActionDto action = pipelineActionRepository.getAction(configDetail.getActionId());
+    if (Objects.isNull(action)) {
+      return null;
+    }
     taskNode.setExecuteType(action.getExecuteType());
 
     ActionDetail actionDetail = new ActionDetail(configDetail, action);
@@ -217,6 +216,7 @@ public class PipelineDispatch implements IDispatchExecutor {
     List<TaskNode> taskNodeList = pipelineNodes.stream()
         .filter(node -> subTasks.contains(node.getNodeId()))
         .map(node -> buildTaskNode(node, dispatchLog.getSourceRecordId(), pipeline.getServiceId()))
+        .filter(Objects::nonNull)
         .collect(Collectors.toList());
     pipelineTask.setHistoryId(dispatchLog.getSourceRecordId());
     pipelineTask.addAll(taskNodeList);

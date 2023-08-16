@@ -26,8 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TestCaseRest {
 
-  private TestCaseService testCaseService;
-  private TestCaseConfigService testCaseConfigService;
+  private final TestCaseService testCaseService;
+  private final TestCaseConfigService testCaseConfigService;
 
   public TestCaseRest(TestCaseService testCaseService, TestCaseConfigService testCaseConfigService) {
     this.testCaseService = testCaseService;

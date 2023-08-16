@@ -1,15 +1,11 @@
 package com.zj.common.monitor.collector;
 
+import com.sun.management.OperatingSystemMXBean;
 import com.zj.common.monitor.collector.PhysicsCollect.GarbageHistory;
 import com.zj.common.utils.IpUtils;
-import java.lang.management.GarbageCollectorMXBean;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.MemoryUsage;
-import com.sun.management.OperatingSystemMXBean;
-import java.lang.management.ThreadMXBean;
+
+import java.lang.management.*;
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 

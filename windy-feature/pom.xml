@@ -12,6 +12,26 @@
   <artifactId>windy-feature</artifactId>
 
   <dependencies>
+    <!--    内部引用开始-->
+    <dependency>
+      <groupId>com.zj</groupId>
+      <artifactId>windy-service</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.zj</groupId>
+      <artifactId>windy-plugin</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.zj</groupId>
+      <artifactId>windy-domain</artifactId>
+    </dependency>
+    <!--    内部引用结束-->
+
+    <!--    外部引用开始-->
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
     <dependency>
       <groupId>redis.clients</groupId>
       <artifactId>jedis</artifactId>
@@ -70,17 +90,14 @@
       <artifactId>lombok</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.zj</groupId>
-      <artifactId>windy-service</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.zj</groupId>
-      <artifactId>windy-domain</artifactId>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
     </dependency>
     <dependency>
       <groupId>ognl</groupId>
       <artifactId>ognl</artifactId>
     </dependency>
+    <!--    外部应用结束-->
   </dependencies>
 
 </project>

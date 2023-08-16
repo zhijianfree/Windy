@@ -3,20 +3,20 @@ package com.zj.master.schedule;
 import com.zj.common.monitor.InstanceMonitor;
 import com.zj.common.utils.IpUtils;
 import com.zj.domain.entity.dto.log.DispatchLogDto;
-import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.domain.repository.log.IDispatchLogRepository;
+import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.master.dispatch.Dispatcher;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author guyuelan
@@ -29,11 +29,11 @@ public class DispatchLogSchedule {
   public static final String WINDY_MASTER_NAME = "WindyMaster";
   public static final int MAX_REDO_TIMEOUT = 1000 * 60 * 60;
 
-  private IDispatchLogRepository taskLogRepository;
-  private ISubDispatchLogRepository subDispatchLogRepository;
-  private DiscoveryClient discoveryClient;
-  private InstanceMonitor instanceMonitor;
-  private Dispatcher dispatcher;
+  private final IDispatchLogRepository taskLogRepository;
+  private final ISubDispatchLogRepository subDispatchLogRepository;
+  private final DiscoveryClient discoveryClient;
+  private final InstanceMonitor instanceMonitor;
+  private final Dispatcher dispatcher;
 
   public DispatchLogSchedule(IDispatchLogRepository taskLogRepository,
       ISubDispatchLogRepository subDispatchLogRepository, DiscoveryClient discoveryClient,
@@ -45,8 +45,7 @@ public class DispatchLogSchedule {
     this.dispatcher = dispatcher;
   }
 
-  //  @Scheduled(cron = "0 0 0/1 * * ? ")
-  @Scheduled(cron = "0/5 * * * * ? ")
+  @Scheduled(cron = "0 0 0/1 * * ? ")
   public void scanTaskLog() {
     if (instanceMonitor.isUnStable()) {
       return;
@@ -67,15 +66,14 @@ public class DispatchLogSchedule {
     List<DispatchLogDto> logs = needRunList.stream().distinct().collect(Collectors.toList());
     log.debug("start run no master task size={}", logs.size());
     // 4 筛选出来的任务开始切换到当前节点执行
-    logs.forEach(taskLog -> dispatcher.resumeTask(taskLog));
+    logs.forEach(dispatcher::resumeTask);
   }
 
   private List<DispatchLogDto> resolveLocalIpTaskLog(List<DispatchLogDto> runningTaskLog) {
     String localIP = IpUtils.getLocalIP();
     return runningTaskLog.stream().filter(log -> Objects.equals(localIP, log.getNodeIp()))
         .filter(log -> (System.currentTimeMillis() - log.getUpdateTime()) > MAX_REDO_TIMEOUT)
-        .filter(log -> !dispatcher.isExitInJvm(log))
-        .collect(Collectors.toList());
+        .filter(log -> !dispatcher.isExitInJvm(log)).collect(Collectors.toList());
   }
 
 

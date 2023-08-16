@@ -6,7 +6,6 @@ import com.zj.common.model.ResponseMeta;
 import com.zj.domain.entity.dto.pipeline.NodeBindDto;
 import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
 import com.zj.pipeline.service.NodeBindService;
-import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * @author guyuelan
  * @since 2023/3/27
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/devops/pipeline")
 public class NodeBindRest {
 
-  private NodeBindService service;
+  private final NodeBindService service;
 
   public NodeBindRest(NodeBindService service) {
     this.service = service;

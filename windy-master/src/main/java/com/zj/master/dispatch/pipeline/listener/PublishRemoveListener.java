@@ -1,23 +1,24 @@
 package com.zj.master.dispatch.pipeline.listener;
 
-import com.zj.common.enums.ProcessStatus;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.enums.PipelineType;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.domain.repository.pipeline.IPublishBindRepository;
 import com.zj.master.entity.vo.NodeStatusChange;
-import java.util.Objects;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 /**
+ * 流水线成功过完成之后删除发布绑定的分支
  * @author guyuelan
  * @since 2023/6/29
  */
 @Component
 public class PublishRemoveListener implements IPipelineEndListener {
 
-  private IPublishBindRepository publishBindRepository;
-  private IPipelineRepository pipelineRepository;
+  private final IPublishBindRepository publishBindRepository;
+  private final IPipelineRepository pipelineRepository;
 
   public PublishRemoveListener(IPublishBindRepository publishBindRepository,
       IPipelineRepository pipelineRepository) {
