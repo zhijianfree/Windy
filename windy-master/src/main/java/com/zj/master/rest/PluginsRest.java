@@ -4,10 +4,11 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.ResponseMeta;
 import com.zj.domain.entity.dto.feature.PluginInfoDto;
 import com.zj.master.service.PluginsService;
-import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @author guyuelan
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/devops/master")
 public class PluginsRest {
 
-  private PluginsService pluginsService;
+  private final PluginsService pluginsService;
 
   public PluginsRest(PluginsService pluginsService) {
     this.pluginsService = pluginsService;

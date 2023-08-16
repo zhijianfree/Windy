@@ -7,10 +7,11 @@ import com.zj.pipeline.entity.enums.PlatformEnum;
 import com.zj.pipeline.entity.vo.GitParseResult;
 import com.zj.pipeline.entity.vo.GiteaHookVo;
 import com.zj.pipeline.service.PipelineService;
-import java.util.concurrent.Executor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.Executor;
 
 /**
  * @author guyuelan
@@ -19,9 +20,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class GiteaWebhook extends AbstractWebhook {
-
-
-  private Executor executorService;
 
   public GiteaWebhook(IMicroServiceRepository serviceRepository, PipelineService pipelineService,
       @Qualifier("webHookExecutorPool") Executor executorService,

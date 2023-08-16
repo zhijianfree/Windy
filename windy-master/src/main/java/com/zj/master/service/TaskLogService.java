@@ -23,9 +23,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class TaskLogService {
 
-  private UniqueIdService uniqueIdService;
-  private IDispatchLogRepository taskLogRepository;
-  private Dispatcher dispatcher;
+  private final UniqueIdService uniqueIdService;
+  private final IDispatchLogRepository taskLogRepository;
+  private final Dispatcher dispatcher;
 
   public TaskLogService(UniqueIdService uniqueIdService, IDispatchLogRepository taskLogRepository,
       Dispatcher dispatcher) {

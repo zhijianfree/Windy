@@ -31,11 +31,11 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class TaskInfoService {
 
-  private TaskRecordService taskRecordService;
-  private FeatureHistoryService featureHistoryService;
-  private UniqueIdService uniqueIdService;
-  private ITaskRepository taskRepository;
-  private RequestProxy requestProxy;
+  private final TaskRecordService taskRecordService;
+  private final FeatureHistoryService featureHistoryService;
+  private final UniqueIdService uniqueIdService;
+  private final ITaskRepository taskRepository;
+  private final RequestProxy requestProxy;
 
   public static final String FORMAT_TIPS = "任务执行状态: 成功数: %s 成功率百分比: %s";
 

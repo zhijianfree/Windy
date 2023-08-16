@@ -15,9 +15,8 @@ import org.springframework.util.CollectionUtils;
  */
 @Service
 public class TestCaseService {
-
-  private UniqueIdService uniqueIdService;
-  private ITestCaseRepository testCaseRepository;
+  private final UniqueIdService uniqueIdService;
+  private final ITestCaseRepository testCaseRepository;
 
   public TestCaseService(UniqueIdService uniqueIdService, ITestCaseRepository testCaseRepository) {
     this.uniqueIdService = uniqueIdService;

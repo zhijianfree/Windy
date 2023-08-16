@@ -2,12 +2,13 @@ package com.zj.master.dispatch;
 
 import com.zj.common.model.DispatchTaskModel;
 import com.zj.domain.entity.dto.log.DispatchLogDto;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /**
  * @author guyuelan

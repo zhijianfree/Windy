@@ -7,6 +7,13 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.git.IRepositoryBranch;
 import com.zj.pipeline.entity.vo.BranchInfo;
 import com.zj.pipeline.entity.vo.GitlabRepository;
+import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Component;
+
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
@@ -16,12 +23,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.stereotype.Component;
 
 /**
  * @author guyuelan
@@ -31,8 +32,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class GitlabRepositoryBranch implements IRepositoryBranch {
 
-  private Map<String, String> headers;
-  private GitRequestProxy gitRequestProxy;
+  private final Map<String, String> headers;
+  private final GitRequestProxy gitRequestProxy;
 
   private Map<String, Integer> serviceIdMap = new HashMap<>();
 

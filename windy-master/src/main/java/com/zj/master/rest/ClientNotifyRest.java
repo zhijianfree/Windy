@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/devops/dispatch")
 public class ClientNotifyRest {
 
-  private ClientNotifyService clientNotifyService;
+  private final ClientNotifyService clientNotifyService;
 
   public ClientNotifyRest(ClientNotifyService clientNotifyService) {
     this.clientNotifyService = clientNotifyService;

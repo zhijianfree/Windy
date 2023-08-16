@@ -17,8 +17,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class ApiService {
 
-  private UniqueIdService uniqueIdService;
-  private IServiceApiRepository apiRepository;
+  private final UniqueIdService uniqueIdService;
+  private final IServiceApiRepository apiRepository;
 
   public ApiService(UniqueIdService uniqueIdService, IServiceApiRepository apiRepository) {
     this.uniqueIdService = uniqueIdService;

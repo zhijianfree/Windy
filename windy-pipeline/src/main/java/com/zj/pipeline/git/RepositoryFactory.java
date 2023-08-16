@@ -1,14 +1,15 @@
 package com.zj.pipeline.git;
 
+import com.zj.common.enums.GitType;
 import com.zj.common.git.IRepositoryBranch;
 import com.zj.domain.entity.vo.GitAccessVo;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
-import com.zj.common.enums.GitType;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.stereotype.Component;
 
 /**
  * @author guyuelan
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class RepositoryFactory {
 
-  private IRepositoryBranch repositoryBranch;
+  private final IRepositoryBranch repositoryBranch;
 
   public RepositoryFactory(List<IRepositoryBranch> repositories,
       ISystemConfigRepository systemConfig) {

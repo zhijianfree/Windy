@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ExecutePointRecordRest {
 
-    private ExecuteRecordService executeRecordService;
+    private final ExecuteRecordService executeRecordService;
 
     public ExecutePointRecordRest(ExecuteRecordService executeRecordService) {
         this.executeRecordService = executeRecordService;

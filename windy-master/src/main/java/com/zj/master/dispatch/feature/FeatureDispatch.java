@@ -30,11 +30,11 @@ import org.springframework.stereotype.Component;
 public class FeatureDispatch implements IDispatchExecutor {
 
   public static final String TEMP_KEY = "temp_";
-  private IFeatureRepository featureRepository;
-  private ITestCaseConfigRepository testCaseConfigRepository;
-  private UniqueIdService uniqueIdService;
-  private FeatureExecuteProxy featureExecuteProxy;
-  private IDispatchLogRepository dispatchLogRepository;
+  private final IFeatureRepository featureRepository;
+  private final ITestCaseConfigRepository testCaseConfigRepository;
+  private final UniqueIdService uniqueIdService;
+  private final FeatureExecuteProxy featureExecuteProxy;
+  private final IDispatchLogRepository dispatchLogRepository;
 
   public FeatureDispatch(IFeatureRepository featureRepository,
       ITestCaseRepository testCaseRepository, ITestCaseConfigRepository testCaseConfigRepository,

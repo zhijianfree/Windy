@@ -21,8 +21,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class PipelineActionService {
 
-  private UniqueIdService uniqueIdService;
-  private IPipelineActionRepository pipelineActionRepository;
+  private final UniqueIdService uniqueIdService;
+  private final IPipelineActionRepository pipelineActionRepository;
 
   public PipelineActionService(UniqueIdService uniqueIdService,
       IPipelineActionRepository pipelineActionRepository) {

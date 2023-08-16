@@ -46,10 +46,10 @@ import org.springframework.web.multipart.MultipartFile;
 public class TemplateService {
 
   public static final String PLUGINS_PATH = "plugins";
-  private UniqueIdService uniqueIdService;
-  private IExecuteTemplateRepository templateRepository;
-  private IExecutePointRepository executePointRepository;
-  private IPluginRepository pluginRepository;
+  private final UniqueIdService uniqueIdService;
+  private final IExecuteTemplateRepository templateRepository;
+  private final IExecutePointRepository executePointRepository;
+  private final IPluginRepository pluginRepository;
 
   public TemplateService(UniqueIdService uniqueIdService,
       IExecuteTemplateRepository TemplateRepository,

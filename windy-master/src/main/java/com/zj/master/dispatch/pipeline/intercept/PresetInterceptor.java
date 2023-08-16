@@ -6,8 +6,9 @@ import com.zj.domain.entity.vo.GitAccessVo;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.master.entity.vo.TaskNode;
-import java.util.Objects;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 /**
  * 在流水线每个节点执行都会处理，用来添加全局的参数配置
@@ -16,9 +17,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class PresetInterceptor implements INodeExecuteInterceptor {
-  private IMicroServiceRepository microServiceRepository;
+  private final IMicroServiceRepository microServiceRepository;
 
-  private ISystemConfigRepository systemConfigRepository;
+  private final ISystemConfigRepository systemConfigRepository;
 
   public PresetInterceptor(IMicroServiceRepository microServiceRepository,
       ISystemConfigRepository systemConfigRepository) {

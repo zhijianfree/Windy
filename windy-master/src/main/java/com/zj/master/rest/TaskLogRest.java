@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/devops/dispatch")
 public class TaskLogRest {
 
-  private TaskLogService taskLogService;
+  private final TaskLogService taskLogService;
 
   public TaskLogRest(TaskLogService taskLogService) {
     this.taskLogService = taskLogService;

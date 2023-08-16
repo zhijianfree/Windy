@@ -20,8 +20,8 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class ExecutePointService{
 
-  private UniqueIdService uniqueIdService;
-  private IExecutePointRepository executePointRepository;
+  private final UniqueIdService uniqueIdService;
+  private final IExecutePointRepository executePointRepository;
 
   public ExecutePointService(UniqueIdService uniqueIdService,
       IExecutePointRepository executePointRepository) {

@@ -20,10 +20,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class PublishService {
 
-  private IPublishBindRepository publishBindRepository;
-  private IBindBranchRepository bindBranchRepository;
-  private IPipelineRepository pipelineRepository;
-  private UniqueIdService uniqueIdService;
+  private final IPublishBindRepository publishBindRepository;
+  private final IBindBranchRepository bindBranchRepository;
+  private final IPipelineRepository pipelineRepository;
+  private final UniqueIdService uniqueIdService;
 
   public PublishService(IPublishBindRepository publishBindRepository,
       IBindBranchRepository bindBranchRepository, IPipelineRepository pipelineRepository,

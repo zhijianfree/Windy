@@ -11,14 +11,15 @@ import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.pipeline.entity.enums.PipelineExecuteType;
 import com.zj.pipeline.entity.vo.GitParseResult;
 import com.zj.pipeline.service.PipelineService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.util.StringUtils;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * @author guyuelan
@@ -27,10 +28,10 @@ import org.springframework.util.StringUtils;
 @Slf4j
 public abstract class AbstractWebhook implements IGitWebhook {
 
-  private IMicroServiceRepository serviceRepository;
-  private PipelineService pipelineService;
-  private IBindBranchRepository gitBindRepository;
-  private Executor executorService;
+  private final IMicroServiceRepository serviceRepository;
+  private final PipelineService pipelineService;
+  private final IBindBranchRepository gitBindRepository;
+  private final Executor executorService;
 
   public AbstractWebhook(IMicroServiceRepository serviceRepository, PipelineService pipelineService,
       Executor executorService, IBindBranchRepository gitBindRepository) {

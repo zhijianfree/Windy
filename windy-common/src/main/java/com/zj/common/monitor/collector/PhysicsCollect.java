@@ -1,7 +1,8 @@
 package com.zj.common.monitor.collector;
 
-import java.util.List;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @author guyuelan

@@ -1,7 +1,8 @@
 package com.zj.master.entity.vo;
 
-import java.util.concurrent.ScheduledFuture;
 import lombok.Data;
+
+import java.util.concurrent.ScheduledFuture;
 
 /**
  * @author falcon

@@ -12,30 +12,29 @@ import com.zj.domain.entity.enums.EnvType;
 import com.zj.domain.repository.service.IEnvironmentRepository;
 import com.zj.service.entity.K8SParams;
 import com.zj.service.entity.SSHParams;
-import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.VersionInfo;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 public class EnvironmentService {
 
-  private Map<Integer, Function<String, Boolean>> checkFuncMap = new ConcurrentHashMap<>();
+  private final Map<Integer, Function<String, Boolean>> checkFuncMap = new ConcurrentHashMap<>();
 
-  private IEnvironmentRepository repository;
-  private UniqueIdService uniqueIdService;
+  private final IEnvironmentRepository repository;
+  private final UniqueIdService uniqueIdService;
 
   public EnvironmentService(IEnvironmentRepository repository, UniqueIdService uniqueIdService) {
     this.repository = repository;

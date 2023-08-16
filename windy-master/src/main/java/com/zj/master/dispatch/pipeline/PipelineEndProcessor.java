@@ -7,13 +7,13 @@ import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import com.zj.domain.repository.pipeline.IPipelineNodeRepository;
-import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.master.dispatch.pipeline.listener.IPipelineEndListener;
 import com.zj.master.entity.vo.NodeStatusChange;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 监听node节点变化，更新流水线状态
@@ -25,21 +25,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class PipelineEndProcessor {
 
-  private IPipelineNodeRepository pipelineNodeRepository;
-  private INodeRecordRepository nodeRecordRepository;
-  private IPipelineRepository pipelineRepository;
-  private IDispatchLogRepository dispatchLogRepository;
-  private IPipelineHistoryRepository pipelineHistoryRepository;
-  private List<IPipelineEndListener> pipelineEndListeners;
+  private final IPipelineNodeRepository pipelineNodeRepository;
+  private final INodeRecordRepository nodeRecordRepository;
+  private final IDispatchLogRepository dispatchLogRepository;
+  private final IPipelineHistoryRepository pipelineHistoryRepository;
+  private final List<IPipelineEndListener> pipelineEndListeners;
 
   public PipelineEndProcessor(IPipelineNodeRepository pipelineNodeRepository,
-      INodeRecordRepository nodeRecordRepository, IPipelineRepository pipelineRepository,
-      IDispatchLogRepository dispatchLogRepository,
+      INodeRecordRepository nodeRecordRepository, IDispatchLogRepository dispatchLogRepository,
       IPipelineHistoryRepository pipelineHistoryRepository,
       List<IPipelineEndListener> pipelineEndListeners) {
     this.pipelineNodeRepository = pipelineNodeRepository;
     this.nodeRecordRepository = nodeRecordRepository;
-    this.pipelineRepository = pipelineRepository;
     this.dispatchLogRepository = dispatchLogRepository;
     this.pipelineHistoryRepository = pipelineHistoryRepository;
     this.pipelineEndListeners = pipelineEndListeners;

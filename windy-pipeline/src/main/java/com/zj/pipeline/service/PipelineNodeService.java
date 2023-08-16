@@ -11,8 +11,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class PipelineNodeService {
-
-  private IPipelineNodeRepository pipelineNodeRepository;
+  private final IPipelineNodeRepository pipelineNodeRepository;
 
   public PipelineNodeService(IPipelineNodeRepository pipelineNodeRepository) {
     this.pipelineNodeRepository = pipelineNodeRepository;

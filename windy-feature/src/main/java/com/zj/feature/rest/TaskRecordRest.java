@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/devops/feature")
 public class TaskRecordRest {
-  private TaskRecordService taskRecordService;
+  private final TaskRecordService taskRecordService;
 
   public TaskRecordRest(TaskRecordService taskRecordService) {
     this.taskRecordService = taskRecordService;

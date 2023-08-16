@@ -9,10 +9,11 @@ import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.master.dispatch.pipeline.PipelineExecuteProxy;
-import java.util.Objects;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author guyuelan
@@ -22,9 +23,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class UpdateNodeRecordEvent implements INotifyEvent {
 
-  private INodeRecordRepository nodeRecordRepository;
-  private PipelineExecuteProxy pipelineExecuteProxy;
-  private ISubDispatchLogRepository subTaskLogRepository;
+  private final INodeRecordRepository nodeRecordRepository;
+  private final PipelineExecuteProxy pipelineExecuteProxy;
+  private final ISubDispatchLogRepository subTaskLogRepository;
 
   public UpdateNodeRecordEvent(INodeRecordRepository nodeRecordRepository,
       PipelineExecuteProxy pipelineExecuteProxy, ISubDispatchLogRepository subTaskLogRepository) {

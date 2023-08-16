@@ -2,8 +2,9 @@ package com.zj.common.model;
 
 import com.zj.common.enums.NotifyType;
 import com.zj.common.enums.ProcessStatus;
-import java.util.Map;
 import lombok.Data;
+
+import java.util.Map;
 
 /**
  * @author guyuelan

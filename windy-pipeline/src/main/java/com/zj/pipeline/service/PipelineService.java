@@ -34,12 +34,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PipelineService {
 
-  private PipelineNodeService pipelineNodeService;
-  private PipelineStageService pipelineStageService;
-  private PipelineHistoryService pipelineHistoryService;
-  private UniqueIdService uniqueIdService;
-  private IPipelineRepository pipelineRepository;
-  private RequestProxy requestProxy;
+  private final PipelineNodeService pipelineNodeService;
+  private final PipelineStageService pipelineStageService;
+  private final PipelineHistoryService pipelineHistoryService;
+  private final UniqueIdService uniqueIdService;
+  private final IPipelineRepository pipelineRepository;
+  private final RequestProxy requestProxy;
 
   public PipelineService(PipelineNodeService pipelineNodeService,
       PipelineStageService pipelineStageService, PipelineHistoryService pipelineHistoryService,

@@ -9,12 +9,6 @@ import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.master.entity.vo.PipelineConfig;
 import com.zj.master.entity.vo.ScheduleHolder;
 import com.zj.master.service.TaskLogService;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledFuture;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -25,6 +19,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.stream.Collectors;
+
 /**
  * @author falcon
  * @since 2023/7/19
@@ -34,12 +35,12 @@ import org.springframework.stereotype.Component;
 public class PipelineSchedule implements CommandLineRunner {
 
   public static final String PIPELINE_SCHEDULE = "pipeline_schedule";
-  private IOptimisticLockRepository lockRepository;
-  private IPipelineRepository pipelineRepository;
-  private TaskScheduler taskScheduler;
-  private TaskLogService taskLogService;
+  private final IOptimisticLockRepository lockRepository;
+  private final IPipelineRepository pipelineRepository;
+  private final TaskScheduler taskScheduler;
+  private final TaskLogService taskLogService;
 
-  private Map<String, ScheduleHolder> scheduledMap = new ConcurrentHashMap<>();
+  private final Map<String, ScheduleHolder> scheduledMap = new ConcurrentHashMap<>();
 
   public PipelineSchedule(IOptimisticLockRepository lockRepository,
       IPipelineRepository pipelineRepository, TaskScheduler taskScheduler,

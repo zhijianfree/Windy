@@ -7,10 +7,11 @@ import com.zj.pipeline.entity.enums.PlatformEnum;
 import com.zj.pipeline.entity.vo.GitParseResult;
 import com.zj.pipeline.entity.vo.GitlabHookVo;
 import com.zj.pipeline.service.PipelineService;
-import java.util.concurrent.Executor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.Executor;
 
 /**
  * @author guyuelan

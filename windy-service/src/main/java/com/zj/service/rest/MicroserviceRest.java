@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MicroserviceRest {
 
-  private MicroserviceService microservice;
+  private final MicroserviceService microservice;
 
   public MicroserviceRest(MicroserviceService microservice) {
     this.microservice = microservice;

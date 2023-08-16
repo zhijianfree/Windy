@@ -1,10 +1,11 @@
 package com.zj.common.monitor.discover;
 
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.stereotype.Service;
 
 /**
  * @author guyuelan

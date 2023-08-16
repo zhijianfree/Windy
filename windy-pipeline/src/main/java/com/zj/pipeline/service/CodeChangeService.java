@@ -25,10 +25,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class CodeChangeService {
 
-  private RepositoryFactory repositoryFactory;
-  private IMicroServiceRepository serviceRepository;
-  private UniqueIdService uniqueIdService;
-  private ICodeChangeRepository codeChangeRepository;
+  private final RepositoryFactory repositoryFactory;
+  private final IMicroServiceRepository serviceRepository;
+  private final UniqueIdService uniqueIdService;
+  private final ICodeChangeRepository codeChangeRepository;
 
   public CodeChangeService(RepositoryFactory repositoryFactory, IMicroServiceRepository serviceRepository,
       UniqueIdService uniqueIdService, ICodeChangeRepository codeChangeRepository) {

@@ -9,9 +9,10 @@ import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Objects;
-import org.springframework.stereotype.Service;
 
 /**
  * @author guyuelan
@@ -20,9 +21,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class RecordQueryService {
 
-  private INodeRecordRepository nodeRecordRepository;
-  private ITaskRecordRepository taskRecordRepository;
-  private IFeatureHistoryRepository featureHistoryRepository;
+  private final INodeRecordRepository nodeRecordRepository;
+  private final ITaskRecordRepository taskRecordRepository;
+  private final IFeatureHistoryRepository featureHistoryRepository;
 
   public static final String FORMAT_TIPS = "任务执行状态: 成功数: %s 成功率百分比: %s";
 

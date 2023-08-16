@@ -1,23 +1,8 @@
 package com.zj.common.monitor.pool;
 
 import com.alibaba.ttl.threadpool.TtlExecutors;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
-import java.util.concurrent.TimeUnit;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.scheduling.concurrent.ExecutorConfigurationSupport;
@@ -25,10 +10,16 @@ import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
 
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.*;
+import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
+
 /**
  * @author guyuelan
  * @since 2023/6/27
  */
+@Getter
 @Slf4j
 public class WindyThreadPool extends ExecutorConfigurationSupport implements
     AsyncListenableTaskExecutor {
@@ -40,8 +31,6 @@ public class WindyThreadPool extends ExecutorConfigurationSupport implements
   private Integer queueSize = 100;
   private boolean allowCoreThreadTimeOut;
   private final Map<String, Long> timeCache = new ConcurrentHashMap(128);
-
-  private RejectedExecutionHandler rejectedExecutionHandler = new CallerRunsPolicy();
   private ThreadPoolExecutor executor;
 
   public ThreadPoolExecutor getThreadPoolExecutor() throws IllegalStateException {
@@ -165,16 +154,8 @@ public class WindyThreadPool extends ExecutorConfigurationSupport implements
     return Objects.isNull(executor) ? 0 : executor.getActiveCount();
   }
 
-  public Integer getCorePoolSize() {
-    return corePoolSize;
-  }
-
   public void setCorePoolSize(Integer corePoolSize) {
     this.corePoolSize = corePoolSize;
-  }
-
-  public Integer getMaxPoolSize() {
-    return maxPoolSize;
   }
 
   public void setMaxPoolSize(Integer maxPoolSize) {
@@ -192,11 +173,5 @@ public class WindyThreadPool extends ExecutorConfigurationSupport implements
 
   public void setAllowCoreThreadTimeOut(boolean allowCoreThreadTimeOut) {
     this.allowCoreThreadTimeOut = allowCoreThreadTimeOut;
-  }
-
-  @Override
-  public void setRejectedExecutionHandler(
-      RejectedExecutionHandler rejectedExecutionHandler) {
-    this.rejectedExecutionHandler = rejectedExecutionHandler;
   }
 }

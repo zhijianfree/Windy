@@ -2,8 +2,9 @@ package com.zj.pipeline.entity.dto;
 
 import com.zj.common.model.ClientCollect;
 import com.zj.common.model.MasterCollect;
-import java.util.List;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @author guyuelan

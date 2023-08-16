@@ -41,13 +41,13 @@ public class FeatureService {
 
   public static final String COPY_STRING = " copy";
 
-  private ExecutePointService executePointService;
-  private TestCaseService testCaseService;
-  private TestCaseConfigService testCaseConfigService;
-  private FeatureTagService featureTagService;
-  private UniqueIdService uniqueIdService;
-  private IFeatureRepository featureRepository;
-  private RequestProxy requestProxy;
+  private final ExecutePointService executePointService;
+  private final TestCaseService testCaseService;
+  private final TestCaseConfigService testCaseConfigService;
+  private final FeatureTagService featureTagService;
+  private final UniqueIdService uniqueIdService;
+  private final IFeatureRepository featureRepository;
+  private final RequestProxy requestProxy;
 
   public FeatureService(ExecutePointService executePointService, TestCaseService testCaseService,
       TestCaseConfigService testCaseConfigService, FeatureTagService featureTagService,

@@ -1,7 +1,8 @@
 package com.zj.domain.entity.dto.pipeline;
 
-import java.util.List;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @author guyuelan

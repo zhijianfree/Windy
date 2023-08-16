@@ -1,7 +1,9 @@
 package com.zj.common.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@Getter
 public enum ErrorCode {
   /*===================流水线=================*/
   SUCCESS(HttpStatus.OK, "Pipeline.000000", "请求成功"),
@@ -57,19 +59,8 @@ public enum ErrorCode {
     this.httpStatus = httpStatus;
   }
 
-  private String code;
-  private String message;
-  private HttpStatus httpStatus;
+  private final String code;
+  private final String message;
+  private final HttpStatus httpStatus;
 
-  public HttpStatus getHttpStatus() {
-    return httpStatus;
-  }
-
-  public String getCode() {
-    return code;
-  }
-
-  public String getMessage() {
-    return message;
-  }
 }

@@ -1,8 +1,8 @@
 package com.zj.master.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.ResponseMeta;
 import com.zj.common.model.MasterCollect;
+import com.zj.common.model.ResponseMeta;
 import com.zj.master.service.MasterMonitor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/devops/master")
 public class MasterMonitorRest {
 
-  private MasterMonitor masterMonitor;
+  private final MasterMonitor masterMonitor;
 
   public MasterMonitorRest(MasterMonitor masterMonitor) {
     this.masterMonitor = masterMonitor;

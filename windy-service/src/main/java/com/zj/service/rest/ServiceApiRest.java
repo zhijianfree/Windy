@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/devops")
 public class ServiceApiRest {
 
-  private ApiService apiService;
+  private final ApiService apiService;
 
   public ServiceApiRest(ApiService apiService) {
     this.apiService = apiService;

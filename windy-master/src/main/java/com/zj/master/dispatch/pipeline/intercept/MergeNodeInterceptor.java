@@ -4,18 +4,17 @@ import com.zj.common.enums.ExecuteType;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
 import com.zj.domain.entity.dto.pipeline.PublishBindDto;
-import com.zj.domain.entity.enums.PipelineType;
 import com.zj.domain.repository.pipeline.IPipelineNodeRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.domain.repository.pipeline.IPublishBindRepository;
-import com.zj.master.entity.vo.BuildCodeContext;
 import com.zj.master.entity.vo.MergeMasterContext;
 import com.zj.master.entity.vo.TaskNode;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /**
  * 只处理代码合并的节点

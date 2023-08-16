@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/devops")
 public class EnvironmentRest {
 
-  private EnvironmentService environmentService;
+  private final EnvironmentService environmentService;
 
   public EnvironmentRest(EnvironmentService environmentService) {
     this.environmentService = environmentService;

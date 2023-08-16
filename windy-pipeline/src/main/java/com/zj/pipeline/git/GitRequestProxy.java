@@ -2,11 +2,8 @@ package com.zj.pipeline.git;
 
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.entity.vo.GitAccessVo;
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Map;
+import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
 import okhttp3.MediaType;
@@ -15,6 +12,10 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Map;
 
 /**
  * @author guyuelan
@@ -27,7 +28,7 @@ public class GitRequestProxy {
   public static final MediaType CONTENT_TYPE = MediaType.parse("application/json");
   OkHttpClient okHttpClient = new OkHttpClient.Builder().readTimeout(Duration.ofMinutes(1))
       .connectTimeout(Duration.ofSeconds(30)).build();
-  private GitAccessVo gitAccess;
+  private final GitAccessVo gitAccess;
 
   public GitRequestProxy(ISystemConfigRepository systemRepository) {
     gitAccess = systemRepository.getGitAccess();

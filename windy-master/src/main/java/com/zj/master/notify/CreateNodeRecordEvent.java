@@ -17,8 +17,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class CreateNodeRecordEvent implements INotifyEvent {
 
-  private INodeRecordRepository nodeRecordRepository;
-  private ISubDispatchLogRepository subDispatchLogRepository;
+  private final INodeRecordRepository nodeRecordRepository;
+  private final ISubDispatchLogRepository subDispatchLogRepository;
 
   public CreateNodeRecordEvent(INodeRecordRepository nodeRecordRepository,
       ISubDispatchLogRepository subDispatchLogRepository) {

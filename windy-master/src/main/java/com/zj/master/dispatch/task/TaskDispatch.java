@@ -35,13 +35,13 @@ import org.springframework.util.CollectionUtils;
 @Component
 public class TaskDispatch implements IDispatchExecutor {
 
-  private ITaskRepository taskRepository;
-  private IFeatureRepository featureRepository;
-  private ITaskRecordRepository taskRecordRepository;
-  private FeatureExecuteProxy featureExecuteProxy;
-  private ISubDispatchLogRepository subTaskLogRepository;
-  private IDispatchLogRepository dispatchLogRepository;
-  private UniqueIdService uniqueIdService;
+  private final ITaskRepository taskRepository;
+  private final IFeatureRepository featureRepository;
+  private final ITaskRecordRepository taskRecordRepository;
+  private final FeatureExecuteProxy featureExecuteProxy;
+  private final ISubDispatchLogRepository subTaskLogRepository;
+  private final IDispatchLogRepository dispatchLogRepository;
+  private final UniqueIdService uniqueIdService;
 
   public TaskDispatch(ITaskRepository taskRepository, IFeatureRepository featureRepository,
       ITaskRecordRepository taskRecordRepository, FeatureExecuteProxy featureExecuteProxy,

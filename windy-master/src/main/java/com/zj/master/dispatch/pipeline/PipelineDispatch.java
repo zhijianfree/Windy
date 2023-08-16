@@ -20,21 +20,17 @@ import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.master.dispatch.IDispatchExecutor;
 import com.zj.master.dispatch.pipeline.builder.RefreshContextBuilder;
 import com.zj.master.dispatch.pipeline.builder.RequestContextBuilder;
-import com.zj.master.entity.vo.ActionDetail;
-import com.zj.master.entity.vo.ConfigDetail;
-import com.zj.master.entity.vo.NodeConfig;
-import com.zj.master.entity.vo.RefreshContext;
-import com.zj.master.entity.vo.RequestContext;
-import com.zj.master.entity.vo.TaskNode;
+import com.zj.master.entity.vo.*;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Component;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.stereotype.Component;
 
 /**
  * @author guyuelan
@@ -44,14 +40,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class PipelineDispatch implements IDispatchExecutor {
 
-  private IPipelineRepository pipelineRepository;
-  private IPipelineNodeRepository pipelineNodeRepository;
-  private IPipelineHistoryRepository pipelineHistoryRepository;
-  private IPipelineActionRepository pipelineActionRepository;
-  private UniqueIdService uniqueIdService;
-  private PipelineExecuteProxy pipelineExecuteProxy;
-  private ISubDispatchLogRepository subDispatchLogRepository;
-  private IDispatchLogRepository dispatchLogRepository;
+  private final IPipelineRepository pipelineRepository;
+  private final IPipelineNodeRepository pipelineNodeRepository;
+  private final IPipelineHistoryRepository pipelineHistoryRepository;
+  private final IPipelineActionRepository pipelineActionRepository;
+  private final UniqueIdService uniqueIdService;
+  private final PipelineExecuteProxy pipelineExecuteProxy;
+  private final ISubDispatchLogRepository subDispatchLogRepository;
+  private final IDispatchLogRepository dispatchLogRepository;
 
   public PipelineDispatch(IPipelineRepository pipelineRepository,
       IPipelineNodeRepository pipelineNodeRepository,

@@ -1,9 +1,12 @@
 package com.zj.common.enums;
 
+import lombok.Getter;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+@Getter
 public enum ProcessStatus {
   SUCCESS(1, "处理成功"),
   FAIL(2, "处理失败"),
@@ -20,10 +23,6 @@ public enum ProcessStatus {
 
   public static boolean isCompleteStatus(Integer status) {
     return !Objects.equals(status, ProcessStatus.RUNNING.getType());
-  }
-
-  public static boolean isSuccess(Integer status) {
-    return Objects.equals(status, ProcessStatus.SUCCESS.getType());
   }
 
   public boolean isFailStatus() {
@@ -44,11 +43,4 @@ public enum ProcessStatus {
   private final int type;
   private final String desc;
 
-  public int getType() {
-    return type;
-  }
-
-  public String getDesc() {
-    return desc;
-  }
 }

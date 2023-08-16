@@ -2,10 +2,10 @@ package com.zj.master.dispatch.task;
 
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
 import com.zj.master.entity.vo.BaseDispatch;
-import com.zj.master.entity.vo.ExecuteContext;
+import lombok.Data;
+
 import java.util.List;
 import java.util.Map;
-import lombok.Data;
 
 /**
  * @author guyuelan

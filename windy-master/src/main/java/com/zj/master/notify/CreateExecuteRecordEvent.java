@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CreateExecuteRecordEvent implements INotifyEvent {
 
-  private IExecuteRecordRepository executeRecordRepository;
+  private final IExecuteRecordRepository executeRecordRepository;
 
   public CreateExecuteRecordEvent(IExecuteRecordRepository executeRecordRepository) {
     this.executeRecordRepository = executeRecordRepository;

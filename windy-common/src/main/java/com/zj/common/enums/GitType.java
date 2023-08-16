@@ -1,18 +1,17 @@
 package com.zj.common.enums;
 
+import lombok.Getter;
+
 import java.util.Objects;
 import java.util.stream.Stream;
 
+@Getter
 public enum GitType {
   Gitlab("Private-Token"), Gitea("token");
-  private String tokenName;
+  private final String tokenName;
 
   GitType(String tokenName) {
     this.tokenName = tokenName;
-  }
-
-  public String getTokenName() {
-    return tokenName;
   }
 
   public static GitType exchange(String name) {

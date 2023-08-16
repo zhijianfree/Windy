@@ -30,7 +30,7 @@ import org.springframework.web.multipart.support.StandardMultipartHttpServletReq
 @RestController
 public class FeatureTemplateRest {
 
-  private TemplateService templateService;
+  private final TemplateService templateService;
 
   public FeatureTemplateRest(TemplateService templateService) {
     this.templateService = templateService;

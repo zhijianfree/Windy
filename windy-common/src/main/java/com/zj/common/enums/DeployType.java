@@ -1,5 +1,8 @@
 package com.zj.common.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum DeployType {
   SSH(1, "二进制ssh部署"),
   K8S(2, "K8S部署"),
@@ -10,11 +13,8 @@ public enum DeployType {
     this.type = type;
   }
 
-  private String desc;
+  private final String desc;
 
-  private Integer type;
+  private final Integer type;
 
-  public Integer getType() {
-    return type;
-  }
-  }
+}

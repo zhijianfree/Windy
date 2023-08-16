@@ -19,9 +19,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class UpdateFeatureHistoryEvent implements INotifyEvent {
 
-  private IFeatureHistoryRepository featureHistoryRepository;
-  private FeatureExecuteProxy featureExecuteProxy;
-  private ISubDispatchLogRepository subTaskLogRepository;
+  private final IFeatureHistoryRepository featureHistoryRepository;
+  private final FeatureExecuteProxy featureExecuteProxy;
+  private final ISubDispatchLogRepository subTaskLogRepository;
 
   public UpdateFeatureHistoryEvent(IFeatureHistoryRepository featureHistoryRepository,
       FeatureExecuteProxy featureExecuteProxy, ISubDispatchLogRepository subTaskLogRepository) {

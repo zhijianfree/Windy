@@ -18,9 +18,9 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class TaskRecordService {
 
-  private FeatureHistoryService featureHistoryService;
-  private FeatureService featureService;
-  private ITaskRecordRepository taskRecordRepository;
+  private final FeatureHistoryService featureHistoryService;
+  private final FeatureService featureService;
+  private final ITaskRecordRepository taskRecordRepository;
 
   public TaskRecordService(FeatureHistoryService featureHistoryService,
       FeatureService featureService, ITaskRecordRepository taskRecordRepository) {

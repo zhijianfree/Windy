@@ -29,14 +29,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class GitBindService {
 
-  private IMicroServiceRepository microServiceRepository;
-  private PipelineService pipelineService;
-
-  private RepositoryFactory repositoryFactory;
-  private UniqueIdService uniqueIdService;
-  private IBindBranchRepository gitBindRepository;
-
-  private Map<String, IGitWebhook> webhookMap;
+  private final IMicroServiceRepository microServiceRepository;
+  private final PipelineService pipelineService;
+  private final RepositoryFactory repositoryFactory;
+  private final UniqueIdService uniqueIdService;
+  private final IBindBranchRepository gitBindRepository;
+  private final Map<String, IGitWebhook> webhookMap;
 
   public GitBindService(IMicroServiceRepository microServiceRepository, PipelineService pipelineService,
       RepositoryFactory repositoryFactory,

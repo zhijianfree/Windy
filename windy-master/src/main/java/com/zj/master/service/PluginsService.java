@@ -2,9 +2,10 @@ package com.zj.master.service;
 
 import com.zj.domain.entity.dto.feature.PluginInfoDto;
 import com.zj.domain.repository.feature.IPluginRepository;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author guyuelan
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class PluginsService {
 
-  private IPluginRepository pluginRepository;
+  private final IPluginRepository pluginRepository;
 
   public PluginsService(IPluginRepository pluginRepository) {
     this.pluginRepository = pluginRepository;

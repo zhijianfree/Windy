@@ -13,12 +13,12 @@ import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.domain.repository.service.IEnvironmentRepository;
 import com.zj.master.entity.vo.DeployContext;
 import com.zj.master.entity.vo.TaskNode;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import javax.crypto.Mac;
-import org.springframework.stereotype.Component;
 
 /**
  * 部署节点前置处理

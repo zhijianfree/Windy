@@ -1,10 +1,11 @@
 package com.zj.master.entity.vo;
 
 import com.zj.domain.entity.dto.pipeline.CompareResult;
-import java.util.List;
-import java.util.Map;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author guyuelan

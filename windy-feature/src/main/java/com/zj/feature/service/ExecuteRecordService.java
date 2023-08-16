@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ExecuteRecordService {
 
-  private IExecuteRecordRepository executeRecordRepository;
+  private final IExecuteRecordRepository executeRecordRepository;
 
   public ExecuteRecordService(IExecuteRecordRepository executeRecordRepository) {
     this.executeRecordRepository = executeRecordRepository;
