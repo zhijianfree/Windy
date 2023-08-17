@@ -1,13 +1,14 @@
 package com.zj.client.config;
 
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import java.io.File;
 import java.io.IOException;
 
-import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
-
+@Slf4j
 @Component
 public class GlobalEnvConfig {
 
@@ -22,14 +23,15 @@ public class GlobalEnvConfig {
   private Integer loopQueryTimeout;
 
   @Getter
-  @Value("${windy.pipeline.maven.path")
+  @Value("${windy.pipeline.maven.path}")
   private String mavenPath;
 
   public String getWorkspace() {
     if (!isWorkspaceExist(workspace)) {
       try {
         return new File("").getCanonicalPath() + File.separator + WINDY;
-      } catch (IOException ignore) {
+      } catch (IOException e){
+        log.warn("get work space error", e);
       }
     }
     return workspace;
