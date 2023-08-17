@@ -4,42 +4,29 @@ server:
 spring:
   application:
     name: WindyMaster
-  datasource:
-    driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:33060/windy?serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: zj137899
 
 eureka:
+  server:
+    # server清理无效节点的时间间隔
+    eviction-interval-timer-in-ms: 60
+    # 是否开启自我保护，默认true
+    enable-self-preservation: true
+    # 开启自我保护的系数
+    renewal-percent-threshold: 0.85
+    # 一级缓存与二级缓存同步时间
+    response-cache-update-interval-ms: 0
+    # 关闭服务端一级cache缓存
+    use-read-only-response-cache: false
   instance:
     # 服务时效时间，默认90秒.当server 90秒内没有收到client的注册信息时，会将该节点剔除
     lease-expiration-duration-in-seconds: 30
     # 服务续约任务调用间隔时间，默认30秒.client每隔30秒向server上报自己状态，避免被server剔除
     lease-renewal-interval-in-seconds: 30
     # 注册服务时是否使用IP注册，默认false
-    prefer-ip-address: false
+    prefer-ip-address: true
 
   client:
-    # 是否注册
-    register-with-eureka: true
-    # 是否检索服务
-    fetch-registry: true
-    # 连接server服务器超时时间
-    eureka-server-connect-timeout-seconds: 5
-    # 连接server的连接空闲时长
-    eureka-connection-idle-timeout-seconds: 30
-    # 连接server读取数据超时时间
-    eureka-server-read-timeout-seconds: 8
-    # 连接server的最大连接数
-    eureka-server-total-connections: 200
-    # 对单个server的最大连接数
-    eureka-server-total-connections-per-host: 50
-    # 获取集群中最新的server节点数据
-    eureka-service-url-poll-interval-seconds: 2
-    # client维持与server的心跳线程数
-    heartbeat-executor-thread-pool-size: 2
-    # client本地缓存清单更新间隔，默认30秒.
-    # client每隔30秒，向server请求可用服务清单。对于API网关类应用，可以适当降低时间间隔
-    registry-fetch-interval-seconds: 90
+    register-with-eureka: true #false表示不向注册中心注册自己。
+    fetch-registry: true #false表示自己端就是注册中心，我的职责就是维护服务实例，并不需要去检索服务
     service-url:
-      defaultZone: http://windy-cluster:9768/eureka/
+      defaultZone: http://windy-cluster:9888/eureka/
