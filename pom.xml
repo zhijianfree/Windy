@@ -192,11 +192,6 @@
         <artifactId>commons-io</artifactId>
         <version>${common-io.version}</version>
       </dependency>
-<!--      <dependency>-->
-<!--        <groupId>org.eclipse.jgit</groupId>-->
-<!--        <artifactId>org.eclipse.jgit</artifactId>-->
-<!--        <version>${git-client.version}</version>-->
-<!--      </dependency>-->
       <dependency>
         <groupId>org.apache.maven.shared</groupId>
         <artifactId>maven-invoker</artifactId>

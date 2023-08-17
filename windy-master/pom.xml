@@ -20,6 +20,12 @@
     <dependency>
       <groupId>com.zj</groupId>
       <artifactId>windy-common</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.zj</groupId>

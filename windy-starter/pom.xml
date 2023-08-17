@@ -32,6 +32,16 @@
     <dependency>
       <groupId>com.zj</groupId>
       <artifactId>windy-service</artifactId>
+      <exclusions>
+        <exclusion>
+          <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+          <groupId>org.springframework.cloud</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+      <groupId>org.springframework.cloud</groupId>
     </dependency>
 
   </dependencies>
