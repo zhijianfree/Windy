@@ -41,7 +41,7 @@ CREATE TABLE `environment` (
 
 DROP TABLE IF EXISTS `execute_point`;
 CREATE TABLE `execute_point` (
-  `id` bigint(20) DEFAULT NULL,
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `point_id` varchar(64) NOT NULL COMMENT '用例Id',
   `execute_type` int(11) DEFAULT '1' COMMENT '执行类型',
   `feature_id` varchar(64) NOT NULL COMMENT '用例Id',
@@ -267,7 +267,7 @@ CREATE TABLE `pipeline` (
   `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_pipeline_id` (`pipeline_id`),
-  KEY `idx_service_id` (`service_id`),
+  KEY `idx_service_id` (`service_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
 
 --
@@ -281,9 +281,9 @@ CREATE TABLE `pipeline_action` (
   `action_name` varchar(100) NOT NULL COMMENT '配置名称',
   `user_id` varchar(100) DEFAULT NULL COMMENT '创建人',
   `node_id` varchar(100) DEFAULT NULL COMMENT '执行点类型',
-  `action_url` varchar(100) NOT NULL COMMENT '请求地址',
+  `action_url` varchar(100) DEFAULT NULL COMMENT '请求地址',
   `param_detail` text COMMENT '配置详情',
-  `query_url` varchar(100) NOT NULL COMMENT '请求地址',
+  `query_url` varchar(100) DEFAULT NULL COMMENT '请求地址',
   `result` varchar(256) DEFAULT NULL COMMENT '响应结果比较',
   `description` varchar(256) DEFAULT NULL COMMENT '执行点描述',
   `execute_type` varchar(10) NOT NULL COMMENT '执行类型',
@@ -311,7 +311,7 @@ CREATE TABLE `pipeline_history` (
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_history_id` (`history_id`)
+  UNIQUE KEY `idx_history_id` (`history_id`),
   KEY `idx_pipeline_id` (`pipeline_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='流水线执行历史';
 
@@ -338,8 +338,6 @@ CREATE TABLE `pipeline_node` (
 --
 
 DROP TABLE IF EXISTS `pipeline_stage`;
-
-
 CREATE TABLE `pipeline_stage` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `stage_id` varchar(64) DEFAULT NULL COMMENT '阶段Id',
@@ -529,36 +527,33 @@ CREATE TABLE `service_api` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 
 ## 流水线默认配置
-INSERT INTO windy.system_config (config_id,config_name,parent_id,`type`,config_detail,sort,create_time,update_time) VALUES
-	 ('1','流水线默认配置',NULL,1,'[{"id":"0","name":"开始","status":"success","root":true,"group":"0","disable":true,"next":[{"index":1,"weight":0}]},{"id":"1","name":"结束","disable":true,"status":"success","group":"1","root":true}]',1,1,1);
+INSERT INTO test.system_config (config_id,config_name,parent_id,`type`,config_detail,sort,create_time,update_time) VALUES
+   	 ('1','default_pipeline',NULL,1,'{"configDetail":"[{\\"id\\":\\"0\\",\\"name\\":\\"开始\\",\\"status\\":\\"success\\",\\"root\\":true,\\"group\\":\\"0\\",\\"disable\\":true,\\"next\\":[{\\"index\\":1,\\"weight\\":0}]},{\\"id\\":\\"1\\",\\"name\\":\\"结束\\",\\"disable\\":true,\\"status\\":\\"success\\",\\"group\\":\\"1\\",\\"root\\":true}]"}',1,1692543958895,1692543958895);
 
 ## 添加默认用例模版
-INSERT INTO devops.execute_template(id, template_id, template_type, service, `method`, name, author, description, source, param, create_time, update_time)
-VALUES(1, '71a26960299f49c3aa26b687ea2fbdb2', 2, NULL, 'for', 'for循环', 'admin', '循环查询', NULL, NULL, 1, 1);
-INSERT INTO devops.execute_template(id, template_id, template_type, service, `method`, name, author, description, source, param, create_time, update_time)
-VALUES(2, '71a26960299f49c3aa26b687ea2fbdb3', 2, NULL, 'if', 'if判断', 'admin', '条件执行', NULL, NULL, 1, 2);
-INSERT INTO devops.execute_template
-(id, template_id, template_type, service, `method`, name, author, description, source, param, create_time, update_time)
-VALUES(3, '71a26960299f49c3aa26b687ea2fbdba', 1, 'com.zj.feature.ability.mysql.MysqlFeature', 'executeQuery', 'mysql查询', 'admin', '执行mysql语句', NULL, '[{"defaultValue":{"defaultValue":"NULL"},"description":"mysql连接地址","paramKey":"connect","type":0},{"defaultValue":{"defaultValue":"NULL"},"description":"数据库名称","paramKey":"dbName","type":0},{"defaultValue":{"defaultValue":"NULL"},"description":"数据库用户","paramKey":"user","type":0},{"defaultValue":{"defaultValue":"NULL"},"description":"用户密码","paramKey":"password","type":0},{"defaultValue":{"defaultValue":""},"description":"执行的sql","paramKey":"sql","type":0}]', 1670927202853, 1675219942024);
-INSERT INTO devops.execute_template
-(id, template_id, template_type, service, `method`, name, author, description, source, param, create_time, update_time)
-VALUES(4, 'f18a546c54fe4f70bae3a0b529e46908', 1, 'com.zj.feature.ability.http.HttpFeature', 'startHttp', 'Http请求', 'admin', '简单的http请求', NULL, '[{"defaultValue":{"defaultValue":""},"description":"请求的url","paramKey":"url","type":0},{"defaultValue":{"defaultValue":"","range":["GET","POST","PUT","DELETE"]},"description":"请求的Http方法","paramKey":"method","type":2},{"defaultValue":{"defaultValue":""},"description":"http请求的header","paramKey":"headers","type":1},{"defaultValue":{"defaultValue":""},"description":"请求的body内容","paramKey":"body","type":0}]', 1671003944283, 1675230014305);
-INSERT INTO devops.execute_template
-(id, template_id, template_type, service, `method`, name, author, description, source, param, create_time, update_time)
-VALUES(5, '75196a0088be47cea7c58452f432d6e5', 1, 'com.zj.feature.ability.atop.AtopFeature', 'atopRequest', 'atop接口请求', 'admin', '发起atop接口请求', NULL, '[{"defaultValue":{"defaultValue":"${remoteUrl}"},"description":"atop接口域名","paramKey":"url","type":0},{"defaultValue":{"defaultValue":""},"description":"请求的atop接口","paramKey":"api","type":0},{"defaultValue":{"defaultValue":""},"description":"接口版本号","paramKey":"version","type":0},{"defaultValue":{"defaultValue":"${clientId}"},"description":"客户端唯一标识ID","paramKey":"clientId","type":0},{"defaultValue":{"defaultValue":"${secret}"},"description":"客户端密钥","paramKey":"secret","type":0},{"defaultValue":{"defaultValue":""},"description":"请求的参数，json字符串格式","paramKey":"postData","type":0},{"defaultValue":{"defaultValue":"${sessionId}"},"description":"用户sessionId","paramKey":"sid","type":0}]', 1672900982693, 1677494163700);
-INSERT INTO devops.execute_template
-(id, template_id, template_type, service, `method`, name, author, description, source, param, create_time, update_time)
-VALUES(6, '566635e07a0d4e62a39abec42f3cd610', 1, 'com.zj.feature.ability.highway.HighwayFeature', 'requestHighway', 'Highway请求', 'admin', '发起Highway接口请求', NULL, '[{"defaultValue":{"defaultValue":"${remoteUrl}"},"description":"highway接口url","paramKey":"url","type":0},{"defaultValue":{"defaultValue":"","range":["GET","PUT","DELETE","POST"]},"description":"http请求方法","paramKey":"method","type":2},{"defaultValue":{"defaultValue":""},"description":"请求的内容","paramKey":"body","type":0},{"defaultValue":{"defaultValue":"${clientId}"},"description":"请求的clientId(IOT开放平台)","paramKey":"appKey","type":0},{"defaultValue":{"defaultValue":"${secret}"},"description":"请求的secret(IOT开放平台)","paramKey":"appSecret","type":0},{"defaultValue":{"defaultValue":""},"description":"请求的token，需要时填写","paramKey":"accessToken","type":0},{"defaultValue":{"defaultValue":""},"description":"http请求的header","paramKey":"header","type":1}]', 1672998035742, 1677227401010);
-INSERT INTO devops.execute_template
-(id, template_id, template_type, service, `method`, name, author, description, source, param, create_time, update_time)
-VALUES(7, '9dcb1e34d902487fa2e5698a14dbb552', 1, 'com.zj.feature.ability.kafka.KafkaFeature', 'startConsume', 'kafka消费', 'guyuelan', '消费kafka消息', NULL, '[{"description":"kafka地址ip:port格式","paramKey":"address","type":0},{"description":"kafka消费topic","paramKey":"topic","type":0},{"description":"kafka消费群组","paramKey":"group","type":0}]', 1673421517596, 1673421517596);
-INSERT INTO devops.execute_template
-(id, template_id, template_type, service, `method`, name, author, description, source, param, create_time, update_time)
-VALUES(8, 'ef4fa4c63cc8488c801590eca36580d4', 1, 'com.zj.feature.ability.kafka.KafkaFeature', 'produceMessage', '发送Kafak消息', 'guyuelan', '发送kafka消息', NULL, '[{"description":"发送的topic","paramKey":"topic","type":0},{"description":"发送消息的key","paramKey":"key","type":0},{"description":"发送kafka消息内容","paramKey":"value","type":0},{"description":"发送超时时间，单位秒","paramKey":"timeout","type":3},{"description":"kafka地址格式ip:port","paramKey":"address","type":0}]', 1673422627042, 1673423118348);
-INSERT INTO devops.execute_template
-(id, template_id, template_type, service, `method`, name, author, description, source, param, create_time, update_time)
-VALUES(9, 'd9329caeea7340f4bec38d5727e521c8', 1, 'com.zj.feature.ability.redis.RedisFeature', 'setValue', 'Redis设置Value', 'guyuelan', '设置redis值', NULL, '[{"description":"redis实例IP","paramKey":"ip","type":0},{"description":"redis实例端口","paramKey":"port","type":3},{"description":"设置Key","paramKey":"key","type":0},{"description":"设置value","paramKey":"value","type":0},{"description":"超时时间","paramKey":"timeout","type":3}]', 1673431790811, 1673431790811);
-INSERT INTO devops.execute_template
-(id, template_id, template_type, service, `method`, name, author, description, source, param, create_time, update_time)
-VALUES(10, 'a145661e75e040d0bb7be75fedf6c60e', 1, 'com.zj.feature.ability.redis.RedisFeature', 'getValue', '获取Redis值', 'guyuelan', '获取redis值', NULL, '[{"description":"redis实例ip","paramKey":"ip","type":0},{"description":"redis实例端口","paramKey":"port","type":3},{"description":"key","paramKey":"key","type":0}]', 1673431883618, 1673431883618);
+INSERT INTO test.execute_template (template_id,template_type,service,`method`,name,author,description,source,param,invoke_type,header,create_time,update_time) VALUES
+	 ('71a26960299f49c3aa26b687ea2fbdb2',2,NULL,'for','for循环','admin','循环查询',NULL,NULL,NULL,NULL,1,1),
+	 ('71a26960299f49c3aa26b687ea2fbdb3',2,NULL,'if','if判断','admin','条件执行',NULL,NULL,NULL,NULL,1,2),
+	 ('71a26960299f49c3aa26b687ea2fbdba',1,'com.zj.client.handler.feature.ability.mysql.MysqlFeature','executeQuery','mysql查询','admin','执行mysql语句',NULL,'[{"defaultValue":{"defaultValue":"${dnHost}"},"description":"mysql连接地址","paramKey":"connect","type":0},{"defaultValue":{"defaultValue":"${dbName}"},"description":"数据库名称","paramKey":"dbName","type":0},{"defaultValue":{"defaultValue":"${dbUser}"},"description":"数据库用户","paramKey":"user","type":0},{"defaultValue":{"defaultValue":"${dpPassword}"},"description":"用户密码","paramKey":"password","type":0},{"defaultValue":{"defaultValue":""},"description":"执行的sql","paramKey":"sql","type":0}]',1,'{}',1670927202853,1692542168926),
+	 ('f18a546c54fe4f70bae3a0b529e46908',1,'com.zj.client.handler.feature.ability.http.HttpFeature','startHttp','Http请求','admin','简单的http请求',NULL,'[{"defaultValue":{"defaultValue":""},"description":"请求的url","paramKey":"url","type":0},{"defaultValue":{"defaultValue":"","range":["GET","POST","PUT","DELETE"]},"description":"请求的Http方法","paramKey":"method","type":2},{"defaultValue":{"defaultValue":""},"description":"http请求的header","paramKey":"headers","type":1},{"defaultValue":{"defaultValue":""},"description":"请求的body内容","paramKey":"body","type":0}]',NULL,NULL,1671003944283,1675230014305),
+	 ('9dcb1e34d902487fa2e5698a14dbb552',1,'com.zj.client.handler.feature.ability.kafka.KafkaFeature','startConsume','kafka消费','guyuelan','消费kafka消息',NULL,'[{"description":"kafka地址ip:port格式","paramKey":"address","type":0},{"description":"kafka消费topic","paramKey":"topic","type":0},{"description":"kafka消费群组","paramKey":"group","type":0}]',NULL,NULL,1673421517596,1673421517596),
+	 ('ef4fa4c63cc8488c801590eca36580d4',1,'com.zj.client.handler.feature.ability.kafka.KafkaFeature','produceMessage','发送Kafak消息','guyuelan','发送kafka消息',NULL,'[{"description":"发送的topic","paramKey":"topic","type":0},{"description":"发送消息的key","paramKey":"key","type":0},{"description":"发送kafka消息内容","paramKey":"value","type":0},{"description":"发送超时时间，单位秒","paramKey":"timeout","type":3},{"description":"kafka地址格式ip:port","paramKey":"address","type":0}]',NULL,NULL,1673422627042,1673423118348),
+	 ('d9329caeea7340f4bec38d5727e521c8',1,'com.zj.client.handler.feature.ability.redis.RedisFeature','setValue','Redis设置Value','guyuelan','设置redis值',NULL,'[{"description":"redis实例IP","paramKey":"ip","type":0},{"description":"redis实例端口","paramKey":"port","type":3},{"description":"设置Key","paramKey":"key","type":0},{"description":"设置value","paramKey":"value","type":0},{"description":"超时时间","paramKey":"timeout","type":3}]',NULL,NULL,1673431790811,1673431790811),
+	 ('a145661e75e040d0bb7be75fedf6c60e',1,'com.zj.client.handler.feature.ability.redis.RedisFeature','getValue','获取Redis值','guyuelan','获取redis值',NULL,'[{"description":"redis实例ip","paramKey":"ip","type":0},{"description":"redis实例端口","paramKey":"port","type":3},{"description":"key","paramKey":"key","type":0}]',NULL,NULL,1673431883618,1673431883618);
 
+## 默认执行节点
+INSERT INTO test.node_bind (node_id,node_name,user_id,description,create_time,update_time) VALUES
+	 ('07db7de5f7df4b7fa570ef9b14af24e9','代码构建','admin','代码构建',1692540580625,1692540580625),
+	 ('a13bf21127284a348ae151e78bbecc0c','执行等待','admin','执行等待',1692540629263,1692540629263),
+	 ('3dcd3dc023234abc8892001426d1d3ec','部署','admin','代码部署',1692540643877,1692540643877),
+	 ('ce78243933964da78c09c9122c043053','用例任务','admin','用例任务测试',1692540667088,1692540667088),
+	 ('5851a43339974fa6b9100c7509502a21','人工卡点','admin','人工卡点',1692540686733,1692540686733),
+	 ('3884dbd25e974a508554bf575648fa92','合并代码','admin','合并代码',1692540711592,1692540711592);
+
+INSERT INTO test.pipeline_action (action_id,action_name,user_id,node_id,action_url,param_detail,query_url,`result`,description,execute_type,create_time,update_time) VALUES
+	 ('62a0f23ab666417e9a7116d4e78a70a4','代码构建',NULL,'07db7de5f7df4b7fa570ef9b14af24e9',NULL,'[{"description":"构建pom相对路径","name":"pomPath","value":"pom.xml"}]',NULL,'[{"compareKey":"status","description":"构建状态","operator":"=","showCompare":false,"value":"1","valueType":"Integer"}]','代码构建','BUILD',1692539956836,1692539956836),
+	 ('304d5182969945dda37bf974bc322c83','等待执行',NULL,'a13bf21127284a348ae151e78bbecc0c',NULL,'[{"description":"节点等待时长","name":"waitTime","value":"300"}]',NULL,'[]','这个节点可以用于两个任务之间不期望立即执行的场景，比如部署与测试功能一般可在服务部署之后等待5min然后再开始功能测试。','WAIT',1692540079424,1692540079424),
+	 ('24a60706af63443e9721b8653b67fb3a','环境部署',NULL,'3dcd3dc023234abc8892001426d1d3ec',NULL,'[{"description":"环境Id","name":"envId","type":"select","value":""}]',NULL,'[]','当前节点支持将构建好的代码部署到指定的环境，这里说的环境是在系统的环境管理中添加，流水线部署的环境可在流水线中自定义配置。','DEPLOY',1692540178899,1692540178899),
+	 ('08fd64be475c49c89daf872a540fe99e','功能测试',NULL,'ce78243933964da78c09c9122c043053',NULL,'[{"description":"选择任务","name":"taskId","type":"select","value":""}]',NULL,'[{"compareKey":"percent","description":"执行成功率","operator":">=","showCompare":true,"value":"90","valueType":"Integer"}]','当前节点用于服务功能测试，具体的功能用例在Windy系统的“用例管理”功能中实现。测试任务在流水线中配置选择，成功率是指测试任务的成功百分比只有在测试任务达到设置值之后当前节点运行才算成功。','TEST',1692540382487,1692540382487),
+	 ('89de9bdb09a647d2b43c8c386e12d413','审批',NULL,'5851a43339974fa6b9100c7509502a21',NULL,'[{"description":"审批最大等待时长(秒)","name":"maxWait","value":"604800"}]',NULL,'[]','这个节点用于线上发布功能，针对线上代码共在相关功能测试完成之后，由审核人员确认是否发布，这个功能是可选项。','APPROVAL',1692540478118,1692540478118),
+	 ('34dabe9de45543fdafd3031875c4d4ca','合入主干',NULL,'3884dbd25e974a508554bf575648fa92',NULL,'[{"description":"是否删除分支","name":"deleteBranch","value":"false"}]',NULL,'[]','当前节点用于线上发布，线上发布流水线功能测试和审批都完成就可以将对应的分支合并到master节点中。','MERGE',1692540555777,1692540555777);
