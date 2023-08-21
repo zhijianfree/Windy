@@ -1,6 +1,4 @@
---
--- Table structure for table `code_change`
---
+
 
 DROP TABLE IF EXISTS `code_change`;
 CREATE TABLE `code_change` (
@@ -18,9 +16,6 @@ CREATE TABLE `code_change` (
   UNIQUE KEY `unique_change_id` (`change_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
 
---
--- Table structure for table `environment`
---
 
 DROP TABLE IF EXISTS `environment`;
 CREATE TABLE `environment` (
@@ -35,9 +30,6 @@ CREATE TABLE `environment` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4
 
---
--- Table structure for table `execute_point`
---
 
 DROP TABLE IF EXISTS `execute_point`;
 CREATE TABLE `execute_point` (
@@ -60,9 +52,6 @@ CREATE TABLE `execute_point` (
   KEY `idx_point_id` (`point_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Table structure for table `execute_record`
---
 
 DROP TABLE IF EXISTS `execute_record`;
 CREATE TABLE `execute_record` (
@@ -81,9 +70,6 @@ CREATE TABLE `execute_record` (
   KEY `idx_history_id` (`history_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Table structure for table `execute_template`
---
 
 DROP TABLE IF EXISTS `execute_template`;
 CREATE TABLE `execute_template` (
@@ -104,9 +90,6 @@ CREATE TABLE `execute_template` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Table structure for table `feature_history`
---
 
 DROP TABLE IF EXISTS `feature_history`;
 CREATE TABLE `feature_history` (
@@ -124,9 +107,6 @@ CREATE TABLE `feature_history` (
   KEY `idx_history_id` (`history_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Table structure for table `feature_info`
---
 
 DROP TABLE IF EXISTS `feature_info`;
 CREATE TABLE `feature_info` (
@@ -147,20 +127,12 @@ CREATE TABLE `feature_info` (
   KEY `idx_feature_id` (`feature_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Table structure for table `feature_tag`
---
-
 DROP TABLE IF EXISTS `feature_tag`;
 CREATE TABLE `feature_tag` (
   `feature_id` varchar(64) DEFAULT NULL COMMENT '用例Id',
   `tag_value` varchar(100) NOT NULL COMMENT '标签值',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Table structure for table `git_bind`
---
 
 DROP TABLE IF EXISTS `git_bind`;
 CREATE TABLE `bind_branch` (
@@ -176,10 +148,6 @@ CREATE TABLE `bind_branch` (
   KEY `idx_pipeline_id` (`pipeline_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
 
---
--- Table structure for table `microservice`
---
-
 DROP TABLE IF EXISTS `microservice`;
 CREATE TABLE `microservice` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -194,10 +162,6 @@ CREATE TABLE `microservice` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
 
---
--- Table structure for table `node_bind`
---
-
 DROP TABLE IF EXISTS `node_bind`;
 CREATE TABLE `node_bind` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -209,10 +173,6 @@ CREATE TABLE `node_bind` (
   `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
-
---
--- Table structure for table `node_config`
---
 
 DROP TABLE IF EXISTS `node_config`;
 CREATE TABLE `node_config` (
@@ -226,10 +186,6 @@ CREATE TABLE `node_config` (
   `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Table structure for table `node_record`
---
 
 DROP TABLE IF EXISTS `node_record`;
 CREATE TABLE `node_record` (
@@ -248,10 +204,6 @@ CREATE TABLE `node_record` (
   KEY `idx_history_id` (`history_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Table structure for table `pipeline`
---
-
 DROP TABLE IF EXISTS `pipeline`;
 CREATE TABLE `pipeline` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -269,10 +221,6 @@ CREATE TABLE `pipeline` (
   UNIQUE KEY `unique_pipeline_id` (`pipeline_id`),
   KEY `idx_service_id` (`service_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
-
---
--- Table structure for table `pipeline_action`
---
 
 DROP TABLE IF EXISTS `pipeline_action`;
 CREATE TABLE `pipeline_action` (
@@ -294,10 +242,6 @@ CREATE TABLE `pipeline_action` (
   KEY `idx_node_id` (`node_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
 
---
--- Table structure for table `pipeline_history`
---
-
 DROP TABLE IF EXISTS `pipeline_history`;
 CREATE TABLE `pipeline_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -315,10 +259,6 @@ CREATE TABLE `pipeline_history` (
   KEY `idx_pipeline_id` (`pipeline_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='流水线执行历史';
 
---
--- Table structure for table `pipeline_node`
---
-
 DROP TABLE IF EXISTS `pipeline_node`;
 CREATE TABLE `pipeline_node` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -333,10 +273,6 @@ CREATE TABLE `pipeline_node` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
 
---
--- Table structure for table `pipeline_stage`
---
-
 DROP TABLE IF EXISTS `pipeline_stage`;
 CREATE TABLE `pipeline_stage` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -349,10 +285,6 @@ CREATE TABLE `pipeline_stage` (
   `update_time` bigint(20) NOT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
-
---
--- Table structure for table `system_config`
---
 
 DROP TABLE IF EXISTS `system_config`;
 CREATE TABLE `system_config` (
@@ -367,10 +299,6 @@ CREATE TABLE `system_config` (
   `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
-
---
--- Table structure for table `task_info`
---
 
 DROP TABLE IF EXISTS `task_info`;
 CREATE TABLE `task_info` (
@@ -390,9 +318,6 @@ CREATE TABLE `task_info` (
   KEY `idx_service_id` (`service_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Table structure for table `task_record`
---
 
 DROP TABLE IF EXISTS `task_record`;
 CREATE TABLE `task_record` (
@@ -412,10 +337,6 @@ CREATE TABLE `task_record` (
   KEY `idx_task_id` (`task_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Table structure for table `test_case`
---
-
 DROP TABLE IF EXISTS `test_case`;
 CREATE TABLE `test_case` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -431,9 +352,6 @@ CREATE TABLE `test_case` (
   KEY `idx_service_id` (`service_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Table structure for table `test_case_config`
---
 
 DROP TABLE IF EXISTS `test_case_config`;
 CREATE TABLE `test_case_config` (
