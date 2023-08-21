@@ -3,6 +3,7 @@ package com.zj.client.handler.pipeline.git;
 import com.zj.client.handler.pipeline.executer.vo.GitMeta;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.exception.ExecuteException;
+import java.io.PrintWriter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
@@ -13,6 +14,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.TextProgressMonitor;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -47,7 +49,7 @@ public class GitOperator implements IGitProcessor {
     return Git.cloneRepository().setURI(gitMeta.getGitUrl()).setDirectory(new File(workspace))
         .setCredentialsProvider(
             new UsernamePasswordCredentialsProvider(gitMeta.getTokenName(), gitMeta.getToken()))
-        .setRemote(ORIGIN).setBranch(branch).call();
+        .setRemote(ORIGIN).setBranch(branch).setProgressMonitor(new TextProgressMonitor(new PrintWriter(System.out))).call();
   }
 
   private void createIfNotExist(String serviceDir) {

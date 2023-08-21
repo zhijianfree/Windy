@@ -37,8 +37,7 @@ public class CodeBuildService {
   public static final String BUILD_SUCCESS_TIPS = "构建成功";
   public static final String SUFFIX = "/";
   public static final String SPLIT_STRING = ":";
-  public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmmss");
-  public static final String[] JAR_FILTER = {".jar"};
+  public final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
   public static final String IMAGE_NAME = "imageName";
 
   private final IGitProcessor gitProcessor;
@@ -65,12 +64,14 @@ public class CodeBuildService {
         String pipelineWorkspace = globalEnvConfig.getPipelineWorkspace(serviceName,
             buildParam.getPipelineId());
 
+        QueryResponseModel queryResponseModel = statusMap.get(buildParam.getRecordId());
         //1 拉取代码到本地
         pullCodeFrmGit(buildParam, pipelineWorkspace);
 
         //2 本地maven构建
         String pomPath = getTargetPomPath(pipelineWorkspace, buildParam.getPomPath());
-        Integer exitCode = mavenOperator.build(pomPath, pipelineWorkspace);
+
+        Integer exitCode = mavenOperator.build(pomPath, pipelineWorkspace, queryResponseModel);
         log.info("get maven exit code={}", exitCode);
 
         //3 构建docker镜像
@@ -90,7 +91,7 @@ public class CodeBuildService {
 
   private String startBuildDocker(String serviceName, String pipelineWorkspace,
       BuildParam buildParam) throws InterruptedException {
-    String dateNow = DATE_FORMAT.format(new Date());
+    String dateNow = dateFormat.format(new Date());
     String dockerFilePath =
         pipelineWorkspace + File.separator + "docker" + File.separator + "Dockerfile";
     File dockerFile = new File(dockerFilePath);

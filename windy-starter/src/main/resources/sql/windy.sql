@@ -24,11 +24,11 @@ CREATE TABLE `environment` (
   `env_name` varchar(50) NOT NULL COMMENT '环境名称',
   `env_status` int DEFAULT NULL COMMENT '环境状态 1 正常 2 暂停 3 已删除',
   `env_type` int NOT NULL DEFAULT '1' COMMENT '1 ssh 2 k8s 3 docker',
-  `env_params` varchar(1000) DEFAULT NULL COMMENT '环境相关配置',
+  `env_params` text COMMENT '环境相关配置',
   `create_time` bigint DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `execute_point`;
@@ -268,6 +268,7 @@ CREATE TABLE `pipeline_node` (
   `node_name` varchar(100) NOT NULL COMMENT '节点名称',
   `type` int(2) DEFAULT NULL COMMENT '节点类型',
   `config_detail` varchar(1000) DEFAULT NULL COMMENT '节点配置',
+  `sort_order` int(3) DEFAULT NULL COMMENT '排序',
   `create_time` bigint(20) NOT NULL COMMENT '创建时间',
   `update_time` bigint(20) NOT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
@@ -281,6 +282,7 @@ CREATE TABLE `pipeline_stage` (
   `config_id` varchar(100) DEFAULT NULL COMMENT '关联的配置Id',
   `stage_name` varchar(100) NOT NULL COMMENT '阶段名称',
   `type` int(2) DEFAULT '1' COMMENT '阶段类型',
+  `sort_order` int(3) DEFAULT NULL COMMENT '排序',
   `create_time` bigint(20) NOT NULL COMMENT '创建时间',
   `update_time` bigint(20) NOT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
@@ -385,7 +387,7 @@ CREATE TABLE `dispatch_log` (
   PRIMARY KEY (`id`),
   KEY `idx_log_id` (`log_id`),
   KEY `idx_source_id` (`source_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `publish_bind` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -400,7 +402,7 @@ CREATE TABLE `publish_bind` (
   `update_time` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_service_id_branch` (`service_id`,`branch`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `plugin_info` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -412,7 +414,7 @@ CREATE TABLE `plugin_info` (
   `create_time` bigint(20) NOT NULL,
   `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `optimistic_lock` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -424,7 +426,7 @@ CREATE TABLE `optimistic_lock` (
   `version` bigint(20) DEFAULT NULL COMMENT '乐观锁版本',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_biz_code` (`biz_code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='分布式乐观锁'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='分布式乐观锁';
 
 CREATE TABLE `service_api` (
   `id` bigint(20) NOT NULL,
@@ -442,14 +444,14 @@ CREATE TABLE `service_api` (
   `create_time` bigint(20) DEFAULT NULL,
   `update_time` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ## 流水线默认配置
-INSERT INTO test.system_config (config_id,config_name,parent_id,`type`,config_detail,sort,create_time,update_time) VALUES
+INSERT INTO system_config (config_id,config_name,parent_id,`type`,config_detail,sort,create_time,update_time) VALUES
    	 ('1','default_pipeline',NULL,1,'{"configDetail":"[{\\"id\\":\\"0\\",\\"name\\":\\"开始\\",\\"status\\":\\"success\\",\\"root\\":true,\\"group\\":\\"0\\",\\"disable\\":true,\\"next\\":[{\\"index\\":1,\\"weight\\":0}]},{\\"id\\":\\"1\\",\\"name\\":\\"结束\\",\\"disable\\":true,\\"status\\":\\"success\\",\\"group\\":\\"1\\",\\"root\\":true}]"}',1,1692543958895,1692543958895);
 
 ## 添加默认用例模版
-INSERT INTO test.execute_template (template_id,template_type,service,`method`,name,author,description,source,param,invoke_type,header,create_time,update_time) VALUES
+INSERT INTO execute_template (template_id,template_type,service,`method`,name,author,description,source,param,invoke_type,header,create_time,update_time) VALUES
 	 ('71a26960299f49c3aa26b687ea2fbdb2',2,NULL,'for','for循环','admin','循环查询',NULL,NULL,NULL,NULL,1,1),
 	 ('71a26960299f49c3aa26b687ea2fbdb3',2,NULL,'if','if判断','admin','条件执行',NULL,NULL,NULL,NULL,1,2),
 	 ('71a26960299f49c3aa26b687ea2fbdba',1,'com.zj.client.handler.feature.ability.mysql.MysqlFeature','executeQuery','mysql查询','admin','执行mysql语句',NULL,'[{"defaultValue":{"defaultValue":"${dnHost}"},"description":"mysql连接地址","paramKey":"connect","type":0},{"defaultValue":{"defaultValue":"${dbName}"},"description":"数据库名称","paramKey":"dbName","type":0},{"defaultValue":{"defaultValue":"${dbUser}"},"description":"数据库用户","paramKey":"user","type":0},{"defaultValue":{"defaultValue":"${dpPassword}"},"description":"用户密码","paramKey":"password","type":0},{"defaultValue":{"defaultValue":""},"description":"执行的sql","paramKey":"sql","type":0}]',1,'{}',1670927202853,1692542168926),
@@ -460,7 +462,7 @@ INSERT INTO test.execute_template (template_id,template_type,service,`method`,na
 	 ('a145661e75e040d0bb7be75fedf6c60e',1,'com.zj.client.handler.feature.ability.redis.RedisFeature','getValue','获取Redis值','guyuelan','获取redis值',NULL,'[{"description":"redis实例ip","paramKey":"ip","type":0},{"description":"redis实例端口","paramKey":"port","type":3},{"description":"key","paramKey":"key","type":0}]',NULL,NULL,1673431883618,1673431883618);
 
 ## 默认执行节点
-INSERT INTO test.node_bind (node_id,node_name,user_id,description,create_time,update_time) VALUES
+INSERT INTO node_bind (node_id,node_name,user_id,description,create_time,update_time) VALUES
 	 ('07db7de5f7df4b7fa570ef9b14af24e9','代码构建','admin','代码构建',1692540580625,1692540580625),
 	 ('a13bf21127284a348ae151e78bbecc0c','执行等待','admin','执行等待',1692540629263,1692540629263),
 	 ('3dcd3dc023234abc8892001426d1d3ec','部署','admin','代码部署',1692540643877,1692540643877),
@@ -468,7 +470,7 @@ INSERT INTO test.node_bind (node_id,node_name,user_id,description,create_time,up
 	 ('5851a43339974fa6b9100c7509502a21','人工卡点','admin','人工卡点',1692540686733,1692540686733),
 	 ('3884dbd25e974a508554bf575648fa92','合并代码','admin','合并代码',1692540711592,1692540711592);
 
-INSERT INTO test.pipeline_action (action_id,action_name,user_id,node_id,action_url,param_detail,query_url,`result`,description,execute_type,create_time,update_time) VALUES
+INSERT INTO pipeline_action (action_id,action_name,user_id,node_id,action_url,param_detail,query_url,`result`,description,execute_type,create_time,update_time) VALUES
 	 ('62a0f23ab666417e9a7116d4e78a70a4','代码构建',NULL,'07db7de5f7df4b7fa570ef9b14af24e9',NULL,'[{"description":"构建pom相对路径","name":"pomPath","value":"pom.xml"}]',NULL,'[{"compareKey":"status","description":"构建状态","operator":"=","showCompare":false,"value":"1","valueType":"Integer"}]','代码构建','BUILD',1692539956836,1692539956836),
 	 ('304d5182969945dda37bf974bc322c83','等待执行',NULL,'a13bf21127284a348ae151e78bbecc0c',NULL,'[{"description":"节点等待时长","name":"waitTime","value":"300"}]',NULL,'[]','这个节点可以用于两个任务之间不期望立即执行的场景，比如部署与测试功能一般可在服务部署之后等待5min然后再开始功能测试。','WAIT',1692540079424,1692540079424),
 	 ('24a60706af63443e9721b8653b67fb3a','环境部署',NULL,'3dcd3dc023234abc8892001426d1d3ec',NULL,'[{"description":"环境Id","name":"envId","type":"select","value":""}]',NULL,'[]','当前节点支持将构建好的代码部署到指定的环境，这里说的环境是在系统的环境管理中添加，流水线部署的环境可在流水线中自定义配置。','DEPLOY',1692540178899,1692540178899),

@@ -2,6 +2,7 @@ package com.zj.client.handler.pipeline.maven;
 
 import com.google.common.base.Preconditions;
 import com.zj.client.config.GlobalEnvConfig;
+import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +46,7 @@ public class MavenOperator {
     }
   }
 
-  public Integer build(String pomPath, String servicePath) throws Exception {
+  public Integer build(String pomPath, String servicePath, QueryResponseModel responseModel) throws Exception {
     File pomFile = new File(pomPath);
     InvocationRequest ideaRequest = new DefaultInvocationRequest();
     ideaRequest.setBaseDirectory(new File(servicePath));
@@ -56,7 +57,7 @@ public class MavenOperator {
     Preconditions.checkNotNull(mavenDir, "maven path can not find , consider to fix it");
     Invoker ideaInvoker = new DefaultInvoker();
     ideaInvoker.setMavenHome(new File(mavenDir));
-    ideaInvoker.setOutputHandler(System.out::println);
+    ideaInvoker.setOutputHandler(responseModel::addMessage);
     InvocationResult ideaResult = ideaInvoker.execute(ideaRequest);
     copyJar2DeployDir(pomFile, servicePath);
     return ideaResult.getExitCode();
@@ -89,9 +90,8 @@ public class MavenOperator {
 
   private void createSHFileIfNeed(String jarName, String destDir, File dir) {
     if (!dir.exists()) {
-      if(!dir.mkdirs()){
-        dir.mkdirs();
-      }
+      boolean result = dir.mkdirs();
+      log.debug("creat sh file parent path result={}", result);
     }
 
     Collection<File> deployFiles = FileUtils.listFiles(dir, TrueFileFilter.INSTANCE,

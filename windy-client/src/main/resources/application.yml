@@ -6,14 +6,6 @@ spring:
     name: WindyClient
 
 eureka:
-  instance:
-    # 服务时效时间，默认90秒.当server 90秒内没有收到client的注册信息时，会将该节点剔除
-    lease-expiration-duration-in-seconds: 5
-    # 服务续约任务调用间隔时间，默认30秒.client每隔30秒向server上报自己状态，避免被server剔除
-    lease-renewal-interval-in-seconds: 30
-    # 注册服务时是否使用IP注册，默认false
-    prefer-ip-address: true
-
   client:
     # 是否注册
     register-with-eureka: true
