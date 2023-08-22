@@ -389,6 +389,21 @@ CREATE TABLE `dispatch_log` (
   KEY `idx_source_id` (`source_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `sub_dispatch_log` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `sub_task_id` varchar(64) NOT NULL COMMENT '子任务Id',
+    `sub_task_name` varchar(100) DEFAULT NULL COMMENT '子任务名称',
+    `execute_id` varchar(64) NOT NULL COMMENT '具体任务的Id',
+    `execute_param` varchar(500) DEFAULT NULL COMMENT '运行参数',
+    `status` int(11) DEFAULT NULL COMMENT '子任务状态',
+    `log_id` varchar(100) DEFAULT NULL COMMENT '执行记录Id',
+    `client_ip` varchar(20) DEFAULT NULL COMMENT 'client的ip',
+    `execute_type` varchar(10) DEFAULT NULL COMMENT '客户端执行 IP',
+    `update_time` bigint(20) NOT NULL COMMENT '修改时间',
+    `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `publish_bind` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `branch` varchar(100) NOT NULL COMMENT '分支名称',

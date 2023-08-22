@@ -36,7 +36,7 @@ public class BuildCodeTrigger implements INodeTrigger {
   public void triggerRun(TriggerContext triggerContext, TaskNode taskNode) throws Exception {
     BuildParam buildParam = JSON.parseObject(JSON.toJSONString(triggerContext.getData()), BuildParam.class);
     buildParam.setRecordId(taskNode.getRecordId());
-    codeBuildService.buildCode(buildParam);
+    codeBuildService.buildCode(buildParam, taskNode);
   }
 
   @Override

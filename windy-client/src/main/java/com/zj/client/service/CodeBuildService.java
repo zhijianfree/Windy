@@ -8,13 +8,18 @@ import com.github.dockerjava.api.model.PushResponseItem;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.zj.client.config.GlobalEnvConfig;
 import com.zj.client.entity.dto.BuildParam;
+import com.zj.client.handler.pipeline.executer.notify.PipelineEventFactory;
+import com.zj.client.handler.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel.ResponseStatus;
+import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.client.handler.pipeline.git.IGitProcessor;
 import com.zj.client.handler.pipeline.maven.MavenOperator;
 import com.zj.client.utils.Utils;
 import com.zj.common.enums.ProcessStatus;
+import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.maven.shared.invoker.InvocationOutputHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -55,7 +60,7 @@ public class CodeBuildService {
     this.globalEnvConfig = globalEnvConfig;
   }
 
-  public void buildCode(BuildParam buildParam) {
+  public void buildCode(BuildParam buildParam, TaskNode taskNode) {
     executorService.execute(() -> {
       try {
         //从git服务端拉取代码
@@ -64,29 +69,56 @@ public class CodeBuildService {
         String pipelineWorkspace = globalEnvConfig.getPipelineWorkspace(serviceName,
             buildParam.getPipelineId());
 
-        QueryResponseModel queryResponseModel = statusMap.get(buildParam.getRecordId());
         //1 拉取代码到本地
+        updateProcessMsg(taskNode, "拉取代码");
+        updateProcessMsg(taskNode, "拉取分支: " + buildParam.getBranches());
         pullCodeFrmGit(buildParam, pipelineWorkspace);
+        updateProcessMsg(taskNode, "拉取代码完成");
 
         //2 本地maven构建
+        updateProcessMsg(taskNode, "开始maven打包");
         String pomPath = getTargetPomPath(pipelineWorkspace, buildParam.getPomPath());
-
-        Integer exitCode = mavenOperator.build(pomPath, pipelineWorkspace, queryResponseModel);
+        Integer exitCode = mavenOperator.build(pomPath, pipelineWorkspace,
+            line -> notifyMessage(taskNode, line));
         log.info("get maven exit code={}", exitCode);
+        updateProcessMsg(taskNode, "maven构建完成 状态码: " + exitCode);
 
         //3 构建docker镜像
+        updateProcessMsg(taskNode, "开始构建docker镜像");
         String remoteImage = startBuildDocker(serviceName, pipelineWorkspace, buildParam);
-        ProcessStatus result =
-            Objects.equals(BUILD_SUCCESS, exitCode) ? ProcessStatus.SUCCESS : ProcessStatus.FAIL;
-        Map<String, Object> context = new HashMap<>();
-        context.put(IMAGE_NAME, remoteImage);
-        saveStatus(buildParam.getRecordId(), result, BUILD_SUCCESS_TIPS, context);
+        updateProcessMsg(taskNode, "构建docker镜像完成 镜像地址: " + remoteImage);
+
+        // 4处理构建结果
+        handleBuildResult(buildParam, exitCode, remoteImage);
       } catch (Exception e) {
         log.error("buildCode error", e);
         saveStatus(buildParam.getRecordId(), ProcessStatus.FAIL, e.getMessage(), null);
       }
     });
     saveStatus(buildParam.getRecordId(), ProcessStatus.RUNNING, "构建中", null);
+  }
+
+  private void handleBuildResult(BuildParam buildParam, Integer exitCode, String remoteImage) {
+    ProcessStatus result =
+        Objects.equals(BUILD_SUCCESS, exitCode) ? ProcessStatus.SUCCESS : ProcessStatus.FAIL;
+    Map<String, Object> context = new HashMap<>();
+    context.put(IMAGE_NAME, remoteImage);
+    saveStatus(buildParam.getRecordId(), result, BUILD_SUCCESS_TIPS, context);
+  }
+
+  /**
+   * 只有构建消息才需要运行日志
+   * */
+  private void notifyMessage(TaskNode taskNode, String line) {
+    QueryResponseModel model = statusMap.get(taskNode.getRecordId());
+    model.addMessage(line);
+    PipelineStatusEvent statusEvent = PipelineStatusEvent.builder()
+        .taskNode(taskNode)
+        .processStatus(ProcessStatus.exchange(model.getStatus()))
+        .errorMsg(model.getMessage())
+        .context(model.getContext())
+        .build();
+    PipelineEventFactory.sendNotifyEvent(statusEvent);
   }
 
   private String startBuildDocker(String serviceName, String pipelineWorkspace,
@@ -98,8 +130,7 @@ public class CodeBuildService {
     return buildDocker(serviceName, dateNow, dockerFile, buildParam);
   }
 
-  private void pullCodeFrmGit(BuildParam buildParam, String pipelineWorkspace)
-      throws Exception {
+  private void pullCodeFrmGit(BuildParam buildParam, String pipelineWorkspace) throws Exception {
     if (buildParam.isPublish()) {
       gitProcessor.createTempBranch(buildParam, buildParam.getBranches(), pipelineWorkspace);
     } else {
@@ -108,16 +139,22 @@ public class CodeBuildService {
     }
   }
 
-  private void saveStatus(String recordId, ProcessStatus status, String message, Map<String, Object> context) {
-    QueryResponseModel queryResponseModel = new QueryResponseModel();
-    queryResponseModel.setStatus(status.getType());
-    queryResponseModel.setMessage(Collections.singletonList(message));
-    queryResponseModel.setContext(context);
+  private void updateProcessMsg(TaskNode taskNode,  String message) {
+    notifyMessage(taskNode, "======= " + message);
+  }
+
+  private void saveStatus(String recordId, ProcessStatus status, String message,
+      Map<String, Object> context) {
+    QueryResponseModel model = Optional.ofNullable(statusMap.get(recordId))
+        .orElse(new QueryResponseModel());
+    model.setStatus(status.getType());
+    model.setContext(context);
+    model.addMessage(message);
 
     ResponseStatus responseStatus = new ResponseStatus();
     responseStatus.setStatus(status.getType());
-    queryResponseModel.setData(responseStatus);
-    statusMap.put(recordId, queryResponseModel);
+    model.setData(responseStatus);
+    statusMap.put(recordId, model);
   }
 
   private String getTargetPomPath(String pipelineWorkspace, String configPath) {
@@ -159,14 +196,12 @@ public class CodeBuildService {
 
     // 设置登陆远程仓库的用户信息
     AuthConfig authConfig = new AuthConfig().withRegistryAddress(repository)
-        .withUsername(param.getUser())
-        .withPassword(param.getPassword());
+        .withUsername(param.getUser()).withPassword(param.getPassword());
 
     // 将镜像推送到远程镜像仓库
     String remoteImage = tagName + SPLIT_STRING + version;
     Adapter<PushResponseItem> responseItemAdapter = dockerClient.pushImageCmd(remoteImage)
-        .withAuthConfig(authConfig)
-        .start();
+        .withAuthConfig(authConfig).start();
     responseItemAdapter.awaitCompletion();
     return remoteImage;
   }
