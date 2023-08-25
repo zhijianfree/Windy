@@ -1,6 +1,7 @@
 package com.zj.client.config;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ public class GlobalEnvConfig {
   public static final String WINDY = "windy";
   public static final String SERVICES = "services";
 
+  @Setter
   @Value("${windy.pipeline.workspace:/opt/windy}")
   private String workspace;
   
@@ -22,6 +24,7 @@ public class GlobalEnvConfig {
   @Value("${windy.loop.query.timeout:7200000}")
   private Integer loopQueryTimeout;
 
+  @Setter
   @Getter
   @Value("${windy.pipeline.maven.path}")
   private String mavenPath;

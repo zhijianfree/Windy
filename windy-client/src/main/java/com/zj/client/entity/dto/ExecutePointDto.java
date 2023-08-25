@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class ExecutePointDTO {
+public class ExecutePointDto {
 
     private String pointId;
 
@@ -35,7 +35,7 @@ public class ExecutePointDTO {
     private Integer testStage;
     private Integer sortOrder;
 
-    public static ExecutePoint toExecutePoint(ExecutePointDTO dto) {
+    public static ExecutePoint toExecutePoint(ExecutePointDto dto) {
         ExecutePoint point = new ExecutePoint();
         point.setFeatureId(dto.getFeatureId());
         point.setPointId(dto.getPointId());
@@ -49,8 +49,8 @@ public class ExecutePointDTO {
         return point;
     }
 
-    public static ExecutePointDTO toExecutePointDTO(ExecutePoint executePoint){
-        ExecutePointDTO dto = new ExecutePointDTO();
+    public static ExecutePointDto toExecutePointDTO(ExecutePoint executePoint){
+        ExecutePointDto dto = new ExecutePointDto();
         dto.setDescription(executePoint.getDescription());
         dto.setPointId(executePoint.getPointId());
         dto.setExecuteType(executePoint.getExecuteType());

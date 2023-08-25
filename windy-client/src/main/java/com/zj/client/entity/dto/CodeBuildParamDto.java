@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class BuildParam extends GitMeta {
+public class CodeBuildParamDto extends GitMeta {
 
   /**
    * 节点记录Id

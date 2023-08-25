@@ -1,6 +1,7 @@
 package com.zj.common.monitor.pool;
 
 import com.alibaba.ttl.threadpool.TtlExecutors;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
@@ -109,6 +110,7 @@ public class WindyThreadPool extends ExecutorConfigurationSupport implements
         super.beforeExecute(t, r);
       }
 
+      @Override
       protected void afterExecute(Runnable r, Throwable throwable) {
         Long startTime = timeCache.remove(String.valueOf(r.hashCode()));
         long duration = System.currentTimeMillis() - startTime;
@@ -139,19 +141,19 @@ public class WindyThreadPool extends ExecutorConfigurationSupport implements
   }
 
   public long getCompletedTaskCount() {
-    return Objects.isNull(executor) ? 0L : executor.getCompletedTaskCount();
+    return Optional.ofNullable(executor).map(ThreadPoolExecutor::getCompletedTaskCount).orElse(0L);
   }
 
   public long getTaskCount() {
-    return Objects.isNull(executor) ? 0L : executor.getTaskCount();
+    return Optional.ofNullable(executor).map(ThreadPoolExecutor::getTaskCount).orElse(0L);
   }
 
   public int getQueueSize() {
-    return Objects.isNull(executor) ? 0 : executor.getQueue().size();
+    return Optional.ofNullable(executor).map(e -> e.getQueue().size()).orElse(0);
   }
 
   public int getActiveCount() {
-    return Objects.isNull(executor) ? 0 : executor.getActiveCount();
+    return Optional.ofNullable(executor).map(ThreadPoolExecutor::getActiveCount).orElse(0);
   }
 
   public void setCorePoolSize(Integer corePoolSize) {

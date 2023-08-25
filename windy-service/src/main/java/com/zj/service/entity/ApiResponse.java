@@ -18,5 +18,7 @@ public class ApiResponse {
 
   private boolean required;
 
+  private String objectName;
+
   private List<ApiResponse> children;
 }

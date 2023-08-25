@@ -245,6 +245,23 @@ public class RequestProxy {
   }
 
   /**
+   * 控制台点击运行流水线
+   */
+  public Boolean runGenerate(Object data) {
+    wrapTraceHeader();
+    HttpEntity<Object> httpEntity = new HttpEntity<>(data, headers);
+    try {
+      ResponseEntity<ResponseMeta> responseEntity = restTemplate.postForEntity(CONSOLE_RUN_TASK,
+          httpEntity, ResponseMeta.class);
+      ResponseMeta body = responseEntity.getBody();
+      return Boolean.valueOf(String.valueOf(body.getData()));
+    } catch (Exception e) {
+      log.error("request dispatch pipeline task error ={}", e.toString());
+    }
+    return false;
+  }
+
+  /**
    * 控制台停止流水线
    */
   public boolean stopPipeline(Object data) {

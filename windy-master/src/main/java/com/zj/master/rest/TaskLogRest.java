@@ -24,7 +24,7 @@ public class TaskLogRest {
   }
 
   @PostMapping("/task")
-  private ResponseMeta<String> createTask(@RequestBody DispatchTaskModel task) {
+  private ResponseMeta<Object> createTask(@RequestBody DispatchTaskModel task) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, taskLogService.createTask(task));
   }
 

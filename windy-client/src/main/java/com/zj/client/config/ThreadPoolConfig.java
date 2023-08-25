@@ -58,4 +58,15 @@ public class ThreadPoolConfig {
     windyThreadPool.setThreadNamePrefix("event-bus-");
     return windyThreadPool;
   }
+
+  @Bean("generatePool")
+  public Executor getGeneratePool() {
+    WindyThreadPool windyThreadPool = new WindyThreadPool();
+    windyThreadPool.setCorePoolSize(10);
+    windyThreadPool.setMaxPoolSize(20);
+    windyThreadPool.setAllowCoreThreadTimeOut(false);
+    windyThreadPool.setQueueSize(100);
+    windyThreadPool.setThreadNamePrefix("generate-");
+    return windyThreadPool;
+  }
 }

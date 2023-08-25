@@ -1,7 +1,7 @@
 package com.zj.client.handler.feature.executor.invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.client.entity.dto.ExecutePointDTO;
+import com.zj.client.entity.dto.ExecutePointDto;
 import com.zj.client.entity.enuns.ExecutePointType;
 import com.zj.client.entity.vo.ExecutePoint;
 import com.zj.client.entity.vo.FeatureResponse;
@@ -41,12 +41,12 @@ public class ForExecuteStrategy extends BaseExecuteStrategy{
     ExecutorUnit executorUnit = JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit
         .class);
     List<FeatureResponse> responses = new ArrayList<>();
-    List<ExecutePointDTO> executePoints = executorUnit.getExecutePoints();
+    List<ExecutePointDto> executePoints = executorUnit.getExecutePoints();
     int size = Integer.parseInt(executorUnit.getMethod());
     for (int i = 0; i < size; i++) {
       executeContext.set("$item", i);
-      List<FeatureResponse> responseList = executePoints.stream().map(executePointDTO -> {
-        ExecutePoint point = ExecutePointDTO.toExecutePoint(executePointDTO);
+      List<FeatureResponse> responseList = executePoints.stream().map(executePointDto -> {
+        ExecutePoint point = ExecutePointDto.toExecutePoint(executePointDto);
         return executeFeature(executeContext, point);
       }).collect(Collectors.toList());
 

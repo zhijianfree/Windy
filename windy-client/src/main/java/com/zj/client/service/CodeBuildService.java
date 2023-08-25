@@ -7,7 +7,7 @@ import com.github.dockerjava.api.model.AuthConfig;
 import com.github.dockerjava.api.model.PushResponseItem;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.zj.client.config.GlobalEnvConfig;
-import com.zj.client.entity.dto.BuildParam;
+import com.zj.client.entity.dto.CodeBuildParamDto;
 import com.zj.client.handler.pipeline.executer.notify.PipelineEventFactory;
 import com.zj.client.handler.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
@@ -17,9 +17,7 @@ import com.zj.client.handler.pipeline.git.IGitProcessor;
 import com.zj.client.handler.pipeline.maven.MavenOperator;
 import com.zj.client.utils.Utils;
 import com.zj.common.enums.ProcessStatus;
-import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.maven.shared.invoker.InvocationOutputHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -60,24 +58,25 @@ public class CodeBuildService {
     this.globalEnvConfig = globalEnvConfig;
   }
 
-  public void buildCode(BuildParam buildParam, TaskNode taskNode) {
+  public void buildCode(CodeBuildParamDto codeBuildParamDto, TaskNode taskNode) {
+    saveStatus(codeBuildParamDto.getRecordId(), ProcessStatus.RUNNING, "构建中", null);
     executorService.execute(() -> {
       try {
         //从git服务端拉取代码
-        String gitUrl = buildParam.getGitUrl();
+        String gitUrl = codeBuildParamDto.getGitUrl();
         String serviceName = Utils.getServiceFromUrl(gitUrl);
         String pipelineWorkspace = globalEnvConfig.getPipelineWorkspace(serviceName,
-            buildParam.getPipelineId());
+            codeBuildParamDto.getPipelineId());
 
         //1 拉取代码到本地
-        updateProcessMsg(taskNode, "拉取代码");
-        updateProcessMsg(taskNode, "拉取分支: " + buildParam.getBranches());
-        pullCodeFrmGit(buildParam, pipelineWorkspace);
+        updateProcessMsg(taskNode, "拉取代码: " + gitUrl);
+        updateProcessMsg(taskNode, "拉取分支: " + codeBuildParamDto.getBranches());
+        pullCodeFrmGit(codeBuildParamDto, pipelineWorkspace);
         updateProcessMsg(taskNode, "拉取代码完成");
 
         //2 本地maven构建
-        updateProcessMsg(taskNode, "开始maven打包");
-        String pomPath = getTargetPomPath(pipelineWorkspace, buildParam.getPomPath());
+        String pomPath = getTargetPomPath(pipelineWorkspace, codeBuildParamDto.getPomPath());
+        updateProcessMsg(taskNode, "开始maven打包: " + pomPath);
         Integer exitCode = mavenOperator.build(pomPath, pipelineWorkspace,
             line -> notifyMessage(taskNode, line));
         log.info("get maven exit code={}", exitCode);
@@ -85,30 +84,30 @@ public class CodeBuildService {
 
         //3 构建docker镜像
         updateProcessMsg(taskNode, "开始构建docker镜像");
-        String remoteImage = startBuildDocker(serviceName, pipelineWorkspace, buildParam);
+        String remoteImage = startBuildDocker(serviceName, pipelineWorkspace, codeBuildParamDto);
         updateProcessMsg(taskNode, "构建docker镜像完成 镜像地址: " + remoteImage);
 
         // 4处理构建结果
-        handleBuildResult(buildParam, exitCode, remoteImage);
+        handleBuildResult(codeBuildParamDto, exitCode, remoteImage);
       } catch (Exception e) {
         log.error("buildCode error", e);
-        saveStatus(buildParam.getRecordId(), ProcessStatus.FAIL, e.getMessage(), null);
+        saveStatus(codeBuildParamDto.getRecordId(), ProcessStatus.FAIL, e.getMessage(), null);
       }
     });
-    saveStatus(buildParam.getRecordId(), ProcessStatus.RUNNING, "构建中", null);
   }
 
-  private void handleBuildResult(BuildParam buildParam, Integer exitCode, String remoteImage) {
-    ProcessStatus result =
-        Objects.equals(BUILD_SUCCESS, exitCode) ? ProcessStatus.SUCCESS : ProcessStatus.FAIL;
+  private void handleBuildResult(CodeBuildParamDto codeBuildParamDto, Integer exitCode,
+      String remoteImage) {
+    ProcessStatus result = Optional.of(exitCode).filter(code -> Objects.equals(BUILD_SUCCESS, code))
+        .map(code -> ProcessStatus.SUCCESS).orElse(ProcessStatus.FAIL);
     Map<String, Object> context = new HashMap<>();
     context.put(IMAGE_NAME, remoteImage);
-    saveStatus(buildParam.getRecordId(), result, BUILD_SUCCESS_TIPS, context);
+    saveStatus(codeBuildParamDto.getRecordId(), result, BUILD_SUCCESS_TIPS, context);
   }
 
   /**
    * 只有构建消息才需要运行日志
-   * */
+   */
   private void notifyMessage(TaskNode taskNode, String line) {
     QueryResponseModel model = statusMap.get(taskNode.getRecordId());
     model.addMessage(line);
@@ -122,24 +121,26 @@ public class CodeBuildService {
   }
 
   private String startBuildDocker(String serviceName, String pipelineWorkspace,
-      BuildParam buildParam) throws InterruptedException {
+      CodeBuildParamDto codeBuildParamDto) throws InterruptedException {
     String dateNow = dateFormat.format(new Date());
     String dockerFilePath =
         pipelineWorkspace + File.separator + "docker" + File.separator + "Dockerfile";
     File dockerFile = new File(dockerFilePath);
-    return buildDocker(serviceName, dateNow, dockerFile, buildParam);
+    return buildDocker(serviceName, dateNow, dockerFile, codeBuildParamDto);
   }
 
-  private void pullCodeFrmGit(BuildParam buildParam, String pipelineWorkspace) throws Exception {
-    if (buildParam.isPublish()) {
-      gitProcessor.createTempBranch(buildParam, buildParam.getBranches(), pipelineWorkspace);
+  private void pullCodeFrmGit(CodeBuildParamDto codeBuildParamDto, String pipelineWorkspace)
+      throws Exception {
+    if (codeBuildParamDto.isPublish()) {
+      gitProcessor.createTempBranch(codeBuildParamDto, codeBuildParamDto.getBranches(),
+          pipelineWorkspace);
     } else {
-      String branch = buildParam.getBranches().stream().findFirst().orElse(null);
-      gitProcessor.pullCodeFromGit(buildParam, branch, pipelineWorkspace);
+      String branch = codeBuildParamDto.getBranches().stream().findFirst().orElse(null);
+      gitProcessor.pullCodeFromGit(codeBuildParamDto, branch, pipelineWorkspace);
     }
   }
 
-  private void updateProcessMsg(TaskNode taskNode,  String message) {
+  private void updateProcessMsg(TaskNode taskNode, String message) {
     notifyMessage(taskNode, "======= " + message);
   }
 
@@ -165,7 +166,8 @@ public class CodeBuildService {
     return statusMap.get(recordId);
   }
 
-  public String buildDocker(String imageName, String version, File dockerfile, BuildParam param)
+  public String buildDocker(String imageName, String version, File dockerfile,
+      CodeBuildParamDto param)
       throws InterruptedException {
     DockerClient dockerClient = DockerClientBuilder.getInstance().build();
     BuildImageResultCallback callback = new BuildImageResultCallback() {

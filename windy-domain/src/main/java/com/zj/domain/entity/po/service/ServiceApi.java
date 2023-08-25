@@ -38,7 +38,7 @@ public class ServiceApi {
    * type = http时api内容为uri
    * type = http时api内容为service#method
    * */
-  private String api;
+  private String resource;
 
   /**
    * 服务Id
@@ -64,6 +64,20 @@ public class ServiceApi {
    * 响应参数
    * */
   private String responseParams;
+
+  private String bodyClass;
+
+  private String resultClass;
+
+  /**
+   * 代码生成的类名
+   * */
+  private String className;
+
+  /**
+   * 代码生成的类方法名
+   * */
+  private String classMethod;
 
   private Long createTime;
 

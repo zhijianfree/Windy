@@ -60,4 +60,9 @@ public class ServiceApiRest {
   public ResponseMeta<Boolean> batchDeleteApi(@RequestParam("apis") List<String> apis) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.batchDeleteApi(apis));
   }
+
+  @PostMapping("/service/resources/{serviceId}/generate")
+  public ResponseMeta<Boolean> generateServiceApi(@PathVariable("serviceId") String serviceId) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.generateServiceApi(serviceId));
+  }
 }

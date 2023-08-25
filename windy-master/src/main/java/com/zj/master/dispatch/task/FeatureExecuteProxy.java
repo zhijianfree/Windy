@@ -2,6 +2,7 @@ package com.zj.master.dispatch.task;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
+import com.zj.common.enums.DispatchType;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.monitor.RequestProxy;
@@ -35,8 +36,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class FeatureExecuteProxy implements IStopEventListener {
-
-  public static final String DISPATCH_FEATURE_TYPE = "FEATURE";
 
   private final RequestProxy requestProxy;
   private final Executor executorService;
@@ -79,14 +78,14 @@ public class FeatureExecuteProxy implements IStopEventListener {
       }
 
       FeatureExecuteParam featureExecuteParam = getFeatureExecuteParam(featureTask, featureId);
-      featureExecuteParam.setDispatchType(DISPATCH_FEATURE_TYPE);
+      featureExecuteParam.setDispatchType(DispatchType.FEATURE.name());
       featureExecuteParam.setMasterIp(IpUtils.getLocalIP());
       requestProxy.sendDispatchTask(featureExecuteParam, false, null);
       return featureId;
     }, executorService).whenComplete((featureId, e) -> {
       String recordId = Optional.ofNullable(featureId).orElse(TASK_FEATURE_TIPS);
       log.info("complete trigger action recordId = {}", recordId);
-    }).exceptionally((e) -> {
+    }).exceptionally(e -> {
       log.error("handle task error", e);
       return null;
     });

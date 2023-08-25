@@ -57,12 +57,12 @@ public class TaskDispatch implements IDispatchExecutor {
   }
 
   @Override
-  public Integer type() {
-    return LogType.FEATURE_TASK.getType();
+  public LogType type() {
+    return LogType.FEATURE_TASK;
   }
 
   @Override
-  public boolean isExitInJvm(DispatchLogDto taskLog) {
+  public boolean isExistInJvm(DispatchLogDto taskLog) {
     return featureExecuteProxy.isExitTask(taskLog.getSourceRecordId());
   }
 
