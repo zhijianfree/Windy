@@ -83,9 +83,4 @@ public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Micr
         Wrappers.lambdaQuery(Microservice.class).eq(Microservice::getServiceName, serviceName));
     return OrikaUtil.convert(microservice, MicroserviceDto.class);
   }
-
-  @Override
-  public Integer countAll() {
-    return count();
-  }
 }

@@ -25,9 +25,9 @@ public class ApiModel {
    */
   private String description;
 
-  private List<ApiParamModel> requestParams;
+  private List<ApiParamModel> requestParamList;
 
-  private List<ApiParamModel> responseParams;
+  private List<ApiParamModel> responseParamList;
 
   private String bodyClass;
 

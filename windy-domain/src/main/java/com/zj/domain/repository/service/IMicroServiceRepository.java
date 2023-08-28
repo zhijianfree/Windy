@@ -1,7 +1,6 @@
 package com.zj.domain.repository.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.zj.common.model.PageSize;
 import com.zj.domain.entity.dto.service.MicroserviceDto;
 import java.util.List;
 
@@ -24,6 +23,4 @@ public interface IMicroServiceRepository {
   IPage<MicroserviceDto> getServices(Integer pageNo, Integer size, String name);
 
   MicroserviceDto queryServiceByName(String serviceName);
-
-  Integer countAll();
 }

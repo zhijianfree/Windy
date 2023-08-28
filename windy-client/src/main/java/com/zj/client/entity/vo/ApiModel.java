@@ -21,18 +21,18 @@ public class ApiModel {
   private String method;
 
   /**
-   * api信息 type = http时api内容为uri type = http时api内容为service#method
+   * api信息 type = http时api内容为uri type = dubbo时api内容为service
    */
-  private String api;
+  private String resource;
 
   /**
    * api描述
    */
   private String description;
 
-  private List<ApiRequest> requestParams;
+  private List<ApiParamModel> requestParamList;
 
-  private List<ApiRequest> responseParams;
+  private List<ApiParamModel> responseParamList;
 
   private String bodyClass;
 

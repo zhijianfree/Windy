@@ -7,11 +7,13 @@ import com.zj.common.model.DispatchTaskModel;
 import com.zj.common.monitor.RequestProxy;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.log.DispatchLogDto;
+import com.zj.domain.entity.dto.service.MicroserviceDto;
 import com.zj.domain.entity.dto.service.ServiceApiDto;
 import com.zj.domain.entity.dto.service.ServiceGenerateDto;
 import com.zj.domain.entity.vo.MavenConfigVo;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IGenerateRepository;
+import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.domain.repository.service.IServiceApiRepository;
 import com.zj.master.dispatch.IDispatchExecutor;
 import java.util.List;
@@ -27,14 +29,16 @@ public class GenerateDispatcher implements IDispatchExecutor {
   private final IServiceApiRepository serviceApiRepository;
   private final ISystemConfigRepository systemConfigRepository;
   private final RequestProxy requestProxy;
+  private final IMicroServiceRepository serviceRepository;
 
   public GenerateDispatcher(IGenerateRepository generateRepository,
       IServiceApiRepository serviceApiRepository, ISystemConfigRepository systemConfigRepository,
-      RequestProxy requestProxy) {
+      RequestProxy requestProxy, IMicroServiceRepository serviceRepository) {
     this.generateRepository = generateRepository;
     this.serviceApiRepository = serviceApiRepository;
     this.systemConfigRepository = systemConfigRepository;
     this.requestProxy = requestProxy;
+    this.serviceRepository = serviceRepository;
   }
 
   @Override
@@ -49,7 +53,8 @@ public class GenerateDispatcher implements IDispatchExecutor {
 
   @Override
   public Boolean dispatch(DispatchTaskModel task, String logId) {
-    ServiceGenerateDto serviceGenerate = generateRepository.getByService(task.getSourceId());
+    String serviceId = task.getSourceId();
+    ServiceGenerateDto serviceGenerate = generateRepository.getByService(serviceId);
     if (Objects.isNull(serviceGenerate)) {
       return false;
     }
@@ -58,18 +63,22 @@ public class GenerateDispatcher implements IDispatchExecutor {
     generateParam.setDispatchType(DispatchType.GENERATE.name());
     MavenConfigVo mavenConfig = systemConfigRepository.getMavenConfig();
     generateParam.setMavenUser(mavenConfig.getUserName());
-    generateParam.setMavenPwd(mavenConfig.getUserName());
+    generateParam.setMavenPwd(mavenConfig.getPassword());
     generateParam.setMavenRepository(mavenConfig.getMavenUrl());
-    List<ServiceApiDto> apiList = serviceApiRepository.getApiByService(task.getSourceId());
+    List<ServiceApiDto> apiList = serviceApiRepository.getApiByService(serviceId);
     if (CollectionUtils.isEmpty(apiList)) {
       return false;
     }
     List<ApiModel> models = apiList.stream().map(api -> {
       ApiModel apiModel = OrikaUtil.convert(api, ApiModel.class);
-      apiModel.setRequestParams(JSON.parseArray(api.getRequestParams(), ApiParamModel.class));
-      apiModel.setResponseParams(JSON.parseArray(api.getRequestParams(), ApiParamModel.class));
+      apiModel.setRequestParamList(JSON.parseArray(api.getRequestParams(), ApiParamModel.class));
+      apiModel.setResponseParamList(JSON.parseArray(api.getRequestParams(), ApiParamModel.class));
       return apiModel;
     }).collect(Collectors.toList());
+
+    MicroserviceDto service = serviceRepository.queryServiceDetail(serviceId);
+    generateParam.setService(service.getServiceName());
+    generateParam.setServiceId(serviceId);
     generateParam.setApiList(models);
     return requestProxy.sendDispatchTask(generateParam, false, null);
   }
@@ -81,6 +90,6 @@ public class GenerateDispatcher implements IDispatchExecutor {
 
   @Override
   public Integer getExecuteCount() {
-    return null;
+    return 1;
   }
 }

@@ -13,6 +13,11 @@ public class GenerateParam extends BaseDispatch {
   private String service;
 
   /**
+   * 服务Id
+   * */
+  private String serviceId;
+
+  /**
    * 打包的包名路径
    * */
   private String packageName;

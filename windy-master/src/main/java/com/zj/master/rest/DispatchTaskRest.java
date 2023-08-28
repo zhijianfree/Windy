@@ -15,21 +15,21 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/v1/devops/dispatch")
-public class TaskLogRest {
+public class DispatchTaskRest {
 
   private final TaskLogService taskLogService;
 
-  public TaskLogRest(TaskLogService taskLogService) {
+  public DispatchTaskRest(TaskLogService taskLogService) {
     this.taskLogService = taskLogService;
   }
 
   @PostMapping("/task")
-  private ResponseMeta<Object> createTask(@RequestBody DispatchTaskModel task) {
+  public ResponseMeta<Object> createTask(@RequestBody DispatchTaskModel task) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, taskLogService.createTask(task));
   }
 
   @PostMapping("/stop")
-  private ResponseMeta<Boolean> stopTask(@RequestBody DispatchTaskModel task) {
+  public ResponseMeta<Boolean> stopTask(@RequestBody DispatchTaskModel task) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, taskLogService.pauseTask(task));
   }
 }

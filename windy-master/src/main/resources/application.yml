@@ -8,7 +8,7 @@ spring:
 eureka:
   server:
     # server清理无效节点的时间间隔
-    eviction-interval-timer-in-ms: 60
+    eviction-interval-timer-in-ms: 10
     # 是否开启自我保护，默认true
     enable-self-preservation: true
     # 开启自我保护的系数
@@ -18,10 +18,10 @@ eureka:
     # 关闭服务端一级cache缓存
     use-read-only-response-cache: false
   instance:
-    # 服务时效时间，默认90秒.当server 90秒内没有收到client的注册信息时，会将该节点剔除
+    # 服务时效时间，默认90秒.当server 30秒内没有收到client的注册信息时，会将该节点剔除
     lease-expiration-duration-in-seconds: 30
     # 服务续约任务调用间隔时间，默认30秒.client每隔30秒向server上报自己状态，避免被server剔除
-    lease-renewal-interval-in-seconds: 30
+    lease-renewal-interval-in-seconds: 10
     # 注册服务时是否使用IP注册，默认false
     prefer-ip-address: true
 

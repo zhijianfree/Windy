@@ -6,7 +6,7 @@ import java.util.List;
  * @author falcon
  * @since 2023/8/9
  */
-public class ApiRequest {
+public class ApiParamModel {
 
   private String paramKey;
 
@@ -20,7 +20,7 @@ public class ApiRequest {
 
   private String objectName;
 
-  private List<ApiRequest> children;
+  private List<ApiParamModel> children;
 
   public String getObjectName() {
     return objectName;
@@ -70,11 +70,11 @@ public class ApiRequest {
     isRequired = required;
   }
 
-  public List<ApiRequest> getChildren() {
+  public List<ApiParamModel> getChildren() {
     return children;
   }
 
-  public void setChildren(List<ApiRequest> children) {
+  public void setChildren(List<ApiParamModel> children) {
     this.children = children;
   }
 }

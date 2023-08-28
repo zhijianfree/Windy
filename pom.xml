@@ -50,7 +50,7 @@
     <k8s.version>5.3.0</k8s.version>
     <docker.version>3.3.2</docker.version>
     <transmittable-thread.version>2.14.2</transmittable-thread.version>
-    <freemarker.version>2.3.23</freemarker.version>
+    <freemarker.version>2.3.30</freemarker.version>
     <maven-model.version>3.0</maven-model.version>
   </properties>
 

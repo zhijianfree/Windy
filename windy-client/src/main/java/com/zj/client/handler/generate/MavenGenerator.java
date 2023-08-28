@@ -7,7 +7,7 @@ import com.zj.client.entity.enuns.HttpParamType;
 import com.zj.client.entity.vo.ApiItem;
 import com.zj.client.entity.vo.ApiItem.MethodParam;
 import com.zj.client.entity.vo.ApiModel;
-import com.zj.client.entity.vo.ApiRequest;
+import com.zj.client.entity.vo.ApiParamModel;
 import com.zj.client.entity.vo.EntityItem.PropertyItem;
 import com.zj.client.entity.vo.FreemarkerContext;
 import com.zj.client.entity.vo.GenerateConfig;
@@ -32,6 +32,7 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -81,6 +82,7 @@ public class MavenGenerator {
   public static final String POM_XML_FILE = "pom.xml";
   public static final String GENERATE = "generate";
   public static final String SETTING_XML = "setting.xml";
+  public static final int SUCCESS_CODE = 0;
   private Template entityFtl;
   private Template serviceFtl;
   private Template restFtl;
@@ -88,7 +90,7 @@ public class MavenGenerator {
       File.separator + "service" + File.separator + "I%sService.java";
   private final String ENTITY_FILE_PATH = File.separator + "model" + File.separator + "%s.java";
   private final String REST_FILE_PATH = File.separator + "rest" + File.separator + "%sRest.java";
-  private Map<String, List<String>> recordMap = new ConcurrentHashMap<>();
+  private final Map<String, List<String>> recordMap = new ConcurrentHashMap<>();
   private final GlobalEnvConfig globalEnvConfig;
   private final UniqueIdService uniqueIdService;
   private final IResultEventNotify resultEventNotify;
@@ -117,7 +119,9 @@ public class MavenGenerator {
 
   private void saveGenerateRecord(GenerateDto generateDto, String recordId) {
     GenerateParam generateParam = new GenerateParam();
+    generateParam.setServiceId(generateDto.getServiceId());
     generateParam.setRecordId(recordId);
+    generateParam.setResult(JSON.toJSONString(Collections.singleton("start generate maven version")));
     generateParam.setStatus(ProcessStatus.RUNNING.getType());
     GenerateConfig params = OrikaUtil.convert(generateDto, GenerateConfig.class);
     generateParam.setExecuteParams(JSON.toJSONString(params));
@@ -136,7 +140,7 @@ public class MavenGenerator {
               + generateDto.getService();
       boolean result = createProjectDir(projectPath);
       if (!result) {
-        updateMessage(recordId, "create project dir error");
+        updateMessage(recordId, ProcessStatus.FAIL, "create project dir error");
         return;
       }
 
@@ -144,14 +148,14 @@ public class MavenGenerator {
       String pomPath = projectPath + File.separator + POM_XML_FILE;
       result = createPomFile(pomPath, generateDto);
       if (!result) {
-        updateMessage(recordId, "create project pom file error");
+        updateMessage(recordId, ProcessStatus.FAIL, "create project pom file error");
         return;
       }
 
       //3 创建项目代码
       result = createProjectCode(generateDto, projectPath);
       if (!result) {
-        updateMessage(recordId, "create project java files error");
+        updateMessage(recordId, ProcessStatus.FAIL, "create project java files error");
         return;
       }
 
@@ -160,21 +164,25 @@ public class MavenGenerator {
       result = createSettingFile(settingPath, generateDto.getMavenUser(),
           generateDto.getMavenPwd());
       if (!result) {
-        updateMessage(recordId, "create project java files error");
+        updateMessage(recordId, ProcessStatus.FAIL, "create project java files error");
         return;
       }
 
       //5 部署到远程仓库
       Integer deployResult = deployRepository(projectPath, pomPath, globalEnvConfig.getMavenPath(),
           generateDto.getMavenRepository(), line -> updateMessage(recordId, line));
-      ProcessStatus status = Optional.of(deployResult).filter(res -> Objects.equals(res, 0))
+      ProcessStatus status = Optional.of(deployResult).filter(res -> Objects.equals(res, SUCCESS_CODE))
           .map(res -> ProcessStatus.SUCCESS).orElse(ProcessStatus.FAIL);
-      updateMessage(recordId, status,
-          "generate maven code success version" + generateDto.getVersion());
-      log.info("deploy maven jar result = {}", result);
+      if (Objects.equals(status, ProcessStatus.SUCCESS)) {
+        updateMessage(recordId, status,
+            "generate maven code success version" + generateDto.getVersion());
+      }
+      log.info("deploy maven jar result = {}", deployResult);
     } catch (Exception e) {
       log.error("generate error", e);
       updateMessage(recordId, ProcessStatus.FAIL, "generate maven code error");
+    }finally {
+      recordMap.remove(recordId);
     }
   }
 
@@ -186,10 +194,12 @@ public class MavenGenerator {
     List<String> messages = Optional.ofNullable(recordMap.get(recordId)).orElseGet(ArrayList::new);
     messages.add(message);
     GenerateParam generateParam = new GenerateParam();
+    generateParam.setRecordId(recordId);
     generateParam.setResult(JSON.toJSONString(messages));
     ResultEvent resultEvent = new ResultEvent().executeId(recordId)
         .notifyType(NotifyType.UPDATE_GENERATE_MAVEN).status(status).params(generateParam);
     resultEventNotify.notifyEvent(resultEvent);
+    recordMap.put(recordId, messages);
   }
 
   private Integer deployRepository(String projectPath, String pomPath, String mavenPath,
@@ -280,12 +290,12 @@ public class MavenGenerator {
 
         apiModels.forEach(apiModel -> {
           //创建请求的Model对象
-          List<ApiRequest> requestParams = apiModel.getRequestParams();
+          List<ApiParamModel> requestParams = apiModel.getRequestParamList();
           createEntity(projectPath, requestParams, apiModel.getBodyClass(),
               generateDto.getPackageName());
 
           //创建响应的Model对象
-          List<ApiRequest> resParams = apiModel.getResponseParams();
+          List<ApiParamModel> resParams = apiModel.getResponseParamList();
           createEntity(projectPath, resParams, apiModel.getResultClass(),
               generateDto.getPackageName());
         });
@@ -298,20 +308,20 @@ public class MavenGenerator {
     return createResult.get();
   }
 
-  public void createEntity(String projectPath, List<ApiRequest> apiRequests, String className,
+  public void createEntity(String projectPath, List<ApiParamModel> apiParamModels, String className,
       String packageName) {
     if (StringUtils.isEmpty(className)) {
       return;
     }
     try {
-      List<PropertyItem> properties = apiRequests.stream().map(apiRequest -> {
+      List<PropertyItem> properties = apiParamModels.stream().map(apiParamModel -> {
         PropertyItem propertyItem = new PropertyItem();
-        propertyItem.setName(apiRequest.getParamKey());
-        propertyItem.setType(apiRequest.getObjectName());
-        propertyItem.setNameUpper(capitalize(apiRequest.getParamKey(), true));
-        if (Objects.equals(apiRequest.getType(), HttpParamType.Object.name())) {
-          List<ApiRequest> children = apiRequest.getChildren();
-          createEntity(projectPath, children, apiRequest.getObjectName(), packageName);
+        propertyItem.setName(apiParamModel.getParamKey());
+        propertyItem.setType(apiParamModel.getObjectName());
+        propertyItem.setNameUpper(capitalize(apiParamModel.getParamKey(), true));
+        if (Objects.equals(apiParamModel.getType(), HttpParamType.Object.name())) {
+          List<ApiParamModel> children = apiParamModel.getChildren();
+          createEntity(projectPath, children, apiParamModel.getObjectName(), packageName);
         }
         return propertyItem;
       }).collect(Collectors.toList());
@@ -331,14 +341,14 @@ public class MavenGenerator {
   private List<ApiItem> convertApiItems(List<ApiModel> apiModels) {
     return apiModels.stream().map(apiModel -> {
       ApiItem apiItem = new ApiItem();
-      apiItem.setUri(apiModel.getApi());
+      apiItem.setUri(apiModel.getResource());
       apiItem.setHttpMethod(apiModel.getMethod());
       apiItem.setResultClass(apiModel.getResultClass());
       apiItem.setMethodName(apiModel.getClassMethod());
       apiItem.setBodyClass(apiModel.getBodyClass());
       apiItem.setLowerBodyClass(capitalize(apiModel.getBodyClass(), false));
 
-      List<ApiRequest> requestParams = apiModel.getRequestParams();
+      List<ApiParamModel> requestParams = apiModel.getRequestParamList();
       List<MethodParam> methodParamList = requestParams.stream().map(req -> {
         MethodParam methodParam = new MethodParam();
         methodParam.setName(req.getParamKey());
