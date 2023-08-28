@@ -2,7 +2,9 @@ package com.zj.service.rest;
 
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.ResponseMeta;
+import com.zj.domain.entity.dto.service.GenerateRecordDto;
 import com.zj.domain.entity.dto.service.ServiceApiDto;
+import com.zj.domain.entity.dto.service.ServiceGenerateDto;
 import com.zj.service.entity.ApiModel;
 import com.zj.service.service.ApiService;
 import java.util.List;
@@ -59,5 +61,20 @@ public class ServiceApiRest {
   @DeleteMapping("/service/resources")
   public ResponseMeta<Boolean> batchDeleteApi(@RequestParam("apis") List<String> apis) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.batchDeleteApi(apis));
+  }
+
+  @PostMapping("/service/resources/generate")
+  public ResponseMeta<Boolean> generateServiceApi(@RequestBody ServiceGenerateDto generate) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.generateServiceApi(generate));
+  }
+
+  @GetMapping("/service/{serviceId}/generate")
+  public ResponseMeta<ServiceGenerateDto> getGenerateParams(@PathVariable("serviceId") String serviceId) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.getGenerateParams(serviceId));
+  }
+
+  @GetMapping("/service/{serviceId}/generate/log")
+  public ResponseMeta<List<GenerateRecordDto>> getLatestGenerateLog(@PathVariable("serviceId") String serviceId) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.getLatestGenerateLog(serviceId));
   }
 }

@@ -6,7 +6,6 @@ import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
 import com.zj.client.handler.feature.executor.vo.ExecutorUnit;
 import com.zj.client.utils.ExceptionUtils;
 import com.zj.plugin.loader.ExecuteDetailVo;
-import com.zj.plugin.loader.RequestDetailVo;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,10 +56,7 @@ public class HttpInvoker implements IExecuteInvoker {
     } catch (Exception e) {
       executeDetailVo.setErrorMessage(ExceptionUtils.getSimplifyError(e));
     }
-    RequestDetailVo requestDetailVo = new RequestDetailVo();
-    requestDetailVo.setRequestBody(body);
-    executeDetailVo.setRequestDetailVo(requestDetailVo);
-
+    executeDetailVo.setRequestBody(body);
     return executeDetailVo;
   }
 
@@ -72,9 +68,7 @@ public class HttpInvoker implements IExecuteInvoker {
 
   private static Map<String, Object> getParamsMap(ExecutorUnit executorUnit) {
     Map<String, Object> paramsMap = new HashMap<>();
-    executorUnit.getParams().forEach(param -> {
-      paramsMap.put(param.getParamKey(), param.getValue());
-    });
+    executorUnit.getParams().forEach(param -> paramsMap.put(param.getParamKey(), param.getValue()));
     return paramsMap;
   }
 }

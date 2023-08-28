@@ -1,5 +1,6 @@
 package com.zj.master.dispatch;
 
+import com.zj.common.enums.LogType;
 import com.zj.common.model.DispatchTaskModel;
 import com.zj.domain.entity.dto.log.DispatchLogDto;
 
@@ -9,19 +10,19 @@ import com.zj.domain.entity.dto.log.DispatchLogDto;
  */
 public interface IDispatchExecutor {
 
-  Integer type();
+  LogType type();
 
   /**
    * 传入的任务是否在当前实例中
    * */
-  boolean isExitInJvm(DispatchLogDto taskLog);
+  boolean isExistInJvm(DispatchLogDto taskLog);
 
   /**
    * 分配任务给子节点
    * @param task 任务内容
    * @param logId 分发任务的记录Id
    * */
-  String dispatch(DispatchTaskModel task, String logId);
+  Object dispatch(DispatchTaskModel task, String logId);
 
   /**
    * 恢复执行任务

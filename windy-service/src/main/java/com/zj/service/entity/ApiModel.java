@@ -42,7 +42,7 @@ public class ApiModel {
   /**
    * api信息 type = http时api内容为uri type = http时api内容为service#method
    */
-  private String api;
+  private String resource;
 
   /**
    * api描述
@@ -52,4 +52,24 @@ public class ApiModel {
   private List<ApiRequest> requestParams;
 
   private List<ApiResponse> responseParams;
+
+  /**
+   * 请求的body类名
+   * */
+  private String bodyClass;
+
+  /**
+   * 响应结果类名
+   * */
+  private String resultClass;
+
+  /**
+   * 代码生成的类名
+   * */
+  private String className;
+
+  /**
+   * 代码生成的类方法名
+   * */
+  private String classMethod;
 }

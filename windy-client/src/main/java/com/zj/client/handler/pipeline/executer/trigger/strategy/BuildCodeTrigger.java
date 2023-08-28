@@ -1,7 +1,7 @@
 package com.zj.client.handler.pipeline.executer.trigger.strategy;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.client.entity.dto.BuildParam;
+import com.zj.client.entity.dto.CodeBuildParamDto;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
 import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
@@ -34,9 +34,9 @@ public class BuildCodeTrigger implements INodeTrigger {
 
   @Override
   public void triggerRun(TriggerContext triggerContext, TaskNode taskNode) throws Exception {
-    BuildParam buildParam = JSON.parseObject(JSON.toJSONString(triggerContext.getData()), BuildParam.class);
-    buildParam.setRecordId(taskNode.getRecordId());
-    codeBuildService.buildCode(buildParam);
+    CodeBuildParamDto codeBuildParamDto = JSON.parseObject(JSON.toJSONString(triggerContext.getData()), CodeBuildParamDto.class);
+    codeBuildParamDto.setRecordId(taskNode.getRecordId());
+    codeBuildService.buildCode(codeBuildParamDto, taskNode);
   }
 
   @Override

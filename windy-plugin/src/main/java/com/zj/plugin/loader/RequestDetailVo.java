@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RequestDetailVo {
-    private List<String> request = new ArrayList<>();
+    private List<String> headerTips = new ArrayList<>();
     private Object requestBody;
 
-    public List<String> getRequest() {
-        return request;
+    public List<String> getHeaderTips() {
+        return headerTips;
     }
 
-    public void setRequest(List<String> request) {
-        this.request = request;
+    public void setHeaderTips(List<String> headerTips) {
+        this.headerTips = headerTips;
     }
 
     public Object getRequestBody() {
@@ -23,7 +23,7 @@ public class RequestDetailVo {
         this.requestBody = requestBody;
     }
 
-    public void addRequest(String info) {
-        request.add(info);
+    public void addTips(String info) {
+        headerTips.add(info);
     }
 }

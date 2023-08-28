@@ -20,5 +20,7 @@ public class ApiRequest {
 
   private boolean isRequired;
 
+  private String objectName;
+
   private List<ApiRequest> children;
 }

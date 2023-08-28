@@ -3,6 +3,7 @@ package com.zj.master.dispatch.pipeline;
 import com.alibaba.fastjson.JSON;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
+import com.zj.common.enums.DispatchType;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.model.StopDispatch;
@@ -38,7 +39,6 @@ import java.util.stream.Collectors;
 public class PipelineExecuteProxy implements IStopEventListener {
 
   public static final String TASK_DONE_TIPS = "no task need run";
-  public static final String DISPATCH_PIPELINE_TYPE = "PIPELINE";
 
   private final RequestProxy requestProxy;
   private final Executor executorService;
@@ -77,7 +77,7 @@ public class PipelineExecuteProxy implements IStopEventListener {
     CompletableFuture.supplyAsync(() -> {
       String logId = pipelineTask.getLogId();
       taskNode.setLogId(logId);
-      taskNode.setDispatchType(DISPATCH_PIPELINE_TYPE);
+      taskNode.setDispatchType(DispatchType.PIPELINE.name());
       taskNode.setMasterIp(IpUtils.getLocalIP());
 
       interceptBefore(taskNode);
@@ -96,7 +96,7 @@ public class PipelineExecuteProxy implements IStopEventListener {
     }, executorService).whenComplete((node, e) -> {
       String recordId = Optional.ofNullable(node).map(TaskNode::getRecordId).orElse(TASK_DONE_TIPS);
       log.info("complete trigger action recordId = {}", recordId);
-    }).exceptionally((e) -> {
+    }).exceptionally(e -> {
       log.error("handle task error", e);
       NodeStatusChange change = buildStatusChange(pipelineTask, taskNode.getHistoryId(),
           taskNode.getNodeId(), ProcessStatus.FAIL);
@@ -137,11 +137,6 @@ public class PipelineExecuteProxy implements IStopEventListener {
 
 
   public void statusChange(NodeRecordDto nodeRecord) {
-    //todo 如果节点配置跳过，则修改状态为IGNORE
-//    if (processStatus.isFailStatus() && taskNode.getNodeConfig().isIgnoreError()) {
-//      processStatus = ProcessStatus.IGNORE_FAIL;
-//    }
-
     //1 获取流水线关联的任务
     PipelineTask pipelineTask = pipelineTaskMap.get(nodeRecord.getHistoryId());
     if (Objects.isNull(pipelineTask)) {
@@ -150,9 +145,9 @@ public class PipelineExecuteProxy implements IStopEventListener {
     }
 
     //2 节点执行完成是否触发整个流水线结束
-    NodeRecordDto record = nodeRecordRepository.getRecordById(nodeRecord.getRecordId());
+    NodeRecordDto nodeRecordDto = nodeRecordRepository.getRecordById(nodeRecord.getRecordId());
     NodeStatusChange statusChange = buildStatusChange(pipelineTask, nodeRecord.getHistoryId(),
-        record.getNodeId(), ProcessStatus.exchange(nodeRecord.getStatus()));
+        nodeRecordDto.getNodeId(), ProcessStatus.exchange(nodeRecord.getStatus()));
     pipelineEndProcessor.statusChange(statusChange);
 
     //3 继续递归执行下一个任务

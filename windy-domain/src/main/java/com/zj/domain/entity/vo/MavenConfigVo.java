@@ -1,6 +1,7 @@
 package com.zj.domain.entity.vo;
 
 import lombok.Data;
+import org.apache.commons.lang.StringUtils;
 
 @Data
 public class MavenConfigVo {
@@ -18,4 +19,9 @@ public class MavenConfigVo {
      * 推送用户密码
      * */
     private String password;
+
+    public boolean checkConfig() {
+        return StringUtils.isNotBlank(mavenUrl) && StringUtils.isNotBlank(userName)
+            && StringUtils.isNotBlank(password);
+    }
 }

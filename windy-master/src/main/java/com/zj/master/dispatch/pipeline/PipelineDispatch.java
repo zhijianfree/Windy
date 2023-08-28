@@ -66,12 +66,12 @@ public class PipelineDispatch implements IDispatchExecutor {
   }
 
   @Override
-  public Integer type() {
-    return LogType.PIPELINE.getType();
+  public LogType type() {
+    return LogType.PIPELINE;
   }
 
   @Override
-  public boolean isExitInJvm(DispatchLogDto taskLog) {
+  public boolean isExistInJvm(DispatchLogDto taskLog) {
     return pipelineExecuteProxy.isExitTask(taskLog.getSourceRecordId());
   }
 

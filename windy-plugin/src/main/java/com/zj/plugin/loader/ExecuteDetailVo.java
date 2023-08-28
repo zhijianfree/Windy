@@ -26,7 +26,7 @@ public class ExecuteDetailVo {
   }
 
   public void addRequestInfo(String info) {
-    requestDetailVo.getRequest().add(info);
+    requestDetailVo.addTips(info);
   }
 
   public void setRequestBody(Object requestBody) {
@@ -45,15 +45,7 @@ public class ExecuteDetailVo {
     return requestDetailVo;
   }
 
-  public void setRequestDetailVo(RequestDetailVo requestDetailVo) {
-    this.requestDetailVo = requestDetailVo;
-  }
-
   public ResponseDetailVo getResponseDetailVo() {
     return responseDetailVo;
-  }
-
-  public void setResponseDetailVo(ResponseDetailVo responseDetailVo) {
-    this.responseDetailVo = responseDetailVo;
   }
 }

@@ -18,14 +18,14 @@ import java.util.stream.Collectors;
 @Component
 public class Dispatcher {
 
-  private Map<Integer, IDispatchExecutor> dispatchExecutorMap;
+  private final Map<Integer, IDispatchExecutor> dispatchExecutorMap;
 
   public Dispatcher(List<IDispatchExecutor> dispatchExecutors) {
     this.dispatchExecutorMap = dispatchExecutors.stream()
-        .collect(Collectors.toMap(IDispatchExecutor::type, dispatchExecutor -> dispatchExecutor));
+        .collect(Collectors.toMap(executor -> executor.type().getType(), dispatchExecutor -> dispatchExecutor));
   }
 
-  public String dispatch(DispatchTaskModel task, String logId) {
+  public Object dispatch(DispatchTaskModel task, String logId) {
     log.info("go into dispatch name={}", task.getSourceName());
     IDispatchExecutor dispatchExecutor = dispatchExecutorMap.get(task.getType());
     if (Objects.isNull(dispatchExecutor)) {
@@ -44,6 +44,6 @@ public class Dispatcher {
 
   public boolean isExitInJvm(DispatchLogDto taskLog){
     IDispatchExecutor dispatchExecutor = dispatchExecutorMap.get(taskLog.getLogType());
-    return dispatchExecutor.isExitInJvm(taskLog);
+    return dispatchExecutor.isExistInJvm(taskLog);
   }
 }

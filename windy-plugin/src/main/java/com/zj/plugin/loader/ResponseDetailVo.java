@@ -2,7 +2,7 @@ package com.zj.plugin.loader;
 
 public class ResponseDetailVo {
     /**
-     * 响应状态码 200成功
+     * 响应状态
      * */
     private Boolean responseStatus;
 

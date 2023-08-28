@@ -34,7 +34,7 @@ public class TaskLogService {
     this.dispatcher = dispatcher;
   }
 
-  public String createTask(DispatchTaskModel task) {
+  public Object createTask(DispatchTaskModel task) {
     log.info("receive task detail ={}", JSON.toJSONString(task));
     DispatchLogDto taskLog = saveLog(task);
     return dispatcher.dispatch(task, taskLog.getLogId());

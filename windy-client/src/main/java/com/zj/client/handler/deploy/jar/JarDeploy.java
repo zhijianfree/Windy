@@ -15,10 +15,12 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
@@ -85,19 +87,19 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
           + deployContext.getServicePort();
       channelExec.setCommand(shellCommand);
       channelExec.connect();
-      channelExec.setErrStream(System.err);
 
       while (!channelExec.isClosed()) {
-        Thread.sleep(1000);
+        Thread.sleep(3000);
       }
 
       // 获取shell脚本执行结果
       int exitStatus = channelExec.getExitStatus();
-      log.info("execute shell result = {}", exitStatus);
-      ProcessStatus status =
-          Objects.equals(exitStatus, 0) ? ProcessStatus.SUCCESS : ProcessStatus.FAIL;
-      bindStatus(deployContext.getRecordId(), status);
       channelExec.disconnect();
+      log.info("execute shell result = {}", exitStatus);
+      
+      ProcessStatus status = Optional.of(exitStatus).filter(s -> Objects.equals(exitStatus, 0))
+          .map(s -> ProcessStatus.SUCCESS).orElse(ProcessStatus.FAIL);
+      bindStatus(deployContext.getRecordId(), status);
     } catch (Exception e) {
       log.error("execute deploy jar error", e);
       statusMap.remove(deployContext.getRecordId());
@@ -130,9 +132,9 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
     try (FileInputStream fis = new FileInputStream(
         localFile); OutputStream outputStream = channelSftp.put(
         remoteFilePath); BufferedReader reader = new BufferedReader(
-        new InputStreamReader(fis, Charsets.UTF_8))) {
+        new InputStreamReader(fis, StandardCharsets.UTF_8))) {
       BufferedWriter writer = new BufferedWriter(
-          new OutputStreamWriter(outputStream, Charsets.UTF_8));
+          new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
 
       String line;
       while ((line = reader.readLine()) != null) {

@@ -37,7 +37,7 @@ public class FeatureDispatch implements IDispatchExecutor {
   private final IDispatchLogRepository dispatchLogRepository;
 
   public FeatureDispatch(IFeatureRepository featureRepository,
-      ITestCaseRepository testCaseRepository, ITestCaseConfigRepository testCaseConfigRepository,
+      ITestCaseConfigRepository testCaseConfigRepository,
       UniqueIdService uniqueIdService, FeatureExecuteProxy featureExecuteProxy,
       IDispatchLogRepository dispatchLogRepository) {
     this.featureRepository = featureRepository;
@@ -48,12 +48,12 @@ public class FeatureDispatch implements IDispatchExecutor {
   }
 
   @Override
-  public Integer type() {
-    return LogType.FEATURE.getType();
+  public LogType type() {
+    return LogType.FEATURE;
   }
 
   @Override
-  public boolean isExitInJvm(DispatchLogDto taskLog) {
+  public boolean isExistInJvm(DispatchLogDto taskLog) {
     return featureExecuteProxy.isExitTask(taskLog.getSourceRecordId());
   }
 
