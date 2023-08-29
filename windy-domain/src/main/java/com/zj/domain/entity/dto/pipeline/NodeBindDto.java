@@ -18,4 +18,8 @@ public class NodeBindDto {
   private String description;
 
   private List<String> executors;
+
+  private Long createTime;
+
+  private Long updateTime;
 }

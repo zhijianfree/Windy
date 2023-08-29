@@ -29,14 +29,7 @@ eureka:
     # client每隔30秒，向server请求可用服务清单。对于API网关类应用，可以适当降低时间间隔
     registry-fetch-interval-seconds: 30
     service-url:
-      defaultZone: http://windy-cluster:9888/eureka/
-
-windy:
-  pipeline:
-      workspace: /opt/windy
-  loop:
-    query:
-      timeout: 7200000
+      defaultZone: http://localhost:9888/eureka/
 
 
 

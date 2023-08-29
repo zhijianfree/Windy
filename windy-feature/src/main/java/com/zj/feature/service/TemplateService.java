@@ -52,10 +52,10 @@ public class TemplateService {
   private final IPluginRepository pluginRepository;
 
   public TemplateService(UniqueIdService uniqueIdService,
-      IExecuteTemplateRepository TemplateRepository,
+      IExecuteTemplateRepository templateRepository,
       IExecutePointRepository executePointRepository, IPluginRepository pluginRepository) {
     this.uniqueIdService = uniqueIdService;
-    this.templateRepository = TemplateRepository;
+    this.templateRepository = templateRepository;
     this.executePointRepository = executePointRepository;
     this.pluginRepository = pluginRepository;
   }
@@ -161,7 +161,7 @@ public class TemplateService {
 
   private static ExecuteTemplateVo buildExecuteTemplateVo(FeatureDefine define) {
     ExecuteTemplateVo executeTemplateVo = new ExecuteTemplateVo();
-    executeTemplateVo.setTemplateType(TemplateType.DEFAULT.getType());
+    executeTemplateVo.setTemplateType(TemplateType.CUSTOM.getType());
     executeTemplateVo.setInvokeType(InvokeType.LOCAL_METHOD.getType());
     executeTemplateVo.setName(define.getName());
     executeTemplateVo.setMethod(define.getMethod());
