@@ -54,9 +54,9 @@ public class PipelineSchedule implements CommandLineRunner {
   /**
    * 30 分钟检查一次是否有新的定时任务需要执行或者修改
    * */
-  @Scheduled(cron = "* 0/30 * * * ? ")
+  @Scheduled(cron = "0/5 * * * * ? ")
   public void scanTaskLog() {
-    log.info("start scan schedule pipeline");
+    log.debug("start scan schedule pipeline");
     loadSchedulePipeline();
   }
 
@@ -70,7 +70,7 @@ public class PipelineSchedule implements CommandLineRunner {
   private void loadSchedulePipeline() {
     List<PipelineDto> pipelines = pipelineRepository.getSchedulePipelines().stream()
         .filter(pipeline -> StringUtils.isNotBlank(pipeline.getPipelineConfig()))
-        .filter(this::haveSchedule)
+        .filter(this::notExistLocalMap)
         .collect(Collectors.toList());
     if (CollectionUtils.isEmpty(pipelines)) {
       return;
@@ -99,7 +99,7 @@ public class PipelineSchedule implements CommandLineRunner {
     });
   }
 
-  private boolean haveSchedule(PipelineDto pipeline) {
+  private boolean notExistLocalMap(PipelineDto pipeline) {
     ScheduleHolder holder = scheduledMap.get(pipeline.getPipelineId());
     if (Objects.isNull(holder)) {
       return true;

@@ -30,7 +30,8 @@ public class MicroserviceService {
   private final IPipelineRepository pipelineRepository;
 
   private final ITestCaseRepository testCaseRepository;
-  private final IRepositoryBranch repositoryBranch;
+  private final List<IRepositoryBranch> repositoryBranches;
+  private final ISystemConfigRepository systemConfig;
 
   public MicroserviceService(IMicroServiceRepository microServiceRepository,
       UniqueIdService uniqueIdService, List<IRepositoryBranch> gitRepositories,
@@ -40,8 +41,13 @@ public class MicroserviceService {
     this.uniqueIdService = uniqueIdService;
     this.pipelineRepository = pipelineRepository;
     this.testCaseRepository = testCaseRepository;
+    this.repositoryBranches = gitRepositories;
+    this.systemConfig = systemConfig;
+  }
+
+  private IRepositoryBranch getRepositoryBranch(){
     GitAccessVo gitAccess = systemConfig.getGitAccess();
-    this.repositoryBranch = gitRepositories.stream()
+    return repositoryBranches.stream()
         .filter(repository -> Objects.equals(repository.gitType(), gitAccess.getGitType()))
         .findAny().orElse(null);
   }
@@ -64,6 +70,7 @@ public class MicroserviceService {
   }
 
   public String createService(MicroserviceDto microserviceDto) {
+    IRepositoryBranch repositoryBranch = getRepositoryBranch();
     if (Objects.isNull(repositoryBranch)) {
       throw new ApiException(ErrorCode.NOT_FIND_REPO_CONFIG);
     }

@@ -43,7 +43,7 @@ public class UpdateNodeRecordEvent implements INotifyEvent {
   public boolean handle(ResultEvent resultEvent) {
     String string = JSON.toJSONString(resultEvent.getParams());
     log.info("receive node record create event id = {} event={}", resultEvent.getExecuteId(),
-        string);
+        resultEvent.getExecuteType());
     NodeRecordDto oldNodeRecord = nodeRecordRepository.getRecordById(resultEvent.getExecuteId());
     if (ProcessStatus.isCompleteStatus(oldNodeRecord.getStatus()) && !Objects.equals(
         ExecuteType.APPROVAL.name(), resultEvent.getExecuteType())) {

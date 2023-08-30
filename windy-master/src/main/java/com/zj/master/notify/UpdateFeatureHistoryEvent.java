@@ -38,7 +38,7 @@ public class UpdateFeatureHistoryEvent implements INotifyEvent {
   @Override
   public boolean handle(ResultEvent resultEvent) {
     log.info("receive node record create event id = {} event={}", resultEvent.getExecuteId(),
-        JSON.toJSONString(resultEvent.getParams()));
+        resultEvent.getExecuteType());
     FeatureHistoryDto history = JSON.parseObject(
         JSON.toJSONString(resultEvent.getParams()), FeatureHistoryDto.class);
     FeatureHistoryDto featureHistory = featureHistoryRepository.getFeatureHistory(
