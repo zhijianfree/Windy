@@ -32,17 +32,22 @@ import java.util.stream.Collectors;
 @Component
 public class GitlabRepositoryBranch implements IRepositoryBranch {
 
-  private final Map<String, String> headers;
+  public static final String MASTER = "master";
+  public static final String TEMP_PREFIX = "temp_";
   private final GitRequestProxy gitRequestProxy;
 
   private Map<String, Integer> serviceIdMap = new HashMap<>();
 
   public GitlabRepositoryBranch(GitRequestProxy gitRequestProxy) {
     this.gitRequestProxy = gitRequestProxy;
-    this.headers = new HashMap<>();
-    String accessToken = gitRequestProxy.getGitAccess().getAccessToken();
-    headers.put("Private-Token", accessToken);
     new Thread(this::loadGitRepositories).start();
+  }
+
+  private Map<String, String> getTokenHeader() {
+    Map<String, String> header = new HashMap<>();
+    String accessToken = gitRequestProxy.getGitAccess().getAccessToken();
+    header.put("Private-Token", accessToken);
+    return header;
   }
 
   private void loadGitRepositories() {
@@ -50,7 +55,9 @@ public class GitlabRepositoryBranch implements IRepositoryBranch {
       List<GitlabRepository> gitlabRepositories = getGitlabRepositories();
       serviceIdMap = gitlabRepositories.stream()
           .collect(Collectors.toMap(repo -> repo.getName().toLowerCase(), GitlabRepository::getId));
-    } catch (Exception ignore) {}
+    } catch (Exception e) {
+      log.info("load gitlab repositories error ={}", e.getMessage());
+    }
   }
 
   @Override
@@ -63,7 +70,7 @@ public class GitlabRepositoryBranch implements IRepositoryBranch {
     Integer projectId = transformProjectId(serviceName);
     String path = String.format("/api/v4/projects/%s/repository/branches?branch=%s&ref=master",
         projectId, branchName);
-    String result = gitRequestProxy.post(path, "", headers);
+    String result = gitRequestProxy.post(path, "", getTokenHeader());
     log.info("gitea create branch result = {}", result);
     BranchInfo branchInfo = JSON.parseObject(result, BranchInfo.class);
     if (Objects.isNull(branchInfo) || !Objects.equals(branchInfo.getName(), branchName)) {
@@ -77,7 +84,7 @@ public class GitlabRepositoryBranch implements IRepositoryBranch {
     Integer projectId = transformProjectId(serviceName);
     String path = String.format("/api/v4/projects/%s/repository/branches/%s", projectId,
         branchName);
-    String result = gitRequestProxy.delete(path, headers);
+    String result = gitRequestProxy.delete(path, getTokenHeader());
     log.info("gitea delete branch result = {}", result);
   }
 
@@ -85,7 +92,7 @@ public class GitlabRepositoryBranch implements IRepositoryBranch {
   public List<String> listBranch(String serviceName) {
     Integer projectId = transformProjectId(serviceName);
     String path = String.format("/api/v4/projects/%s/repository/branches", projectId);
-    String result = gitRequestProxy.get(path, headers);
+    String result = gitRequestProxy.get(path, getTokenHeader());
     List<BranchInfo> branches = JSON.parseArray(result, BranchInfo.class);
     if (CollectionUtils.isEmpty(branches)) {
       return Collections.emptyList();
@@ -93,7 +100,8 @@ public class GitlabRepositoryBranch implements IRepositoryBranch {
 
     log.info("get list={}", result);
     return branches.stream().map(BranchInfo::getName)
-        .filter(branch -> !Objects.equals(branch, "master") && !branch.startsWith("temp_"))
+        //不显示master分支以及构建的临时分支
+        .filter(branch -> !Objects.equals(branch, MASTER) && !branch.startsWith(TEMP_PREFIX))
         .collect(Collectors.toList());
   }
 
@@ -126,23 +134,7 @@ public class GitlabRepositoryBranch implements IRepositoryBranch {
   }
 
   private List<GitlabRepository> getGitlabRepositories() {
-    String result = gitRequestProxy.get("/api/v4/projects", headers);
+    String result = gitRequestProxy.get("/api/v4/projects", getTokenHeader());
     return JSON.parseArray(result, GitlabRepository.class);
-  }
-
-  public static void main(String[] args) {
-    OkHttpClient okHttpClient = new OkHttpClient.Builder().readTimeout(Duration.ofMinutes(1))
-        .connectTimeout(Duration.ofSeconds(30)).build();
-
-    String path = String.format("/projects/%s/repository/branches", "47345267");
-    Request request = new Request.Builder().url("https://gitlab.com/api/v4" + path)
-        .header("PRIVATE-TOKEN", "glpat-BJt61wWoBZWsyfspfsaw").get().build();
-    try {
-      Response execute = okHttpClient.newCall(request).execute();
-      String string = execute.body().string();
-      System.out.println(string);
-    } catch (IOException e) {
-      System.out.println(e);
-    }
   }
 }
