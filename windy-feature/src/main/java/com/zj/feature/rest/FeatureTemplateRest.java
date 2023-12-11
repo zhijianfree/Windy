@@ -43,7 +43,7 @@ public class FeatureTemplateRest {
       @RequestParam(value = "size", defaultValue = "10") Integer size,
       @RequestParam(value = "name", defaultValue = "") String name) {
     PageSize<ExecuteTemplateVo> featureConfigs = templateService.getTemplatePage(page, size, name);
-    return new ResponseMeta(ErrorCode.SUCCESS, featureConfigs);
+    return new ResponseMeta<>(ErrorCode.SUCCESS, featureConfigs);
   }
 
   @ResponseBody

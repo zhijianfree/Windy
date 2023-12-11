@@ -1,10 +1,11 @@
 package com.zj.feature.entity.vo;
 
-import com.zj.plugin.loader.ParameterDefine;
 import com.zj.feature.entity.dto.ExecutePointVo;
+import com.zj.plugin.loader.ParameterDefine;
+import lombok.Data;
+
 import java.util.List;
 import java.util.Map;
-import lombok.Data;
 
 @Data
 public class ExecutorUnit {

@@ -1,13 +1,11 @@
-package com.zj.domain.entity.dto.service;
+package com.zj.service.entity;
 
+import com.zj.common.model.K8SContainerParams;
 import lombok.Data;
 
 @Data
-public class MicroserviceDto {
+public class ServiceDto {
 
-    /**
-     * 服务Id
-     * */
     private String serviceId;
 
     /**
@@ -36,18 +34,8 @@ public class MicroserviceDto {
     private Integer priority;
 
     /**
-     * 服务配置
+     * 服务部署容器配置
      */
-    private String serviceConfig;
-
-    /**
-     * 创建时间
-     * */
-    private Long createTime;
-
-    /**
-     * 修改时间
-     * */
-    private Long updateTime;
+    private K8SContainerParams containerParams;
 
 }

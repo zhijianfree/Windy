@@ -37,6 +37,11 @@ public class Microservice {
     private Integer priority;
 
     /**
+     * 服务配置
+     */
+    private String serviceConfig;
+
+    /**
      * 创建时间
      * */
     private Long createTime;

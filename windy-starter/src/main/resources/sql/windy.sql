@@ -289,6 +289,7 @@ CREATE TABLE `microservice` (
                                 `description` varchar(300) NOT NULL COMMENT '服务描述',
                                 `owner` varchar(100) NOT NULL COMMENT '服务拥有者',
                                 `priority` int(4) DEFAULT NULL COMMENT '服务优先级',
+                                `service_config` text COMMENT '服务配置',
                                 `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
                                 `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
                                 PRIMARY KEY (`id`)

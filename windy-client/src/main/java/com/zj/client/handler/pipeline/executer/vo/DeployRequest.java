@@ -19,10 +19,6 @@ public class DeployRequest {
 
   private Integer deployType;
 
-  private String imageName;
-
-  private Integer replicas;
-
   @Data
   public static class SSHParams{
     private String remotePath;
@@ -34,16 +30,5 @@ public class DeployRequest {
     private String user;
 
     private String password;
-  }
-
-  @Data
-  public static class K8SParams{
-    private String apiService;
-
-    private String token;
-
-    private String repository;
-
-    private String namespace;
   }
 }

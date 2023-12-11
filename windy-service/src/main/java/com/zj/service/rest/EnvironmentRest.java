@@ -4,6 +4,7 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseMeta;
 import com.zj.domain.entity.dto.service.DeployEnvironmentDto;
+import com.zj.service.entity.NodeInfo;
 import com.zj.service.service.EnvironmentService;
 import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -60,5 +61,10 @@ public class EnvironmentRest {
   @PostMapping("/environment/check")
   public ResponseMeta<Boolean> checkStatus(@RequestBody String data, @RequestParam("checkType") Integer checkType) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, environmentService.checkStatus(checkType, data));
+  }
+
+  @GetMapping("/environment/{envId}/nodes")
+  public ResponseMeta<List<NodeInfo>> getNodeList(@PathVariable("envId") String envId) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, environmentService.getNodeList(envId));
   }
 }

@@ -12,17 +12,21 @@
   <artifactId>windy-service</artifactId>
 
   <dependencies>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
+    <!--    内部依赖开始-->
     <dependency>
       <groupId>com.zj</groupId>
       <artifactId>windy-common</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.baomidou</groupId>
-      <artifactId>mybatis-plus-boot-starter</artifactId>
+      <groupId>com.zj</groupId>
+      <artifactId>windy-domain</artifactId>
+    </dependency>
+    <!--    内部依赖结束-->
+
+    <!--    外部依赖开始-->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -30,16 +34,9 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>com.zj</groupId>
-      <artifactId>windy-domain</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.jcraft</groupId>
       <artifactId>jsch</artifactId>
     </dependency>
-    <dependency>
-      <groupId>io.fabric8</groupId>
-      <artifactId>kubernetes-client</artifactId>
-    </dependency>
+    <!--    外部依赖结束-->
   </dependencies>
 </project>
