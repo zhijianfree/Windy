@@ -8,14 +8,9 @@ import com.zj.common.git.IRepositoryBranch;
 import com.zj.pipeline.entity.vo.BranchInfo;
 import com.zj.pipeline.entity.vo.GitlabRepository;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -53,8 +48,10 @@ public class GitlabRepositoryBranch implements IRepositoryBranch {
     private void loadGitRepositories() {
         try {
             List<GitlabRepository> gitlabRepositories = getGitlabRepositories();
+            log.info("get all repository ={}", JSON.toJSONString(gitlabRepositories));
             serviceIdMap = gitlabRepositories.stream()
-                    .collect(Collectors.toMap(repo -> repo.getName().toLowerCase(), GitlabRepository::getId));
+                    .collect(Collectors.toMap(repo -> repo.getName().toLowerCase(), GitlabRepository::getId,
+                            (value1, value2) -> value2));
         } catch (Exception e) {
             log.info("load gitlab repositories error ={}", e.getMessage());
         }

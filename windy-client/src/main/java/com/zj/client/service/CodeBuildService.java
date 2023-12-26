@@ -119,7 +119,14 @@ public class CodeBuildService {
    */
   private void notifyMessage(TaskNode taskNode, String line) {
     QueryResponseModel model = statusMap.get(taskNode.getRecordId());
-    model.addMessage(line);
+    if (model.getMessage().size() >= 400){
+      model.getMessage().remove(0);
+    }
+
+    if (!line.contains("Progress") && !line.contains("Downloading")){
+      model.addMessage(line);
+    }
+
     PipelineStatusEvent statusEvent = PipelineStatusEvent.builder()
         .taskNode(taskNode)
         .processStatus(ProcessStatus.exchange(model.getStatus()))
@@ -195,25 +202,22 @@ public class CodeBuildService {
     };
 
     //构建镜像
-    String image = imageName + SPLIT_STRING + version;
-    String imageId = dockerClient.buildImageCmd().withDockerfile(dockerfile)
-        .withTags(Collections.singleton(image)).exec(callback).awaitImageId();
-
     String repository = param.getRepository();
-    //执行docker命令
     String imageUrl = repository.endsWith(SUFFIX) ? repository : repository + SUFFIX;
-    String tagName = imageUrl + imageName;
-    dockerClient.tagImageCmd(imageId, tagName, version).exec();
+    String tag = imageName + SPLIT_STRING + version;
+    String imageRepository = imageUrl + tag;
+    log.info("docker imageRepository ={}", imageRepository);
+    dockerClient.buildImageCmd().withDockerfile(dockerfile)
+        .withTags(Collections.singleton(imageRepository)).exec(callback).awaitImageId();
 
     // 设置登陆远程仓库的用户信息
     AuthConfig authConfig = new AuthConfig().withRegistryAddress(repository)
         .withUsername(param.getUser()).withPassword(param.getPassword());
 
     // 将镜像推送到远程镜像仓库
-    String remoteImage = tagName + SPLIT_STRING + version;
-    Adapter<PushResponseItem> responseItemAdapter = dockerClient.pushImageCmd(remoteImage)
+    Adapter<PushResponseItem> responseItemAdapter = dockerClient.pushImageCmd(imageRepository)
         .withAuthConfig(authConfig).start();
     responseItemAdapter.awaitCompletion();
-    return remoteImage;
+    return imageRepository;
   }
 }
