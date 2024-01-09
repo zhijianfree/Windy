@@ -8,26 +8,23 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class CompareJsonUtils {
-    public static Map<String, Object> compareJsonObject(String oldJsonStr, String newJsonStr1) {
+    public static Map<String, Object> compareJsonObject(String responseJson, String expectJson) {
         //将字符串转换为json对象
-        JSON oldJson = JSON.parseObject(oldJsonStr);
-        JSON newJson = JSON.parseObject(newJsonStr1);
+        JSON oldJson = JSON.parseObject(responseJson);
+        JSON newJson = JSON.parseObject(expectJson);
         //递归遍历json对象所有的key-value，将其封装成path:value格式进行比较
-        Map<String, Object> oldMap = new LinkedHashMap<>();
-        Map<String, Object> newMap = new LinkedHashMap<>();
-        convertJsonToMap(oldJson, "", oldMap);
-        convertJsonToMap(newJson, "", newMap);
-        return compareMap(oldMap, newMap);
+        Map<String, Object> responseMap = new LinkedHashMap<>();
+        Map<String, Object> expectMap = new LinkedHashMap<>();
+        convertJsonToMap(oldJson, "", responseMap);
+        convertJsonToMap(newJson, "", expectMap);
+        return compareExpectWithResponse(responseMap, expectMap);
     }
 
     /**
      * 将json数据转换为map存储用于比较
-     *
-     * @param json
-     * @param root
-     * @param resultMap
      */
     private static void convertJsonToMap(Object json, String root, Map<String, Object> resultMap) {
         if (json instanceof JSONObject) {
@@ -46,82 +43,42 @@ public class CompareJsonUtils {
         } else if (json instanceof JSONArray) {
             JSONArray jsonArray = (JSONArray) json;
             for (int i = 0; i < jsonArray.size(); i++) {
-                Object vaule = jsonArray.get(i);
+                Object value = jsonArray.get(i);
                 String newRoot = "".equals(root) ? "[" + i + "]" : root + ".[" + i + "]";
-                if (vaule instanceof JSONObject || vaule instanceof JSONArray) {
-                    convertJsonToMap(vaule, newRoot, resultMap);
+                if (value instanceof JSONObject || value instanceof JSONArray) {
+                    convertJsonToMap(value, newRoot, resultMap);
                 } else {
-                    resultMap.put(newRoot, vaule);
+                    resultMap.put(newRoot, value);
                 }
-            }
-        }
-    }
-
-    /**
-     * 比较两个map，返回不同数据
-     *
-     * @param oldMap
-     * @param newMap
-     * @return
-     */
-    private static Map<String, Object> compareMap(Map<String, Object> oldMap, Map<String, Object> newMap) {
-        //遍历newMap，将newMap的不同数据装进oldMap，同时删除oldMap中与newMap相同的数据
-        compareNewToOld(oldMap, newMap);
-        //將舊的有新的沒有的數據封裝數據結構存在舊的裡面
-        compareOldToNew(oldMap);
-        return oldMap;
-    }
-
-    /**
-     * 將舊的有新的沒有的數據封裝數據結構存在舊的裡面
-     * @param oldMap
-     * @return
-     */
-    private static void compareOldToNew(Map<String, Object> oldMap) {
-        //统一oldMap中newMap不存在的数据的数据结构，便于解析
-        for (Iterator<Map.Entry<String, Object>> it = oldMap.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry<String, Object> item = it.next();
-            String key = item.getKey();
-            Object value = item.getValue();
-            int lastIndex = key.lastIndexOf(".");
-            if (!(value instanceof Map)) {
-                Map<String, Object> differenceMap = new HashMap<>();
-                differenceMap.put("oldValue", value);
-                differenceMap.put("newValue", "");
-                oldMap.put(key, differenceMap);
             }
         }
     }
 
     /**
      * 將新的map與舊的比較，並將數據統一存在舊的裡面
-     * @param oldMap
-     * @param newMap
+     * @param responseMap
+     * @param expectMap
      */
-    private static void compareNewToOld(Map<String, Object> oldMap, Map<String, Object> newMap) {
-        for (Iterator<Map.Entry<String, Object>> it = newMap.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry<String, Object> item = it.next();
+    private static Map<String, Object> compareExpectWithResponse(Map<String, Object> responseMap, Map<String, Object> expectMap) {
+        Map<String, Object> resultMap = new HashMap<>();
+        for (Map.Entry<String, Object> item : expectMap.entrySet()) {
             String key = item.getKey();
             Object newValue = item.getValue();
             Map<String, Object> differenceMap = new HashMap<>();
-            int lastIndex = key.lastIndexOf(".");
-            String lastPath = key.substring(lastIndex + 1).toLowerCase();
-            if (oldMap.containsKey(key)) {
-                Object oldValue = oldMap.get(key);
-                if (newValue.equals(oldValue)) {
-                    oldMap.remove(key);
-                    continue;
-                } else {
+            if (responseMap.containsKey(key)) {
+                Object oldValue = responseMap.get(key);
+                if (!Objects.equals(oldValue, newValue)) {
                     differenceMap.put("oldValue", oldValue);
                     differenceMap.put("newValue", newValue);
-                    oldMap.put(key, differenceMap);
+                    resultMap.put(key, differenceMap);
                 }
             } else {
                 differenceMap.put("oldValue", "");
                 differenceMap.put("newValue", newValue);
-                oldMap.put(key, differenceMap);
+                resultMap.put(key, differenceMap);
             }
         }
+        return resultMap;
     }
 
     /**
@@ -130,7 +87,7 @@ public class CompareJsonUtils {
      * @param map
      * @return
      */
-    private String convertMapToJson(Map<String, Object> map) {
+    private static String convertMapToJson(Map<String, Object> map) {
         JSONObject resultJSONObject = new JSONObject();
         for (Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<String, Object> item = it.next();
@@ -216,8 +173,11 @@ public class CompareJsonUtils {
     }
 
     public static void main(String[] args){
-        String oldStr= "{a:'aaa',b:'bbb'}";
-        String newStr= "{a:'aa',b:'bb'}";
-        System.out.println(new CompareJsonUtils().compareJsonObject(oldStr,newStr));
+        String oldStr= "{a:'aaa',b:'bbb',c:{'d':'ddd'}}";
+        String newStr= "{a:'aa',b:'bb',c:{'d':'d'}}";
+        Map<String, Object> stringObjectMap = new CompareJsonUtils().compareJsonObject(oldStr, newStr);
+        System.out.println(stringObjectMap);
+
+        System.out.println(convertMapToJson(stringObjectMap));;
     }
 }
