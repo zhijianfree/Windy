@@ -28,7 +28,7 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
 
   private final CompareHandler compareHandler;
 
-  public BaseExecuteStrategy(InterceptorProxy interceptorProxy,
+  protected BaseExecuteStrategy(InterceptorProxy interceptorProxy,
       List<IExecuteInvoker> executeInvokers, CompareHandler compareHandler) {
     this.interceptorProxy = interceptorProxy;
     this.executeInvokerMap = executeInvokers.stream()
