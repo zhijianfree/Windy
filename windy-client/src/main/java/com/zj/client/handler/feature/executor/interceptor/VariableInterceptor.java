@@ -2,6 +2,7 @@ package com.zj.client.handler.feature.executor.interceptor;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.vo.ExecutePoint;
+import com.zj.client.handler.feature.executor.compare.CompareDefine;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.client.handler.feature.executor.vo.ExecuteContext;
@@ -30,14 +31,40 @@ public class VariableInterceptor implements IExecuteInterceptor {
   @Override
   public void afterExecute(ExecutePoint executePoint, ExecuteDetailVo executeDetailVo,
       ExecuteContext context) {
-    String variables = executePoint.getVariables();
-    List<VariableDefine> variableDefines = JSON.parseArray(variables, VariableDefine.class);
+    //将执行完的结果转化为上下文变量的值
+    Object responseBody = executeDetailVo.getResponseDetailVo().getResponseBody();
+    exchangeVariableContext(context, executePoint, responseBody);
+
+    //将断言对比的参数设置为具体的值
+    exchangeCompareContext(context, executePoint);
+  }
+
+  private void exchangeCompareContext(ExecuteContext context, ExecutePoint executePoint) {
+    List<CompareDefine> compareDefines = JSON.parseArray(executePoint.getCompareDefine(), CompareDefine.class);
+    if (CollectionUtils.isEmpty(compareDefines)) {
+      return;
+    }
+
+    StrSubstitutor strSubstitutor = new StrSubstitutor(context.toMap());
+    compareDefines.forEach(compareDefine -> {
+      String expectValue = compareDefine.getExpectValue();
+      if (StringUtils.isBlank(expectValue)) {
+        return;
+      }
+
+      String replaceResult = strSubstitutor.replace(expectValue);
+      compareDefine.setExpectValue(replaceResult);
+    });
+
+    executePoint.setCompareDefine(JSON.toJSONString(compareDefines));
+  }
+
+  private void exchangeVariableContext(ExecuteContext context, ExecutePoint executePoint, Object responseBody) {
+    List<VariableDefine> variableDefines = JSON.parseArray(executePoint.getVariables(), VariableDefine.class);
     if (CollectionUtils.isEmpty(variableDefines)) {
       return;
     }
 
-    //将执行完的结果转化为变量的值
-    Object responseBody = executeDetailVo.getResponseDetailVo().getResponseBody();
     variableDefines.forEach(variableDefine -> {
       String expressionString = variableDefine.getVariableValue();
       if (StringUtils.isBlank(expressionString)) {

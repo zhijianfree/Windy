@@ -1,4 +1,4 @@
-package com.zj.client.handler.feature.executor.compare;
+package com.zj.common.enums;
 
 public enum CompareType {
     /** json对比*/
@@ -17,6 +17,8 @@ public enum CompareType {
     LESS("<"),
     /** 数字小于等于*/
     LESS_EQUAL("<="),
+    /** 字符串内容不能为空*/
+    NOT_EMPTY("不为空"),
     ;
     private String operator;
 

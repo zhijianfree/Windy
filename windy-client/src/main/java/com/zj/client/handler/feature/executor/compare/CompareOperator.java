@@ -1,5 +1,7 @@
 package com.zj.client.handler.feature.executor.compare;
 
+import com.zj.common.enums.CompareType;
+
 public interface CompareOperator {
 
     /**

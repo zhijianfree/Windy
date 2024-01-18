@@ -18,13 +18,13 @@ public class InterceptorProxy {
 
 
   public void beforeExecute(ExecutorUnit executorUnit, ExecuteContext context) {
-    interceptors.forEach(IExecuteInterceptor ->
-        IExecuteInterceptor.beforeExecute(executorUnit, context));
+    interceptors.forEach(executeInterceptor ->
+            executeInterceptor.beforeExecute(executorUnit, context));
   }
 
   public void afterExecute(ExecutePoint executePoint, ExecuteDetailVo executeDetailVo,
       ExecuteContext context) {
-    interceptors.forEach(IExecuteInterceptor -> IExecuteInterceptor
+    interceptors.forEach(executeInterceptor -> executeInterceptor
             .afterExecute(executePoint, executeDetailVo, context));
   }
 }
