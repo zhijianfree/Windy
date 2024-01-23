@@ -27,7 +27,7 @@ public class ClientNotifyService {
   }
 
   public Boolean notifyEvent(ResultEvent resultEvent) {
-    log.info("master receive notify = {}", JSON.toJSONString(resultEvent));
+    log.debug("master receive notify = {}", JSON.toJSONString(resultEvent));
     String notifyType = resultEvent.getNotifyType().name();
     INotifyEvent notifyEvent = notifyEventMap.get(notifyType);
     if (Objects.isNull(notifyEvent)) {

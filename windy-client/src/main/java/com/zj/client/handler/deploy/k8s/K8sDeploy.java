@@ -110,11 +110,6 @@ public class K8sDeploy implements IDeployMode<K8sDeployContext> {
     client.apps().deployments().inNamespace(namespace).createOrReplace(deployment);
   }
 
-  private static EnvVar buildEnvItem(String name, String value) {
-    return new EnvVarBuilder().withName(name).withValue(value)
-        .build();
-  }
-
   private static void loopQueryDeployStatus(K8sDeployContext deployContext, KubernetesClient client,
       String serviceName) throws InterruptedException {
     AtomicLong atomicLong = new AtomicLong(0);

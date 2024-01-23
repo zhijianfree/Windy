@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Component;
  * @author guyuelan
  * @since 2023/5/25
  */
+@Slf4j
 @Component
 public class HttpInvoker implements IExecuteInvoker {
 
@@ -33,6 +36,7 @@ public class HttpInvoker implements IExecuteInvoker {
 
   @Override
   public Object invoke(ExecutorUnit executorUnit) {
+    log.info("get execute unit={}", JSON.toJSONString(executorUnit));
     Map<String, Object> bodyMap = getParamsMap(executorUnit);
     assemblyUrlParam(executorUnit, bodyMap);
     String url = executorUnit.getService();

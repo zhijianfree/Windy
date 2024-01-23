@@ -8,9 +8,13 @@ import com.zj.client.handler.deploy.IDeployMode;
 import com.zj.client.handler.deploy.jar.JarDeployContext;
 import com.zj.client.handler.deploy.k8s.K8sDeployContext;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
-import com.zj.client.handler.pipeline.executer.vo.*;
+import com.zj.client.handler.pipeline.executer.vo.DeployRequest;
 import com.zj.client.handler.pipeline.executer.vo.DeployRequest.SSHParams;
+import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel.ResponseStatus;
+import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
+import com.zj.client.handler.pipeline.executer.vo.TaskNode;
+import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
 import com.zj.client.utils.Utils;
 import com.zj.common.enums.DeployType;
 import com.zj.common.enums.ExecuteType;
@@ -46,8 +50,7 @@ public class DeployTrigger implements INodeTrigger {
 
     private final Map<Integer, Function<DeployRequest, DeployContext>> functionMap = new HashMap<>();
 
-    public DeployTrigger(DeployFactory deployFactory,
-                         GlobalEnvConfig globalEnvConfig) {
+    public DeployTrigger(DeployFactory deployFactory, GlobalEnvConfig globalEnvConfig) {
         this.deployFactory = deployFactory;
         this.globalEnvConfig = globalEnvConfig;
         functionMap.put(DeployType.SSH.getType(), this::buildSSHContext);
@@ -61,10 +64,10 @@ public class DeployTrigger implements INodeTrigger {
 
     @Override
     public void triggerRun(TriggerContext triggerContext, TaskNode taskNode) throws IOException {
+        log.info("triggerContext = {}", triggerContext.getData());
         DeployRequest deployRequest = JSON.parseObject(JSON.toJSONString(triggerContext.getData()),
                 DeployRequest.class);
-        Function<DeployRequest, DeployContext> function = functionMap.get(
-                deployRequest.getDeployType());
+        Function<DeployRequest, DeployContext> function = functionMap.get(deployRequest.getDeployType());
         if (Objects.isNull(function)) {
             throw new ExecuteException("can not find deploy type");
         }
@@ -89,18 +92,10 @@ public class DeployTrigger implements INodeTrigger {
     private JarDeployContext buildSSHContext(DeployRequest deployRequest) {
         String serviceName = Utils.getServiceFromUrl(deployRequest.getGitUrl());
         String filePath =
-                globalEnvConfig.getPipelineWorkspace(serviceName, deployRequest.getPipelineId())
-                        + File.separator + DEPLOY;
+                globalEnvConfig.getPipelineWorkspace(serviceName, deployRequest.getPipelineId()) + File.separator + DEPLOY;
         SSHParams sshParams = JSON.parseObject(JSON.toJSONString(deployRequest.getParams()), SSHParams.class);
         String serverPort = Optional.ofNullable(deployRequest.getServerPort()).orElse("");
-        return JarDeployContext.builder().sshUser(sshParams.getUser())
-                .sshPassword(sshParams.getPassword())
-                .remotePath(sshParams.getRemotePath())
-                .sshIp(sshParams.getSshIp())
-                .sshPort(sshParams.getSshPort())
-                .localPath(filePath)
-                .servicePort(serverPort)
-                .build();
+        return JarDeployContext.builder().sshUser(sshParams.getUser()).sshPassword(sshParams.getPassword()).remotePath(sshParams.getRemotePath()).sshIp(sshParams.getSshIp()).sshPort(sshParams.getSshPort()).localPath(filePath).servicePort(serverPort).build();
     }
 
     private K8sDeployContext buildK8SContext(DeployRequest deployRequest) {
@@ -108,10 +103,6 @@ public class DeployTrigger implements INodeTrigger {
         DeployParams deployParams = JSON.parseObject(JSON.toJSONString(deployRequest.getParams()), DeployParams.class);
         K8SAccessParams k8SAccessParams = deployParams.getK8SAccessParams();
         K8SContainerParams k8SContainerParams = deployParams.getK8SContainerParams();
-        return K8sDeployContext.builder()
-                .k8SContainerParams(k8SContainerParams)
-                .k8SAccessParams(k8SAccessParams)
-                .serviceName(serviceName)
-                .build();
+        return K8sDeployContext.builder().k8SContainerParams(k8SContainerParams).k8SAccessParams(k8SAccessParams).serviceName(serviceName).build();
     }
 }

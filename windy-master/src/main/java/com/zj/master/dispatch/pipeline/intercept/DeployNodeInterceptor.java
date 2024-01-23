@@ -70,12 +70,12 @@ public class DeployNodeInterceptor implements INodeExecuteInterceptor {
 
       requestContext.setSingleClientIp(subDispatchLogDto.getClientIp());
       requestContext.setRequestSingle(true);
-      taskNode.setRequestContext(requestContext);
 
       DeployEnvironmentDto deployEnvironment = environmentRepository.getEnvironment(
           requestContext.getEnvId());
       requestContext.setParams(JSON.parse(deployEnvironment.getEnvParams()));
       requestContext.setDeployType(deployEnvironment.getEnvType());
+      taskNode.setRequestContext(requestContext);
     }
 
   }

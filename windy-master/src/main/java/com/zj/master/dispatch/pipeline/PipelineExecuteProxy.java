@@ -151,7 +151,9 @@ public class PipelineExecuteProxy implements IStopEventListener {
     pipelineEndProcessor.statusChange(statusChange);
 
     //3 继续递归执行下一个任务
-    runTaskNodeFromPipeline(pipelineTask);
+    if (ProcessStatus.isCompleteStatus(nodeRecord.getStatus())) {
+      runTaskNodeFromPipeline(pipelineTask);
+    }
   }
 
   @Override
