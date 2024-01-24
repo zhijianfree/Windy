@@ -17,5 +17,4 @@ public class DeployContext extends RequestContext{
 
   private String imageName;
 
-
 }

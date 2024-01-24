@@ -698,6 +698,7 @@ CREATE TABLE `task_record` (
                                `task_name` varchar(100) NOT NULL COMMENT '任务名称',
                                `task_config` varchar(2000) DEFAULT NULL COMMENT '任务执行参数',
                                `machines` varchar(100) DEFAULT NULL COMMENT '执行机器列表',
+                               `trigger_id` varchar(64) DEFAULT NULL COMMENT '触发任务的来源方',
                                `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
                                `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
                                PRIMARY KEY (`id`),

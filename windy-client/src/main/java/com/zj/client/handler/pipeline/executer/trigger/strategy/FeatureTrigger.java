@@ -2,7 +2,11 @@ package com.zj.client.handler.pipeline.executer.trigger.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
-import com.zj.client.handler.pipeline.executer.vo.*;
+import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
+import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
+import com.zj.client.handler.pipeline.executer.vo.TaskNode;
+import com.zj.client.handler.pipeline.executer.vo.TestRequestContext;
+import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
@@ -50,6 +54,7 @@ public class FeatureTrigger implements INodeTrigger {
     task.setSourceId(taskId);
     task.setSourceName(TASK_TIPS);
     task.setType(LogType.FEATURE_TASK.getType());
+    task.setTriggerId(taskNode.getRecordId());
     String recordId = requestProxy.startFeatureTask(task);
     log.info("get TestFeatureInvoker triggerRun recordId= {}",recordId);
 
@@ -62,7 +67,7 @@ public class FeatureTrigger implements INodeTrigger {
   }
 
   @Override
-  public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
+  public QueryResponseModel queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
     QueryResponseModel queryResponseModel = new QueryResponseModel();
     try {
       log.info("get refresh url ={}", refreshContext.getUrl());
@@ -73,16 +78,16 @@ public class FeatureTrigger implements INodeTrigger {
       if (responseEntity.getStatusCode().isError()) {
         queryResponseModel.setStatus(ProcessStatus.FAIL.getType());
         queryResponseModel.setMessage(Collections.singletonList("request http error"));
-        return JSON.toJSONString(queryResponseModel);
+        return queryResponseModel;
       }
 
-      return JSON.toJSONString(responseEntity.getBody());
+      return JSON.parseObject(JSON.toJSONString(responseEntity.getBody()), QueryResponseModel.class);
     } catch (Exception e) {
       log.error("request dispatch task error", e);
       queryResponseModel.setStatus(ProcessStatus.FAIL.getType());
       queryResponseModel.setMessage(getErrorMsg(e));
     }
-    return JSON.toJSONString(queryResponseModel);
+    return queryResponseModel;
   }
 
   private List<String> getErrorMsg(Exception exception) {

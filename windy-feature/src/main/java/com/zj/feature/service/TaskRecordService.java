@@ -52,7 +52,11 @@ public class TaskRecordService {
     return executeHistory && flag;
   }
 
-  public List<HistoryNodeDto> getTaskResult(String recordId) {
+  public List<FeatureHistoryDto>  getTaskFeatureHistories(String recordId) {
+    return  featureHistoryService.getHistories(recordId);
+  }
+
+  public List<HistoryNodeDto> getTaskFeatureHistoryTree(String recordId) {
     List<FeatureHistoryDto> histories = featureHistoryService.getHistories(recordId);
     if (CollectionUtils.isEmpty(histories)) {
       return Collections.emptyList();
@@ -107,5 +111,9 @@ public class TaskRecordService {
   public Boolean stopTaskRecord(String recordId) {
     //todo notify master to stop dispatch task
     return taskRecordRepository.deleteTaskRecord(recordId);
+  }
+
+  public TaskRecordDto getTaskRecordByTrigger(String triggerId) {
+    return taskRecordRepository.getTaskRecordByTrigger(triggerId);
   }
 }

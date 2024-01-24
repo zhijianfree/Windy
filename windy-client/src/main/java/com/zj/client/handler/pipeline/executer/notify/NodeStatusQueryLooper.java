@@ -13,11 +13,14 @@ import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.common.enums.ProcessStatus;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -69,9 +72,9 @@ public class NodeStatusQueryLooper implements Runnable {
     executorService.execute(() -> {
       try {
         INodeTrigger remoteInvoker = remoteInvokerMap.get(node.getExecuteType());
-        String result = remoteInvoker.queryStatus(node.getRefreshContext(), node);
-        log.info("get query status result={}", result);
-        if (StringUtils.isBlank(result)) {
+        QueryResponseModel queryResponse = remoteInvoker.queryStatus(node.getRefreshContext(), node);
+        log.info("get query status result={}", queryResponse);
+        if (Objects.isNull(queryResponse)) {
           handleDefaultError(node);
           return;
         }
@@ -82,7 +85,6 @@ public class NodeStatusQueryLooper implements Runnable {
           return;
         }
 
-        QueryResponseModel queryResponse = JSON.parseObject(result, QueryResponseModel.class);
         if (Objects.isNull(queryResponse.getStatus())) {
           log.info("get task record status is empty. recordId={}", node.getRecordId());
           cycleRunTask(node);
@@ -95,7 +97,7 @@ public class NodeStatusQueryLooper implements Runnable {
         }
         cycleRunTask(node);
       } catch (Exception e) {
-        log.info("loop query status error", e);
+        log.info(QUERY_ERROR_TIPS, e);
         handleDefaultError(node);
       }
     });

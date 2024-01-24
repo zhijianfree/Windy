@@ -1,6 +1,7 @@
 package com.zj.client.handler.pipeline.executer.trigger;
 
 
+import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
@@ -26,5 +27,5 @@ public interface INodeTrigger {
    * @param refreshContext  请求刷新状态的参数
    * @param taskNode 任务详情
    * */
-  String queryStatus(RefreshContext refreshContext, TaskNode taskNode);
+  QueryResponseModel queryStatus(RefreshContext refreshContext, TaskNode taskNode);
 }

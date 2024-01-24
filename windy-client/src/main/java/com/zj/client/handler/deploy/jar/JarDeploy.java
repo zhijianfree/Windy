@@ -4,10 +4,16 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
-import com.zj.client.handler.deploy.IDeployMode;
+import com.zj.client.handler.deploy.AbstractDeployMode;
+import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
+import com.zj.client.utils.ExceptionUtils;
 import com.zj.common.enums.DeployType;
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.exception.ExecuteException;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.springframework.stereotype.Component;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -17,15 +23,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.Charsets;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.TrueFileFilter;
-import org.springframework.stereotype.Component;
 
 /**
  * jar包部署
@@ -35,11 +34,9 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class JarDeploy implements IDeployMode<JarDeployContext> {
+public class JarDeploy extends AbstractDeployMode<JarDeployContext> {
 
   private final JSch jsch = new JSch();
-
-  private final Map<String, ProcessStatus> statusMap = new HashMap<>();
 
   @Override
   public Integer deployType() {
@@ -48,7 +45,7 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
 
   @Override
   public void deploy(JarDeployContext deployContext) {
-    bindStatus(deployContext.getRecordId(), ProcessStatus.RUNNING);
+    updateDeployStatus(deployContext.getRecordId(), ProcessStatus.RUNNING);
     Session session = null;
     ChannelSftp channelSftp = null;
     try {
@@ -99,11 +96,10 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
       
       ProcessStatus status = Optional.of(exitStatus).filter(s -> Objects.equals(exitStatus, 0))
           .map(s -> ProcessStatus.SUCCESS).orElse(ProcessStatus.FAIL);
-      bindStatus(deployContext.getRecordId(), status);
+      updateDeployStatus(deployContext.getRecordId(), status);
     } catch (Exception e) {
       log.error("execute deploy jar error", e);
-      statusMap.remove(deployContext.getRecordId());
-      throw new ExecuteException(e.toString());
+      updateDeployStatus(deployContext.getRecordId(), ProcessStatus.FAIL, ExceptionUtils.getErrorMsg(e));
     } finally {
       if (channelSftp != null) {
         channelSftp.disconnect();
@@ -119,12 +115,8 @@ public class JarDeploy implements IDeployMode<JarDeployContext> {
   }
 
   @Override
-  public ProcessStatus getDeployStatus(String recordId) {
+  public QueryResponseModel getDeployStatus(String recordId) {
     return statusMap.get(recordId);
-  }
-
-  private void bindStatus(String recordId, ProcessStatus status) {
-    statusMap.put(recordId, status);
   }
 
   private void sendShFile(ChannelSftp channelSftp, String remoteFilePath, File localFile)

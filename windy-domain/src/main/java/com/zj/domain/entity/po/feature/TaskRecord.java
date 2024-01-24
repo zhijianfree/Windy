@@ -47,6 +47,11 @@ public class TaskRecord {
    * */
   private String machines;
 
+  /**
+   * 触发任务的来源方，用来记录由谁触发的任务
+   */
+  private String triggerId;
+
   private Long createTime;
 
   private Long updateTime;

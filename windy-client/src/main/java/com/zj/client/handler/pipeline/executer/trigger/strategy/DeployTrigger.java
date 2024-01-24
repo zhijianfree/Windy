@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -79,14 +80,8 @@ public class DeployTrigger implements INodeTrigger {
     }
 
     @Override
-    public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
-        ProcessStatus deployStatus = deployFactory.getDeployStatus(taskNode.getRecordId());
-        QueryResponseModel loopQueryResponse = new QueryResponseModel();
-        loopQueryResponse.setStatus(deployStatus.getType());
-        ResponseStatus responseStatus = new ResponseStatus();
-        responseStatus.setStatus(loopQueryResponse.getStatus());
-        loopQueryResponse.setData(responseStatus);
-        return JSON.toJSONString(loopQueryResponse);
+    public QueryResponseModel queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
+        return deployFactory.getDeployStatus(taskNode.getRecordId());
     }
 
     private JarDeployContext buildSSHContext(DeployRequest deployRequest) {

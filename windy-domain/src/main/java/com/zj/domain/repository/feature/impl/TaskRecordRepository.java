@@ -80,4 +80,11 @@ public class TaskRecordRepository extends ServiceImpl<TaskRecordMapper, TaskReco
             .orderByDesc(TaskRecord::getCreateTime));
     return OrikaUtil.convertList(taskRecords, TaskRecordDto.class);
   }
+
+  @Override
+  public TaskRecordDto getTaskRecordByTrigger(String triggerId) {
+    TaskRecord taskRecord = getOne(
+            Wrappers.lambdaQuery(TaskRecord.class).eq(TaskRecord::getTriggerId, triggerId));
+    return OrikaUtil.convert(taskRecord, TaskRecordDto.class);
+  }
 }

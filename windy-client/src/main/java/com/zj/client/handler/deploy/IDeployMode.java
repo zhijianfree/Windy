@@ -1,6 +1,6 @@
 package com.zj.client.handler.deploy;
 
-import com.zj.common.enums.ProcessStatus;
+import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 
 /**
  * @author guyuelan
@@ -12,5 +12,5 @@ public interface IDeployMode<T extends DeployContext> {
 
   void deploy(T deployContext);
 
-  ProcessStatus getDeployStatus(String recordId);
+  QueryResponseModel getDeployStatus(String recordId);
 }

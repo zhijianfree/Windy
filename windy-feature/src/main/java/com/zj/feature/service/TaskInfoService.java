@@ -37,7 +37,7 @@ public class TaskInfoService {
   private final ITaskRepository taskRepository;
   private final RequestProxy requestProxy;
 
-  public static final String FORMAT_TIPS = "任务执行状态: 成功数: %s 成功率百分比: %s";
+  public static final String FORMAT_TIPS = "任务执行状态: 总任务数:%s 成功数: %s 成功率百分比: %s %";
 
   public TaskInfoService(TaskRecordService taskRecordService,
       FeatureHistoryService featureHistoryService, UniqueIdService uniqueIdService,

@@ -1,15 +1,25 @@
 package com.zj.client.handler.deploy.k8s;
 
+import com.zj.client.handler.deploy.AbstractDeployMode;
 import com.zj.client.handler.deploy.IDeployMode;
+import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
+import com.zj.client.utils.ExceptionUtils;
 import com.zj.common.enums.DeployType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ExecuteException;
 import com.zj.common.model.K8SAccessParams;
 import com.zj.common.model.K8SContainerParams;
+import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
+import io.fabric8.kubernetes.api.model.LocalObjectReference;
+import io.fabric8.kubernetes.api.model.PodTemplateSpec;
+import io.fabric8.kubernetes.api.model.PodTemplateSpecBuilder;
+import io.fabric8.kubernetes.api.model.SecurityContextBuilder;
+import io.fabric8.kubernetes.api.model.Toleration;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
@@ -33,11 +43,11 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-public class K8sDeploy implements IDeployMode<K8sDeployContext> {
+public class K8sDeploy extends AbstractDeployMode<K8sDeployContext> {
 
   public static final int DEFAULT_REPLICAS = 1;
   public static final int MAX_DEPLOY_TIME = 300 * 1000;
-  private final Map<String, ProcessStatus> statusMap = new HashMap<>();
+  public static final String LABEL_APP_KEY = "app";
 
   @Override
   public Integer deployType() {
@@ -57,10 +67,11 @@ public class K8sDeploy implements IDeployMode<K8sDeployContext> {
       String serviceName = deployContext.getServiceName().toLowerCase();
       deployK8s(deployContext, client, serviceName);
       loopQueryDeployStatus(deployContext, client, serviceName);
-      statusMap.put(deployContext.getRecordId(), ProcessStatus.SUCCESS);
+      updateDeployStatus(deployContext.getRecordId(), ProcessStatus.SUCCESS);
     } catch (Exception e) {
       log.error("deploy k8s instance error", e);
-      statusMap.put(deployContext.getRecordId(), ProcessStatus.FAIL);
+      List<String> errorMsg = ExceptionUtils.getErrorMsg(e);
+      updateDeployStatus(deployContext.getRecordId(), ProcessStatus.FAIL, errorMsg);
     } finally {
       Optional.ofNullable(client).ifPresent(Client::close);
     }
@@ -78,39 +89,36 @@ public class K8sDeploy implements IDeployMode<K8sDeployContext> {
     List<ContainerPort> containerPorts = buildContainerPorts(containerParams.getPorts());
     Integer replicas = Optional.ofNullable(containerParams.getReplicas()).orElse(DEFAULT_REPLICAS);
 
+    Container container =
+            new ContainerBuilder().withEnv(envVars).withName(serviceName).withImage(containerParams.getImageName())
+                    .withPorts(containerPorts)
+                    .withVolumeMounts(volumeMounts).build();
+
+    K8SAccessParams k8SAccessParams = deployContext.getK8SAccessParams();
+    PodTemplateSpec podTemplate = new PodTemplateSpecBuilder().withNewMetadata().addToLabels(LABEL_APP_KEY,
+                    serviceName).endMetadata().withNewSpec()
+            .withVolumes(volumes)
+            .withImagePullSecrets(new LocalObjectReference(k8SAccessParams.getSecretName()))
+            .withContainers(container).endSpec().build();
+
     DeploymentStrategy strategy = new DeploymentStrategy();
     strategy.setType(containerParams.getStrategy().getType());
 
-    Deployment deployment = new DeploymentBuilder()
-            .withNewMetadata()
-                .withName(serviceName)
-                .addToLabels("app", serviceName)
-            .endMetadata()
-            .withNewSpec()
-                .withNewSelector()
-                  .addToMatchLabels("app", serviceName)
-                .endSelector().withReplicas(replicas)
-                .withNewTemplate()
-                  .withNewSpec()
-                      .withVolumes(volumes)
-                      .addNewContainer()
-                            .withName(serviceName)
-                            .withImage(containerParams.getImageName())
-                            .withEnv(envVars)
-                            .withPorts(containerPorts)
-                            .withVolumeMounts(volumeMounts)
-                      .endContainer()
-                  .endSpec()
-                .endTemplate()
-            .endSpec()
-            .build();
+    Deployment deployment =
+            new DeploymentBuilder().withNewMetadata().withName(serviceName)
+                    .addToLabels(LABEL_APP_KEY, serviceName).endMetadata()
+                    .withNewSpec().withNewSelector()
+                    .addToMatchLabels(LABEL_APP_KEY, serviceName).endSelector()
+                    .withReplicas(replicas).withStrategy(strategy)
+                    .withTemplate(podTemplate).endSpec().build();
+
     log.info("image name={}", containerParams.getImageName());
-    statusMap.put(deployContext.getRecordId(), ProcessStatus.RUNNING);
-    String namespace = deployContext.getK8SAccessParams().getNamespace();
+    updateDeployStatus(deployContext.getRecordId(), ProcessStatus.RUNNING);
+    String namespace = k8SAccessParams.getNamespace();
     client.apps().deployments().inNamespace(namespace).createOrReplace(deployment);
   }
 
-  private static void loopQueryDeployStatus(K8sDeployContext deployContext, KubernetesClient client,
+  private void loopQueryDeployStatus(K8sDeployContext deployContext, KubernetesClient client,
       String serviceName) throws InterruptedException {
     AtomicLong atomicLong = new AtomicLong(0);
     while (true) {
@@ -131,7 +139,7 @@ public class K8sDeploy implements IDeployMode<K8sDeployContext> {
   }
 
   @Override
-  public ProcessStatus getDeployStatus(String recordId) {
+  public QueryResponseModel getDeployStatus(String recordId) {
     return statusMap.get(recordId);
   }
 

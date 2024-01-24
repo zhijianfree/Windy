@@ -23,4 +23,9 @@ public class K8SAccessParams {
      * 命名空间
      */
     private String namespace;
+
+    /**
+     * 密钥名称
+     */
+    private String secretName;
 }

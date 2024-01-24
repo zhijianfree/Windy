@@ -25,7 +25,12 @@ import org.springframework.stereotype.Service;
 import java.io.Closeable;
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
@@ -168,9 +173,7 @@ public class CodeBuildService {
     model.setContext(context);
     model.addMessage(message);
 
-    ResponseStatus responseStatus = new ResponseStatus();
-    responseStatus.setStatus(status.getType());
-    model.setData(responseStatus);
+    model.setData(new ResponseStatus(status.getType()));
     statusMap.put(recordId, model);
   }
 
