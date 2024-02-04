@@ -101,8 +101,7 @@ public class FeatureTemplateRest {
   }
 
   @PostMapping(value = "/template/upload")
-  public ResponseMeta<UploadResultDto> uploadTemplate(StandardMultipartHttpServletRequest request,
-      @RequestPart("file") MultipartFile file) {
+  public ResponseMeta<UploadResultDto> uploadTemplate(@RequestPart("file") MultipartFile file) {
     return new ResponseMeta(ErrorCode.SUCCESS, templateService.uploadTemplate(file));
   }
 

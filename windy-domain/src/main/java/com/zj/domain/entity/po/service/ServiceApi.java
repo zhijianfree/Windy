@@ -79,6 +79,11 @@ public class ServiceApi {
    * */
   private String classMethod;
 
+  /**
+   * http 请求的Header
+   */
+  private String header;
+
   private Long createTime;
 
   private Long updateTime;

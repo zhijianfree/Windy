@@ -31,7 +31,7 @@ public class CompareHandler {
 
     public CompareResult compare(ExecuteDetailVo executeDetailVo, List<CompareDefine> compareDefines) {
         CompareResult compareResult = new CompareResult();
-        compareResult.setCompareStatus(true);
+        compareResult.setCompareSuccess(true);
         if (CollectionUtils.isEmpty(compareDefines)) {
             log.warn("compare defines is empty");
             return compareResult;
@@ -47,7 +47,7 @@ public class CompareHandler {
 
         for (CompareDefine compareDefine : compareDefines) {
             compareResult = compareOne(compareDefine);
-            if (!compareResult.isCompareStatus()) {
+            if (!compareResult.isCompareSuccess()) {
                 compareResult.setDescription(
                         String.format(TIP_FORMAT, compareDefine.getCompareKey(), compareDefine.getExpectValue(),
                                 compareDefine.getResponseValue()));
@@ -63,7 +63,7 @@ public class CompareHandler {
             CompareResult compareResult = new CompareResult();
             CompareOperator compareOperator = compareFactory.getOperator(compareDefine.getOperator());
             if (Objects.isNull(compareOperator)) {
-                compareResult.setCompareStatus(false);
+                compareResult.setCompareSuccess(false);
                 compareResult.setErrorMessage("not support operator [" + compareDefine.getOperator() + "]");
                 return compareResult;
             }

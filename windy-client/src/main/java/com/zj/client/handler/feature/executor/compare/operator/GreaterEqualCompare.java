@@ -21,12 +21,12 @@ public class GreaterEqualCompare extends BaseCompare {
     try {
       if (Long.parseLong(responseValue) < Long.parseLong(compareDefine.getExpectValue())) {
         compareResult.setErrorType(ErrorCode.COMPARE_ERROR);
-        compareResult.setErrorMessage("response value > expect value");
+        compareResult.setErrorMessage("response value < expect value");
       }
     } catch (Exception e) {
       if (Double.parseDouble(responseValue) < Long.parseLong(compareDefine.getExpectValue())) {
         compareResult.setErrorType(ErrorCode.COMPARE_ERROR);
-        compareResult.setErrorMessage("response value >= expect value");
+        compareResult.setErrorMessage("response value < expect value");
       }
     }
     return compareResult;

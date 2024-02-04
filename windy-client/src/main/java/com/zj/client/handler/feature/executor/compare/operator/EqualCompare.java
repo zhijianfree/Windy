@@ -36,7 +36,7 @@ public class EqualCompare extends BaseCompare {
                     compareResult.setErrorMessage("response value not equal expect");
                 }
             }catch (Exception ex){
-                compareResult.setCompareStatus(false);
+                compareResult.setCompareSuccess(false);
                 String message = String.format(NOT_MATCH_FORMAT, compareDefine.getExpectValue(),
                     compareDefine.getResponseValue());
                 compareResult.setErrorMessage(message);

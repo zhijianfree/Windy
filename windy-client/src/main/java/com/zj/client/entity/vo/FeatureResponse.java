@@ -34,7 +34,7 @@ public class FeatureResponse {
 
         boolean compareStatus = true;
         if (Objects.nonNull(compareResult)){
-            compareStatus = compareResult.isCompareStatus();
+            compareStatus = compareResult.isCompareSuccess();
         }
 
         return invokeStatus && compareStatus;
