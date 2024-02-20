@@ -8,7 +8,7 @@ import lombok.Data;
  * @since 2023/8/9
  */
 @Data
-public class ApiRequest {
+public class ApiRequestVariable {
 
   private String paramKey;
 
@@ -22,5 +22,5 @@ public class ApiRequest {
 
   private String objectName;
 
-  private List<ApiRequest> children;
+  private List<ApiRequestVariable> children;
 }

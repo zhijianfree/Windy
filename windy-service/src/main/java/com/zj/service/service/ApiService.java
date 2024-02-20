@@ -138,10 +138,11 @@ public class ApiService {
             String fileContent = new String(file.getBytes());
             IApiImportStrategy importStrategy = apiImportFactory.getImportStrategy(importType);
             if (Objects.isNull(importStrategy)) {
+                log.info("can not support import type={}", importType);
                 return null;
             }
-            log.info("context " + fileContent);
-            importStrategy.importContent(serviceId, fileContent);
+            List<ServiceApiDto> serviceApiList = importStrategy.importContent(serviceId, fileContent);
+            return new ImportApiResult(serviceApiList);
         } catch (IOException exception) {
             log.error("import api error importType={}", importType, exception);
         }

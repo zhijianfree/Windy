@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.zj.common.generate.UniqueIdService;
 import com.zj.domain.entity.dto.service.ServiceApiDto;
 import com.zj.domain.repository.service.IServiceApiRepository;
-import com.zj.service.entity.ApiRequest;
+import com.zj.service.entity.ApiRequestVariable;
 import com.zj.service.entity.ApiResponse;
 import com.zj.service.entity.YapiImportApi;
 import com.zj.service.service.imports.IApiImportStrategy;
@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 @Component
 public class YapiApiImportStrategy implements IApiImportStrategy {
 
+    public static final String PROPERTIES_KEY = "properties";
     private final IServiceApiRepository serviceApiRepository;
     private final UniqueIdService uniqueIdService;
 
@@ -74,40 +75,40 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
             serviceApi.setResource(apiModel.getPath());
             serviceApi.setHeader(JSON.toJSONString(apiModel.getHeaders()));
 
-            List<ApiRequest> apiRequests = new ArrayList<>();
+            List<ApiRequestVariable> apiRequestVariables = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(apiModel.getPathParams())) {
-                apiRequests = apiModel.getPathParams().stream().map(pathParm -> {
-                    ApiRequest apiRequest = new ApiRequest();
-                    apiRequest.setParamKey(pathParm.getName());
-                    apiRequest.setDescription(pathParm.getDesc());
-                    apiRequest.setType("String");
-                    apiRequest.setRequired(true);
-                    apiRequest.setPosition("Path");
-                    return apiRequest;
+                apiRequestVariables = apiModel.getPathParams().stream().map(pathParm -> {
+                    ApiRequestVariable apiRequestVariable = new ApiRequestVariable();
+                    apiRequestVariable.setParamKey(pathParm.getName());
+                    apiRequestVariable.setDescription(pathParm.getDesc());
+                    apiRequestVariable.setType("String");
+                    apiRequestVariable.setRequired(true);
+                    apiRequestVariable.setPosition("Path");
+                    return apiRequestVariable;
                 }).collect(Collectors.toList());
             }
 
             log.info("api name={}", apiModel.getTitle());
             JSONObject jsonObject = JSON.parseObject(apiModel.getRequestBody());
-            if (Objects.nonNull(jsonObject) && Objects.nonNull(jsonObject.getJSONObject("properties"))) {
-                JSONObject properties = jsonObject.getJSONObject("properties");
-                List<ApiRequest> bodyRequests = properties.entrySet().stream().map(entry -> {
-                    ApiRequest apiRequest = new ApiRequest();
-                    apiRequest.setParamKey(entry.getKey());
+            if (Objects.nonNull(jsonObject) && Objects.nonNull(jsonObject.getJSONObject(PROPERTIES_KEY))) {
+                JSONObject properties = jsonObject.getJSONObject(PROPERTIES_KEY);
+                List<ApiRequestVariable> bodyRequests = properties.entrySet().stream().map(entry -> {
+                    ApiRequestVariable apiRequestVariable = new ApiRequestVariable();
+                    apiRequestVariable.setParamKey(entry.getKey());
 
                     JSONObject typeJSON = JSON.parseObject(JSON.toJSONString(entry.getValue()),
                             JSONObject.class);
-                    apiRequest.setType(typeJSON.getString("type"));
-                    apiRequest.setPosition("Body");
-                    return apiRequest;
+                    apiRequestVariable.setType(typeJSON.getString("type"));
+                    apiRequestVariable.setPosition("Body");
+                    return apiRequestVariable;
                 }).collect(Collectors.toList());
-                apiRequests.addAll(bodyRequests);
+                apiRequestVariables.addAll(bodyRequests);
             }
-            serviceApi.setRequestParams(JSON.toJSONString(apiRequests));
+            serviceApi.setRequestParams(JSON.toJSONString(apiRequestVariables));
 
             JSONObject responseObject = JSON.parseObject(apiModel.getResBody());
             if (Objects.nonNull(responseObject)) {
-                JSONObject resProperties = responseObject.getJSONObject("properties");
+                JSONObject resProperties = responseObject.getJSONObject(PROPERTIES_KEY);
                 List<ApiResponse> apiResponses = resProperties.entrySet().stream().map(entry -> {
                     ApiResponse apiResponse = new ApiResponse();
                     apiResponse.setParamKey(entry.getKey());

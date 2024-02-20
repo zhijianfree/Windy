@@ -49,7 +49,7 @@ public class ApiModel {
    */
   private String description;
 
-  private List<ApiRequest> requestParams;
+  private List<ApiRequestVariable> requestParams;
 
   private List<ApiResponse> responseParams;
 

@@ -41,7 +41,15 @@ public class PostmanImport {
 
         private List<String> path;
 
-        private List<String> query;
+        private List<PostmanApiQuery> query;
+    }
+
+    @Data
+    public static class PostmanApiQuery{
+
+        private String key;
+
+        private String value;
     }
 
     @Data
