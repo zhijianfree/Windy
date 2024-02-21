@@ -3,7 +3,7 @@ package com.zj.service.service.imports.strategy;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.service.ServiceApiDto;
 import com.zj.domain.repository.service.IServiceApiRepository;
 import com.zj.service.entity.ApiRequestVariable;
@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 @Component
 public class PostmanImportStrategy implements IApiImportStrategy {
 
+    public static final String STRING_VARIABLE_TYPE = "String";
     private final UniqueIdService uniqueIdService;
     private final IServiceApiRepository serviceApiRepository;
     private final String variableString = "\\{\\{([^\\}]+)\\}\\}";
@@ -106,11 +107,11 @@ public class PostmanImportStrategy implements IApiImportStrategy {
             }
             ApiRequestVariable apiRequestVariable = new ApiRequestVariable();
             apiRequestVariable.setParamKey(query.getKey());
-            apiRequestVariable.setType("String");
+            apiRequestVariable.setType(STRING_VARIABLE_TYPE);
             apiRequestVariable.setRequired(true);
             apiRequestVariable.setPosition(Position.Query.name());
             return apiRequestVariable;
-        }).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     private List<ApiRequestVariable> getBodyVariableList(PostmanImport.PostmanApiRequest request) {
@@ -129,7 +130,7 @@ public class PostmanImportStrategy implements IApiImportStrategy {
 
     private String convertVariableType(Map.Entry<String, Object> e) {
         if (e.getValue() instanceof String) {
-            return "String";
+            return STRING_VARIABLE_TYPE;
         } else if (e.getValue() instanceof Integer) {
             return "Integer";
         } else if (e.getValue() instanceof Boolean) {
@@ -157,9 +158,9 @@ public class PostmanImportStrategy implements IApiImportStrategy {
             String paramName = matcher.group(1);
             ApiRequestVariable apiRequestVariable = new ApiRequestVariable();
             apiRequestVariable.setParamKey(paramName);
-            apiRequestVariable.setType("String");
+            apiRequestVariable.setType(STRING_VARIABLE_TYPE);
             apiRequestVariable.setRequired(true);
-            apiRequestVariable.setPosition("Query");
+            apiRequestVariable.setPosition(Position.Query.name());
             return apiRequestVariable;
         }).filter(Objects::nonNull).collect(Collectors.toList());
     }

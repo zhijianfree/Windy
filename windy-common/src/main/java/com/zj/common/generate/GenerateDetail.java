@@ -1,9 +1,9 @@
-package com.zj.client.entity.vo;
+package com.zj.common.generate;
 
 import lombok.Data;
 
 @Data
-public class GenerateConfig {
+public class GenerateDetail {
   /**
    * 打包的包名路径
    * */

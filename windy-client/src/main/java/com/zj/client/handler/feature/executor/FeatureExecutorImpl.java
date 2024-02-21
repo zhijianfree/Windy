@@ -11,7 +11,7 @@ import com.zj.client.handler.feature.executor.vo.FeatureParam;
 import com.zj.client.handler.notify.IResultEventNotify;
 import com.zj.common.enums.NotifyType;
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.common.model.ResultEvent;
 import com.zj.common.utils.IpUtils;
 import com.zj.plugin.loader.ExecuteDetailVo;

@@ -10,4 +10,6 @@ public interface IGenerateRecordRepository {
   boolean create(GenerateRecordDto generateRecordDto);
 
   boolean update(GenerateRecordDto generateRecordDto);
+
+  GenerateRecordDto getGenerateRecord(String serviceId, String version);
 }

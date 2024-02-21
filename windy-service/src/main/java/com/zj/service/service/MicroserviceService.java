@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.common.git.IRepositoryBranch;
 import com.zj.common.model.K8SContainerParams;
 import com.zj.common.model.PageSize;

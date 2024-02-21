@@ -4,10 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.LogType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.generate.UniqueIdService;
 import com.zj.common.model.DispatchTaskModel;
 import com.zj.common.monitor.RequestProxy;
 import com.zj.common.utils.OrikaUtil;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.service.GenerateRecordDto;
 import com.zj.domain.entity.dto.service.ServiceApiDto;
 import com.zj.domain.entity.dto.service.ServiceGenerateDto;
@@ -73,7 +73,6 @@ public class ApiService {
         ServiceApiDto serviceApi = OrikaUtil.convert(apiModel, ServiceApiDto.class);
         String requestParams = Optional.ofNullable(apiModel.getRequestParams()).map(JSON::toJSONString).orElse(null);
         serviceApi.setRequestParams(requestParams);
-
         String responseParams = Optional.ofNullable(apiModel.getResponseParams()).map(JSON::toJSONString).orElse(null);
         serviceApi.setResponseParams(responseParams);
         serviceApi.setApiId(uniqueIdService.getUniqueId());
@@ -97,11 +96,21 @@ public class ApiService {
 
     public Boolean generateServiceApi(ServiceGenerateDto generate) {
         checkMavenConfig();
+        checkVersionExist(generate.getServiceId(), generate.getVersion());
         saveOrUpdateParams(generate);
+
         DispatchTaskModel dispatchTaskModel = new DispatchTaskModel();
         dispatchTaskModel.setSourceId(generate.getServiceId());
         dispatchTaskModel.setType(LogType.GENERATE.getType());
         return requestProxy.runGenerate(dispatchTaskModel);
+    }
+
+    private void checkVersionExist(String serviceId, String version) {
+        GenerateRecordDto generateRecord = generateRecordRepository.getGenerateRecord(serviceId, version);
+        if (Objects.nonNull(generateRecord)) {
+            log.info("generate version exist, can not execute serviceId={} version={}", serviceId, version);
+            throw new ApiException(ErrorCode.GENERATE_VERSION_EXIST);
+        }
     }
 
     private void checkMavenConfig() {

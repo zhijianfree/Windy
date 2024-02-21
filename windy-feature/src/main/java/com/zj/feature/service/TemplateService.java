@@ -6,7 +6,7 @@ import com.zj.plugin.loader.Feature;
 import com.zj.plugin.loader.FeatureDefine;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.common.model.PageSize;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
@@ -122,7 +122,7 @@ public class TemplateService {
       executorUnit.setService(executeTemplate.getService());
       executorUnit.setMethod(executeTemplate.getMethod());
       executorUnit.setInvokeType(executeTemplate.getInvokeType());
-      Map<String, String> map = (Map<String, String>) JSON.parseObject(executeTemplate.getHeader(),
+      Map<String, String> map = JSON.parseObject(executeTemplate.getHeader(),
           Map.class);
       executorUnit.setHeaders(map);
       executePoint.setFeatureInfo(JSON.toJSONString(executorUnit));

@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.common.model.K8SAccessParams;
 import com.zj.common.model.PageSize;
 import com.zj.domain.entity.dto.service.DeployEnvironmentDto;

@@ -3,7 +3,7 @@ package com.zj.feature.service;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zj.common.enums.CompareType;
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.common.model.PageSize;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
 import com.zj.domain.repository.feature.IExecutePointRepository;

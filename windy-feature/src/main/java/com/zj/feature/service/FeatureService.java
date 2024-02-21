@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.common.enums.LogType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.common.model.DispatchTaskModel;
 import com.zj.common.model.PageSize;
 import com.zj.common.monitor.RequestProxy;
@@ -84,9 +84,7 @@ public class FeatureService {
     parent.setChildren(list);
 
     featureList.removeIf(feature -> Objects.equals(feature.getParentId(), parent.getFeatureId()));
-    list.forEach(node -> {
-      convertTree(featureList, node);
-    });
+    list.forEach(node -> convertTree(featureList, node));
 
     return parent;
   }

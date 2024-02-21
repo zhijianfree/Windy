@@ -2,7 +2,7 @@ package com.zj.service.service.imports.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.service.ServiceApiDto;
 import com.zj.domain.repository.service.IServiceApiRepository;
 import com.zj.service.entity.ApiRequestVariable;

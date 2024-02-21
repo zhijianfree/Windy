@@ -3,7 +3,7 @@ package com.zj.master.service;
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.common.model.DispatchTaskModel;
 import com.zj.common.utils.IpUtils;
 import com.zj.domain.entity.dto.log.DispatchLogDto;

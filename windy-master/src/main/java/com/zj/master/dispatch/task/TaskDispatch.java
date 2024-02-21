@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.common.model.DispatchTaskModel;
 import com.zj.domain.entity.dto.feature.FeatureInfoDto;
 import com.zj.domain.entity.dto.feature.TaskInfoDto;

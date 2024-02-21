@@ -2,7 +2,7 @@ package com.zj.pipeline.service;
 
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.pipeline.BindBranchDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.pipeline.PublishBindDto;

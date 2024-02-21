@@ -69,10 +69,10 @@ public class GenerateDispatcher implements IDispatchExecutor {
     if (CollectionUtils.isEmpty(apiList)) {
       return false;
     }
-    List<ApiModel> models = apiList.stream().map(api -> {
+    List<ApiModel> models = apiList.stream().filter(ServiceApiDto::getIsApi).map(api -> {
       ApiModel apiModel = OrikaUtil.convert(api, ApiModel.class);
       apiModel.setRequestParamList(JSON.parseArray(api.getRequestParams(), ApiParamModel.class));
-      apiModel.setResponseParamList(JSON.parseArray(api.getRequestParams(), ApiParamModel.class));
+      apiModel.setResponseParamList(JSON.parseArray(api.getResponseParams(), ApiParamModel.class));
       return apiModel;
     }).collect(Collectors.toList());
 

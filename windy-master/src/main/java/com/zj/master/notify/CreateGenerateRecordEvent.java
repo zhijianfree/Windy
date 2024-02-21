@@ -1,6 +1,8 @@
 package com.zj.master.notify;
 
+import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.NotifyType;
+import com.zj.common.generate.GenerateDetail;
 import com.zj.common.model.ResultEvent;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.service.GenerateRecordDto;
@@ -28,6 +30,8 @@ public class CreateGenerateRecordEvent implements INotifyEvent{
     if (Objects.isNull(recordDto)) {
       return false;
     }
+    GenerateDetail generateDetail = JSON.parseObject(recordDto.getExecuteParams(), GenerateDetail.class);
+    recordDto.setVersion(generateDetail.getVersion());
     return generateRecordRepository.create(recordDto);
   }
 }

@@ -1,6 +1,6 @@
 package com.zj.feature.service;
 
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
 import com.zj.domain.repository.feature.ITestCaseConfigRepository;
 import java.util.List;

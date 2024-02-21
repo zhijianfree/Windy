@@ -1,8 +1,8 @@
-package com.zj.common.generate;
+package com.zj.common.uuid;
+
+import org.springframework.stereotype.Component;
 
 import java.util.UUID;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 /**
  * @author guyuelan
