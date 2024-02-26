@@ -64,7 +64,7 @@ public class MysqlFeature implements Feature {
         executeDetailVo.addRequestInfo("url: " + jdbcUrl);
         executeDetailVo.addRequestInfo("user: " + user);
         executeDetailVo.addRequestInfo("password: " + user);
-        executeDetailVo.addRequestInfo("sql: " + sql);
+        executeDetailVo.addRequestInfo("sql: " + executeSql);
 
         return executeDetailVo;
     }
