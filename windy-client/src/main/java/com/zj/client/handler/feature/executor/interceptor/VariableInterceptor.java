@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.vo.ExecutePoint;
 import com.zj.client.handler.feature.executor.compare.CompareDefine;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
-import com.zj.client.handler.feature.executor.invoker.invoke.InvokerType;
+import com.zj.common.enums.InvokerType;
 import com.zj.client.handler.feature.executor.vo.ExecuteContext;
 import com.zj.client.handler.feature.executor.vo.ExecutorUnit;
 import com.zj.client.handler.feature.executor.vo.VariableDefine;

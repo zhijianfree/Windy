@@ -145,7 +145,6 @@ public class TaskDispatch implements IDispatchExecutor {
     taskRecordDTO.setTaskName(taskDetail.getTaskName());
     taskRecordDTO.setTaskId(taskDetail.getTaskId());
     taskRecordDTO.setRecordId(uniqueIdService.getUniqueId());
-    taskRecordDTO.setUserId("admin");
     taskRecordDTO.setTriggerId(triggerId);
     taskRecordDTO.setStatus(ProcessStatus.RUNNING.getType());
     taskRecordDTO.setMachines(taskDetail.getMachines());

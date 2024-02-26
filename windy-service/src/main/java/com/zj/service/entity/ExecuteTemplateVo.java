@@ -1,12 +1,13 @@
-package com.zj.feature.entity.dto;
+package com.zj.service.entity;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.plugin.loader.ParameterDefine;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.ExecuteTemplateDto;
+import com.zj.plugin.loader.ParameterDefine;
+import lombok.Data;
+
 import java.util.List;
 import java.util.Map;
-import lombok.Data;
 
 @Data
 public class ExecuteTemplateVo {

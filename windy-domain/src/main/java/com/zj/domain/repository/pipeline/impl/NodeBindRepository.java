@@ -25,7 +25,6 @@ public class NodeBindRepository extends ServiceImpl<NodeBindMapper, NodeBind> im
   @Override
   public boolean saveNodeBind(NodeBindDto nodeBindDto) {
     NodeBind nodeBind = OrikaUtil.convert(nodeBindDto, NodeBind.class);
-    nodeBind.setUserId("admin");
     nodeBind.setCreateTime(System.currentTimeMillis());
     nodeBind.setUpdateTime(System.currentTimeMillis());
     return save(nodeBind);

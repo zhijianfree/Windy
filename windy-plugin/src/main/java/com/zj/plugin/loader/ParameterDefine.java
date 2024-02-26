@@ -3,7 +3,7 @@ package com.zj.plugin.loader;
 
 public class ParameterDefine {
     private String paramKey;
-    private int type;
+    private String type;
     private String description;
     private Object value;
     private DefaultValue defaultValue;
@@ -24,11 +24,11 @@ public class ParameterDefine {
         this.paramKey = paramKey;
     }
 
-    public int getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(int type) {
+    public void setType(String type) {
         this.type = type;
     }
 

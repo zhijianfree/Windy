@@ -37,7 +37,6 @@ public class KafkaFeature implements Feature {
 
     KafkaConsumer<String, String> consumer = buildConsumer(address, topic, group);
     ConsumerRecords<String, String> consumerRecords = consumer.poll(Duration.ofSeconds(100));
-    System.out.println("get record =" + consumerRecords.count());
 
     List<KafkaResult> kafkaResults = new ArrayList<>();
     Iterator<ConsumerRecord<String, String>> iterator = consumerRecords.iterator();
@@ -78,7 +77,7 @@ public class KafkaFeature implements Feature {
       props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
       KafkaProducer<String, String> producer = new KafkaProducer<String, String>(props);
-      ProducerRecord<String, String> record = new ProducerRecord<String, String>(topic, key, value);
+      ProducerRecord<String, String> record = new ProducerRecord<>(topic, key, value);
       RecordMetadata recordMetadata = producer.send(record).get(timeout, TimeUnit.SECONDS);
       executeDetailVo.setStatus(true);
       executeDetailVo.setResBody(recordMetadata);
@@ -126,19 +125,19 @@ public class KafkaFeature implements Feature {
     List<ParameterDefine> params = new ArrayList<>();
     ParameterDefine topic = new ParameterDefine();
     topic.setParamKey("topic");
-    topic.setType(ParamTypeEnum.STRING.getType());
+    topic.setType(ParamTypeEnum.String.name());
     topic.setDescription("topic");
     params.add(topic);
 
     ParameterDefine group = new ParameterDefine();
     group.setParamKey("group");
-    group.setType(ParamTypeEnum.STRING.getType());
+    group.setType(ParamTypeEnum.String.name());
     group.setDescription("消费组");
     params.add(group);
 
     ParameterDefine address = new ParameterDefine();
     address.setParamKey("address");
-    address.setType(ParamTypeEnum.STRING.getType());
+    address.setType(ParamTypeEnum.String.name());
     address.setDescription("kafka地址");
     params.add(address);
     featureDefine.setParams(params);
@@ -154,31 +153,31 @@ public class KafkaFeature implements Feature {
     List<ParameterDefine> params = new ArrayList<>();
     ParameterDefine topic = new ParameterDefine();
     topic.setParamKey("topic");
-    topic.setType(ParamTypeEnum.STRING.getType());
+    topic.setType(ParamTypeEnum.String.name());
     topic.setDescription("topic");
     params.add(topic);
 
     ParameterDefine key = new ParameterDefine();
     key.setParamKey("key");
-    key.setType(ParamTypeEnum.STRING.getType());
+    key.setType(ParamTypeEnum.String.name());
     key.setDescription("key");
     params.add(key);
 
     ParameterDefine value = new ParameterDefine();
     value.setParamKey("value");
-    value.setType(ParamTypeEnum.STRING.getType());
+    value.setType(ParamTypeEnum.String.name());
     value.setDescription("消息内容");
     params.add(value);
 
     ParameterDefine timeout = new ParameterDefine();
     timeout.setParamKey("timeout");
-    timeout.setType(ParamTypeEnum.INTEGER.getType());
+    timeout.setType(ParamTypeEnum.Integer.name());
     timeout.setDescription("发送超时时间");
     params.add(timeout);
 
     ParameterDefine address = new ParameterDefine();
     address.setParamKey("address");
-    address.setType(ParamTypeEnum.STRING.getType());
+    address.setType(ParamTypeEnum.String.name());
     address.setDescription("kafka地址");
     params.add(address);
     featureDefine.setParams(params);

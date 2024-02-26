@@ -19,6 +19,10 @@
     </dependency>
     <dependency>
       <groupId>com.zj</groupId>
+      <artifactId>windy-plugin</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.zj</groupId>
       <artifactId>windy-domain</artifactId>
     </dependency>
     <!--    内部依赖结束-->

@@ -1,4 +1,4 @@
-package com.zj.feature.entity.type;
+package com.zj.common.enums;
 
 import lombok.Getter;
 

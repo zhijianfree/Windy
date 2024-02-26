@@ -20,4 +20,6 @@ public interface IServiceApiRepository {
   ServiceApiDto getServiceApi(String apiId);
 
   List<ServiceApiDto> getApiByService(String serviceId);
+
+  List<ServiceApiDto> getServiceApiList(List<String> apiIds);
 }

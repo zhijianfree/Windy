@@ -2,6 +2,7 @@ package com.zj.service.service.imports.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.zj.common.enums.ApiType;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.service.ServiceApiDto;
 import com.zj.domain.repository.service.IServiceApiRepository;
@@ -48,7 +49,7 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
             ServiceApiDto serviceApiDto = new ServiceApiDto();
             serviceApiDto.setApiId(uniqueIdService.getUniqueId());
             serviceApiDto.setApiName(yapiImportApi.getName());
-            serviceApiDto.setIsApi(false);
+            serviceApiDto.setApiType(ApiType.DIR.getType());
             serviceApiDto.setServiceId(serviceId);
             serviceApiRepository.saveApi(serviceApiDto);
 
@@ -66,7 +67,7 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
         try {
             ServiceApiDto serviceApi = new ServiceApiDto();
             serviceApi.setApiId(uniqueIdService.getUniqueId());
-            serviceApi.setIsApi(true);
+            serviceApi.setApiType(ApiType.API.getType());
             serviceApi.setApiName(apiModel.getTitle());
             serviceApi.setMethod(apiModel.getMethod());
             serviceApi.setServiceId(serviceId);
@@ -77,10 +78,10 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
 
             List<ApiRequestVariable> apiRequestVariables = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(apiModel.getPathParams())) {
-                apiRequestVariables = apiModel.getPathParams().stream().map(pathParm -> {
+                apiRequestVariables = apiModel.getPathParams().stream().map(pathParam -> {
                     ApiRequestVariable apiRequestVariable = new ApiRequestVariable();
-                    apiRequestVariable.setParamKey(pathParm.getName());
-                    apiRequestVariable.setDescription(pathParm.getDesc());
+                    apiRequestVariable.setParamKey(pathParam.getName());
+                    apiRequestVariable.setDescription(pathParam.getDesc());
                     apiRequestVariable.setType("String");
                     apiRequestVariable.setRequired(true);
                     apiRequestVariable.setPosition("Path");

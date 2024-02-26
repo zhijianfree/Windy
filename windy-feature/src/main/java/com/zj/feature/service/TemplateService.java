@@ -2,6 +2,7 @@ package com.zj.feature.service;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.zj.common.enums.InvokerType;
 import com.zj.plugin.loader.Feature;
 import com.zj.plugin.loader.FeatureDefine;
 import com.zj.common.exception.ApiException;
@@ -19,8 +20,7 @@ import com.zj.domain.repository.feature.IPluginRepository;
 import com.zj.feature.entity.dto.BatchTemplates;
 import com.zj.feature.entity.dto.ExecuteTemplateVo;
 import com.zj.feature.entity.dto.UploadResultDto;
-import com.zj.feature.entity.type.InvokeType;
-import com.zj.feature.entity.type.TemplateType;
+import com.zj.common.enums.TemplateType;
 import com.zj.feature.entity.vo.ExecutorUnit;
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
@@ -60,8 +61,8 @@ public class TemplateService {
     this.pluginRepository = pluginRepository;
   }
 
-  public PageSize<ExecuteTemplateVo> getTemplatePage(Integer pageNo, Integer size, String name) {
-    IPage<ExecuteTemplateDto> templateIPage = templateRepository.getPage(pageNo, size, name);
+  public PageSize<ExecuteTemplateVo> getTemplatePage(String serviceId, Integer pageNo, Integer size, String name) {
+    IPage<ExecuteTemplateDto> templateIPage = templateRepository.getPage(serviceId, pageNo, size, name);
     PageSize<ExecuteTemplateVo> pageSize = new PageSize<>();
     if (CollectionUtils.isEmpty(templateIPage.getRecords())) {
       pageSize.setTotal(0);
@@ -90,7 +91,6 @@ public class TemplateService {
   public String updateTemplate(ExecuteTemplateVo executeTemplateVo) {
     ExecuteTemplateDto executeTemplate = OrikaUtil.convert(executeTemplateVo,
         ExecuteTemplateDto.class);
-    executeTemplate.setAuthor("admin");
     executeTemplate.setUpdateTime(System.currentTimeMillis());
     executeTemplate.setParam(JSON.toJSONString(executeTemplateVo.getParams()));
     executeTemplate.setHeader(JSON.toJSONString(executeTemplateVo.getHeaders()));
@@ -102,8 +102,8 @@ public class TemplateService {
     return templateRepository.deleteTemplate(templateId);
   }
 
-  public List<ExecuteTemplateVo> getFeatureList() {
-    List<ExecuteTemplateDto> executeTemplates = templateRepository.getAllTemplates();
+  public List<ExecuteTemplateVo> getFeatureList(String serviceId) {
+    List<ExecuteTemplateDto> executeTemplates = templateRepository.getServiceTemplates(serviceId);
     return executeTemplates.stream().map(ExecuteTemplateVo::toExecuteTemplateDTO)
         .collect(Collectors.toList());
   }
@@ -132,7 +132,7 @@ public class TemplateService {
   }
 
   @Transactional
-  public UploadResultDto uploadTemplate(MultipartFile file) {
+  public UploadResultDto uploadTemplate(MultipartFile file, String serviceId) {
     try {
       List<FeatureDefine> featureDefines = parseJarFile(file);
       if (CollectionUtils.isEmpty(featureDefines)) {
@@ -150,7 +150,7 @@ public class TemplateService {
       UploadResultDto uploadResult = new UploadResultDto();
       uploadResult.setPluginId(pluginInfoDto.getPluginId());
       List<ExecuteTemplateVo> templates = featureDefines.stream()
-          .map(TemplateService::buildExecuteTemplateVo).collect(Collectors.toList());
+          .map(featureDefine -> buildExecuteTemplateVo(featureDefine, serviceId)).collect(Collectors.toList());
       uploadResult.setTemplateDefines(templates);
       return uploadResult;
     } catch (Exception e) {
@@ -159,15 +159,16 @@ public class TemplateService {
     }
   }
 
-  private static ExecuteTemplateVo buildExecuteTemplateVo(FeatureDefine define) {
+  private static ExecuteTemplateVo buildExecuteTemplateVo(FeatureDefine define, String serviceId) {
     ExecuteTemplateVo executeTemplateVo = new ExecuteTemplateVo();
     executeTemplateVo.setTemplateType(TemplateType.CUSTOM.getType());
-    executeTemplateVo.setInvokeType(InvokeType.LOCAL_METHOD.getType());
+    executeTemplateVo.setInvokeType(InvokerType.METHOD.getType());
     executeTemplateVo.setName(define.getName());
     executeTemplateVo.setMethod(define.getMethod());
     executeTemplateVo.setService(define.getSource());
     executeTemplateVo.setDescription(define.getDescription());
     executeTemplateVo.setParams(define.getParams());
+    executeTemplateVo.setOwner(serviceId);
     return executeTemplateVo;
   }
 
@@ -218,8 +219,10 @@ public class TemplateService {
 
   @Transactional
   public Boolean batchCreateTemplates(BatchTemplates batchTemplates) {
-    String pluginId = batchTemplates.getPluginId();
-    pluginRepository.updatePluginStatus(pluginId);
+    if (StringUtils.isNotBlank(batchTemplates.getPluginId())){
+      String pluginId = batchTemplates.getPluginId();
+      pluginRepository.updatePluginStatus(pluginId);
+    }
 
     List<ExecuteTemplateDto> templates = batchTemplates.getTemplates().stream().map(this::buildExecuteTemplateDto)
         .collect(Collectors.toList());
@@ -230,7 +233,6 @@ public class TemplateService {
     ExecuteTemplateDto executeTemplate = OrikaUtil.convert(executeTemplateVo,
         ExecuteTemplateDto.class);
     executeTemplate.setTemplateId(uniqueIdService.getUniqueId());
-    executeTemplate.setAuthor("admin");
     executeTemplate.setCreateTime(System.currentTimeMillis());
     executeTemplate.setUpdateTime(System.currentTimeMillis());
     executeTemplate.setHeader(JSON.toJSONString(executeTemplateVo.getHeaders()));

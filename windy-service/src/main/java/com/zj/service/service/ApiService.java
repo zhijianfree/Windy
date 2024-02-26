@@ -1,25 +1,34 @@
 package com.zj.service.service;
 
 import com.alibaba.fastjson.JSON;
+import com.zj.common.enums.InvokerType;
 import com.zj.common.enums.LogType;
+import com.zj.common.enums.TemplateType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.DispatchTaskModel;
 import com.zj.common.monitor.RequestProxy;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.common.uuid.UniqueIdService;
+import com.zj.domain.entity.dto.feature.ExecuteTemplateDto;
 import com.zj.domain.entity.dto.service.GenerateRecordDto;
 import com.zj.domain.entity.dto.service.ServiceApiDto;
 import com.zj.domain.entity.dto.service.ServiceGenerateDto;
 import com.zj.domain.entity.vo.MavenConfigVo;
+import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IGenerateRecordRepository;
 import com.zj.domain.repository.service.IGenerateRepository;
 import com.zj.domain.repository.service.IServiceApiRepository;
+import com.zj.plugin.loader.ParameterDefine;
 import com.zj.service.entity.ApiModel;
+import com.zj.service.entity.ApiRequestVariable;
+import com.zj.service.entity.ExecuteTemplateVo;
+import com.zj.service.entity.GenerateTemplate;
 import com.zj.service.entity.ImportApiResult;
 import com.zj.service.service.imports.ApiImportFactory;
 import com.zj.service.service.imports.IApiImportStrategy;
+import com.zj.service.service.imports.Position;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -156,5 +165,63 @@ public class ApiService {
             log.error("import api error importType={}", importType, exception);
         }
         return null;
+    }
+
+    public List<ExecuteTemplateVo> apiGenerateTemplate(GenerateTemplate generateTemplate) {
+        List<ServiceApiDto> serviceApis = apiRepository.getServiceApiList(generateTemplate.getApiIds());
+        if (CollectionUtils.isEmpty(serviceApis)) {
+            return Collections.emptyList();
+        }
+
+        return serviceApis.stream().map(this::convertApi2Template).filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
+    private ExecuteTemplateVo convertApi2Template(ServiceApiDto serviceApi) {
+        if (!serviceApi.isApi()) {
+            return null;
+        }
+
+        ExecuteTemplateDto templateDto = new ExecuteTemplateDto();
+        templateDto.setTemplateId(serviceApi.getApiId());
+        templateDto.setName(serviceApi.getApiName());
+        templateDto.setMethod(serviceApi.getMethod());
+        templateDto.setHeader(serviceApi.getHeader());
+        templateDto.setInvokeType(InvokerType.HTTP.getType());
+        templateDto.setTemplateType(TemplateType.DEFAULT.getType());
+        templateDto.setDescription(serviceApi.getDescription());
+        templateDto.setOwner(serviceApi.getServiceId());
+
+        List<ApiRequestVariable> apiVariables = JSON.parseArray(serviceApi.getRequestParams(),
+                ApiRequestVariable.class);
+        List<ParameterDefine> parameterDefines = apiVariables.stream().map(variable -> {
+            ParameterDefine parameterDefine = new ParameterDefine();
+            parameterDefine.setParamKey(variable.getParamKey());
+            parameterDefine.setType(variable.getType());
+            parameterDefine.setDescription(variable.getDescription());
+            parameterDefine.setValue(variable.getDefaultValue());
+            return parameterDefine;
+        }).collect(Collectors.toList());
+        templateDto.setParam(JSON.toJSONString(parameterDefines));
+
+        String assembledUrl = assembledApiUrl(serviceApi.getResource(), apiVariables);
+        templateDto.setService(assembledUrl);
+        return ExecuteTemplateVo.toExecuteTemplateDTO(templateDto);
+    }
+
+    /**
+     * 将uri路径参数添加进去
+     *
+     * @param uri          原始rest请求的api
+     * @param apiVariables 请求的参数
+     */
+    private String assembledApiUrl(String uri, List<ApiRequestVariable> apiVariables) {
+        for (ApiRequestVariable variable : apiVariables) {
+            if (!Objects.equals(variable.getPosition(), Position.Path.name())) {
+                continue;
+            }
+
+            uri = uri.replace("{" + variable.getParamKey() + "}", "${" + variable.getParamKey() + "}");
+        }
+        return "${host}" + uri;
     }
 }

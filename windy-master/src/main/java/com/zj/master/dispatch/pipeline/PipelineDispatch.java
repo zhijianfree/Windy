@@ -143,7 +143,6 @@ public class PipelineDispatch implements IDispatchExecutor {
     pipelineHistory.setPipelineStatus(ProcessStatus.RUNNING.getType());
     pipelineHistory.setPipelineConfig("");
     pipelineHistory.setBranch("master");
-    pipelineHistory.setExecutor("admin");
     pipelineHistory.setCreateTime(System.currentTimeMillis());
     pipelineHistory.setUpdateTime(System.currentTimeMillis());
     pipelineHistoryRepository.createPipelineHistory(pipelineHistory);

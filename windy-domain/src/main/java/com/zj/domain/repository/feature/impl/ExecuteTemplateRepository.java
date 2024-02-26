@@ -12,7 +12,7 @@ import com.zj.domain.mapper.feeature.ExecuteTemplateMapper;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
+
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
@@ -55,15 +55,16 @@ public class ExecuteTemplateRepository extends
   }
 
   @Override
-  public List<ExecuteTemplateDto> getAllTemplates() {
-    List<ExecuteTemplate> executeTemplates = list();
+  public List<ExecuteTemplateDto> getServiceTemplates(String serviceId) {
+    List<ExecuteTemplate> executeTemplates = list(Wrappers.lambdaQuery(ExecuteTemplate.class).eq(ExecuteTemplate::getOwner, serviceId));
     return OrikaUtil.convertList(executeTemplates, ExecuteTemplateDto.class);
   }
 
   @Override
-  public IPage<ExecuteTemplateDto> getPage(Integer pageNo, Integer size, String name) {
+  public IPage<ExecuteTemplateDto> getPage(String serviceId, Integer pageNo, Integer size, String name) {
     IPage<ExecuteTemplate> page = new Page<>(pageNo, size);
-    LambdaQueryWrapper<ExecuteTemplate> queryWrapper = Wrappers.lambdaQuery(ExecuteTemplate.class);
+    LambdaQueryWrapper<ExecuteTemplate> queryWrapper =
+            Wrappers.lambdaQuery(ExecuteTemplate.class).eq(ExecuteTemplate::getOwner, serviceId);
     if (!StringUtils.isEmpty(name)) {
       queryWrapper.and(wrapper -> wrapper.like(ExecuteTemplate::getName, name));
     }

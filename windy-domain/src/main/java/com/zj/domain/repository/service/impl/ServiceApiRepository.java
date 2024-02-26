@@ -69,4 +69,10 @@ public class ServiceApiRepository extends ServiceImpl<IServiceApiMapper, Service
     }
     return OrikaUtil.convertList(list, ServiceApiDto.class);
   }
+
+  @Override
+  public List<ServiceApiDto> getServiceApiList(List<String> apiIds) {
+    List<ServiceApi> serviceApis = list(Wrappers.lambdaQuery(ServiceApi.class).in(ServiceApi::getApiId, apiIds));
+    return OrikaUtil.convertList(serviceApis, ServiceApiDto.class);
+  }
 }

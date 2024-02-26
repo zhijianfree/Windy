@@ -51,9 +51,9 @@ public class ServiceApi {
   private String description;
 
   /**
-   * 是否是API
+   * 是否是API 0 目录 1 api
    * */
-  private Boolean isApi;
+  private Integer apiType;
 
   /**
    * 请求参数

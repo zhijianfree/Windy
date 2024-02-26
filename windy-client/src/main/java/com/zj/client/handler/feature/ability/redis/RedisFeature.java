@@ -79,17 +79,17 @@ public class RedisFeature implements Feature {
     List<ParameterDefine> parameterDefines = new ArrayList<>();
     ParameterDefine ip = new ParameterDefine();
     ip.setParamKey("ip");
-    ip.setType(ParamValueType.String.getType());
+    ip.setType(ParamValueType.String.name());
     parameterDefines.add(ip);
 
     ParameterDefine port = new ParameterDefine();
     port.setParamKey("port");
-    port.setType(ParamValueType.Integer.getType());
+    port.setType(ParamValueType.Integer.name());
     parameterDefines.add(port);
 
     ParameterDefine key = new ParameterDefine();
     key.setParamKey("key");
-    key.setType(ParamValueType.String.getType());
+    key.setType(ParamValueType.String.name());
     parameterDefines.add(key);
 
     FeatureDefine featureDefine = new FeatureDefine();
@@ -105,27 +105,27 @@ public class RedisFeature implements Feature {
     List<ParameterDefine> parameterDefines = new ArrayList<>();
     ParameterDefine ip = new ParameterDefine();
     ip.setParamKey("ip");
-    ip.setType(ParamValueType.String.getType());
+    ip.setType(ParamValueType.String.name());
     parameterDefines.add(ip);
 
     ParameterDefine port = new ParameterDefine();
     port.setParamKey("port");
-    port.setType(ParamValueType.Integer.getType());
+    port.setType(ParamValueType.Integer.name());
     parameterDefines.add(port);
 
     ParameterDefine key = new ParameterDefine();
     key.setParamKey("key");
-    key.setType(ParamValueType.String.getType());
+    key.setType(ParamValueType.String.name());
     parameterDefines.add(key);
 
     ParameterDefine value = new ParameterDefine();
     value.setParamKey("value");
-    value.setType(ParamValueType.String.getType());
+    value.setType(ParamValueType.String.name());
     parameterDefines.add(value);
 
     ParameterDefine timeout = new ParameterDefine();
     timeout.setParamKey("timeout");
-    timeout.setType(ParamValueType.Integer.getType());
+    timeout.setType(ParamValueType.Integer.name());
     parameterDefines.add(timeout);
 
     FeatureDefine featureDefine = new FeatureDefine();
@@ -135,15 +135,5 @@ public class RedisFeature implements Feature {
     featureDefine.setName("Redis-Set");
     featureDefine.setParams(parameterDefines);
     return featureDefine;
-  }
-
-  public static void main(String[] args) {
-    RedisFeature redisFeature = new RedisFeature();
-    ExecuteDetailVo executeDetailVo = redisFeature.setValue("10.202.162.127", 6379, "name_huhu", "guyuelan", 5);
-    System.out.println(JSON.toJSONString(executeDetailVo));
-
-    ExecuteDetailVo result = redisFeature.getValue("10.202.162.127", 6379, "name_huhu");
-    System.out.println(JSON.toJSONString(result));
-
   }
 }

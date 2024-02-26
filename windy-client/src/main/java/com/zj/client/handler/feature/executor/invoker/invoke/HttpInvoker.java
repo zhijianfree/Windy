@@ -5,6 +5,7 @@ import com.zj.client.handler.feature.ability.http.HttpFeature;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
 import com.zj.client.handler.feature.executor.vo.ExecutorUnit;
 import com.zj.client.utils.ExceptionUtils;
+import com.zj.common.enums.InvokerType;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import java.io.IOException;
 import java.util.HashMap;

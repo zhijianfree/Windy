@@ -99,6 +99,8 @@ public class HttpFeature implements Feature {
             .ifPresent(requestBody -> builder.delete(RequestBody.create(mediaType, requestBody)));
         request = builder.url(url).headers(Headers.of(headers)).build();
         break;
+      default:
+        break;
     }
     return request;
   }
@@ -114,25 +116,25 @@ public class HttpFeature implements Feature {
     List<ParameterDefine> params = new ArrayList<>();
     ParameterDefine url = new ParameterDefine();
     url.setParamKey("url");
-    url.setType(ParamTypeEnum.STRING.getType());
+    url.setType(ParamTypeEnum.String.name());
     url.setDescription("http请求的url");
     params.add(url);
 
     ParameterDefine method = new ParameterDefine();
     method.setParamKey("method");
-    method.setType(ParamTypeEnum.STRING.getType());
+    method.setType(ParamTypeEnum.String.name());
     method.setDescription("http请求的方法");
     params.add(method);
 
     ParameterDefine headers = new ParameterDefine();
     headers.setParamKey("headers");
-    headers.setType(ParamTypeEnum.MAP.getType());
+    headers.setType(ParamTypeEnum.Map.name());
     headers.setDescription("http请求的Headers");
     params.add(headers);
 
     ParameterDefine body = new ParameterDefine();
     body.setParamKey("body");
-    body.setType(ParamTypeEnum.STRING.getType());
+    body.setType(ParamTypeEnum.String.name());
     body.setDescription("http请求的请求体");
     params.add(body);
     featureDefine.setParams(params);

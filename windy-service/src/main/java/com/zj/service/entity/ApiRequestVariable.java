@@ -22,5 +22,7 @@ public class ApiRequestVariable {
 
   private String objectName;
 
+  private String defaultValue;
+
   private List<ApiRequestVariable> children;
 }
