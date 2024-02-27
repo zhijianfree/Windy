@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -103,7 +104,9 @@ public class TemplateService {
   }
 
   public List<ExecuteTemplateVo> getFeatureList(String serviceId) {
+    List<ExecuteTemplateDto> defaultTemplates = templateRepository.getDefaultTemplates(TemplateType.DEFAULT.getType());
     List<ExecuteTemplateDto> executeTemplates = templateRepository.getServiceTemplates(serviceId);
+    executeTemplates.addAll(defaultTemplates);
     return executeTemplates.stream().map(ExecuteTemplateVo::toExecuteTemplateDTO)
         .collect(Collectors.toList());
   }
@@ -161,7 +164,7 @@ public class TemplateService {
 
   private static ExecuteTemplateVo buildExecuteTemplateVo(FeatureDefine define, String serviceId) {
     ExecuteTemplateVo executeTemplateVo = new ExecuteTemplateVo();
-    executeTemplateVo.setTemplateType(TemplateType.CUSTOM.getType());
+    executeTemplateVo.setTemplateType(TemplateType.PLUGIN.getType());
     executeTemplateVo.setInvokeType(InvokerType.METHOD.getType());
     executeTemplateVo.setName(define.getName());
     executeTemplateVo.setMethod(define.getMethod());
@@ -232,7 +235,8 @@ public class TemplateService {
   private ExecuteTemplateDto buildExecuteTemplateDto(ExecuteTemplateVo executeTemplateVo) {
     ExecuteTemplateDto executeTemplate = OrikaUtil.convert(executeTemplateVo,
         ExecuteTemplateDto.class);
-    executeTemplate.setTemplateId(uniqueIdService.getUniqueId());
+    String templateId = Optional.ofNullable(executeTemplateVo.getTemplateId()).orElseGet(uniqueIdService::getUniqueId);
+    executeTemplate.setTemplateId(templateId);
     executeTemplate.setCreateTime(System.currentTimeMillis());
     executeTemplate.setUpdateTime(System.currentTimeMillis());
     executeTemplate.setHeader(JSON.toJSONString(executeTemplateVo.getHeaders()));

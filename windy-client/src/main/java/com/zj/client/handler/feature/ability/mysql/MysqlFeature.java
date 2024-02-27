@@ -49,7 +49,6 @@ public class MysqlFeature implements Feature {
                     Object columnValue = resultSet.getObject(position);
                     jsonObject.put(columnName, columnValue);
                 }
-
                 jsonArray.add(jsonObject);
             }
 
@@ -61,10 +60,10 @@ public class MysqlFeature implements Feature {
             executeDetailVo.setStatus(false);
         }
 
-        executeDetailVo.addRequestInfo("url: " + jdbcUrl);
-        executeDetailVo.addRequestInfo("user: " + user);
-        executeDetailVo.addRequestInfo("password: " + user);
-        executeDetailVo.addRequestInfo("sql: " + executeSql);
+        executeDetailVo.addRequestInfo("url" , jdbcUrl);
+        executeDetailVo.addRequestInfo("user" , user);
+        executeDetailVo.addRequestInfo("password" , user);
+        executeDetailVo.addRequestInfo("sql" , executeSql);
 
         return executeDetailVo;
     }

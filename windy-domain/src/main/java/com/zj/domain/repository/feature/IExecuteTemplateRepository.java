@@ -24,4 +24,6 @@ public interface IExecuteTemplateRepository {
   Boolean batchAddTemplates(List<ExecuteTemplateDto> templates);
 
     List<ExecuteTemplateDto> getServiceTemplates(String serviceId);
+
+  List<ExecuteTemplateDto> getDefaultTemplates(Integer templateType);
 }

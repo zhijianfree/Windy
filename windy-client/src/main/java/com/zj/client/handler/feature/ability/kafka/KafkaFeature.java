@@ -65,11 +65,11 @@ public class KafkaFeature implements Feature {
   public ExecuteDetailVo produceMessage(String topic, String key, String value, Integer timeout,
       String address) {
     ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
-    executeDetailVo.addRequestInfo("address: " + address);
-    executeDetailVo.addRequestInfo("topic: " + topic);
-    executeDetailVo.addRequestInfo("key: " + key);
-    executeDetailVo.addRequestInfo("value: " + value);
-    executeDetailVo.addRequestInfo("timeout: " + timeout);
+    executeDetailVo.addRequestInfo("address" , address);
+    executeDetailVo.addRequestInfo("topic" , topic);
+    executeDetailVo.addRequestInfo("key" , key);
+    executeDetailVo.addRequestInfo("value" , value);
+    executeDetailVo.addRequestInfo("timeout" , timeout);
     try {
       Properties props = new Properties();
       props.put("bootstrap.servers", address);
@@ -92,9 +92,9 @@ public class KafkaFeature implements Feature {
 
   private void saveRequestParam(ExecuteDetailVo executeDetailVo, String address, String topic,
       String group) {
-    executeDetailVo.addRequestInfo("address: " + address);
-    executeDetailVo.addRequestInfo("group: " + group);
-    executeDetailVo.addRequestInfo("topic: " + topic);
+    executeDetailVo.addRequestInfo("address" , address);
+    executeDetailVo.addRequestInfo("group" , group);
+    executeDetailVo.addRequestInfo("topic" , topic);
   }
 
   private KafkaConsumer<String, String> buildConsumer(String address, String topic, String group) {
@@ -182,14 +182,6 @@ public class KafkaFeature implements Feature {
     params.add(address);
     featureDefine.setParams(params);
     return featureDefine;
-  }
-
-  public static void main(String[] args) throws InterruptedException {
-    KafkaFeature kafkaFeature = new KafkaFeature();
-    kafkaFeature.produceMessage("sun", "111", "{\"name\":\"huhuhuhuhu\"}",
-        5, "10.202.162.127:9092");
-    Thread.sleep(4000);
-    kafkaFeature.startConsume("10.202.162.127:9092", "sun", "group_gong");
   }
 
 }

@@ -11,7 +11,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.zj</groupId>
-  <artifactId>Windy</artifactId>
+  <artifactId>windy</artifactId>
   <packaging>pom</packaging>
   <version>${revision}</version>
 
@@ -85,7 +85,7 @@
       <dependency>
         <groupId>com.zj</groupId>
         <artifactId>windy-plugin</artifactId>
-        <version>${revision}</version>
+        <version>1.0.0</version>
       </dependency>
       <!--内部模块结束-->
 

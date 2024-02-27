@@ -15,7 +15,6 @@ import com.zj.domain.entity.dto.service.GenerateRecordDto;
 import com.zj.domain.entity.dto.service.ServiceApiDto;
 import com.zj.domain.entity.dto.service.ServiceGenerateDto;
 import com.zj.domain.entity.vo.MavenConfigVo;
-import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IGenerateRecordRepository;
 import com.zj.domain.repository.service.IGenerateRepository;
@@ -37,7 +36,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -185,23 +186,29 @@ public class ApiService {
         templateDto.setTemplateId(serviceApi.getApiId());
         templateDto.setName(serviceApi.getApiName());
         templateDto.setMethod(serviceApi.getMethod());
-        templateDto.setHeader(serviceApi.getHeader());
+
         templateDto.setInvokeType(InvokerType.HTTP.getType());
-        templateDto.setTemplateType(TemplateType.DEFAULT.getType());
+        templateDto.setTemplateType(TemplateType.CUSTOM.getType());
         templateDto.setDescription(serviceApi.getDescription());
         templateDto.setOwner(serviceApi.getServiceId());
 
         List<ApiRequestVariable> apiVariables = JSON.parseArray(serviceApi.getRequestParams(),
                 ApiRequestVariable.class);
+        Map<String, String> header = new HashMap<>();
         List<ParameterDefine> parameterDefines = apiVariables.stream().map(variable -> {
+            if (Objects.equals(variable.getPosition(), Position.Header.name())) {
+                header.put(variable.getParamKey(), variable.getDefaultValue());
+                return null;
+            }
             ParameterDefine parameterDefine = new ParameterDefine();
             parameterDefine.setParamKey(variable.getParamKey());
             parameterDefine.setType(variable.getType());
             parameterDefine.setDescription(variable.getDescription());
             parameterDefine.setValue(variable.getDefaultValue());
             return parameterDefine;
-        }).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
         templateDto.setParam(JSON.toJSONString(parameterDefines));
+        templateDto.setHeader(JSON.toJSONString(header));
 
         String assembledUrl = assembledApiUrl(serviceApi.getResource(), apiVariables);
         templateDto.setService(assembledUrl);

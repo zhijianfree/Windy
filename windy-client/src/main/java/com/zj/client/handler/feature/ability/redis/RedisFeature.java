@@ -41,9 +41,9 @@ public class RedisFeature implements Feature {
 
   public ExecuteDetailVo getValue(String ip, Integer port,String key) {
     ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
-    executeDetailVo.addRequestInfo("ip: " + ip);
-    executeDetailVo.addRequestInfo("port: " + port);
-    executeDetailVo.addRequestInfo("key: " + key);
+    executeDetailVo.addRequestInfo("ip" , ip);
+    executeDetailVo.addRequestInfo("port" , port);
+    executeDetailVo.addRequestInfo("key" , key);
 
     try {
       Jedis jedis = new Jedis(ip, port);
@@ -61,11 +61,11 @@ public class RedisFeature implements Feature {
 
   private static void saveRequestParam(String ip, Integer port, String key, String value, Integer timeout,
       ExecuteDetailVo executeDetailVo) {
-    executeDetailVo.addRequestInfo("ip: " + ip);
-    executeDetailVo.addRequestInfo("port: " + port);
-    executeDetailVo.addRequestInfo("key: " + key);
-    executeDetailVo.addRequestInfo("value: " + value);
-    executeDetailVo.addRequestInfo("timeout: " + timeout);
+    executeDetailVo.addRequestInfo("ip" , ip);
+    executeDetailVo.addRequestInfo("port" , port);
+    executeDetailVo.addRequestInfo("key" , key);
+    executeDetailVo.addRequestInfo("value" , value);
+    executeDetailVo.addRequestInfo("timeout" , timeout);
   }
 
   @Override

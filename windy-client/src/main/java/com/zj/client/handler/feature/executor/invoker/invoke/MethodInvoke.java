@@ -43,7 +43,11 @@ public class MethodInvoke implements IExecuteInvoker {
         return;
       }
 
-      featureDefines.forEach(featureDefine -> instanceMap.put(featureDefine.getName(), featureDefine));
+      featureDefines.forEach(featureDefine -> {
+        if (!instanceMap.containsKey(featureDefine.getSource())){
+          instanceMap.put(featureDefine.getSource(), feature);
+        }
+      });
     });
   }
 
@@ -71,7 +75,7 @@ public class MethodInvoke implements IExecuteInvoker {
         instance = ConstructorUtils.invokeConstructor(cls);
         instanceMap.put(executorUnit.getName(), instance);
       }
-
+      log.info("start invoke obj = {}", instance.getClass().getName());
       return MethodUtils.invokeMethod(instance, executorUnit.getMethod(), objects);
     } catch (Exception e) {
       log.error("invoke method error", e);
@@ -113,17 +117,5 @@ public class MethodInvoke implements IExecuteInvoker {
 
     return paramDefine.getValue();
 
-  }
-
-  public static void main(String[] args) {
-    MethodInvoke methodInvoke = new MethodInvoke(null);
-
-    ExecutorUnit executorUnit = new ExecutorUnit();
-    executorUnit.setMethod("startHttp");
-    executorUnit.setService("com.zj.feature.ability.http.HttpFeature");
-    executorUnit.setParams(JSON.parseArray(
-        "[{\"paramKey\":\"url\",\"value\":\"http://10.58.239.162:8079/v5/iot/11111111111111111/devices/1234567890111w1qw\"},{\"paramKey\":\"method\",\"value\":\"delete\"},{\"paramKey\":\"headers\",\"type\":1,\"value\":{\"X_USER_INFO\":\"{\\\"domainId\\\": \\\"gyl\\\"}\",\"domainId\":\"huhuhu11111223\"}},{\"paramKey\":\"body\",\"value\":\"\"}]",
-        ParameterDefine.class));
-    System.out.println(JSON.toJSONString(methodInvoke.invoke(executorUnit)));
   }
 }

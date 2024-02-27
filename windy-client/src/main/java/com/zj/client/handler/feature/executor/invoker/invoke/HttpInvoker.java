@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class HttpInvoker implements IExecuteInvoker {
 
-  private OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
+  private final OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
 
   @Override
   public InvokerType type() {
@@ -48,6 +48,7 @@ public class HttpInvoker implements IExecuteInvoker {
 
     //执行并记录状态数据
     ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
+    saveRequestInfo(executeDetailVo, url, method,body,headers);
     try (Response response = okHttpClient.newCall(request).execute();) {
       Optional.ofNullable(response.body()).ifPresent(responseBody -> {
         try {
@@ -61,9 +62,17 @@ public class HttpInvoker implements IExecuteInvoker {
     } catch (Exception e) {
       executeDetailVo.setErrorMessage(ExceptionUtils.getSimplifyError(e));
     }
-    executeDetailVo.setRequestBody(body);
     return executeDetailVo;
   }
+
+  private void saveRequestInfo(ExecuteDetailVo executeDetailVo, String url, String method, String body, Map<String, String> headers) {
+    executeDetailVo.addRequestInfo("Url", url);
+    executeDetailVo.addRequestInfo("Http Method", method);
+    executeDetailVo.addRequestInfo("header", headers);
+    executeDetailVo.addRequestInfo("body", body);
+  }
+
+
 
   private void assemblyUrlParam(ExecutorUnit executorUnit, Map<String, Object> paramsMap) {
     StrSubstitutor strSubstitutor = new StrSubstitutor(paramsMap);
