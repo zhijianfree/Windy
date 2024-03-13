@@ -1,17 +1,18 @@
 package com.zj.client.handler.feature.executor.invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
+import com.zj.common.feature.ExecutePointDto;
 import com.zj.client.entity.vo.ExecutePoint;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import com.zj.client.entity.vo.FeatureResponse;
-import com.zj.client.handler.feature.executor.compare.CompareDefine;
+import com.zj.common.feature.CompareDefine;
 import com.zj.client.handler.feature.executor.compare.CompareHandler;
 import com.zj.client.handler.feature.executor.compare.CompareResult;
 import com.zj.client.handler.feature.executor.invoker.IExecuteStrategy;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
 import com.zj.client.handler.feature.executor.interceptor.InterceptorProxy;
 import com.zj.client.handler.feature.executor.vo.ExecuteContext;
-import com.zj.client.handler.feature.executor.vo.ExecutorUnit;
+import com.zj.common.feature.ExecutorUnit;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -65,5 +66,19 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
     //6 返回执行状态
     return FeatureResponse.builder().name(executorUnit.getName()).pointId(executePoint.getPointId())
         .executeDetailVo(executeDetailVo).compareResult(compareResult).build();
+  }
+
+  public static ExecutePoint toExecutePoint(ExecutePointDto dto) {
+    ExecutePoint point = new ExecutePoint();
+    point.setFeatureId(dto.getFeatureId());
+    point.setPointId(dto.getPointId());
+    point.setDescription(dto.getDescription());
+    point.setCompareDefine(JSON.toJSONString(dto.getCompareDefine()));
+    point.setVariables(JSON.toJSONString(dto.getVariableDefine()));
+    point.setFeatureInfo(JSON.toJSONString(dto.getExecutorUnit()));
+    point.setSortOrder(dto.getSortOrder());
+    point.setTestStage(dto.getTestStage());
+    point.setExecuteType(dto.getExecuteType());
+    return point;
   }
 }

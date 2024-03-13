@@ -1,4 +1,4 @@
-package com.zj.client.handler.feature.executor.compare;
+package com.zj.common.feature;
 
 import lombok.Data;
 

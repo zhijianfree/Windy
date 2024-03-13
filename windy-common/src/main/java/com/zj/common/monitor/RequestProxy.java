@@ -290,7 +290,7 @@ public class RequestProxy {
           responseEntity.getBody());
       return responseEntity.getStatusCode().is2xxSuccessful();
     } catch (Exception e) {
-      log.error("request start pipeline task error ={}", e.toString());
+      log.error("request start task error ={}", e.toString());
     }
     return false;
   }

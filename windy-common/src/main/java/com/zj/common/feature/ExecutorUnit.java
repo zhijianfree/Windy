@@ -1,6 +1,5 @@
-package com.zj.client.handler.feature.executor.vo;
+package com.zj.common.feature;
 
-import com.zj.client.entity.dto.ExecutePointDto;
 import com.zj.plugin.loader.ParameterDefine;
 import lombok.Data;
 
@@ -40,4 +39,14 @@ public class ExecutorUnit {
      * 针对for循环的需要特殊处理
      * */
     private List<ExecutePointDto> executePoints;
+
+    /**
+     * 关联的模版Id
+     */
+    private String relatedId;
+
+    /**
+     * 关联的模版Id
+     */
+    private ExecutorUnit relatedTemplate;
 }

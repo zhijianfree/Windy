@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.client.handler.feature.executor.compare.operator.CompareFactory;
 import com.zj.common.exception.ErrorCode;
+import com.zj.common.feature.CompareDefine;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

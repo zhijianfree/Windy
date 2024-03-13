@@ -1,18 +1,15 @@
 package com.zj.feature.entity.dto;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.common.utils.OrikaUtil;
+import com.zj.common.feature.ExecutorUnit;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
-import com.zj.domain.entity.po.feature.ExecutePoint;
 import com.zj.feature.entity.vo.CompareDefine;
-import com.zj.feature.entity.vo.ExecutorUnit;
 import com.zj.feature.entity.vo.VariableDefine;
 import java.util.List;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
-import org.apache.commons.collections4.CollectionUtils;
 
 @Data
 public class ExecutePointVo {

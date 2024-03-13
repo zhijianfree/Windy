@@ -2,12 +2,12 @@ package com.zj.client.handler.feature.executor.interceptor;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.vo.ExecutePoint;
-import com.zj.client.handler.feature.executor.compare.CompareDefine;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
-import com.zj.common.enums.InvokerType;
 import com.zj.client.handler.feature.executor.vo.ExecuteContext;
-import com.zj.client.handler.feature.executor.vo.ExecutorUnit;
-import com.zj.client.handler.feature.executor.vo.VariableDefine;
+import com.zj.common.enums.InvokerType;
+import com.zj.common.feature.CompareDefine;
+import com.zj.common.feature.ExecutorUnit;
+import com.zj.common.feature.VariableDefine;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import com.zj.plugin.loader.ParameterDefine;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 public class VariableInterceptor implements IExecuteInterceptor {
 
     private static final String VARIABLE_CHAR = "$";
-    private OgnlDataParser ognlDataParser = new OgnlDataParser();
+    private final OgnlDataParser ognlDataParser = new OgnlDataParser();
 
     @Override
     public void beforeExecute(ExecutorUnit executorUnit, ExecuteContext context) {
@@ -96,8 +97,13 @@ public class VariableInterceptor implements IExecuteInterceptor {
         }
 
         //如果是HTTP请求的方式，还需要给service(url)、header替换变量参数
-        if (Objects.equals(executorUnit.getInvokeType(), InvokerType.HTTP.getType())) {
+        if (Objects.equals(executorUnit.getInvokeType(), InvokerType.HTTP.getType()) ||
+                Objects.equals(executorUnit.getInvokeType(), InvokerType.RELATED_TEMPLATE.getType())) {
             filterHttpInvokerParam(executorUnit, executeContext);
+        }
+
+        if (Objects.nonNull(executorUnit.getRelatedTemplate())) {
+            filterVariable(executorUnit.getRelatedTemplate(), executeContext);
         }
     }
 
@@ -117,7 +123,8 @@ public class VariableInterceptor implements IExecuteInterceptor {
         executorUnit.setService(replaceResult);
 
         if (MapUtils.isNotEmpty(executorUnit.getHeaders())) {
-            Map<String, String> exchangeHeaders = executorUnit.getHeaders().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+            Map<String, String> exchangeHeaders =
+                    executorUnit.getHeaders().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
                     entry -> pointSubstitutor.replace(entry.getValue())));
             log.info("replace headers={}", exchangeHeaders);
             executorUnit.setHeaders(exchangeHeaders);
@@ -128,7 +135,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
         //如果执行点的参数使用了环境变量则需要转换变量
         StrSubstitutor strSubstitutor = new StrSubstitutor(executeContext.toMap());
         params.forEach(param -> {
-            Object paramValue = param.getValue();
+            Object paramValue = getParamValueWithDefaultValue(param);
             if (paramValue instanceof String) {
                 String stringValue = String.valueOf(paramValue);
                 String replaceResult = strSubstitutor.replace(stringValue);
@@ -141,6 +148,15 @@ public class VariableInterceptor implements IExecuteInterceptor {
                         key -> strSubstitutor.replace(map.get(key))));
                 param.setValue(result);
             }
+        });
+    }
+
+    private Object getParamValueWithDefaultValue(ParameterDefine param) {
+        return Optional.ofNullable(param.getValue()).orElseGet(() -> {
+            if (Objects.isNull(param.getDefaultValue())) {
+                return null;
+            }
+            return param.getDefaultValue().getDefaultValue();
         });
     }
 }

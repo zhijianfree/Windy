@@ -3,6 +3,7 @@ package com.zj.feature.service;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.common.enums.InvokerType;
+import com.zj.common.feature.ExecutorUnit;
 import com.zj.plugin.loader.Feature;
 import com.zj.plugin.loader.FeatureDefine;
 import com.zj.common.exception.ApiException;
@@ -18,10 +19,10 @@ import com.zj.domain.repository.feature.IExecutePointRepository;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import com.zj.domain.repository.feature.IPluginRepository;
 import com.zj.feature.entity.dto.BatchTemplates;
-import com.zj.feature.entity.dto.ExecuteTemplateVo;
+import com.zj.common.feature.ExecuteTemplateVo;
 import com.zj.feature.entity.dto.UploadResultDto;
 import com.zj.common.enums.TemplateType;
-import com.zj.feature.entity.vo.ExecutorUnit;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -33,6 +34,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
+
+import com.zj.plugin.loader.ParameterDefine;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -71,7 +74,7 @@ public class TemplateService {
     }
 
     List<ExecuteTemplateVo> templateDTOS = templateIPage.getRecords().stream()
-        .map(ExecuteTemplateVo::toExecuteTemplateDTO).collect(Collectors.toList());
+        .map(this::toExecuteTemplateDTO).collect(Collectors.toList());
     pageSize.setData(templateDTOS);
     pageSize.setTotal(templateIPage.getTotal());
     return pageSize;
@@ -79,7 +82,7 @@ public class TemplateService {
 
   public ExecuteTemplateVo getExecuteTemplate(String templateId) {
     ExecuteTemplateDto executeTemplate = templateRepository.getExecuteTemplate(templateId);
-    return ExecuteTemplateVo.toExecuteTemplateDTO(executeTemplate);
+    return toExecuteTemplateDTO(executeTemplate);
   }
 
   public String createTemplate(ExecuteTemplateVo executeTemplateVo) {
@@ -104,10 +107,10 @@ public class TemplateService {
   }
 
   public List<ExecuteTemplateVo> getFeatureList(String serviceId) {
-    List<ExecuteTemplateDto> defaultTemplates = templateRepository.getDefaultTemplates(TemplateType.DEFAULT.getType());
+    List<ExecuteTemplateDto> defaultTemplates = templateRepository.getTemplatesByType(TemplateType.DEFAULT.getType());
     List<ExecuteTemplateDto> executeTemplates = templateRepository.getServiceTemplates(serviceId);
     executeTemplates.addAll(defaultTemplates);
-    return executeTemplates.stream().map(ExecuteTemplateVo::toExecuteTemplateDTO)
+    return executeTemplates.stream().map(this::toExecuteTemplateDTO)
         .collect(Collectors.toList());
   }
 
@@ -246,5 +249,17 @@ public class TemplateService {
 
   public Boolean deletePlugin(String pluginId) {
     return pluginRepository.deletePlugin(pluginId);
+  }
+
+  public List<ExecuteTemplateVo> getTemplatesByInvokeType(Integer invokeType) {
+    List<ExecuteTemplateDto> templateList = templateRepository.getTemplatesByType(invokeType);
+    return templateList.stream().map(this::toExecuteTemplateDTO).collect(Collectors.toList());
+  }
+
+  public ExecuteTemplateVo toExecuteTemplateDTO(ExecuteTemplateDto executeTemplate) {
+    ExecuteTemplateVo templateVo = OrikaUtil.convert(executeTemplate, ExecuteTemplateVo.class);
+    templateVo.setParams(JSON.parseArray(executeTemplate.getParam(), ParameterDefine.class));
+    templateVo.setHeaders((Map<String, String>)JSON.parse(executeTemplate.getHeader()));
+    return templateVo;
   }
 }

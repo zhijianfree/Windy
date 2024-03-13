@@ -4,7 +4,7 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseMeta;
 import com.zj.feature.entity.dto.BatchTemplates;
-import com.zj.feature.entity.dto.ExecuteTemplateVo;
+import com.zj.common.feature.ExecuteTemplateVo;
 import com.zj.feature.entity.dto.UploadResultDto;
 import com.zj.feature.service.TemplateService;
 import org.springframework.validation.annotation.Validated;
@@ -43,6 +43,13 @@ public class FeatureTemplateRest {
             defaultValue = "") String name) {
         PageSize<ExecuteTemplateVo> featureConfigs = templateService.getTemplatePage(serviceId, page, size, name);
         return new ResponseMeta<>(ErrorCode.SUCCESS, featureConfigs);
+    }
+
+    @ResponseBody
+    @GetMapping("/types/{invokeType}/templates")
+    public ResponseMeta<List<ExecuteTemplateVo>> getTemplatesByInvokeType(@PathVariable("invokeType") Integer invokeType) {
+        List<ExecuteTemplateVo> executeTemplates = templateService.getTemplatesByInvokeType(invokeType);
+        return new ResponseMeta<>(ErrorCode.SUCCESS, executeTemplates);
     }
 
     @ResponseBody

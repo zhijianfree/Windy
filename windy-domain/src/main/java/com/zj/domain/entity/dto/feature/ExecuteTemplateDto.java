@@ -56,6 +56,11 @@ public class ExecuteTemplateDto {
      */
     private String owner;
 
+    /**
+     * 关联的模版Id
+     */
+    private String relatedId;
+
     private Long createTime;
     private Long updateTime;
 }

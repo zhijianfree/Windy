@@ -2,7 +2,7 @@ package com.zj.client.handler.feature.executor.invoker;
 
 
 import com.zj.common.enums.InvokerType;
-import com.zj.client.handler.feature.executor.vo.ExecutorUnit;
+import com.zj.common.feature.ExecutorUnit;
 
 public interface IExecuteInvoker {
 

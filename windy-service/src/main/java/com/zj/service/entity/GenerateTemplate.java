@@ -13,8 +13,18 @@ public class GenerateTemplate {
     private List<String> apiIds;
 
     /**
+     * 模版调用方式
+     */
+    private Integer invokeType;
+
+    /**
      * 服务Id
      */
     private String serviceId;
+
+    /**
+     * 关联的模版Id
+     */
+    private String relatedId;
 
 }

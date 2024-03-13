@@ -1,16 +1,21 @@
 package com.zj.master.dispatch.task;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import com.zj.common.enums.DispatchType;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.feature.ExecutorUnit;
 import com.zj.common.monitor.RequestProxy;
 import com.zj.common.utils.IpUtils;
+import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
+import com.zj.domain.entity.dto.feature.ExecuteTemplateDto;
 import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
 import com.zj.domain.entity.dto.feature.TaskRecordDto;
 import com.zj.domain.repository.feature.IExecutePointRepository;
+import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
 import com.zj.master.dispatch.feature.FeatureDispatch;
@@ -24,6 +29,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import com.zj.plugin.loader.ParameterDefine;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -37,26 +44,28 @@ import org.springframework.stereotype.Component;
 @Component
 public class FeatureExecuteProxy implements IStopEventListener {
 
+  public static final String TASK_FEATURE_TIPS = "no task need run";
+  private final Map<String, FeatureTask> featureTaskMap = new ConcurrentHashMap<>();
+
   private final RequestProxy requestProxy;
   private final Executor executorService;
   private final TaskEndProcessor taskEndProcessor;
   private final IExecutePointRepository executePointRepository;
   private final ITaskRecordRepository taskRecordRepository;
   private final IFeatureHistoryRepository featureHistoryRepository;
-
-  public static final String TASK_FEATURE_TIPS = "no task need run";
-  private final Map<String, FeatureTask> featureTaskMap = new ConcurrentHashMap<>();
+  private final IExecuteTemplateRepository executeTemplateRepository;
 
   public FeatureExecuteProxy(RequestProxy requestProxy,
-      @Qualifier("featureExecutorPool") Executor executorService, TaskEndProcessor taskEndProcessor,
-      IExecutePointRepository executePointRepository, ITaskRecordRepository taskRecordRepository,
-      IFeatureHistoryRepository featureHistoryRepository) {
+                             @Qualifier("featureExecutorPool") Executor executorService, TaskEndProcessor taskEndProcessor,
+                             IExecutePointRepository executePointRepository, ITaskRecordRepository taskRecordRepository,
+                             IFeatureHistoryRepository featureHistoryRepository, IExecuteTemplateRepository executeTemplateRepository) {
     this.requestProxy = requestProxy;
     this.executorService = executorService;
     this.taskEndProcessor = taskEndProcessor;
     this.executePointRepository = executePointRepository;
     this.taskRecordRepository = taskRecordRepository;
     this.featureHistoryRepository = featureHistoryRepository;
+    this.executeTemplateRepository = executeTemplateRepository;
   }
 
   public void execute(FeatureTask featureTask) {
@@ -103,10 +112,30 @@ public class FeatureExecuteProxy implements IStopEventListener {
     featureExecuteParam.setFeatureId(featureId);
     featureExecuteParam.setExecuteContext(featureTask.getExecuteContext().toMap());
     featureExecuteParam.setTaskRecordId(featureTask.getTaskRecordId());
-    List<ExecutePointDto> executePoints = executePointRepository.getExecutePointByFeatureId(
-        featureId);
+    List<ExecutePointDto> executePoints = executePointRepository.getExecutePointByFeatureId(featureId);
+    //将用例关联模版信息也添加到用例信息中
+    executePoints.forEach(executePoint -> {
+      ExecutorUnit executorUnit = wrapExecutorUnitTemplate(executePoint);
+      executePoint.setFeatureInfo(JSON.toJSONString(executorUnit));
+    });
     featureExecuteParam.setExecutePointList(executePoints);
     return featureExecuteParam;
+  }
+
+  private ExecutorUnit wrapExecutorUnitTemplate(ExecutePointDto executePoint) {
+    ExecutorUnit executorUnit = JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit.class);
+    if (StringUtils.isBlank(executorUnit.getRelatedId())) {
+      return executorUnit;
+    }
+    ExecuteTemplateDto executeTemplate = executeTemplateRepository.getExecuteTemplate(executorUnit.getRelatedId());
+    if (Objects.isNull(executeTemplate)) {
+      return executorUnit;
+    }
+    ExecutorUnit related = OrikaUtil.convert(executeTemplate, ExecutorUnit.class);
+    related.setParams(JSON.parseArray(executeTemplate.getParam(), ParameterDefine.class));
+    related.setHeaders((Map<String, String>)JSON.parse(executeTemplate.getHeader()));
+    executorUnit.setRelatedTemplate(related);
+    return executorUnit;
   }
 
   public void featureStatusChange(String taskRecordId, FeatureHistoryDto history) {

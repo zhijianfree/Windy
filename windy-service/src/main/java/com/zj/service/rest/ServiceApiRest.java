@@ -1,12 +1,12 @@
 package com.zj.service.rest;
 
 import com.zj.common.exception.ErrorCode;
+import com.zj.common.feature.ExecuteTemplateVo;
 import com.zj.common.model.ResponseMeta;
 import com.zj.domain.entity.dto.service.GenerateRecordDto;
 import com.zj.domain.entity.dto.service.ServiceApiDto;
 import com.zj.domain.entity.dto.service.ServiceGenerateDto;
 import com.zj.service.entity.ApiModel;
-import com.zj.service.entity.ExecuteTemplateVo;
 import com.zj.service.entity.GenerateTemplate;
 import com.zj.service.entity.ImportApiResult;
 import com.zj.service.service.ApiService;

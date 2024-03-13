@@ -7,7 +7,7 @@ import com.zj.common.enums.InvokerType;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
 import com.zj.client.handler.feature.executor.invoker.loader.PluginManager;
-import com.zj.client.handler.feature.executor.vo.ExecutorUnit;
+import com.zj.common.feature.ExecutorUnit;
 import com.zj.plugin.loader.Feature;
 import com.zj.plugin.loader.FeatureDefine;
 import com.zj.plugin.loader.ParameterDefine;

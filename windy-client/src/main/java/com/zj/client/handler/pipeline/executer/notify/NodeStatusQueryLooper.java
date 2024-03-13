@@ -2,7 +2,7 @@ package com.zj.client.handler.pipeline.executer.notify;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.client.config.GlobalEnvConfig;
-import com.zj.client.handler.feature.executor.compare.CompareDefine;
+import com.zj.common.feature.CompareDefine;
 import com.zj.client.handler.feature.executor.compare.CompareOperator;
 import com.zj.client.handler.feature.executor.compare.CompareResult;
 import com.zj.client.handler.feature.executor.compare.operator.CompareFactory;
@@ -26,7 +26,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -44,7 +43,7 @@ public class NodeStatusQueryLooper implements Runnable {
   public static final String QUERY_ERROR_TIPS = "loop query status error";
   private final Map<String, INodeTrigger> remoteInvokerMap;
   private final Map<String, Long> stopPipelineHistoryMap = new ConcurrentHashMap<>();
-  private final LinkedBlockingQueue<TaskNode> queue = new LinkedBlockingQueue<TaskNode>();
+  private final LinkedBlockingQueue<TaskNode> queue = new LinkedBlockingQueue<>();
   private final Executor executorService;
   private final CompareFactory compareFactory;
   private final GlobalEnvConfig globalEnvConfig;

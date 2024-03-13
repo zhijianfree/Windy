@@ -52,6 +52,13 @@ public class ParameterDefine {
         private String defaultValue;
         private Object range;
 
+        public DefaultValue() {
+        }
+
+        public DefaultValue(String defaultValue) {
+            this.defaultValue = defaultValue;
+        }
+
         public String getDefaultValue() {
             return defaultValue;
         }

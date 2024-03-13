@@ -2,7 +2,7 @@ package com.zj.client.handler.feature.executor.compare.operator;
 
 import com.zj.common.exception.ErrorCode;
 import org.springframework.stereotype.Component;
-import com.zj.client.handler.feature.executor.compare.CompareDefine;
+import com.zj.common.feature.CompareDefine;
 import com.zj.client.handler.feature.executor.compare.CompareResult;
 import com.zj.common.enums.CompareType;
 

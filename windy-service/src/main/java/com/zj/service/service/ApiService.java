@@ -1,11 +1,11 @@
 package com.zj.service.service;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.common.enums.InvokerType;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.TemplateType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
+import com.zj.common.feature.ExecuteTemplateVo;
 import com.zj.common.model.DispatchTaskModel;
 import com.zj.common.monitor.RequestProxy;
 import com.zj.common.utils.OrikaUtil;
@@ -22,7 +22,6 @@ import com.zj.domain.repository.service.IServiceApiRepository;
 import com.zj.plugin.loader.ParameterDefine;
 import com.zj.service.entity.ApiModel;
 import com.zj.service.entity.ApiRequestVariable;
-import com.zj.service.entity.ExecuteTemplateVo;
 import com.zj.service.entity.GenerateTemplate;
 import com.zj.service.entity.ImportApiResult;
 import com.zj.service.service.imports.ApiImportFactory;
@@ -174,10 +173,11 @@ public class ApiService {
             return Collections.emptyList();
         }
 
-        return serviceApis.stream().map(this::convertApi2Template).filter(Objects::nonNull).collect(Collectors.toList());
+        return serviceApis.stream().map(serviceApi -> convertApi2Template(serviceApi,
+                generateTemplate.getInvokeType(), generateTemplate.getRelatedId())).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    private ExecuteTemplateVo convertApi2Template(ServiceApiDto serviceApi) {
+    private ExecuteTemplateVo convertApi2Template(ServiceApiDto serviceApi, Integer invokeType, String relatedId) {
         if (!serviceApi.isApi()) {
             return null;
         }
@@ -186,11 +186,11 @@ public class ApiService {
         templateDto.setTemplateId(serviceApi.getApiId());
         templateDto.setName(serviceApi.getApiName());
         templateDto.setMethod(serviceApi.getMethod());
-
-        templateDto.setInvokeType(InvokerType.HTTP.getType());
+        templateDto.setInvokeType(invokeType);
         templateDto.setTemplateType(TemplateType.CUSTOM.getType());
         templateDto.setDescription(serviceApi.getDescription());
         templateDto.setOwner(serviceApi.getServiceId());
+        templateDto.setRelatedId(relatedId);
 
         List<ApiRequestVariable> apiVariables = JSON.parseArray(serviceApi.getRequestParams(),
                 ApiRequestVariable.class);
@@ -204,7 +204,7 @@ public class ApiService {
             parameterDefine.setParamKey(variable.getParamKey());
             parameterDefine.setType(variable.getType());
             parameterDefine.setDescription(variable.getDescription());
-            parameterDefine.setValue(variable.getDefaultValue());
+            parameterDefine.setDefaultValue(new ParameterDefine.DefaultValue(variable.getDefaultValue()));
             return parameterDefine;
         }).filter(Objects::nonNull).collect(Collectors.toList());
         templateDto.setParam(JSON.toJSONString(parameterDefines));
@@ -212,7 +212,7 @@ public class ApiService {
 
         String assembledUrl = assembledApiUrl(serviceApi.getResource(), apiVariables);
         templateDto.setService(assembledUrl);
-        return ExecuteTemplateVo.toExecuteTemplateDTO(templateDto);
+        return toExecuteTemplateDTO(templateDto);
     }
 
     /**
@@ -222,13 +222,26 @@ public class ApiService {
      * @param apiVariables 请求的参数
      */
     private String assembledApiUrl(String uri, List<ApiRequestVariable> apiVariables) {
+        StringBuilder uriBuilder = new StringBuilder(uri);
         for (ApiRequestVariable variable : apiVariables) {
-            if (!Objects.equals(variable.getPosition(), Position.Path.name())) {
-                continue;
+            if (Objects.equals(variable.getPosition(), Position.Query.name())) {
+                String paramKey = variable.getParamKey();
+                uriBuilder.append(uriBuilder.indexOf("?") >= 0 ? "&" : "?")
+                        .append(String.format("%s=${%s}", paramKey, paramKey));
             }
-
-            uri = uri.replace("{" + variable.getParamKey() + "}", "${" + variable.getParamKey() + "}");
+            if (Objects.equals(variable.getPosition(), Position.Path.name())) {
+                uriBuilder = new StringBuilder(uriBuilder.toString().replace("{" + variable.getParamKey() + "}",
+                        "${" + variable.getParamKey() + "}"));
+            }
         }
+        uri = uriBuilder.toString();
         return "${host}" + uri;
+    }
+
+    public ExecuteTemplateVo toExecuteTemplateDTO(ExecuteTemplateDto executeTemplate) {
+        ExecuteTemplateVo templateVo = OrikaUtil.convert(executeTemplate, ExecuteTemplateVo.class);
+        templateVo.setParams(JSON.parseArray(executeTemplate.getParam(), ParameterDefine.class));
+        templateVo.setHeaders((Map<String, String>) JSON.parse(executeTemplate.getHeader()));
+        return templateVo;
     }
 }
