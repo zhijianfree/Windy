@@ -10,11 +10,11 @@ import com.zj.domain.entity.dto.feature.ExecuteTemplateDto;
 import com.zj.domain.entity.po.feature.ExecuteTemplate;
 import com.zj.domain.mapper.feeature.ExecuteTemplateMapper;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author guyuelan
@@ -93,5 +93,14 @@ public class ExecuteTemplateRepository extends
       return executeTemplate;
     }).collect(Collectors.toList());
     return saveBatch(templateList);
+  }
+
+
+
+  @Override
+  public List<ExecuteTemplateDto> getTemplateByIds(List<String> templateIds) {
+    List<ExecuteTemplate> executeTemplates =
+            list(Wrappers.lambdaQuery(ExecuteTemplate.class).in(ExecuteTemplate::getTemplateId, templateIds));
+    return OrikaUtil.convertList(executeTemplates, ExecuteTemplateDto.class);
   }
 }

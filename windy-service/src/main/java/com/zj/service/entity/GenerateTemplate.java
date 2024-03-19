@@ -27,4 +27,9 @@ public class GenerateTemplate {
      */
     private String relatedId;
 
+    /**
+     * 是否覆盖
+     */
+    private Boolean cover = false;
+
 }

@@ -15,6 +15,7 @@ import com.zj.domain.entity.dto.service.GenerateRecordDto;
 import com.zj.domain.entity.dto.service.ServiceApiDto;
 import com.zj.domain.entity.dto.service.ServiceGenerateDto;
 import com.zj.domain.entity.vo.MavenConfigVo;
+import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IGenerateRecordRepository;
 import com.zj.domain.repository.service.IGenerateRepository;
@@ -57,10 +58,12 @@ public class ApiService {
     private final IGenerateRepository generateRepository;
     private final IGenerateRecordRepository generateRecordRepository;
     private final ApiImportFactory apiImportFactory;
+    private final IExecuteTemplateRepository executeTemplateRepository;
 
     public ApiService(UniqueIdService uniqueIdService, IServiceApiRepository apiRepository, RequestProxy requestProxy
             , ISystemConfigRepository systemConfigRepository, IGenerateRepository generateRepository,
-                      IGenerateRecordRepository generateRecordRepository, ApiImportFactory apiImportFactory) {
+                      IGenerateRecordRepository generateRecordRepository, ApiImportFactory apiImportFactory,
+                      IExecuteTemplateRepository executeTemplateRepository) {
         this.uniqueIdService = uniqueIdService;
         this.apiRepository = apiRepository;
         this.requestProxy = requestProxy;
@@ -68,6 +71,7 @@ public class ApiService {
         this.generateRepository = generateRepository;
         this.generateRecordRepository = generateRecordRepository;
         this.apiImportFactory = apiImportFactory;
+        this.executeTemplateRepository = executeTemplateRepository;
     }
 
     public ServiceApiDto getServiceApi(String apiId) {
@@ -173,8 +177,13 @@ public class ApiService {
             return Collections.emptyList();
         }
 
-        return serviceApis.stream().map(serviceApi -> convertApi2Template(serviceApi,
-                generateTemplate.getInvokeType(), generateTemplate.getRelatedId())).filter(Objects::nonNull).collect(Collectors.toList());
+        List<String> templateIds = serviceApis.stream().map(ServiceApiDto::getApiId).collect(Collectors.toList());
+        List<String> existTemplateIds = executeTemplateRepository.getTemplateByIds(templateIds).stream()
+                .map(ExecuteTemplateDto::getTemplateId).collect(Collectors.toList());
+
+        return serviceApis.stream().filter(serviceApi -> generateTemplate.getCover() || !existTemplateIds.contains(serviceApi.getApiId()))
+                .map(serviceApi -> convertApi2Template(serviceApi, generateTemplate.getInvokeType(), generateTemplate.getRelatedId()))
+                .filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     private ExecuteTemplateVo convertApi2Template(ServiceApiDto serviceApi, Integer invokeType, String relatedId) {

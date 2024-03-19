@@ -54,3 +54,7 @@ eureka:
 logging:
   level:
     com.netflix: warn
+
+mybatis-plus:
+  global-config:
+    banner: false
