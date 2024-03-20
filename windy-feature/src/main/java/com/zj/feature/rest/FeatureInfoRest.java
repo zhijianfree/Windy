@@ -4,6 +4,7 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseMeta;
 import com.zj.domain.entity.dto.feature.BatchDeleteDto;
+import com.zj.domain.entity.dto.feature.FeatureInfoDto;
 import com.zj.domain.entity.po.feature.FeatureInfo;
 import com.zj.feature.entity.dto.CopyFeatureDto;
 import com.zj.feature.entity.dto.FeatureInfoVo;
@@ -37,8 +38,12 @@ public class FeatureInfoRest {
     @GetMapping("/{caseId}/tree/features")
     public ResponseMeta<List<FeatureInfo>> getFeatureTreeList(
             @PathVariable("caseId") String caseId) {
-        return new ResponseMeta(ErrorCode.SUCCESS,
-                featureService.getFeatureTreeList(caseId));
+        return new ResponseMeta(ErrorCode.SUCCESS, featureService.getFeatureTreeList(caseId));
+    }
+
+    @GetMapping("/{caseId}/features")
+    public ResponseMeta<List<FeatureInfo>> getFeatureList(@PathVariable("caseId") String caseId) {
+        return new ResponseMeta(ErrorCode.SUCCESS, featureService.queryFeatureList(caseId));
     }
 
     @PostMapping("/feature")
@@ -63,17 +68,15 @@ public class FeatureInfoRest {
 
     @GetMapping("/feature/{featureId}")
     public ResponseMeta<FeatureInfoVo> queryFeature(@PathVariable("featureId") String featureId) {
-        return new ResponseMeta<FeatureInfoVo>(ErrorCode.SUCCESS,
-                featureService.getFeatureById(featureId));
+        return new ResponseMeta<FeatureInfoVo>(ErrorCode.SUCCESS, featureService.getFeatureById(featureId));
     }
 
     @GetMapping("/case/{caseId}/features")
-    public ResponseMeta<PageSize<com.zj.domain.entity.dto.feature.FeatureInfoDto>> queryFeatureTask(
+    public ResponseMeta<PageSize<FeatureInfoDto>> queryFeatureTask(
             @PathVariable("caseId") String caseId,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) {
-        return new ResponseMeta(ErrorCode.SUCCESS,
-                featureService.queryFeaturePage(caseId, page, size));
+        return new ResponseMeta(ErrorCode.SUCCESS, featureService.queryFeaturePage(caseId, page, size));
     }
 
     @PostMapping("/feature/start/{featureId}")
@@ -82,10 +85,8 @@ public class FeatureInfoRest {
     }
 
     @PostMapping("/feature/tag/filter")
-    public ResponseMeta<List<FeatureNodeDto>> getFeaturesByTag(
-            @Valid @RequestBody TagFilterDto tagFilterDTO) {
-        return new ResponseMeta<List<FeatureNodeDto>>(ErrorCode.SUCCESS,
-                featureService.filterFeaturesByTag(tagFilterDTO));
+    public ResponseMeta<List<FeatureNodeDto>> getFeaturesByTag(@Valid @RequestBody TagFilterDto tagFilterDTO) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, featureService.filterFeaturesByTag(tagFilterDTO));
     }
 
     @PostMapping("/feature/copy")

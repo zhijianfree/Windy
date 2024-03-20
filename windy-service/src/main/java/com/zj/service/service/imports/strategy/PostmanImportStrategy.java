@@ -11,7 +11,7 @@ import com.zj.service.entity.ApiRequestVariable;
 import com.zj.service.entity.PostmanImport;
 import com.zj.service.service.imports.IApiImportStrategy;
 import com.zj.service.service.imports.ImportType;
-import com.zj.service.service.imports.Position;
+import com.zj.common.enums.Position;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 

@@ -2,14 +2,46 @@ package com.zj.plugin.loader;
 
 
 public class ParameterDefine {
+    /**
+     * 参数名称
+     */
     private String paramKey;
+
+    /**
+     * 参数的数据类型 {@link ParamValueType}
+     */
     private String type;
+
+    /**
+     * 参数描述
+     */
     private String description;
+
+    /**
+     * 参数值
+     */
     private Object value;
+
+    /**
+     * 参数位置，只有在调用类型为HTTP时使用
+     */
+    private String position;
+
+    /**
+     * 参数默认值
+     */
     private DefaultValue defaultValue;
 
     public Object getValue() {
         return value;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
     }
 
     public void setValue(Object value) {

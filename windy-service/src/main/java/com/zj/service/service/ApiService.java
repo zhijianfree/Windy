@@ -27,7 +27,7 @@ import com.zj.service.entity.GenerateTemplate;
 import com.zj.service.entity.ImportApiResult;
 import com.zj.service.service.imports.ApiImportFactory;
 import com.zj.service.service.imports.IApiImportStrategy;
-import com.zj.service.service.imports.Position;
+import com.zj.common.enums.Position;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -214,6 +214,7 @@ public class ApiService {
             parameterDefine.setType(variable.getType());
             parameterDefine.setDescription(variable.getDescription());
             parameterDefine.setDefaultValue(new ParameterDefine.DefaultValue(variable.getDefaultValue()));
+            parameterDefine.setPosition(variable.getPosition());
             return parameterDefine;
         }).filter(Objects::nonNull).collect(Collectors.toList());
         templateDto.setParam(JSON.toJSONString(parameterDefines));
