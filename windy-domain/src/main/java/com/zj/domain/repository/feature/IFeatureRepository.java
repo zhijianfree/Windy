@@ -29,9 +29,7 @@ public interface IFeatureRepository {
 
   IPage<FeatureInfoDto> queryFeaturePage(String testCaseId, int page, int size);
 
-  void saveBatch(List<FeatureInfoDto> infoList);
+  boolean saveBatch(List<FeatureInfoDto> infoList);
 
   List<FeatureInfoDto> getSubFeatures(String featureId);
-
-  Integer countAll();
 }

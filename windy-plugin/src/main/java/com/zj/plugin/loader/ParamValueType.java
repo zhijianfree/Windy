@@ -8,5 +8,6 @@ public enum  ParamValueType {
     Array,
     Float,
     Double,
-    Object
+    Object,
+    Long
 }

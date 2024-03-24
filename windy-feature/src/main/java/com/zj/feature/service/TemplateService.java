@@ -248,13 +248,20 @@ public class TemplateService {
             pluginRepository.updatePluginStatus(pluginId);
         }
 
+        //获取已存在的模版
+        List<String> templateIds = batchTemplates.getTemplates().stream().map(ExecuteTemplateVo::getTemplateId).collect(Collectors.toList());
+        List<String> existTemplates =
+                templateRepository.getTemplateByIds(templateIds).stream().map(ExecuteTemplateDto::getTemplateId).collect(Collectors.toList());
+
+        //更新已存在的模版
         List<ExecuteTemplateDto> templates = batchTemplates.getTemplates().stream().map(this::buildExecuteTemplateDto)
                 .collect(Collectors.toList());
-        templates.stream().filter(template -> Objects.nonNull(template.getTemplateId()))
+        templates.stream().filter(template -> existTemplates.contains(template.getTemplateId()))
                 .forEach(templateRepository::updateTemplate);
 
+        //添加新的模版
         List<ExecuteTemplateDto> createList =
-                templates.stream().filter(template -> Objects.isNull(template.getTemplateId())).collect(Collectors.toList());
+                templates.stream().filter(template -> !existTemplates.contains(template.getTemplateId())).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(createList)) {
             return true;
         }

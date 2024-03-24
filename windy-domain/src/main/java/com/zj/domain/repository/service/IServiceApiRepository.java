@@ -11,6 +11,8 @@ public interface IServiceApiRepository {
 
   boolean saveApi(ServiceApiDto serviceApi);
 
+  boolean saveBatch(List<ServiceApiDto> serviceApis);
+
   boolean updateApi(ServiceApiDto serviceApi);
 
   boolean deleteApi(String apiId);

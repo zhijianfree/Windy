@@ -25,15 +25,12 @@ public class JSONArrayCompare extends BaseCompare {
   @Override
   public CompareResult compare(CompareDefine compareDefine) {
     CompareResult compareResult = createSuccessResult();
-    List<Object> resList = JSON.parseArray(JSON.toJSONString(compareDefine.getResponseValue()),
-        Object.class);
-    List<Object> expectList = JSON.parseArray(compareDefine.getExpectValue(),
-        Object.class);
-
+    List<Object> resList = JSON.parseArray(JSON.toJSONString(compareDefine.getResponseValue()), Object.class);
+    List<Object> expectList = JSON.parseArray(compareDefine.getExpectValue(), Object.class);
     for (int i = 0; i < expectList.size(); i++) {
       Map<String, Object> result = CompareJsonUtils.compareJsonObject(
           JSON.toJSONString(resList.get(i)), JSON.toJSONString(expectList.get(i)));
-      if (result.size() != 0) {
+      if (!result.isEmpty()) {
         compareResult.setErrorType(ErrorCode.COMPARE_ERROR);
         compareResult.setErrorMessage("JSON compare error");
         return compareResult;

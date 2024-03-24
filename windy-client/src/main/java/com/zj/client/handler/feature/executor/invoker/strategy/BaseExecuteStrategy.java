@@ -47,7 +47,8 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
 
     //2 将全局变量配置给执行点
     interceptorProxy.beforeExecute(executorUnit, executeContext);
-    log.info("step 1 execute before interceptor");
+    log.info("step 1 execute before interceptor service={} context={}", executorUnit.getService(),
+            JSON.toJSONString(executeContext));
 
     //3 调用方法执行
     IExecuteInvoker executeInvoker = executeInvokerMap.get(executorUnit.getInvokeType());
@@ -56,7 +57,8 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
 
     //4 将执行之后的响应结果添加到context中，方便后面用例使用
     interceptorProxy.afterExecute(executePoint, executeDetailVo, executeContext);
-    log.info("step 3 execute execute after interceptor");
+    log.info("step 3 execute execute after interceptor service={} context={}", executorUnit.getService(),
+            JSON.toJSONString(executeContext.toMap()));
 
     //5 下面开始对比
     String compareInfo = executePoint.getCompareDefine();

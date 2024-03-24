@@ -4,14 +4,16 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.common.enums.ApiType;
+import com.zj.common.enums.Position;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.service.ServiceApiDto;
 import com.zj.domain.repository.service.IServiceApiRepository;
+import com.zj.plugin.loader.ParamValueType;
 import com.zj.service.entity.ApiRequestVariable;
 import com.zj.service.entity.PostmanImport;
 import com.zj.service.service.imports.IApiImportStrategy;
 import com.zj.service.service.imports.ImportType;
-import com.zj.common.enums.Position;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
@@ -20,14 +22,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class PostmanImportStrategy implements IApiImportStrategy {
-
-    public static final String STRING_VARIABLE_TYPE = "String";
     private final UniqueIdService uniqueIdService;
     private final IServiceApiRepository serviceApiRepository;
     private final String variableString = "\\{\\{([^\\}]+)\\}\\}";
@@ -50,28 +52,38 @@ public class PostmanImportStrategy implements IApiImportStrategy {
         }
 
         ServiceApiDto dirApi = createApiDir(serviceId, postmanImport);
-        return postmanImport.getItem().stream().map(postmanApi -> {
+        List<ServiceApiDto> serviceApiList = postmanImport.getItem().stream().map(postmanApi -> {
             PostmanImport.PostmanApiRequest request = postmanApi.getRequest();
             ServiceApiDto serviceApi = new ServiceApiDto();
             serviceApi.setApiId(uniqueIdService.getUniqueId());
             serviceApi.setApiType(ApiType.API.getType());
             serviceApi.setApiName(postmanApi.getName());
+            serviceApi.setDescription(postmanApi.getName());
             serviceApi.setMethod(request.getMethod());
             serviceApi.setServiceId(serviceId);
             serviceApi.setParentId(dirApi.getApiId());
             serviceApi.setType("http");
 
-            String path = String.join("/", request.getUrl().getPath());
-            serviceApi.setResource("/" + path);
+            Optional.ofNullable(request.getUrl()).ifPresent(url -> {
+                String path = String.join("/", request.getUrl().getPath());
+                serviceApi.setResource("/" + path);
+            });
+
 
             List<ApiRequestVariable> variableList = getRequestParams(request);
             serviceApi.setRequestParams(JSON.toJSONString(variableList));
 
-            Map<String, String> headerMap =
-                    postmanApi.getRequest().getHeader().stream().collect(Collectors.toMap(PostmanImport.PostmanApiHeader::getKey, PostmanImport.PostmanApiHeader::getValue));
-            serviceApi.setHeader(JSON.toJSONString(headerMap));
-            return serviceApiRepository.saveApi(serviceApi) ? serviceApi : null;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+            Optional.ofNullable(request.getHeader()).ifPresent(headers -> {
+                Map<String, String> headerMap =
+                        headers.stream().collect(Collectors.toMap(PostmanImport.PostmanApiHeader::getKey,
+                                PostmanImport.PostmanApiHeader::getValue));
+                serviceApi.setHeader(JSON.toJSONString(headerMap));
+            });
+            return serviceApi;
+        }).collect(Collectors.toList());
+        boolean saveBatch = serviceApiRepository.saveBatch(serviceApiList);
+        log.info("batch save postman api result = {}", saveBatch);
+        return serviceApiList;
     }
 
     private ServiceApiDto createApiDir(String serviceId, PostmanImport postmanImport) {
@@ -86,40 +98,52 @@ public class PostmanImportStrategy implements IApiImportStrategy {
     }
 
     private List<ApiRequestVariable> getRequestParams(PostmanImport.PostmanApiRequest request) {
-        List<ApiRequestVariable> pathVariableList = getPathVariableList(request.getUrl().getPath());
-        List<ApiRequestVariable> variableList = new ArrayList<>(pathVariableList);
+        PostmanImport.PostmanApiUrl postmanApiUrl = request.getUrl();
+        List<ApiRequestVariable> variableList = new ArrayList<>();
+        if (Objects.nonNull(postmanApiUrl)){
+            List<ApiRequestVariable> pathVariableList = getPathVariableList(postmanApiUrl.getPath());
+            variableList.addAll(pathVariableList);
+
+            if (CollectionUtils.isNotEmpty(postmanApiUrl.getQuery())) {
+                List<ApiRequestVariable> queryVariableList = getQueryVariableList(request);
+                variableList.addAll(queryVariableList);
+            }
+        }
 
         List<ApiRequestVariable> bodyVariableList = getBodyVariableList(request);
         variableList.addAll(bodyVariableList);
-
-        if (CollectionUtils.isNotEmpty(request.getUrl().getQuery())){
-            List<ApiRequestVariable> queryVariableList = getQueryVariableList(request);
-            variableList.addAll(queryVariableList);
-        }
         return variableList;
     }
 
     private List<ApiRequestVariable> getQueryVariableList(PostmanImport.PostmanApiRequest request) {
         return request.getUrl().getQuery().stream().map(query -> {
+            ApiRequestVariable apiRequestVariable = new ApiRequestVariable();
+            apiRequestVariable.setParamKey(query.getKey());
+            apiRequestVariable.setType(ParamValueType.String.name());
+            apiRequestVariable.setRequired(true);
+            apiRequestVariable.setPosition(Position.Query.name());
+
+
             Pattern pattern = Pattern.compile(variableString);
             Matcher matcher = pattern.matcher(query.getValue());
             if (!matcher.find()) {
-                return null;
+                return apiRequestVariable;
             }
-            ApiRequestVariable apiRequestVariable = new ApiRequestVariable();
-            apiRequestVariable.setParamKey(query.getKey());
-            apiRequestVariable.setType(STRING_VARIABLE_TYPE);
-            apiRequestVariable.setRequired(true);
-            apiRequestVariable.setPosition(Position.Query.name());
+            apiRequestVariable.setDefaultValue(query.getValue());
             return apiRequestVariable;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        }).collect(Collectors.toList());
     }
 
     private List<ApiRequestVariable> getBodyVariableList(PostmanImport.PostmanApiRequest request) {
         if (Objects.isNull(request.getBody())) {
             return Collections.emptyList();
         }
-        JSONObject jsonObject = JSON.parseObject(request.getBody().getRaw(), JSONObject.class);
+
+        JSONObject jsonObject = parseJsonString(request);
+        if (Objects.isNull(jsonObject)) {
+            return Collections.emptyList();
+        }
+
         return jsonObject.entrySet().stream().map(e -> {
             ApiRequestVariable apiRequestVariable = new ApiRequestVariable();
             apiRequestVariable.setParamKey(e.getKey());
@@ -129,21 +153,30 @@ public class PostmanImportStrategy implements IApiImportStrategy {
         }).collect(Collectors.toList());
     }
 
+    private JSONObject parseJsonString(PostmanImport.PostmanApiRequest request) {
+        try {
+            return JSON.parseObject(request.getBody().getRaw(), JSONObject.class);
+        }catch (Exception e){
+            log.info("convert json error", e);
+        }
+        return null;
+    }
+
     private String convertVariableType(Map.Entry<String, Object> e) {
         if (e.getValue() instanceof String) {
-            return STRING_VARIABLE_TYPE;
+            return ParamValueType.String.name();
         } else if (e.getValue() instanceof Integer) {
-            return "Integer";
+            return ParamValueType.Integer.name();
         } else if (e.getValue() instanceof Boolean) {
-            return "Boolean";
-        }else if (e.getValue() instanceof Long) {
-            return "Long";
+            return ParamValueType.Boolean.name();
+        } else if (e.getValue() instanceof Long) {
+            return ParamValueType.Long.name();
         } else if (e.getValue() instanceof Double || e.getValue() instanceof Float) {
-            return "Float";
+            return ParamValueType.Float.name();
         } else if (e.getValue() instanceof JSONArray) {
-            return "Array";
+            return ParamValueType.Array.name();
         } else if (e.getValue() instanceof JSONObject) {
-            return "Object";
+            return ParamValueType.Object.name();
         } else {
             return null;
         }
@@ -159,9 +192,9 @@ public class PostmanImportStrategy implements IApiImportStrategy {
             String paramName = matcher.group(1);
             ApiRequestVariable apiRequestVariable = new ApiRequestVariable();
             apiRequestVariable.setParamKey(paramName);
-            apiRequestVariable.setType(STRING_VARIABLE_TYPE);
+            apiRequestVariable.setType(ParamValueType.String.name());
             apiRequestVariable.setRequired(true);
-            apiRequestVariable.setPosition(Position.Query.name());
+            apiRequestVariable.setPosition(Position.Path.name());
             return apiRequestVariable;
         }).filter(Objects::nonNull).collect(Collectors.toList());
     }

@@ -11,17 +11,16 @@ import java.util.List;
  * @since 2023/1/28
  */
 @Data
-public class CopyFeatureDto {
-
+public class CopyCaseFeatureDto {
   /**
-   * 源用例
+   * 用例Id列表
    * */
   @NotEmpty
   private List<String> featureIds;
 
   /**
-   * 目标用例
+   * 测试集Id
    * */
   @NotBlank
-  private String targetFeature;
+  private String testCaseId;
 }

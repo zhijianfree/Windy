@@ -11,6 +11,7 @@ import com.zj.domain.repository.feature.IExecutePointRepository;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author guyuelan
@@ -103,7 +104,9 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
     return saveBatch(pointList);
   }
 
+
   @Override
+  @Transactional
   public boolean updateBatch(List<ExecutePointDto> newExecutePoints) {
     List<ExecutePoint> pointList = OrikaUtil.convertList(newExecutePoints, ExecutePoint.class);
     return updateBatchById(pointList);

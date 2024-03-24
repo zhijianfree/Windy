@@ -6,6 +6,7 @@ import com.zj.common.model.ResponseMeta;
 import com.zj.domain.entity.dto.feature.BatchDeleteDto;
 import com.zj.domain.entity.dto.feature.FeatureInfoDto;
 import com.zj.domain.entity.po.feature.FeatureInfo;
+import com.zj.feature.entity.dto.CopyCaseFeatureDto;
 import com.zj.feature.entity.dto.CopyFeatureDto;
 import com.zj.feature.entity.dto.FeatureInfoVo;
 import com.zj.feature.entity.dto.FeatureNodeDto;
@@ -89,8 +90,13 @@ public class FeatureInfoRest {
         return new ResponseMeta<>(ErrorCode.SUCCESS, featureService.filterFeaturesByTag(tagFilterDTO));
     }
 
+    @PostMapping("/feature/case/copy")
+    public ResponseMeta<Boolean> copyCaseFeatures(@Valid @RequestBody CopyCaseFeatureDto copyCaseFeatures) {
+        return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, featureService.copyCaseFeatures(copyCaseFeatures));
+    }
+
     @PostMapping("/feature/copy")
-    public ResponseMeta<Boolean> copyFeatures(@Valid @RequestBody CopyFeatureDto copyFeatureDTO) {
-        return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, featureService.copyFeatures(copyFeatureDTO));
+    public ResponseMeta<Boolean> copyFeatures(@Valid @RequestBody CopyFeatureDto copyFeature) {
+        return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, featureService.copyFeature(copyFeature));
     }
 }

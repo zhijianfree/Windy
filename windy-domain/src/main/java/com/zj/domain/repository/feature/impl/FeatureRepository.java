@@ -64,9 +64,9 @@ public class FeatureRepository extends ServiceImpl<FeatureMapper, FeatureInfo> i
   }
 
   @Override
-  public void saveBatch(List<FeatureInfoDto> infoList) {
+  public boolean saveBatch(List<FeatureInfoDto> infoList) {
     List<FeatureInfo> list = OrikaUtil.convertList(infoList, FeatureInfo.class);
-    saveBatch(list);
+    return saveBatch(list);
   }
 
   @Override
@@ -114,10 +114,5 @@ public class FeatureRepository extends ServiceImpl<FeatureMapper, FeatureInfo> i
 
     return remove(Wrappers.lambdaQuery(FeatureInfo.class)
         .in(FeatureInfo::getFeatureId, batchDeleteDto.getFeatures()));
-  }
-
-  @Override
-  public Integer countAll() {
-    return count();
   }
 }

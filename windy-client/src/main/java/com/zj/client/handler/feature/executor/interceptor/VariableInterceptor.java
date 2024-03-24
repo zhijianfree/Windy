@@ -17,6 +17,7 @@ import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 public class VariableInterceptor implements IExecuteInterceptor {
 
     private static final String VARIABLE_CHAR = "$";
+    public static final String RUNTIME_VARIABLE_CHAR = "#";
     private final OgnlDataParser ognlDataParser = new OgnlDataParser();
 
     @Override
@@ -79,11 +81,12 @@ public class VariableInterceptor implements IExecuteInterceptor {
 
             //字符串替换 $ => #
             if (expressionString.startsWith(VARIABLE_CHAR)) {
-                expressionString = expressionString.replace(VARIABLE_CHAR, "#");
+                expressionString = expressionString.replace(VARIABLE_CHAR, RUNTIME_VARIABLE_CHAR);
             }
 
             Object result = ognlDataParser.parserExpression(responseBody, expressionString);
             context.set(variableDefine.getVariableKey(), result);
+            log.info("set context key={} value= {}", variableDefine.getVariableKey(), result);
         });
     }
 
@@ -108,12 +111,12 @@ public class VariableInterceptor implements IExecuteInterceptor {
     }
 
     private void filterHttpInvokerParam(ExecutorUnit executorUnit, ExecuteContext executeContext) {
-        Map<String, Object> pointContext = executeContext.toMap();
+        //此处使用新的Map是避免ExecuteContext被局部参数污染
+        Map<String, Object> pointContext = new HashMap<>(executeContext.toMap());
         //service(url)中的存在路径参数，所以需要将路径参数的值替换
         if (CollectionUtils.isNotEmpty(executorUnit.getParams())) {
             Map<String, Object> pointParams = executorUnit.getParams().stream()
-                    .filter(p -> Objects.nonNull(p.getValue()) && !String.valueOf(p.getValue())
-                            .contains(VARIABLE_CHAR))
+                    .filter(p -> Objects.nonNull(p.getValue()) && !String.valueOf(p.getValue()).contains(VARIABLE_CHAR))
                     .collect(Collectors.toMap(ParameterDefine::getParamKey, ParameterDefine::getValue));
             pointContext.putAll(pointParams);
         }
@@ -125,7 +128,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
         if (MapUtils.isNotEmpty(executorUnit.getHeaders())) {
             Map<String, String> exchangeHeaders =
                     executorUnit.getHeaders().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
-                    entry -> pointSubstitutor.replace(entry.getValue())));
+                            entry -> pointSubstitutor.replace(entry.getValue())));
             log.info("replace headers={}", exchangeHeaders);
             executorUnit.setHeaders(exchangeHeaders);
         }
@@ -134,7 +137,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
     private void filterParam(ExecuteContext executeContext, List<ParameterDefine> params) {
         //如果执行点的参数使用了环境变量则需要转换变量
         StrSubstitutor strSubstitutor = new StrSubstitutor(executeContext.toMap());
-        params.forEach(param -> {
+        params.stream().filter(param -> String.valueOf(param.getValue()).contains(VARIABLE_CHAR)).forEach(param -> {
             Object paramValue = getParamValueWithDefaultValue(param);
             if (paramValue instanceof String) {
                 String stringValue = String.valueOf(paramValue);
