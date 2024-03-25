@@ -3,6 +3,7 @@ package com.zj.client.handler.feature.executor.invoker.invoke;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.client.entity.enuns.ParamTypeEnum;
+import com.zj.client.handler.feature.executor.vo.ExecuteContext;
 import com.zj.common.enums.InvokerType;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
@@ -56,7 +57,7 @@ public class MethodInvoke implements IExecuteInvoker {
     return InvokerType.METHOD;
   }
 
-  public Object invoke(ExecutorUnit executorUnit) {
+  public Object invoke(ExecutorUnit executorUnit, ExecuteContext executeContext) {
     try {
       Object[] objects = null;
       List<ParameterDefine> paramDefines = executorUnit.getParams();
@@ -92,7 +93,7 @@ public class MethodInvoke implements IExecuteInvoker {
       if (Objects.isNull(paramDefine.getValue())) {
         return new HashMap<>();
       }
-      return JSONObject.parse(JSON.toJSONString(paramDefine.getValue()));
+      return JSON.parse(JSON.toJSONString(paramDefine.getValue()));
     }
 
     if (Objects.equals(ParamTypeEnum.Array.name(), paramDefine.getType())) {

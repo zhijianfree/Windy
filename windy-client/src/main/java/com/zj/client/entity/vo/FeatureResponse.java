@@ -2,6 +2,8 @@ package com.zj.client.entity.vo;
 
 import com.zj.client.handler.feature.executor.compare.CompareResult;
 import com.zj.plugin.loader.ExecuteDetailVo;
+
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -17,6 +19,11 @@ public class FeatureResponse {
     private ExecuteDetailVo executeDetailVo;
 
     private CompareResult compareResult;
+
+    /**
+     * 执行过程中需要设置的临时全局变量
+     */
+    private Map<String, Object> context;
 
     /**
      * 模版名称

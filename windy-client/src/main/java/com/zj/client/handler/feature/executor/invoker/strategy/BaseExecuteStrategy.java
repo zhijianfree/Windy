@@ -1,8 +1,10 @@
 package com.zj.client.handler.feature.executor.invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
+import com.zj.common.enums.InvokerType;
 import com.zj.common.feature.ExecutePointDto;
 import com.zj.client.entity.vo.ExecutePoint;
+import com.zj.common.feature.VariableDefine;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import com.zj.client.entity.vo.FeatureResponse;
 import com.zj.common.feature.CompareDefine;
@@ -14,9 +16,12 @@ import com.zj.client.handler.feature.executor.interceptor.InterceptorProxy;
 import com.zj.client.handler.feature.executor.vo.ExecuteContext;
 import com.zj.common.feature.ExecutorUnit;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -48,11 +53,13 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
     //2 将全局变量配置给执行点
     interceptorProxy.beforeExecute(executorUnit, executeContext);
     log.info("step 1 execute before interceptor service={} context={}", executorUnit.getService(),
-            JSON.toJSONString(executeContext));
+            JSON.toJSONString(executeContext.toMap()));
 
     //3 调用方法执行
-    IExecuteInvoker executeInvoker = executeInvokerMap.get(executorUnit.getInvokeType());
-    ExecuteDetailVo executeDetailVo = (ExecuteDetailVo) executeInvoker.invoke(executorUnit);
+    Integer invokeType = Optional.ofNullable(executorUnit.getRelatedTemplate())
+            .map(executor -> InvokerType.RELATED_TEMPLATE.getType()).orElseGet(executorUnit::getInvokeType);
+    IExecuteInvoker executeInvoker = executeInvokerMap.get(invokeType);
+    ExecuteDetailVo executeDetailVo = (ExecuteDetailVo) executeInvoker.invoke(executorUnit, executeContext);
     log.info("step 2 execute invoker ={} invoke", executeInvoker.type().name());
 
     //4 将执行之后的响应结果添加到context中，方便后面用例使用
@@ -65,8 +72,18 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
     List<CompareDefine> compareDefines = JSON.parseArray(compareInfo, CompareDefine.class);
     CompareResult compareResult = compareHandler.compare(executeDetailVo, compareDefines);
 
+    //6 获取临时全局环境变量
+    List<VariableDefine> variableDefines = JSON.parseArray(executePoint.getVariables(), VariableDefine.class);
+    Map<String, Object> globalContext = new HashMap<>();
+    if (CollectionUtils.isNotEmpty(variableDefines)) {
+      variableDefines.stream().filter(VariableDefine::isGlobal).forEach(variableDefine -> {
+        Object runtimeValue = executeContext.toMap().get(variableDefine.getVariableKey());
+        globalContext.put(variableDefine.getVariableKey(), runtimeValue);
+      });
+    }
+
     //6 返回执行状态
-    return FeatureResponse.builder().name(executorUnit.getName()).pointId(executePoint.getPointId())
+    return FeatureResponse.builder().context(globalContext).name(executorUnit.getName()).pointId(executePoint.getPointId())
         .executeDetailVo(executeDetailVo).compareResult(compareResult).build();
   }
 

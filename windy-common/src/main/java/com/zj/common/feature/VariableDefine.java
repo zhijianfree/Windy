@@ -19,4 +19,9 @@ public class VariableDefine {
    * */
   private String variableValue;
 
+  /**
+   * 设置全局变量
+   * */
+  private boolean global;
+
 }

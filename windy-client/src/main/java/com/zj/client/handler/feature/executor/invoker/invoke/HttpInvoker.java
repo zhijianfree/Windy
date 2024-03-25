@@ -3,6 +3,7 @@ package com.zj.client.handler.feature.executor.invoker.invoke;
 import com.alibaba.fastjson.JSON;
 import com.zj.client.handler.feature.ability.http.HttpFeature;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
+import com.zj.client.handler.feature.executor.vo.ExecuteContext;
 import com.zj.common.enums.Position;
 import com.zj.common.feature.ExecutorUnit;
 import com.zj.client.utils.ExceptionUtils;
@@ -18,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.apache.commons.lang.text.StrSubstitutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -38,12 +38,12 @@ public class HttpInvoker implements IExecuteInvoker {
   }
 
   @Override
-  public Object invoke(ExecutorUnit executorUnit) {
+  public Object invoke(ExecutorUnit executorUnit, ExecuteContext executeContext) {
     log.info("get execute unit={}", JSON.toJSONString(executorUnit));
-    Map<String, Object> bodyMap = getParamsMap(executorUnit);
     String url = executorUnit.getService();
     String method = executorUnit.getMethod();
-    String body = JSON.toJSONString(bodyMap);
+    Map<String, Object> bodyMap = getParamsMap(executorUnit);
+    String body = Optional.of(bodyMap).filter(map -> !map.isEmpty()).map(JSON::toJSONString).orElse(null);
     Map<String, String> headers = Optional.ofNullable(executorUnit.getHeaders()).orElse(new HashMap<>());
     Request request = HttpFeature.requestFactory(url, method, headers, body);
 
@@ -76,7 +76,7 @@ public class HttpInvoker implements IExecuteInvoker {
   private static Map<String, Object> getParamsMap(ExecutorUnit executorUnit) {
     Map<String, Object> paramsMap = new HashMap<>();
     executorUnit.getParams().stream()
-            .filter(param -> Objects.isNull(param.getPosition()) || Position.isBodyPosition(param.getPosition()))
+            .filter(param -> Position.isBodyPosition(param.getPosition()))
             .forEach(param -> paramsMap.put(param.getParamKey(), param.getValue()));
     return paramsMap;
   }

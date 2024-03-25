@@ -30,8 +30,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import com.zj.master.entity.vo.ExecuteContext;
 import com.zj.plugin.loader.ParameterDefine;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -138,7 +140,7 @@ public class FeatureExecuteProxy implements IStopEventListener {
     return executorUnit;
   }
 
-  public void featureStatusChange(String taskRecordId, FeatureHistoryDto history) {
+  public void featureStatusChange(String taskRecordId, FeatureHistoryDto history, Map<String, Object> context) {
     //每个用例执行完成之后都需要判断下是整个任务是否执行完成
     FeatureTask featureTask = featureTaskMap.get(taskRecordId);
     if (Objects.isNull(featureTask)) {
@@ -152,6 +154,12 @@ public class FeatureExecuteProxy implements IStopEventListener {
     if (isTaskEnd) {
       featureTaskMap.remove(taskRecordId);
       return;
+    }
+
+    if (MapUtils.isNotEmpty(context)) {
+      ExecuteContext executeContext = featureTask.getExecuteContext();
+      executeContext.toMap().putAll(context);
+      featureTask.setExecuteContext(executeContext);
     }
 
     log.info("feature task start cycle run");

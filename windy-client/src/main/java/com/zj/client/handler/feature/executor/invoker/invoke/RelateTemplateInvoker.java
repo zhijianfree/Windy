@@ -1,21 +1,29 @@
 package com.zj.client.handler.feature.executor.invoker.invoke;
 
 import com.alibaba.fastjson.JSON;
+import com.zj.client.handler.feature.executor.interceptor.VariableInterceptor;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
+import com.zj.client.handler.feature.executor.vo.ExecuteContext;
 import com.zj.common.enums.InvokerType;
+import com.zj.common.enums.Position;
 import com.zj.common.feature.ExecutorUnit;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
+@Slf4j
 @Component
 public class RelateTemplateInvoker implements IExecuteInvoker {
     private final MethodInvoke methodInvoke;
+    private final VariableInterceptor variableInterceptor;
 
-    public RelateTemplateInvoker(MethodInvoke methodInvoke) {
+    public RelateTemplateInvoker(MethodInvoke methodInvoke, VariableInterceptor variableInterceptor) {
         this.methodInvoke = methodInvoke;
+        this.variableInterceptor = variableInterceptor;
     }
 
     @Override
@@ -24,15 +32,17 @@ public class RelateTemplateInvoker implements IExecuteInvoker {
     }
 
     @Override
-    public Object invoke(ExecutorUnit executorUnit) {
-        Map<String, Object> paramMap = new HashMap<>();
-        executorUnit.getParams().forEach(param -> paramMap.put(param.getParamKey(),
+    public Object invoke(ExecutorUnit executorUnit, ExecuteContext executeContext) {
+        Map<String, Object> bodyMap = new HashMap<>();
+        executorUnit.getParams().stream().filter(parameterDefine -> Objects.equals(parameterDefine.getPosition(),
+                Position.Body.name())).forEach(param -> bodyMap.put(param.getParamKey(),
                 MethodInvoke.convertDataToType(param)));
-        String body = JSON.toJSONString(paramMap);
+        String body = Optional.of(bodyMap).filter(map -> !map.isEmpty()).map(JSON::toJSONString).orElse(null);
 
         ExecutorUnit relatedTemplate = executorUnit.getRelatedTemplate();
         relatedTemplate.getParams().forEach(param ->{
             if (Objects.equals(param.getParamKey(), "url")) {
+                log.info("get request url = {}", executorUnit.getService());
                 param.setValue(executorUnit.getService());
             }
             if (Objects.equals(param.getParamKey(), "body")) {
@@ -45,6 +55,7 @@ public class RelateTemplateInvoker implements IExecuteInvoker {
                 param.setValue(executorUnit.getMethod());
             }
         });
-        return methodInvoke.invoke(relatedTemplate);
+        variableInterceptor.filterVariable(relatedTemplate, executeContext);
+        return methodInvoke.invoke(relatedTemplate, executeContext);
     }
 }

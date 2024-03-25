@@ -93,7 +93,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
     /**
      * 执行点在执行之前将变量值替换为全局配置值
      */
-    private void filterVariable(ExecutorUnit executorUnit, ExecuteContext executeContext) {
+    public void filterVariable(ExecutorUnit executorUnit, ExecuteContext executeContext) {
         List<ParameterDefine> params = executorUnit.getParams();
         if (CollectionUtils.isNotEmpty(params)) {
             filterParam(executeContext, params);
@@ -137,8 +137,11 @@ public class VariableInterceptor implements IExecuteInterceptor {
     private void filterParam(ExecuteContext executeContext, List<ParameterDefine> params) {
         //如果执行点的参数使用了环境变量则需要转换变量
         StrSubstitutor strSubstitutor = new StrSubstitutor(executeContext.toMap());
-        params.stream().filter(param -> String.valueOf(param.getValue()).contains(VARIABLE_CHAR)).forEach(param -> {
+        params.forEach(param -> {
             Object paramValue = getParamValueWithDefaultValue(param);
+            if (!String.valueOf(paramValue).contains(VARIABLE_CHAR)){
+                return;
+            }
             if (paramValue instanceof String) {
                 String stringValue = String.valueOf(paramValue);
                 String replaceResult = strSubstitutor.replace(stringValue);
