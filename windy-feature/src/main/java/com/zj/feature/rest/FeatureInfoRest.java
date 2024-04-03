@@ -53,8 +53,8 @@ public class FeatureInfoRest {
     }
 
     @PutMapping("/feature")
-    public ResponseMeta<String> updateFeature(@RequestBody FeatureInfoVo featureInfoDTO) {
-        return new ResponseMeta(ErrorCode.SUCCESS, featureService.updateFeatureInfo(featureInfoDTO));
+    public ResponseMeta<String> updateFeature(@RequestBody FeatureInfoVo featureInfoVo) {
+        return new ResponseMeta(ErrorCode.SUCCESS, featureService.updateFeatureInfo(featureInfoVo));
     }
 
     @DeleteMapping("/feature/{featureId}")

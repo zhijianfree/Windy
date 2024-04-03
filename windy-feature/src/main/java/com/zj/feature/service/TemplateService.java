@@ -152,6 +152,7 @@ public class TemplateService {
             }
         });
         executorUnit.setParams(parameterDefines);
+        executorUnit.setRelatedId(executeTemplate.getRelatedId());
         return executorUnit;
     }
 

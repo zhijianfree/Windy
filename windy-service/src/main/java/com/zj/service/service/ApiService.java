@@ -2,6 +2,7 @@ package com.zj.service.service;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.LogType;
+import com.zj.common.enums.Position;
 import com.zj.common.enums.TemplateType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
@@ -20,6 +21,8 @@ import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IGenerateRecordRepository;
 import com.zj.domain.repository.service.IGenerateRepository;
 import com.zj.domain.repository.service.IServiceApiRepository;
+import com.zj.plugin.loader.InitData;
+import com.zj.plugin.loader.ParamValueType;
 import com.zj.plugin.loader.ParameterDefine;
 import com.zj.service.entity.ApiModel;
 import com.zj.service.entity.ApiRequestVariable;
@@ -27,7 +30,6 @@ import com.zj.service.entity.GenerateTemplate;
 import com.zj.service.entity.ImportApiResult;
 import com.zj.service.service.imports.ApiImportFactory;
 import com.zj.service.service.imports.IApiImportStrategy;
-import com.zj.common.enums.Position;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -182,7 +184,8 @@ public class ApiService {
                 .map(ExecuteTemplateDto::getTemplateId).collect(Collectors.toList());
 
         return serviceApis.stream().filter(serviceApi -> generateTemplate.getCover() || !existTemplateIds.contains(serviceApi.getApiId()))
-                .map(serviceApi -> convertApi2Template(serviceApi, generateTemplate.getInvokeType(), generateTemplate.getRelatedId()))
+                .map(serviceApi -> convertApi2Template(serviceApi, generateTemplate.getInvokeType(),
+                        generateTemplate.getRelatedId()))
                 .filter(Objects::nonNull).collect(Collectors.toList());
     }
 
@@ -209,12 +212,10 @@ public class ApiService {
                 header.put(variable.getParamKey(), variable.getDefaultValue());
                 return null;
             }
-            ParameterDefine parameterDefine = new ParameterDefine();
-            parameterDefine.setParamKey(variable.getParamKey());
-            parameterDefine.setType(variable.getType());
-            parameterDefine.setDescription(variable.getDescription());
-            parameterDefine.setDefaultValue(new ParameterDefine.DefaultValue(variable.getDefaultValue()));
-            parameterDefine.setPosition(variable.getPosition());
+            ParameterDefine parameterDefine = getParameterDefine(variable);
+            InitData initData = new InitData(variable.getDefaultValue());
+            setObjectArrayRange(variable, initData);
+            parameterDefine.setInitData(initData);
             return parameterDefine;
         }).filter(Objects::nonNull).collect(Collectors.toList());
         templateDto.setParam(JSON.toJSONString(parameterDefines));
@@ -223,6 +224,33 @@ public class ApiService {
         String assembledUrl = assembledApiUrl(serviceApi.getResource(), apiVariables);
         templateDto.setService(assembledUrl);
         return toExecuteTemplateDTO(templateDto);
+    }
+
+    private void setObjectArrayRange(ApiRequestVariable apiVariable, InitData initData) {
+        if (CollectionUtils.isEmpty(apiVariable.getChildren())){
+            return;
+        }
+
+        // 对象数组参数默认创建了一个空child，然后将对象的属性添加到空child的子对象中
+        ApiRequestVariable emptyChild = apiVariable.getChildren().get(0);
+        initData.setRangeType(emptyChild.getType());
+        if (Objects.equals(emptyChild.getType(), ParamValueType.Object.name())) {
+            List<ParameterDefine> rangeList = emptyChild.getChildren().stream().map(childVariable -> {
+                ParameterDefine param = getParameterDefine(childVariable);
+                param.setInitData(new InitData(childVariable.getDefaultValue()));
+                return param;
+            }).collect(Collectors.toList());
+            initData.setRange(rangeList);
+        }
+    }
+
+    private ParameterDefine getParameterDefine(ApiRequestVariable variable) {
+        ParameterDefine parameterDefine = new ParameterDefine();
+        parameterDefine.setParamKey(variable.getParamKey());
+        parameterDefine.setType(variable.getType());
+        parameterDefine.setDescription(variable.getDescription());
+        parameterDefine.setPosition(variable.getPosition());
+        return parameterDefine;
     }
 
     /**

@@ -46,6 +46,7 @@ public class MethodInvoke implements IExecuteInvoker {
 
       featureDefines.forEach(featureDefine -> {
         if (!instanceMap.containsKey(featureDefine.getSource())){
+          log.info("get source ={} className={}", featureDefine.getSource(), feature.getClass().getSimpleName());
           instanceMap.put(featureDefine.getSource(), feature);
         }
       });

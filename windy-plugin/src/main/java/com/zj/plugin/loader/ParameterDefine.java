@@ -30,7 +30,7 @@ public class ParameterDefine {
     /**
      * 参数默认值
      */
-    private DefaultValue defaultValue;
+    private InitData initData;
 
     public Object getValue() {
         return value;
@@ -72,39 +72,11 @@ public class ParameterDefine {
         this.description = description;
     }
 
-    public DefaultValue getDefaultValue() {
-        return defaultValue;
+    public InitData getInitData() {
+        return initData;
     }
 
-    public void setDefaultValue(DefaultValue defaultValue) {
-        this.defaultValue = defaultValue;
-    }
-
-    public static class  DefaultValue{
-        private String defaultValue;
-        private Object range;
-
-        public DefaultValue() {
-        }
-
-        public DefaultValue(String defaultValue) {
-            this.defaultValue = defaultValue;
-        }
-
-        public String getDefaultValue() {
-            return defaultValue;
-        }
-
-        public void setDefaultValue(String defaultValue) {
-            this.defaultValue = defaultValue;
-        }
-
-        public Object getRange() {
-            return range;
-        }
-
-        public void setRange(Object range) {
-            this.range = range;
-        }
+    public void setInitData(InitData initData) {
+        this.initData = initData;
     }
 }

@@ -159,10 +159,10 @@ public class VariableInterceptor implements IExecuteInterceptor {
 
     private Object getParamValueWithDefaultValue(ParameterDefine param) {
         return Optional.ofNullable(param.getValue()).orElseGet(() -> {
-            if (Objects.isNull(param.getDefaultValue())) {
+            if (Objects.isNull(param.getInitData())) {
                 return null;
             }
-            return param.getDefaultValue().getDefaultValue();
+            return param.getInitData().getData();
         });
     }
 }

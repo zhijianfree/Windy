@@ -55,7 +55,9 @@ public class RelateTemplateInvoker implements IExecuteInvoker {
                 param.setValue(executorUnit.getMethod());
             }
         });
+        log.info("execute param={}", JSON.toJSONString(relatedTemplate));
         variableInterceptor.filterVariable(relatedTemplate, executeContext);
+        log.info("filter execute param={}", JSON.toJSONString(relatedTemplate));
         return methodInvoke.invoke(relatedTemplate, executeContext);
     }
 }

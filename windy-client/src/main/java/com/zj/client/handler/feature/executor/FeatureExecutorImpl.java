@@ -9,6 +9,7 @@ import com.zj.client.handler.feature.executor.invoker.strategy.ExecuteStrategyFa
 import com.zj.client.handler.feature.executor.vo.ExecuteContext;
 import com.zj.client.handler.feature.executor.vo.FeatureParam;
 import com.zj.client.handler.notify.IResultEventNotify;
+import com.zj.client.utils.ExceptionUtils;
 import com.zj.common.enums.NotifyType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.model.ResultEvent;
@@ -79,7 +80,8 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
 
                     Map<String, Object> pointGlobalContext =
                             responses.stream().map(FeatureResponse::getContext).flatMap(map -> map.entrySet().stream())
-                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                                    .filter(entry -> Objects.nonNull(entry.getValue()))
+                                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
                     globalContext.putAll(pointGlobalContext);
                 } catch (Exception e) {
                     log.error("execute error", e);
@@ -148,7 +150,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
 
     private FeatureResponse createFailResponse(ExecutePoint executePoint, Exception e) {
         ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
-        executeDetailVo.setErrorMessage(e.toString());
+        executeDetailVo.setErrorMessage(ExceptionUtils.getSimplifyError(e));
         executeDetailVo.setStatus(false);
         return FeatureResponse.builder()
                 .pointId(executePoint.getPointId()).executeDetailVo(executeDetailVo).build();
