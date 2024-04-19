@@ -4,9 +4,10 @@ import lombok.Getter;
 
 @Getter
 public enum TemplateType {
-  CUSTOM(1),
-  DEFAULT(2),
-  PLUGIN(3);
+  NORMAL(1),
+  FOR(2),
+  IF(3),
+  DEFAULT(4),;
   private final int type;
 
   TemplateType(int type) {

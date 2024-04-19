@@ -1,14 +1,17 @@
 package com.zj.client.handler.feature.ability.mysql;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.zj.client.utils.ExceptionUtils;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import com.zj.plugin.loader.Feature;
-import com.zj.plugin.loader.ParamValueType;
 import com.zj.plugin.loader.FeatureDefine;
+import com.zj.plugin.loader.ParamValueType;
 import com.zj.plugin.loader.ParameterDefine;
-import com.zj.client.utils.ExceptionUtils;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -17,9 +20,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @Data

@@ -3,6 +3,8 @@ package com.zj.common.feature;
 import com.zj.plugin.loader.ParameterDefine;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 
@@ -16,13 +18,16 @@ public class ExecutorUnit {
     /**
      * 执行类名称
      * */
+    @NotBlank
     private String service;
 
+    @NotNull
     private Integer invokeType;
 
     /**
      * 执行方法
      * */
+    @NotBlank
     private String method;
 
     /**

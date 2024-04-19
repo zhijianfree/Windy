@@ -37,7 +37,7 @@ public class RelateTemplateInvoker implements IExecuteInvoker {
         executorUnit.getParams().stream().filter(parameterDefine -> Objects.equals(parameterDefine.getPosition(),
                 Position.Body.name())).forEach(param -> bodyMap.put(param.getParamKey(),
                 MethodInvoke.convertDataToType(param)));
-        String body = Optional.of(bodyMap).filter(map -> !map.isEmpty()).map(JSON::toJSONString).orElse(null);
+        String body = Optional.of(bodyMap).filter(map -> !map.isEmpty()).map(JSON::toJSONString).orElse("");
 
         ExecutorUnit relatedTemplate = executorUnit.getRelatedTemplate();
         relatedTemplate.getParams().forEach(param ->{

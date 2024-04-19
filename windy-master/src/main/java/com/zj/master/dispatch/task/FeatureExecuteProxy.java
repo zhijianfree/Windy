@@ -161,7 +161,7 @@ public class FeatureExecuteProxy implements IStopEventListener {
       executeContext.toMap().putAll(context);
       featureTask.setExecuteContext(executeContext);
     }
-
+    log.info("execute get token ={}", context.get("accessToken"));
     log.info("feature task start cycle run");
     execute(featureTask);
   }

@@ -55,9 +55,9 @@ public class ExecuteTemplateRepository extends
   }
 
   @Override
-  public List<ExecuteTemplateDto> getTemplatesByType(Integer templateType) {
-    List<ExecuteTemplate> executeTemplates = list(Wrappers.lambdaQuery(ExecuteTemplate.class).eq(ExecuteTemplate::getTemplateType,
-            templateType));
+  public List<ExecuteTemplateDto> getTemplatesByType(List<Integer> templateTypes) {
+    List<ExecuteTemplate> executeTemplates = list(Wrappers.lambdaQuery(ExecuteTemplate.class)
+            .in(ExecuteTemplate::getTemplateType, templateTypes));
     return OrikaUtil.convertList(executeTemplates, ExecuteTemplateDto.class);
   }
 

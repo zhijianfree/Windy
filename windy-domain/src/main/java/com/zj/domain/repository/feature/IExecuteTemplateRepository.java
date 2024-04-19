@@ -25,7 +25,7 @@ public interface IExecuteTemplateRepository {
 
     List<ExecuteTemplateDto> getServiceTemplates(String serviceId);
 
-  List<ExecuteTemplateDto> getTemplatesByType(Integer templateType);
+  List<ExecuteTemplateDto> getTemplatesByType(List<Integer> templateTypes);
 
   List<ExecuteTemplateDto> getTemplateByIds(List<String> templateIds);
 }

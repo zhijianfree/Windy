@@ -1,8 +1,6 @@
 package com.zj.client.handler.feature.executor.invoker.invoke;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.zj.client.entity.enuns.ParamTypeEnum;
 import com.zj.client.handler.feature.executor.vo.ExecuteContext;
 import com.zj.common.enums.InvokerType;
 import com.zj.plugin.loader.ExecuteDetailVo;
@@ -11,6 +9,7 @@ import com.zj.client.handler.feature.executor.invoker.loader.PluginManager;
 import com.zj.common.feature.ExecutorUnit;
 import com.zj.plugin.loader.Feature;
 import com.zj.plugin.loader.FeatureDefine;
+import com.zj.plugin.loader.ParamValueType;
 import com.zj.plugin.loader.ParameterDefine;
 import com.zj.client.utils.ExceptionUtils;
 import java.util.HashMap;
@@ -90,30 +89,38 @@ public class MethodInvoke implements IExecuteInvoker {
   }
 
   public static Object convertDataToType(ParameterDefine paramDefine) {
-    if (Objects.equals(ParamTypeEnum.Map.name(), paramDefine.getType())) {
+    if (Objects.isNull(paramDefine.getValue())) {
+      return null;
+    }
+
+    if (Objects.equals(ParamValueType.Map.name(), paramDefine.getType())) {
       if (Objects.isNull(paramDefine.getValue())) {
         return new HashMap<>();
       }
       return JSON.parse(JSON.toJSONString(paramDefine.getValue()));
     }
 
-    if (Objects.equals(ParamTypeEnum.Array.name(), paramDefine.getType())) {
+    if (Objects.equals(ParamValueType.Array.name(), paramDefine.getType())) {
       return paramDefine.getValue();
     }
 
-    if (Objects.equals(ParamTypeEnum.String.name(), paramDefine.getType())) {
+    if (Objects.equals(ParamValueType.String.name(), paramDefine.getType())) {
       return String.valueOf(paramDefine.getValue());
     }
 
-    if (Objects.equals(ParamTypeEnum.Integer.name(), paramDefine.getType())) {
+    if (Objects.equals(ParamValueType.Integer.name(), paramDefine.getType())) {
       return Integer.parseInt(String.valueOf(paramDefine.getValue()));
     }
 
-    if (Objects.equals(ParamTypeEnum.Float.name(), paramDefine.getType())) {
+    if (Objects.equals(ParamValueType.Long.name(), paramDefine.getType())) {
+      return Long.parseLong(String.valueOf(paramDefine.getValue()));
+    }
+
+    if (Objects.equals(ParamValueType.Float.name(), paramDefine.getType())) {
       return Float.parseFloat(String.valueOf(paramDefine.getValue()));
     }
 
-    if (Objects.equals(ParamTypeEnum.Double.name(), paramDefine.getType())) {
+    if (Objects.equals(ParamValueType.Double.name(), paramDefine.getType())) {
       return Double.parseDouble(String.valueOf(paramDefine.getValue()));
     }
 

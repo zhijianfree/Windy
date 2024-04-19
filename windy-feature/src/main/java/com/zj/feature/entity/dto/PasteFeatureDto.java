@@ -11,7 +11,7 @@ import java.util.List;
  * @since 2023/1/28
  */
 @Data
-public class CopyFeatureDto {
+public class PasteFeatureDto {
 
   /**
    * 源用例

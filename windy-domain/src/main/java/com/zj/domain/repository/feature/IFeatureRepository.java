@@ -1,8 +1,8 @@
 package com.zj.domain.repository.feature;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.zj.domain.entity.dto.feature.BatchDeleteDto;
 import com.zj.domain.entity.dto.feature.FeatureInfoDto;
+
 import java.util.List;
 
 /**
@@ -25,11 +25,13 @@ public interface IFeatureRepository {
 
   List<FeatureInfoDto> queryFeatureList(List<String> featureIds);
 
-  Boolean batchDeleteByFeatureId(BatchDeleteDto batchDeleteDTO);
+  Boolean batchDeleteByFeatureId(List<String> featureIds);
 
   IPage<FeatureInfoDto> queryFeaturePage(String testCaseId, int page, int size);
 
   boolean saveBatch(List<FeatureInfoDto> infoList);
 
   List<FeatureInfoDto> getSubFeatures(String featureId);
+
+  Boolean batchUpdate(List<FeatureInfoDto> features);
 }

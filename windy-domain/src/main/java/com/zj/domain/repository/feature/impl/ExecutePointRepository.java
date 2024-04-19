@@ -1,17 +1,17 @@
 package com.zj.domain.repository.feature.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
 import com.zj.domain.entity.po.feature.ExecutePoint;
 import com.zj.domain.mapper.feeature.ExecutePointMapper;
 import com.zj.domain.repository.feature.IExecutePointRepository;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * @author guyuelan
@@ -81,21 +81,6 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
     executePoint.setCreateTime(dateNow);
     executePoint.setUpdateTime(dateNow);
     return save(executePoint);
-  }
-
-  @Override
-  public Page<ExecutePointDto> queryExecutePointPage(String featureId, int page, int size) {
-    Page<ExecutePoint> pageSize = new Page<>(page, size);
-    Page<ExecutePoint> result = page(pageSize,
-        Wrappers.lambdaQuery(ExecutePoint.class).eq(ExecutePoint::getFeatureId, featureId)
-            .orderByAsc(ExecutePoint::getSortOrder));
-    Page<ExecutePointDto> pointDtoPage = new Page<>();
-    pointDtoPage.setTotal(result.getTotal());
-
-    List<ExecutePointDto> executePointDtos = OrikaUtil.convertList(result.getRecords(),
-        ExecutePointDto.class);
-    pointDtoPage.setRecords(executePointDtos);
-    return pointDtoPage;
   }
 
   @Override

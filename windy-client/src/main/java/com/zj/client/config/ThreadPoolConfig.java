@@ -69,4 +69,15 @@ public class ThreadPoolConfig {
     windyThreadPool.setThreadNamePrefix("generate-");
     return windyThreadPool;
   }
+
+  @Bean("featureExecutePool")
+  public Executor getFeatureExecutePool() {
+    WindyThreadPool windyThreadPool = new WindyThreadPool();
+    windyThreadPool.setCorePoolSize(10);
+    windyThreadPool.setMaxPoolSize(40);
+    windyThreadPool.setAllowCoreThreadTimeOut(false);
+    windyThreadPool.setQueueSize(100);
+    windyThreadPool.setThreadNamePrefix("feature-");
+    return windyThreadPool;
+  }
 }

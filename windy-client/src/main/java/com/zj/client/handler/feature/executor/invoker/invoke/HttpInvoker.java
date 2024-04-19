@@ -43,7 +43,7 @@ public class HttpInvoker implements IExecuteInvoker {
     String url = executorUnit.getService();
     String method = executorUnit.getMethod();
     Map<String, Object> bodyMap = getParamsMap(executorUnit);
-    String body = Optional.of(bodyMap).filter(map -> !map.isEmpty()).map(JSON::toJSONString).orElse(null);
+    String body = Optional.of(bodyMap).filter(map -> !map.isEmpty()).map(JSON::toJSONString).orElse("");
     Map<String, String> headers = Optional.ofNullable(executorUnit.getHeaders()).orElse(new HashMap<>());
     Request request = HttpFeature.requestFactory(url, method, headers, body);
 

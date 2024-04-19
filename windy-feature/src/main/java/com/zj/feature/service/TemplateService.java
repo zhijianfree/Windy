@@ -38,7 +38,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -108,7 +110,8 @@ public class TemplateService {
 
     public List<ExecuteTemplateVo> getFeatureList(String serviceId) {
         List<ExecuteTemplateDto> defaultTemplates =
-                templateRepository.getTemplatesByType(TemplateType.DEFAULT.getType());
+                templateRepository.getTemplatesByType(Arrays.asList(TemplateType.FOR.getType(),
+                        TemplateType.IF.getType(), TemplateType.DEFAULT.getType()));
         List<ExecuteTemplateDto> executeTemplates = templateRepository.getServiceTemplates(serviceId);
         executeTemplates.addAll(defaultTemplates);
         return executeTemplates.stream().map(this::toExecuteTemplateDTO)
@@ -137,11 +140,10 @@ public class TemplateService {
         executorUnit.setService(executeTemplate.getService());
         executorUnit.setMethod(executeTemplate.getMethod());
         executorUnit.setInvokeType(executeTemplate.getInvokeType());
-        Map<String, String> map = JSON.parseObject(executeTemplate.getHeader(),
-                Map.class);
+        Map<String, String> map = JSON.parseObject(executeTemplate.getHeader(), Map.class);
         executorUnit.setHeaders(map);
-        Map<String, ParameterDefine> pointParameterMap =
-                executorUnit.getParams().stream().collect(Collectors.toMap(ParameterDefine::getParamKey, param -> param));
+        Map<String, ParameterDefine> pointParameterMap = executorUnit.getParams().stream().collect(
+                Collectors.toMap(ParameterDefine::getParamKey, param -> param));
 
         //存量执行点的执行菜单使用最新模版的配置，只需替换value即可
         List<ParameterDefine> parameterDefines = JSON.parseArray(executeTemplate.getParam(), ParameterDefine.class);
@@ -186,7 +188,7 @@ public class TemplateService {
 
     private static ExecuteTemplateVo buildExecuteTemplateVo(FeatureDefine define, String serviceId) {
         ExecuteTemplateVo executeTemplateVo = new ExecuteTemplateVo();
-        executeTemplateVo.setTemplateType(TemplateType.PLUGIN.getType());
+        executeTemplateVo.setTemplateType(TemplateType.NORMAL.getType());
         executeTemplateVo.setInvokeType(InvokerType.METHOD.getType());
         executeTemplateVo.setName(define.getName());
         executeTemplateVo.setMethod(define.getMethod());
@@ -250,7 +252,8 @@ public class TemplateService {
         }
 
         //获取已存在的模版
-        List<String> templateIds = batchTemplates.getTemplates().stream().map(ExecuteTemplateVo::getTemplateId).collect(Collectors.toList());
+        List<String> templateIds =
+                batchTemplates.getTemplates().stream().map(ExecuteTemplateVo::getTemplateId).collect(Collectors.toList());
         List<String> existTemplates =
                 templateRepository.getTemplateByIds(templateIds).stream().map(ExecuteTemplateDto::getTemplateId).collect(Collectors.toList());
 
@@ -287,7 +290,8 @@ public class TemplateService {
     }
 
     public List<ExecuteTemplateVo> getTemplatesByInvokeType(Integer invokeType) {
-        List<ExecuteTemplateDto> templateList = templateRepository.getTemplatesByType(invokeType);
+        List<ExecuteTemplateDto> templateList =
+                templateRepository.getTemplatesByType(Collections.singletonList(invokeType));
         return templateList.stream().map(this::toExecuteTemplateDTO).collect(Collectors.toList());
     }
 

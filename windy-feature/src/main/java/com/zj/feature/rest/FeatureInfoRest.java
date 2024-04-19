@@ -3,19 +3,15 @@ package com.zj.feature.rest;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseMeta;
-import com.zj.domain.entity.dto.feature.BatchDeleteDto;
 import com.zj.domain.entity.dto.feature.FeatureInfoDto;
-import com.zj.domain.entity.po.feature.FeatureInfo;
+import com.zj.feature.entity.dto.BatchDeleteDto;
+import com.zj.feature.entity.dto.BatchUpdateFeatures;
 import com.zj.feature.entity.dto.CopyCaseFeatureDto;
-import com.zj.feature.entity.dto.CopyFeatureDto;
 import com.zj.feature.entity.dto.FeatureInfoVo;
 import com.zj.feature.entity.dto.FeatureNodeDto;
+import com.zj.feature.entity.dto.PasteFeatureDto;
 import com.zj.feature.entity.dto.TagFilterDto;
 import com.zj.feature.service.FeatureService;
-
-import java.util.List;
-import javax.validation.Valid;
-
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +21,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
+import java.util.List;
 
 @RequestMapping("/v1/devops")
 @RestController
@@ -37,13 +36,13 @@ public class FeatureInfoRest {
     }
 
     @GetMapping("/{caseId}/tree/features")
-    public ResponseMeta<List<FeatureInfo>> getFeatureTreeList(
+    public ResponseMeta<List<FeatureNodeDto>> getFeatureTreeList(
             @PathVariable("caseId") String caseId) {
         return new ResponseMeta(ErrorCode.SUCCESS, featureService.getFeatureTreeList(caseId));
     }
 
     @GetMapping("/{caseId}/features")
-    public ResponseMeta<List<FeatureInfo>> getFeatureList(@PathVariable("caseId") String caseId) {
+    public ResponseMeta<List<FeatureInfoDto>> getFeatureList(@PathVariable("caseId") String caseId) {
         return new ResponseMeta(ErrorCode.SUCCESS, featureService.queryFeatureList(caseId));
     }
 
@@ -62,7 +61,12 @@ public class FeatureInfoRest {
         return new ResponseMeta<>(ErrorCode.SUCCESS, featureService.deleteByFeatureId(featureId));
     }
 
-    @PostMapping("/delete/features")
+    @PutMapping("/batch/features")
+    public ResponseMeta<Boolean> batchUpdateFeatures(@RequestBody BatchUpdateFeatures batchUpdateFeatures) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, featureService.batchUpdateFeatures(batchUpdateFeatures));
+    }
+
+    @DeleteMapping("/delete/features")
     public ResponseMeta<Boolean> batchDeleteFeature(@RequestBody BatchDeleteDto batchDeleteDTO) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, featureService.batchDeleteByFeatureId(batchDeleteDTO));
     }
@@ -95,8 +99,8 @@ public class FeatureInfoRest {
         return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, featureService.copyCaseFeatures(copyCaseFeatures));
     }
 
-    @PostMapping("/feature/copy")
-    public ResponseMeta<Boolean> copyFeatures(@Valid @RequestBody CopyFeatureDto copyFeature) {
-        return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, featureService.copyFeature(copyFeature));
+    @PostMapping("/feature/paste")
+    public ResponseMeta<Boolean> pasteFeatures(@Valid @RequestBody PasteFeatureDto copyFeature) {
+        return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, featureService.pasteFeatures(copyFeature));
     }
 }

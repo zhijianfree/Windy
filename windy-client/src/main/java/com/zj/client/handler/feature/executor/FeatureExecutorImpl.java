@@ -17,6 +17,8 @@ import com.zj.common.utils.IpUtils;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -26,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -41,7 +44,9 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
 
     private final IResultEventNotify resultEventNotify;
 
-    private final ExecutorService executorService = Executors.newFixedThreadPool(30);
+    @Autowired
+    @Qualifier("featureExecutePool")
+    private Executor executor;
 
     public FeatureExecutorImpl(
             ExecuteStrategyFactory executeStrategyFactory, UniqueIdService uniqueIdService,
@@ -53,6 +58,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
 
     @Override
     public void execute(FeatureParam featureParam) {
+        log.info("execute get token ={}", featureParam.getExecuteContext().get("accessToken"));
         String historyId = uniqueIdService.getUniqueId();
         FeatureHistory featureHistory = saveFeatureHistory(featureParam.getFeatureId(), historyId,
                 featureParam.getTaskRecordId());
@@ -111,7 +117,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
                     .context(globalContext)
                     .params(featureHistory);
             resultEventNotify.notifyEvent(resultEvent);
-        }, executorService);
+        }, executor);
     }
 
     private void saveRecord(FeatureParam featureParam, ExecutePoint executePoint,

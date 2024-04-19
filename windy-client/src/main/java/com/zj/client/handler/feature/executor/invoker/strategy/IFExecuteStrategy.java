@@ -34,8 +34,8 @@ public class IFExecuteStrategy extends BaseExecuteStrategy {
   }
 
   @Override
-  public ExecutePointType getType() {
-    return ExecutePointType.IF;
+  public List<ExecutePointType> getType() {
+    return Collections.singletonList(ExecutePointType.IF);
   }
 
   @Override

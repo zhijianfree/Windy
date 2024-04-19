@@ -180,13 +180,10 @@ public class ApiService {
         }
 
         List<String> templateIds = serviceApis.stream().map(ServiceApiDto::getApiId).collect(Collectors.toList());
-        List<String> existTemplateIds = executeTemplateRepository.getTemplateByIds(templateIds).stream()
-                .map(ExecuteTemplateDto::getTemplateId).collect(Collectors.toList());
+        List<String> existTemplateIds =
+                executeTemplateRepository.getTemplateByIds(templateIds).stream().map(ExecuteTemplateDto::getTemplateId).collect(Collectors.toList());
 
-        return serviceApis.stream().filter(serviceApi -> generateTemplate.getCover() || !existTemplateIds.contains(serviceApi.getApiId()))
-                .map(serviceApi -> convertApi2Template(serviceApi, generateTemplate.getInvokeType(),
-                        generateTemplate.getRelatedId()))
-                .filter(Objects::nonNull).collect(Collectors.toList());
+        return serviceApis.stream().filter(serviceApi -> generateTemplate.getCover() || !existTemplateIds.contains(serviceApi.getApiId())).map(serviceApi -> convertApi2Template(serviceApi, generateTemplate.getInvokeType(), generateTemplate.getRelatedId())).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     private ExecuteTemplateVo convertApi2Template(ServiceApiDto serviceApi, Integer invokeType, String relatedId) {
@@ -199,7 +196,7 @@ public class ApiService {
         templateDto.setName(serviceApi.getApiName());
         templateDto.setMethod(serviceApi.getMethod());
         templateDto.setInvokeType(invokeType);
-        templateDto.setTemplateType(TemplateType.CUSTOM.getType());
+        templateDto.setTemplateType(TemplateType.NORMAL.getType());
         templateDto.setDescription(serviceApi.getDescription());
         templateDto.setOwner(serviceApi.getServiceId());
         templateDto.setRelatedId(relatedId);
@@ -214,7 +211,7 @@ public class ApiService {
             }
             ParameterDefine parameterDefine = getParameterDefine(variable);
             InitData initData = new InitData(variable.getDefaultValue());
-            setObjectArrayRange(variable, initData);
+            setParamRangeData(variable, initData);
             parameterDefine.setInitData(initData);
             return parameterDefine;
         }).filter(Objects::nonNull).collect(Collectors.toList());
@@ -226,18 +223,34 @@ public class ApiService {
         return toExecuteTemplateDTO(templateDto);
     }
 
-    private void setObjectArrayRange(ApiRequestVariable apiVariable, InitData initData) {
-        if (CollectionUtils.isEmpty(apiVariable.getChildren())){
+    private void setParamRangeData(ApiRequestVariable apiVariable, InitData initData) {
+        if (CollectionUtils.isEmpty(apiVariable.getChildren())) {
             return;
         }
 
+        if (Objects.equals(apiVariable.getType(), ParamValueType.Object.name())) {
+            List<ParameterDefine> parameters =
+                    apiVariable.getChildren().stream().map(this::getParameterDefine).collect(Collectors.toList());
+            initData.setRange(parameters);
+            return;
+        }
+
+
         // 对象数组参数默认创建了一个空child，然后将对象的属性添加到空child的子对象中
+        setArrayInitDta(apiVariable, initData);
+    }
+
+    private void setArrayInitDta(ApiRequestVariable apiVariable, InitData initData) {
         ApiRequestVariable emptyChild = apiVariable.getChildren().get(0);
         initData.setRangeType(emptyChild.getType());
         if (Objects.equals(emptyChild.getType(), ParamValueType.Object.name())) {
             List<ParameterDefine> rangeList = emptyChild.getChildren().stream().map(childVariable -> {
+                InitData init = new InitData(childVariable.getDefaultValue());
+                if (Objects.equals(childVariable.getType(), "Array") && CollectionUtils.isNotEmpty(childVariable.getChildren())) {
+                    setArrayInitDta(childVariable, init);
+                }
                 ParameterDefine param = getParameterDefine(childVariable);
-                param.setInitData(new InitData(childVariable.getDefaultValue()));
+                param.setInitData(init);
                 return param;
             }).collect(Collectors.toList());
             initData.setRange(rangeList);
@@ -264,8 +277,8 @@ public class ApiService {
         for (ApiRequestVariable variable : apiVariables) {
             if (Objects.equals(variable.getPosition(), Position.Query.name())) {
                 String paramKey = variable.getParamKey();
-                uriBuilder.append(uriBuilder.indexOf("?") >= 0 ? "&" : "?")
-                        .append(String.format("%s=${%s}", paramKey, paramKey));
+                uriBuilder.append(uriBuilder.indexOf("?") >= 0 ? "&" : "?").append(String.format("%s=${%s}", paramKey
+                        , paramKey));
             }
             if (Objects.equals(variable.getPosition(), Position.Path.name())) {
                 uriBuilder = new StringBuilder(uriBuilder.toString().replace("{" + variable.getParamKey() + "}",

@@ -11,6 +11,7 @@ import com.zj.client.handler.feature.executor.interceptor.InterceptorProxy;
 import com.zj.client.handler.feature.executor.vo.ExecuteContext;
 import com.zj.common.feature.ExecutorUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +32,8 @@ public class ForExecuteStrategy extends BaseExecuteStrategy{
   }
 
   @Override
-  public ExecutePointType getType() {
-    return ExecutePointType.FOR;
+  public List<ExecutePointType> getType() {
+    return Collections.singletonList(ExecutePointType.FOR);
   }
 
   @Override

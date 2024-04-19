@@ -10,6 +10,7 @@ import com.zj.client.handler.feature.executor.vo.ExecuteContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,8 +29,8 @@ public class INormalExecuteStrategy extends BaseExecuteStrategy {
     }
 
     @Override
-    public ExecutePointType getType() {
-        return ExecutePointType.NORMAL;
+    public List<ExecutePointType> getType() {
+        return Arrays.asList(ExecutePointType.NORMAL, ExecutePointType.DEFAULT);
     }
 
     @Override
