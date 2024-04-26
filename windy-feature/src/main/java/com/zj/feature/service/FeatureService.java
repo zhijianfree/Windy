@@ -190,6 +190,7 @@ public class FeatureService {
             String uniqueId = uniqueIdService.getUniqueId();
             idRecordMap.put(feature.getFeatureId(), uniqueId);
             feature.setFeatureId(uniqueId);
+            feature.setId(null);
             feature.setTestCaseId(newCaseId);
             feature.setCreateTime(currentTime);
             feature.setUpdateTime(currentTime);
