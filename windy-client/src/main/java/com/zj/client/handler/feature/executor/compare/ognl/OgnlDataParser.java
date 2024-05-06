@@ -1,6 +1,8 @@
 package com.zj.client.handler.feature.executor.compare.ognl;
 
 import java.util.Map;
+import java.util.Optional;
+
 import ognl.DefaultClassResolver;
 import ognl.DefaultTypeConverter;
 import ognl.Ognl;
@@ -8,10 +10,12 @@ import ognl.OgnlContext;
 import ognl.OgnlException;
 
 public class OgnlDataParser {
-
+    private static final String VARIABLE_CHAR = "$";
+    public static final String RUNTIME_VARIABLE_CHAR = "#";
     public static final String BODY = "body";
 
     public Object parserExpression(Object object, String expression) {
+        expression = expression.replace(VARIABLE_CHAR, RUNTIME_VARIABLE_CHAR);
         OgnlContext context = (OgnlContext) Ognl.createDefaultContext(this,
                 new DefaultMemberAccess(true),
                 new DefaultClassResolver(),
@@ -29,13 +33,14 @@ public class OgnlDataParser {
         return ans;
     }
 
-    public Object parserExpression(Map<String, Object> map, String expression,Object obj) {
-        Object ans = null;
+    public boolean parserExpression(Map<String, Object> map, String expression) {
         try {
-            ans = Ognl.getValue(Ognl.parseExpression(expression), map, obj);
+            expression = expression.replace(VARIABLE_CHAR, RUNTIME_VARIABLE_CHAR);
+            Object result = Ognl.getValue(Ognl.parseExpression(expression), map, new Object());
+            return Optional.ofNullable(result).map(r -> Boolean.parseBoolean(String.valueOf(result))).orElse(false);
         } catch (OgnlException e) {
             e.printStackTrace();
         }
-        return ans;
+        return false;
     }
 }

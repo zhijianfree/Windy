@@ -85,7 +85,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
 
 
                     Map<String, Object> pointGlobalContext =
-                            responses.stream().map(FeatureResponse::getContext).flatMap(map -> map.entrySet().stream())
+                            responses.stream().map(FeatureResponse::getContext).filter(Objects::nonNull).flatMap(map -> map.entrySet().stream())
                                     .filter(entry -> Objects.nonNull(entry.getValue()))
                                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
                     globalContext.putAll(pointGlobalContext);

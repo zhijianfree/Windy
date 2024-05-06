@@ -27,9 +27,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class VariableInterceptor implements IExecuteInterceptor {
-
     private static final String VARIABLE_CHAR = "$";
-    public static final String RUNTIME_VARIABLE_CHAR = "#";
     private final OgnlDataParser ognlDataParser = new OgnlDataParser();
 
     @Override
@@ -77,11 +75,6 @@ public class VariableInterceptor implements IExecuteInterceptor {
             String expressionString = variableDefine.getVariableValue();
             if (StringUtils.isBlank(expressionString)) {
                 return;
-            }
-
-            //字符串替换 $ => #
-            if (expressionString.startsWith(VARIABLE_CHAR)) {
-                expressionString = expressionString.replace(VARIABLE_CHAR, RUNTIME_VARIABLE_CHAR);
             }
 
             Object result = ognlDataParser.parserExpression(responseBody, expressionString);

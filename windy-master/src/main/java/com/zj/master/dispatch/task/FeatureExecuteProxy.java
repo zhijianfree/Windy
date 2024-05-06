@@ -73,6 +73,7 @@ public class FeatureExecuteProxy implements IStopEventListener {
   public void execute(FeatureTask featureTask) {
     featureTaskMap.put(featureTask.getTaskRecordId(), featureTask);
     CompletableFuture.supplyAsync(() -> {
+
       LinkedBlockingQueue<String> featureIds = featureTask.getFeatureIds();
       String featureId = featureIds.poll();
       String taskRecordId = featureTask.getTaskRecordId();

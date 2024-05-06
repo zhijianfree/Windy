@@ -101,8 +101,7 @@ public class CompareHandler {
                 return;
             }
 
-            String compare = key.replace("$", "#");
-            Object result = ognlDataParser.parserExpression(executeDetailVo.responseBody(), compare);
+            Object result = ognlDataParser.parserExpression(executeDetailVo.responseBody(), key);
             compareDefine.setResponseValue(result);
         });
     }

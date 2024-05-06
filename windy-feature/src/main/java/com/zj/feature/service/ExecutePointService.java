@@ -49,12 +49,27 @@ public class ExecutePointService {
     }
 
     public String createExecutePoint(ExecutePointVo executePointVo) {
-        ExecutePointDto executePoint = ExecutePointVo.toExecutePoint(executePointVo);
+        ExecutePointDto executePoint = toExecutePoint(executePointVo);
         executePoint.setPointId(uniqueIdService.getUniqueId());
         boolean result = executePointRepository.saveExecutePoint(executePoint);
 
         log.info("create feature detail result = {}", result);
         return executePoint.getPointId();
+    }
+
+    public  ExecutePointDto toExecutePoint(ExecutePointVo dto) {
+        ExecutePointDto point = new ExecutePointDto();
+        point.setFeatureId(dto.getFeatureId());
+        point.setPointId(dto.getPointId());
+        point.setDescription(dto.getDescription());
+        point.setSortOrder(dto.getSortOrder());
+        point.setTemplateId(dto.getTemplateId());
+        point.setTestStage(dto.getTestStage());
+        point.setExecuteType(dto.getExecuteType());
+        point.setCompareDefine(JSON.toJSONString(dto.getCompareDefine()));
+        point.setVariables(JSON.toJSONString(dto.getVariableDefine()));
+        point.setFeatureInfo(JSON.toJSONString(dto.getExecutorUnit()));
+        return point;
     }
 
     public String updateExecutePoint(ExecutePointVo executePointVo) {
