@@ -141,7 +141,6 @@ public class PipelineDispatch implements IDispatchExecutor {
   }
 
   private void saveHistory(String pipelineId, String historyId) {
-
     PipelineHistoryDto pipelineHistory = new PipelineHistoryDto();
     pipelineHistory.setHistoryId(historyId);
     pipelineHistory.setPipelineId(pipelineId);
