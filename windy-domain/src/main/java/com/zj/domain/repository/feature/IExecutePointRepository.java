@@ -21,6 +21,7 @@ public interface IExecutePointRepository {
   boolean deleteExecutePoint(String pointId);
 
   boolean deleteByFeatureId(String featureId);
+  boolean deleteByFeatureIds(List<String> featureIds);
 
   List<ExecutePointDto> getPointsByFeatureIds(List<String> featureIds);
 

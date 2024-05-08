@@ -67,6 +67,12 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
   }
 
   @Override
+  public boolean deleteByFeatureIds(List<String> featureIds) {
+    return remove(
+            Wrappers.lambdaQuery(ExecutePoint.class).in(ExecutePoint::getFeatureId, featureIds));
+  }
+
+  @Override
   public List<ExecutePointDto> getPointsByFeatureIds(List<String> featureIds) {
     List<ExecutePoint> executePoints = list(
         Wrappers.lambdaQuery(ExecutePoint.class).in(ExecutePoint::getFeatureId, featureIds)

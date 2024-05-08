@@ -22,11 +22,6 @@ public class Microservice {
     private String gitUrl;
 
     /**
-     * 服务拥有者
-     * */
-    private String owner;
-
-    /**
      * 服务描述
      * */
     private String description;

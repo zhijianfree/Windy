@@ -26,11 +26,6 @@ public class MicroserviceDto {
     private String description;
 
     /**
-     * 服务拥有者
-     * */
-    private String owner;
-
-    /**
      * 服务优先级，用来服务列表排序
      * */
     private Integer priority;

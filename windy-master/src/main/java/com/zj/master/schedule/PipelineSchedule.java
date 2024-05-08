@@ -76,6 +76,7 @@ public class PipelineSchedule implements CommandLineRunner {
       return;
     }
 
+    log.info("start run task");
     lockRepository.tryLock(PIPELINE_SCHEDULE);
     pipelines.forEach(pipeline -> {
       PipelineConfig pipelineConfig = JSON.parseObject(pipeline.getPipelineConfig(),
@@ -83,8 +84,10 @@ public class PipelineSchedule implements CommandLineRunner {
       Trigger trigger = new CronTrigger(pipelineConfig.getSchedule());
       ScheduledFuture<?> scheduledFuture = taskScheduler.schedule(() -> {
         if (!lockRepository.hasLock(PIPELINE_SCHEDULE)) {
+          log.info("pipeline do not have lock pipelineId={}", pipeline.getPipelineId());
           return;
         }
+        log.info("start dispatch pipeline task pipelineId={}", pipeline.getPipelineId());
         DispatchTaskModel task = new DispatchTaskModel();
         task.setType(LogType.PIPELINE.getType());
         task.setSourceName(pipeline.getPipelineName());

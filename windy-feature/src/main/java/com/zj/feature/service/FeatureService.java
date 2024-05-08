@@ -217,6 +217,7 @@ public class FeatureService {
             String newFeatureId = idRecordMap.get(oldId);
             pointGroupMap.get(oldId).forEach(executePoint -> {
                 executePoint.setId(null);
+                executePoint.setPointId(uniqueIdService.getUniqueId());
                 executePoint.setFeatureId(newFeatureId);
                 executePoint.setCreateTime(currentTime);
                 executePoint.setUpdateTime(currentTime);
@@ -300,13 +301,14 @@ public class FeatureService {
             //将用例关联的执行点也复制懂啊新的用例下
             String newFeatureId = uniqueIdService.getUniqueId();
             List<ExecutePointDto> existPoints = featurePointsMap.get(feature.getFeatureId());
-            existPoints.forEach(point -> {
+            existPoints = existPoints.stream().map(point -> {
                 point.setId(null);
                 point.setPointId(uniqueIdService.getUniqueId());
                 point.setFeatureId(newFeatureId);
                 point.setUpdateTime(System.currentTimeMillis());
                 point.setCreateTime(System.currentTimeMillis());
-            });
+                return point;
+            }).collect(Collectors.toList());
             executePointService.saveBatch(existPoints);
 
             feature.setId(null);
