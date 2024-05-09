@@ -22,11 +22,6 @@ public class FeatureHistoryDto {
     private String featureName;
 
     /**
-     * 用例执行人
-     * */
-    private String executor;
-
-    /**
      * 执行状态
      * */
     private Integer executeStatus;

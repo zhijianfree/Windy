@@ -27,11 +27,6 @@ public class Pipeline {
   private String serviceId;
 
   /**
-   * 流水线创建者
-   * */
-  private String creator;
-
-  /**
    * 流水线类型
    * */
   private Integer pipelineType;

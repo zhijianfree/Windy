@@ -23,11 +23,6 @@ public class TaskRecordDto {
   private String statusName;
 
   /**
-   * 创建者
-   * */
-  private String userId;
-
-  /**
    * 任务名称
    * */
   private String taskName;

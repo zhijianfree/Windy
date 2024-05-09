@@ -17,11 +17,6 @@ public class TestCase {
   private String testCaseId;
 
   /**
-   * 创建人
-   * */
-  private String author;
-
-  /**
    * 用例集名称
    * */
   private String testCaseName;

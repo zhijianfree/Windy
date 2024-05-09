@@ -18,11 +18,6 @@ public class TaskRecord {
   private String taskId;
 
   /**
-   * 创建者
-   * */
-  private String userId;
-
-  /**
    * 执行状态
    * */
   private Integer status;

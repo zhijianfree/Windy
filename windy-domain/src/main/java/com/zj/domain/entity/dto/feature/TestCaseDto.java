@@ -18,11 +18,6 @@ public class TestCaseDto {
   private String testCaseId;
 
   /**
-   * 创建人
-   * */
-  private String author;
-
-  /**
    * 服务ID
    * */
   private String serviceId;
