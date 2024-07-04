@@ -186,9 +186,9 @@ public class TemplateService {
         }
     }
 
-    private static ExecuteTemplateVo buildExecuteTemplateVo(FeatureDefine define, String serviceId) {
+    private ExecuteTemplateVo buildExecuteTemplateVo(FeatureDefine define, String serviceId) {
         ExecuteTemplateVo executeTemplateVo = new ExecuteTemplateVo();
-        executeTemplateVo.setTemplateType(TemplateType.NORMAL.getType());
+        executeTemplateVo.setTemplateType(TemplateType.PLUGIN.getType());
         executeTemplateVo.setInvokeType(InvokerType.METHOD.getType());
         executeTemplateVo.setName(define.getName());
         executeTemplateVo.setMethod(define.getMethod());

@@ -7,7 +7,8 @@ public enum TemplateType {
   NORMAL(1),
   FOR(2),
   IF(3),
-  DEFAULT(4),;
+  DEFAULT(4),
+  PLUGIN(5);
   private final int type;
 
   TemplateType(int type) {
