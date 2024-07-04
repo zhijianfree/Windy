@@ -77,13 +77,12 @@ public class PipelineSchedule implements CommandLineRunner {
     }
 
     log.info("start run task");
-    lockRepository.tryLock(PIPELINE_SCHEDULE);
     pipelines.forEach(pipeline -> {
       PipelineConfig pipelineConfig = JSON.parseObject(pipeline.getPipelineConfig(),
           PipelineConfig.class);
       Trigger trigger = new CronTrigger(pipelineConfig.getSchedule());
       ScheduledFuture<?> scheduledFuture = taskScheduler.schedule(() -> {
-        if (!lockRepository.hasLock(PIPELINE_SCHEDULE)) {
+        if (!lockRepository.tryLock(PIPELINE_SCHEDULE)) {
           log.info("pipeline do not have lock pipelineId={}", pipeline.getPipelineId());
           return;
         }
@@ -114,6 +113,7 @@ public class PipelineSchedule implements CommandLineRunner {
       //如果定时任务发生改变需要将之前的定时任务取消，后面会重新添加新的定时任务
       holder.getScheduledFuture().cancel(true);
       scheduledMap.remove(pipeline.getPipelineId());
+      log.info("remove pipeline old schedule = {} pipelineId={}", holder.getCron(), pipeline.getPipelineId());
       return true;
     }
     return false;
