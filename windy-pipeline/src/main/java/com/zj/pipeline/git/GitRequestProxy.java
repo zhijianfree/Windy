@@ -51,6 +51,18 @@ public class GitRequestProxy {
     }
   }
 
+  public Response getWithResponse(String path, Map<String, String> headers) {
+    String gitDomain = getGitAccess().getGitDomain();
+    Request request = new Request.Builder().url(gitDomain + path).headers(Headers.of(headers)).get()
+            .build();
+    try {
+      Response execute = okHttpClient.newCall(request).execute();
+      return execute;
+    } catch (IOException e) {
+      throw new ApiException(ErrorCode.REQUEST_GIT_SERVER_FAILED);
+    }
+  }
+
   public String post(String path, String body, Map<String, String> headers) {
     RequestBody requestBody = RequestBody.create(CONTENT_TYPE, body);
     String gitDomain = getGitAccess().getGitDomain();

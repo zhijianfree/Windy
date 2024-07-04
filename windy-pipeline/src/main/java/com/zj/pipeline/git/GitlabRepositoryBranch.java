@@ -8,9 +8,12 @@ import com.zj.common.git.IRepositoryBranch;
 import com.zj.pipeline.entity.vo.BranchInfo;
 import com.zj.pipeline.entity.vo.GitlabRepository;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Response;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +51,6 @@ public class GitlabRepositoryBranch implements IRepositoryBranch {
     private void loadGitRepositories() {
         try {
             List<GitlabRepository> gitlabRepositories = getGitlabRepositories();
-            log.info("get all repository ={}", JSON.toJSONString(gitlabRepositories));
             serviceIdMap = gitlabRepositories.stream()
                     .collect(Collectors.toMap(repo -> repo.getName().toLowerCase(), GitlabRepository::getId,
                             (value1, value2) -> value2));
@@ -73,7 +75,6 @@ public class GitlabRepositoryBranch implements IRepositoryBranch {
         if (Objects.isNull(branchInfo) || !Objects.equals(branchInfo.getName(), branchName)) {
             throw new ApiException(ErrorCode.CREATE_BRANCH_ERROR);
         }
-
     }
 
     @Override
@@ -88,17 +89,21 @@ public class GitlabRepositoryBranch implements IRepositoryBranch {
     @Override
     public List<String> listBranch(String serviceName) {
         Integer projectId = transformProjectId(serviceName);
+        if (Objects.isNull(projectId)) {
+            log.info("can not get service project id={}", serviceName);
+            return Collections.emptyList();
+        }
+
         String path = String.format("/api/v4/projects/%s/repository/branches", projectId);
         String result = gitRequestProxy.get(path, getTokenHeader());
         List<BranchInfo> branches = JSON.parseArray(result, BranchInfo.class);
         if (CollectionUtils.isEmpty(branches)) {
             return Collections.emptyList();
         }
-
-        log.info("get list={}", result);
         return branches.stream().map(BranchInfo::getName)
                 //不显示master分支以及构建的临时分支
-                .filter(branch -> !Objects.equals(branch, MASTER) && !branch.startsWith(TEMP_PREFIX))
+                .filter(branch -> Objects.nonNull(branch) && !Objects.equals(branch, MASTER)
+                        && !branch.startsWith(TEMP_PREFIX))
                 .collect(Collectors.toList());
     }
 
@@ -114,6 +119,7 @@ public class GitlabRepositoryBranch implements IRepositoryBranch {
     public void checkRepository(String serviceName) {
         List<GitlabRepository> repositories = getGitlabRepository(serviceName);
         if (CollectionUtils.isEmpty(repositories)) {
+            log.info("gitlab repository not exist={}", serviceName);
             throw new ApiException(ErrorCode.REPO_NOT_EXIST);
         }
 
@@ -121,18 +127,50 @@ public class GitlabRepositoryBranch implements IRepositoryBranch {
                 .filter(repo -> Objects.equals(repo.getName().toLowerCase(), serviceName.toLowerCase()))
                 .findAny();
         if (!optional.isPresent()) {
+            log.info("user can not access gitlab repository permission={}", serviceName);
             throw new ApiException(ErrorCode.USER_NO_PERMISSION);
         }
 
         boolean permission = optional.get().getPermissions().checkPermission();
         if (!permission) {
+            log.info("user do not have gitlab repository permission={}", serviceName);
             throw new ApiException(ErrorCode.GIT_NO_PERMISSION);
         }
     }
 
     private List<GitlabRepository> getGitlabRepositories() {
-        String result = gitRequestProxy.get("/api/v4/projects?per_page=500&page=1", getTokenHeader());
-        return JSON.parseArray(result, GitlabRepository.class);
+        Response response = gitRequestProxy.getWithResponse("/api/v4/projects?per_page=100&page=1", getTokenHeader());
+        try {
+            String result = response.body().string();
+            List<GitlabRepository> allRepositories = JSON.parseArray(result, GitlabRepository.class);
+            String pageNum = response.header("x-total-pages");
+            allRepositories.addAll(requestAllRepositories(pageNum));
+            return allRepositories;
+        } catch (Exception e) {
+            log.info("get gitlab repositories error", e);
+            return Collections.emptyList();
+        }
+    }
+
+    private List<GitlabRepository> requestAllRepositories(String numString) {
+        if (StringUtils.isBlank(numString)) {
+            log.info("gitlab response header not find x-total-pages");
+            return Collections.emptyList();
+        }
+
+        int num = Integer.parseInt(numString);
+        List<GitlabRepository> list = new ArrayList<>();
+        for (int i = 2; i <= num; i++) {
+            Response response = gitRequestProxy.getWithResponse("/api/v4/projects?per_page=100&page=" + i,
+                    getTokenHeader());
+            try {
+                String result = response.body().string();
+                list.addAll(JSON.parseArray(result, GitlabRepository.class));
+            } catch (Exception e) {
+                log.info("get gitlab repositories error", e);
+            }
+        }
+        return list;
     }
 
     private List<GitlabRepository> getGitlabRepository(String serviceName) {
