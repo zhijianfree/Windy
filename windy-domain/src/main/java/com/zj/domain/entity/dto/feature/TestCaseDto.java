@@ -1,8 +1,5 @@
 package com.zj.domain.entity.dto.feature;
 
-import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.po.feature.TestCase;
-import java.util.Objects;
 import lombok.Data;
 
 /**
@@ -31,6 +28,13 @@ public class TestCaseDto {
    * 用例集描述
    * */
   private String description;
+
+  /**
+   * 测试集合类型:
+   * 1 普通测试集
+   * 2 e2e测试集
+   */
+  private Integer caseType;
 
   private Long createTime;
 

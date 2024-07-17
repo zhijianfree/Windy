@@ -301,4 +301,10 @@ public class TemplateService {
         templateVo.setHeaders((Map<String, String>) JSON.parse(executeTemplate.getHeader()));
         return templateVo;
     }
+
+    public List<ExecuteTemplateVo> getAllTemplates() {
+        List<ExecuteTemplateDto> executeTemplates = templateRepository.getAllTemplates();
+        return executeTemplates.stream().map(this::toExecuteTemplateDTO)
+                .collect(Collectors.toList());
+    }
 }

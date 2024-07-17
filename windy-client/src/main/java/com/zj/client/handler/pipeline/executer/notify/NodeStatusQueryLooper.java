@@ -132,7 +132,8 @@ public class NodeStatusQueryLooper implements Runnable {
       CompareResult compareResult = handleCompare(map, compareInfo);
       if (!compareResult.isCompareSuccess()) {
         responseModel.setStatus(ProcessStatus.FAIL.getType());
-        responseModel.setMessage(exchangeTips(map, compareInfo));
+        List<String> tips = exchangeTips(map, compareInfo);
+        responseModel.getMessage().addAll(tips);
       }
       return !compareResult.isCompareSuccess();
     });

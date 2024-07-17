@@ -34,19 +34,29 @@ public class TestCaseService {
     this.executePointRepository = executePointRepository;
   }
 
-  public PageSize<TestCaseDto> getTestCaseList(String serviceId, Integer page, Integer pageSize) {
-    IPage<TestCaseDto> pageObj = testCaseRepository.getCasePage(serviceId, page, pageSize);
-    List<TestCaseDto> records = pageObj.getRecords();
+  public PageSize<TestCaseDto> getE2ECases(Integer page, Integer pageSize) {
+    IPage<TestCaseDto> pageObj = testCaseRepository.getE2ECasesPage(page, pageSize);
+    return convertPageSize(pageObj);
+  }
+
+  public PageSize<TestCaseDto> convertPageSize(IPage<TestCaseDto> page){
+    List<TestCaseDto> records = page.getRecords();
     PageSize<TestCaseDto> dtoPageSize = new PageSize<>();
     if (CollectionUtils.isEmpty(records)) {
       dtoPageSize.setTotal(0);
       return dtoPageSize;
     }
 
-    long total = pageObj.getTotal();
+
+    long total = page.getTotal();
     dtoPageSize.setTotal(total);
     dtoPageSize.setData(records);
     return dtoPageSize;
+  }
+
+  public PageSize<TestCaseDto> getTestCaseList(String serviceId, Integer page, Integer pageSize) {
+    IPage<TestCaseDto> pageObj = testCaseRepository.getCasePage(serviceId, page, pageSize);
+    return convertPageSize(pageObj);
   }
 
   public String createTestCase(TestCaseDto testCaseDto) {

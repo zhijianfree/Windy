@@ -128,7 +128,7 @@ public class CodeBuildService {
       model.getMessage().remove(0);
     }
 
-    if (!line.contains("Progress") && !line.contains("Downloading")){
+    if (!line.contains("Progress") && !line.contains("Downloading") && !line.contains("Downloaded")){
       model.addMessage(line);
     }
 

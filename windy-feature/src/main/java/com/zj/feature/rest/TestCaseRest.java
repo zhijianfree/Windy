@@ -41,6 +41,13 @@ public class TestCaseRest {
     return new ResponseMeta<>(ErrorCode.SUCCESS, testCaseDTOS);
   }
 
+  @RequestMapping("/e2e/cases")
+  public ResponseMeta<PageSize<TestCaseDto>> getE2ECases( @RequestParam("page") Integer page,
+                                                          @RequestParam("pageSize") Integer pageSize) {
+    PageSize<TestCaseDto> testCaseDTOS = testCaseService.getE2ECases(page, pageSize);
+    return new ResponseMeta<>(ErrorCode.SUCCESS, testCaseDTOS);
+  }
+
   @PostMapping("/case")
   public ResponseMeta<String> createTestCases(@RequestBody TestCaseDto testCaseDTO) {
     String testCaseId = testCaseService.createTestCase(testCaseDTO);

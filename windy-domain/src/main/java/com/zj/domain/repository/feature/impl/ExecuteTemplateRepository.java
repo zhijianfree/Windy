@@ -68,6 +68,12 @@ public class ExecuteTemplateRepository extends
   }
 
   @Override
+  public List<ExecuteTemplateDto> getAllTemplates() {
+    List<ExecuteTemplate> executeTemplates = list();
+    return OrikaUtil.convertList(executeTemplates, ExecuteTemplateDto.class);
+  }
+
+  @Override
   public IPage<ExecuteTemplateDto> getPage(String serviceId, Integer pageNo, Integer size, String name) {
     IPage<ExecuteTemplate> page = new Page<>(pageNo, size);
     LambdaQueryWrapper<ExecuteTemplate> queryWrapper =

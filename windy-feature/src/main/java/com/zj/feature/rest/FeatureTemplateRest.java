@@ -72,6 +72,12 @@ public class FeatureTemplateRest {
     }
 
     @ResponseBody
+    @GetMapping("/templates")
+    public ResponseMeta<List<ExecuteTemplateVo>> getAllTemplates() {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, templateService.getAllTemplates());
+    }
+
+    @ResponseBody
     @PutMapping("/template")
     public ResponseMeta<String> updateFeatureTemplate(@RequestBody ExecuteTemplateVo executeTemplate) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, templateService.updateTemplate(executeTemplate));
