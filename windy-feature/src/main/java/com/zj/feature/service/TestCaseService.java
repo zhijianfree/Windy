@@ -94,4 +94,8 @@ public class TestCaseService {
     boolean deletePoints = executePointRepository.deleteByFeatureIds(featureIds);
     return deleteFeatures && deletePoints && testCaseRepository.deleteTestCase(caseId);
   }
+
+  public List<TestCaseDto> getE2ECases() {
+    return testCaseRepository.getE2ECases();
+  }
 }

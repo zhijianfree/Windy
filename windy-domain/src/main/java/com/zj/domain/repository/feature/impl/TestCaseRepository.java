@@ -78,4 +78,11 @@ public class TestCaseRepository extends ServiceImpl<TestCaseMapper, TestCase> im
     caseDtoPage.setRecords(OrikaUtil.convertList(pageObj.getRecords(), TestCaseDto.class));
     return caseDtoPage;
   }
+
+  @Override
+  public List<TestCaseDto> getE2ECases() {
+    List<TestCase> testCases = list(
+            Wrappers.lambdaQuery(TestCase.class).eq(TestCase::getCaseType, CaseType.E2E.getType()));
+    return OrikaUtil.convertList(testCases, TestCaseDto.class);
+  }
 }

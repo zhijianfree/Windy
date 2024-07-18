@@ -24,4 +24,6 @@ public interface ITestCaseRepository {
     IPage<TestCaseDto> getCasePage(String serviceId, Integer page, Integer pageSize);
 
     IPage<TestCaseDto> getE2ECasesPage(Integer page, Integer pageSize);
+
+    List<TestCaseDto> getE2ECases();
 }

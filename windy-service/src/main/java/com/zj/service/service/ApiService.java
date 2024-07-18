@@ -53,6 +53,8 @@ import java.util.stream.Collectors;
 @Service
 public class ApiService {
 
+    public static final String HOST_VARIABLE_LABEL = "${host}";
+    public static final String HOST_KEY = "host";
     private final UniqueIdService uniqueIdService;
     private final IServiceApiRepository apiRepository;
     private final RequestProxy requestProxy;
@@ -215,12 +217,23 @@ public class ApiService {
             parameterDefine.setInitData(initData);
             return parameterDefine;
         }).filter(Objects::nonNull).collect(Collectors.toList());
+        parameterDefines.add(createHostParam());
         templateDto.setParam(JSON.toJSONString(parameterDefines));
         templateDto.setHeader(JSON.toJSONString(header));
 
         String assembledUrl = assembledApiUrl(serviceApi.getResource(), apiVariables);
         templateDto.setService(assembledUrl);
         return toExecuteTemplateDTO(templateDto);
+    }
+
+    private ParameterDefine createHostParam() {
+        ParameterDefine parameterDefine = new ParameterDefine();
+        parameterDefine.setDescription("request domain address");
+        parameterDefine.setParamKey(HOST_KEY);
+        parameterDefine.setPosition(Position.Path.name());
+        parameterDefine.setType(ParamValueType.String.name());
+        parameterDefine.setInitData(new InitData(HOST_VARIABLE_LABEL));
+        return parameterDefine;
     }
 
     private void setParamRangeData(ApiRequestVariable apiVariable, InitData initData) {
@@ -286,7 +299,7 @@ public class ApiService {
             }
         }
         uri = uriBuilder.toString();
-        return "${host}" + uri;
+        return HOST_VARIABLE_LABEL + uri;
     }
 
     public ExecuteTemplateVo toExecuteTemplateDTO(ExecuteTemplateDto executeTemplate) {
