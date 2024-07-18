@@ -25,6 +25,7 @@
     <module>windy-master</module>
     <module>windy-domain</module>
     <module>windy-plugin</module>
+    <module>windy-demand</module>
   </modules>
 
 
@@ -85,6 +86,11 @@
       <dependency>
         <groupId>com.zj</groupId>
         <artifactId>windy-plugin</artifactId>
+        <version>${windy.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.zj</groupId>
+        <artifactId>windy-demand</artifactId>
         <version>${windy.version}</version>
       </dependency>
       <!--内部模块结束-->
