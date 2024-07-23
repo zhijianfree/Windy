@@ -1,6 +1,7 @@
 package com.zj.service.service.imports.strategy;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.common.enums.ApiType;
 import com.zj.common.uuid.UniqueIdService;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -28,6 +30,8 @@ import java.util.stream.Collectors;
 public class YapiApiImportStrategy implements IApiImportStrategy {
 
     public static final String PROPERTIES_KEY = "properties";
+    public static final String SPLIT_PREFIX = "_";
+    public static final String HTTP_API_TYPE = "http";
     private final IServiceApiRepository serviceApiRepository;
     private final UniqueIdService uniqueIdService;
 
@@ -45,25 +49,56 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
     @Override
     public List<ServiceApiDto> importContent(String serviceId, String fileContent) {
         List<YapiImportApi> yapiImportApis = JSON.parseArray(fileContent, YapiImportApi.class);
+        Map<String, ServiceApiDto> serviceExistApi = getServiceExistApi(serviceId);
         return yapiImportApis.stream().map(yapiImportApi -> {
             ServiceApiDto serviceApiDto = new ServiceApiDto();
             serviceApiDto.setApiId(uniqueIdService.getUniqueId());
             serviceApiDto.setApiName(yapiImportApi.getName());
             serviceApiDto.setApiType(ApiType.DIR.getType());
             serviceApiDto.setServiceId(serviceId);
-            serviceApiRepository.saveApi(serviceApiDto);
+            saveOrUpdateApi(yapiImportApi.getName(), serviceExistApi, serviceApiDto);
+
 
             List<YapiImportApi.YapiApiModel> list = yapiImportApi.getList();
             if (CollectionUtils.isEmpty(list)) {
                 return Collections.singletonList(serviceApiDto);
             }
-            return list.stream().map(apiModel -> convertApiAndSave(serviceId, apiModel, serviceApiDto))
+            return list.stream().map(apiModel -> convertApiAndSave(serviceId, apiModel, serviceApiDto, serviceExistApi))
                     .filter(Objects::nonNull).collect(Collectors.toList());
         }).filter(CollectionUtils::isNotEmpty).flatMap(Collection::stream).collect(Collectors.toList());
     }
 
+    private boolean saveOrUpdateApi(String apiName, Map<String, ServiceApiDto> serviceExistApi,
+                                 ServiceApiDto serviceApiDto) {
+        String compareKey = getCompareKey(serviceApiDto.isApi(), serviceApiDto.getResource(), serviceApiDto.getMethod(), apiName);
+        ServiceApiDto existApi = serviceExistApi.get(compareKey);
+        if (Objects.isNull(existApi)) {
+            boolean result = serviceApiRepository.saveApi(serviceApiDto);
+            log.info("create service api={} method={} result={}", serviceApiDto.getResource(),
+                    serviceApiDto.getMethod(), result);
+            return result;
+        }
+
+        serviceApiDto.setApiId(existApi.getApiId());
+        boolean result = serviceApiRepository.updateApi(serviceApiDto);
+        log.info("update service api={} method=" +
+                "{} result={}", serviceApiDto.isApi() ? serviceApiDto.getResource() :
+                        serviceApiDto.getApiName(), serviceApiDto.getMethod(), result);
+        return result;
+    }
+
+    private Map<String, ServiceApiDto> getServiceExistApi(String serviceId) {
+        List<ServiceApiDto> apiList = serviceApiRepository.getApiByService(serviceId);
+        return apiList.stream().collect(Collectors.toMap(api -> getCompareKey(api.isApi(), api.getResource(),
+                        api.getMethod(), api.getApiName()), api -> api));
+    }
+
+    public String getCompareKey(boolean isApi, String resource, String method, String apiName) {
+        return isApi ? resource + SPLIT_PREFIX + method : apiName;
+    }
+
     private ServiceApiDto convertApiAndSave(String serviceId, YapiImportApi.YapiApiModel apiModel,
-                                            ServiceApiDto serviceApiDto) {
+                                            ServiceApiDto serviceApiDto, Map<String, ServiceApiDto> serviceExistApi) {
         try {
             ServiceApiDto serviceApi = new ServiceApiDto();
             serviceApi.setApiId(uniqueIdService.getUniqueId());
@@ -72,7 +107,8 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
             serviceApi.setMethod(apiModel.getMethod());
             serviceApi.setServiceId(serviceId);
             serviceApi.setParentId(serviceApiDto.getApiId());
-            serviceApi.setType("http");
+            serviceApi.setDescription(apiModel.getTitle());
+            serviceApi.setType(HTTP_API_TYPE);
             serviceApi.setResource(apiModel.getPath());
             serviceApi.setHeader(JSON.toJSONString(apiModel.getHeaders()));
 
@@ -93,12 +129,14 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
             JSONObject jsonObject = JSON.parseObject(apiModel.getRequestBody());
             if (Objects.nonNull(jsonObject) && Objects.nonNull(jsonObject.getJSONObject(PROPERTIES_KEY))) {
                 JSONObject properties = jsonObject.getJSONObject(PROPERTIES_KEY);
+                List<String> requirdList = JSON.parseArray(JSON.toJSONString(jsonObject.getJSONArray("required")), String.class);
                 List<ApiRequestVariable> bodyRequests = properties.entrySet().stream().map(entry -> {
                     ApiRequestVariable apiRequestVariable = new ApiRequestVariable();
                     apiRequestVariable.setParamKey(entry.getKey());
 
                     JSONObject typeJSON = JSON.parseObject(JSON.toJSONString(entry.getValue()),
                             JSONObject.class);
+                    apiRequestVariable.setRequired(requirdList.contains(entry.getKey()));
                     apiRequestVariable.setType(typeJSON.getString("type"));
                     apiRequestVariable.setPosition("Body");
                     return apiRequestVariable;
@@ -121,7 +159,7 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
                 }).collect(Collectors.toList());
                 serviceApi.setResponseParams(JSON.toJSONString(apiResponses));
             }
-            return serviceApiRepository.saveApi(serviceApi) ? serviceApi : null;
+            return saveOrUpdateApi(apiModel.getTitle(), serviceExistApi, serviceApi) ? serviceApi : null;
         } catch (Exception e) {
             log.info("import api error");
         }
