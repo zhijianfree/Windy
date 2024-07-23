@@ -109,9 +109,7 @@ public class TemplateService {
     }
 
     public List<ExecuteTemplateVo> getFeatureList(String serviceId) {
-        List<ExecuteTemplateDto> defaultTemplates =
-                templateRepository.getTemplatesByType(Arrays.asList(TemplateType.FOR.getType(),
-                        TemplateType.IF.getType(), TemplateType.DEFAULT.getType()));
+        List<ExecuteTemplateDto> defaultTemplates = templateRepository.getToolTemplates();
         List<ExecuteTemplateDto> executeTemplates = templateRepository.getServiceTemplates(serviceId);
         executeTemplates.addAll(defaultTemplates);
         return executeTemplates.stream().map(this::toExecuteTemplateDTO)

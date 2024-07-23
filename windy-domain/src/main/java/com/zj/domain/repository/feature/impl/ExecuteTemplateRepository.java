@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.enums.TemplateType;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.ExecuteTemplateDto;
 import com.zj.domain.entity.po.feature.ExecuteTemplate;
@@ -58,6 +59,14 @@ public class ExecuteTemplateRepository extends
   public List<ExecuteTemplateDto> getTemplatesByType(List<Integer> templateTypes) {
     List<ExecuteTemplate> executeTemplates = list(Wrappers.lambdaQuery(ExecuteTemplate.class)
             .in(ExecuteTemplate::getTemplateType, templateTypes));
+    return OrikaUtil.convertList(executeTemplates, ExecuteTemplateDto.class);
+  }
+
+  @Override
+  public List<ExecuteTemplateDto> getToolTemplates() {
+    List<Integer> typeList = TemplateType.getToolTemplates();
+    List<ExecuteTemplate> executeTemplates = list(Wrappers.lambdaQuery(ExecuteTemplate.class)
+            .in(ExecuteTemplate::getTemplateType, typeList));
     return OrikaUtil.convertList(executeTemplates, ExecuteTemplateDto.class);
   }
 

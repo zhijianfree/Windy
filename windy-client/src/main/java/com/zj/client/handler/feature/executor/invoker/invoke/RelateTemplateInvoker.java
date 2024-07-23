@@ -40,6 +40,7 @@ public class RelateTemplateInvoker implements IExecuteInvoker {
         String body = Optional.of(bodyMap).filter(map -> !map.isEmpty()).map(JSON::toJSONString).orElse("");
 
         ExecutorUnit relatedTemplate = executorUnit.getRelatedTemplate();
+        log.info("get related template={}", JSON.toJSONString(relatedTemplate));
         relatedTemplate.getParams().forEach(param ->{
             if (Objects.equals(param.getParamKey(), "url")) {
                 log.info("get request url = {}", executorUnit.getService());

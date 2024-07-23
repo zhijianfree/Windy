@@ -5,6 +5,7 @@ public enum ExecutePointType {
   FOR(2, "for循环用例"),
   IF(3, "if判断用例"),
   DEFAULT(4, "系统默认用例"),
+  SCRIPT(6, "js脚本"),
   ;
   private final Integer type;
   private final String desc;

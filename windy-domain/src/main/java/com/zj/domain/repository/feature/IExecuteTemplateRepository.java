@@ -29,5 +29,7 @@ public interface IExecuteTemplateRepository {
 
   List<ExecuteTemplateDto> getTemplatesByType(List<Integer> templateTypes);
 
+  List<ExecuteTemplateDto> getToolTemplates();
+
   List<ExecuteTemplateDto> getTemplateByIds(List<String> templateIds);
 }
