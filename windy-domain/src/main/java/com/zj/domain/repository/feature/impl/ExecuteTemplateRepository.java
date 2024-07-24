@@ -86,7 +86,7 @@ public class ExecuteTemplateRepository extends
   public IPage<ExecuteTemplateDto> getPage(String serviceId, Integer pageNo, Integer size, String name) {
     IPage<ExecuteTemplate> page = new Page<>(pageNo, size);
     LambdaQueryWrapper<ExecuteTemplate> queryWrapper =
-            Wrappers.lambdaQuery(ExecuteTemplate.class).eq(ExecuteTemplate::getOwner, serviceId);
+            Wrappers.lambdaQuery(ExecuteTemplate. class).eq(ExecuteTemplate::getOwner, serviceId);
     if (!StringUtils.isEmpty(name)) {
       queryWrapper.and(wrapper -> wrapper.like(ExecuteTemplate::getName, name));
     }
