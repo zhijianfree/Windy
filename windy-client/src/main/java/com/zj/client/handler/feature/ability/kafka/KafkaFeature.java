@@ -1,10 +1,19 @@
 package com.zj.client.handler.feature.ability.kafka;
 
-import com.zj.client.entity.enuns.ParamTypeEnum;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import com.zj.plugin.loader.Feature;
 import com.zj.plugin.loader.FeatureDefine;
+import com.zj.plugin.loader.ParamValueType;
 import com.zj.plugin.loader.ParameterDefine;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.header.Header;
+
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -15,14 +24,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.common.header.Header;
 
 /**
  * @author guyuelan
@@ -37,7 +38,6 @@ public class KafkaFeature implements Feature {
 
     KafkaConsumer<String, String> consumer = buildConsumer(address, topic, group);
     ConsumerRecords<String, String> consumerRecords = consumer.poll(Duration.ofSeconds(100));
-    System.out.println("get record =" + consumerRecords.count());
 
     List<KafkaResult> kafkaResults = new ArrayList<>();
     Iterator<ConsumerRecord<String, String>> iterator = consumerRecords.iterator();
@@ -66,11 +66,11 @@ public class KafkaFeature implements Feature {
   public ExecuteDetailVo produceMessage(String topic, String key, String value, Integer timeout,
       String address) {
     ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
-    executeDetailVo.addRequestInfo("address: " + address);
-    executeDetailVo.addRequestInfo("topic: " + topic);
-    executeDetailVo.addRequestInfo("key: " + key);
-    executeDetailVo.addRequestInfo("value: " + value);
-    executeDetailVo.addRequestInfo("timeout: " + timeout);
+    executeDetailVo.addRequestInfo("address" , address);
+    executeDetailVo.addRequestInfo("topic" , topic);
+    executeDetailVo.addRequestInfo("key" , key);
+    executeDetailVo.addRequestInfo("value" , value);
+    executeDetailVo.addRequestInfo("timeout" , timeout);
     try {
       Properties props = new Properties();
       props.put("bootstrap.servers", address);
@@ -78,8 +78,8 @@ public class KafkaFeature implements Feature {
       props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
       KafkaProducer<String, String> producer = new KafkaProducer<String, String>(props);
-      ProducerRecord<String, String> record = new ProducerRecord<String, String>(topic, key, value);
-      RecordMetadata recordMetadata = producer.send(record).get(timeout, TimeUnit.SECONDS);
+      ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topic, key, value);
+      RecordMetadata recordMetadata = producer.send(producerRecord).get(timeout, TimeUnit.SECONDS);
       executeDetailVo.setStatus(true);
       executeDetailVo.setResBody(recordMetadata);
       producer.close();
@@ -93,9 +93,9 @@ public class KafkaFeature implements Feature {
 
   private void saveRequestParam(ExecuteDetailVo executeDetailVo, String address, String topic,
       String group) {
-    executeDetailVo.addRequestInfo("address: " + address);
-    executeDetailVo.addRequestInfo("group: " + group);
-    executeDetailVo.addRequestInfo("topic: " + topic);
+    executeDetailVo.addRequestInfo("address" , address);
+    executeDetailVo.addRequestInfo("group" , group);
+    executeDetailVo.addRequestInfo("topic" , topic);
   }
 
   private KafkaConsumer<String, String> buildConsumer(String address, String topic, String group) {
@@ -126,19 +126,19 @@ public class KafkaFeature implements Feature {
     List<ParameterDefine> params = new ArrayList<>();
     ParameterDefine topic = new ParameterDefine();
     topic.setParamKey("topic");
-    topic.setType(ParamTypeEnum.STRING.getType());
+    topic.setType(ParamValueType.String.name());
     topic.setDescription("topic");
     params.add(topic);
 
     ParameterDefine group = new ParameterDefine();
     group.setParamKey("group");
-    group.setType(ParamTypeEnum.STRING.getType());
+    group.setType(ParamValueType.String.name());
     group.setDescription("消费组");
     params.add(group);
 
     ParameterDefine address = new ParameterDefine();
     address.setParamKey("address");
-    address.setType(ParamTypeEnum.STRING.getType());
+    address.setType(ParamValueType.String.name());
     address.setDescription("kafka地址");
     params.add(address);
     featureDefine.setParams(params);
@@ -154,43 +154,35 @@ public class KafkaFeature implements Feature {
     List<ParameterDefine> params = new ArrayList<>();
     ParameterDefine topic = new ParameterDefine();
     topic.setParamKey("topic");
-    topic.setType(ParamTypeEnum.STRING.getType());
+    topic.setType(ParamValueType.String.name());
     topic.setDescription("topic");
     params.add(topic);
 
     ParameterDefine key = new ParameterDefine();
     key.setParamKey("key");
-    key.setType(ParamTypeEnum.STRING.getType());
+    key.setType(ParamValueType.String.name());
     key.setDescription("key");
     params.add(key);
 
     ParameterDefine value = new ParameterDefine();
     value.setParamKey("value");
-    value.setType(ParamTypeEnum.STRING.getType());
+    value.setType(ParamValueType.String.name());
     value.setDescription("消息内容");
     params.add(value);
 
     ParameterDefine timeout = new ParameterDefine();
     timeout.setParamKey("timeout");
-    timeout.setType(ParamTypeEnum.INTEGER.getType());
+    timeout.setType(ParamValueType.Integer.name());
     timeout.setDescription("发送超时时间");
     params.add(timeout);
 
     ParameterDefine address = new ParameterDefine();
     address.setParamKey("address");
-    address.setType(ParamTypeEnum.STRING.getType());
+    address.setType(ParamValueType.String.name());
     address.setDescription("kafka地址");
     params.add(address);
     featureDefine.setParams(params);
     return featureDefine;
-  }
-
-  public static void main(String[] args) throws InterruptedException {
-    KafkaFeature kafkaFeature = new KafkaFeature();
-    kafkaFeature.produceMessage("sun", "111", "{\"name\":\"huhuhuhuhu\"}",
-        5, "10.202.162.127:9092");
-    Thread.sleep(4000);
-    kafkaFeature.startConsume("10.202.162.127:9092", "sun", "group_gong");
   }
 
 }

@@ -4,14 +4,17 @@ import lombok.Data;
 
 @Data
 public class ExecutePointDto {
+
     private Long id;
+
     /**
      * 执行点Id
      * */
     private String pointId;
 
     /**
-     * 执行类型
+     *
+     *
      * */
     private Integer executeType;
 

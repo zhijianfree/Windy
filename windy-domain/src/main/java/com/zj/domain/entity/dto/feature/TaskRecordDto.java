@@ -23,11 +23,6 @@ public class TaskRecordDto {
   private String statusName;
 
   /**
-   * 创建者
-   * */
-  private String userId;
-
-  /**
    * 任务名称
    * */
   private String taskName;
@@ -46,6 +41,11 @@ public class TaskRecordDto {
    * 执行机器
    * */
   private String machines;
+
+  /**
+   * 触发任务的来源方，用来记录由谁触发的任务
+   */
+  private String triggerId;
 
   private Long createTime;
 

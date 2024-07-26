@@ -1,16 +1,17 @@
 package com.zj.domain.repository.feature.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
 import com.zj.domain.entity.po.feature.ExecutePoint;
 import com.zj.domain.mapper.feeature.ExecutePointMapper;
 import com.zj.domain.repository.feature.IExecutePointRepository;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * @author guyuelan
@@ -66,6 +67,12 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
   }
 
   @Override
+  public boolean deleteByFeatureIds(List<String> featureIds) {
+    return remove(
+            Wrappers.lambdaQuery(ExecutePoint.class).in(ExecutePoint::getFeatureId, featureIds));
+  }
+
+  @Override
   public List<ExecutePointDto> getPointsByFeatureIds(List<String> featureIds) {
     List<ExecutePoint> executePoints = list(
         Wrappers.lambdaQuery(ExecutePoint.class).in(ExecutePoint::getFeatureId, featureIds)
@@ -83,27 +90,14 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
   }
 
   @Override
-  public Page<ExecutePointDto> queryExecutePointPage(String featureId, int page, int size) {
-    Page<ExecutePoint> pageSize = new Page<>(page, size);
-    Page<ExecutePoint> result = page(pageSize,
-        Wrappers.lambdaQuery(ExecutePoint.class).eq(ExecutePoint::getFeatureId, featureId)
-            .orderByAsc(ExecutePoint::getSortOrder));
-    Page<ExecutePointDto> pointDtoPage = new Page<>();
-    pointDtoPage.setTotal(result.getTotal());
-
-    List<ExecutePointDto> executePointDtos = OrikaUtil.convertList(result.getRecords(),
-        ExecutePointDto.class);
-    pointDtoPage.setRecords(executePointDtos);
-    return pointDtoPage;
-  }
-
-  @Override
   public boolean saveBatch(List<ExecutePointDto> executePoints) {
     List<ExecutePoint> pointList = OrikaUtil.convertList(executePoints, ExecutePoint.class);
     return saveBatch(pointList);
   }
 
+
   @Override
+  @Transactional
   public boolean updateBatch(List<ExecutePointDto> newExecutePoints) {
     List<ExecutePoint> pointList = OrikaUtil.convertList(newExecutePoints, ExecutePoint.class);
     return updateBatchById(pointList);

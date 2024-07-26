@@ -38,11 +38,6 @@ public class PipelineDto {
   private String ServiceName;
 
   /**
-   * 流水线创建者
-   */
-  private String creator;
-
-  /**
    * 流水线类型
    */
   @NotNull(message = "流水线类型不能为空")

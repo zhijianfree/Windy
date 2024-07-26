@@ -1,12 +1,15 @@
 package com.zj.plugin.loader;
 
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ExecuteDetailVo {
 
   /**
    * 当前任务执行的请求信息与请求参数
    */
-  private RequestDetailVo requestDetailVo = new RequestDetailVo();
+  private Map<String, Object> requestTips = new HashMap<>();
 
   /**
    * 当前请求执行完成之后的响应结果
@@ -25,12 +28,16 @@ public class ExecuteDetailVo {
     responseDetailVo.setErrorMessage(errorMessage);
   }
 
-  public void addRequestInfo(String info) {
-    requestDetailVo.addTips(info);
+  public void addRequestInfo(String key, Object value) {
+    requestTips.put(key, value);
   }
 
-  public void setRequestBody(Object requestBody) {
-    requestDetailVo.setRequestBody(requestBody);
+  public Map<String, Object> getRequestTips() {
+    return requestTips;
+  }
+
+  public void setRequestTips(Map<String, Object> requestTips) {
+    this.requestTips = requestTips;
   }
 
   public Boolean responseStatus() {
@@ -39,10 +46,6 @@ public class ExecuteDetailVo {
 
   public Object responseBody() {
     return responseDetailVo.getResponseBody();
-  }
-
-  public RequestDetailVo getRequestDetailVo() {
-    return requestDetailVo;
   }
 
   public ResponseDetailVo getResponseDetailVo() {

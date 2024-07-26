@@ -42,8 +42,8 @@ public class UpdateNodeRecordEvent implements INotifyEvent {
   @Override
   public boolean handle(ResultEvent resultEvent) {
     String string = JSON.toJSONString(resultEvent.getParams());
-    log.info("receive node record create event id = {} event={}", resultEvent.getExecuteId(),
-        string);
+    log.info("receive node record update event id = {} event={}", resultEvent.getExecuteId(),
+        resultEvent.getExecuteType());
     NodeRecordDto oldNodeRecord = nodeRecordRepository.getRecordById(resultEvent.getExecuteId());
     if (ProcessStatus.isCompleteStatus(oldNodeRecord.getStatus()) && !Objects.equals(
         ExecuteType.APPROVAL.name(), resultEvent.getExecuteType())) {
@@ -60,6 +60,7 @@ public class UpdateNodeRecordEvent implements INotifyEvent {
     boolean updateStatus = nodeRecordRepository.updateNodeRecord(nodeRecord);
     subTaskLogRepository.updateLogStatus(resultEvent.getLogId(), nodeRecord.getNodeId(),
         nodeRecord.getStatus());
+
     //单个节点状态变化要通知给执行者，然后执行一下节点的任务
     pipelineExecuteProxy.statusChange(nodeRecord);
     return updateStatus;

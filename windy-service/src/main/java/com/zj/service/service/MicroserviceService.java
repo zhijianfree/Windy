@@ -1,10 +1,12 @@
 package com.zj.service.service;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.common.git.IRepositoryBranch;
+import com.zj.common.model.K8SContainerParams;
 import com.zj.common.model.PageSize;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.TestCaseDto;
@@ -18,7 +20,10 @@ import com.zj.domain.repository.service.IMicroServiceRepository;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import com.zj.service.entity.ServiceDto;
 import org.springframework.stereotype.Service;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -30,7 +35,8 @@ public class MicroserviceService {
   private final IPipelineRepository pipelineRepository;
 
   private final ITestCaseRepository testCaseRepository;
-  private final IRepositoryBranch repositoryBranch;
+  private final List<IRepositoryBranch> repositoryBranches;
+  private final ISystemConfigRepository systemConfig;
 
   public MicroserviceService(IMicroServiceRepository microServiceRepository,
       UniqueIdService uniqueIdService, List<IRepositoryBranch> gitRepositories,
@@ -40,22 +46,31 @@ public class MicroserviceService {
     this.uniqueIdService = uniqueIdService;
     this.pipelineRepository = pipelineRepository;
     this.testCaseRepository = testCaseRepository;
+    this.repositoryBranches = gitRepositories;
+    this.systemConfig = systemConfig;
+  }
+
+  private IRepositoryBranch getRepositoryBranch(){
     GitAccessVo gitAccess = systemConfig.getGitAccess();
-    this.repositoryBranch = gitRepositories.stream()
+    return repositoryBranches.stream()
         .filter(repository -> Objects.equals(repository.gitType(), gitAccess.getGitType()))
         .findAny().orElse(null);
   }
 
-  public PageSize<MicroserviceDto> getServices(Integer pageNo, Integer size, String name) {
+  public PageSize<ServiceDto> getServices(Integer pageNo, Integer size, String name) {
     IPage<MicroserviceDto> page = microServiceRepository.getServices(pageNo, size, name);
-    PageSize<MicroserviceDto> pageSize = new PageSize<>();
+    PageSize<ServiceDto> pageSize = new PageSize<>();
     if (CollectionUtils.isEmpty(page.getRecords())) {
       pageSize.setTotal(0);
       return pageSize;
     }
 
-    List<MicroserviceDto> microservices = page.getRecords().stream()
-        .map(microservice -> OrikaUtil.convert(microservice, MicroserviceDto.class))
+    List<ServiceDto> microservices = page.getRecords().stream()
+        .map(microservice -> {
+          ServiceDto serviceDto = OrikaUtil.convert(microservice, ServiceDto.class);
+          serviceDto.setContainerParams(JSON.parseObject(microservice.getServiceConfig(), K8SContainerParams.class));
+          return serviceDto;
+        })
         .collect(Collectors.toList());
 
     pageSize.setData(microservices);
@@ -63,18 +78,24 @@ public class MicroserviceService {
     return pageSize;
   }
 
-  public String createService(MicroserviceDto microserviceDto) {
+  public String createService(ServiceDto serviceDto) {
+    IRepositoryBranch repositoryBranch = getRepositoryBranch();
     if (Objects.isNull(repositoryBranch)) {
       throw new ApiException(ErrorCode.NOT_FIND_REPO_CONFIG);
     }
 
-    repositoryBranch.checkRepository(microserviceDto.getServiceName());
+    repositoryBranch.checkRepository(serviceDto.getServiceName());
 
+    MicroserviceDto microserviceDto = OrikaUtil.convert(serviceDto, MicroserviceDto.class);
+    microserviceDto.setServiceConfig(JSON.toJSONString(serviceDto.getContainerParams()));
     microserviceDto.setServiceId(uniqueIdService.getUniqueId());
     return microServiceRepository.createService(microserviceDto);
   }
 
-  public String updateService(MicroserviceDto microserviceDto) {
+  public String updateService(ServiceDto update) {
+    MicroserviceDto microserviceDto = OrikaUtil.convert(update, MicroserviceDto.class);
+    Optional.ofNullable(update.getContainerParams()).ifPresent(params ->
+            microserviceDto.setServiceConfig(JSON.toJSONString(params)));
     return microServiceRepository.updateService(microserviceDto);
   }
 

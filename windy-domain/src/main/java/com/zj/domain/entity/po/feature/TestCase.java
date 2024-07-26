@@ -17,11 +17,6 @@ public class TestCase {
   private String testCaseId;
 
   /**
-   * 创建人
-   * */
-  private String author;
-
-  /**
    * 用例集名称
    * */
   private String testCaseName;
@@ -35,6 +30,13 @@ public class TestCase {
    * 服务ID
    * */
   private String serviceId;
+
+  /**
+   * 测试集合类型:
+   * 1 普通测试集
+   * 2 e2e测试集
+   */
+  private Integer caseType;
 
   private Long createTime;
 

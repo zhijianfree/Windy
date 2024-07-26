@@ -2,14 +2,46 @@ package com.zj.plugin.loader;
 
 
 public class ParameterDefine {
+    /**
+     * 参数名称
+     */
     private String paramKey;
-    private int type;
+
+    /**
+     * 参数的数据类型 {@link ParamValueType}
+     */
+    private String type;
+
+    /**
+     * 参数描述
+     */
     private String description;
+
+    /**
+     * 参数值
+     */
     private Object value;
-    private DefaultValue defaultValue;
+
+    /**
+     * 参数位置，只有在调用类型为HTTP时使用
+     */
+    private String position;
+
+    /**
+     * 参数默认值
+     */
+    private InitData initData;
 
     public Object getValue() {
         return value;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
     }
 
     public void setValue(Object value) {
@@ -24,11 +56,11 @@ public class ParameterDefine {
         this.paramKey = paramKey;
     }
 
-    public int getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(int type) {
+    public void setType(String type) {
         this.type = type;
     }
 
@@ -40,32 +72,11 @@ public class ParameterDefine {
         this.description = description;
     }
 
-    public DefaultValue getDefaultValue() {
-        return defaultValue;
+    public InitData getInitData() {
+        return initData;
     }
 
-    public void setDefaultValue(DefaultValue defaultValue) {
-        this.defaultValue = defaultValue;
-    }
-
-    public static class  DefaultValue{
-        private String defaultValue;
-        private Object range;
-
-        public String getDefaultValue() {
-            return defaultValue;
-        }
-
-        public void setDefaultValue(String defaultValue) {
-            this.defaultValue = defaultValue;
-        }
-
-        public Object getRange() {
-            return range;
-        }
-
-        public void setRange(Object range) {
-            this.range = range;
-        }
+    public void setInitData(InitData initData) {
+        this.initData = initData;
     }
 }

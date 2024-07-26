@@ -8,7 +8,7 @@ public abstract class BaseCompare implements CompareOperator {
 
     public CompareResult createSuccessResult(){
         CompareResult result = new CompareResult();
-        result.setCompareStatus(true);
+        result.setCompareSuccess(true);
         result.setErrorMessage(ErrorCode.SUCCESS.getMessage());
         return result;
     }

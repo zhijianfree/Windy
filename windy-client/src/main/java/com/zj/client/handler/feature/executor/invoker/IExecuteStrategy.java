@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface IExecuteStrategy {
 
-  ExecutePointType getType();
+  List<ExecutePointType> getType();
 
   List<FeatureResponse> execute(ExecutePoint executePoint,
       ExecuteContext executeContext);

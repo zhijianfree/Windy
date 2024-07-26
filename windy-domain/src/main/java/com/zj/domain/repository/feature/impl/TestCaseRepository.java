@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.TestCaseDto;
+import com.zj.domain.entity.enums.CaseType;
 import com.zj.domain.entity.po.feature.TestCase;
 import com.zj.domain.mapper.feeature.TestCaseMapper;
 import com.zj.domain.repository.feature.ITestCaseRepository;
@@ -65,5 +66,23 @@ public class TestCaseRepository extends ServiceImpl<TestCaseMapper, TestCase> im
     caseDtoPage.setTotal(pageObj.getTotal());
     caseDtoPage.setRecords(OrikaUtil.convertList(pageObj.getRecords(), TestCaseDto.class));
     return caseDtoPage;
+  }
+
+  @Override
+  public IPage<TestCaseDto> getE2ECasesPage(Integer page, Integer pageSize) {
+    IPage<TestCase> pageObj = page(new Page<>(page, pageSize),
+            Wrappers.lambdaQuery(TestCase.class).eq(TestCase::getCaseType, CaseType.E2E.getType()));
+
+    IPage<TestCaseDto> caseDtoPage = new Page<>();
+    caseDtoPage.setTotal(pageObj.getTotal());
+    caseDtoPage.setRecords(OrikaUtil.convertList(pageObj.getRecords(), TestCaseDto.class));
+    return caseDtoPage;
+  }
+
+  @Override
+  public List<TestCaseDto> getE2ECases() {
+    List<TestCase> testCases = list(
+            Wrappers.lambdaQuery(TestCase.class).eq(TestCase::getCaseType, CaseType.E2E.getType()));
+    return OrikaUtil.convertList(testCases, TestCaseDto.class);
   }
 }

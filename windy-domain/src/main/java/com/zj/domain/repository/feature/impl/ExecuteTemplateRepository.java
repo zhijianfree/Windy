@@ -5,16 +5,17 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.enums.TemplateType;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.ExecuteTemplateDto;
 import com.zj.domain.entity.po.feature.ExecuteTemplate;
 import com.zj.domain.mapper.feeature.ExecuteTemplateMapper;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author guyuelan
@@ -55,15 +56,37 @@ public class ExecuteTemplateRepository extends
   }
 
   @Override
+  public List<ExecuteTemplateDto> getTemplatesByType(List<Integer> templateTypes) {
+    List<ExecuteTemplate> executeTemplates = list(Wrappers.lambdaQuery(ExecuteTemplate.class)
+            .in(ExecuteTemplate::getTemplateType, templateTypes));
+    return OrikaUtil.convertList(executeTemplates, ExecuteTemplateDto.class);
+  }
+
+  @Override
+  public List<ExecuteTemplateDto> getToolTemplates() {
+    List<Integer> typeList = TemplateType.getToolTemplates();
+    List<ExecuteTemplate> executeTemplates = list(Wrappers.lambdaQuery(ExecuteTemplate.class)
+            .in(ExecuteTemplate::getTemplateType, typeList));
+    return OrikaUtil.convertList(executeTemplates, ExecuteTemplateDto.class);
+  }
+
+  @Override
+  public List<ExecuteTemplateDto> getServiceTemplates(String serviceId) {
+    List<ExecuteTemplate> executeTemplates = list(Wrappers.lambdaQuery(ExecuteTemplate.class).eq(ExecuteTemplate::getOwner, serviceId));
+    return OrikaUtil.convertList(executeTemplates, ExecuteTemplateDto.class);
+  }
+
+  @Override
   public List<ExecuteTemplateDto> getAllTemplates() {
     List<ExecuteTemplate> executeTemplates = list();
     return OrikaUtil.convertList(executeTemplates, ExecuteTemplateDto.class);
   }
 
   @Override
-  public IPage<ExecuteTemplateDto> getPage(Integer pageNo, Integer size, String name) {
+  public IPage<ExecuteTemplateDto> getPage(String serviceId, Integer pageNo, Integer size, String name) {
     IPage<ExecuteTemplate> page = new Page<>(pageNo, size);
-    LambdaQueryWrapper<ExecuteTemplate> queryWrapper = Wrappers.lambdaQuery(ExecuteTemplate.class);
+    LambdaQueryWrapper<ExecuteTemplate> queryWrapper =
+            Wrappers.lambdaQuery(ExecuteTemplate. class).eq(ExecuteTemplate::getOwner, serviceId);
     if (!StringUtils.isEmpty(name)) {
       queryWrapper.and(wrapper -> wrapper.like(ExecuteTemplate::getName, name));
     }
@@ -85,5 +108,14 @@ public class ExecuteTemplateRepository extends
       return executeTemplate;
     }).collect(Collectors.toList());
     return saveBatch(templateList);
+  }
+
+
+
+  @Override
+  public List<ExecuteTemplateDto> getTemplateByIds(List<String> templateIds) {
+    List<ExecuteTemplate> executeTemplates =
+            list(Wrappers.lambdaQuery(ExecuteTemplate.class).in(ExecuteTemplate::getTemplateId, templateIds));
+    return OrikaUtil.convertList(executeTemplates, ExecuteTemplateDto.class);
   }
 }

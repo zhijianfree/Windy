@@ -26,11 +26,6 @@ public class PipelineActionDto {
   private String nodeId;
 
   /**
-   * 用户Id
-   */
-  private String userId;
-
-  /**
    * 描述
    */
   private String description;

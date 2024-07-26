@@ -51,9 +51,9 @@ public class ServiceApi {
   private String description;
 
   /**
-   * 是否是API
+   * 是否是API 0 目录 1 api
    * */
-  private Boolean isApi;
+  private Integer apiType;
 
   /**
    * 请求参数
@@ -78,6 +78,11 @@ public class ServiceApi {
    * 代码生成的类方法名
    * */
   private String classMethod;
+
+  /**
+   * http 请求的Header
+   */
+  private String header;
 
   private Long createTime;
 

@@ -13,7 +13,7 @@ import com.zj.common.enums.NotifyType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.exception.ExecuteException;
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.common.model.ResultEvent;
 import com.zj.common.utils.IpUtils;
 import lombok.extern.slf4j.Slf4j;

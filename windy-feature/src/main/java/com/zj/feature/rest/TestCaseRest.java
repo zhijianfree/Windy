@@ -34,11 +34,24 @@ public class TestCaseRest {
     this.testCaseConfigService = testCaseConfigService;
   }
 
-  @RequestMapping("/{serviceId}/cases")
+  @GetMapping("/{serviceId}/cases")
   public ResponseMeta<PageSize<TestCaseDto>> getTestCases(@PathVariable("serviceId") String serviceId, @RequestParam("page") Integer page,
       @RequestParam("pageSize") Integer pageSize) {
     PageSize<TestCaseDto> testCaseDTOS = testCaseService.getTestCaseList(serviceId, page, pageSize);
     return new ResponseMeta<>(ErrorCode.SUCCESS, testCaseDTOS);
+  }
+
+  @RequestMapping("/e2e/page")
+  public ResponseMeta<PageSize<TestCaseDto>> getE2ECases( @RequestParam("page") Integer page,
+                                                          @RequestParam("pageSize") Integer pageSize) {
+    PageSize<TestCaseDto> testCaseDTOS = testCaseService.getE2ECases(page, pageSize);
+    return new ResponseMeta<>(ErrorCode.SUCCESS, testCaseDTOS);
+  }
+
+  @GetMapping("/e2e/cases")
+  public ResponseMeta<List<TestCaseDto>> getE2ECases() {
+    List<TestCaseDto> e2eCases = testCaseService.getE2ECases();
+    return new ResponseMeta<>(ErrorCode.SUCCESS, e2eCases);
   }
 
   @PostMapping("/case")

@@ -8,14 +8,12 @@ import com.zj.common.git.IRepositoryBranch;
 import com.zj.pipeline.entity.vo.BranchInfo;
 import com.zj.pipeline.entity.vo.GitlabRepository;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -32,117 +30,152 @@ import java.util.stream.Collectors;
 @Component
 public class GitlabRepositoryBranch implements IRepositoryBranch {
 
-  private final Map<String, String> headers;
-  private final GitRequestProxy gitRequestProxy;
+    public static final String MASTER = "master";
+    public static final String TEMP_PREFIX = "temp_";
+    private final GitRequestProxy gitRequestProxy;
 
-  private Map<String, Integer> serviceIdMap = new HashMap<>();
+    private Map<String, Integer> serviceIdMap = new HashMap<>();
 
-  public GitlabRepositoryBranch(GitRequestProxy gitRequestProxy) {
-    this.gitRequestProxy = gitRequestProxy;
-    this.headers = new HashMap<>();
-    String accessToken = gitRequestProxy.getGitAccess().getAccessToken();
-    headers.put("Private-Token", accessToken);
-    new Thread(this::loadGitRepositories).start();
-  }
-
-  private void loadGitRepositories() {
-    try {
-      List<GitlabRepository> gitlabRepositories = getGitlabRepositories();
-      serviceIdMap = gitlabRepositories.stream()
-          .collect(Collectors.toMap(repo -> repo.getName().toLowerCase(), GitlabRepository::getId));
-    } catch (Exception ignore) {}
-  }
-
-  @Override
-  public String gitType() {
-    return GitType.Gitlab.name();
-  }
-
-  @Override
-  public void createBranch(String serviceName, String branchName) {
-    Integer projectId = transformProjectId(serviceName);
-    String path = String.format("/api/v4/projects/%s/repository/branches?branch=%s&ref=master",
-        projectId, branchName);
-    String result = gitRequestProxy.post(path, "", headers);
-    log.info("gitea create branch result = {}", result);
-    BranchInfo branchInfo = JSON.parseObject(result, BranchInfo.class);
-    if (Objects.isNull(branchInfo) || !Objects.equals(branchInfo.getName(), branchName)) {
-      throw new ApiException(ErrorCode.CREATE_BRANCH_ERROR);
+    public GitlabRepositoryBranch(GitRequestProxy gitRequestProxy) {
+        this.gitRequestProxy = gitRequestProxy;
+        new Thread(this::loadGitRepositories).start();
     }
 
-  }
-
-  @Override
-  public void deleteBranch(String serviceName, String branchName) {
-    Integer projectId = transformProjectId(serviceName);
-    String path = String.format("/api/v4/projects/%s/repository/branches/%s", projectId,
-        branchName);
-    String result = gitRequestProxy.delete(path, headers);
-    log.info("gitea delete branch result = {}", result);
-  }
-
-  @Override
-  public List<String> listBranch(String serviceName) {
-    Integer projectId = transformProjectId(serviceName);
-    String path = String.format("/api/v4/projects/%s/repository/branches", projectId);
-    String result = gitRequestProxy.get(path, headers);
-    List<BranchInfo> branches = JSON.parseArray(result, BranchInfo.class);
-    if (CollectionUtils.isEmpty(branches)) {
-      return Collections.emptyList();
+    private Map<String, String> getTokenHeader() {
+        Map<String, String> header = new HashMap<>();
+        String accessToken = gitRequestProxy.getGitAccess().getAccessToken();
+        header.put("Private-Token", accessToken);
+        return header;
     }
 
-    log.info("get list={}", result);
-    return branches.stream().map(BranchInfo::getName)
-        .filter(branch -> !Objects.equals(branch, "master") && !branch.startsWith("temp_"))
-        .collect(Collectors.toList());
-  }
-
-  private Integer transformProjectId(String serviceName) {
-    Integer projectId = serviceIdMap.get(serviceName.toLowerCase());
-    if (Objects.isNull(projectId)) {
-      loadGitRepositories();
-    }
-    return serviceIdMap.get(serviceName.toLowerCase());
-  }
-
-  @Override
-  public void checkRepository(String serviceName) {
-    List<GitlabRepository> repositories = getGitlabRepositories();
-    if (CollectionUtils.isEmpty(repositories)) {
-      throw new ApiException(ErrorCode.REPO_NOT_EXIST);
+    private void loadGitRepositories() {
+        try {
+            List<GitlabRepository> gitlabRepositories = getGitlabRepositories();
+            serviceIdMap = gitlabRepositories.stream()
+                    .collect(Collectors.toMap(repo -> repo.getName().toLowerCase(), GitlabRepository::getId,
+                            (value1, value2) -> value2));
+        } catch (Exception e) {
+            log.info("load gitlab repositories error ={}", e.getMessage());
+        }
     }
 
-    Optional<GitlabRepository> optional = repositories.stream()
-        .filter(repo -> Objects.equals(repo.getName().toLowerCase(), serviceName.toLowerCase()))
-        .findAny();
-    if (!optional.isPresent()) {
-      throw new ApiException(ErrorCode.USER_NO_PERMISSION);
+    @Override
+    public String gitType() {
+        return GitType.Gitlab.name();
     }
 
-    boolean permission = optional.get().getPermissions().checkPermission();
-    if (!permission) {
-      throw new ApiException(ErrorCode.GIT_NO_PERMISSION);
+    @Override
+    public void createBranch(String serviceName, String branchName) {
+        Integer projectId = transformProjectId(serviceName);
+        String path = String.format("/api/v4/projects/%s/repository/branches?branch=%s&ref=master",
+                projectId, branchName);
+        String result = gitRequestProxy.post(path, "", getTokenHeader());
+        log.info("gitea create branch result = {}", result);
+        BranchInfo branchInfo = JSON.parseObject(result, BranchInfo.class);
+        if (Objects.isNull(branchInfo) || !Objects.equals(branchInfo.getName(), branchName)) {
+            throw new ApiException(ErrorCode.CREATE_BRANCH_ERROR);
+        }
     }
-  }
 
-  private List<GitlabRepository> getGitlabRepositories() {
-    String result = gitRequestProxy.get("/api/v4/projects", headers);
-    return JSON.parseArray(result, GitlabRepository.class);
-  }
-
-  public static void main(String[] args) {
-    OkHttpClient okHttpClient = new OkHttpClient.Builder().readTimeout(Duration.ofMinutes(1))
-        .connectTimeout(Duration.ofSeconds(30)).build();
-
-    String path = String.format("/projects/%s/repository/branches", "47345267");
-    Request request = new Request.Builder().url("https://gitlab.com/api/v4" + path)
-        .header("PRIVATE-TOKEN", "glpat-BJt61wWoBZWsyfspfsaw").get().build();
-    try {
-      Response execute = okHttpClient.newCall(request).execute();
-      String string = execute.body().string();
-      System.out.println(string);
-    } catch (IOException e) {
-      System.out.println(e);
+    @Override
+    public void deleteBranch(String serviceName, String branchName) {
+        Integer projectId = transformProjectId(serviceName);
+        String path = String.format("/api/v4/projects/%s/repository/branches/%s", projectId,
+                branchName);
+        String result = gitRequestProxy.delete(path, getTokenHeader());
+        log.info("gitea delete branch result = {}", result);
     }
-  }
+
+    @Override
+    public List<String> listBranch(String serviceName) {
+        Integer projectId = transformProjectId(serviceName);
+        if (Objects.isNull(projectId)) {
+            log.info("can not get service project id={}", serviceName);
+            return Collections.emptyList();
+        }
+
+        String path = String.format("/api/v4/projects/%s/repository/branches", projectId);
+        String result = gitRequestProxy.get(path, getTokenHeader());
+        List<BranchInfo> branches = JSON.parseArray(result, BranchInfo.class);
+        if (CollectionUtils.isEmpty(branches)) {
+            return Collections.emptyList();
+        }
+        return branches.stream().map(BranchInfo::getName)
+                //不显示master分支以及构建的临时分支
+                .filter(branch -> Objects.nonNull(branch) && !Objects.equals(branch, MASTER)
+                        && !branch.startsWith(TEMP_PREFIX))
+                .collect(Collectors.toList());
+    }
+
+    private Integer transformProjectId(String serviceName) {
+        Integer projectId = serviceIdMap.get(serviceName.toLowerCase());
+        if (Objects.isNull(projectId)) {
+            loadGitRepositories();
+        }
+        return serviceIdMap.get(serviceName.toLowerCase());
+    }
+
+    @Override
+    public void checkRepository(String serviceName) {
+        List<GitlabRepository> repositories = getGitlabRepository(serviceName);
+        if (CollectionUtils.isEmpty(repositories)) {
+            log.info("gitlab repository not exist={}", serviceName);
+            throw new ApiException(ErrorCode.REPO_NOT_EXIST);
+        }
+
+        Optional<GitlabRepository> optional = repositories.stream()
+                .filter(repo -> Objects.equals(repo.getName().toLowerCase(), serviceName.toLowerCase()))
+                .findAny();
+        if (!optional.isPresent()) {
+            log.info("user can not access gitlab repository permission={}", serviceName);
+            throw new ApiException(ErrorCode.USER_NO_PERMISSION);
+        }
+
+        boolean permission = optional.get().getPermissions().checkPermission();
+        if (!permission) {
+            log.info("user do not have gitlab repository permission={}", serviceName);
+            throw new ApiException(ErrorCode.GIT_NO_PERMISSION);
+        }
+    }
+
+    private List<GitlabRepository> getGitlabRepositories() {
+        Response response = gitRequestProxy.getWithResponse("/api/v4/projects?per_page=100&page=1", getTokenHeader());
+        try {
+            String result = response.body().string();
+            List<GitlabRepository> allRepositories = JSON.parseArray(result, GitlabRepository.class);
+            String pageNum = response.header("x-total-pages");
+            allRepositories.addAll(requestAllRepositories(pageNum));
+            return allRepositories;
+        } catch (Exception e) {
+            log.info("get gitlab repositories error", e);
+            return Collections.emptyList();
+        }
+    }
+
+    private List<GitlabRepository> requestAllRepositories(String numString) {
+        if (StringUtils.isBlank(numString)) {
+            log.info("gitlab response header not find x-total-pages");
+            return Collections.emptyList();
+        }
+
+        int num = Integer.parseInt(numString);
+        List<GitlabRepository> list = new ArrayList<>();
+        for (int i = 2; i <= num; i++) {
+            Response response = gitRequestProxy.getWithResponse("/api/v4/projects?per_page=100&page=" + i,
+                    getTokenHeader());
+            try {
+                String result = response.body().string();
+                list.addAll(JSON.parseArray(result, GitlabRepository.class));
+            } catch (Exception e) {
+                log.info("get gitlab repositories error", e);
+            }
+        }
+        return list;
+    }
+
+    private List<GitlabRepository> getGitlabRepository(String serviceName) {
+        String result = gitRequestProxy.get("/api/v4/projects?search=" + serviceName, getTokenHeader());
+        return JSON.parseArray(result, GitlabRepository.class);
+    }
+
 }

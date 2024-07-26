@@ -2,7 +2,11 @@ package com.zj.client.entity.vo;
 
 import com.zj.client.handler.feature.executor.compare.CompareResult;
 import com.zj.plugin.loader.ExecuteDetailVo;
+
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -17,6 +21,11 @@ public class FeatureResponse {
     private CompareResult compareResult;
 
     /**
+     * 执行过程中需要设置的临时全局变量
+     */
+    private Map<String, Object> context;
+
+    /**
      * 模版名称
      */
     private String name;
@@ -29,12 +38,12 @@ public class FeatureResponse {
     public boolean isSuccess() {
         boolean invokeStatus = true;
         if (Objects.nonNull(executeDetailVo)) {
-            invokeStatus = executeDetailVo.getResponseDetailVo().getResponseStatus();
+            invokeStatus = Optional.ofNullable(executeDetailVo.responseStatus()).orElse(false);
         }
 
         boolean compareStatus = true;
         if (Objects.nonNull(compareResult)){
-            compareStatus = compareResult.isCompareStatus();
+            compareStatus = compareResult.isCompareSuccess();
         }
 
         return invokeStatus && compareStatus;

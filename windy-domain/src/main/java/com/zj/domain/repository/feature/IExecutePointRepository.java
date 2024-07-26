@@ -1,9 +1,7 @@
 package com.zj.domain.repository.feature;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
-import com.zj.domain.entity.po.feature.ExecutePoint;
+
 import java.util.List;
 
 /**
@@ -23,12 +21,11 @@ public interface IExecutePointRepository {
   boolean deleteExecutePoint(String pointId);
 
   boolean deleteByFeatureId(String featureId);
+  boolean deleteByFeatureIds(List<String> featureIds);
 
   List<ExecutePointDto> getPointsByFeatureIds(List<String> featureIds);
 
   boolean saveExecutePoint(ExecutePointDto executePoint);
-
-  Page<ExecutePointDto> queryExecutePointPage(String featureId, int page, int size);
 
   boolean saveBatch(List<ExecutePointDto> newExecutePoints);
 

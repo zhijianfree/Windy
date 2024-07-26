@@ -1,7 +1,7 @@
 package com.zj.pipeline.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.common.model.PageSize;
 import com.zj.domain.entity.dto.pipeline.NodeBindDto;
 import com.zj.domain.entity.dto.pipeline.PipelineActionDto;

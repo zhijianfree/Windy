@@ -28,15 +28,21 @@ public class GitRequestProxy {
   public static final MediaType CONTENT_TYPE = MediaType.parse("application/json");
   OkHttpClient okHttpClient = new OkHttpClient.Builder().readTimeout(Duration.ofMinutes(1))
       .connectTimeout(Duration.ofSeconds(30)).build();
-  private final GitAccessVo gitAccess;
+
+  private final ISystemConfigRepository systemRepository;
 
   public GitRequestProxy(ISystemConfigRepository systemRepository) {
-    gitAccess = systemRepository.getGitAccess();
+    this.systemRepository = systemRepository;
+  }
+
+  public GitAccessVo getGitAccess() {
+    return systemRepository.getGitAccess();
   }
 
   public String get(String path, Map<String, String> headers) {
-    Request request = new Request.Builder().url(gitAccess.getGitDomain() + path)
-        .headers(Headers.of(headers)).get().build();
+    String gitDomain = getGitAccess().getGitDomain();
+    Request request = new Request.Builder().url(gitDomain + path).headers(Headers.of(headers)).get()
+        .build();
     try {
       Response execute = okHttpClient.newCall(request).execute();
       return execute.body().string();
@@ -45,11 +51,23 @@ public class GitRequestProxy {
     }
   }
 
+  public Response getWithResponse(String path, Map<String, String> headers) {
+    String gitDomain = getGitAccess().getGitDomain();
+    Request request = new Request.Builder().url(gitDomain + path).headers(Headers.of(headers)).get()
+            .build();
+    try {
+      Response execute = okHttpClient.newCall(request).execute();
+      return execute;
+    } catch (IOException e) {
+      throw new ApiException(ErrorCode.REQUEST_GIT_SERVER_FAILED);
+    }
+  }
+
   public String post(String path, String body, Map<String, String> headers) {
     RequestBody requestBody = RequestBody.create(CONTENT_TYPE, body);
-
-    Request request = new Request.Builder().url(gitAccess.getGitDomain() + path)
-        .headers(Headers.of(headers)).post(requestBody).build();
+    String gitDomain = getGitAccess().getGitDomain();
+    Request request = new Request.Builder().url(gitDomain + path).headers(Headers.of(headers))
+        .post(requestBody).build();
     try {
       Response execute = okHttpClient.newCall(request).execute();
       return execute.body().string();
@@ -60,9 +78,8 @@ public class GitRequestProxy {
 
   public String put(String path, String body) {
     RequestBody requestBody = RequestBody.create(CONTENT_TYPE, body);
-
-    Request request = new Request.Builder().url(gitAccess.getGitDomain() + path).put(requestBody)
-        .build();
+    String gitDomain = getGitAccess().getGitDomain();
+    Request request = new Request.Builder().url(gitDomain + path).put(requestBody).build();
     try {
       Response execute = okHttpClient.newCall(request).execute();
       return execute.body().string();
@@ -72,8 +89,9 @@ public class GitRequestProxy {
   }
 
   public String delete(String path, Map<String, String> headers) {
-    Request request = new Request.Builder().url(gitAccess.getGitDomain() + path)
-        .headers(Headers.of(headers)).delete().build();
+    String gitDomain = getGitAccess().getGitDomain();
+    Request request = new Request.Builder().url(gitDomain + path).headers(Headers.of(headers))
+        .delete().build();
     try {
       Response execute = okHttpClient.newCall(request).execute();
       return execute.body().string();
@@ -81,9 +99,5 @@ public class GitRequestProxy {
       log.error("request git serve error", e);
       throw new ApiException(ErrorCode.REQUEST_GIT_SERVER_FAILED);
     }
-  }
-
-  public GitAccessVo getGitAccess() {
-    return gitAccess;
   }
 }

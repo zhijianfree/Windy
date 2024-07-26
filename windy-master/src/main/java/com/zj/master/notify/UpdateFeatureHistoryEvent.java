@@ -11,6 +11,8 @@ import com.zj.master.dispatch.task.FeatureExecuteProxy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 /**
  * @author guyuelan
  * @since 2023/5/17
@@ -37,10 +39,9 @@ public class UpdateFeatureHistoryEvent implements INotifyEvent {
 
   @Override
   public boolean handle(ResultEvent resultEvent) {
-    log.info("receive node record create event id = {} event={}", resultEvent.getExecuteId(),
-        JSON.toJSONString(resultEvent.getParams()));
-    FeatureHistoryDto history = JSON.parseObject(
-        JSON.toJSONString(resultEvent.getParams()), FeatureHistoryDto.class);
+    log.info("receive update feature history event id = {} event={}", resultEvent.getExecuteId(),
+        resultEvent.getExecuteType());
+    FeatureHistoryDto history = JSON.parseObject(JSON.toJSONString(resultEvent.getParams()), FeatureHistoryDto.class);
     FeatureHistoryDto featureHistory = featureHistoryRepository.getFeatureHistory(
         history.getHistoryId());
     if (ProcessStatus.isCompleteStatus(featureHistory.getExecuteStatus())) {
@@ -50,11 +51,11 @@ public class UpdateFeatureHistoryEvent implements INotifyEvent {
 
     boolean updateStatus = featureHistoryRepository.updateStatus(history.getHistoryId(),
         resultEvent.getStatus().getType());
-
     subTaskLogRepository.updateLogStatus(resultEvent.getLogId(), history.getHistoryId(),
         history.getExecuteStatus());
 
-    featureExecuteProxy.featureStatusChange(resultEvent.getExecuteId(), history);
+    Map<String, Object> context = resultEvent.getContext();
+    featureExecuteProxy.featureStatusChange(resultEvent.getExecuteId(), history, context);
     return updateStatus;
   }
 }

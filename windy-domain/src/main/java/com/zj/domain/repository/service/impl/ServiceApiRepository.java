@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author falcon
@@ -27,6 +28,13 @@ public class ServiceApiRepository extends ServiceImpl<IServiceApiMapper, Service
     api.setCreateTime(System.currentTimeMillis());
     api.setUpdateTime(System.currentTimeMillis());
     return save(api);
+  }
+
+  @Override
+  @Transactional
+  public boolean saveBatch(List<ServiceApiDto> serviceApis) {
+    List<ServiceApi> serviceApiList = OrikaUtil.convertList(serviceApis, ServiceApi.class);
+    return saveBatch(serviceApiList);
   }
 
   @Override
@@ -68,5 +76,11 @@ public class ServiceApiRepository extends ServiceImpl<IServiceApiMapper, Service
       return Collections.emptyList();
     }
     return OrikaUtil.convertList(list, ServiceApiDto.class);
+  }
+
+  @Override
+  public List<ServiceApiDto> getServiceApiList(List<String> apiIds) {
+    List<ServiceApi> serviceApis = list(Wrappers.lambdaQuery(ServiceApi.class).in(ServiceApi::getApiId, apiIds));
+    return OrikaUtil.convertList(serviceApis, ServiceApiDto.class);
   }
 }

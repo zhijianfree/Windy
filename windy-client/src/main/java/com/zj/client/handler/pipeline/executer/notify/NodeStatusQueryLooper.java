@@ -2,7 +2,7 @@ package com.zj.client.handler.pipeline.executer.notify;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.client.config.GlobalEnvConfig;
-import com.zj.client.handler.feature.executor.compare.CompareDefine;
+import com.zj.common.feature.CompareDefine;
 import com.zj.client.handler.feature.executor.compare.CompareOperator;
 import com.zj.client.handler.feature.executor.compare.CompareResult;
 import com.zj.client.handler.feature.executor.compare.operator.CompareFactory;
@@ -13,11 +13,15 @@ import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.common.enums.ProcessStatus;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -39,7 +43,7 @@ public class NodeStatusQueryLooper implements Runnable {
   public static final String QUERY_ERROR_TIPS = "loop query status error";
   private final Map<String, INodeTrigger> remoteInvokerMap;
   private final Map<String, Long> stopPipelineHistoryMap = new ConcurrentHashMap<>();
-  private final LinkedBlockingQueue<TaskNode> queue = new LinkedBlockingQueue<TaskNode>();
+  private final LinkedBlockingQueue<TaskNode> queue = new LinkedBlockingQueue<>();
   private final Executor executorService;
   private final CompareFactory compareFactory;
   private final GlobalEnvConfig globalEnvConfig;
@@ -69,9 +73,9 @@ public class NodeStatusQueryLooper implements Runnable {
     executorService.execute(() -> {
       try {
         INodeTrigger remoteInvoker = remoteInvokerMap.get(node.getExecuteType());
-        String result = remoteInvoker.queryStatus(node.getRefreshContext(), node);
-        log.info("get query status result={}", result);
-        if (StringUtils.isBlank(result)) {
+        QueryResponseModel queryResponse = remoteInvoker.queryStatus(node.getRefreshContext(), node);
+        log.info("get query status result={}", queryResponse);
+        if (Objects.isNull(queryResponse)) {
           handleDefaultError(node);
           return;
         }
@@ -82,7 +86,6 @@ public class NodeStatusQueryLooper implements Runnable {
           return;
         }
 
-        QueryResponseModel queryResponse = JSON.parseObject(result, QueryResponseModel.class);
         if (Objects.isNull(queryResponse.getStatus())) {
           log.info("get task record status is empty. recordId={}", node.getRecordId());
           cycleRunTask(node);
@@ -95,7 +98,7 @@ public class NodeStatusQueryLooper implements Runnable {
         }
         cycleRunTask(node);
       } catch (Exception e) {
-        log.info("loop query status error", e);
+        log.info(QUERY_ERROR_TIPS, e);
         handleDefaultError(node);
       }
     });
@@ -118,20 +121,28 @@ public class NodeStatusQueryLooper implements Runnable {
    * 将查询的成功的结果与配置的期望值比较
    */
   private void compareResultWithExpect(TaskNode node, QueryResponseModel responseModel) {
-    if (!Objects.equals(responseModel.getStatus(), ProcessStatus.SUCCESS.getType())) {
+    //如果没有断言比较直接退出
+    List<CompareInfo> compareConfigs = node.getRefreshContext().getCompareConfig();
+    if (CollectionUtils.isEmpty(compareConfigs)) {
       return;
     }
 
     Map<String, Object> map = JSON.parseObject(JSON.toJSONString(responseModel.getData()));
-    List<CompareInfo> compareConfigs = node.getRefreshContext().getCompareConfig();
-    for (CompareInfo compareInfo : compareConfigs) {
+    boolean anyMatch = compareConfigs.stream().anyMatch(compareInfo -> {
       CompareResult compareResult = handleCompare(map, compareInfo);
-      if (!compareResult.isCompareStatus()) {
+      if (!compareResult.isCompareSuccess()) {
         responseModel.setStatus(ProcessStatus.FAIL.getType());
-        responseModel.setMessage(exchangeTips(map, compareInfo));
-        return;
+        List<String> tips = exchangeTips(map, compareInfo);
+        responseModel.getMessage().addAll(tips);
       }
+      return !compareResult.isCompareSuccess();
+    });
+
+    //如果比较值都成功，那么就可以判断当前任务状态为成功
+    if (!anyMatch) {
+      responseModel.setStatus(ProcessStatus.SUCCESS.getType());
     }
+    log.info("feature result compare with expect = {}", !anyMatch);
   }
 
   private CompareResult handleCompare(Map<String, Object> response, CompareInfo compareInfo) {

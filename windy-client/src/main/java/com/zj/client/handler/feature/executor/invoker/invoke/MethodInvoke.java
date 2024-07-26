@@ -1,14 +1,15 @@
 package com.zj.client.handler.feature.executor.invoker.invoke;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.zj.client.entity.enuns.ParamTypeEnum;
+import com.zj.client.handler.feature.executor.vo.ExecuteContext;
+import com.zj.common.enums.InvokerType;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
 import com.zj.client.handler.feature.executor.invoker.loader.PluginManager;
-import com.zj.client.handler.feature.executor.vo.ExecutorUnit;
+import com.zj.common.feature.ExecutorUnit;
 import com.zj.plugin.loader.Feature;
 import com.zj.plugin.loader.FeatureDefine;
+import com.zj.plugin.loader.ParamValueType;
 import com.zj.plugin.loader.ParameterDefine;
 import com.zj.client.utils.ExceptionUtils;
 import java.util.HashMap;
@@ -43,7 +44,10 @@ public class MethodInvoke implements IExecuteInvoker {
       }
 
       featureDefines.forEach(featureDefine -> {
-        instanceMap.put(featureDefine.getName(), featureDefine);
+        if (!instanceMap.containsKey(featureDefine.getSource())){
+          log.info("get source ={} className={}", featureDefine.getSource(), feature.getClass().getSimpleName());
+          instanceMap.put(featureDefine.getSource(), feature);
+        }
       });
     });
   }
@@ -53,7 +57,7 @@ public class MethodInvoke implements IExecuteInvoker {
     return InvokerType.METHOD;
   }
 
-  public Object invoke(ExecutorUnit executorUnit) {
+  public Object invoke(ExecutorUnit executorUnit, ExecuteContext executeContext) {
     try {
       Object[] objects = null;
       List<ParameterDefine> paramDefines = executorUnit.getParams();
@@ -72,7 +76,7 @@ public class MethodInvoke implements IExecuteInvoker {
         instance = ConstructorUtils.invokeConstructor(cls);
         instanceMap.put(executorUnit.getName(), instance);
       }
-
+      log.info("start invoke obj = {}", instance.getClass().getName());
       return MethodUtils.invokeMethod(instance, executorUnit.getMethod(), objects);
     } catch (Exception e) {
       log.error("invoke method error", e);
@@ -85,47 +89,42 @@ public class MethodInvoke implements IExecuteInvoker {
   }
 
   public static Object convertDataToType(ParameterDefine paramDefine) {
-    if (Objects.equals(ParamTypeEnum.MAP.getType(), paramDefine.getType())) {
+    if (Objects.isNull(paramDefine.getValue())) {
+      return null;
+    }
+
+    if (Objects.equals(ParamValueType.Map.name(), paramDefine.getType())) {
       if (Objects.isNull(paramDefine.getValue())) {
         return new HashMap<>();
       }
-      return (Map<String, Object>) JSONObject.parse(JSON.toJSONString(paramDefine.getValue()));
+      return JSON.parse(JSON.toJSONString(paramDefine.getValue()));
     }
 
-    if (Objects.equals(ParamTypeEnum.LIST.getType(), paramDefine.getType())) {
+    if (Objects.equals(ParamValueType.Array.name(), paramDefine.getType())) {
       return paramDefine.getValue();
     }
 
-    if (Objects.equals(ParamTypeEnum.STRING.getType(), paramDefine.getType())) {
+    if (Objects.equals(ParamValueType.String.name(), paramDefine.getType())) {
       return String.valueOf(paramDefine.getValue());
     }
 
-    if (Objects.equals(ParamTypeEnum.INTEGER.getType(), paramDefine.getType())) {
+    if (Objects.equals(ParamValueType.Integer.name(), paramDefine.getType())) {
       return Integer.parseInt(String.valueOf(paramDefine.getValue()));
     }
 
-    if (Objects.equals(ParamTypeEnum.FLOAT.getType(), paramDefine.getType())) {
+    if (Objects.equals(ParamValueType.Long.name(), paramDefine.getType())) {
+      return Long.parseLong(String.valueOf(paramDefine.getValue()));
+    }
+
+    if (Objects.equals(ParamValueType.Float.name(), paramDefine.getType())) {
       return Float.parseFloat(String.valueOf(paramDefine.getValue()));
     }
 
-    if (Objects.equals(ParamTypeEnum.DOUBLE.getType(), paramDefine.getType())) {
+    if (Objects.equals(ParamValueType.Double.name(), paramDefine.getType())) {
       return Double.parseDouble(String.valueOf(paramDefine.getValue()));
     }
 
     return paramDefine.getValue();
 
-  }
-
-  public static void main(String[] args) {
-    MethodInvoke methodInvoke = new MethodInvoke(null);
-
-    ExecutorUnit executorUnit = new ExecutorUnit();
-    executorUnit.setMethod("startHttp");
-    executorUnit.setService("com.zj.feature.ability.http.HttpFeature");
-    executorUnit.setParams(JSON.parseArray(
-        "[{\"paramKey\":\"url\",\"value\":\"http://10.58.239.162:8079/v5/iot/11111111111111111/devices/1234567890111w1qw\"},{\"paramKey\":\"method\",\"value\":\"delete\"},{\"paramKey\":\"headers\",\"type\":1,\"value\":{\"X_USER_INFO\":\"{\\\"domainId\\\": \\\"gyl\\\"}\",\"domainId\":\"huhuhu11111223\"}},{\"paramKey\":\"body\",\"value\":\"\"}]",
-        ParameterDefine.class));
-    System.out.println(JSON.toJSONString(methodInvoke.invoke(executorUnit)));
-    ;
   }
 }

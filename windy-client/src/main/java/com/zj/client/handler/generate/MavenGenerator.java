@@ -10,13 +10,13 @@ import com.zj.client.entity.vo.ApiModel;
 import com.zj.client.entity.vo.ApiParamModel;
 import com.zj.client.entity.vo.EntityItem.PropertyItem;
 import com.zj.client.entity.vo.FreemarkerContext;
-import com.zj.client.entity.vo.GenerateConfig;
+import com.zj.common.generate.GenerateDetail;
 import com.zj.client.entity.vo.GenerateParam;
 import com.zj.client.handler.notify.IResultEventNotify;
 import com.zj.client.utils.FreemarkerUtils;
 import com.zj.common.enums.NotifyType;
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.common.model.ResultEvent;
 import com.zj.common.utils.OrikaUtil;
 import freemarker.template.Template;
@@ -56,6 +56,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DeploymentRepository;
+import org.apache.maven.model.DistributionManagement;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.Plugin;
@@ -123,18 +125,20 @@ public class MavenGenerator {
     generateParam.setRecordId(recordId);
     generateParam.setResult(JSON.toJSONString(Collections.singleton("start generate maven version")));
     generateParam.setStatus(ProcessStatus.RUNNING.getType());
-    GenerateConfig params = OrikaUtil.convert(generateDto, GenerateConfig.class);
+    GenerateDetail params = OrikaUtil.convert(generateDto, GenerateDetail.class);
     generateParam.setExecuteParams(JSON.toJSONString(params));
 
     ResultEvent resultEvent = new ResultEvent().executeId(recordId)
         .notifyType(NotifyType.CREATE_GENERATE_MAVEN).status(ProcessStatus.RUNNING)
         .params(generateParam);
     resultEventNotify.notifyEvent(resultEvent);
+    resultEventNotify.notifyEvent(resultEvent);
   }
 
   public void runGenerate(GenerateDto generateDto, String recordId) {
     try {
       //1 创建项目目录
+      log.info("step1 create project dir");
       String projectPath =
           globalEnvConfig.getWorkspace() + File.separator + GENERATE + File.separator
               + generateDto.getService();
@@ -145,6 +149,7 @@ public class MavenGenerator {
       }
 
       //2 创建pom文件
+      log.info("step2 create project pom.xml");
       String pomPath = projectPath + File.separator + POM_XML_FILE;
       result = createPomFile(pomPath, generateDto);
       if (!result) {
@@ -153,6 +158,7 @@ public class MavenGenerator {
       }
 
       //3 创建项目代码
+      log.info("step3 create project code");
       result = createProjectCode(generateDto, projectPath);
       if (!result) {
         updateMessage(recordId, ProcessStatus.FAIL, "create project java files error");
@@ -160,6 +166,7 @@ public class MavenGenerator {
       }
 
       //4 创建setting文件
+      log.info("step4 create project setting.xml");
       String settingPath = projectPath + File.separator + SETTING_XML;
       result = createSettingFile(settingPath, generateDto.getMavenUser(),
           generateDto.getMavenPwd());
@@ -169,14 +176,13 @@ public class MavenGenerator {
       }
 
       //5 部署到远程仓库
+      log.info("step5 start deploy remote repository");
       Integer deployResult = deployRepository(projectPath, pomPath, globalEnvConfig.getMavenPath(),
           generateDto.getMavenRepository(), line -> updateMessage(recordId, line));
       ProcessStatus status = Optional.of(deployResult).filter(res -> Objects.equals(res, SUCCESS_CODE))
           .map(res -> ProcessStatus.SUCCESS).orElse(ProcessStatus.FAIL);
-      if (Objects.equals(status, ProcessStatus.SUCCESS)) {
-        updateMessage(recordId, status,
-            "generate maven code success version" + generateDto.getVersion());
-      }
+      updateMessage(recordId, status,
+              "generate maven code result " + status.name());
       log.info("deploy maven jar result = {}", deployResult);
     } catch (Exception e) {
       log.error("generate error", e);
@@ -449,6 +455,13 @@ public class MavenGenerator {
 
     Build build = initBuild();
     model.setBuild(build);
+
+    DistributionManagement distributionManagement = new DistributionManagement();
+    DeploymentRepository deploymentRepository = new DeploymentRepository();
+    deploymentRepository.setId("maven_remote");
+    deploymentRepository.setUrl(generateDto.getMavenRepository());
+    distributionManagement.setRepository(deploymentRepository);
+    model.setDistributionManagement(distributionManagement);
     return model;
   }
 

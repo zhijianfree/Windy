@@ -52,7 +52,11 @@ public class TaskRecordService {
     return executeHistory && flag;
   }
 
-  public List<HistoryNodeDto> getTaskResult(String recordId) {
+  public List<FeatureHistoryDto>  getTaskFeatureHistories(String recordId) {
+    return  featureHistoryService.getHistories(recordId);
+  }
+
+  public List<HistoryNodeDto> getTaskFeatureHistoryTree(String recordId) {
     List<FeatureHistoryDto> histories = featureHistoryService.getHistories(recordId);
     if (CollectionUtils.isEmpty(histories)) {
       return Collections.emptyList();
@@ -60,10 +64,10 @@ public class TaskRecordService {
 
     Map<String, FeatureHistoryDto> historyMap = histories.stream()
         .collect(Collectors.toMap(FeatureHistoryDto::getFeatureId, history -> history));
-    TaskRecordDto record = getTaskRecord(recordId);
-    String testCaseId = record.getTestCaseId();
+    TaskRecordDto taskRecord = getTaskRecord(recordId);
+    String testCaseId = taskRecord.getTestCaseId();
     List<FeatureInfoDto> featureInfos = featureService.queryFeatureList(testCaseId);
-    List<HistoryNodeDto> historyNodeDtos = featureInfos.stream().map(feature -> {
+    List<HistoryNodeDto> historyNodes = featureInfos.stream().map(feature -> {
       HistoryNodeDto historyNodeDTO = new HistoryNodeDto();
       historyNodeDTO.setParentId(feature.getParentId());
       historyNodeDTO.setRecordId(recordId);
@@ -72,13 +76,13 @@ public class TaskRecordService {
       FeatureHistoryDto featureHistory = historyMap.get(feature.getFeatureId());
       if (Objects.nonNull(featureHistory)) {
         historyNodeDTO.setHistoryId(featureHistory.getHistoryId());
-        historyNodeDTO.setExecuteStatus(historyNodeDTO.getExecuteStatus());
+        historyNodeDTO.setExecuteStatus(featureHistory.getExecuteStatus());
       }
       return historyNodeDTO;
     }).collect(Collectors.toList());
 
     HistoryNodeDto root = new HistoryNodeDto();
-    convertTree(historyNodeDtos, root);
+    convertTree(historyNodes, root);
     return root.getChildren();
   }
 
@@ -93,9 +97,7 @@ public class TaskRecordService {
     parent.setChildren(list);
 
     featureList.removeIf(feature -> Objects.equals(feature.getParentId(), parent.getFeatureId()));
-    list.forEach(node -> {
-      convertTree(featureList, node);
-    });
+    list.forEach(node -> convertTree(featureList, node));
   }
 
   public TaskRecordDto getTaskRecord(String recordId) {
@@ -109,5 +111,9 @@ public class TaskRecordService {
   public Boolean stopTaskRecord(String recordId) {
     //todo notify master to stop dispatch task
     return taskRecordRepository.deleteTaskRecord(recordId);
+  }
+
+  public TaskRecordDto getTaskRecordByTrigger(String triggerId) {
+    return taskRecordRepository.getTaskRecordByTrigger(triggerId);
   }
 }

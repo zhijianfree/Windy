@@ -1,9 +1,10 @@
 package com.zj.feature.entity.dto;
 
-import java.util.List;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
+import com.zj.common.feature.ExecuteTemplateVo;
 import lombok.Data;
+
+import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
 /**
  * @author guyuelan
@@ -12,7 +13,6 @@ import lombok.Data;
 @Data
 public class BatchTemplates {
 
-  @NotBlank
   private String pluginId;
 
   @NotEmpty

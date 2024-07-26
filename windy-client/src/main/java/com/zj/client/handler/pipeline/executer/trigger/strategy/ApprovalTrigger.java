@@ -46,7 +46,7 @@ public class ApprovalTrigger implements INodeTrigger {
   }
 
   @Override
-  public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
+  public QueryResponseModel queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
     //审批通过就直接根据数据库的状态即可，因为这个状态变化不在节点执行是用户在ui界面完成
     String result = requestProxy.getApprovalRecord(taskNode.getRecordId());
     ResponseMeta responseMeta = JSONObject.parseObject(result, ResponseMeta.class);
@@ -61,6 +61,6 @@ public class ApprovalTrigger implements INodeTrigger {
     responseModel.setMessage(Collections.singletonList(msg));
     responseModel.setStatus(record.getStatus());
     responseModel.setData(record);
-    return JSON.toJSONString(responseModel);
+    return responseModel;
   }
 }
