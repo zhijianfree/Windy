@@ -34,9 +34,4 @@ public class TaskDispatchRest {
   public ResponseMeta<Boolean> stopTask(@RequestBody StopDispatch stopDispatch) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, taskDispatchService.stopDispatch(stopDispatch));
   }
-
-  @GetMapping("/dd")
-  public String test(){
-    return globalEnvConfig.getMavenPath();
-  }
 }

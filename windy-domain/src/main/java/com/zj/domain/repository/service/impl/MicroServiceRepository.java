@@ -26,7 +26,6 @@ public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Micr
   @Override
   public String createService(MicroserviceDto microserviceDto) {
     Microservice microservice = OrikaUtil.convert(microserviceDto, Microservice.class);
-    microservice.setOwner("admin");
     microservice.setCreateTime(System.currentTimeMillis());
     microservice.setUpdateTime(System.currentTimeMillis());
     boolean save = save(microservice);

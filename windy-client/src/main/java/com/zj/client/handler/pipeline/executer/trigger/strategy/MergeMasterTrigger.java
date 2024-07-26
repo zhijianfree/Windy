@@ -3,8 +3,13 @@ package com.zj.client.handler.pipeline.executer.trigger.strategy;
 import com.alibaba.fastjson.JSON;
 import com.zj.client.config.GlobalEnvConfig;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
-import com.zj.client.handler.pipeline.executer.vo.*;
+import com.zj.client.handler.pipeline.executer.vo.MergeRequest;
+import com.zj.client.handler.pipeline.executer.vo.MergeStatus;
+import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel.ResponseStatus;
+import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
+import com.zj.client.handler.pipeline.executer.vo.TaskNode;
+import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
 import com.zj.client.handler.pipeline.git.IGitProcessor;
 import com.zj.client.utils.Utils;
 import com.zj.common.enums.ExecuteType;
@@ -25,7 +30,11 @@ import org.eclipse.jgit.transport.RemoteRefUpdate.Status;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -135,14 +144,12 @@ public class MergeMasterTrigger implements INodeTrigger {
   }
 
   @Override
-  public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
+  public QueryResponseModel queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
     MergeStatus mergeStatus = statusMap.get(taskNode.getRecordId());
     QueryResponseModel loopQueryResponse = new QueryResponseModel();
     loopQueryResponse.setStatus(mergeStatus.getStatus());
-    ResponseStatus responseStatus = new ResponseStatus();
-    responseStatus.setStatus(loopQueryResponse.getStatus());
-    loopQueryResponse.setData(responseStatus);
+    loopQueryResponse.setData(new ResponseStatus(loopQueryResponse.getStatus()));
     loopQueryResponse.setMessage(mergeStatus.getMessage());
-    return JSON.toJSONString(loopQueryResponse);
+    return loopQueryResponse;
   }
 }

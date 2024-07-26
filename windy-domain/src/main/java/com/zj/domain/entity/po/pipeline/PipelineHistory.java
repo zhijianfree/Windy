@@ -32,11 +32,6 @@ public class PipelineHistory {
   private String branch;
 
   /**
-   * 流水线执行人
-   * */
-  private String executor;
-
-  /**
    * 流水线配置
    * */
   private String pipelineConfig;

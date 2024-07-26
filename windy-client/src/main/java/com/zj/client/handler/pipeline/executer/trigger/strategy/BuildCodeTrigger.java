@@ -40,8 +40,7 @@ public class BuildCodeTrigger implements INodeTrigger {
   }
 
   @Override
-  public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
-    QueryResponseModel recordStatus = codeBuildService.getRecordStatus(taskNode.getRecordId());
-    return JSON.toJSONString(recordStatus);
+  public QueryResponseModel queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
+    return codeBuildService.getRecordStatus(taskNode.getRecordId());
   }
 }

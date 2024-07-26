@@ -290,7 +290,7 @@ public class RequestProxy {
           responseEntity.getBody());
       return responseEntity.getStatusCode().is2xxSuccessful();
     } catch (Exception e) {
-      log.error("request start pipeline task error ={}", e.toString());
+      log.error("request start task error ={}", e.toString());
     }
     return false;
   }
@@ -299,6 +299,7 @@ public class RequestProxy {
     List<ServiceInstance> serviceInstances = discoverService.getServiceInstances(WINDY_CLIENT);
     return serviceInstances.stream().map(service -> {
       String url = String.format(CLIENT_MONITOR_URL, service.getHost());
+      log.info("request url = {}", url);
       String traceId = MDC.get(TidInterceptor.MDC_TID_KEY);
       Request request = new Request.Builder().url(url)
           .header(TidInterceptor.HTTP_HEADER_TRACE_ID, traceId).get().build();
@@ -323,6 +324,7 @@ public class RequestProxy {
       Request request = new Request.Builder().url(url)
           .header(TidInterceptor.HTTP_HEADER_TRACE_ID, traceId).get().build();
       try {
+        log.info("request url = {}", url);
         Response response = okHttpClient.newCall(request).execute();
         String string = response.body().string();
         log.info("request master monitor result={}", string);

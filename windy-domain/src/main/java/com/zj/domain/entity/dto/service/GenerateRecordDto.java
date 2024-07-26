@@ -23,6 +23,11 @@ public class GenerateRecordDto {
   private String result;
 
   /**
+   * 构建的版本号
+   */
+  private String version;
+
+  /**
    * 执行状态
    * */
   private Integer status;

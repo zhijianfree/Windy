@@ -37,6 +37,7 @@ public enum ErrorCode {
   GIT_NO_PERMISSION(HttpStatus.BAD_REQUEST, "Service.000005", "配置的用户token无权限访问"),
   USER_NO_PERMISSION(HttpStatus.BAD_REQUEST, "Service.000006", "用户未被授权访问当前git地址"),
   MAVEN_NOT_CONFIG(HttpStatus.BAD_REQUEST, "Service.000007", "系统未配置maven仓库地址，请先配置再尝试生成"),
+  GENERATE_VERSION_EXIST(HttpStatus.BAD_REQUEST, "Service.000008", "构建Maven而方包失败，版本号已存在"),
   /*==================用例服务==================*/
   COMPARE_ERROR(HttpStatus.FORBIDDEN, "Feature.000002", "feature compare error"),
   EXECUTE_POINT_NOT_FIND(HttpStatus.NOT_FOUND, "Feature.000003", "can not find execute point"),

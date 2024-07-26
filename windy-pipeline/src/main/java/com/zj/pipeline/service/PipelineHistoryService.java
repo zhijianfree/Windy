@@ -2,7 +2,7 @@ package com.zj.pipeline.service;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.entity.dto.pipeline.NodeStatus;
 import com.zj.domain.entity.dto.pipeline.PipelineExecuteInfo;

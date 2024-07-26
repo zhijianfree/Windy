@@ -22,11 +22,6 @@ public class Microservice {
     private String gitUrl;
 
     /**
-     * 服务拥有者
-     * */
-    private String owner;
-
-    /**
      * 服务描述
      * */
     private String description;
@@ -35,6 +30,11 @@ public class Microservice {
      * 服务优先级，用来服务列表排序
      * */
     private Integer priority;
+
+    /**
+     * 服务配置
+     */
+    private String serviceConfig;
 
     /**
      * 创建时间

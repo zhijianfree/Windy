@@ -29,13 +29,16 @@ import java.util.stream.Collectors;
 public class GiteaRepositoryBranch implements IRepositoryBranch {
 
   private final GitRequestProxy gitRequestProxy;
-  private final Map<String, String> headers;
 
   public GiteaRepositoryBranch(GitRequestProxy gitRequestProxy) {
     this.gitRequestProxy = gitRequestProxy;
+  }
+
+  private Map<String, String> getTokenHeader() {
+    Map<String, String> header = new HashMap<>();
     String accessToken = gitRequestProxy.getGitAccess().getAccessToken();
-    headers = new HashMap<>();
-    headers.put("Authorization", "token " + accessToken);
+    header.put("Private-Token", accessToken);
+    return header;
   }
 
   @Override
@@ -49,7 +52,7 @@ public class GiteaRepositoryBranch implements IRepositoryBranch {
     String gitPath = String.format("/api/v1/repos/%s/%s/branches", owner, serviceName);
     CreateBranchVo createBranchVO = new CreateBranchVo();
     createBranchVO.setBranchName(branchName);
-    String result = gitRequestProxy.post(gitPath, JSON.toJSONString(createBranchVO), headers);
+    String result = gitRequestProxy.post(gitPath, JSON.toJSONString(createBranchVO), getTokenHeader());
     log.info("gitea create branch result = {}", result);
     BranchInfo branchInfo = JSON.parseObject(result, BranchInfo.class);
     if (Objects.isNull(branchInfo) || !Objects.equals(branchInfo.getName(), branchName)){
@@ -63,12 +66,12 @@ public class GiteaRepositoryBranch implements IRepositoryBranch {
     String owner = gitRequestProxy.getGitAccess().getOwner();
     String gitPath = String.format("/api/v1/repos/%s/%s/branches/%s", owner, serviceName,
         branchName);
-    gitRequestProxy.delete(gitPath, headers);
+    gitRequestProxy.delete(gitPath, getTokenHeader());
   }
 
   @Override
   public void checkRepository(String serviceName) {
-    String result = gitRequestProxy.get("/api/v1/user/repos", headers);
+    String result = gitRequestProxy.get("/api/v1/user/repos", getTokenHeader());
     log.info("query repository result ={}", result);
     List<GiteaRepository> repositories = JSON.parseArray(result, GiteaRepository.class);
     if (CollectionUtils.isEmpty(repositories)) {
@@ -90,7 +93,7 @@ public class GiteaRepositoryBranch implements IRepositoryBranch {
   public List<String> listBranch(String serviceName) {
     String owner = gitRequestProxy.getGitAccess().getOwner();
     String gitPath = String.format("/api/v1/repos/%s/%s/branches", owner, serviceName);
-    String result = gitRequestProxy.get(gitPath, headers);
+    String result = gitRequestProxy.get(gitPath, getTokenHeader());
     List<BranchInfo> branches = JSON.parseArray(result, BranchInfo.class);
     if (CollectionUtils.isEmpty(branches)) {
       return Collections.emptyList();

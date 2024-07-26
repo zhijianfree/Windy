@@ -1,7 +1,7 @@
 package com.zj.client.handler.feature.executor.invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.client.entity.dto.ExecutePointDto;
+import com.zj.common.feature.ExecutePointDto;
 import com.zj.client.entity.enuns.ExecutePointType;
 import com.zj.client.entity.vo.ExecutePoint;
 import com.zj.client.entity.vo.FeatureResponse;
@@ -9,8 +9,9 @@ import com.zj.client.handler.feature.executor.compare.CompareHandler;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
 import com.zj.client.handler.feature.executor.interceptor.InterceptorProxy;
 import com.zj.client.handler.feature.executor.vo.ExecuteContext;
-import com.zj.client.handler.feature.executor.vo.ExecutorUnit;
+import com.zj.common.feature.ExecutorUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +32,8 @@ public class ForExecuteStrategy extends BaseExecuteStrategy{
   }
 
   @Override
-  public ExecutePointType getType() {
-    return ExecutePointType.FOR;
+  public List<ExecutePointType> getType() {
+    return Collections.singletonList(ExecutePointType.FOR);
   }
 
   @Override
@@ -46,7 +47,7 @@ public class ForExecuteStrategy extends BaseExecuteStrategy{
     for (int i = 0; i < size; i++) {
       executeContext.set("$item", i);
       List<FeatureResponse> responseList = executePoints.stream().map(executePointDto -> {
-        ExecutePoint point = ExecutePointDto.toExecutePoint(executePointDto);
+        ExecutePoint point = toExecutePoint(executePointDto);
         return executeFeature(executeContext, point);
       }).collect(Collectors.toList());
 

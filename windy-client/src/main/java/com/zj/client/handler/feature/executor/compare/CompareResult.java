@@ -5,12 +5,12 @@ import lombok.Data;
 
 @Data
 public class CompareResult {
-    private boolean compareStatus;
+    private boolean compareSuccess;
     private String errorMessage;
     private String description;
 
     public void setErrorType(ErrorCode errorType){
-        this.compareStatus = false;
+        this.compareSuccess = false;
         this.errorMessage = errorType.getMessage();
     }
 }

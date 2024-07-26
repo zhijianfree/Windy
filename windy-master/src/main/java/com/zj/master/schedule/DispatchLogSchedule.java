@@ -87,6 +87,9 @@ public class DispatchLogSchedule {
     subDispatchLogRepository.batchDeleteByLogIds(logIds);
   }
 
+  /**
+   * 任务的NodeIP在现有Master的list中不存在时，证明当前任务未执行
+   * */
   private List<DispatchLogDto> resolveNoMasterTaskLog(List<DispatchLogDto> runningTaskLog) {
     String localIP = IpUtils.getLocalIP();
     List<String> masterIps = getCurrentMasterIpList();

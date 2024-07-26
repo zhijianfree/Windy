@@ -2,37 +2,42 @@ package com.zj.common.monitor.trace;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.MDC;
-import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.stereotype.Component;
 
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.UUID;
 
 /**
  * @author guyuelan
  * @since 2023/6/26
  */
-public class TidInterceptor implements HandlerInterceptor {
+@Component
+@WebFilter(urlPatterns = "/**", filterName = "requestTraceFilter")
+public class TidInterceptor implements Filter {
 
   public static final String MDC_TID_KEY = "tid";
   public static final String HTTP_HEADER_TRACE_ID = "REQUEST-TRACE-ID";
 
   @Override
-  public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-      throws Exception {
-    String tid = request.getHeader(HTTP_HEADER_TRACE_ID);
-    if (StringUtils.isBlank(tid)) {
-      tid = UUID.randomUUID().toString().replace("-","");
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    try {
+      HttpServletRequest httpRequest = (HttpServletRequest) request;
+      String tid = httpRequest.getHeader(HTTP_HEADER_TRACE_ID);
+      if (StringUtils.isBlank(tid)) {
+        tid = UUID.randomUUID().toString().replace("-","");
+      }
+      MDC.put(MDC_TID_KEY, tid);
+      chain.doFilter(request, response);
+    } finally {
+      // 清除MDC的traceId值，确保在请求结束后不会影响其他请求的日志
+      MDC.remove(MDC_TID_KEY);
     }
-    MDC.put(MDC_TID_KEY, tid);
-    return true;
-  }
-
-  @Override
-  public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-      ModelAndView modelAndView) throws Exception {
-    // 在请求处理完毕后，移除tid参数
-    MDC.remove(MDC_TID_KEY);
   }
 }

@@ -1,5 +1,6 @@
 package com.zj.client.handler.deploy;
 
+import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.common.enums.ProcessStatus;
 import java.util.List;
 import java.util.Map;
@@ -25,13 +26,13 @@ public class DeployFactory {
     return deployModeMap.get(mode);
   }
 
-  public ProcessStatus getDeployStatus(String recordId) {
+  public QueryResponseModel getDeployStatus(String recordId) {
     for (IDeployMode deployMode : deployModeMap.values()) {
-      ProcessStatus deployStatus = deployMode.getDeployStatus(recordId);
+      QueryResponseModel deployStatus = deployMode.getDeployStatus(recordId);
       if (Objects.nonNull(deployStatus)) {
         return deployStatus;
       }
     }
-    return ProcessStatus.FAIL;
+    return new QueryResponseModel();
   }
 }

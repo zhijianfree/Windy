@@ -54,9 +54,9 @@ public class PipelineSchedule implements CommandLineRunner {
   /**
    * 30 分钟检查一次是否有新的定时任务需要执行或者修改
    * */
-  @Scheduled(cron = "* 0/30 * * * ? ")
+  @Scheduled(cron = "0/5 * * * * ? ")
   public void scanTaskLog() {
-    log.info("start scan schedule pipeline");
+    log.debug("start scan schedule pipeline");
     loadSchedulePipeline();
   }
 
@@ -70,21 +70,23 @@ public class PipelineSchedule implements CommandLineRunner {
   private void loadSchedulePipeline() {
     List<PipelineDto> pipelines = pipelineRepository.getSchedulePipelines().stream()
         .filter(pipeline -> StringUtils.isNotBlank(pipeline.getPipelineConfig()))
-        .filter(this::haveSchedule)
+        .filter(this::notExistLocalMap)
         .collect(Collectors.toList());
     if (CollectionUtils.isEmpty(pipelines)) {
       return;
     }
 
-    lockRepository.tryLock(PIPELINE_SCHEDULE);
+    log.info("start run task");
     pipelines.forEach(pipeline -> {
       PipelineConfig pipelineConfig = JSON.parseObject(pipeline.getPipelineConfig(),
           PipelineConfig.class);
       Trigger trigger = new CronTrigger(pipelineConfig.getSchedule());
       ScheduledFuture<?> scheduledFuture = taskScheduler.schedule(() -> {
-        if (!lockRepository.hasLock(PIPELINE_SCHEDULE)) {
+        if (!lockRepository.tryLock(PIPELINE_SCHEDULE)) {
+          log.info("pipeline do not have lock pipelineId={}", pipeline.getPipelineId());
           return;
         }
+        log.info("start dispatch pipeline task pipelineId={}", pipeline.getPipelineId());
         DispatchTaskModel task = new DispatchTaskModel();
         task.setType(LogType.PIPELINE.getType());
         task.setSourceName(pipeline.getPipelineName());
@@ -99,7 +101,7 @@ public class PipelineSchedule implements CommandLineRunner {
     });
   }
 
-  private boolean haveSchedule(PipelineDto pipeline) {
+  private boolean notExistLocalMap(PipelineDto pipeline) {
     ScheduleHolder holder = scheduledMap.get(pipeline.getPipelineId());
     if (Objects.isNull(holder)) {
       return true;
@@ -111,6 +113,7 @@ public class PipelineSchedule implements CommandLineRunner {
       //如果定时任务发生改变需要将之前的定时任务取消，后面会重新添加新的定时任务
       holder.getScheduledFuture().cancel(true);
       scheduledMap.remove(pipeline.getPipelineId());
+      log.info("remove pipeline old schedule = {} pipelineId={}", holder.getCron(), pipeline.getPipelineId());
       return true;
     }
     return false;

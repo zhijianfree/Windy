@@ -2,7 +2,7 @@ package com.zj.domain.repository.feature;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.domain.entity.dto.feature.ExecuteTemplateDto;
-import com.zj.domain.entity.po.feature.ExecuteTemplate;
+
 import java.util.List;
 
 /**
@@ -19,9 +19,17 @@ public interface IExecuteTemplateRepository {
 
   Boolean deleteTemplate(String templateId);
 
-  List<ExecuteTemplateDto> getAllTemplates();
-
-  IPage<ExecuteTemplateDto> getPage(Integer pageNo, Integer size, String name);
+  IPage<ExecuteTemplateDto> getPage(String serviceId, Integer pageNo, Integer size, String name);
 
   Boolean batchAddTemplates(List<ExecuteTemplateDto> templates);
+
+  List<ExecuteTemplateDto> getServiceTemplates(String serviceId);
+
+  List<ExecuteTemplateDto> getAllTemplates();
+
+  List<ExecuteTemplateDto> getTemplatesByType(List<Integer> templateTypes);
+
+  List<ExecuteTemplateDto> getToolTemplates();
+
+  List<ExecuteTemplateDto> getTemplateByIds(List<String> templateIds);
 }

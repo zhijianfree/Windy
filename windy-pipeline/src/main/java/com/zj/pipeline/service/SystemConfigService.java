@@ -1,6 +1,6 @@
 package com.zj.pipeline.service;
 
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.common.model.ClientCollect;
 import com.zj.common.model.MasterCollect;
 import com.zj.common.monitor.RequestProxy;

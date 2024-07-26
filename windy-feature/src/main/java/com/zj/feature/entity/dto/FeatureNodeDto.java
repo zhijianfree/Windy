@@ -13,19 +13,46 @@ import lombok.Data;
  */
 @Data
 public class FeatureNodeDto {
+
+  /**
+   * 用例Id
+   */
   private String featureId;
+
+  /**
+   * 用例名称
+   */
   @NotNull
   private String featureName;
-  @NotNull
-  private String author;
-  private String modify;
+
+  /**
+   * 用例类型
+   */
   private Integer featureType;
-  private List<String> tags;
-  private String testStep;
+
+  /**
+   * 测试集Id
+   */
   private String testCaseId;
-  private Long createTime;
-  private Long updateTime;
-  private List<ExecutePointVo> testFeatures;
+
+  /**
+   * 排序
+   */
+  private Integer sortOrder;
+
+  /**
+   * 用例的测试步骤
+   */
+  private String testStep;
+
+  /**
+   * 父节点Id
+   */
+  private String parentId;
+
+  /**
+   * 子节点列表
+   */
   private List<FeatureNodeDto> children;
 
   public static FeatureNodeDto toNode(FeatureInfoDto featureInfo) {

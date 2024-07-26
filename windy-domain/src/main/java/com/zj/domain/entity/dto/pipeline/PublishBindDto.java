@@ -11,8 +11,6 @@ public class PublishBindDto {
 
   private String publishId;
 
-  private String userId;
-
   private String branch;
 
   private String serviceId;

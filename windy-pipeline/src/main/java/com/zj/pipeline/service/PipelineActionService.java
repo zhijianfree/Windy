@@ -3,7 +3,7 @@ package com.zj.pipeline.service;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.common.model.PageSize;
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.pipeline.ActionParam;
 import com.zj.domain.entity.dto.pipeline.CompareResult;

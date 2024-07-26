@@ -1,6 +1,8 @@
 package com.zj.client.handler.deploy.docker;
 
+import com.zj.client.handler.deploy.AbstractDeployMode;
 import com.zj.client.handler.deploy.IDeployMode;
+import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.common.enums.DeployType;
 import com.zj.common.enums.ProcessStatus;
 import org.springframework.stereotype.Component;
@@ -11,7 +13,7 @@ import org.springframework.stereotype.Component;
  * @since 2023/6/8
  */
 @Component
-public class DockerDeploy implements IDeployMode<DockerDeployContext> {
+public class DockerDeploy extends AbstractDeployMode<DockerDeployContext> {
 
   @Override
   public Integer deployType() {
@@ -24,7 +26,7 @@ public class DockerDeploy implements IDeployMode<DockerDeployContext> {
   }
 
   @Override
-  public ProcessStatus getDeployStatus(String recordId) {
+  public QueryResponseModel getDeployStatus(String recordId) {
     return null;
   }
 }

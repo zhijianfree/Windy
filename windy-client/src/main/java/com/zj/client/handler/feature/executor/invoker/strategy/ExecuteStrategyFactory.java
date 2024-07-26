@@ -4,11 +4,13 @@ import com.zj.client.entity.vo.ExecutePoint;
 import com.zj.client.entity.vo.FeatureResponse;
 import com.zj.client.handler.feature.executor.invoker.IExecuteStrategy;
 import com.zj.client.handler.feature.executor.vo.ExecuteContext;
+import com.zj.common.exception.ExecuteException;
+import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import org.springframework.stereotype.Service;
 
 /**
  * @author guyuelan
@@ -17,18 +19,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class ExecuteStrategyFactory {
 
-  private final Map<Integer, IExecuteStrategy> executeStrategyMap;
+    private final Map<Integer, IExecuteStrategy> executeStrategyMap = new HashMap<>();
 
-  public ExecuteStrategyFactory(List<IExecuteStrategy> strategies) {
-    executeStrategyMap = strategies.stream()
-        .collect(Collectors.toMap(strategy -> strategy.getType().getType(), strategy -> strategy));
-  }
-
-  public List<FeatureResponse> execute(ExecutePoint executePoint, ExecuteContext executeContext){
-    IExecuteStrategy executeStrategy = executeStrategyMap.get(executePoint.getExecuteType());
-    if (Objects.isNull(executeStrategy)) {
-      throw new RuntimeException("can not find strategy, not execute");
+    public ExecuteStrategyFactory(List<IExecuteStrategy> strategies) {
+        strategies.forEach(strategy -> strategy.getType().forEach(type -> executeStrategyMap.put(type.getType(),
+                strategy)));
     }
-    return executeStrategy.execute(executePoint, executeContext);
-  }
+
+    public List<FeatureResponse> execute(ExecutePoint executePoint, ExecuteContext executeContext) {
+        IExecuteStrategy executeStrategy = executeStrategyMap.get(executePoint.getExecuteType());
+        if (Objects.isNull(executeStrategy)) {
+            throw new ExecuteException("can not find strategy, not execute");
+        }
+        return executeStrategy.execute(executePoint, executeContext);
+    }
 }

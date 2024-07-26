@@ -29,6 +29,10 @@ public class GenerateRecord {
    * */
   private Integer status;
 
+  /**
+   * 构建的版本号
+   */
+  private String version;
 
   private Long createTime;
 

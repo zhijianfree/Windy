@@ -50,13 +50,13 @@ public class TaskRecordRepository extends ServiceImpl<TaskRecordMapper, TaskReco
         Wrappers.lambdaQuery(TaskRecord.class).orderByDesc(TaskRecord::getUpdateTime));
 
     List<TaskRecordDto> list = OrikaUtil.convertList(recordIPage.getRecords(), TaskRecordDto.class);
-    list = list.stream().peek(record -> {
-      String desc = ProcessStatus.exchange(record.getStatus()).getDesc();
-      record.setStatusName(desc);
+    list = list.stream().peek(taskRecord -> {
+      String desc = ProcessStatus.exchange(taskRecord.getStatus()).getDesc();
+      taskRecord.setStatusName(desc);
     }).collect(Collectors.toList());
 
     Page<TaskRecordDto> recordDtoPage = new Page<>();
-    recordDtoPage.setTotal(recordDtoPage.getTotal());
+    recordDtoPage.setTotal(recordIPage.getTotal());
     recordDtoPage.setRecords(list);
     return recordDtoPage;
   }
@@ -79,5 +79,12 @@ public class TaskRecordRepository extends ServiceImpl<TaskRecordMapper, TaskReco
         Wrappers.lambdaQuery(TaskRecord.class).eq(TaskRecord::getTaskId, taskId)
             .orderByDesc(TaskRecord::getCreateTime));
     return OrikaUtil.convertList(taskRecords, TaskRecordDto.class);
+  }
+
+  @Override
+  public TaskRecordDto getTaskRecordByTrigger(String triggerId) {
+    TaskRecord taskRecord = getOne(
+            Wrappers.lambdaQuery(TaskRecord.class).eq(TaskRecord::getTriggerId, triggerId));
+    return OrikaUtil.convert(taskRecord, TaskRecordDto.class);
   }
 }

@@ -3,16 +3,18 @@ package com.zj.master.dispatch.pipeline;
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.common.model.DispatchTaskModel;
 import com.zj.domain.entity.dto.log.DispatchLogDto;
 import com.zj.domain.entity.dto.log.SubDispatchLogDto;
+import com.zj.domain.entity.dto.pipeline.BindBranchDto;
 import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
 import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
 import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
+import com.zj.domain.repository.pipeline.IBindBranchRepository;
 import com.zj.domain.repository.pipeline.IPipelineActionRepository;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import com.zj.domain.repository.pipeline.IPipelineNodeRepository;
@@ -48,13 +50,14 @@ public class PipelineDispatch implements IDispatchExecutor {
   private final PipelineExecuteProxy pipelineExecuteProxy;
   private final ISubDispatchLogRepository subDispatchLogRepository;
   private final IDispatchLogRepository dispatchLogRepository;
+  private final IBindBranchRepository bindBranchRepository;
 
   public PipelineDispatch(IPipelineRepository pipelineRepository,
-      IPipelineNodeRepository pipelineNodeRepository,
-      IPipelineHistoryRepository pipelineHistoryRepository,
-      IPipelineActionRepository pipelineActionRepository, UniqueIdService uniqueIdService,
-      PipelineExecuteProxy pipelineExecuteProxy, ISubDispatchLogRepository subDispatchLogRepository,
-      IDispatchLogRepository dispatchLogRepository) {
+                          IPipelineNodeRepository pipelineNodeRepository,
+                          IPipelineHistoryRepository pipelineHistoryRepository,
+                          IPipelineActionRepository pipelineActionRepository, UniqueIdService uniqueIdService,
+                          PipelineExecuteProxy pipelineExecuteProxy, ISubDispatchLogRepository subDispatchLogRepository,
+                          IDispatchLogRepository dispatchLogRepository, IBindBranchRepository bindBranchRepository) {
     this.pipelineRepository = pipelineRepository;
     this.pipelineNodeRepository = pipelineNodeRepository;
     this.pipelineHistoryRepository = pipelineHistoryRepository;
@@ -63,6 +66,7 @@ public class PipelineDispatch implements IDispatchExecutor {
     this.pipelineExecuteProxy = pipelineExecuteProxy;
     this.subDispatchLogRepository = subDispatchLogRepository;
     this.dispatchLogRepository = dispatchLogRepository;
+    this.bindBranchRepository = bindBranchRepository;
   }
 
   @Override
@@ -142,10 +146,10 @@ public class PipelineDispatch implements IDispatchExecutor {
     pipelineHistory.setPipelineId(pipelineId);
     pipelineHistory.setPipelineStatus(ProcessStatus.RUNNING.getType());
     pipelineHistory.setPipelineConfig("");
-    pipelineHistory.setBranch("master");
-    pipelineHistory.setExecutor("admin");
     pipelineHistory.setCreateTime(System.currentTimeMillis());
     pipelineHistory.setUpdateTime(System.currentTimeMillis());
+    BindBranchDto bindBranch = bindBranchRepository.getPipelineBindBranch(pipelineId);
+    pipelineHistory.setBranch(bindBranch.getGitBranch());
     pipelineHistoryRepository.createPipelineHistory(pipelineHistory);
   }
 

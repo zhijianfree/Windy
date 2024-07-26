@@ -4,6 +4,7 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseMeta;
 import com.zj.domain.entity.dto.service.MicroserviceDto;
+import com.zj.service.entity.ServiceDto;
 import com.zj.service.service.MicroserviceService;
 import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,9 +36,9 @@ public class MicroserviceRest {
 
   @ResponseBody
   @GetMapping("/services/page")
-  public ResponseMeta<PageSize<MicroserviceDto>> queryPageServices(@RequestParam(value = "page", defaultValue = "1") Integer page,
+  public ResponseMeta<PageSize<ServiceDto>> queryPageServices(@RequestParam(value = "page", defaultValue = "1") Integer page,
       @RequestParam(value = "size", defaultValue = "10") Integer size, @RequestParam(value = "name", defaultValue = "") String name) {
-    return new ResponseMeta<PageSize<MicroserviceDto>>(ErrorCode.SUCCESS, microservice.getServices(page, size, name));
+    return new ResponseMeta<PageSize<ServiceDto>>(ErrorCode.SUCCESS, microservice.getServices(page, size, name));
   }
 
   @GetMapping("/service/{serviceId}/detail")
@@ -47,14 +48,14 @@ public class MicroserviceRest {
 
   @ResponseBody
   @PostMapping("/services")
-  public ResponseMeta<String> createService(@RequestBody MicroserviceDto MicroserviceDto) {
-    return new ResponseMeta<String>(ErrorCode.SUCCESS, microservice.createService(MicroserviceDto));
+  public ResponseMeta<String> createService(@RequestBody ServiceDto serviceDto) {
+    return new ResponseMeta<String>(ErrorCode.SUCCESS, microservice.createService(serviceDto));
   }
 
   @ResponseBody
   @PutMapping("/services")
-  public ResponseMeta<String> updateService(@RequestBody MicroserviceDto MicroserviceDto) {
-    return new ResponseMeta<String>(ErrorCode.SUCCESS, microservice.updateService(MicroserviceDto));
+  public ResponseMeta<String> updateService(@RequestBody ServiceDto update) {
+    return new ResponseMeta<String>(ErrorCode.SUCCESS, microservice.updateService(update));
   }
 
   @ResponseBody

@@ -29,11 +29,6 @@ public class CodeChangeDto {
     private String changeDesc;
 
     /**
-     * 变更创建者
-     */
-    private String creator;
-
-    /**
      * 变更分支
      */
     @NotEmpty

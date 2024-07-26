@@ -26,6 +26,11 @@ public class DispatchTaskModel {
    * */
   private Integer type;
 
+  /**
+   * 触发源头方
+   */
+  private String triggerId;
+
   public DispatchTaskModel() {
   }
 

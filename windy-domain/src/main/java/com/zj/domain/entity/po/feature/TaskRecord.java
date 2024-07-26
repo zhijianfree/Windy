@@ -18,11 +18,6 @@ public class TaskRecord {
   private String taskId;
 
   /**
-   * 创建者
-   * */
-  private String userId;
-
-  /**
    * 执行状态
    * */
   private Integer status;
@@ -46,6 +41,11 @@ public class TaskRecord {
    * 执行机器
    * */
   private String machines;
+
+  /**
+   * 触发任务的来源方，用来记录由谁触发的任务
+   */
+  private String triggerId;
 
   private Long createTime;
 

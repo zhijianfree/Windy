@@ -21,4 +21,6 @@ public interface ITaskRecordRepository {
   boolean deleteTaskRecord(String recordId);
 
   List<TaskRecordDto> getTaskRecordsOrderByTime(String taskId);
+
+    TaskRecordDto getTaskRecordByTrigger(String triggerId);
 }

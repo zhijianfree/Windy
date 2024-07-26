@@ -16,7 +16,7 @@
     <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
       <fileNamePattern>starter_log/starter-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
       <maxFileSize>50MB</maxFileSize>
-      <totalSizeCap>10GB</totalSizeCap>
+      <totalSizeCap>2GB</totalSizeCap>
       <maxHistory>30</maxHistory>
     </rollingPolicy>
     <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
@@ -37,7 +37,7 @@
     <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
       <fileNamePattern>starter_log/warn-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
       <maxFileSize>50MB</maxFileSize>
-      <totalSizeCap>10GB</totalSizeCap>
+      <totalSizeCap>2GB</totalSizeCap>
       <maxHistory>30</maxHistory>
     </rollingPolicy>
     <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
@@ -58,7 +58,7 @@
     <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
       <fileNamePattern>starter_log/error-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
       <maxFileSize>50MB</maxFileSize>
-      <totalSizeCap>10GB</totalSizeCap>
+      <totalSizeCap>2GB</totalSizeCap>
       <maxHistory>30</maxHistory>
     </rollingPolicy>
     <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">

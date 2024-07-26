@@ -2,7 +2,11 @@ package com.zj.client.handler.pipeline.executer.trigger.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
-import com.zj.client.handler.pipeline.executer.vo.*;
+import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
+import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
+import com.zj.client.handler.pipeline.executer.vo.TaskNode;
+import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
+import com.zj.client.handler.pipeline.executer.vo.WaitRequestContext;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.ProcessStatus;
 import lombok.extern.slf4j.Slf4j;
@@ -50,19 +54,19 @@ public class WaitTrigger implements INodeTrigger {
   }
 
   @Override
-  public String queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
+  public QueryResponseModel queryStatus(RefreshContext refreshContext, TaskNode taskNode) {
     QueryResponseModel responseModel = new QueryResponseModel();
     responseModel.setMessage(Collections.singletonList(MESSAGE_TIPS));
     responseModel.setStatus(ProcessStatus.RUNNING.getType());
     CountDownLatch countDownLatch = countDownMap.get(taskNode.getRecordId());
     long count = countDownLatch.getCount();
     if (count > 0) {
-      return JSON.toJSONString(responseModel);
+      return responseModel;
     }
 
     log.info("wait task complete recordId={}", taskNode.getRecordId());
     responseModel.setStatus(ProcessStatus.SUCCESS.getType());
     countDownMap.remove(taskNode.getRecordId());
-    return JSON.toJSONString(responseModel);
+    return responseModel;
   }
 }

@@ -29,8 +29,12 @@ eureka:
     register-with-eureka: true #false表示不向注册中心注册自己。
     fetch-registry: true #false表示自己端就是注册中心，我的职责就是维护服务实例，并不需要去检索服务
     service-url:
-      defaultZone: http://localhost:9888/eureka/
+      defaultZone: ${eureka_zone}
 
 logging:
   level:
     com.netflix: warn
+
+mybatis-plus:
+  global-config:
+    banner: false

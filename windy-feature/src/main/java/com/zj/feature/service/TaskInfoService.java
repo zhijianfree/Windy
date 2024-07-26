@@ -3,7 +3,7 @@ package com.zj.feature.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.generate.UniqueIdService;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.common.model.DispatchTaskModel;
 import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseStatusModel;
@@ -37,7 +37,7 @@ public class TaskInfoService {
   private final ITaskRepository taskRepository;
   private final RequestProxy requestProxy;
 
-  public static final String FORMAT_TIPS = "任务执行状态: 成功数: %s 成功率百分比: %s";
+  public static final String FORMAT_TIPS = "任务执行状态: 总任务数:%s 成功数: %s 成功率百分比: %s %";
 
   public TaskInfoService(TaskRecordService taskRecordService,
       FeatureHistoryService featureHistoryService, UniqueIdService uniqueIdService,

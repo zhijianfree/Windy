@@ -1,13 +1,15 @@
 package com.zj.service.rest;
 
 import com.zj.common.exception.ErrorCode;
+import com.zj.common.feature.ExecuteTemplateVo;
 import com.zj.common.model.ResponseMeta;
 import com.zj.domain.entity.dto.service.GenerateRecordDto;
 import com.zj.domain.entity.dto.service.ServiceApiDto;
 import com.zj.domain.entity.dto.service.ServiceGenerateDto;
 import com.zj.service.entity.ApiModel;
+import com.zj.service.entity.GenerateTemplate;
+import com.zj.service.entity.ImportApiResult;
 import com.zj.service.service.ApiService;
-import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,7 +18,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * @author falcon
@@ -48,6 +54,11 @@ public class ServiceApiRest {
     return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.createServiceApi(apiModel));
   }
 
+  @PostMapping("/service/resource/templates")
+  public ResponseMeta<List<ExecuteTemplateVo>> apiGenerateTemplate(@RequestBody GenerateTemplate generateTemplate) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.apiGenerateTemplate(generateTemplate));
+  }
+
   @PutMapping("/service/resources")
   public ResponseMeta<Boolean> updateServiceApi(@RequestBody ApiModel apiModel) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.updateServiceApi(apiModel));
@@ -76,5 +87,12 @@ public class ServiceApiRest {
   @GetMapping("/service/{serviceId}/generate/log")
   public ResponseMeta<List<GenerateRecordDto>> getLatestGenerateLog(@PathVariable("serviceId") String serviceId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.getLatestGenerateLog(serviceId));
+  }
+
+  @PostMapping(value = "/service/api/import")
+  public ResponseMeta<ImportApiResult> importAPIFile(@RequestPart("file") MultipartFile file,
+                                                     @RequestPart("type") String fileType,
+                                                     @RequestPart("serviceId") String serviceId) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.importApiFile(file, fileType, serviceId));
   }
 }

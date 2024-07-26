@@ -29,7 +29,7 @@ public class CreateExecuteRecordEvent implements INotifyEvent {
 
   @Override
   public boolean handle(ResultEvent resultEvent) {
-    log.info("receive node record create event id = {} event={}", resultEvent.getExecuteId(),
+    log.info("receive execute record create event id = {} event={}", resultEvent.getExecuteId(),
         JSON.toJSONString(resultEvent.getParams()));
     ExecuteRecordDto executeRecordDto = JSON.parseObject(JSON.toJSONString(resultEvent.getParams()),
         ExecuteRecordDto.class);
