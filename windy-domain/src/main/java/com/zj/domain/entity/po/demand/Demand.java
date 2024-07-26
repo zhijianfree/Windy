@@ -62,6 +62,11 @@ public class Demand {
     private Integer status;
 
     /**
+     * 需求优先级
+     */
+    private Integer level;
+
+    /**
      * 期待完成时间
      * */
     private Long expectTime;
