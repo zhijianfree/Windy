@@ -26,6 +26,15 @@ public class YapiImportApi {
         private String resBody;
         @JSONField(name = "req_params")
         private List<PathParam> pathParams;
+
+        @JSONField(name = "req_query")
+        private List<QueryParam> queryParams;
+    }
+
+    @Data
+    public static class QueryParam {
+        private String name;
+        private String desc;
     }
 
     @Data
