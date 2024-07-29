@@ -1,7 +1,7 @@
 package com.zj.demand.service;
 
-import com.zj.common.generate.UniqueIdService;
 import com.zj.common.model.PageSize;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.demand.BugDTO;
 import com.zj.domain.repository.demand.IBugRepository;
 import org.springframework.stereotype.Service;

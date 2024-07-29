@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class Demand {
+
     private Long id;
 
     /**
@@ -54,7 +55,7 @@ public class Demand {
     /**
      * 接受时间
      * */
-    private Long accept_time;
+    private Long acceptTime;
 
     /**
      * 需求状态

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.enums.DemandStatus;
 import com.zj.common.model.PageSize;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.demand.DemandDTO;
@@ -20,6 +21,7 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
     @Override
     public boolean createDemand(DemandDTO demandDTO) {
         Demand demand = OrikaUtil.convert(demandDTO, Demand.class);
+        demand.setStatus(DemandStatus.CREATE.getType());
         demand.setCreateTime(System.currentTimeMillis());
         demand.setUpdateTime(System.currentTimeMillis());
         return save(demand);
@@ -63,7 +65,7 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
 
     private  PageSize<DemandDTO> convertPageSize(IPage<Demand> recordPage) {
         List<DemandDTO> list = OrikaUtil.convertList(recordPage.getRecords(), DemandDTO.class);
-        PageSize<DemandDTO> pageSize = new PageSize();
+        PageSize<DemandDTO> pageSize = new PageSize<>();
         pageSize.setTotal(recordPage.getTotal());
         pageSize.setData(list);
         return pageSize;

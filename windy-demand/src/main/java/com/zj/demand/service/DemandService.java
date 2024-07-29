@@ -2,12 +2,11 @@ package com.zj.demand.service;
 
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.generate.UniqueIdService;
 import com.zj.common.model.PageSize;
+import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.demand.DemandDTO;
 import com.zj.domain.repository.demand.IDemandRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.stereotype.Service;
 
 @Slf4j
