@@ -3,8 +3,10 @@ package com.zj.client.handler.feature.executor.interceptor;
 import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.vo.ExecutePoint;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
+import com.zj.client.handler.feature.executor.invoker.invoke.MethodInvoke;
 import com.zj.client.handler.feature.executor.vo.ExecuteContext;
 import com.zj.common.enums.InvokerType;
+import com.zj.common.enums.Position;
 import com.zj.common.feature.CompareDefine;
 import com.zj.common.feature.ExecutorUnit;
 import com.zj.common.feature.VariableDefine;
@@ -98,6 +100,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
             filterHttpInvokerParam(executorUnit, executeContext);
         }
 
+        //将关联模版的参数替换变量
         if (Objects.nonNull(executorUnit.getRelatedTemplate())) {
             filterVariable(executorUnit.getRelatedTemplate(), executeContext);
         }
@@ -109,6 +112,15 @@ public class VariableInterceptor implements IExecuteInterceptor {
         //service(url)中的存在路径参数，所以需要将路径参数的值替换
         if (CollectionUtils.isNotEmpty(executorUnit.getParams())) {
             Map<String, Object> pointParams = executorUnit.getParams().stream()
+                    .map(p -> {
+                        //如果是Query参数value为null时，那么就将value设置为空字符串避免污染url
+                        //比如:http://192.168.1.1:8000/test?name=${name}，如果变量name为null执行之前应该转化为
+                        //新的url:http://192.168.1.1:8000/test?name=
+                        if (Objects.equals(p.getPosition(), Position.Query.name()) && Objects.nonNull(p.getValue())) {
+                            p.setValue("");
+                        }
+                        return p;
+                    })
                     .filter(p -> Objects.nonNull(p.getValue()) && !String.valueOf(p.getValue()).contains(VARIABLE_CHAR))
                     .collect(Collectors.toMap(ParameterDefine::getParamKey, ParameterDefine::getValue));
             pointContext.putAll(pointParams);
@@ -139,6 +151,8 @@ public class VariableInterceptor implements IExecuteInterceptor {
                 String stringValue = String.valueOf(paramValue);
                 String replaceResult = strSubstitutor.replace(stringValue);
                 param.setValue(replaceResult);
+                Object value = MethodInvoke.convertDataToType(param);
+                param.setValue(value);
             }
 
             if (paramValue instanceof Map) {

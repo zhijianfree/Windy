@@ -89,7 +89,6 @@ public class FeatureService {
 
         featureList.removeIf(feature -> Objects.equals(feature.getParentId(), parent.getFeatureId()));
         list.forEach(node -> convertTree(featureList, node));
-
         return parent;
     }
 
