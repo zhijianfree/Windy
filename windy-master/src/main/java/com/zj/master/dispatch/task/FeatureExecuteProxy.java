@@ -13,15 +13,20 @@ import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
 import com.zj.domain.entity.dto.feature.ExecuteTemplateDto;
 import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
+import com.zj.domain.entity.dto.feature.FeatureInfoDto;
 import com.zj.domain.entity.dto.feature.TaskRecordDto;
+import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
 import com.zj.domain.repository.feature.IExecutePointRepository;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
+import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
+import com.zj.domain.repository.feature.ITestCaseConfigRepository;
 import com.zj.master.dispatch.feature.FeatureDispatch;
 import com.zj.master.dispatch.listener.IStopEventListener;
-import com.zj.master.dispatch.listener.InnerEvent;
-import com.zj.master.entity.vo.ExecuteContext;
+import com.zj.master.dispatch.listener.InternalEvent;
+import com.zj.master.dispatch.listener.InternalEventFactory;
+import com.zj.master.entity.enums.EventType;
 import com.zj.plugin.loader.ParameterDefine;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -38,6 +43,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.stream.Collectors;
 
 /**
  * @author guyuelan
@@ -57,6 +63,8 @@ public class FeatureExecuteProxy implements IStopEventListener {
     private final ITaskRecordRepository taskRecordRepository;
     private final IFeatureHistoryRepository featureHistoryRepository;
     private final IExecuteTemplateRepository executeTemplateRepository;
+    private final ITestCaseConfigRepository caseConfigRepository;
+    private final IFeatureRepository featureRepository;
 
     public FeatureExecuteProxy(RequestProxy requestProxy,
                                @Qualifier("featureExecutorPool") Executor executorService,
@@ -64,7 +72,9 @@ public class FeatureExecuteProxy implements IStopEventListener {
                                IExecutePointRepository executePointRepository,
                                ITaskRecordRepository taskRecordRepository,
                                IFeatureHistoryRepository featureHistoryRepository,
-                               IExecuteTemplateRepository executeTemplateRepository) {
+                               IExecuteTemplateRepository executeTemplateRepository,
+                               ITestCaseConfigRepository caseConfigRepository,
+                               IFeatureRepository featureRepository) {
         this.requestProxy = requestProxy;
         this.executorService = executorService;
         this.taskEndProcessor = taskEndProcessor;
@@ -72,12 +82,13 @@ public class FeatureExecuteProxy implements IStopEventListener {
         this.taskRecordRepository = taskRecordRepository;
         this.featureHistoryRepository = featureHistoryRepository;
         this.executeTemplateRepository = executeTemplateRepository;
+        this.caseConfigRepository = caseConfigRepository;
+        this.featureRepository = featureRepository;
     }
 
     public void execute(FeatureTask featureTask) {
         featureTaskMap.put(featureTask.getTaskRecordId(), featureTask);
         CompletableFuture.supplyAsync(() -> {
-
             LinkedBlockingQueue<String> featureIds = featureTask.getFeatureIds();
             String featureId = featureIds.poll();
             String taskRecordId = featureTask.getTaskRecordId();
@@ -153,7 +164,7 @@ public class FeatureExecuteProxy implements IStopEventListener {
         if (Objects.isNull(executorUnit) || CollectionUtils.isEmpty(executorUnit.getExecutePoints())) {
             return;
         }
-        executorUnit.getExecutePoints().forEach(point ->{
+        executorUnit.getExecutePoints().forEach(point -> {
             String relatedId = point.getExecutorUnit().getRelatedId();
             if (StringUtils.isBlank(relatedId)) {
                 return;
@@ -186,20 +197,46 @@ public class FeatureExecuteProxy implements IStopEventListener {
         }
 
         if (MapUtils.isNotEmpty(context)) {
-            ExecuteContext executeContext = featureTask.getExecuteContext();
-            executeContext.toMap().putAll(context);
-            featureTask.setExecuteContext(executeContext);
+            featureTask.getExecuteContext().toMap().putAll(context);
+            //异步将上下文替换
+            InternalEventFactory.sendNotifyEvent(new InternalEvent(EventType.RECOVER_CONTEXT, history.getFeatureId(),
+                    context));
         }
         log.info("execute get token ={}", context.get("accessToken"));
         log.info("feature task start cycle run");
         execute(featureTask);
     }
 
+    @Subscribe
+    @AllowConcurrentEvents
+    public void recoverGlobalContext(InternalEvent event) {
+        if (!Objects.equals(event.getEventType().getType(), EventType.RECOVER_CONTEXT.getType())) {
+            return;
+        }
+        FeatureInfoDto feature = featureRepository.getFeatureById(event.getTargetId());
+        if (Objects.isNull(feature)) {
+            log.info("can not find feature, not recover global context ={}", event.getTargetId());
+            return;
+        }
+        List<TestCaseConfigDto> caseConfigs = caseConfigRepository.getCaseConfigs(
+                feature.getTestCaseId());
+        List<TestCaseConfigDto> updateList =
+                caseConfigs.stream().filter(config -> event.getContext().containsKey(config.getParamKey())
+                        && !Objects.equals(event.getContext().get(config.getParamKey()), config.getValue()))
+                        .map(config -> {
+                            config.setValue(String.valueOf(event.getContext().get(config.getParamKey())));
+                            return config;
+                        }).collect(Collectors.toList());
+        boolean result = caseConfigRepository.batchUpdateCaseConfig(updateList);
+        log.info("batch recover global context result={}", result);
+    }
+
     @Override
     @Subscribe
     @AllowConcurrentEvents
-    public void stopEvent(InnerEvent event) {
-        if (!Objects.equals(event.getLogType().getType(), LogType.FEATURE_TASK.getType())) {
+    public void stopEvent(InternalEvent event) {
+        if (Objects.isNull(event.getLogType()) || !Objects.equals(event.getLogType().getType(),
+                LogType.FEATURE_TASK.getType())) {
             return;
         }
 

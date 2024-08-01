@@ -14,7 +14,7 @@ import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import com.zj.master.dispatch.listener.IStopEventListener;
-import com.zj.master.dispatch.listener.InnerEvent;
+import com.zj.master.dispatch.listener.InternalEvent;
 import com.zj.master.dispatch.pipeline.intercept.INodeExecuteInterceptor;
 import com.zj.master.entity.vo.NodeStatusChange;
 import com.zj.master.entity.vo.RequestContext;
@@ -159,8 +159,8 @@ public class PipelineExecuteProxy implements IStopEventListener {
   @Override
   @Subscribe
   @AllowConcurrentEvents
-  public void stopEvent(InnerEvent event) {
-    if (!Objects.equals(event.getLogType().getType(), LogType.PIPELINE.getType())) {
+  public void stopEvent(InternalEvent event) {
+    if (Objects.isNull(event.getLogType()) ||!Objects.equals(event.getLogType().getType(), LogType.PIPELINE.getType())) {
       return;
     }
 

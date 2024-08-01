@@ -9,8 +9,8 @@ import com.zj.common.utils.IpUtils;
 import com.zj.domain.entity.dto.log.DispatchLogDto;
 import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.master.dispatch.Dispatcher;
-import com.zj.master.dispatch.listener.InnerEvent;
-import com.zj.master.dispatch.listener.TaskInnerEventFactory;
+import com.zj.master.dispatch.listener.InternalEvent;
+import com.zj.master.dispatch.listener.InternalEventFactory;
 import com.zj.master.entity.enums.EventType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -54,11 +54,11 @@ public class TaskLogService {
   }
 
   public Boolean pauseTask(DispatchTaskModel task) {
-    InnerEvent event = new InnerEvent();
+    InternalEvent event = new InternalEvent();
     event.setEventType(EventType.STOP);
     event.setLogType(LogType.exchange(task.getType()));
     event.setTargetId(task.getSourceId());
-    TaskInnerEventFactory.sendNotifyEvent(event);
+    InternalEventFactory.sendNotifyEvent(event);
     return true;
   }
 }
