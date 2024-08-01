@@ -1,7 +1,5 @@
 package com.zj.domain.entity.dto.feature;
 
-import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.po.feature.TestCaseConfig;
 import lombok.Data;
 
 /**
@@ -10,6 +8,8 @@ import lombok.Data;
  */
 @Data
 public class TestCaseConfigDto {
+
+  private Long id;
 
   private String configId;
 

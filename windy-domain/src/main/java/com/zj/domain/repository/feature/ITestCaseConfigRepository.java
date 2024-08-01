@@ -16,4 +16,6 @@ public interface ITestCaseConfigRepository {
   boolean updateCaseConfig(TestCaseConfigDto configDto);
 
   boolean deleteCaseConfig(String configId);
+
+  boolean batchUpdateCaseConfig(List<TestCaseConfigDto> updateList);
 }

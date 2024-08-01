@@ -101,7 +101,7 @@ public class CompareHandler {
                 return;
             }
 
-            Object result = ognlDataParser.parserExpression(executeDetailVo.responseBody(), key);
+            Object result = ognlDataParser.exchangeOgnlParamValue(executeDetailVo.responseBody(), key);
             compareDefine.setResponseValue(result);
         });
     }

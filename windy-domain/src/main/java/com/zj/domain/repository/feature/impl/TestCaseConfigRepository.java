@@ -8,7 +8,11 @@ import com.zj.domain.entity.po.feature.TestCaseConfig;
 import com.zj.domain.mapper.feeature.TestCaseConfigMapper;
 import com.zj.domain.repository.feature.ITestCaseConfigRepository;
 import java.util.List;
+import java.util.Objects;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author guyuelan
@@ -45,5 +49,15 @@ public class TestCaseConfigRepository extends
   public boolean deleteCaseConfig(String configId) {
     return remove(
         Wrappers.lambdaQuery(TestCaseConfig.class).eq(TestCaseConfig::getConfigId, configId));
+  }
+
+  @Override
+  @Transactional
+  public boolean batchUpdateCaseConfig(List<TestCaseConfigDto> updateList) {
+    if (CollectionUtils.isEmpty(updateList)) {
+      return false;
+    }
+    List<TestCaseConfig> list = OrikaUtil.convertList(updateList, TestCaseConfig.class);
+    return updateBatchById(list);
   }
 }

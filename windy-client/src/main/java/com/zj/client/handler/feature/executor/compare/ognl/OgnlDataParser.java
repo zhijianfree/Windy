@@ -14,7 +14,7 @@ public class OgnlDataParser {
     public static final String RUNTIME_VARIABLE_CHAR = "#";
     public static final String BODY = "body";
 
-    public Object parserExpression(Object object, String expression) {
+    public Object exchangeOgnlParamValue(Object object, String expression) {
         expression = expression.replace(VARIABLE_CHAR, RUNTIME_VARIABLE_CHAR);
         OgnlContext context = (OgnlContext) Ognl.createDefaultContext(this,
                 new DefaultMemberAccess(true),
@@ -33,7 +33,7 @@ public class OgnlDataParser {
         return ans;
     }
 
-    public boolean parserExpression(Map<String, Object> map, String expression) {
+    public boolean judgeExpression(Map<String, Object> map, String expression) {
         try {
             expression = expression.replace(VARIABLE_CHAR, RUNTIME_VARIABLE_CHAR);
             Object result = Ognl.getValue(Ognl.parseExpression(expression), map, new Object());

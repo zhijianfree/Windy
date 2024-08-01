@@ -79,7 +79,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
                 return;
             }
 
-            Object result = ognlDataParser.parserExpression(responseBody, expressionString);
+            Object result = ognlDataParser.exchangeOgnlParamValue(responseBody, expressionString);
             context.set(variableDefine.getVariableKey(), result);
             log.info("set context key={} value= {}", variableDefine.getVariableKey(), result);
         });
@@ -116,7 +116,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
                         //如果是Query参数value为null时，那么就将value设置为空字符串避免污染url
                         //比如:http://192.168.1.1:8000/test?name=${name}，如果变量name为null执行之前应该转化为
                         //新的url:http://192.168.1.1:8000/test?name=
-                        if (Objects.equals(p.getPosition(), Position.Query.name()) && Objects.nonNull(p.getValue())) {
+                        if (Objects.equals(p.getPosition(), Position.Query.name()) && Objects.isNull(p.getValue())) {
                             p.setValue("");
                         }
                         return p;
