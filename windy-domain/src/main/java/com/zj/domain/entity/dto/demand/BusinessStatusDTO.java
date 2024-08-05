@@ -1,9 +1,9 @@
-package com.zj.domain.entity.po.demand;
+package com.zj.domain.entity.dto.demand;
 
 import lombok.Data;
 
 @Data
-public class BusinessStatus {
+public class BusinessStatusDTO {
 
     private Long id;
 

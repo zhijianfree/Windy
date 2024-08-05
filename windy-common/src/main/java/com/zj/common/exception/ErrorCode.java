@@ -6,9 +6,9 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
   /*===================流水线=================*/
-  SUCCESS(HttpStatus.OK, "Pipeline.000000", "请求成功"),
-  ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000001", "请求失败"),
-  PARAM_VALIDATE_ERROR(HttpStatus.BAD_REQUEST, "Pipeline.000005", "参数校验失败"),
+  SUCCESS(HttpStatus.OK, "Common.000000", "请求成功"),
+  ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Common.000001", "请求失败"),
+  PARAM_VALIDATE_ERROR(HttpStatus.BAD_REQUEST, "Common.000005", "参数校验失败"),
   NOT_FOUND_PIPELINE(HttpStatus.NOT_FOUND, "Pipeline.000002", "流水线未找到"),
   NOT_FOUND_CODE_CHANGE(HttpStatus.NOT_FOUND, "Pipeline.000003", "服务变更未找到"),
   NOT_FOUND_PIPELINE_GIT_BIND(HttpStatus.NOT_FOUND, "Pipeline.000004", "流水关联分支未找到"),

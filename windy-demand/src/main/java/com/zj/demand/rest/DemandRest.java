@@ -4,6 +4,7 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseMeta;
 import com.zj.demand.service.DemandService;
+import com.zj.domain.entity.dto.demand.BusinessStatusDTO;
 import com.zj.domain.entity.dto.demand.DemandDTO;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/v1/devops")
@@ -37,8 +40,22 @@ public class DemandRest {
 
   @GetMapping("/demands")
   public ResponseMeta<PageSize<DemandDTO>> getDemandPage(@RequestParam(value = "page", defaultValue = "1") Integer page,
-                                                         @RequestParam(value = "size", defaultValue = "10") Integer size) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getDemandPage(page, size));
+                                                         @RequestParam(value = "size", defaultValue = "10") Integer size,
+                                                         @RequestParam(value = "name", required = false) String name,
+                                                         @RequestParam(value = "status", required = false) Integer status) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getDemandPage(page, size, name, status));
+  }
+
+  @GetMapping("/user/demands")
+  public ResponseMeta<PageSize<DemandDTO>> getUserDemands(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                         @RequestParam(value = "size", defaultValue = "10") Integer size,
+                                                         @RequestParam(value = "status", required = false) Integer status) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getUserDemands(page, size, status));
+  }
+
+    @GetMapping("/demand/statuses")
+  public ResponseMeta<List<BusinessStatusDTO>> getDemandStatuses() {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getDemandStatuses());
   }
 
   @GetMapping("/demands/{demandId}")

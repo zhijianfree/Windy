@@ -1,5 +1,6 @@
 package com.zj.domain.repository.demand.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -8,6 +9,7 @@ import com.zj.common.enums.DemandStatus;
 import com.zj.common.model.PageSize;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.demand.DemandDTO;
+import com.zj.domain.entity.dto.demand.DemandQuery;
 import com.zj.domain.entity.po.demand.Demand;
 import com.zj.domain.mapper.demand.DemandMapper;
 import com.zj.domain.repository.demand.IDemandRepository;
@@ -28,11 +30,13 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
     }
 
     @Override
-    public PageSize<DemandDTO> getDemandPage(String creator, Integer pageNo, Integer size) {
-        IPage<Demand> pageObj = new Page<>(pageNo, size);
-        IPage<Demand> recordPage = page(pageObj, Wrappers.lambdaQuery(Demand.class).eq(Demand::getCreator, creator)
-                .orderByDesc(Demand::getCreateTime));
-
+    public PageSize<DemandDTO> getDemandPage(DemandQuery query) {
+        IPage<Demand> pageObj = new Page<>(query.getPage(), query.getPageSize());
+        LambdaQueryWrapper<Demand> queryWrapper = Wrappers.lambdaQuery(Demand.class).eq(Demand::getCreator,
+                        query.getCreator()).orderByDesc(Demand::getCreateTime);
+        Optional.ofNullable(query.getName()).ifPresent(name -> queryWrapper.like(Demand::getDemandName, name));
+        Optional.ofNullable(query.getStatus()).ifPresent(status -> queryWrapper.eq(Demand::getStatus, status));
+        IPage<Demand> recordPage = page(pageObj, queryWrapper);
         return convertPageSize(recordPage);
     }
 
@@ -46,7 +50,7 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
     @Override
     public DemandDTO getDemand(String demandId) {
         Demand demand = getOne(Wrappers.lambdaUpdate(Demand.class).eq(Demand::getDemandId, demandId));
-        return Optional.ofNullable(demand).map(d -> OrikaUtil.convert(d, DemandDTO.class)).orElse(null) ;
+        return Optional.ofNullable(demand).map(d -> OrikaUtil.convert(d, DemandDTO.class)).orElse(null);
     }
 
     @Override
@@ -63,7 +67,7 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
         return convertPageSize(recordPage);
     }
 
-    private  PageSize<DemandDTO> convertPageSize(IPage<Demand> recordPage) {
+    private PageSize<DemandDTO> convertPageSize(IPage<Demand> recordPage) {
         List<DemandDTO> list = OrikaUtil.convertList(recordPage.getRecords(), DemandDTO.class);
         PageSize<DemandDTO> pageSize = new PageSize<>();
         pageSize.setTotal(recordPage.getTotal());
