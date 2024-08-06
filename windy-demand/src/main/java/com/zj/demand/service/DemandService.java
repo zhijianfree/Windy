@@ -7,7 +7,7 @@ import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.demand.BusinessStatusDTO;
 import com.zj.domain.entity.dto.demand.DemandDTO;
 import com.zj.domain.entity.dto.demand.DemandQuery;
-import com.zj.domain.repository.demand.BusinessStatusRepository;
+import com.zj.domain.repository.demand.IBusinessStatusRepository;
 import com.zj.domain.repository.demand.IDemandRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,10 +21,10 @@ public class DemandService {
     private final IAuthService authService;
     private final IDemandRepository demandRepository;
     private final UniqueIdService uniqueIdService;
-    private final BusinessStatusRepository businessStatusRepository;
+    private final IBusinessStatusRepository businessStatusRepository;
 
     public DemandService(IAuthService authService, IDemandRepository demandRepository,
-                         UniqueIdService uniqueIdService, BusinessStatusRepository businessStatusRepository) {
+                         UniqueIdService uniqueIdService, IBusinessStatusRepository businessStatusRepository) {
         this.authService = authService;
         this.demandRepository = demandRepository;
         this.uniqueIdService = uniqueIdService;

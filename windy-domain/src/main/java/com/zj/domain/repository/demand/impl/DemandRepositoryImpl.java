@@ -13,6 +13,7 @@ import com.zj.domain.entity.dto.demand.DemandQuery;
 import com.zj.domain.entity.po.demand.Demand;
 import com.zj.domain.mapper.demand.DemandMapper;
 import com.zj.domain.repository.demand.IDemandRepository;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -34,8 +35,10 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
         IPage<Demand> pageObj = new Page<>(query.getPage(), query.getPageSize());
         LambdaQueryWrapper<Demand> queryWrapper = Wrappers.lambdaQuery(Demand.class).eq(Demand::getCreator,
                         query.getCreator()).orderByDesc(Demand::getCreateTime);
-        Optional.ofNullable(query.getName()).ifPresent(name -> queryWrapper.like(Demand::getDemandName, name));
         Optional.ofNullable(query.getStatus()).ifPresent(status -> queryWrapper.eq(Demand::getStatus, status));
+        if (StringUtils.isNotBlank(query.getName())){
+            queryWrapper.like(Demand::getDemandName, query.getName());
+        }
         IPage<Demand> recordPage = page(pageObj, queryWrapper);
         return convertPageSize(recordPage);
     }

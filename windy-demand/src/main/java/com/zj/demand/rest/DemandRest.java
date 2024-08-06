@@ -22,55 +22,55 @@ import java.util.List;
 @RequestMapping("/v1/devops")
 public class DemandRest {
 
-  private final DemandService demandService;
+    private final DemandService demandService;
 
-  public DemandRest(DemandService demandService) {
-    this.demandService = demandService;
-  }
+    public DemandRest(DemandService demandService) {
+        this.demandService = demandService;
+    }
 
-  @PostMapping("/demands")
-  public ResponseMeta<DemandDTO> createDemand(@RequestBody DemandDTO demandDTO) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.createDemand(demandDTO));
-  }
+    @PostMapping("/demands")
+    public ResponseMeta<DemandDTO> createDemand(@RequestBody DemandDTO demandDTO) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.createDemand(demandDTO));
+    }
 
-  @PutMapping("/demand")
-  public ResponseMeta<Boolean> updateDemand(@RequestBody DemandDTO demandDTO) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.updateDemand(demandDTO));
-  }
+    @PutMapping("/demand")
+    public ResponseMeta<Boolean> updateDemand(@RequestBody DemandDTO demandDTO) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.updateDemand(demandDTO));
+    }
 
-  @GetMapping("/demands")
-  public ResponseMeta<PageSize<DemandDTO>> getDemandPage(@RequestParam(value = "page", defaultValue = "1") Integer page,
-                                                         @RequestParam(value = "size", defaultValue = "10") Integer size,
-                                                         @RequestParam(value = "name", required = false) String name,
-                                                         @RequestParam(value = "status", required = false) Integer status) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getDemandPage(page, size, name, status));
-  }
+    @GetMapping("/demands")
+    public ResponseMeta<PageSize<DemandDTO>> getDemandPage(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                           @RequestParam(value = "size", defaultValue = "10") Integer size,
+                                                           @RequestParam(value = "name", required = false) String name,
+                                                           @RequestParam(value = "status", required = false) Integer status) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getDemandPage(page, size, name, status));
+    }
 
-  @GetMapping("/user/demands")
-  public ResponseMeta<PageSize<DemandDTO>> getUserDemands(@RequestParam(value = "page", defaultValue = "1") Integer page,
-                                                         @RequestParam(value = "size", defaultValue = "10") Integer size,
-                                                         @RequestParam(value = "status", required = false) Integer status) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getUserDemands(page, size, status));
-  }
+    @GetMapping("/user/demands")
+    public ResponseMeta<PageSize<DemandDTO>> getUserDemands(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                            @RequestParam(value = "size", defaultValue = "10") Integer size,
+                                                            @RequestParam(value = "status", required = false) Integer status) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getUserDemands(page, size, status));
+    }
 
     @GetMapping("/demand/statuses")
-  public ResponseMeta<List<BusinessStatusDTO>> getDemandStatuses() {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getDemandStatuses());
-  }
+    public ResponseMeta<List<BusinessStatusDTO>> getDemandStatuses() {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getDemandStatuses());
+    }
 
-  @GetMapping("/demands/{demandId}")
-  public ResponseMeta<DemandDTO> getDemand(@PathVariable("demandId") String demandId) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getDemand(demandId));
-  }
+    @GetMapping("/demands/{demandId}")
+    public ResponseMeta<DemandDTO> getDemand(@PathVariable("demandId") String demandId) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getDemand(demandId));
+    }
 
-  @DeleteMapping("/demands/{demandId}")
-  public ResponseMeta<Boolean> deleteDemand(@PathVariable("demandId") String demandId) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.deleteDemand(demandId));
-  }
+    @DeleteMapping("/demands/{demandId}")
+    public ResponseMeta<Boolean> deleteDemand(@PathVariable("demandId") String demandId) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.deleteDemand(demandId));
+    }
 
-  @GetMapping("/related/demands")
-  public ResponseMeta<PageSize<DemandDTO>> getRelatedDemands(@RequestParam(value = "page", defaultValue = "1") Integer page,
-                                                             @RequestParam(value = "size", defaultValue = "10") Integer size) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getRelatedDemands(page, size));
-  }
+    @GetMapping("/related/demands")
+    public ResponseMeta<PageSize<DemandDTO>> getRelatedDemands(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                               @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getRelatedDemands(page, size));
+    }
 }
