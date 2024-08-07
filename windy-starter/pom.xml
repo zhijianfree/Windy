@@ -18,6 +18,10 @@
     </dependency>
     <dependency>
       <groupId>com.zj</groupId>
+      <artifactId>windy-demand</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.zj</groupId>
       <artifactId>windy-pipeline</artifactId>
     </dependency>
     <dependency>
