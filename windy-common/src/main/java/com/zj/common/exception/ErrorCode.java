@@ -6,9 +6,9 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
   /*===================流水线=================*/
-  SUCCESS(HttpStatus.OK, "Pipeline.000000", "请求成功"),
-  ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000001", "请求失败"),
-  PARAM_VALIDATE_ERROR(HttpStatus.BAD_REQUEST, "Pipeline.000005", "参数校验失败"),
+  SUCCESS(HttpStatus.OK, "Common.000000", "请求成功"),
+  ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Common.000001", "请求失败"),
+  PARAM_VALIDATE_ERROR(HttpStatus.BAD_REQUEST, "Common.000005", "参数校验失败"),
   NOT_FOUND_PIPELINE(HttpStatus.NOT_FOUND, "Pipeline.000002", "流水线未找到"),
   NOT_FOUND_CODE_CHANGE(HttpStatus.NOT_FOUND, "Pipeline.000003", "服务变更未找到"),
   NOT_FOUND_PIPELINE_GIT_BIND(HttpStatus.NOT_FOUND, "Pipeline.000004", "流水关联分支未找到"),
@@ -45,7 +45,8 @@ public enum ErrorCode {
   SYSTEM_EXECUTE_ERROR(HttpStatus.BAD_REQUEST, "Feature.000101", "unknown error occur when execute feature "),
   SUB_FEATURE_EXIST(HttpStatus.BAD_REQUEST, "Feature.000005", "存在子用例不能删除目录"),
   PARSE_PLUGIN_ERROR(HttpStatus.BAD_REQUEST, "Feature.000006", "解析插件错误"),
-
+  /*==================需求缺陷管理==================*/
+  DEMAND_CREATE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Demand.000001", "创建需求失败"),
   /*==================Client端构建运行==================*/
   NOT_FIND_JAR(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000001", "构建时未发现JAR包"),
   UNKNOWN_EXECUTE_TYPE(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000002", "未找到节点执行类型"),
