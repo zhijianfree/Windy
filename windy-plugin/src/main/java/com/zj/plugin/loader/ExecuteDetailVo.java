@@ -9,7 +9,7 @@ public class ExecuteDetailVo {
   /**
    * 当前任务执行的请求信息与请求参数
    */
-  private Map<String, Object> requestTips = new HashMap<>();
+  private Map<String, Object> requestTips = new HashMap<String,Object>();
 
   /**
    * 当前请求执行完成之后的响应结果

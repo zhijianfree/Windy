@@ -83,6 +83,16 @@ public class Bug {
     private Integer status;
 
     /**
+     * 空间ID
+     */
+    private String spaceId;
+
+    /**
+     * 迭代ID
+     */
+    private String iterationId;
+
+    /**
      * 创建时间
      * */
     private Long createTime;
