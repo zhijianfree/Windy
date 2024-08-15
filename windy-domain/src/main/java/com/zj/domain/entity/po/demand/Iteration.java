@@ -1,5 +1,8 @@
 package com.zj.domain.entity.po.demand;
 
+import lombok.Data;
+
+@Data
 public class Iteration {
 
   private Long id;
@@ -8,6 +11,8 @@ public class Iteration {
    * 迭代ID
    */
   private String iterationId;
+
+  private String name;
 
   /**
    * 迭代描述
@@ -28,6 +33,8 @@ public class Iteration {
    * 迭代状态
    */
   private Integer status;
+
+  private String userId;
 
   private Long createTime;
 

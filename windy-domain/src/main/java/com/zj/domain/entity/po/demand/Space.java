@@ -23,6 +23,8 @@ public class Space {
    */
   private String description;
 
+  private String userId;
+
   private Long createTime;
 
   private Long updateTime;

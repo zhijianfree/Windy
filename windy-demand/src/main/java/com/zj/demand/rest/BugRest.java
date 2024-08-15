@@ -42,13 +42,20 @@ public class BugRest {
     public ResponseMeta<PageSize<BugDTO>> getBugPage(@RequestParam(value = "page", defaultValue = "1") Integer page,
                                                      @RequestParam(value = "size", defaultValue = "10") Integer size,
                                                      @RequestParam(value = "name", required = false) String name,
+                                                     @RequestParam(value = "spaceId", required = false) String spaceId,
+                                                     @RequestParam(value = "iterationId", required = false) String iterationId,
                                                      @RequestParam(value = "status", required = false) Integer status) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getBugPage(page, size, name, status));
+        return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getBugPage(page, size, name, status, spaceId, iterationId));
     }
 
     @GetMapping("/bugs/{bugId}")
     public ResponseMeta<BugDTO> getBug(@PathVariable("bugId") String bugId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getBug(bugId));
+    }
+
+    @GetMapping("/iterations/{iterationId}/bugs")
+    public ResponseMeta<List<BugDTO>> getIterationBugs(@PathVariable("iterationId") String iterationId) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getIterationBugs(iterationId));
     }
 
     @GetMapping("/bug/statuses")

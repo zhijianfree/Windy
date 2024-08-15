@@ -1,12 +1,16 @@
 package com.zj.domain.entity.dto.pipeline;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author guyuelan
  * @since 2023/3/10
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class RelationDemandBug {
 
   /**

@@ -31,6 +31,11 @@ public class IBusinessStatusRepositoryImpl extends ServiceImpl<BusinessStatusMap
         return getStatusListByType(BusinessStatusType.WORK);
     }
 
+    @Override
+    public List<BusinessStatusDTO> getDemandTags() {
+        return getStatusListByType(BusinessStatusType.DEMAND_TAG);
+    }
+
     private List<BusinessStatusDTO> getStatusListByType(BusinessStatusType bug) {
         List<BusinessStatus> list = list(Wrappers.lambdaQuery(BusinessStatus.class).eq(BusinessStatus::getType,
                 bug.name()));

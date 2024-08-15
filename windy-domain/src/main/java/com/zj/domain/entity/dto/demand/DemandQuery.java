@@ -30,4 +30,8 @@ public class DemandQuery {
    * 创建人
    */
   private String creator;
+
+  private String iterationId;
+
+  private String spaceId;
 }

@@ -5,8 +5,8 @@ import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.demand.BugDTO;
 import com.zj.domain.entity.dto.demand.BugQuery;
 import com.zj.domain.entity.dto.demand.BusinessStatusDTO;
-import com.zj.domain.repository.demand.IBusinessStatusRepository;
 import com.zj.domain.repository.demand.IBugRepository;
+import com.zj.domain.repository.demand.IBusinessStatusRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +18,7 @@ public class BugService {
     private final UniqueIdService uniqueIdService;
     private final IAuthService authService;
     private final IBusinessStatusRepository businessStatusRepository;
+
     public BugService(IBugRepository bugRepository, UniqueIdService uniqueIdService, IAuthService authService,
                       IBusinessStatusRepository businessStatusRepository) {
         this.bugRepository = bugRepository;
@@ -37,9 +38,16 @@ public class BugService {
         return bugRepository.updateBug(bugDTO);
     }
 
-    public PageSize<BugDTO> getBugPage(Integer page, Integer size, String name, Integer status) {
+    public PageSize<BugDTO> getBugPage(Integer page, Integer size, String name, Integer status, String spaceId, String iterationId) {
         String userId = authService.getCurrentUserId();
-        BugQuery bugQuery = BugQuery.builder().userId(userId).page(page).size(size).name(name).status(status).build();
+        BugQuery bugQuery = BugQuery.builder()
+                .userId(userId)
+                .page(page)
+                .size(size)
+                .name(name)
+                .iterationId(iterationId)
+                .status(status)
+                .spaceId(spaceId).build();
         return bugRepository.getUserBugs(bugQuery);
     }
 
@@ -59,5 +67,9 @@ public class BugService {
 
     public List<BusinessStatusDTO> getBugStatuses() {
         return businessStatusRepository.getBugStatuses();
+    }
+
+    public List<BugDTO> getIterationBugs(String iterationId) {
+        return bugRepository.getIterationBugs(iterationId);
     }
 }

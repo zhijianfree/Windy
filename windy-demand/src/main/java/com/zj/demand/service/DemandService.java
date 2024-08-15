@@ -42,10 +42,16 @@ public class DemandService {
         return demandDTO;
     }
 
-    public PageSize<DemandDTO> getDemandPage(Integer page, Integer size, String name, Integer status) {
+    public PageSize<DemandDTO> getDemandPage(Integer page, Integer size, String name, Integer status, String spaceId, String iterationId) {
         String currentUserId = authService.getCurrentUserId();
-        DemandQuery demandQuery =
-                DemandQuery.builder().pageSize(size).page(page).name(name).status(status).creator(currentUserId).build();
+        DemandQuery demandQuery = DemandQuery.builder()
+                .pageSize(size)
+                .page(page)
+                .name(name)
+                .status(status)
+                .spaceId(spaceId)
+                .iterationId(iterationId)
+                .creator(currentUserId).build();
         return demandRepository.getDemandPage(demandQuery);
     }
 
@@ -78,4 +84,11 @@ public class DemandService {
     }
 
 
+    public List<DemandDTO> getIterationDemands(String iterationId) {
+        return demandRepository.getIterationDemand(iterationId);
+    }
+
+    public List<BusinessStatusDTO> getDemandTags() {
+        return businessStatusRepository.getDemandTags();
+    }
 }

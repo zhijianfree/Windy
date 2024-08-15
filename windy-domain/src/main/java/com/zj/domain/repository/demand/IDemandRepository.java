@@ -4,6 +4,8 @@ import com.zj.common.model.PageSize;
 import com.zj.domain.entity.dto.demand.DemandDTO;
 import com.zj.domain.entity.dto.demand.DemandQuery;
 
+import java.util.List;
+
 public interface IDemandRepository {
     boolean createDemand(DemandDTO demand);
 
@@ -16,4 +18,10 @@ public interface IDemandRepository {
     boolean deleteDemand(String demandId);
 
     PageSize<DemandDTO> getRelatedDemands(String proposer, Integer page, Integer size);
+
+    Integer countIteration(String iterationId);
+
+    List<DemandDTO> getIterationDemand(String iterationId);
+
+    List<DemandDTO> getDemandsByName(String queryName);
 }

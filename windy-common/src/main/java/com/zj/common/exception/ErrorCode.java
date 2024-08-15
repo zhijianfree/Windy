@@ -47,6 +47,8 @@ public enum ErrorCode {
   PARSE_PLUGIN_ERROR(HttpStatus.BAD_REQUEST, "Feature.000006", "解析插件错误"),
   /*==================需求缺陷管理==================*/
   DEMAND_CREATE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Demand.000001", "创建需求失败"),
+  SPACE_NOT_EXIST(HttpStatus.BAD_REQUEST, "Demand.000002", "空间不存在"),
+  ITERATION_NOT_EXIST(HttpStatus.BAD_REQUEST, "Demand.000003", "迭代不存在"),
   /*==================Client端构建运行==================*/
   NOT_FIND_JAR(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000001", "构建时未发现JAR包"),
   UNKNOWN_EXECUTE_TYPE(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000002", "未找到节点执行类型"),

@@ -11,4 +11,6 @@ public class BugQuery {
     private String name;
     private Integer status;
     private String userId;
+    private String spaceId;
+    private String iterationId;
 }

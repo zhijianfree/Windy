@@ -44,6 +44,11 @@ public class CodeChange {
   private String relationId;
 
   /**
+   * 关联业务类型
+   */
+  private Integer relationType;
+
+  /**
    * 创建时间
    * */
   private Long createTime;

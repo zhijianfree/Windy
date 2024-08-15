@@ -16,6 +16,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -26,6 +27,12 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
     public PageSize<BugDTO> getUserBugs(BugQuery bugQuery) {
         LambdaQueryWrapper<Bug> wrapper = Wrappers.lambdaQuery(Bug.class).eq(Bug::getProposer, bugQuery.getUserId());
         Optional.ofNullable(bugQuery.getStatus()).ifPresent(status -> wrapper.eq(Bug::getStatus, status));
+        if (StringUtils.isNotBlank(bugQuery.getIterationId())){
+            wrapper.eq(Bug::getIterationId, bugQuery.getIterationId());
+        }
+        if (StringUtils.isNotBlank(bugQuery.getSpaceId())){
+            wrapper.eq(Bug::getSpaceId, bugQuery.getSpaceId());
+        }
         if (StringUtils.isNotBlank(bugQuery.getName())){
             wrapper.eq(Bug::getBugName, bugQuery.getName());
         }
@@ -78,5 +85,22 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
     @Override
     public boolean deleteBug(String bugId) {
         return remove(Wrappers.lambdaQuery(Bug.class).eq(Bug::getBugId, bugId));
+    }
+
+    @Override
+    public Integer countIteration(String iterationId) {
+        return count(Wrappers.lambdaQuery(Bug.class).eq(Bug::getIterationId, iterationId));
+    }
+
+    @Override
+    public List<BugDTO> getIterationBugs(String iterationId) {
+        List<Bug> list = list(Wrappers.lambdaQuery(Bug.class).eq(Bug::getIterationId, iterationId));
+        return OrikaUtil.convertList(list, BugDTO.class);
+    }
+
+    @Override
+    public List<BugDTO> getBugsByName(String queryName) {
+        List<Bug> list = list(Wrappers.lambdaQuery(Bug.class).like(Bug::getBugName, queryName));
+        return OrikaUtil.convertList(list, BugDTO.class);
     }
 }

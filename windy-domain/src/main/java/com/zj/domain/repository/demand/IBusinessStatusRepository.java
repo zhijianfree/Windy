@@ -10,4 +10,6 @@ public interface IBusinessStatusRepository {
     List<BusinessStatusDTO> getBugStatuses();
 
     List<BusinessStatusDTO> getWorkTaskStatuses();
+
+    List<BusinessStatusDTO> getDemandTags();
 }

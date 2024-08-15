@@ -49,6 +49,11 @@ public class CodeChangeDto {
     private String relationId;
 
     /**
+     * 关联的业务类型
+     */
+    private String relationType;
+
+    /**
      * 创建时间
      */
     private Long createTime;

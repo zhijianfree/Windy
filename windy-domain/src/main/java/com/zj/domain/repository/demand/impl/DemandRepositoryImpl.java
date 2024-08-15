@@ -36,6 +36,12 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
         LambdaQueryWrapper<Demand> queryWrapper = Wrappers.lambdaQuery(Demand.class).eq(Demand::getCreator,
                         query.getCreator()).orderByDesc(Demand::getCreateTime);
         Optional.ofNullable(query.getStatus()).ifPresent(status -> queryWrapper.eq(Demand::getStatus, status));
+        if (StringUtils.isNotBlank(query.getSpaceId())){
+            queryWrapper.eq(Demand::getSpaceId, query.getSpaceId());
+        }
+        if (StringUtils.isNotBlank(query.getIterationId())){
+            queryWrapper.eq(Demand::getIterationId, query.getIterationId());
+        }
         if (StringUtils.isNotBlank(query.getName())){
             queryWrapper.like(Demand::getDemandName, query.getName());
         }
@@ -68,6 +74,23 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
                 .orderByDesc(Demand::getCreateTime));
 
         return convertPageSize(recordPage);
+    }
+
+    @Override
+    public Integer countIteration(String iterationId) {
+        return count(Wrappers.lambdaUpdate(Demand.class).eq(Demand::getIterationId, iterationId));
+    }
+
+    @Override
+    public List<DemandDTO> getIterationDemand(String iterationId) {
+        List<Demand> list = list(Wrappers.lambdaUpdate(Demand.class).eq(Demand::getIterationId, iterationId));
+        return OrikaUtil.convertList(list, DemandDTO.class);
+    }
+
+    @Override
+    public List<DemandDTO> getDemandsByName(String queryName) {
+        List<Demand> list = list(Wrappers.lambdaUpdate(Demand.class).like(Demand::getDemandName, queryName));
+        return OrikaUtil.convertList(list, DemandDTO.class);
     }
 
     private PageSize<DemandDTO> convertPageSize(IPage<Demand> recordPage) {

@@ -16,6 +16,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -47,6 +48,12 @@ public class IWorkTaskRepositoryImpl extends ServiceImpl<WorkTaskMapper, WorkTas
     }
 
     @Override
+    public List<WorkTaskDTO> getWorkTaskByName(String queryName) {
+        List<WorkTask> workTasks = list(Wrappers.lambdaQuery(WorkTask.class).eq(WorkTask::getTaskName, queryName));
+        return OrikaUtil.convertList(workTasks, WorkTaskDTO.class);
+    }
+
+    @Override
     public PageSize<WorkTaskDTO> getWorkTaskPage(TaskQuery taskQuery) {
         LambdaQueryWrapper<WorkTask> wrapper = Wrappers.lambdaQuery(WorkTask.class).eq(WorkTask::getCreator,
                 taskQuery.getUserId());
@@ -59,5 +66,10 @@ public class IWorkTaskRepositoryImpl extends ServiceImpl<WorkTaskMapper, WorkTas
             pageSize.setData(OrikaUtil.convertList(page.getRecords(), WorkTaskDTO.class));
         }
         return pageSize;
+    }
+
+    @Override
+    public Integer countIteration(String iterationId) {
+        return 0;
     }
 }

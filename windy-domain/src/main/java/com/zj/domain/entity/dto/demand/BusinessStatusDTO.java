@@ -14,4 +14,6 @@ public class BusinessStatusDTO {
     private Integer value;
 
     private Integer sort;
+
+    private String statusColor;
 }
