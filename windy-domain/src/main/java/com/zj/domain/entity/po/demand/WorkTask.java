@@ -28,6 +28,11 @@ public class WorkTask {
     private String relatedId;
 
     /**
+     * 关联类型
+     */
+    private Integer relatedType;
+
+    /**
      * 任务状态
      */
     private Integer status;

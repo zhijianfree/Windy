@@ -26,6 +26,7 @@
     <module>windy-domain</module>
     <module>windy-plugin</module>
     <module>windy-demand</module>
+      <module>windy-auth</module>
   </modules>
 
 
@@ -53,6 +54,7 @@
     <transmittable-thread.version>2.14.2</transmittable-thread.version>
     <freemarker.version>2.3.30</freemarker.version>
     <maven-model.version>3.0</maven-model.version>
+    <hutool.version>5.8.25</hutool.version>
   </properties>
 
   <dependencyManagement>
@@ -93,9 +95,19 @@
         <artifactId>windy-demand</artifactId>
         <version>${revision}</version>
       </dependency>
+      <dependency>
+        <groupId>com.zj</groupId>
+        <artifactId>windy-auth</artifactId>
+        <version>${revision}</version>
+      </dependency>
       <!--内部模块结束-->
 
       <!--外部模块开始-->
+      <dependency>
+        <groupId>cn.hutool</groupId>
+        <artifactId>hutool-all</artifactId>
+        <version>${hutool.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.freemarker</groupId>
         <artifactId>freemarker</artifactId>

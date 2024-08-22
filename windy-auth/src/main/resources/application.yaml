@@ -1,0 +1,3 @@
+windy:
+  token:
+    expire: 3600

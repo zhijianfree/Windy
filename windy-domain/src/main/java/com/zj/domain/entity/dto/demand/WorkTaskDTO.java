@@ -33,9 +33,16 @@ public class WorkTaskDTO {
     private String relatedId;
 
     /**
+     * 关联类型
+     */
+    private Integer relatedType;
+
+    /**
      * 工作量
      */
     private Integer workload;
+
+    private Integer status;
 
     /**
      * 完成时间

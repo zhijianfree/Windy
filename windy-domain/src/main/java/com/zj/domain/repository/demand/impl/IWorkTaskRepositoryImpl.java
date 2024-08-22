@@ -49,7 +49,7 @@ public class IWorkTaskRepositoryImpl extends ServiceImpl<WorkTaskMapper, WorkTas
 
     @Override
     public List<WorkTaskDTO> getWorkTaskByName(String queryName) {
-        List<WorkTask> workTasks = list(Wrappers.lambdaQuery(WorkTask.class).eq(WorkTask::getTaskName, queryName));
+        List<WorkTask> workTasks = list(Wrappers.lambdaQuery(WorkTask.class).like(WorkTask::getTaskName, queryName));
         return OrikaUtil.convertList(workTasks, WorkTaskDTO.class);
     }
 

@@ -26,6 +26,10 @@
     </dependency>
     <dependency>
       <groupId>com.zj</groupId>
+      <artifactId>windy-auth</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.zj</groupId>
       <artifactId>windy-service</artifactId>
       <exclusions>
         <exclusion>

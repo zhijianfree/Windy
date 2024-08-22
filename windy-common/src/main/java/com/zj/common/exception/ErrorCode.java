@@ -45,7 +45,7 @@ public enum ErrorCode {
   SYSTEM_EXECUTE_ERROR(HttpStatus.BAD_REQUEST, "Feature.000101", "unknown error occur when execute feature "),
   SUB_FEATURE_EXIST(HttpStatus.BAD_REQUEST, "Feature.000005", "存在子用例不能删除目录"),
   PARSE_PLUGIN_ERROR(HttpStatus.BAD_REQUEST, "Feature.000006", "解析插件错误"),
-  /*==================需求缺陷管理==================*/
+  /*==================需求缺陷管理======================*/
   DEMAND_CREATE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Demand.000001", "创建需求失败"),
   SPACE_NOT_EXIST(HttpStatus.BAD_REQUEST, "Demand.000002", "空间不存在"),
   ITERATION_NOT_EXIST(HttpStatus.BAD_REQUEST, "Demand.000003", "迭代不存在"),
@@ -54,8 +54,11 @@ public enum ErrorCode {
   UNKNOWN_EXECUTE_TYPE(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000002", "未找到节点执行类型"),
   RUN_DEPLOY_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000003", "部署节点失败"),
   MERGE_CODE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000004", "合并代码失败"),
-
   BRANCH_NOT_DIFF(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000005", "合并分支%s与master不存在差异，不能发布"),
+  /*==================权限校验==================*/
+  USER_TOKEN_INVALID(HttpStatus.FORBIDDEN,"Auth.000001","非法用户token"),
+  USER_NOT_FIND(HttpStatus.BAD_REQUEST,"Auth.000002","用户不存在"),
+  USER_PASSWORD_ERROR(HttpStatus.BAD_REQUEST,"Auth.000003","用户名或者密码错误"),
   ;
 
   ErrorCode(HttpStatus httpStatus, String code, String message) {

@@ -105,10 +105,10 @@ public class CodeChangeService {
         try {
             List<RelationDemandBug> relationList =
                     bugFuture.get().stream().map(bug -> new RelationDemandBug(bug.getBugId(),
-                            RelationType.DEMAND.getType(), bug.getBugName())).collect(Collectors.toList());
+                            RelationType.BUG.getType(), bug.getBugName())).collect(Collectors.toList());
             List<RelationDemandBug> relationDemands =
                     demandFuture.get().stream().map(demand -> new RelationDemandBug(demand.getDemandId(),
-                            RelationType.BUG.getType(), demand.getDemandName())).collect(Collectors.toList());
+                            RelationType.DEMAND.getType(), demand.getDemandName())).collect(Collectors.toList());
             List<RelationDemandBug> relationWorks =
                     workFuture.get().stream().map(work -> new RelationDemandBug(work.getTaskId(),
                             RelationType.WORK.getType(), work.getTaskName())).collect(Collectors.toList());
