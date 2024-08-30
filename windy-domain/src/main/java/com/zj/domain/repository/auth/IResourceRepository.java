@@ -20,9 +20,11 @@ public interface IResourceRepository {
 
     ResourceDto getResource(String resourceId);
 
-    Boolean resourceBind(String relationId, List<String> resourceIds);
+    boolean resourceBind(String relationId, List<String> resourceIds);
 
     List<ResourceDto> getRoleResources(String roleId);
 
     boolean isResourceBind(String resourceId);
+
+    boolean unbindResource(String roleId);
 }

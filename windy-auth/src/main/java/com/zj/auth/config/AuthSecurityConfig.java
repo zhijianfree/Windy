@@ -43,6 +43,7 @@ public class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
                  .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
                 .antMatchers(Constants.USER_LOGIN_URL).permitAll()
+                .antMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/static/**").permitAll()
                 .anyRequest().authenticated()
                 .withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {
                     @Override

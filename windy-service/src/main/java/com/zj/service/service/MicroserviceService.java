@@ -14,6 +14,7 @@ import com.zj.domain.entity.dto.auth.UserDto;
 import com.zj.domain.entity.dto.feature.TestCaseDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.service.MicroserviceDto;
+import com.zj.domain.entity.po.service.ServiceMember;
 import com.zj.domain.entity.vo.GitAccessVo;
 import com.zj.domain.repository.feature.ITestCaseRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
@@ -65,7 +66,14 @@ public class MicroserviceService {
     }
 
     public PageSize<ServiceDto> getServices(Integer pageNo, Integer size, String name) {
-        IPage<MicroserviceDto> page = microServiceRepository.getServices(pageNo, size, name);
+        String currentUserId = authService.getCurrentUserId();
+        List<ServiceMember> serviceMembers = microServiceRepository.getServiceMembersByUser(currentUserId);
+        if (CollectionUtils.isEmpty(serviceMembers)){
+            return new PageSize<>();
+        }
+
+        List<String> serviceIds = serviceMembers.stream().map(ServiceMember::getServiceId).collect(Collectors.toList());
+        IPage<MicroserviceDto> page = microServiceRepository.getServices(pageNo, size, name, serviceIds);
         PageSize<ServiceDto> pageSize = new PageSize<>();
         if (CollectionUtils.isEmpty(page.getRecords())) {
             pageSize.setTotal(0);

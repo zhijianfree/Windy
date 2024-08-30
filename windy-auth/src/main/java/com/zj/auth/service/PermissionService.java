@@ -1,5 +1,8 @@
 package com.zj.auth.service;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.zj.auth.entity.Constants;
 import com.zj.auth.entity.UserSession;
 import com.zj.domain.entity.dto.auth.ResourceDto;
@@ -13,10 +16,20 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
 public class PermissionService {
+
+    LoadingCache<String, List<ResourceDto>> cacheLoader = CacheBuilder.newBuilder()
+            .expireAfterWrite(1, TimeUnit.HOURS)
+            .build(new CacheLoader<String, List<ResourceDto>>() {
+                @Override
+                public List<ResourceDto> load(String userId) {
+                    return resourceRepository.getResourceByyUserId(userId);
+                }
+            });
 
     private final List<String> whiteList = new ArrayList<>();
 
@@ -28,10 +41,26 @@ public class PermissionService {
         this.resourceRepository = resourceRepository;
         whiteList.add(Constants.USER_LOGIN_URL);
         whiteList.add(Constants.USER_LOGOUT_URL);
+        whiteList.add("/");
+        whiteList.add("/login");
+        whiteList.add("/css/**");
+        whiteList.add("/js/**");
+        whiteList.add("/img/**");
+        whiteList.add("/fonts/**");
+        whiteList.add("/media/**");
+        whiteList.add( "/static/**");
+    }
+
+    public void removeUserCache(String userId) {
+        cacheLoader.invalidate(userId);
+    }
+
+    public void removeAllAuthCache() {
+        cacheLoader.invalidateAll();
     }
 
     public boolean isInWhiteList(String uri) {
-        return whiteList.contains(uri);
+        return whiteList.stream().anyMatch(whiteUri -> antPathMatcher.match(whiteUri, uri));
     }
 
     public boolean isLoginUrl(String uri) {
@@ -49,7 +78,7 @@ public class PermissionService {
             return true;
         }
 
-        List<ResourceDto> resources = resourceRepository.getResourceByyUserId(userSession.getUserId());
+        List<ResourceDto> resources = cacheLoader.getUnchecked(userSession.getUserId());
         if (CollectionUtils.isEmpty(resources)) {
             return false;
         }
@@ -62,7 +91,8 @@ public class PermissionService {
                     resource.getOperate()));
         });
         if (!matchURI) {
-            log.info("user do not have permission user={} uri={} operate={}", userSession.getUserId(), requestUri, operate);
+            log.info("user do not have permission user={} uri={} operate={}", userSession.getUserId(), requestUri,
+                    operate);
         }
         return matchURI;
     }

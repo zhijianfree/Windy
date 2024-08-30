@@ -94,14 +94,18 @@ public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Micr
   }
 
   @Override
-  public IPage<MicroserviceDto> getServices(Integer pageNo, Integer size, String name) {
+  public IPage<MicroserviceDto> getServices(Integer pageNo, Integer size, String name, List<String> serviceIds) {
     IPage<Microservice> iPage = new Page<>(pageNo, size);
     LambdaQueryWrapper<Microservice> queryWrapper = Wrappers.lambdaQuery(Microservice.class);
     if (!StringUtils.isEmpty(name)) {
       queryWrapper.like(Microservice::getServiceName, name);
     }
-    IPage<Microservice> pageList = page(iPage, queryWrapper);
 
+    if (CollectionUtils.isNotEmpty(serviceIds)) {
+      queryWrapper.in(Microservice::getServiceId, serviceIds);
+    }
+
+    IPage<Microservice> pageList = page(iPage, queryWrapper);
     IPage<MicroserviceDto> page = new Page<>();
     page.setTotal(pageList.getTotal());
     page.setRecords(OrikaUtil.convertList(pageList.getRecords(), MicroserviceDto.class));
@@ -133,6 +137,12 @@ public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Micr
     }
     List<String> userIds = serviceMembers.stream().map(ServiceMember::getUserId).collect(Collectors.toList());
     return userRepository.getUserByUserList(userIds);
+  }
+
+  @Override
+  public List<ServiceMember> getServiceMembersByUser(String userId) {
+    return serviceMemberMapper.selectList(Wrappers.lambdaQuery(ServiceMember.class).eq(ServiceMember::getUserId,
+            userId));
   }
 
   @Override

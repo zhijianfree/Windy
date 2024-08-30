@@ -43,7 +43,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         UserSession userSession = tokenHolder.getUserSessionByToken(request);
-        if (!permissionService.isLoginUrl(request.getRequestURI()) && Objects.isNull(userSession)) {
+        if (!permissionService.isInWhiteList(request.getRequestURI()) && Objects.isNull(userSession)) {
             forbiddenAccess(response);
             return;
         }

@@ -19,10 +19,12 @@ public class RoleService {
 
     private final IRoleRepository roleRepository;
     private final UniqueIdService uniqueIdService;
+    private final PermissionService permissionService;
 
-    public RoleService(IRoleRepository roleRepository, UniqueIdService uniqueIdService) {
+    public RoleService(IRoleRepository roleRepository, UniqueIdService uniqueIdService, PermissionService permissionService) {
         this.roleRepository = roleRepository;
         this.uniqueIdService = uniqueIdService;
+        this.permissionService = permissionService;
     }
 
     public PageSize<RoleDto> getRoles(Integer page, Integer size) {
@@ -64,6 +66,10 @@ public class RoleService {
     public Boolean bindRole(RoleBind roleBind) {
         boolean unbindResult = roleRepository.unbind(roleBind.getRelationId());
         log.info("un bind roles result = {}", unbindResult);
-        return roleRepository.bindRole(roleBind.getRelationId(), roleBind.getRoleIds());
+        boolean result = roleRepository.bindRole(roleBind.getRelationId(), roleBind.getRoleIds());
+        if (result) {
+            permissionService.removeUserCache(roleBind.getRelationId());
+        }
+        return result;
     }
 }

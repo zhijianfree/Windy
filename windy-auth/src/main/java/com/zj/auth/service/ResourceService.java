@@ -18,10 +18,12 @@ public class ResourceService {
 
     private final IResourceRepository resourceRepository;
     private final UniqueIdService uniqueIdService;
+    private final PermissionService permissionService;
 
-    public ResourceService(IResourceRepository resourceRepository, UniqueIdService uniqueIdService) {
+    public ResourceService(IResourceRepository resourceRepository, UniqueIdService uniqueIdService, PermissionService permissionService) {
         this.resourceRepository = resourceRepository;
         this.uniqueIdService = uniqueIdService;
+        this.permissionService = permissionService;
     }
 
     public PageSize<ResourceDto> getResources(Integer page, Integer size) {
@@ -56,7 +58,13 @@ public class ResourceService {
     }
 
     public Boolean resourceBind(ResourceBind resourceBind) {
-        return resourceRepository.resourceBind(resourceBind.getRelationId(), resourceBind.getResourceIds());
+        boolean unbindResource = resourceRepository.unbindResource(resourceBind.getRelationId());
+        log.info("unbind resource result={}", unbindResource);
+        boolean result = resourceRepository.resourceBind(resourceBind.getRelationId(), resourceBind.getResourceIds());
+        if (result) {
+            permissionService.removeAllAuthCache();
+        }
+        return result;
     }
 
     public List<ResourceDto> getRoleResources(String roleId) {

@@ -101,7 +101,7 @@ public class ResourceRepositoryImpl extends ServiceImpl<ResourceMapper, Resource
 
     @Override
     @Transactional
-    public Boolean resourceBind(String relationId, List<String> resourceIds) {
+    public boolean resourceBind(String relationId, List<String> resourceIds) {
         resourceIds.forEach(resourceId -> {
             RoleResource userRole = new RoleResource();
             userRole.setRoleId(relationId);
@@ -127,5 +127,10 @@ public class ResourceRepositoryImpl extends ServiceImpl<ResourceMapper, Resource
         List<RoleResource> roleResources =
                 roleResourceMapper.selectList(Wrappers.lambdaQuery(RoleResource.class).eq(RoleResource::getResourceId, resourceId));
         return CollectionUtils.isNotEmpty(roleResources);
+    }
+
+    @Override
+    public boolean unbindResource(String roleId) {
+        return roleResourceMapper.delete(Wrappers.lambdaQuery(RoleResource.class).eq(RoleResource::getRoleId, roleId)) > 0;
     }
 }
