@@ -34,8 +34,9 @@ public class WindyUserDetailsService implements UserDetailsService {
 
         if (Objects.equals(UserStatus.DISABLE.getType(), user.getStatus())) {
             log.info("user is not find ={}", userName);
-            throw new ApiException(ErrorCode.USER_NOT_FIND);
+            throw new ApiException(ErrorCode.USER_WAS_BLOCKED);
         }
+
         return new UserSession(user);
     }
 

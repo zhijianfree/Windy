@@ -1,5 +1,6 @@
 package com.zj.demand.service;
 
+import com.zj.common.auth.IAuthService;
 import com.zj.common.model.PageSize;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.demand.BusinessStatusDTO;

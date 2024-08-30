@@ -48,7 +48,9 @@ public enum ErrorCode {
   /*==================需求缺陷管理======================*/
   DEMAND_CREATE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Demand.000001", "创建需求失败"),
   SPACE_NOT_EXIST(HttpStatus.BAD_REQUEST, "Demand.000002", "空间不存在"),
+  DEMAND_NOT_EXIST(HttpStatus.BAD_REQUEST, "Demand.000004", "需求不存在"),
   ITERATION_NOT_EXIST(HttpStatus.BAD_REQUEST, "Demand.000003", "迭代不存在"),
+  BUG_NOT_EXIST(HttpStatus.BAD_REQUEST, "Demand.000005", "缺陷不存在"),
   /*==================Client端构建运行==================*/
   NOT_FIND_JAR(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000001", "构建时未发现JAR包"),
   UNKNOWN_EXECUTE_TYPE(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000002", "未找到节点执行类型"),
@@ -56,9 +58,13 @@ public enum ErrorCode {
   MERGE_CODE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000004", "合并代码失败"),
   BRANCH_NOT_DIFF(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000005", "合并分支%s与master不存在差异，不能发布"),
   /*==================权限校验==================*/
-  USER_TOKEN_INVALID(HttpStatus.FORBIDDEN,"Auth.000001","非法用户token"),
+  USER_TOKEN_INVALID(HttpStatus.FORBIDDEN,"Auth.000001","token无效"),
   USER_NOT_FIND(HttpStatus.BAD_REQUEST,"Auth.000002","用户不存在"),
   USER_PASSWORD_ERROR(HttpStatus.BAD_REQUEST,"Auth.000003","用户名或者密码错误"),
+  USER_WAS_BLOCKED(HttpStatus.BAD_REQUEST,"Auth.000004","用户被冻结"),
+  USER_NOT_HAVE_PERMISSION(HttpStatus.BAD_REQUEST,"Auth.000005","用户没有权限"),
+  RESOURCE_IS_BIND(HttpStatus.BAD_REQUEST,"Auth.000006","资源被绑定无法删除"),
+  ROLE_IS_BIND(HttpStatus.BAD_REQUEST,"Auth.000007","角色被绑定无法删除"),
   ;
 
   ErrorCode(HttpStatus httpStatus, String code, String message) {

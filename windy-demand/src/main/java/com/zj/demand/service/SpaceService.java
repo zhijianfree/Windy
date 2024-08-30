@@ -1,5 +1,6 @@
 package com.zj.demand.service;
 
+import com.zj.common.auth.IAuthService;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.uuid.UniqueIdService;

@@ -10,7 +10,7 @@ public class Role {
     /**
      * 角色ID
      */
-    private Long roleId;
+    private String roleId;
 
     /**
      * 角色名称

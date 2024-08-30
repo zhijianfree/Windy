@@ -32,6 +32,11 @@ public class Resource {
     private String content;
 
     /**
+     * 操作类型
+     */
+    private String operate;
+
+    /**
      * 是否可见
      */
     private boolean visible;

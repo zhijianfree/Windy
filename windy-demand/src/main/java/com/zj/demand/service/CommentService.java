@@ -1,14 +1,13 @@
 package com.zj.demand.service;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-
+import com.zj.common.auth.IAuthService;
+import com.zj.common.auth.UserDetail;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.demand.CommentDTO;
 import com.zj.domain.repository.demand.ICommentRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * @author falcon
@@ -19,10 +18,12 @@ public class CommentService {
 
   private final ICommentRepository commentRepository;
   private final UniqueIdService uniqueIdService;
+  private final IAuthService authService;
 
-  public CommentService(ICommentRepository commentRepository, UniqueIdService uniqueIdService) {
+  public CommentService(ICommentRepository commentRepository, UniqueIdService uniqueIdService, IAuthService authService) {
     this.commentRepository = commentRepository;
     this.uniqueIdService = uniqueIdService;
+    this.authService = authService;
   }
 
   public List<CommentDTO> getRelativeComments(String relativeId) {
@@ -31,6 +32,9 @@ public class CommentService {
 
   public boolean addComment(CommentDTO commentDTO) {
     commentDTO.setCommentId(uniqueIdService.getUniqueId());
+    commentDTO.setUserId(authService.getCurrentUserId());
+    UserDetail userDetail = authService.getUserDetail();
+    commentDTO.setUserName(userDetail.getUserName());
     return commentRepository.saveComment(commentDTO);
   }
 

@@ -8,7 +8,7 @@ public class UserDto {
     /**
      * 用户ID
      */
-    private Long userId;
+    private String userId;
 
     /**
      * 用户名称
@@ -19,6 +19,11 @@ public class UserDto {
      * 用户昵称
      */
     private String nickName;
+
+    /**
+     * 组织ID
+     */
+    private String groupId;
 
     /**
      * 用户密码

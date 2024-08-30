@@ -3,6 +3,7 @@ package com.zj.demand.rest;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseMeta;
+import com.zj.demand.entity.DemandDetail;
 import com.zj.demand.service.DemandService;
 import com.zj.domain.entity.dto.demand.BusinessStatusDTO;
 import com.zj.domain.entity.dto.demand.DemandDTO;
@@ -71,7 +72,7 @@ public class DemandRest {
     }
 
     @GetMapping("/demands/{demandId}")
-    public ResponseMeta<DemandDTO> getDemand(@PathVariable("demandId") String demandId) {
+    public ResponseMeta<DemandDetail> getDemand(@PathVariable("demandId") String demandId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getDemand(demandId));
     }
 

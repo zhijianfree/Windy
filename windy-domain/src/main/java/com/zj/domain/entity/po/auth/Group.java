@@ -1,8 +1,10 @@
 package com.zj.domain.entity.po.auth;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 @Data
+@TableName("windy_group")
 public class Group {
 
     private Long id;

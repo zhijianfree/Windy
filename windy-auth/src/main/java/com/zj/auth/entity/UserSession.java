@@ -1,12 +1,14 @@
 package com.zj.auth.entity;
 
 import com.zj.domain.entity.dto.auth.UserDto;
+import com.zj.domain.entity.enums.UserStatus;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 
 @Data
 public class UserSession implements UserDetails {
@@ -21,6 +23,9 @@ public class UserSession implements UserDetails {
         this.userDto = userDto;
     }
 
+    public String getUserId(){
+        return userDto.getUserId();
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -34,7 +39,7 @@ public class UserSession implements UserDetails {
 
     @Override
     public String getUsername() {
-        return "admin";
+        return userDto.getUserName();
     }
 
     @Override
@@ -49,11 +54,14 @@ public class UserSession implements UserDetails {
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        if (Objects.isNull(expireTime)) {
+            return true;
+        }
+        return System.currentTimeMillis() < expireTime;
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return Objects.equals(userDto.getStatus(), UserStatus.NORMAL.getType());
     }
 }

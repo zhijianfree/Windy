@@ -103,8 +103,7 @@ public class CodeChangeService {
                 CompletableFuture.supplyAsync(() -> workTaskRepository.getWorkTaskByName(queryName));
         CompletableFuture.allOf(bugFuture, demandFuture, workFuture).join();
         try {
-            List<RelationDemandBug> relationList =
-                    bugFuture.get().stream().map(bug -> new RelationDemandBug(bug.getBugId(),
+            List<RelationDemandBug> relationList = bugFuture.get().stream().map(bug -> new RelationDemandBug(bug.getBugId(),
                             RelationType.BUG.getType(), bug.getBugName())).collect(Collectors.toList());
             List<RelationDemandBug> relationDemands =
                     demandFuture.get().stream().map(demand -> new RelationDemandBug(demand.getDemandId(),

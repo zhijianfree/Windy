@@ -1,6 +1,7 @@
 package com.zj.domain.repository.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.zj.domain.entity.dto.auth.UserDto;
 import com.zj.domain.entity.dto.service.MicroserviceDto;
 import java.util.List;
 
@@ -10,7 +11,7 @@ import java.util.List;
  */
 public interface IMicroServiceRepository {
 
-  String createService(MicroserviceDto microserviceDto);
+  String createService(String userId, MicroserviceDto microserviceDto);
 
   String updateService(MicroserviceDto microserviceDto);
 
@@ -18,9 +19,15 @@ public interface IMicroServiceRepository {
 
   MicroserviceDto queryServiceDetail(String serviceId);
 
-  List<MicroserviceDto> getServices();
+  List<MicroserviceDto> getServices(String currentUserId);
 
   IPage<MicroserviceDto> getServices(Integer pageNo, Integer size, String name);
 
   MicroserviceDto queryServiceByName(String serviceName);
+
+  boolean addServiceMember(String serviceId, String userId);
+
+  List<UserDto> getServiceMembers(String serviceId);
+
+  Boolean deleteServiceMember(String serviceId, String userId);
 }

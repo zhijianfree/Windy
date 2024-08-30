@@ -10,7 +10,7 @@ public class User {
     /**
      * 用户ID
      */
-    private Long userId;
+    private String userId;
 
     /**
      * 用户名称
@@ -31,6 +31,11 @@ public class User {
      * 密码加密盐
      */
     private String salt;
+
+    /**
+     * 组织ID
+     */
+    private String groupId;
 
     /**
      * 用户状态 1 正常 0 冻结

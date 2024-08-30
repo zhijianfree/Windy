@@ -3,6 +3,7 @@ package com.zj.demand.rest;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseMeta;
+import com.zj.demand.entity.BugDetail;
 import com.zj.demand.service.BugService;
 import com.zj.domain.entity.dto.demand.BugDTO;
 import com.zj.domain.entity.dto.demand.BusinessStatusDTO;
@@ -49,7 +50,7 @@ public class BugRest {
     }
 
     @GetMapping("/bugs/{bugId}")
-    public ResponseMeta<BugDTO> getBug(@PathVariable("bugId") String bugId) {
+    public ResponseMeta<BugDetail> getBug(@PathVariable("bugId") String bugId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getBug(bugId));
     }
 

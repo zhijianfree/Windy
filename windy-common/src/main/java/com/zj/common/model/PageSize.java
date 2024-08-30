@@ -14,4 +14,5 @@ public class PageSize<T> {
     public PageSize(List<T> data) {
         this.data = data;
     }
+
 }
