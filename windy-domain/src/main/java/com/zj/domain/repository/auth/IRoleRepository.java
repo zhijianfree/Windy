@@ -20,7 +20,7 @@ public interface IRoleRepository {
 
     List<RoleDto> getAllRoles();
 
-    Boolean bindRole(String relationId, List<String> roleIds);
+    boolean bindRole(String relationId, List<String> roleIds);
 
     boolean unbind(String relationId);
 

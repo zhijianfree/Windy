@@ -97,7 +97,7 @@ public class RoleRepositoryImpl extends ServiceImpl<RoleMapper, Role> implements
 
     @Override
     @Transactional
-    public Boolean bindRole(String relationId, List<String> roleIds) {
+    public boolean bindRole(String relationId, List<String> roleIds) {
         roleIds.forEach(roleId ->{
             UserRole userRole = new UserRole();
             userRole.setRoleId(roleId);
