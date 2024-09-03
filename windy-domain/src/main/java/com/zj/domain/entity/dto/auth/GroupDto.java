@@ -15,6 +15,8 @@ public class GroupDto {
      */
     private String groupName;
 
+    private String parentId;
+
     /**
      * 组织描述
      */

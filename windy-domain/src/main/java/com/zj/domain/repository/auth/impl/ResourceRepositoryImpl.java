@@ -46,6 +46,10 @@ public class ResourceRepositoryImpl extends ServiceImpl<ResourceMapper, Resource
         List<RoleResource> roleResources =
                 roleResourceMapper.selectList(Wrappers.lambdaQuery(RoleResource.class).in(RoleResource::getRoleId,
                         roleIds));
+        return getResourceList(roleResources);
+    }
+
+    private List<ResourceDto> getResourceList(List<RoleResource> roleResources) {
         if (CollectionUtils.isEmpty(roleResources)) {
             return Collections.emptyList();
         }
@@ -114,12 +118,7 @@ public class ResourceRepositoryImpl extends ServiceImpl<ResourceMapper, Resource
     @Override
     public List<ResourceDto> getRoleResources(String roleId) {
         List<RoleResource> roleResources = roleResourceMapper.selectList(Wrappers.lambdaQuery(RoleResource.class).eq(RoleResource::getRoleId, roleId));
-        if (CollectionUtils.isEmpty(roleResources)) {
-            return Collections.emptyList();
-        }
-        List<String> resourceIds = roleResources.stream().map(RoleResource::getResourceId).collect(Collectors.toList());
-        List<Resource> resources = list(Wrappers.lambdaQuery(Resource.class).in(Resource::getResourceId, resourceIds));
-        return OrikaUtil.convertList(resources, ResourceDto.class);
+        return getResourceList(roleResources);
     }
 
     @Override

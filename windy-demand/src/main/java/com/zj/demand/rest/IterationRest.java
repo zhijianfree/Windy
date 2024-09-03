@@ -4,7 +4,9 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.ResponseMeta;
 import com.zj.demand.entity.IterationStatistic;
 import com.zj.demand.service.IterationService;
+import com.zj.domain.entity.dto.auth.UserDto;
 import com.zj.domain.entity.dto.demand.IterationDTO;
+import com.zj.domain.entity.dto.service.ResourceMemberDto;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,5 +55,22 @@ public class IterationRest {
     @GetMapping("/iterations/{iterationId}")
     public ResponseMeta<IterationDTO> getIteration(@PathVariable("iterationId") String iterationId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.getIteration(iterationId));
+    }
+
+    @GetMapping("/iterations/{iterationId}/members")
+    public ResponseMeta<List<UserDto>> queryIterationMembers(@PathVariable("iterationId") String iterationId) {
+        return new ResponseMeta<List<UserDto>>(ErrorCode.SUCCESS, iterationService.queryIterationMembers(iterationId));
+    }
+
+    @PostMapping("/iterations/{iterationId}/members")
+    public ResponseMeta<Boolean> addIterationMember(@RequestBody ResourceMemberDto serviceMember) {
+        return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, iterationService.addIterationMember(serviceMember));
+    }
+
+    @DeleteMapping("/iterations/{iterationId}/members/{userId}")
+    public ResponseMeta<Boolean> deleteIterationMember(@PathVariable("iterationId") String iterationId,
+                                                     @PathVariable("userId") String userId) {
+        return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, iterationService.deleteIterationMember(iterationId,
+                userId));
     }
 }

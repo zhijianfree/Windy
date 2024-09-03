@@ -1,6 +1,7 @@
 package com.zj.auth.rest;
 
 
+import com.zj.auth.entity.GroupTree;
 import com.zj.auth.service.GroupService;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.ResponseMeta;
@@ -27,7 +28,7 @@ public class GroupRest {
     }
 
     @GetMapping("/groups")
-    public ResponseMeta<List<GroupDto>> getGroups() {
+    public ResponseMeta<List<GroupTree>> getGroups() {
         return new ResponseMeta<>(ErrorCode.SUCCESS, groupService.getGroups());
     }
 

@@ -5,16 +5,23 @@ import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.demand.entity.IterationStatistic;
+import com.zj.domain.entity.dto.auth.UserDto;
 import com.zj.domain.entity.dto.demand.IterationDTO;
+import com.zj.domain.entity.dto.service.ResourceMemberDto;
+import com.zj.domain.entity.po.service.ResourceMember;
 import com.zj.domain.repository.demand.IBugRepository;
 import com.zj.domain.repository.demand.IDemandRepository;
+import com.zj.domain.repository.demand.IMemberRepository;
 import com.zj.domain.repository.demand.IWorkTaskRepository;
 import com.zj.domain.repository.demand.IterationRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -26,20 +33,27 @@ public class IterationService {
     private final IterationRepository iterationRepository;
     private final UniqueIdService uniqueIdService;
     private final IAuthService authService;
-
+    private final IMemberRepository memberRepository;
     public IterationService(IDemandRepository demandRepository, IBugRepository bugRepository,
                             IWorkTaskRepository workTaskRepository, IterationRepository iterationRepository,
-                            UniqueIdService uniqueIdService, IAuthService authService) {
+                            UniqueIdService uniqueIdService, IAuthService authService, IMemberRepository memberRepository) {
         this.demandRepository = demandRepository;
         this.bugRepository = bugRepository;
         this.workTaskRepository = workTaskRepository;
         this.iterationRepository = iterationRepository;
         this.uniqueIdService = uniqueIdService;
         this.authService = authService;
+        this.memberRepository = memberRepository;
     }
 
     public List<IterationDTO> getIterationList() {
-        return iterationRepository.getIterationList();
+        String currentUserId = authService.getCurrentUserId();
+        List<ResourceMember> resourceMembers = memberRepository.getResourceMembersByUser(currentUserId);
+        if (CollectionUtils.isEmpty(resourceMembers)) {
+            return Collections.emptyList();
+        }
+        List<String> iterationIds = resourceMembers.stream().map(ResourceMember::getResourceId).collect(Collectors.toList());
+        return iterationRepository.getIterationList(iterationIds);
     }
 
     public IterationDTO createIteration(IterationDTO iterationDTO) {
@@ -70,5 +84,17 @@ public class IterationService {
         Integer bugCount = bugRepository.countIteration(iterationId);
         Integer workCount = workTaskRepository.countIteration(iterationId);
         return new IterationStatistic(demandCount, bugCount, workCount, 0);
+    }
+
+    public List<UserDto> queryIterationMembers(String iterationId) {
+        return memberRepository.queryResourceMembers(iterationId);
+    }
+
+    public Boolean addIterationMember(ResourceMemberDto resourceMemberDto) {
+        return memberRepository.addResourceMember(resourceMemberDto);
+    }
+
+    public Boolean deleteIterationMember(String iterationId, String userId) {
+        return memberRepository.deleteResourceMember(iterationId, userId);
     }
 }

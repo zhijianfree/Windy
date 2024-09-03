@@ -6,13 +6,12 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.auth.UserDto;
 import com.zj.domain.entity.dto.service.MicroserviceDto;
+import com.zj.domain.entity.dto.service.ResourceMemberDto;
 import com.zj.domain.entity.po.service.Microservice;
-import com.zj.domain.entity.po.service.ServiceMember;
+import com.zj.domain.entity.po.service.ResourceMember;
 import com.zj.domain.mapper.service.MicroServiceMapper;
-import com.zj.domain.mapper.service.ServiceMemberMapper;
-import com.zj.domain.repository.auth.IUserRepository;
+import com.zj.domain.repository.demand.IMemberRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 
 import java.util.Collections;
@@ -35,14 +34,12 @@ import org.springframework.util.StringUtils;
 public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Microservice> implements
     IMicroServiceRepository {
 
-  private final ServiceMemberMapper serviceMemberMapper;
+  private final IMemberRepository memberRepository;
 
-  private final IUserRepository userRepository;
-
-  public MicroServiceRepository(ServiceMemberMapper serviceMemberMapper, IUserRepository userRepository) {
-    this.serviceMemberMapper = serviceMemberMapper;
-    this.userRepository = userRepository;
+  public MicroServiceRepository(IMemberRepository memberRepository) {
+    this.memberRepository = memberRepository;
   }
+
 
   @Override
   @Transactional
@@ -52,7 +49,10 @@ public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Micr
     microservice.setUpdateTime(System.currentTimeMillis());
     boolean save = save(microservice);
     if (save) {
-      boolean result = addServiceMember(microservice.getServiceId(), userId);
+      ResourceMemberDto resourceMemberDto = new ResourceMemberDto();
+      resourceMemberDto.setResourceId(microservice.getServiceId());
+      resourceMemberDto.setUserId(userId);
+      boolean result = memberRepository.addResourceMember(resourceMemberDto);
       log.info("add service member result = {}", result);
     }
     return save ? microservice.getServiceId() : null;
@@ -82,12 +82,11 @@ public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Micr
 
   @Override
   public List<MicroserviceDto> getServices(String currentUserId) {
-    List<ServiceMember> serviceMembers = serviceMemberMapper.selectList(Wrappers.lambdaQuery(ServiceMember.class).eq(ServiceMember::getUserId,
-            currentUserId));
-    if (CollectionUtils.isEmpty(serviceMembers)) {
+    List<ResourceMember> resourceMembers = memberRepository.getResourceMembersByUser(currentUserId);
+    if (CollectionUtils.isEmpty(resourceMembers)) {
       return Collections.emptyList();
     }
-    List<String> serviceIds = serviceMembers.stream().map(ServiceMember::getServiceId).collect(Collectors.toList());
+    List<String> serviceIds = resourceMembers.stream().map(ResourceMember::getResourceId).collect(Collectors.toList());
     return list(Wrappers.lambdaQuery(Microservice.class).in(Microservice::getServiceId, serviceIds)).stream()
         .map(microservice -> OrikaUtil.convert(microservice, MicroserviceDto.class))
         .collect(Collectors.toList());
@@ -117,37 +116,5 @@ public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Micr
     Microservice microservice = getOne(
         Wrappers.lambdaQuery(Microservice.class).eq(Microservice::getServiceName, serviceName));
     return OrikaUtil.convert(microservice, MicroserviceDto.class);
-  }
-
-  @Override
-  public boolean addServiceMember(String serviceId, String userId) {
-    ServiceMember serviceMember = new ServiceMember();
-    serviceMember.setServiceId(serviceId);
-    serviceMember.setUserId(userId);
-    serviceMember.setCreateTime(System.currentTimeMillis());
-    return serviceMemberMapper.insert(serviceMember) > 0;
-  }
-
-  @Override
-  public List<UserDto> getServiceMembers(String serviceId) {
-    List<ServiceMember> serviceMembers = serviceMemberMapper.selectList(Wrappers.lambdaQuery(ServiceMember.class).eq(ServiceMember::getServiceId,
-            serviceId));
-    if (CollectionUtils.isEmpty(serviceMembers)) {
-      return Collections.emptyList();
-    }
-    List<String> userIds = serviceMembers.stream().map(ServiceMember::getUserId).collect(Collectors.toList());
-    return userRepository.getUserByUserList(userIds);
-  }
-
-  @Override
-  public List<ServiceMember> getServiceMembersByUser(String userId) {
-    return serviceMemberMapper.selectList(Wrappers.lambdaQuery(ServiceMember.class).eq(ServiceMember::getUserId,
-            userId));
-  }
-
-  @Override
-  public Boolean deleteServiceMember(String serviceId, String userId) {
-    return serviceMemberMapper.delete(Wrappers.lambdaQuery(ServiceMember.class).eq(ServiceMember::getServiceId,
-            serviceId).eq(ServiceMember::getUserId, userId)) > 0;
   }
 }

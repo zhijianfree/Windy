@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface IterationRepository {
 
-    List<IterationDTO> getIterationList();
+    List<IterationDTO> getIterationList(List<String> iterationIds);
 
     IterationDTO createIteration(IterationDTO iterationDTO);
 

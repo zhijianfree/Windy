@@ -6,7 +6,7 @@ import com.zj.common.model.ResponseMeta;
 import com.zj.domain.entity.dto.auth.UserDto;
 import com.zj.domain.entity.dto.service.MicroserviceDto;
 import com.zj.service.entity.ServiceDto;
-import com.zj.service.entity.ServiceMemberDto;
+import com.zj.domain.entity.dto.service.ResourceMemberDto;
 import com.zj.service.service.MicroserviceService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,7 +55,7 @@ public class MicroserviceRest {
     }
 
     @PostMapping("/services/{serviceId}/members")
-    public ResponseMeta<Boolean> addServiceMember(@RequestBody ServiceMemberDto serviceMember) {
+    public ResponseMeta<Boolean> addServiceMember(@RequestBody ResourceMemberDto serviceMember) {
         return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, microservice.addServiceMember(serviceMember));
     }
 

@@ -27,7 +27,9 @@ public class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
     private final UserAccessDecisionManager accessDecisionManager;
 
     public AuthSecurityConfig(LogoutSuccessHandlerImpl logoutSuccessHandler,
-                              UserAccessDecisionManager accessDecisionManager, WindyUserDetailsService windyUserDetailsService, JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter) {
+                              UserAccessDecisionManager accessDecisionManager,
+                              WindyUserDetailsService windyUserDetailsService,
+                              JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter) {
         this.logoutSuccessHandler = logoutSuccessHandler;
         this.accessDecisionManager = accessDecisionManager;
         this.windyUserDetailsService = windyUserDetailsService;
@@ -40,7 +42,7 @@ public class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling()
                 .accessDeniedHandler(new UserAccessDeniedHandler())
                 .authenticationEntryPoint(new UserNotLoginHandler()).and()
-                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
                 .antMatchers(Constants.USER_LOGIN_URL).permitAll()
                 .antMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/static/**").permitAll()

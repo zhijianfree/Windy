@@ -14,8 +14,11 @@ import org.springframework.util.AntPathMatcher;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -78,7 +81,11 @@ public class PermissionService {
             return true;
         }
 
-        List<ResourceDto> resources = cacheLoader.getUnchecked(userSession.getUserId());
+        List<ResourceDto> userResources = getResourcesFromCache(userSession.getUserId());
+        String groupId = userSession.getUserDto().getGroupId();
+        List<ResourceDto> groupResources = getResourcesFromCache(groupId);
+        Collection<ResourceDto> resources = CollectionUtils.union(userResources, groupResources);
+        resources.addAll(groupResources);
         if (CollectionUtils.isEmpty(resources)) {
             return false;
         }
@@ -95,5 +102,9 @@ public class PermissionService {
                     operate);
         }
         return matchURI;
+    }
+
+    private List<ResourceDto> getResourcesFromCache(String userId) {
+        return cacheLoader.getUnchecked(userId);
     }
 }

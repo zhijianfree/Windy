@@ -24,6 +24,8 @@ public class Group {
      */
     private String description;
 
+    private String parentId;
+
     /**
      * 创建时间
      */

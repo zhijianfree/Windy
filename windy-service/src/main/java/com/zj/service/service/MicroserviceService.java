@@ -14,14 +14,15 @@ import com.zj.domain.entity.dto.auth.UserDto;
 import com.zj.domain.entity.dto.feature.TestCaseDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.service.MicroserviceDto;
-import com.zj.domain.entity.po.service.ServiceMember;
+import com.zj.domain.entity.po.service.ResourceMember;
 import com.zj.domain.entity.vo.GitAccessVo;
+import com.zj.domain.repository.demand.IMemberRepository;
 import com.zj.domain.repository.feature.ITestCaseRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.service.entity.ServiceDto;
-import com.zj.service.entity.ServiceMemberDto;
+import com.zj.domain.entity.dto.service.ResourceMemberDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -43,12 +44,13 @@ public class MicroserviceService {
     private final ITestCaseRepository testCaseRepository;
     private final List<IRepositoryBranch> repositoryBranches;
     private final ISystemConfigRepository systemConfig;
+    private final IMemberRepository memberRepository;
 
     public MicroserviceService(IMicroServiceRepository microServiceRepository,
                                UniqueIdService uniqueIdService, IAuthService authService,
                                List<IRepositoryBranch> gitRepositories,
                                ISystemConfigRepository systemConfig, IPipelineRepository pipelineRepository,
-                               ITestCaseRepository testCaseRepository) {
+                               ITestCaseRepository testCaseRepository, IMemberRepository memberRepository) {
         this.microServiceRepository = microServiceRepository;
         this.uniqueIdService = uniqueIdService;
         this.authService = authService;
@@ -56,6 +58,7 @@ public class MicroserviceService {
         this.testCaseRepository = testCaseRepository;
         this.repositoryBranches = gitRepositories;
         this.systemConfig = systemConfig;
+        this.memberRepository = memberRepository;
     }
 
     private IRepositoryBranch getRepositoryBranch() {
@@ -67,12 +70,12 @@ public class MicroserviceService {
 
     public PageSize<ServiceDto> getServices(Integer pageNo, Integer size, String name) {
         String currentUserId = authService.getCurrentUserId();
-        List<ServiceMember> serviceMembers = microServiceRepository.getServiceMembersByUser(currentUserId);
-        if (CollectionUtils.isEmpty(serviceMembers)){
+        List<ResourceMember> resourceMembers = memberRepository.getResourceMembersByUser(currentUserId);
+        if (CollectionUtils.isEmpty(resourceMembers)){
             return new PageSize<>();
         }
 
-        List<String> serviceIds = serviceMembers.stream().map(ServiceMember::getServiceId).collect(Collectors.toList());
+        List<String> serviceIds = resourceMembers.stream().map(ResourceMember::getResourceId).collect(Collectors.toList());
         IPage<MicroserviceDto> page = microServiceRepository.getServices(pageNo, size, name, serviceIds);
         PageSize<ServiceDto> pageSize = new PageSize<>();
         if (CollectionUtils.isEmpty(page.getRecords())) {
@@ -144,14 +147,14 @@ public class MicroserviceService {
     }
 
     public List<UserDto> queryServiceMembers(String serviceId) {
-        return microServiceRepository.getServiceMembers(serviceId);
+        return memberRepository.queryResourceMembers(serviceId);
     }
 
-    public Boolean addServiceMember(ServiceMemberDto member) {
-        return microServiceRepository.addServiceMember(member.getServiceId(), member.getUserId());
+    public Boolean addServiceMember(ResourceMemberDto member) {
+        return memberRepository.addResourceMember(member);
     }
 
     public Boolean deleteServiceMember(String serviceId, String userId) {
-        return microServiceRepository.deleteServiceMember(serviceId, userId);
+        return memberRepository.deleteResourceMember(serviceId, userId);
     }
 }
