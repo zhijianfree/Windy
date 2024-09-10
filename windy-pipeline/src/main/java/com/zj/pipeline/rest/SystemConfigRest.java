@@ -1,10 +1,10 @@
 package com.zj.pipeline.rest;
 
 import com.zj.common.exception.ErrorCode;
+import com.zj.common.git.GitAccessInfo;
 import com.zj.common.model.ResponseMeta;
 import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
-import com.zj.domain.entity.vo.GitAccessVo;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
 import com.zj.domain.entity.vo.MavenConfigVo;
 import com.zj.pipeline.service.SystemConfigService;
@@ -62,13 +62,13 @@ public class SystemConfigRest {
 
   @ResponseBody
   @GetMapping("/system/config/git")
-  public ResponseMeta<GitAccessVo> getGitConfig() {
+  public ResponseMeta<GitAccessInfo> getGitConfig() {
     return new ResponseMeta<>(ErrorCode.SUCCESS, systemConfigService.getGitConfig());
   }
 
   @ResponseBody
   @PutMapping("/system/config/git")
-  public ResponseMeta<Boolean> updateGit(@RequestBody GitAccessVo config) {
+  public ResponseMeta<Boolean> updateGit(@RequestBody GitAccessInfo config) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, systemConfigService.updateGitConfig(config));
   }
 

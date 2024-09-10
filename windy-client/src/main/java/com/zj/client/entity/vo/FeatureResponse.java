@@ -1,16 +1,15 @@
 package com.zj.client.entity.vo;
 
 import com.zj.client.handler.feature.executor.compare.CompareResult;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.plugin.loader.ExecuteDetailVo;
+import lombok.Data;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import lombok.Builder;
-import lombok.Data;
 
-@Builder
 @Data
 public class FeatureResponse {
     /**
@@ -48,4 +47,46 @@ public class FeatureResponse {
 
         return invokeStatus && compareStatus;
     }
+
+    public boolean isProcessing(){
+        if (Objects.isNull(executeDetailVo) || Objects.isNull(executeDetailVo.getResponseDetailVo())) {
+            return false;
+        }
+        return Objects.equals(executeDetailVo.getResponseDetailVo().getProcessStatus(),
+                ProcessStatus.RUNNING.getType());
+    }
+
+    public static FeatureResponse builder(){
+        return new FeatureResponse();
+    }
+
+    public FeatureResponse executeDetailVo(ExecuteDetailVo executeDetailVo){
+        this.executeDetailVo = executeDetailVo;
+        return this;
+    }
+
+    public FeatureResponse compareResult(CompareResult compareResult){
+        this.compareResult = compareResult;
+        return this;
+    }
+
+    public FeatureResponse context(Map<String, Object>  context){
+        this.context = context;
+        return this;
+    }
+
+    public FeatureResponse name(String  name){
+        this.name = name;
+        return this;
+    }
+
+    public FeatureResponse pointId(String  pointId){
+        this.pointId = pointId;
+        return this;
+    }
+
+    public FeatureResponse build() {
+        return this;
+    }
+
 }

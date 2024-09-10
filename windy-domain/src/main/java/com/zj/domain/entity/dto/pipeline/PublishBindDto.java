@@ -15,6 +15,8 @@ public class PublishBindDto {
 
   private String serviceId;
 
+  private String message;
+
   private String pipelineId;
 
   private String publishLine;

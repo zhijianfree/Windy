@@ -10,6 +10,7 @@ import com.zj.domain.repository.pipeline.IPublishBindRepository;
 import com.zj.master.entity.vo.MergeMasterContext;
 import com.zj.master.entity.vo.TaskNode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -48,12 +49,13 @@ public class MergeNodeInterceptor implements INodeExecuteInterceptor{
 
     PipelineNodeDto pipelineNode = pipelineNodeRepository.getPipelineNode(taskNode.getNodeId());
     PipelineDto pipeline = pipelineRepository.getPipeline(pipelineNode.getPipelineId());
-    List<PublishBindDto> servicePublishes = publishBindRepository.getServicePublishes(
-        pipeline.getServiceId());
-    List<String> branches = servicePublishes.stream().map(PublishBindDto::getBranch).collect(
-        Collectors.toList());
+    List<PublishBindDto> servicePublishes = publishBindRepository.getServicePublishes(pipeline.getServiceId());
+    List<String> branches = servicePublishes.stream().map(PublishBindDto::getBranch).collect(Collectors.toList());
+    String messages = servicePublishes.stream().map(PublishBindDto::getMessage)
+            .filter(StringUtils::isNotBlank).collect(Collectors.joining("\n"));
     MergeMasterContext requestContext = (MergeMasterContext) taskNode.getRequestContext();
     requestContext.setBranches(branches);
+    requestContext.setMessage(messages);
     taskNode.setRequestContext(requestContext);
   }
 }

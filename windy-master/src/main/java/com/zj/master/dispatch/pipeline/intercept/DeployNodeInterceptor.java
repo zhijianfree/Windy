@@ -5,7 +5,7 @@ import com.zj.common.enums.DeployType;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.model.DeployParams;
 import com.zj.common.model.K8SAccessParams;
-import com.zj.common.model.K8SContainerParams;
+import com.zj.common.model.ServiceConfig;
 import com.zj.domain.entity.dto.log.DispatchLogDto;
 import com.zj.domain.entity.dto.log.SubDispatchLogDto;
 import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
@@ -91,12 +91,12 @@ public class DeployNodeInterceptor implements INodeExecuteInterceptor {
     public DeployParams getDeployParams(String serviceId, String k8sAccess, String imageName) {
         K8SAccessParams k8SAccessParams = JSON.parseObject(k8sAccess, K8SAccessParams.class);
         MicroserviceDto serviceDetail = microServiceRepository.queryServiceDetail(serviceId);
-        K8SContainerParams k8SContainerParams = JSON.parseObject(serviceDetail.getServiceConfig(),
-                K8SContainerParams.class);
-        k8SContainerParams.setImageName(imageName);
+        ServiceConfig serviceConfig = JSON.parseObject(serviceDetail.getServiceConfig(),
+                ServiceConfig.class);
+        serviceConfig.setImageName(imageName);
         DeployParams deployParams = new DeployParams();
         deployParams.setK8SAccessParams(k8SAccessParams);
-        deployParams.setK8SContainerParams(k8SContainerParams);
+        deployParams.setServiceConfig(serviceConfig);
         return deployParams;
     }
 

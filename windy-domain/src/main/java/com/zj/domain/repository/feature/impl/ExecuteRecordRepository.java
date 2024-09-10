@@ -42,8 +42,20 @@ public class ExecuteRecordRepository extends
   @Override
   public boolean saveRecord(ExecuteRecordDto executeRecordDto) {
     ExecuteRecord executeRecord = OrikaUtil.convert(executeRecordDto, ExecuteRecord.class);
+    executeRecord.setCreateTime(System.currentTimeMillis());
     executeRecord.setUpdateTime(System.currentTimeMillis());
     return save(executeRecord);
+  }
+
+  @Override
+  public boolean updateStatusAndResult(ExecuteRecordDto executeRecordDto) {
+    ExecuteRecord executeRecord = new ExecuteRecord();
+    executeRecord.setExecuteRecordId(executeRecordDto.getExecuteRecordId());
+    executeRecord.setStatus(executeRecordDto.getStatus());
+    executeRecord.setExecuteResult(String.valueOf(executeRecordDto.getExecuteResult()));
+    executeRecord.setUpdateTime(System.currentTimeMillis());
+    return update(executeRecord, Wrappers.lambdaUpdate(ExecuteRecord.class).eq(ExecuteRecord::getExecuteRecordId,
+            executeRecordDto.getExecuteRecordId()));
   }
 
   @Override

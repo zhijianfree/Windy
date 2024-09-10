@@ -8,12 +8,16 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.DispatchTaskModel;
 import com.zj.common.monitor.RequestProxy;
 import com.zj.common.uuid.UniqueIdService;
+import com.zj.domain.entity.dto.pipeline.BindBranchDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
 import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
 import com.zj.domain.entity.dto.pipeline.PipelineStageDto;
+import com.zj.domain.entity.dto.service.MicroserviceDto;
 import com.zj.domain.entity.enums.PipelineType;
+import com.zj.domain.repository.pipeline.IBindBranchRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
+import com.zj.domain.repository.service.impl.MicroServiceRepository;
 import com.zj.pipeline.entity.enums.PipelineStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -41,17 +45,21 @@ public class PipelineService {
     private final UniqueIdService uniqueIdService;
     private final IPipelineRepository pipelineRepository;
     private final RequestProxy requestProxy;
+    private final IBindBranchRepository bindBranchRepository;
+    private final MicroServiceRepository microServiceRepository;
 
     public PipelineService(PipelineNodeService pipelineNodeService,
                            PipelineStageService pipelineStageService, PipelineHistoryService pipelineHistoryService,
                            UniqueIdService uniqueIdService, IPipelineRepository pipelineRepository,
-                           RequestProxy requestProxy) {
+                           RequestProxy requestProxy, IBindBranchRepository bindBranchRepository, MicroServiceRepository microServiceRepository) {
         this.pipelineNodeService = pipelineNodeService;
         this.pipelineStageService = pipelineStageService;
         this.pipelineHistoryService = pipelineHistoryService;
         this.uniqueIdService = uniqueIdService;
         this.pipelineRepository = pipelineRepository;
         this.requestProxy = requestProxy;
+        this.bindBranchRepository = bindBranchRepository;
+        this.microServiceRepository = microServiceRepository;
     }
 
     @Transactional
@@ -68,8 +76,7 @@ public class PipelineService {
         }
 
         List<PipelineStageDto> stageList = pipelineDTO.getStageList();
-        List<PipelineStageDto> temp = JSON.parseArray(JSON.toJSONString(stageList),
-                PipelineStageDto.class);
+        List<PipelineStageDto> temp = JSON.parseArray(JSON.toJSONString(stageList), PipelineStageDto.class);
         addOrUpdateNode(pipelineId, stageList);
 
         //删除不存在的节点
@@ -77,8 +84,10 @@ public class PipelineService {
         return true;
     }
 
-    private void deleteNotExistStageAndNodes(PipelineDto oldPipeline,
-                                             List<PipelineStageDto> stageList) {
+    private void deleteNotExistStageAndNodes(PipelineDto oldPipeline, List<PipelineStageDto> stageList) {
+        if (CollectionUtils.isEmpty(stageList)) {
+           return;
+        }
         List<String> nodeIds = stageList.stream().map(PipelineStageDto::getNodes)
                 .flatMap(Collection::stream).filter(Objects::nonNull).map(PipelineNodeDto::getNodeId)
                 .collect(Collectors.toList());
@@ -149,8 +158,11 @@ public class PipelineService {
 
     @Transactional
     public String createPipeline(PipelineDto pipelineDTO) {
-        if (Objects.isNull(pipelineDTO)) {
-            return "";
+        String serviceId = pipelineDTO.getServiceId();
+        MicroserviceDto serviceDetail = microServiceRepository.queryServiceDetail(serviceId);
+        if (Objects.isNull(serviceDetail)) {
+            log.info("can not find service ={}", serviceId);
+            throw new ApiException(ErrorCode.NOT_FOUND_SERVICE);
         }
 
         checkPublishPipelineExist(pipelineDTO);
@@ -165,6 +177,15 @@ public class PipelineService {
 
         AtomicInteger atomicInteger = new AtomicInteger(0);
         pipelineDTO.getStageList().forEach(stageDto -> createNewStage(pipelineId, stageDto, atomicInteger));
+
+        BindBranchDto bindBranchDto = new BindBranchDto();
+        bindBranchDto.setBindId(uniqueIdService.getUniqueId());
+        bindBranchDto.setPipelineId(pipelineId);
+        bindBranchDto.setGitBranch("master");
+        bindBranchDto.setGitUrl(serviceDetail.getGitUrl());
+        bindBranchDto.setIsChoose(true);
+        boolean saveGitBranch = bindBranchRepository.saveGitBranch(bindBranchDto);
+        log.info("save bind git master branch result={}", saveGitBranch);
         return pipelineId;
     }
 

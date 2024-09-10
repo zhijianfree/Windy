@@ -7,7 +7,7 @@ import com.zj.common.enums.DeployType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ExecuteException;
 import com.zj.common.model.K8SAccessParams;
-import com.zj.common.model.K8SContainerParams;
+import com.zj.common.model.ServiceConfig;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.ContainerPort;
@@ -73,7 +73,7 @@ public class K8sDeploy extends AbstractDeployMode<K8sDeployContext> {
             deployK8s(deployContext, client, serviceName);
             loopQueryDeployStatus(deployContext, client, serviceName);
             updateDeployStatus(deployContext.getRecordId(), ProcessStatus.SUCCESS);
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             log.error("deploy k8s instance error", e);
             List<String> errorMsg = ExceptionUtils.getErrorMsg(e);
             updateDeployStatus(deployContext.getRecordId(), ProcessStatus.FAIL, errorMsg);
@@ -95,7 +95,7 @@ public class K8sDeploy extends AbstractDeployMode<K8sDeployContext> {
     }
 
     private void deployNewApp(K8sDeployContext deployContext, KubernetesClient client, String serviceName) {
-        K8SContainerParams containerParams = deployContext.getK8SContainerParams();
+        ServiceConfig containerParams = deployContext.getServiceConfig();
         List<EnvVar> envVars = buildEnvParams(containerParams.getEnvParams());
         //宿主机路径
         List<Volume> volumes = buildVolumes(containerParams.getVolumes());
@@ -137,7 +137,7 @@ public class K8sDeploy extends AbstractDeployMode<K8sDeployContext> {
     public void editDeployment(KubernetesClient client, K8sDeployContext deployContext, Deployment deployment) {
         String appName = deployContext.getServiceName().toLowerCase();
         int index = getContainerIndex(appName, deployment);
-        String imageName = deployContext.getK8SContainerParams().getImageName();
+        String imageName = deployContext.getServiceConfig().getImageName();
         client.apps().deployments().inNamespace(deployContext.getK8SAccessParams().getNamespace())
                 .withName(appName)
                 .edit(deploy ->
@@ -186,15 +186,15 @@ public class K8sDeploy extends AbstractDeployMode<K8sDeployContext> {
         return statusMap.get(recordId);
     }
 
-    private List<EnvVar> buildEnvParams(List<K8SContainerParams.ContainerEnv> envParams) {
+    private List<EnvVar> buildEnvParams(List<ServiceConfig.ContainerEnv> envParams) {
         if (CollectionUtils.isEmpty(envParams)) {
             return Collections.emptyList();
         }
-        return envParams.stream().filter(K8SContainerParams.ContainerEnv::notExistEmpty).map(this::buildEnvItem)
+        return envParams.stream().filter(ServiceConfig.ContainerEnv::notExistEmpty).map(this::buildEnvItem)
                 .collect(Collectors.toList());
     }
 
-    private EnvVar buildEnvItem(K8SContainerParams.ContainerEnv containerEnv) {
+    private EnvVar buildEnvItem(ServiceConfig.ContainerEnv containerEnv) {
         if (containerEnv.isRelated()) {
             return new EnvVarBuilder().withName(containerEnv.getName()).withNewValueFrom()
                     .withNewFieldRef().withFieldPath(containerEnv.getValue()).endFieldRef().endValueFrom()
@@ -204,29 +204,29 @@ public class K8sDeploy extends AbstractDeployMode<K8sDeployContext> {
                 .build();
     }
 
-    private List<VolumeMount> buildVolumeMounts(List<K8SContainerParams.ContainerVolume> volumes) {
+    private List<VolumeMount> buildVolumeMounts(List<ServiceConfig.ContainerVolume> volumes) {
         if (CollectionUtils.isEmpty(volumes)) {
             return Collections.emptyList();
         }
-        return volumes.stream().filter(K8SContainerParams.ContainerVolume::notExistEmpty).map(
+        return volumes.stream().filter(ServiceConfig.ContainerVolume::notExistEmpty).map(
                 volume -> new VolumeMountBuilder().withName(volume.getName())
                         .withMountPath(volume.getVolume()).build()).collect(Collectors.toList());
     }
 
-    private List<Volume> buildVolumes(List<K8SContainerParams.ContainerVolume> volumes) {
+    private List<Volume> buildVolumes(List<ServiceConfig.ContainerVolume> volumes) {
         if (CollectionUtils.isEmpty(volumes)) {
             return Collections.emptyList();
         }
-        return volumes.stream().filter(K8SContainerParams.ContainerVolume::notExistEmpty).map(
+        return volumes.stream().filter(ServiceConfig.ContainerVolume::notExistEmpty).map(
                 volume -> new VolumeBuilder().withName(volume.getName())
                         .withNewHostPath(volume.getHostVolume(), "").build()).collect(Collectors.toList());
     }
 
-    private List<ContainerPort> buildContainerPorts(List<K8SContainerParams.ContainerPort> ports) {
+    private List<ContainerPort> buildContainerPorts(List<ServiceConfig.ContainerPort> ports) {
         if (CollectionUtils.isEmpty(ports)) {
             return Collections.emptyList();
         }
-        return ports.stream().filter(K8SContainerParams.ContainerPort::notExistEmpty).map(
+        return ports.stream().filter(ServiceConfig.ContainerPort::notExistEmpty).map(
                         port -> new ContainerPortBuilder().withContainerPort(port.getPort())
                                 .withHostPort(port.getHostPort()).withProtocol(port.getProtocol()).build())
                 .collect(Collectors.toList());

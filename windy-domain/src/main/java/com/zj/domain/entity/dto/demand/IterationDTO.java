@@ -34,7 +34,15 @@ public class IterationDTO {
    */
   private Integer status;
 
+  /**
+   * 创建迭代用户
+   */
   private String userId;
+
+  /**
+   * 空间ID
+   */
+  private String spaceId;
 
   private Long createTime;
 

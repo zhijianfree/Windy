@@ -34,17 +34,18 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
     public PageSize<DemandDTO> getDemandPage(DemandQuery query) {
         IPage<Demand> pageObj = new Page<>(query.getPage(), query.getPageSize());
         LambdaQueryWrapper<Demand> queryWrapper = Wrappers.lambdaQuery(Demand.class).eq(Demand::getCreator,
-                        query.getCreator()).orderByDesc(Demand::getCreateTime);
+                query.getCreator()).orderByDesc(Demand::getCreateTime);
         Optional.ofNullable(query.getStatus()).ifPresent(status -> queryWrapper.eq(Demand::getStatus, status));
-        if (StringUtils.isNotBlank(query.getSpaceId())){
+        if (StringUtils.isNotBlank(query.getSpaceId())) {
             queryWrapper.eq(Demand::getSpaceId, query.getSpaceId());
         }
-        if (StringUtils.isNotBlank(query.getIterationId())){
+        if (StringUtils.isNotBlank(query.getIterationId())) {
             queryWrapper.eq(Demand::getIterationId, query.getIterationId());
         }
-        if (StringUtils.isNotBlank(query.getName())){
+        if (StringUtils.isNotBlank(query.getName())) {
             queryWrapper.like(Demand::getDemandName, query.getName());
         }
+        queryWrapper.orderByDesc(Demand::getCreateTime);
         IPage<Demand> recordPage = page(pageObj, queryWrapper);
         return convertPageSize(recordPage);
     }
@@ -83,7 +84,9 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
 
     @Override
     public List<DemandDTO> getIterationDemand(String iterationId) {
-        List<Demand> list = list(Wrappers.lambdaUpdate(Demand.class).eq(Demand::getIterationId, iterationId));
+        List<Demand> list =
+                list(Wrappers.lambdaUpdate(Demand.class).eq(Demand::getIterationId, iterationId)
+                        .orderByDesc(Demand::getCreateTime));
         return OrikaUtil.convertList(list, DemandDTO.class);
     }
 

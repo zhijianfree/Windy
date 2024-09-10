@@ -1,7 +1,7 @@
 package com.zj.domain.repository.feature;
 
 import com.zj.domain.entity.dto.feature.ExecuteRecordDto;
-import com.zj.domain.entity.po.feature.ExecuteRecord;
+
 import java.util.List;
 
 /**
@@ -13,6 +13,7 @@ public interface IExecuteRecordRepository {
   List<ExecuteRecordDto> getExecuteRecords(String historyId);
 
   boolean saveRecord(ExecuteRecordDto executeRecord);
+  boolean updateStatusAndResult(ExecuteRecordDto executeRecord);
 
   boolean deleteByHistoryId(String historyId);
 

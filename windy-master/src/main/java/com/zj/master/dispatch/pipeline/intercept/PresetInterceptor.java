@@ -1,14 +1,18 @@
 package com.zj.master.dispatch.pipeline.intercept;
 
+import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.zj.common.enums.GitType;
+import com.zj.common.git.GitAccessInfo;
+import com.zj.common.model.ServiceConfig;
 import com.zj.domain.entity.dto.service.MicroserviceDto;
-import com.zj.domain.entity.vo.GitAccessVo;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.master.entity.vo.TaskNode;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 在流水线每个节点执行都会处理，用来添加全局的参数配置
@@ -40,7 +44,10 @@ public class PresetInterceptor implements INodeExecuteInterceptor {
     }
 
     taskNode.getRequestContext().setGitUrl(service.getGitUrl());
-    GitAccessVo gitAccess = systemConfigRepository.getGitAccess();
+    GitAccessInfo gitAccess = Optional.ofNullable(service.getServiceConfig())
+            .map(config -> JSON.parseObject(config, ServiceConfig.class))
+            .map(ServiceConfig::getGitAccessInfo).filter(access -> StringUtils.isNotBlank(access.getAccessToken()))
+            .orElseGet(systemConfigRepository::getGitAccess);
     GitType gitType = GitType.exchange(gitAccess.getGitType());
     taskNode.getRequestContext().setGitType(gitType.name());
     taskNode.getRequestContext().setTokenName(gitAccess.getOwner());

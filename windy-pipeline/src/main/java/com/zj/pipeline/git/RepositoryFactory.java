@@ -1,15 +1,11 @@
 package com.zj.pipeline.git;
 
-import com.zj.common.enums.GitType;
-import com.zj.common.git.IRepositoryBranch;
-import com.zj.domain.entity.vo.GitAccessVo;
-import com.zj.domain.repository.pipeline.ISystemConfigRepository;
-import org.apache.commons.lang.StringUtils;
+import com.zj.common.git.IGitRepositoryHandler;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author guyuelan
@@ -18,18 +14,14 @@ import java.util.Optional;
 @Component
 public class RepositoryFactory {
 
-  private final IRepositoryBranch repositoryBranch;
+  private final Map<String, IGitRepositoryHandler> repositoryHandlerMap;
 
-  public RepositoryFactory(List<IRepositoryBranch> repositories,
-      ISystemConfigRepository systemConfig) {
-    GitAccessVo gitAccessVo = systemConfig.getGitAccess();
-    String gitType = Optional.ofNullable(gitAccessVo).map(GitAccessVo::getGitType)
-        .filter(StringUtils::isNotBlank).orElse(GitType.Gitlab.name());
-    repositoryBranch = repositories.stream()
-        .filter(repository -> Objects.equals(repository.gitType(), gitType)).findAny().orElse(null);
+  public RepositoryFactory(List<IGitRepositoryHandler> repositories) {
+    repositoryHandlerMap = repositories.stream().collect(Collectors.toMap(IGitRepositoryHandler::gitType,
+            handler -> handler));
   }
 
-  public IRepositoryBranch getRepository() {
-    return repositoryBranch;
+  public IGitRepositoryHandler getRepository(String gitType) {
+    return repositoryHandlerMap.get(gitType);
   }
 }

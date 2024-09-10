@@ -90,6 +90,7 @@ public class ExecuteTemplateRepository extends
     if (!StringUtils.isEmpty(name)) {
       queryWrapper.and(wrapper -> wrapper.like(ExecuteTemplate::getName, name));
     }
+    queryWrapper.orderByDesc(ExecuteTemplate::getCreateTime);
     IPage<ExecuteTemplate> templateIPage = page(page, queryWrapper);
 
     IPage<ExecuteTemplateDto> templateDtoIPage = new Page<>();

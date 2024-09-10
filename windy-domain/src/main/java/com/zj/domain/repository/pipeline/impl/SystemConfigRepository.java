@@ -3,11 +3,11 @@ package com.zj.domain.repository.pipeline.impl;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.git.GitAccessInfo;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
 import com.zj.domain.entity.po.pipeline.SystemConfig;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
-import com.zj.domain.entity.vo.GitAccessVo;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
 import com.zj.domain.entity.vo.MavenConfigVo;
 import com.zj.domain.mapper.pipeline.SystemConfigMapper;
@@ -70,13 +70,13 @@ public class SystemConfigRepository extends ServiceImpl<SystemConfigMapper, Syst
     }
 
     @Override
-    public GitAccessVo getGitAccess() {
-        GitAccessVo gitAccess = getGlobalConfig(GIT_ACCESS, GitAccessVo.class);
-        return Optional.ofNullable(gitAccess).orElse(new GitAccessVo());
+    public GitAccessInfo getGitAccess() {
+        com.zj.common.git.GitAccessInfo gitAccess = getGlobalConfig(GIT_ACCESS, com.zj.common.git.GitAccessInfo.class);
+        return Optional.ofNullable(gitAccess).orElse(new GitAccessInfo());
     }
 
     @Override
-    public boolean updateGitAccess(GitAccessVo gitAccess) {
+    public boolean updateGitAccess(GitAccessInfo gitAccess) {
         return updateGlobalConfig(JSON.toJSONString(gitAccess), GIT_ACCESS);
     }
 

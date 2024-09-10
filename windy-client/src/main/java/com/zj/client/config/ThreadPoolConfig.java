@@ -80,4 +80,15 @@ public class ThreadPoolConfig {
     windyThreadPool.setThreadNamePrefix("feature-");
     return windyThreadPool;
   }
+
+  @Bean("asyncExecuteFeaturePool")
+  public Executor getAsyncExecuteFeaturePool() {
+    WindyThreadPool windyThreadPool = new WindyThreadPool();
+    windyThreadPool.setCorePoolSize(10);
+    windyThreadPool.setMaxPoolSize(40);
+    windyThreadPool.setAllowCoreThreadTimeOut(false);
+    windyThreadPool.setQueueSize(1000);
+    windyThreadPool.setThreadNamePrefix("async-exe-");
+    return windyThreadPool;
+  }
 }

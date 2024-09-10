@@ -25,7 +25,8 @@ public class IterationRepositoryImpl extends ServiceImpl<IterationMapper, Iterat
 
     @Override
     public List<IterationDTO> getIterationList(List<String> iterationIds) {
-        List<Iteration> iterations = list(Wrappers.lambdaQuery(Iteration.class).in(Iteration::getIterationId, iterationIds));
+        List<Iteration> iterations = list(Wrappers.lambdaQuery(Iteration.class).in(Iteration::getIterationId, iterationIds)
+                .orderByDesc(Iteration::getCreateTime));
         return OrikaUtil.convertList(iterations, IterationDTO.class);
     }
 

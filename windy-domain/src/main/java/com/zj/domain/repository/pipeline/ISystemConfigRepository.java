@@ -1,8 +1,8 @@
 package com.zj.domain.repository.pipeline;
 
+import com.zj.common.git.GitAccessInfo;
 import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
-import com.zj.domain.entity.vo.GitAccessVo;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
 import com.zj.domain.entity.vo.MavenConfigVo;
 
@@ -24,8 +24,8 @@ public interface ISystemConfigRepository {
 
   SystemConfigDto getSystemConfig(String configId);
 
-  GitAccessVo getGitAccess();
-  boolean updateGitAccess(GitAccessVo gitAccess);
+  GitAccessInfo getGitAccess();
+  boolean updateGitAccess(GitAccessInfo gitAccess);
 
   ImageRepositoryVo getRepository();
 

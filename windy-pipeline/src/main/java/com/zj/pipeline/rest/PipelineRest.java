@@ -40,8 +40,7 @@ public class PipelineRest {
   @ResponseBody
   @PostMapping("")
   public ResponseMeta<String> createPipeline(@Validated @RequestBody PipelineDto pipelineDTO) {
-    return new ResponseMeta<String>(ErrorCode.SUCCESS,
-        pipelineService.createPipeline(pipelineDTO));
+    return new ResponseMeta<String>(ErrorCode.SUCCESS, pipelineService.createPipeline(pipelineDTO));
   }
 
   @ResponseBody

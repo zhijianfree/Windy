@@ -90,6 +90,4 @@ public class RequestContextBuilder {
     return JSON.parseObject(JSON.toJSONString(configDetail.getParamList()),
         MergeMasterContext.class);
   }
-
-
 }

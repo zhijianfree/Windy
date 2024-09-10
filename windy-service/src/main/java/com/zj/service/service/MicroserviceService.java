@@ -5,8 +5,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.common.auth.IAuthService;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.git.IRepositoryBranch;
-import com.zj.common.model.K8SContainerParams;
+import com.zj.common.git.GitAccessInfo;
+import com.zj.common.git.IGitRepositoryHandler;
+import com.zj.common.model.ServiceConfig;
 import com.zj.common.model.PageSize;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.common.uuid.UniqueIdService;
@@ -15,7 +16,6 @@ import com.zj.domain.entity.dto.feature.TestCaseDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.service.MicroserviceDto;
 import com.zj.domain.entity.po.service.ResourceMember;
-import com.zj.domain.entity.vo.GitAccessVo;
 import com.zj.domain.repository.demand.IMemberRepository;
 import com.zj.domain.repository.feature.ITestCaseRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
@@ -24,7 +24,11 @@ import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.service.entity.ServiceDto;
 import com.zj.domain.entity.dto.service.ResourceMemberDto;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -42,13 +46,13 @@ public class MicroserviceService {
     private final IPipelineRepository pipelineRepository;
     private final IAuthService authService;
     private final ITestCaseRepository testCaseRepository;
-    private final List<IRepositoryBranch> repositoryBranches;
+    private final List<IGitRepositoryHandler> repositoryBranches;
     private final ISystemConfigRepository systemConfig;
     private final IMemberRepository memberRepository;
 
     public MicroserviceService(IMicroServiceRepository microServiceRepository,
                                UniqueIdService uniqueIdService, IAuthService authService,
-                               List<IRepositoryBranch> gitRepositories,
+                               List<IGitRepositoryHandler> gitRepositories,
                                ISystemConfigRepository systemConfig, IPipelineRepository pipelineRepository,
                                ITestCaseRepository testCaseRepository, IMemberRepository memberRepository) {
         this.microServiceRepository = microServiceRepository;
@@ -61,10 +65,9 @@ public class MicroserviceService {
         this.memberRepository = memberRepository;
     }
 
-    private IRepositoryBranch getRepositoryBranch() {
-        GitAccessVo gitAccess = systemConfig.getGitAccess();
+    private IGitRepositoryHandler getRepositoryBranch(String type) {
         return repositoryBranches.stream()
-                .filter(repository -> Objects.equals(repository.gitType(), gitAccess.getGitType()))
+                .filter(repository -> Objects.equals(repository.gitType(), type))
                 .findAny().orElse(null);
     }
 
@@ -86,8 +89,8 @@ public class MicroserviceService {
         List<ServiceDto> microservices = page.getRecords().stream()
                 .map(microservice -> {
                     ServiceDto serviceDto = OrikaUtil.convert(microservice, ServiceDto.class);
-                    serviceDto.setContainerParams(JSON.parseObject(microservice.getServiceConfig(),
-                            K8SContainerParams.class));
+                    serviceDto.setServiceConfig(JSON.parseObject(microservice.getServiceConfig(),
+                            ServiceConfig.class));
                     return serviceDto;
                 })
                 .collect(Collectors.toList());
@@ -98,22 +101,34 @@ public class MicroserviceService {
     }
 
     public String createService(ServiceDto serviceDto) {
-        IRepositoryBranch repositoryBranch = getRepositoryBranch();
+        IGitRepositoryHandler repositoryBranch = getRepositoryBranch(chooseGitType(serviceDto));
         if (Objects.isNull(repositoryBranch)) {
+            log.info("can not find git repository config ={}", serviceDto.getServiceName());
             throw new ApiException(ErrorCode.NOT_FIND_REPO_CONFIG);
         }
 
-        repositoryBranch.checkRepository(serviceDto.getServiceName());
+        GitAccessInfo gitAccessInfo = Optional.ofNullable(serviceDto.getServiceConfig())
+                .map(ServiceConfig::getGitAccessInfo).filter(access -> StringUtils.isNotBlank(access.getAccessToken()))
+                .orElseGet(systemConfig::getGitAccess);
+        repositoryBranch.checkRepository(serviceDto.getServiceName(), gitAccessInfo);
 
         MicroserviceDto microserviceDto = OrikaUtil.convert(serviceDto, MicroserviceDto.class);
-        microserviceDto.setServiceConfig(JSON.toJSONString(serviceDto.getContainerParams()));
+        microserviceDto.setServiceConfig(JSON.toJSONString(serviceDto.getServiceConfig()));
         microserviceDto.setServiceId(uniqueIdService.getUniqueId());
         return microServiceRepository.createService(authService.getCurrentUserId(), microserviceDto);
     }
 
+    private String chooseGitType(ServiceDto serviceDto) {
+        if (Objects.isNull(serviceDto.getServiceConfig()) || Objects.isNull(serviceDto.getServiceConfig().getGitAccessInfo())
+                || StringUtils.isBlank(serviceDto.getServiceConfig().getGitAccessInfo().getAccessToken())) {
+            return systemConfig.getGitAccess().getGitType();
+        }
+        return serviceDto.getServiceConfig().getGitAccessInfo().getGitType();
+    }
+
     public String updateService(ServiceDto update) {
         MicroserviceDto microserviceDto = OrikaUtil.convert(update, MicroserviceDto.class);
-        Optional.ofNullable(update.getContainerParams()).ifPresent(params ->
+        Optional.ofNullable(update.getServiceConfig()).ifPresent(params ->
                 microserviceDto.setServiceConfig(JSON.toJSONString(params)));
         return microServiceRepository.updateService(microserviceDto);
     }

@@ -36,6 +36,7 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
         if (StringUtils.isNotBlank(bugQuery.getName())){
             wrapper.eq(Bug::getBugName, bugQuery.getName());
         }
+        wrapper.orderByDesc(Bug::getCreateTime);
         IPage<Bug> pageQuery = new Page<>(bugQuery.getPage(), bugQuery.getSize());
         return exchangePageSize(pageQuery, wrapper);
     }

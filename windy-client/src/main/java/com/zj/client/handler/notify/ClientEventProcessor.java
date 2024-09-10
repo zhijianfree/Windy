@@ -33,7 +33,7 @@ public class ClientEventProcessor implements IResultEventNotify {
 
   @Override
   public boolean notifyEvent(ResultEvent resultEvent) {
-    log.info("start notify client event={} executeId={}", resultEvent.getExecuteType(),
+    log.info("start notify client event type={} executeId={}", resultEvent.getNotifyType(),
         resultEvent.getExecuteId());
     try {
       return requestProxy.clientNotifyEvent(resultEvent);

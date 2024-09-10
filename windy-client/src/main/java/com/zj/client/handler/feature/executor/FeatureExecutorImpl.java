@@ -74,15 +74,16 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
             Map<String, Object> globalContext = new HashMap<>();
             for (ExecutePoint executePoint : executePoints) {
                 ExecuteRecord executeRecord = new ExecuteRecord();
+                String recordId = uniqueIdService.getUniqueId();
+                executeRecord.setExecuteRecordId(recordId);
                 executeRecord.setHistoryId(historyId);
                 try {
                     //2 使用策略类执行用例
+                    executeContext.setRecordId(recordId);
+                    executeContext.setLogId(featureParam.getLogId());
                     List<FeatureResponse> responses = executeStrategyFactory.execute(executePoint, executeContext);
-                    boolean allSuccess = responses.stream().allMatch(FeatureResponse::isSuccess);
-                    executeRecord.setStatus(allSuccess ? ProcessStatus.SUCCESS.getType()
-                            : ProcessStatus.FAIL.getType());
+                    executeRecord.setStatus(judgeRecordStatus(responses));
                     executeRecord.setExecuteResult(JSON.toJSONString(responses));
-
 
                     Map<String, Object> pointGlobalContext =
                             responses.stream().map(FeatureResponse::getContext).filter(Objects::nonNull).flatMap(map -> map.entrySet().stream())
@@ -107,7 +108,6 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
             }
 
             //4 更新整个用例执行结果
-
             featureHistory.setExecuteStatus(status.get());
             ResultEvent resultEvent = new ResultEvent().executeId(featureParam.getTaskRecordId())
                     .notifyType(NotifyType.UPDATE_FEATURE_HISTORY)
@@ -120,6 +120,15 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
         }, executor);
     }
 
+    public static Integer judgeRecordStatus(List<FeatureResponse> responses) {
+        boolean processing = responses.stream().allMatch(FeatureResponse::isProcessing);
+        if (processing) {
+            return ProcessStatus.RUNNING.getType();
+        }
+        boolean allSuccess = responses.stream().allMatch(FeatureResponse::isSuccess);
+        return allSuccess ? ProcessStatus.SUCCESS.getType() : ProcessStatus.FAIL.getType();
+    }
+
     private void saveRecord(FeatureParam featureParam, ExecutePoint executePoint,
                             ExecuteRecord executeRecord) {
         executeRecord.setExecutePointId(executePoint.getPointId());
@@ -127,10 +136,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
         executeRecord.setExecuteType(executePoint.getExecuteType());
         executeRecord.setCreateTime(System.currentTimeMillis());
         executeRecord.setTestStage(executePoint.getTestStage());
-        String recordId = uniqueIdService.getUniqueId();
-        executeRecord.setExecuteRecordId(recordId);
-
-        ResultEvent resultEvent = new ResultEvent().executeId(recordId)
+        ResultEvent resultEvent = new ResultEvent().executeId(executeRecord.getExecuteRecordId())
                 .notifyType(NotifyType.CREATE_EXECUTE_POINT_RECORD)
                 .masterIP(featureParam.getMasterIp())
                 .clientIp(IpUtils.getLocalIP())
@@ -158,7 +164,9 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
         ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
         executeDetailVo.setErrorMessage(ExceptionUtils.getSimplifyError(e));
         executeDetailVo.setStatus(false);
-        return FeatureResponse.builder()
-                .pointId(executePoint.getPointId()).executeDetailVo(executeDetailVo).build();
+        FeatureResponse featureResponse = new FeatureResponse();
+        featureResponse.setPointId(executePoint.getPointId());
+        featureResponse.setExecuteDetailVo(executeDetailVo);
+        return featureResponse;
     }
 }

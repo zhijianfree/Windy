@@ -7,5 +7,5 @@ public class DeployParams {
 
     private K8SAccessParams k8SAccessParams;
 
-    private K8SContainerParams k8SContainerParams;
+    private ServiceConfig serviceConfig;
 }

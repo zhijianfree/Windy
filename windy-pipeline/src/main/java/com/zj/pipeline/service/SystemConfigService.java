@@ -1,12 +1,12 @@
 package com.zj.pipeline.service;
 
+import com.zj.common.git.GitAccessInfo;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.common.model.ClientCollect;
 import com.zj.common.model.MasterCollect;
 import com.zj.common.monitor.RequestProxy;
 import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
-import com.zj.domain.entity.vo.GitAccessVo;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
 import com.zj.domain.entity.vo.MavenConfigVo;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
@@ -60,12 +60,12 @@ public class SystemConfigService {
     return systemMonitorDto;
   }
 
-  public GitAccessVo getGitConfig() {
+  public GitAccessInfo getGitConfig() {
     return systemConfigRepository.getGitAccess();
   }
 
-  public boolean updateGitConfig(GitAccessVo gitAccessVo) {
-    return systemConfigRepository.updateGitAccess(gitAccessVo);
+  public boolean updateGitConfig(GitAccessInfo gitAccessInfo) {
+    return systemConfigRepository.updateGitAccess(gitAccessInfo);
   }
 
   public ImageRepositoryVo getImageRepository() {

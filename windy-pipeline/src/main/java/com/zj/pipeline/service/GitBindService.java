@@ -1,13 +1,18 @@
 package com.zj.pipeline.service;
 
+import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
+import com.zj.common.git.GitAccessInfo;
+import com.zj.common.model.ServiceConfig;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.pipeline.BindBranchDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.service.MicroserviceDto;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
-import com.zj.common.git.IRepositoryBranch;
+import com.zj.common.git.IGitRepositoryHandler;
+import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.pipeline.git.hook.IGitWebhook;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.pipeline.git.RepositoryFactory;
@@ -34,16 +39,18 @@ public class GitBindService {
   private final RepositoryFactory repositoryFactory;
   private final UniqueIdService uniqueIdService;
   private final IBindBranchRepository gitBindRepository;
+  private final ISystemConfigRepository systemConfigRepository;
   private final Map<String, IGitWebhook> webhookMap;
 
   public GitBindService(IMicroServiceRepository microServiceRepository, PipelineService pipelineService,
-      RepositoryFactory repositoryFactory,
-      UniqueIdService uniqueIdService, IBindBranchRepository gitBindRepository, List<IGitWebhook> webhooks) {
+                        RepositoryFactory repositoryFactory,
+                        UniqueIdService uniqueIdService, IBindBranchRepository gitBindRepository, ISystemConfigRepository systemConfigRepository, List<IGitWebhook> webhooks) {
     this.microServiceRepository = microServiceRepository;
     this.pipelineService = pipelineService;
     this.repositoryFactory = repositoryFactory;
     this.uniqueIdService = uniqueIdService;
     this.gitBindRepository = gitBindRepository;
+    this.systemConfigRepository = systemConfigRepository;
     webhookMap = webhooks.stream().collect(Collectors.toMap(IGitWebhook::platform, webhook -> webhook));
   }
 
@@ -112,8 +119,12 @@ public class GitBindService {
 
 
   public List<String> getServiceBranch(String serviceId) {
-    MicroserviceDto serviceDetail = microServiceRepository.queryServiceDetail(serviceId);
-    IRepositoryBranch repository = repositoryFactory.getRepository();
-    return repository.listBranch(serviceDetail.getServiceName());
+    MicroserviceDto service = microServiceRepository.queryServiceDetail(serviceId);
+    GitAccessInfo gitAccessInfo = Optional.ofNullable(service.getServiceConfig())
+            .map(config -> JSON.parseObject(config, ServiceConfig.class))
+            .map(ServiceConfig::getGitAccessInfo).filter(access -> StringUtils.isNotBlank(access.getAccessToken()))
+            .orElseGet(systemConfigRepository::getGitAccess);
+    IGitRepositoryHandler repository = repositoryFactory.getRepository(gitAccessInfo.getGitType());
+    return repository.listBranch(service.getServiceName(), gitAccessInfo);
   }
 }
