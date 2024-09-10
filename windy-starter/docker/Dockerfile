@@ -8,7 +8,7 @@ COPY ./*.jar /opt/windy-console/
 
 COPY start.sh /opt/windy-console/
 
-WORKDIR /opt/windy-console
+WORKDIR /opt/windy-console/
 
 CMD ["sh","start.sh"]
 
