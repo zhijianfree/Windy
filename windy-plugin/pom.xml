@@ -7,4 +7,10 @@
   <groupId>com.zj</groupId>
   <artifactId>windy-plugin</artifactId>
   <version>1.0.0</version>
+
+  <properties>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.release>1.8</maven.compiler.release>
+  </properties>
 </project>
