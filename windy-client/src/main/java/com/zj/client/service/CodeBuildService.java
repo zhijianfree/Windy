@@ -92,7 +92,9 @@ public class CodeBuildService {
         String remoteImage = "";
         if (checkImageRepository(codeBuildParam)) {
           updateProcessMsg(taskNode, "开始构建docker镜像");
-          remoteImage = startBuildDocker(serviceName, pipelineWorkspace, codeBuildParam);
+          String dockerFilePath = new File(pomPath).getParentFile().getPath() + File.separator + "docker" + File.separator +
+                  "Dockerfile";
+          remoteImage = startBuildDocker(serviceName, dockerFilePath, codeBuildParam);
           updateProcessMsg(taskNode, "构建docker镜像完成 镜像地址: " + remoteImage);
         }
 
@@ -141,11 +143,9 @@ public class CodeBuildService {
     PipelineEventFactory.sendNotifyEvent(statusEvent);
   }
 
-  private String startBuildDocker(String serviceName, String pipelineWorkspace,
+  private String startBuildDocker(String serviceName, String dockerFilePath,
       CodeBuildParamDto codeBuildParamDto) throws InterruptedException {
     String dateNow = dateFormat.format(new Date());
-    String dockerFilePath =
-        pipelineWorkspace + File.separator + "docker" + File.separator + "Dockerfile";
     File dockerFile = new File(dockerFilePath);
     return buildDocker(serviceName, dateNow, dockerFile, codeBuildParamDto);
   }
@@ -186,8 +186,7 @@ public class CodeBuildService {
   }
 
   public String buildDocker(String imageName, String version, File dockerfile,
-      CodeBuildParamDto param)
-      throws InterruptedException {
+      CodeBuildParamDto param) throws InterruptedException {
     DockerClient dockerClient = DockerClientBuilder.getInstance().build();
     BuildImageResultCallback callback = new BuildImageResultCallback() {
       @Override

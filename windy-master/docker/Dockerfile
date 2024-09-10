@@ -1,12 +1,12 @@
 FROM openjdk:8
 
-RUN mkdir -p /opt/windy
+RUN mkdir -p /opt/windy-master
 
-COPY ./*.jar /opt/windy
+COPY ./*.jar /opt/windy-master/
 
-COPY start.sh /opt/windy
+COPY start.sh /opt/windy-master/
 
-WORKDIR /opt/windy
+WORKDIR /opt/windy-master
 
 CMD ["sh","start.sh"]
 
