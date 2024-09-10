@@ -62,14 +62,14 @@ public class MavenOperator {
     ideaInvoker.setMavenHome(new File(mavenDir));
     ideaInvoker.setOutputHandler(outputHandler);
     InvocationResult ideaResult = ideaInvoker.execute(ideaRequest);
-    copyJar2DeployDir(pomFile, servicePath);
+    copyJar2DeployDir(pomFile);
     return ideaResult.getExitCode();
   }
 
   /**
    * 将jar文件拷贝到部署目录
    */
-  private void copyJar2DeployDir(File pomFile, String servicePath) throws IOException {
+  private void copyJar2DeployDir(File pomFile) throws IOException {
     Collection<File> files = FileUtils.listFiles(pomFile.getParentFile(), new String[]{"jar"} ,true);
     File jarFile = files.stream().findFirst().orElse(null);
     if (Objects.isNull(jarFile)) {
@@ -77,13 +77,13 @@ public class MavenOperator {
     }
 
     //ssh镜像部署
-    String destDir = servicePath + File.separator + DEPLOY;
+    String destDir = pomFile.getParentFile().getPath() + File.separator + DEPLOY;
     File dir = new File(destDir);
     createSHFileIfNeed(jarFile.getName(), destDir, dir);
     FileUtils.copyToDirectory(jarFile, dir);
 
     //docker镜像部署
-    String dockerDir = servicePath + File.separator + DOCKER;
+    String dockerDir = pomFile.getParentFile().getPath() + File.separator + DOCKER;
     File dockerDirFile = new File(dockerDir);
     createSHFileIfNeed(jarFile.getName(), dockerDir, dockerDirFile);
     FileUtils.copyToDirectory(jarFile, dockerDirFile);

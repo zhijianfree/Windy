@@ -1,7 +1,7 @@
 #!/bin/bash
 
-service="JDevops"
-JAR_NAME="devops-starter-1.0-SNAPSHOT.jar"
+service="Windy"
+JAR_NAME="*.jar"
 
 SYSTEM_CACHE_SIZE=$(awk '($1 == "MemTotal:"){print $2}' /proc/meminfo)
 echo "$SYSTEM_CACHE_SIZE"
