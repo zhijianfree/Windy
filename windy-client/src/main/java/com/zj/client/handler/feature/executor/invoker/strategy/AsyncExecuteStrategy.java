@@ -1,7 +1,6 @@
 package com.zj.client.handler.feature.executor.invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.client.entity.enuns.ExecutePointType;
 import com.zj.client.entity.vo.ExecutePoint;
 import com.zj.client.entity.vo.ExecuteRecord;
 import com.zj.client.entity.vo.FeatureResponse;
@@ -14,6 +13,7 @@ import com.zj.client.handler.notify.IResultEventNotify;
 import com.zj.client.utils.ExceptionUtils;
 import com.zj.common.enums.NotifyType;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.enums.TemplateType;
 import com.zj.common.feature.ExecutePointDto;
 import com.zj.common.feature.ExecutorUnit;
 import com.zj.common.model.ResultEvent;
@@ -50,8 +50,8 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy {
 
 
     @Override
-    public List<ExecutePointType> getType() {
-        return Collections.singletonList(ExecutePointType.TREAD);
+    public List<TemplateType> getType() {
+        return Collections.singletonList(TemplateType.THREAD);
     }
 
     @Override
@@ -59,10 +59,10 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy {
         log.info("start execute AsyncExecuteStrategy context={}", JSON.toJSONString(executeContext.toMap()));
         ExecutorUnit executorUnit = JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit.class);
         String timeout = executorUnit.getMethod();
+        List<ExecutePointDto> executePoints = executorUnit.getExecutePoints();
         executor.execute(() ->{
             CountDownLatch countDownLatch = new CountDownLatch(1);
             CompletableFuture.runAsync(() -> {
-                List<ExecutePointDto> executePoints = executorUnit.getExecutePoints();
                 List<FeatureResponse> responses = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(executePoints)){
                     responses = executePoints.stream().map(executePointDto -> {
@@ -86,14 +86,17 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy {
             }
         });
 
-
-        ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
-        executeDetailVo.addRequestInfo("timeout", timeout);
-        executeDetailVo.setErrorMessage("异步任务执行中");
-        executeDetailVo.getResponseDetailVo().setProcessStatus(ProcessStatus.RUNNING.getType());
-        FeatureResponse featureResponse = new FeatureResponse();
-        featureResponse.setExecuteDetailVo(executeDetailVo);
-        return Collections.singletonList(featureResponse);
+        return executePoints.stream().map(point -> {
+            ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
+            executeDetailVo.addRequestInfo("timeout", timeout);
+            executeDetailVo.setErrorMessage("异步任务执行中");
+            executeDetailVo.getResponseDetailVo().setProcessStatus(ProcessStatus.RUNNING.getType());
+            FeatureResponse featureResponse = new FeatureResponse();
+            featureResponse.setExecuteDetailVo(executeDetailVo);
+            featureResponse.setStatus(ProcessStatus.RUNNING.getType());
+            featureResponse.setName(point.getExecutorUnit().getName());
+            return featureResponse;
+        }).collect(Collectors.toList());
     }
 
     private void notifyError(ExecuteContext executeContext, String errorMessage, String timeout) {
@@ -103,6 +106,7 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy {
         executeDetailVo.setStatus(false);
         FeatureResponse featureResponse = new FeatureResponse();
         featureResponse.setExecuteDetailVo(executeDetailVo);
+        featureResponse.setStatus(ProcessStatus.FAIL.getType());
         notifyAsyncRecordResult(executeContext, Collections.singletonList(featureResponse));
     }
 

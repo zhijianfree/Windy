@@ -1,4 +1,4 @@
-package com.zj.master.notify;
+package com.zj.master.notify.event;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.ExecuteType;
@@ -9,6 +9,7 @@ import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.master.dispatch.pipeline.PipelineExecuteProxy;
+import com.zj.master.notify.INotifyEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

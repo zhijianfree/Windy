@@ -50,7 +50,6 @@ public class MavenOperator {
 
   public Integer build(String pomPath, String servicePath, InvocationOutputHandler outputHandler)
       throws IOException, MavenInvocationException {
-    File pomFile = new File(pomPath);
     InvocationRequest ideaRequest = new DefaultInvocationRequest();
     ideaRequest.setBaseDirectory(new File(servicePath));
     ideaRequest.setAlsoMakeDependents(true);
@@ -62,6 +61,7 @@ public class MavenOperator {
     ideaInvoker.setMavenHome(new File(mavenDir));
     ideaInvoker.setOutputHandler(outputHandler);
     InvocationResult ideaResult = ideaInvoker.execute(ideaRequest);
+    File pomFile = new File(pomPath);
     copyJar2DeployDir(pomFile);
     return ideaResult.getExitCode();
   }

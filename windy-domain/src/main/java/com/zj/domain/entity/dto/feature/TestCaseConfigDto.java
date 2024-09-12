@@ -9,8 +9,6 @@ import lombok.Data;
 @Data
 public class TestCaseConfigDto {
 
-  private Long id;
-
   private String configId;
 
   /**

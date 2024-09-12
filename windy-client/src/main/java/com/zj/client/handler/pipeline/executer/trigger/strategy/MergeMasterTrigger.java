@@ -24,16 +24,12 @@ import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteRefUpdate.Status;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -119,7 +115,8 @@ public class MergeMasterTrigger implements INodeTrigger {
         try {
             String date = dateFormat.format(new Date());
             git.tag().setName(date + mergeRequest.getTagName()).setMessage(mergeRequest.getMessage()).call();
-            git.push().setPushTags().call();
+            git.push().setCredentialsProvider(getCredentialsProvider(mergeRequest.getTokenName(),
+                    mergeRequest.getToken())).setPushTags().call();
         } catch (Exception e) {
             log.info("create code tag error", e);
         }

@@ -83,8 +83,10 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
     }
 
     //6 返回执行状态
-    return FeatureResponse.builder().context(globalContext).name(executorUnit.getName()).pointId(executePoint.getPointId())
-        .executeDetailVo(executeDetailVo).compareResult(compareResult).build();
+    FeatureResponse response = FeatureResponse.builder().context(globalContext).name(executorUnit.getName()).pointId(executePoint.getPointId())
+            .executeDetailVo(executeDetailVo).compareResult(compareResult).build();
+    response.setStatus(response.getExecuteStatus());
+    return response;
   }
 
   public static ExecutePoint toExecutePoint(ExecutePointDto dto) {

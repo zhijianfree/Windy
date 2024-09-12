@@ -17,5 +17,7 @@ public interface ICodeChangeRepository {
 
   List<CodeChangeDto> getServiceChanges(String serviceId);
 
-  Boolean deleteCodeChange(String codeChangeId);
+  boolean deleteCodeChange(String codeChangeId);
+
+  boolean batchDeleteCodeChange(List<String> codeChangeIds);
 }

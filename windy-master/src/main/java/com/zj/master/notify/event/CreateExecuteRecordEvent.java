@@ -1,10 +1,11 @@
-package com.zj.master.notify;
+package com.zj.master.notify.event;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.NotifyType;
 import com.zj.common.model.ResultEvent;
 import com.zj.domain.entity.dto.feature.ExecuteRecordDto;
 import com.zj.domain.repository.feature.IExecuteRecordRepository;
+import com.zj.master.notify.INotifyEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -14,17 +15,17 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class UpdateRecordNotifyEvent implements INotifyEvent {
+public class CreateExecuteRecordEvent implements INotifyEvent {
 
   private final IExecuteRecordRepository executeRecordRepository;
 
-  public UpdateRecordNotifyEvent(IExecuteRecordRepository executeRecordRepository) {
+  public CreateExecuteRecordEvent(IExecuteRecordRepository executeRecordRepository) {
     this.executeRecordRepository = executeRecordRepository;
   }
 
   @Override
   public NotifyType type() {
-    return NotifyType.UPDATE_EXECUTE_POINT_RECORD;
+    return NotifyType.CREATE_EXECUTE_POINT_RECORD;
   }
 
   @Override
@@ -33,6 +34,7 @@ public class UpdateRecordNotifyEvent implements INotifyEvent {
         JSON.toJSONString(resultEvent.getParams()));
     ExecuteRecordDto executeRecordDto = JSON.parseObject(JSON.toJSONString(resultEvent.getParams()),
         ExecuteRecordDto.class);
-    return executeRecordRepository.updateStatusAndResult(executeRecordDto);
+
+    return executeRecordRepository.saveRecord(executeRecordDto);
   }
 }

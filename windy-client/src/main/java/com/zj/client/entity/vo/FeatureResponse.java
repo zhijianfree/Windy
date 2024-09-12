@@ -34,6 +34,8 @@ public class FeatureResponse {
      */
     private String pointId;
 
+    private Integer status;
+
     public boolean isSuccess() {
         boolean invokeStatus = true;
         if (Objects.nonNull(executeDetailVo)) {
@@ -89,4 +91,10 @@ public class FeatureResponse {
         return this;
     }
 
+    public Integer getExecuteStatus() {
+        if (isProcessing()){
+            return ProcessStatus.RUNNING.getType();
+        }
+        return isSuccess() ? ProcessStatus.SUCCESS.getType(): ProcessStatus.FAIL.getType();
+    }
 }

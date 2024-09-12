@@ -1,4 +1,4 @@
-package com.zj.master.notify;
+package com.zj.master.notify.event;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.NotifyType;
@@ -8,6 +8,7 @@ import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.master.dispatch.task.FeatureExecuteProxy;
+import com.zj.master.notify.INotifyEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

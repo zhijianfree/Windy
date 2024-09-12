@@ -19,5 +19,7 @@ public interface IPublishBindRepository {
 
   PublishBindDto getServiceBranch(String serviceId, String gitBranch);
 
-  boolean deletePublishLine(String masterLineId);
+  boolean deletePipelinePublishes(String masterLineId);
+
+    List<PublishBindDto> getPipelinePublishes(String pipelineId);
 }

@@ -1,21 +1,22 @@
 package com.zj.client.handler.feature.executor.invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.common.feature.ExecutePointDto;
-import com.zj.client.entity.enuns.ExecutePointType;
 import com.zj.client.entity.vo.ExecutePoint;
 import com.zj.client.entity.vo.FeatureResponse;
 import com.zj.client.handler.feature.executor.compare.CompareHandler;
-import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
 import com.zj.client.handler.feature.executor.interceptor.InterceptorProxy;
+import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
 import com.zj.client.handler.feature.executor.vo.ExecuteContext;
+import com.zj.common.enums.TemplateType;
+import com.zj.common.feature.ExecutePointDto;
 import com.zj.common.feature.ExecutorUnit;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /**
  * @author guyuelan
@@ -32,8 +33,8 @@ public class ForExecuteStrategy extends BaseExecuteStrategy{
   }
 
   @Override
-  public List<ExecutePointType> getType() {
-    return Collections.singletonList(ExecutePointType.FOR);
+  public List<TemplateType> getType() {
+    return Collections.singletonList(TemplateType.FOR);
   }
 
   @Override
