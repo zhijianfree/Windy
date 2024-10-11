@@ -3,6 +3,7 @@ package com.zj.domain.entity.dto.pipeline;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author guyuelan
@@ -31,17 +32,38 @@ public class PipelineActionDto {
   private String description;
 
   /**
-   * 执行请求url
+   * 请求的header
+   */
+  private Map<String, String> headers;
+
+  /**
+   * 触发执行请求url
    */
   private String actionUrl;
+
+  /**
+   * 触发任务的参数列表
+   */
   private List<ActionParam> paramList;
+
+  /**
+   * 查询任务状态地址
+   */
   private String queryUrl;
+
+  private CompareResult loopExpression;
+
+  /**
+   * 查询结果状态比较逻辑
+   */
   private List<CompareResult> compareResults;
 
   /**
    * 节点执行方式
    */
   private String executeType;
+
   private Long createTime;
+
   private Long updateTime;
 }

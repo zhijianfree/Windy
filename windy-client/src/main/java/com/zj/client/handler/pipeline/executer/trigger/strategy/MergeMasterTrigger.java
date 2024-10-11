@@ -52,7 +52,7 @@ public class MergeMasterTrigger implements INodeTrigger {
     public static final String ORIGIN = "origin";
     public static final String MERGER_ERROR_TIPS = "merger error, find conflict files: ";
     public static final String REFS_HEADS = "refs/heads/";
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-");
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("-yyyy-MM-dd");
     private final IGitProcessor gitProcessor;
     private final GlobalEnvConfig globalEnvConfig;
     private final Map<String, MergeStatus> statusMap = new ConcurrentHashMap<>();
@@ -114,7 +114,7 @@ public class MergeMasterTrigger implements INodeTrigger {
         log.info("start create tag ={}", mergeRequest.getTagName());
         try {
             String date = dateFormat.format(new Date());
-            git.tag().setName(date + mergeRequest.getTagName()).setMessage(mergeRequest.getMessage()).call();
+            git.tag().setName( mergeRequest.getTagName() + date).setMessage(mergeRequest.getMessage()).call();
             git.push().setCredentialsProvider(getCredentialsProvider(mergeRequest.getTokenName(),
                     mergeRequest.getToken())).setPushTags().call();
         } catch (Exception e) {
@@ -150,6 +150,7 @@ public class MergeMasterTrigger implements INodeTrigger {
                 pushResult -> pushResult.getRemoteUpdates().stream()
                         .anyMatch(remoteRefUpdate -> Objects.equals(remoteRefUpdate.getStatus(), Status.OK)));
         if (!pushStatus) {
+            log.info("push remote result={}", JSON.toJSONString(results));
             throw new ExecuteException(ErrorCode.MERGE_CODE_ERROR);
         }
     }

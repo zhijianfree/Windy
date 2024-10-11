@@ -14,6 +14,8 @@ public class RefreshContext {
 
   private String url;
 
+  private CompareInfo loopExpression;
+
   private Map<String, String> headers;
 
   private List<CompareInfo> compareConfig;

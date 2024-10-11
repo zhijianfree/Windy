@@ -19,8 +19,6 @@ public class PublishBindDto {
 
   private String pipelineId;
 
-  private String publishLine;
-
   private Integer status;
 
   private Long createTime;

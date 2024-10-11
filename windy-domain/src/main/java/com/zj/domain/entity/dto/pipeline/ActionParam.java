@@ -10,6 +10,7 @@ import lombok.Data;
 public class ActionParam {
   private String name;
   private String description;
+  private String position;
   private String type;
   private String value;
 }

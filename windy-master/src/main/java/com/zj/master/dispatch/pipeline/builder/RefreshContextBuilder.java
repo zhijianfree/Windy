@@ -30,12 +30,13 @@ public class RefreshContextBuilder {
     PipelineActionDto action = actionDetail.getAction();
     ConfigDetail configDetail = actionDetail.getConfigDetail();
     return RefreshContext.builder().url(action.getQueryUrl())
-        .compareConfig(configDetail.getCompareInfo()).headers(new HashMap<>()).build();
+            .compareConfig(configDetail.getCompareInfo()).loopExpression(action.getLoopExpression())
+            .headers(action.getHeaders()).build();
   }
 
   private static RefreshContext buildTestContext(ActionDetail actionDetail) {
     ConfigDetail configDetail = actionDetail.getConfigDetail();
     return RefreshContext.builder().compareConfig(configDetail.getCompareInfo())
-        .headers(new HashMap<>()).build();
+        .headers(actionDetail.getAction().getHeaders()).build();
   }
 }

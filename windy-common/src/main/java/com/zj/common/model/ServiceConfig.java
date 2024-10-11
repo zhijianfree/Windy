@@ -33,6 +33,11 @@ public class ServiceConfig {
     private NodeStrategy nodeStrategy;
 
     /**
+     * 应用名称
+     */
+    private String appName;
+
+    /**
      * 部署的镜像地址
      */
     private String imageName;

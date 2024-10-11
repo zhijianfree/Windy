@@ -2,6 +2,7 @@ package com.zj.auth.service;
 
 import com.zj.auth.entity.LoginResult;
 import com.zj.auth.entity.LoginUser;
+import com.zj.auth.entity.UpdatePassword;
 import com.zj.auth.entity.UserSession;
 import com.zj.common.auth.IAuthService;
 import com.zj.common.exception.ApiException;
@@ -19,11 +20,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
 public class UserService {
 
+    public static final String DEFAULT_PASSWORD = "123456";
     private final TokenHolder tokenHolder;
     private final AuthenticationManager authenticationManager;
     private final IAuthService authService;
@@ -86,5 +89,30 @@ public class UserService {
 
     public List<UserDto> getUserByName(String name) {
         return userRepository.fuzzyQueryUserName(name);
+    }
+
+    public Boolean updatePassword(String userId, UpdatePassword updatePassword) {
+        UserDto user = getUser(userId);
+        if (Objects.isNull(user)) {
+            log.info("user id not find = {}", userId);
+            throw new ApiException(ErrorCode.USER_NOT_FIND);
+        }
+
+        if (!Objects.equals(user.getPassword(), updatePassword.getOldPassword())) {
+            log.info("user old password not match ={}", userId);
+            throw new ApiException(ErrorCode.USER_PASSWORD_ERROR);
+        }
+        user.setPassword(updatePassword.getNewPassword());
+        return userRepository.updateUser(user);
+    }
+
+    public Boolean resetPassword(String userId) {
+        UserDto user = getUser(userId);
+        if (Objects.isNull(user)) {
+            log.info("user id not find = {}", userId);
+            throw new ApiException(ErrorCode.USER_NOT_FIND);
+        }
+        user.setPassword(DEFAULT_PASSWORD);
+        return userRepository.updateUser(user);
     }
 }

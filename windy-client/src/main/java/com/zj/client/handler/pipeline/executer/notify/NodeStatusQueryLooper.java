@@ -14,6 +14,7 @@ import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.common.enums.ProcessStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -74,7 +75,7 @@ public class NodeStatusQueryLooper implements Runnable {
       try {
         INodeTrigger remoteInvoker = remoteInvokerMap.get(node.getExecuteType());
         QueryResponseModel queryResponse = remoteInvoker.queryStatus(node.getRefreshContext(), node);
-        log.info("get query status result={}", queryResponse);
+        log.info("get query status result={}", JSON.toJSONString(queryResponse));
         if (Objects.isNull(queryResponse)) {
           handleDefaultError(node);
           return;
@@ -154,6 +155,9 @@ public class NodeStatusQueryLooper implements Runnable {
   }
 
   private List<String> exchangeTips(Map<String, Object> response, CompareInfo compareInfo) {
+    if (MapUtils.isEmpty(response)) {
+      return Collections.emptyList();
+    }
     String desc = String.format(DESCRIPTION_FORMAT, compareInfo.getCompareKey(),
         compareInfo.getDescription());
     String expectDesc = String.format(EXPECT_VALUE_FORMAT, compareInfo.getValue());

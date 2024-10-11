@@ -12,11 +12,11 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class DefaultMemoryCache implements ISessionCache{
 
-    Cache<String, UserSession> memoryCache;
+    private final Cache<String, UserSession> memoryCache;
 
     public DefaultMemoryCache(Integer tokenExpire) {
         memoryCache = CacheBuilder.newBuilder()
-                .expireAfterWrite(tokenExpire, TimeUnit.SECONDS)
+                .expireAfterAccess(tokenExpire, TimeUnit.SECONDS)
                 .build();
     }
 

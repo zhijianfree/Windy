@@ -47,11 +47,6 @@ public class PublishService {
       throw new ApiException(ErrorCode.SERVICE_BRANCH_PUBLISH_EXIST);
     }
 
-    //设置关联服务的发布流水线
-    PipelineDto publishPipeline = pipelineRepository.getPublishPipeline(
-        publishBindDto.getServiceId());
-    publishBindDto.setPublishLine(publishPipeline.getPipelineId());
-
     publishBindDto.setBranch(bindBranch.getGitBranch());
     publishBindDto.setPublishId(uniqueIdService.getUniqueId());
     return publishBindRepository.createPublish(publishBindDto);

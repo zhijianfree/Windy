@@ -2,6 +2,7 @@ package com.zj.auth.rest;
 
 import com.zj.auth.entity.LoginResult;
 import com.zj.auth.entity.LoginUser;
+import com.zj.auth.entity.UpdatePassword;
 import com.zj.auth.service.UserService;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.PageSize;
@@ -42,6 +43,17 @@ public class UserRest {
     @PutMapping("/users/{userId}")
     public ResponseMeta<Boolean> updateUser(@PathVariable("userId") String userId, @RequestBody UserDto userDto) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, userService.updateUser(userId, userDto));
+    }
+
+    @PutMapping("/users/{userId}/reset")
+    public ResponseMeta<Boolean> resetPassword(@PathVariable("userId") String userId) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, userService.resetPassword(userId));
+    }
+
+    @PutMapping("/users/{userId}/password")
+    public ResponseMeta<Boolean> updatePassword(@PathVariable("userId") String userId,
+                                               @RequestBody UpdatePassword updatePassword) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, userService.updatePassword(userId, updatePassword));
     }
 
     @DeleteMapping("/users/{userId}")

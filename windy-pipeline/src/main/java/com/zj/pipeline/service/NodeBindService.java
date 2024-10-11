@@ -46,19 +46,20 @@ public class NodeBindService {
   @Transactional
   public Boolean updateNode(NodeBindDto nodeBindDto) {
     boolean result = nodeBindRepository.updateNode(nodeBindDto);
-    List<PipelineAction> actions = actionService.getActionsByNodeId(nodeBindDto.getNodeId());
+    List<PipelineActionDto> actions = actionService.getActionsByNodeId(nodeBindDto.getNodeId());
     if (CollectionUtils.isEmpty(actions)) {
       return batchUpdateNodeId(nodeBindDto.getNodeId(), nodeBindDto.getExecutors());
     }
 
-    List<String> oldList = actions.stream().map(PipelineAction::getActionId)
+    List<String> oldList = actions.stream().map(PipelineActionDto::getActionId)
         .collect(Collectors.toList());
 
     List<String> removeList = oldList.stream()
         .filter(actionId -> !nodeBindDto.getExecutors().contains(actionId))
         .collect(Collectors.toList());
     if (!CollectionUtils.isEmpty(removeList)) {
-      actionService.batchDelete(removeList);
+      boolean removeResult = actionService.batchDelete(removeList);
+      log.info("delete action list result={}", removeResult);
     }
 
     List<String> newList = nodeBindDto.getExecutors().stream()
@@ -91,9 +92,7 @@ public class NodeBindService {
   }
 
   public List<PipelineActionDto> getNodeExecutors(String nodeId) {
-    List<PipelineAction> actions = actionService.getActionsByNodeId(nodeId);
-    return actions.stream().map(PipelineActionService::toPipelineActionDto)
-        .collect(Collectors.toList());
+    return actionService.getActionsByNodeId(nodeId);
   }
 
   public List<NodeBindDto> getAllNodes() {

@@ -6,6 +6,7 @@ import com.zj.common.enums.ApiType;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.service.ServiceApiDto;
 import com.zj.domain.repository.service.IServiceApiRepository;
+import com.zj.plugin.loader.ParamValueType;
 import com.zj.service.entity.ApiRequestVariable;
 import com.zj.service.entity.ApiResponse;
 import com.zj.service.entity.YapiImportApi;
@@ -45,6 +46,8 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
         variableMap.put("integer", "Integer");
         variableMap.put("number", "Long");
         variableMap.put("boolean", "Boolean");
+        variableMap.put("object", "Object");
+        variableMap.put("array", "Array");
     }
 
     @Override
@@ -152,23 +155,13 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
             log.info("api name={}", apiModel.getTitle());
             if (Objects.nonNull(jsonObject) && Objects.nonNull(jsonObject.getJSONObject(PROPERTIES_KEY))) {
                 JSONObject properties = jsonObject.getJSONObject(PROPERTIES_KEY);
-                List<ApiRequestVariable> bodyRequests = properties.entrySet().stream().map(entry -> {
-                    ApiRequestVariable apiRequestVariable = new ApiRequestVariable();
-                    apiRequestVariable.setParamKey(entry.getKey());
-
-                    JSONObject typeJSON = JSON.parseObject(JSON.toJSONString(entry.getValue()),
-                            JSONObject.class);
-                    apiRequestVariable.setRequired(requirdList.contains(entry.getKey()));
-                    apiRequestVariable.setType(typeJSON.getString("type"));
-                    apiRequestVariable.setPosition("Body");
-                    return apiRequestVariable;
-                }).collect(Collectors.toList());
+                List<ApiRequestVariable> bodyRequests = convertProperties(properties, requirdList);
                 apiRequestVariables.addAll(bodyRequests);
             }
             serviceApi.setRequestParams(JSON.toJSONString(apiRequestVariables));
 
             JSONObject responseObject = JSON.parseObject(apiModel.getResBody());
-            if (Objects.nonNull(responseObject)) {
+            if (Objects.nonNull(responseObject) && Objects.nonNull(responseObject.getJSONObject(PROPERTIES_KEY))) {
                 JSONObject resProperties = responseObject.getJSONObject(PROPERTIES_KEY);
                 List<ApiResponse> apiResponses = resProperties.entrySet().stream().map(entry -> {
                     ApiResponse apiResponse = new ApiResponse();
@@ -181,9 +174,45 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
             }
             return saveOrUpdateApi(apiModel.getTitle(), serviceExistApi, serviceApi) ? serviceApi : null;
         } catch (Exception e) {
-            log.info("import api error");
+            log.info("import api error", e);
         }
         return null;
+    }
+
+    private List<ApiRequestVariable> convertProperties(JSONObject properties, List<String> requirdList) {
+        return properties.entrySet().stream().map(entry -> {
+            ApiRequestVariable apiRequestVariable = new ApiRequestVariable();
+            apiRequestVariable.setParamKey(entry.getKey());
+            JSONObject typeJSON = JSON.parseObject(JSON.toJSONString(entry.getValue()),
+                    JSONObject.class);
+            apiRequestVariable.setRequired(requirdList.contains(entry.getKey()));
+            String type = convertVariableType(typeJSON.getString("type"));
+            apiRequestVariable.setType(type);
+            apiRequestVariable.setPosition("Body");
+
+            if (Objects.equals(type, ParamValueType.Object.name())) {
+                JSONObject subProperties = typeJSON.getJSONObject(PROPERTIES_KEY);
+                List<String> subRequirdList =
+                        Optional.of(typeJSON).map(json -> JSON.parseArray(JSON.toJSONString(json.getJSONArray(
+                        "required")), String.class)).orElseGet(Collections::emptyList);
+                List<ApiRequestVariable> apiRequestVariables = convertProperties(subProperties, subRequirdList);
+                apiRequestVariable.setChildren(apiRequestVariables);
+            }
+
+            if (Objects.equals(type, ParamValueType.Array.name())) {
+                JSONObject item = typeJSON.getJSONObject("items");
+                String itemType = convertVariableType(item.getString("type"));
+                if (Objects.equals(itemType,  ParamValueType.Object.name())){
+                    List<String> subRequirdList =
+                            Optional.of(item).map(json -> JSON.parseArray(JSON.toJSONString(json.getJSONArray(
+                                    "required")), String.class)).orElseGet(Collections::emptyList);
+                    JSONObject subProperties = item.getJSONObject(PROPERTIES_KEY);
+                    List<ApiRequestVariable> apiRequestVariables = convertProperties(subProperties, subRequirdList);
+                    apiRequestVariable.setChildren(apiRequestVariables);
+                }
+            }
+            return apiRequestVariable;
+        }).collect(Collectors.toList());
     }
 
     private String convertVariableType(String type) {

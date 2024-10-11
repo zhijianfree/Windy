@@ -52,24 +52,10 @@ public class PipelineActionService {
   }
 
   public PageSize<PipelineActionDto> getActions(Integer page, Integer size, String name) {
-    IPage<PipelineAction> actionPage = pipelineActionRepository.getActions(page, size, name);
-    List<PipelineActionDto> actionList = actionPage.getRecords().stream()
-        .map(PipelineActionService::toPipelineActionDto).collect(Collectors.toList());
-
-    PageSize<PipelineActionDto> pageSize = new PageSize<>();
-    pageSize.setTotal(actionPage.getTotal());
-    pageSize.setData(actionList);
-    return pageSize;
+    return pipelineActionRepository.getActions(page, size, name);
   }
 
-  public static PipelineActionDto toPipelineActionDto(PipelineAction action) {
-    PipelineActionDto pipelineAction = OrikaUtil.convert(action, PipelineActionDto.class);
-    pipelineAction.setParamList(JSON.parseArray(action.getParamDetail(), ActionParam.class));
-    pipelineAction.setCompareResults(JSON.parseArray(action.getResult(), CompareResult.class));
-    return pipelineAction;
-  }
-
-  public List<PipelineAction> getActionsByNodeId(String nodeId) {
+  public List<PipelineActionDto> getActionsByNodeId(String nodeId) {
     return pipelineActionRepository.getActionsByNodeId(nodeId);
   }
 

@@ -36,8 +36,6 @@ public class PublishBind {
    */
   private String message;
 
-  private String publishLine;
-
   /**
    * 发布状态
    */

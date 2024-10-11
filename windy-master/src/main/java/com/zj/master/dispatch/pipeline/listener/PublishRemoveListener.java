@@ -1,5 +1,6 @@
 package com.zj.master.dispatch.pipeline.listener;
 
+import com.alibaba.fastjson.JSON;
 import com.zj.domain.entity.dto.pipeline.CodeChangeDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.pipeline.PublishBindDto;
@@ -42,16 +43,19 @@ public class PublishRemoveListener implements IPipelineEndListener {
       return;
     }
 
+    log.info("pipeline info = {}", JSON.toJSONString(pipeline));
     if (Objects.equals(pipeline.getPipelineType(), PipelineType.PUBLISH.getType())
         && statusChange.getProcessStatus().isSuccess()) {
-      List<PublishBindDto> pipelinePublishes = publishBindRepository.getPipelinePublishes(pipeline.getPipelineId());
+      List<PublishBindDto> pipelinePublishes = publishBindRepository.getServicePublishes(pipeline.getServiceId());
       List<String> branches = pipelinePublishes.stream().map(PublishBindDto::getBranch).collect(Collectors.toList());
+      log.info("get publish branches ={}", branches);
       List<String> serviceChanges = codeChangeRepository.getServiceChanges(pipeline.getServiceId())
               .stream().filter(codeChange -> branches.contains(codeChange.getChangeBranch()))
               .map(CodeChangeDto::getChangeId).collect(Collectors.toList());
+      log.info("code changes id ={}", serviceChanges);
       boolean batchDeleteCodeChange = codeChangeRepository.batchDeleteCodeChange(serviceChanges);
-      boolean deletePublishLine = publishBindRepository.deletePipelinePublishes(statusChange.getPipelineId());
-      log.info("delete code change result = {} delete publish rsult={}", batchDeleteCodeChange, deletePublishLine);
+      boolean deletePublishLine = publishBindRepository.deleteServicePublishes(pipeline.getServiceId());
+      log.info("delete code change result = {} delete publish result={}", batchDeleteCodeChange, deletePublishLine);
     }
   }
 }

@@ -83,7 +83,7 @@ public class K8sDeploy extends AbstractDeployMode<K8sDeployContext> {
     }
 
     private void deployK8s(K8sDeployContext deployContext, KubernetesClient client, String serviceName) {
-        String appName = serviceName.toLowerCase();
+        String appName = Optional.ofNullable(deployContext.getServiceConfig().getAppName()).orElse(serviceName).toLowerCase();
         Deployment deployment = client.apps().deployments().inNamespace(deployContext.getK8SAccessParams().getNamespace())
                 .withName(appName).get();
         if (Objects.nonNull(deployment)) {
@@ -91,10 +91,10 @@ public class K8sDeploy extends AbstractDeployMode<K8sDeployContext> {
             editDeployment(client, deployContext, deployment);
             return;
         }
-        deployNewApp(deployContext, client, serviceName);
+        deployNewApp(deployContext, client, appName);
     }
 
-    private void deployNewApp(K8sDeployContext deployContext, KubernetesClient client, String serviceName) {
+    private void deployNewApp(K8sDeployContext deployContext, KubernetesClient client, String appName) {
         ServiceConfig containerParams = deployContext.getServiceConfig();
         List<EnvVar> envVars = buildEnvParams(containerParams.getEnvParams());
         //宿主机路径
@@ -106,13 +106,13 @@ public class K8sDeploy extends AbstractDeployMode<K8sDeployContext> {
         Integer replicas = Optional.ofNullable(containerParams.getReplicas()).orElse(DEFAULT_REPLICAS);
 
         Container container =
-                new ContainerBuilder().withEnv(envVars).withName(serviceName).withImage(containerParams.getImageName())
+                new ContainerBuilder().withEnv(envVars).withName(appName).withImage(containerParams.getImageName())
                         .withPorts(containerPorts)
                         .withVolumeMounts(volumeMounts).build();
 
         K8SAccessParams k8SAccessParams = deployContext.getK8SAccessParams();
         PodTemplateSpec podTemplate = new PodTemplateSpecBuilder().withNewMetadata().addToLabels(LABEL_APP_KEY,
-                        serviceName).endMetadata().withNewSpec()
+                        appName).endMetadata().withNewSpec()
                 .withVolumes(volumes)
                 .withImagePullSecrets(new LocalObjectReference(k8SAccessParams.getSecretName()))
                 .withContainers(container).endSpec().build();
@@ -121,10 +121,10 @@ public class K8sDeploy extends AbstractDeployMode<K8sDeployContext> {
         strategy.setType(containerParams.getStrategy().getType());
 
         Deployment deployment =
-                new DeploymentBuilder().withNewMetadata().withName(serviceName)
-                        .addToLabels(LABEL_APP_KEY, serviceName).endMetadata()
+                new DeploymentBuilder().withNewMetadata().withName(appName)
+                        .addToLabels(LABEL_APP_KEY, appName).endMetadata()
                         .withNewSpec().withNewSelector()
-                        .addToMatchLabels(LABEL_APP_KEY, serviceName).endSelector()
+                        .addToMatchLabels(LABEL_APP_KEY, appName).endSelector()
                         .withReplicas(replicas).withStrategy(strategy)
                         .withTemplate(podTemplate).endSpec().build();
 

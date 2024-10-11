@@ -45,6 +45,7 @@ public class PermissionService {
         whiteList.add(Constants.USER_LOGIN_URL);
         whiteList.add(Constants.USER_LOGOUT_URL);
         whiteList.add("/");
+        whiteList.add("/logo.svg");
         whiteList.add("/login");
         whiteList.add("/css/**");
         whiteList.add("/js/**");

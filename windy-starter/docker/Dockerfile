@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.2
 
-FROM openjdk:8
+FROM openjdk:11
 
 RUN mkdir -p /opt/windy-console
 
