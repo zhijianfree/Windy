@@ -75,6 +75,7 @@ public class CodeChangeService {
                 .map(config -> JSON.parseObject(config, ServiceConfig.class))
                 .map(ServiceConfig::getGitAccessInfo).filter(access -> StringUtils.isNotBlank(access.getAccessToken()))
                 .orElseGet(systemConfigRepository::getGitAccess);
+        gitAccessInfo.setGitUrl(service.getGitUrl());
         IGitRepositoryHandler repository = repositoryFactory.getRepository(gitAccessInfo.getGitType());
         repository.createBranch(codeChange.getChangeBranch(), gitAccessInfo);
 
@@ -106,6 +107,7 @@ public class CodeChangeService {
                 .map(ServiceConfig::getGitAccessInfo).filter(access -> StringUtils.isNotBlank(access.getAccessToken()))
                 .orElseGet(systemConfigRepository::getGitAccess);
         IGitRepositoryHandler repository = repositoryFactory.getRepository(gitAccessInfo.getGitType());
+        gitAccessInfo.setGitUrl(service.getGitUrl());
         repository.deleteBranch(codeChange.getChangeBranch(), gitAccessInfo);
         return codeChangeRepository.deleteCodeChange(codeChangeId);
     }
