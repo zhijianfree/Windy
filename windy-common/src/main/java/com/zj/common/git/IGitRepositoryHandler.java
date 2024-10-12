@@ -13,20 +13,20 @@ public interface IGitRepositoryHandler {
   /**
    * 创建分支
    */
-  void createBranch(String serviceName, String branchName, GitAccessInfo accessInfo);
+  void createBranch(String branchName, GitAccessInfo accessInfo);
 
   /**
    * 删除分支
    */
-  void deleteBranch(String serviceName, String branchName, GitAccessInfo accessInfo);
+  void deleteBranch(String branchName, GitAccessInfo accessInfo);
 
   /**
    * 查看分支列表
    */
-  List<String> listBranch(String serviceName, GitAccessInfo accessInfo);
+  List<String> listBranch(GitAccessInfo accessInfo);
 
   /**
    * 查询仓库列表
    */
-  void checkRepository(String serviceName, GitAccessInfo accessInfo);
+  void checkRepository(GitAccessInfo accessInfo);
 }

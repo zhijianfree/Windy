@@ -76,7 +76,7 @@ public class CodeChangeService {
                 .map(ServiceConfig::getGitAccessInfo).filter(access -> StringUtils.isNotBlank(access.getAccessToken()))
                 .orElseGet(systemConfigRepository::getGitAccess);
         IGitRepositoryHandler repository = repositoryFactory.getRepository(gitAccessInfo.getGitType());
-        repository.createBranch(service.getServiceName(), codeChange.getChangeBranch(), gitAccessInfo);
+        repository.createBranch(codeChange.getChangeBranch(), gitAccessInfo);
 
         codeChange.setChangeId(uniqueIdService.getUniqueId());
         return codeChangeRepository.saveCodeChange(codeChange) ? codeChange.getChangeId() : "";
@@ -106,7 +106,7 @@ public class CodeChangeService {
                 .map(ServiceConfig::getGitAccessInfo).filter(access -> StringUtils.isNotBlank(access.getAccessToken()))
                 .orElseGet(systemConfigRepository::getGitAccess);
         IGitRepositoryHandler repository = repositoryFactory.getRepository(gitAccessInfo.getGitType());
-        repository.deleteBranch(service.getServiceName(), codeChange.getChangeBranch(), gitAccessInfo);
+        repository.deleteBranch(codeChange.getChangeBranch(), gitAccessInfo);
         return codeChangeRepository.deleteCodeChange(codeChangeId);
     }
 

@@ -11,7 +11,7 @@ import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
 import com.zj.client.handler.pipeline.git.IGitProcessor;
-import com.zj.client.utils.Utils;
+import com.zj.common.utils.GitUtils;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ErrorCode;
@@ -74,7 +74,7 @@ public class MergeMasterTrigger implements INodeTrigger {
             //1 拉取代码到本地
             MergeRequest mergeRequest = JSON.parseObject(JSON.toJSONString(triggerContext.getData()),
                     MergeRequest.class);
-            String serviceName = Utils.getServiceFromUrl(mergeRequest.getGitUrl());
+            String serviceName = GitUtils.getServiceFromUrl(mergeRequest.getGitUrl());
             Git git = gitProcessor.pullCodeFromGit(mergeRequest, MASTER,
                     globalEnvConfig.getPipelineWorkspace(serviceName, mergeRequest.getPipelineId()));
 

@@ -14,7 +14,7 @@ import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
-import com.zj.client.utils.Utils;
+import com.zj.common.utils.GitUtils;
 import com.zj.common.enums.DeployType;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.exception.ExecuteException;
@@ -82,7 +82,7 @@ public class DeployTrigger implements INodeTrigger {
     }
 
     private JarDeployContext buildSSHContext(DeployRequest deployRequest) {
-        String serviceName = Utils.getServiceFromUrl(deployRequest.getGitUrl());
+        String serviceName = GitUtils.getServiceFromUrl(deployRequest.getGitUrl());
         String filePath =
                 globalEnvConfig.getPipelineWorkspace(serviceName, deployRequest.getPipelineId()) + File.separator + DEPLOY;
         SSHParams sshParams = JSON.parseObject(JSON.toJSONString(deployRequest.getParams()), SSHParams.class);
@@ -91,7 +91,7 @@ public class DeployTrigger implements INodeTrigger {
     }
 
     private K8sDeployContext buildK8SContext(DeployRequest deployRequest) {
-        String serviceName = Utils.getServiceFromUrl(deployRequest.getGitUrl());
+        String serviceName = GitUtils.getServiceFromUrl(deployRequest.getGitUrl());
         DeployParams deployParams = JSON.parseObject(JSON.toJSONString(deployRequest.getParams()), DeployParams.class);
         K8SAccessParams k8SAccessParams = deployParams.getK8SAccessParams();
         ServiceConfig serviceConfig = deployParams.getServiceConfig();

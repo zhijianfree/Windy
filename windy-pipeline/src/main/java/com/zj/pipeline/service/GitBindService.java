@@ -125,6 +125,6 @@ public class GitBindService {
             .map(ServiceConfig::getGitAccessInfo).filter(access -> StringUtils.isNotBlank(access.getAccessToken()))
             .orElseGet(systemConfigRepository::getGitAccess);
     IGitRepositoryHandler repository = repositoryFactory.getRepository(gitAccessInfo.getGitType());
-    return repository.listBranch(service.getServiceName(), gitAccessInfo);
+    return repository.listBranch(gitAccessInfo);
   }
 }

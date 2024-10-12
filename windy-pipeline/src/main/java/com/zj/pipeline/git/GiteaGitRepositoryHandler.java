@@ -6,6 +6,7 @@ import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.git.GitAccessInfo;
 import com.zj.common.git.IGitRepositoryHandler;
+import com.zj.common.utils.GitUtils;
 import com.zj.pipeline.entity.vo.BranchInfo;
 import com.zj.pipeline.entity.vo.CreateBranchVo;
 import com.zj.pipeline.entity.vo.GiteaRepository;
@@ -48,9 +49,9 @@ public class GiteaGitRepositoryHandler implements IGitRepositoryHandler {
   }
 
   @Override
-  public void createBranch(String serviceName, String branchName, GitAccessInfo accessInfo) {
+  public void createBranch(String branchName, GitAccessInfo accessInfo) {
     String owner = accessInfo.getOwner();
-    String gitPath = String.format("/api/v1/repos/%s/%s/branches", owner, serviceName);
+    String gitPath = String.format("/api/v1/repos/%s/%s/branches", owner, accessInfo.getGitServiceName());
     CreateBranchVo createBranchVO = new CreateBranchVo();
     createBranchVO.setBranchName(branchName);
     String result = gitRequestProxy.post(gitPath, JSON.toJSONString(createBranchVO), getTokenHeader(accessInfo));
@@ -63,23 +64,24 @@ public class GiteaGitRepositoryHandler implements IGitRepositoryHandler {
   }
 
   @Override
-  public void deleteBranch(String serviceName, String branchName, GitAccessInfo accessInfo) {
+  public void deleteBranch(String branchName, GitAccessInfo accessInfo) {
     String owner = accessInfo.getOwner();
-    String gitPath = String.format("/api/v1/repos/%s/%s/branches/%s", owner, serviceName,
+    String gitPath = String.format("/api/v1/repos/%s/%s/branches/%s", owner, accessInfo.getGitServiceName(),
         branchName);
     gitRequestProxy.delete(gitPath, getTokenHeader(accessInfo));
   }
 
   @Override
-  public void checkRepository(String serviceName, GitAccessInfo accessInfo) {
+  public void checkRepository(GitAccessInfo accessInfo) {
     String result = gitRequestProxy.get("/api/v1/user/repos", getTokenHeader(accessInfo));
     log.info("query repository result ={}", result);
     List<GiteaRepository> repositories = JSON.parseArray(result, GiteaRepository.class);
     if (CollectionUtils.isEmpty(repositories)) {
       throw new ApiException(ErrorCode.REPO_NOT_EXIST);
     }
+
     Optional<GiteaRepository> optional = repositories.stream()
-        .filter(repo -> Objects.equals(repo.getName(), serviceName)).findAny();
+        .filter(repo -> Objects.equals(repo.getName(), accessInfo.getGitServiceName())).findAny();
     if (!optional.isPresent()) {
       throw new ApiException(ErrorCode.USER_NO_PERMISSION);
     }
@@ -91,9 +93,9 @@ public class GiteaGitRepositoryHandler implements IGitRepositoryHandler {
   }
 
   @Override
-  public List<String> listBranch(String serviceName, GitAccessInfo accessInfo) {
+  public List<String> listBranch(GitAccessInfo accessInfo) {
     String owner = accessInfo.getOwner();
-    String gitPath = String.format("/api/v1/repos/%s/%s/branches", owner, serviceName);
+    String gitPath = String.format("/api/v1/repos/%s/%s/branches", owner, accessInfo.getGitServiceName());
     String result = gitRequestProxy.get(gitPath, getTokenHeader(accessInfo));
     List<BranchInfo> branches = JSON.parseArray(result, BranchInfo.class);
     if (CollectionUtils.isEmpty(branches)) {

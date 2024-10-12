@@ -110,7 +110,7 @@ public class MicroserviceService {
         GitAccessInfo gitAccessInfo = Optional.ofNullable(serviceDto.getServiceConfig())
                 .map(ServiceConfig::getGitAccessInfo).filter(access -> StringUtils.isNotBlank(access.getAccessToken()))
                 .orElseGet(systemConfig::getGitAccess);
-        repositoryBranch.checkRepository(serviceDto.getServiceName(), gitAccessInfo);
+        repositoryBranch.checkRepository(gitAccessInfo);
 
         MicroserviceDto microserviceDto = OrikaUtil.convert(serviceDto, MicroserviceDto.class);
         microserviceDto.setServiceConfig(JSON.toJSONString(serviceDto.getServiceConfig()));

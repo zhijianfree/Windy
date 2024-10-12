@@ -65,8 +65,8 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
     }
 
     @Override
-    public void createBranch(String serviceName, String branchName, GitAccessInfo accessInfo) {
-        Integer projectId = transformProjectId(serviceName, accessInfo);
+    public void createBranch(String branchName, GitAccessInfo accessInfo) {
+        Integer projectId = transformProjectId(accessInfo);
         String path = String.format("/api/v4/projects/%s/repository/branches?branch=%s&ref=master",
                 projectId, branchName);
         String result = gitRequestProxy.post(accessInfo.getGitDomain() + path, "", getTokenHeader(accessInfo));
@@ -78,8 +78,8 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
     }
 
     @Override
-    public void deleteBranch(String serviceName, String branchName, GitAccessInfo accessInfo) {
-        Integer projectId = transformProjectId(serviceName, accessInfo);
+    public void deleteBranch(String branchName, GitAccessInfo accessInfo) {
+        Integer projectId = transformProjectId(accessInfo);
         String path = String.format("/api/v4/projects/%s/repository/branches/%s", projectId,
                 branchName);
         String result = gitRequestProxy.delete(accessInfo.getGitDomain() + path, getTokenHeader(accessInfo));
@@ -87,10 +87,10 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
     }
 
     @Override
-    public List<String> listBranch(String serviceName, GitAccessInfo accessInfo) {
-        Integer projectId = transformProjectId(serviceName, accessInfo);
+    public List<String> listBranch(GitAccessInfo accessInfo) {
+        Integer projectId = transformProjectId(accessInfo);
         if (Objects.isNull(projectId)) {
-            log.info("can not get service project id={}", serviceName);
+            log.info("can not get service project id={}", accessInfo.getGitServiceName());
             return Collections.emptyList();
         }
 
@@ -107,33 +107,33 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
                 .collect(Collectors.toList());
     }
 
-    private Integer transformProjectId(String serviceName, GitAccessInfo accessInfo) {
-        Integer projectId = serviceIdMap.get(serviceName.toLowerCase());
+    private Integer transformProjectId(GitAccessInfo accessInfo) {
+        Integer projectId = serviceIdMap.get(accessInfo.getGitServiceName().toLowerCase());
         if (Objects.isNull(projectId)) {
             loadGitRepositories(accessInfo);
         }
-        return serviceIdMap.get(serviceName.toLowerCase());
+        return serviceIdMap.get(accessInfo.getGitServiceName().toLowerCase());
     }
 
     @Override
-    public void checkRepository(String serviceName, GitAccessInfo accessInfo) {
-        List<GitlabRepository> repositories = getGitlabRepository(serviceName, accessInfo);
+    public void checkRepository(GitAccessInfo accessInfo) {
+        List<GitlabRepository> repositories = getGitlabRepository(accessInfo);
         if (CollectionUtils.isEmpty(repositories)) {
-            log.info("gitlab repository not exist={}", serviceName);
+            log.info("gitlab repository not exist={}", accessInfo.getGitServiceName());
             throw new ApiException(ErrorCode.REPO_NOT_EXIST);
         }
 
         Optional<GitlabRepository> optional = repositories.stream()
-                .filter(repo -> Objects.equals(repo.getName().toLowerCase(), serviceName.toLowerCase()))
+                .filter(repo -> Objects.equals(repo.getName().toLowerCase(), accessInfo.getGitServiceName().toLowerCase()))
                 .findAny();
         if (!optional.isPresent()) {
-            log.info("user can not access gitlab repository permission={}", serviceName);
+            log.info("user can not access gitlab repository permission={}", accessInfo.getGitServiceName());
             throw new ApiException(ErrorCode.USER_NO_PERMISSION);
         }
 
         boolean permission = optional.get().getPermissions().checkPermission();
         if (!permission) {
-            log.info("user do not have gitlab repository permission={}", serviceName);
+            log.info("user do not have gitlab repository permission={}", accessInfo.getGitServiceName());
             throw new ApiException(ErrorCode.GIT_NO_PERMISSION);
         }
     }
@@ -175,8 +175,8 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
         return list;
     }
 
-    private List<GitlabRepository> getGitlabRepository(String serviceName, GitAccessInfo accessInfo) {
-        String result = gitRequestProxy.get(accessInfo.getGitDomain() + "/api/v4/projects?search=" + serviceName,
+    private List<GitlabRepository> getGitlabRepository(GitAccessInfo accessInfo) {
+        String result = gitRequestProxy.get(accessInfo.getGitDomain() + "/api/v4/projects?search=" + accessInfo.getGitServiceName(),
                 getTokenHeader(accessInfo));
         return JSON.parseArray(result, GitlabRepository.class);
     }

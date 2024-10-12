@@ -69,9 +69,10 @@ public class K8sDeploy extends AbstractDeployMode<K8sDeployContext> {
         KubernetesClient client = null;
         try {
             client = new DefaultKubernetesClient(config);
-            String serviceName = deployContext.getServiceName().toLowerCase();
-            deployK8s(deployContext, client, serviceName);
-            loopQueryDeployStatus(deployContext, client, serviceName);
+            String appName = Optional.ofNullable(deployContext.getServiceConfig().getAppName())
+                    .orElse(deployContext.getServiceName()).toLowerCase();
+            deployK8s(deployContext, client, appName);
+            loopQueryDeployStatus(deployContext, client, appName);
             updateDeployStatus(deployContext.getRecordId(), ProcessStatus.SUCCESS);
         } catch (InterruptedException e) {
             log.error("deploy k8s instance error", e);
@@ -82,13 +83,12 @@ public class K8sDeploy extends AbstractDeployMode<K8sDeployContext> {
         }
     }
 
-    private void deployK8s(K8sDeployContext deployContext, KubernetesClient client, String serviceName) {
-        String appName = Optional.ofNullable(deployContext.getServiceConfig().getAppName()).orElse(serviceName).toLowerCase();
+    private void deployK8s(K8sDeployContext deployContext, KubernetesClient client, String appName) {
         Deployment deployment = client.apps().deployments().inNamespace(deployContext.getK8SAccessParams().getNamespace())
                 .withName(appName).get();
         if (Objects.nonNull(deployment)) {
             log.info("deployment exist start edit ={}", appName);
-            editDeployment(client, deployContext, deployment);
+            editDeployment(client, appName, deployContext, deployment);
             return;
         }
         deployNewApp(deployContext, client, appName);
@@ -134,8 +134,8 @@ public class K8sDeploy extends AbstractDeployMode<K8sDeployContext> {
         client.apps().deployments().inNamespace(namespace).createOrReplace(deployment);
     }
 
-    public void editDeployment(KubernetesClient client, K8sDeployContext deployContext, Deployment deployment) {
-        String appName = deployContext.getServiceName().toLowerCase();
+    public void editDeployment(KubernetesClient client, String appName, K8sDeployContext deployContext,
+                               Deployment deployment) {
         int index = getContainerIndex(appName, deployment);
         String imageName = deployContext.getServiceConfig().getImageName();
         client.apps().deployments().inNamespace(deployContext.getK8SAccessParams().getNamespace())
@@ -162,14 +162,14 @@ public class K8sDeploy extends AbstractDeployMode<K8sDeployContext> {
     }
 
     private void loopQueryDeployStatus(K8sDeployContext deployContext, KubernetesClient client,
-                                       String serviceName) throws InterruptedException {
+                                       String appName) throws InterruptedException {
         AtomicLong atomicLong = new AtomicLong(0);
         while (true) {
             long time = atomicLong.addAndGet(10000);
             Thread.sleep(time);
             String namespace = deployContext.getK8SAccessParams().getNamespace();
             Deployment deploy = client.apps().deployments().inNamespace(namespace)
-                    .withName(serviceName).get();
+                    .withName(appName).get();
             DeploymentStatus status = deploy.getStatus();
             if (Objects.equals(status.getReplicas(), status.getAvailableReplicas())) {
                 break;

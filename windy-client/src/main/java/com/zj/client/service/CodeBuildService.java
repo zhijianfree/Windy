@@ -17,7 +17,7 @@ import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel.ResponseSta
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.client.handler.pipeline.git.IGitProcessor;
 import com.zj.client.handler.pipeline.maven.MavenOperator;
-import com.zj.client.utils.Utils;
+import com.zj.common.utils.GitUtils;
 import com.zj.common.enums.ProcessStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -73,7 +73,7 @@ public class CodeBuildService {
                 //从git服务端拉取代码
                 String gitUrl = codeBuildParam.getGitUrl();
                 String serviceName =
-                        Optional.ofNullable(codeBuildParam.getServiceName()).orElseGet(() -> Utils.getServiceFromUrl(gitUrl));
+                        Optional.ofNullable(codeBuildParam.getServiceName()).orElseGet(() -> GitUtils.getServiceFromUrl(gitUrl));
                 String pipelineWorkspace = globalEnvConfig.getPipelineWorkspace(serviceName,
                         codeBuildParam.getPipelineId());
 
@@ -216,12 +216,12 @@ public class CodeBuildService {
         String tag = imageName + SPLIT_STRING + version;
         String imageRepository = imageUrl + tag;
         log.info("docker imageRepository ={}", imageRepository);
-        dockerClient.buildImageCmd().withDockerfile(dockerfile)
-                .withTags(Collections.singleton(imageRepository)).exec(callback).awaitImageId();
-
         // 设置登陆远程仓库的用户信息
         AuthConfig authConfig = new AuthConfig().withRegistryAddress(repository)
                 .withUsername(param.getUser()).withPassword(param.getPassword());
+        dockerClient.authCmd().withAuthConfig(authConfig).exec();
+        dockerClient.buildImageCmd().withDockerfile(dockerfile)
+                .withTags(Collections.singleton(imageRepository)).exec(callback).awaitImageId();
 
         // 将镜像推送到远程镜像仓库
         Adapter<PushResponseItem> responseItemAdapter = dockerClient.pushImageCmd(imageRepository)

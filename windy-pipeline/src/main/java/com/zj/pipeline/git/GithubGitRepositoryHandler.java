@@ -8,7 +8,9 @@ import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.git.GitAccessInfo;
 import com.zj.common.git.IGitRepositoryHandler;
+import com.zj.common.utils.GitUtils;
 import com.zj.pipeline.entity.vo.GithubBranch;
+import com.zj.pipeline.entity.vo.GithubRepository;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
 import okhttp3.MediaType;
@@ -23,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -43,10 +46,10 @@ public class GithubGitRepositoryHandler implements IGitRepositoryHandler {
     }
 
     @Override
-    public void createBranch(String serviceName, String branchName, GitAccessInfo accessInfo) {
+    public void createBranch(String branchName, GitAccessInfo accessInfo) {
         try {
-            String baseBranchSHA = getBaseBranchSHA(serviceName, accessInfo);
-            boolean result = createBranch(baseBranchSHA, branchName, serviceName, accessInfo);
+            String baseBranchSHA = getBaseBranchSHA(accessInfo);
+            boolean result = createBranch(baseBranchSHA, branchName, accessInfo);
             log.info("create branch = {} result={}", branchName, result);
         } catch (Exception e) {
             log.info("create github branch error", e);
@@ -55,17 +58,17 @@ public class GithubGitRepositoryHandler implements IGitRepositoryHandler {
     }
 
     @Override
-    public void deleteBranch(String serviceName, String branchName, GitAccessInfo accessInfo) {
+    public void deleteBranch(String branchName, GitAccessInfo accessInfo) {
         String url = accessInfo.getGitDomain() + String.format("/repos/%s/%s/git/refs/heads/%s",
-                accessInfo.getOwner(), serviceName, branchName);
+                accessInfo.getOwner(), accessInfo.getGitServiceName(), branchName);
         HashMap<String, String> headerMap = exchangeHeaders(accessInfo);
         String result = gitRequestProxy.delete(url, headerMap);
         log.info("delete github branch result={}", result);
     }
 
     @Override
-    public List<String> listBranch(String serviceName, GitAccessInfo accessInfo) {
-        String uri = String.format("/repos/%s/%s/branches", accessInfo.getOwner(), serviceName);
+    public List<String> listBranch(GitAccessInfo accessInfo) {
+        String uri = String.format("/repos/%s/%s/branches", accessInfo.getOwner(), accessInfo.getGitServiceName());
         HashMap<String, String> hashMap = exchangeHeaders(accessInfo);
         String result = gitRequestProxy.get(accessInfo.getGitDomain() + uri, hashMap);
         List<GithubBranch> githubBranches = JSON.parseArray(result, GithubBranch.class);
@@ -83,17 +86,21 @@ public class GithubGitRepositoryHandler implements IGitRepositoryHandler {
     }
 
     @Override
-    public void checkRepository(String serviceName, GitAccessInfo accessInfo) {
-        String uri = String.format("/repos/%s/%s/branches", accessInfo.getOwner(), serviceName);
+    public void checkRepository(GitAccessInfo accessInfo) {
+        String uri = String.format("/repos/%s/%s", accessInfo.getOwner(), accessInfo.getGitServiceName());
         HashMap<String, String> hashMap = exchangeHeaders(accessInfo);
         String result = gitRequestProxy.get(accessInfo.getGitDomain() + uri, hashMap);
+        GithubRepository githubRepository = JSON.parseObject(result, GithubRepository.class);
+        if (Objects.isNull(githubRepository)) {
+            throw new ApiException(ErrorCode.REPO_NOT_EXIST);
+        }
         log.info("get github repository result= {}", result);
     }
 
     // 获取指定分支的 SHA
-    private String getBaseBranchSHA(String serviceName, GitAccessInfo accessInfo) throws IOException {
+    private String getBaseBranchSHA(GitAccessInfo accessInfo) throws IOException {
         String url = String.format("%s/repos/%s/%s/git/ref/heads/%s", accessInfo.getGitDomain(), accessInfo.getOwner(),
-                serviceName, "master");
+                accessInfo.getGitServiceName(), "master");
         Request request = new Request.Builder()
                 .url(url)
                 .headers(Headers.of(exchangeHeaders(accessInfo)))
@@ -116,7 +123,7 @@ public class GithubGitRepositoryHandler implements IGitRepositoryHandler {
     /**
      * 创建新的分支。
      */
-    public boolean createBranch(String sha, String branch, String serviceName, GitAccessInfo gitAccessInfo) throws IOException {
+    public boolean createBranch(String sha, String branch, GitAccessInfo gitAccessInfo) throws IOException {
         String url = String.format("%s/repos/%s/%s/git/refs", gitAccessInfo.getGitDomain(), gitAccessInfo.getOwner(),
                 serviceName);
         log.info("request create branch url = {}", url);
