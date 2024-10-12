@@ -125,7 +125,7 @@ public class GithubGitRepositoryHandler implements IGitRepositoryHandler {
      */
     public boolean createBranch(String sha, String branch, GitAccessInfo gitAccessInfo) throws IOException {
         String url = String.format("%s/repos/%s/%s/git/refs", gitAccessInfo.getGitDomain(), gitAccessInfo.getOwner(),
-                serviceName);
+                gitAccessInfo.getGitServiceName());
         log.info("request create branch url = {}", url);
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("ref", "refs/heads/" + branch);
