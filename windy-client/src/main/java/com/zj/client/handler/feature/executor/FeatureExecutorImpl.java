@@ -10,8 +10,10 @@ import com.zj.client.handler.feature.executor.vo.ExecuteContext;
 import com.zj.client.handler.feature.executor.vo.FeatureParam;
 import com.zj.client.handler.notify.IResultEventNotify;
 import com.zj.client.utils.ExceptionUtils;
+import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.NotifyType;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.enums.TemplateType;
 import com.zj.common.model.ResultEvent;
 import com.zj.common.utils.IpUtils;
 import com.zj.common.uuid.UniqueIdService;
@@ -28,9 +30,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -72,7 +76,9 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
             ExecuteContext executeContext = new ExecuteContext();
             executeContext.bindMap(featureParam.getExecuteContext());
             Map<String, Object> globalContext = new HashMap<>();
+            CountDownLatch countDownLatch = null;
             for (ExecutePoint executePoint : executePoints) {
+                judgeWhetherWait(countDownLatch);
                 ExecuteRecord executeRecord = new ExecuteRecord();
                 String recordId = uniqueIdService.getUniqueId();
                 executeRecord.setExecuteRecordId(recordId);
@@ -81,6 +87,12 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
                     //2 使用策略类执行用例
                     executeContext.setRecordId(recordId);
                     executeContext.setLogId(featureParam.getLogId());
+
+                    //如果是异步执行模版就需要添加countDown，保证后续任务是串行执行
+                    if (Objects.equals(executePoint.getExecuteType(), TemplateType.THREAD.getType())) {
+                        countDownLatch = new CountDownLatch(1);
+                        executeContext.setCountDownLatch(countDownLatch);
+                    }
                     List<FeatureResponse> responses = executeStrategyFactory.execute(executePoint, executeContext);
                     executeRecord.setStatus(judgeRecordStatus(responses));
                     executeRecord.setExecuteResult(JSON.toJSONString(responses));
@@ -118,6 +130,20 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
                     .params(featureHistory);
             resultEventNotify.notifyEvent(resultEvent);
         }, executor);
+    }
+
+    /**
+     * 上个任务是异步任务的需要等上个任务执行之后再开始下一个避免
+     */
+    private  void judgeWhetherWait(CountDownLatch countDownLatch) {
+        if (Objects.isNull(countDownLatch) || countDownLatch.getCount() < 1) {
+            return;
+        }
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            log.info("async task not trigger,continue execute next task");
+        }
     }
 
     public static Integer judgeRecordStatus(List<FeatureResponse> responses) {

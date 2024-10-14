@@ -34,7 +34,6 @@ public class CreateExecuteRecordEvent implements INotifyEvent {
         JSON.toJSONString(resultEvent.getParams()));
     ExecuteRecordDto executeRecordDto = JSON.parseObject(JSON.toJSONString(resultEvent.getParams()),
         ExecuteRecordDto.class);
-
     return executeRecordRepository.saveRecord(executeRecordDto);
   }
 }

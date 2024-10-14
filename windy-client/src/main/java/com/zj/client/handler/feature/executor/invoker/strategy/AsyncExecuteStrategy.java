@@ -18,6 +18,7 @@ import com.zj.common.feature.ExecutePointDto;
 import com.zj.common.feature.ExecutorUnit;
 import com.zj.common.model.ResultEvent;
 import com.zj.common.utils.IpUtils;
+import com.zj.common.utils.OrikaUtil;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -27,6 +28,8 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -56,25 +59,44 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy {
 
     @Override
     public List<FeatureResponse> execute(ExecutePoint executePoint, ExecuteContext executeContext) {
-        log.info("start execute AsyncExecuteStrategy context={}", JSON.toJSONString(executeContext.toMap()));
+        Map<String, Object> currentContext = executeContext.toMap();
+        log.info("start execute AsyncExecuteStrategy context={}", JSON.toJSONString(currentContext));
         ExecutorUnit executorUnit = JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit.class);
         String timeout = executorUnit.getMethod();
         List<ExecutePointDto> executePoints = executorUnit.getExecutePoints();
+        ExecuteContext newContext = OrikaUtil.convert(executeContext, ExecuteContext.class);
         executor.execute(() ->{
             CountDownLatch countDownLatch = new CountDownLatch(1);
             CompletableFuture.runAsync(() -> {
+                if (Objects.nonNull(executeContext.getCountDownLatch())) {
+                    log.info("find count down release wait");
+                    executeContext.getCountDownLatch().countDown();
+                }
                 List<FeatureResponse> responses = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(executePoints)){
                     responses = executePoints.stream().map(executePointDto -> {
-                        ExecutePoint point = toExecutePoint(executePointDto);
-                        return executeFeature(executeContext, point);
+                        try {
+                            ExecutePoint point = toExecutePoint(executePointDto);
+                            return executeFeature(newContext, point);
+                        } catch (Exception e) {
+                            log.info("thread execute error", e);
+                            ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
+                            executeDetailVo.setErrorMessage(ExceptionUtils.getSimplifyError(e));
+                            executeDetailVo.getResponseDetailVo().setProcessStatus(ProcessStatus.FAIL.getType());
+                            FeatureResponse featureResponse = new FeatureResponse();
+                            featureResponse.setExecuteDetailVo(executeDetailVo);
+                            featureResponse.setStatus(ProcessStatus.FAIL.getType());
+                            featureResponse.setName(executePointDto.getExecutorUnit().getName());
+                            return featureResponse;
+                        }
                     }).collect(Collectors.toList());
                 }
                 countDownLatch.countDown();
-                notifyAsyncRecordResult(executeContext, responses);
+                notifyAsyncRecordResult(newContext, responses);
             }, executor).exceptionally(throwable -> {
                 log.info("AsyncExecuteStrategy feature execute error", throwable);
-                notifyError(executeContext, ExceptionUtils.getSimplifyError(throwable), timeout);
+                countDownLatch.countDown();
+                notifyError(newContext, ExceptionUtils.getSimplifyError(throwable), timeout);
                 return null;
             });
 
@@ -82,7 +104,7 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy {
                 boolean result = countDownLatch.await(Integer.parseInt(timeout), TimeUnit.SECONDS);
                 log.info("wait time out result= {}", result);
             } catch (InterruptedException e) {
-                notifyError(executeContext, "执行任务超时", timeout);
+                notifyError(newContext, "执行任务超时", timeout);
             }
         });
 
