@@ -69,6 +69,7 @@ public class MergeMasterTrigger implements INodeTrigger {
 
     @Override
     public void triggerRun(TriggerContext triggerContext, TaskNode taskNode) throws Exception {
+        log.info("start run merge code context = {}", JSON.toJSONString(triggerContext));
         statusMap.put(taskNode.getRecordId(), new MergeStatus(ProcessStatus.RUNNING.getType()));
         try {
             //1 拉取代码到本地

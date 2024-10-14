@@ -58,7 +58,7 @@ public class HttpTrigger implements INodeTrigger {
     }
 
     public void triggerRun(TriggerContext triggerContext, TaskNode taskNode) throws IOException {
-        log.info("http executor is running");
+        log.info("start run http executor context={}", JSON.toJSONString(triggerContext));
         HttpRequestContext context = OrikaUtil.convert(triggerContext.getData(), HttpRequestContext.class);
         Map<String, Object> param = JSON.parseObject(context.getBody(), new TypeReference<Map<String, Object>>() {
         });

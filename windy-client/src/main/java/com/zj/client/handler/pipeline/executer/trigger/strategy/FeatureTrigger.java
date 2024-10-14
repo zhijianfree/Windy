@@ -47,6 +47,7 @@ public class FeatureTrigger implements INodeTrigger {
 
   @Override
   public void triggerRun(TriggerContext triggerContext, TaskNode taskNode) {
+    log.info("start run feature context={}", JSON.toJSONString(triggerContext));
     TestRequestContext context = OrikaUtil.convert(triggerContext.getData(),
         TestRequestContext.class);
     String taskId = context.getTaskId();

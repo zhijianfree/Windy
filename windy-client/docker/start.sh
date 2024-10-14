@@ -34,7 +34,7 @@ JVM_OPTION="-Xms${JVM_CACHE_SIZE}m -Xmx${JVM_CACHE_SIZE}m -XX:MaxNewSize=${NEW_C
 echo "start service $service"
 echo "$JVM_OPTION"
 
-nohup java -jar $JVM_OPTION $JAR_NAME
+nohup java -jar -Dwindy.pipeline.maven.path='/opt/windy-client/maven' $JVM_OPTION $JAR_NAME
 
 sleep 10
 

@@ -62,7 +62,7 @@ public class DeployTrigger implements INodeTrigger {
 
     @Override
     public void triggerRun(TriggerContext triggerContext, TaskNode taskNode) throws IOException {
-        log.info("triggerContext = {}", triggerContext.getData());
+        log.info("start run deploy context = {}", triggerContext.getData());
         DeployRequest deployRequest = JSON.parseObject(JSON.toJSONString(triggerContext.getData()),
                 DeployRequest.class);
         Function<DeployRequest, DeployContext> function = functionMap.get(deployRequest.getDeployType());
