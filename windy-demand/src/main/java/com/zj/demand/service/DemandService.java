@@ -1,6 +1,7 @@
 package com.zj.demand.service;
 
 import com.zj.common.auth.IAuthService;
+import com.zj.common.auth.UserDetail;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.PageSize;
@@ -42,9 +43,10 @@ public class DemandService {
 
     public DemandDTO createDemand(DemandDTO demandDTO) {
         demandDTO.setDemandId(uniqueIdService.getUniqueId());
-        String currentUserId = authService.getCurrentUserId();
-        demandDTO.setProposer(currentUserId);
-        demandDTO.setCreator(currentUserId);
+        UserDetail userDetail = authService.getUserDetail();
+        demandDTO.setProposer(userDetail.getUserId());
+        demandDTO.setProposerName(userDetail.getUserName());
+        demandDTO.setCreator(userDetail.getUserId());
         boolean result = demandRepository.createDemand(demandDTO);
         if (!result) {
             log.info("create demand error ={}", demandDTO.getDemandName());

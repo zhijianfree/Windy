@@ -1,6 +1,7 @@
 package com.zj.demand.service;
 
 import com.zj.common.auth.IAuthService;
+import com.zj.common.auth.UserDetail;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.PageSize;
@@ -42,9 +43,10 @@ public class BugService {
 
     public BugDTO createBug(BugDTO bugDTO) {
         bugDTO.setBugId(uniqueIdService.getUniqueId());
-        bugDTO.setProposer(authService.getCurrentUserId());
-        boolean result = bugRepository.createBug(bugDTO);
-        return result ? bugDTO : null;
+        UserDetail userDetail = authService.getUserDetail();
+        bugDTO.setProposer(userDetail.getUserId());
+        bugDTO.setProposerName(userDetail.getUserName());
+        return bugRepository.createBug(bugDTO) ? bugDTO : null;
     }
 
     public Boolean updateBug(BugDTO bugDTO) {

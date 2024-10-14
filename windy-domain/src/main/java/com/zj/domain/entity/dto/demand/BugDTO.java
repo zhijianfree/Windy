@@ -50,9 +50,9 @@ public class BugDTO {
   private String realResult;
 
   /**
-   * 提出团队
+   * 提出人名称
    * */
-  private String proposeTeam;
+  private String proposerName;
 
   /**
    * 提出人
@@ -60,9 +60,9 @@ public class BugDTO {
   private String proposer;
 
   /**
-   * 接受团队
+   * 接受人名称
    * */
-  private String acceptTeam;
+  private String acceptorName;
 
   /**
    *

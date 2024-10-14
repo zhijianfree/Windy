@@ -33,19 +33,19 @@ public class Demand {
     private String enclosurePath;
 
     /**
-     * 提出团队
-     * */
-    private String proposeTeam;
+     * 提出人名称
+     */
+    private String proposerName;
 
     /**
      * 提出人
-     * */
+     */
     private String proposer;
 
     /**
-     * 接受团队
-     * */
-    private String acceptTeam;
+     * 接受人名称
+     */
+    private String acceptorName;
 
     /**
      * 接受人

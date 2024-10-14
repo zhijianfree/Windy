@@ -31,9 +31,9 @@ public class DemandDTO {
   private String enclosurePath;
 
   /**
-   * 提出团队
+   * 提出人名称
    */
-  private String proposeTeam;
+  private String proposerName;
 
   /**
    * 提出人
@@ -41,9 +41,9 @@ public class DemandDTO {
   private String proposer;
 
   /**
-   * 接受团队
+   * 接受人名称
    */
-  private String acceptTeam;
+  private String acceptorName;
 
   /**
    * 接受人

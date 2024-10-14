@@ -61,9 +61,9 @@ public class PipelineHistoryRepository extends
       throw new ApiException(ErrorCode.NOT_FOUND_PIPELINE);
     }
 
-    List<PipelineHistory> pipelineHistories = list(
-        Wrappers.lambdaQuery(PipelineHistory.class).eq(PipelineHistory::getPipelineId, pipelineId));
-
+    List<PipelineHistory> pipelineHistories = list(Wrappers.lambdaQuery(PipelineHistory.class)
+            .eq(PipelineHistory::getPipelineId, pipelineId)
+            .orderByDesc(PipelineHistory::getCreateTime).last("limit 10"));
     if (CollectionUtils.isEmpty(pipelineHistories)) {
       return Collections.emptyList();
     }
