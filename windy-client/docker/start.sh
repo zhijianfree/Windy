@@ -34,8 +34,7 @@ JVM_OPTION="-Xms${JVM_CACHE_SIZE}m -Xmx${JVM_CACHE_SIZE}m -XX:MaxNewSize=${NEW_C
 echo "start service $service"
 echo "$JVM_OPTION"
 
-nohup java -jar $JVM_OPTION $JAR_NAME > devops.log 2>&1
-
+nohup java -jar $JVM_OPTION $JAR_NAME
 
 sleep 10
 
