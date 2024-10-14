@@ -31,4 +31,6 @@ public class BuildCodeContext extends RequestContext{
    * 推送仓库密码
    * */
   private String password;
+
+  private String serviceName;
 }
