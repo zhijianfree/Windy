@@ -123,8 +123,7 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
             throw new ApiException(ErrorCode.REPO_NOT_EXIST);
         }
 
-        Optional<GitlabRepository> optional = repositories.stream()
-                .filter(repo -> Objects.equals(repo.getName().toLowerCase(), accessInfo.getGitServiceName().toLowerCase()))
+        Optional<GitlabRepository> optional = repositories.stream().filter(repo -> isMatchRepo(accessInfo, repo))
                 .findAny();
         if (!optional.isPresent()) {
             log.info("user can not access gitlab repository permission={}", accessInfo.getGitServiceName());
@@ -136,6 +135,11 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
             log.info("user do not have gitlab repository permission={}", accessInfo.getGitServiceName());
             throw new ApiException(ErrorCode.GIT_NO_PERMISSION);
         }
+    }
+
+    private boolean isMatchRepo(GitAccessInfo accessInfo, GitlabRepository repo) {
+        return Objects.equals(repo.getName().toLowerCase(), accessInfo.getGitServiceName().toLowerCase()) ||
+                Objects.equals(repo.getPath().toLowerCase(), accessInfo.getGitServiceName().toLowerCase());
     }
 
     private List<GitlabRepository> getGitlabRepositories(GitAccessInfo accessInfo) {
