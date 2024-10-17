@@ -55,6 +55,11 @@ public class FeatureNodeDto {
   private Long updateTime;
 
   /**
+   * 用例状态
+   */
+  private Integer status;
+
+  /**
    * 子节点列表
    */
   private List<FeatureNodeDto> children;

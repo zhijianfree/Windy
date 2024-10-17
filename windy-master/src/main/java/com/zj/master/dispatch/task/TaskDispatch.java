@@ -2,6 +2,7 @@ package com.zj.master.dispatch.task;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.zj.common.enums.FeatureStatus;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.uuid.UniqueIdService;
@@ -86,8 +87,9 @@ public class TaskDispatch implements IDispatchExecutor {
 
     dispatchLogRepository.updateLogSourceRecord(logId, taskRecordDto.getRecordId());
 
-    List<String> featureIds = featureList.stream().map(FeatureInfoDto::getFeatureId)
-        .collect(Collectors.toList());
+    List<String> featureIds =
+            featureList.stream().filter(feature -> Objects.equals(feature.getStatus(), FeatureStatus.NORMAL.getType()))
+                    .map(FeatureInfoDto::getFeatureId).collect(Collectors.toList());
     FeatureTask featureTask = buildFeatureTask(task, logId, featureIds, taskRecordDto);
     saveSubTaskLog(featureIds, featureTask.getLogId());
     featureExecuteProxy.execute(featureTask);

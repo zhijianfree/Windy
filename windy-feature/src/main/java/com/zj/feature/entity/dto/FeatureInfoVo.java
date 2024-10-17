@@ -62,4 +62,9 @@ public class FeatureInfoVo {
 
     private Long updateTime;
 
+    /**
+     * 用例状态
+     */
+    private Integer status;
+
 }
