@@ -5,6 +5,7 @@ import com.zj.client.handler.feature.executor.random.entity.IntegerRandomRule;
 import com.zj.client.handler.feature.executor.random.entity.RandomType;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.Random;
 
 @Component
@@ -13,8 +14,15 @@ public class IntegerRandomGenerator implements IRandomGenerator<IntegerRandomRul
     public Object generateRandom(IntegerRandomRule randomRule) {
         Integer max = randomRule.getMax();
         Integer min = randomRule.getMin();
-        Random random = new Random();
-        return random.nextInt(max - min + 1) + min;
+        if (Objects.isNull(min) && Objects.isNull(max)) {
+            return null;
+        }
+
+        if (Objects.nonNull(min) && Objects.isNull(max)) {
+            return  new Random(min).nextInt();
+        }
+
+        return new Random().nextInt(max - min + 1) + min;
     }
 
     @Override
