@@ -121,4 +121,11 @@ public class FeatureRepository extends ServiceImpl<FeatureMapper, FeatureInfo> i
 
         return remove(Wrappers.lambdaQuery(FeatureInfo.class).in(FeatureInfo::getFeatureId, featureIds));
     }
+
+    @Override
+    public List<FeatureInfoDto> getCaseFeatures(String testCaseId) {
+        List<FeatureInfo> featureInfoList = list(Wrappers.lambdaQuery(FeatureInfo.class)
+                .eq(FeatureInfo::getTestCaseId, testCaseId));
+        return OrikaUtil.convertList(featureInfoList, FeatureInfoDto.class);
+    }
 }
