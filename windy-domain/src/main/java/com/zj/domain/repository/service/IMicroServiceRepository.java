@@ -24,4 +24,6 @@ public interface IMicroServiceRepository {
   IPage<MicroserviceDto> getServices(Integer pageNo, Integer size, String name, List<String> serviceIds);
 
   MicroserviceDto queryServiceByName(String serviceName);
+
+    List<MicroserviceDto> getAllServices();
 }

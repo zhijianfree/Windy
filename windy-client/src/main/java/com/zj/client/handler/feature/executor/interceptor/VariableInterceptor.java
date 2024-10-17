@@ -4,6 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.vo.ExecutePoint;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.client.handler.feature.executor.invoker.invoke.MethodInvoke;
+import com.zj.client.handler.feature.executor.random.IRandomGenerator;
+import com.zj.client.handler.feature.executor.random.entity.RandomEntity;
+import com.zj.client.handler.feature.executor.random.entity.RandomType;
 import com.zj.client.handler.feature.executor.vo.ExecuteContext;
 import com.zj.common.enums.InvokerType;
 import com.zj.common.enums.Position;
@@ -31,6 +34,13 @@ import java.util.stream.Collectors;
 public class VariableInterceptor implements IExecuteInterceptor {
     private static final String VARIABLE_CHAR = "$";
     private final OgnlDataParser ognlDataParser = new OgnlDataParser();
+
+    private final Map<RandomType, IRandomGenerator> randomGeneratorMap;
+
+    public VariableInterceptor(List<IRandomGenerator> randomGenerators) {
+        randomGeneratorMap = randomGenerators.stream().collect(Collectors.toMap(IRandomGenerator::randomType,
+                generator -> generator));
+    }
 
     @Override
     public void beforeExecute(ExecutorUnit executorUnit, ExecuteContext context) {
@@ -147,6 +157,13 @@ public class VariableInterceptor implements IExecuteInterceptor {
             if (!String.valueOf(paramValue).contains(VARIABLE_CHAR)){
                 return;
             }
+
+            Object randomValue = generateRandomRule(paramValue);
+            if (Objects.nonNull(randomValue)) {
+                param.setValue(randomValue);
+                return;
+            }
+
             if (paramValue instanceof String) {
                 String stringValue = String.valueOf(paramValue);
                 String replaceResult = strSubstitutor.replace(stringValue);
@@ -162,6 +179,19 @@ public class VariableInterceptor implements IExecuteInterceptor {
                 param.setValue(result);
             }
         });
+    }
+
+    private Object generateRandomRule(Object paramValue) {
+        RandomEntity randomEntity = RandomType.exchangeRandomType(String.valueOf(paramValue));
+        if (Objects.isNull(randomEntity)) {
+            return null;
+        }
+
+        IRandomGenerator generator = randomGeneratorMap.get(randomEntity.getRandomType());
+        if (Objects.isNull(generator)) {
+            return null;
+        }
+        return generator.generateRandom(randomEntity.getRandomRule());
     }
 
     private Object getParamValueWithDefaultValue(ParameterDefine param) {

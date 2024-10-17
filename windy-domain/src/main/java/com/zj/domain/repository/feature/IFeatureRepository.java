@@ -34,4 +34,6 @@ public interface IFeatureRepository {
   List<FeatureInfoDto> getSubFeatures(String featureId);
 
   Boolean batchUpdate(List<FeatureInfoDto> features);
+
+    List<FeatureInfoDto> getCaseFeatures(String testCaseId);
 }
