@@ -228,7 +228,7 @@ public class FeatureExecuteProxy implements IStopEventListener {
                             return config;
                         }).collect(Collectors.toList());
         boolean result = caseConfigRepository.batchUpdateCaseConfig(updateList);
-        log.info("batch recover global context result={}", result);
+        log.info("batch recover global context result={} context={}", result, JSON.toJSONString(updateList));
     }
 
     @Override
