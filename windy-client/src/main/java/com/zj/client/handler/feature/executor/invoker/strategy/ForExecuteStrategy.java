@@ -46,13 +46,13 @@ public class ForExecuteStrategy extends BaseExecuteStrategy{
     List<ExecutePointDto> executePoints = executorUnit.getExecutePoints();
     int size = Integer.parseInt(executorUnit.getMethod());
     for (int i = 0; i < size; i++) {
-      executeContext.set("$item", i);
+      executeContext.set("$index", i);
       List<FeatureResponse> responseList = executePoints.stream().map(executePointDto -> {
         ExecutePoint point = toExecutePoint(executePointDto);
         return executeFeature(executeContext, point);
       }).collect(Collectors.toList());
 
-      executeContext.remove("$item");
+      executeContext.remove("$index");
       responses.addAll(responseList);
     }
     return responses;

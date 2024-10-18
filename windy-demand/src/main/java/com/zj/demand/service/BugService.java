@@ -45,7 +45,7 @@ public class BugService {
         bugDTO.setBugId(uniqueIdService.getUniqueId());
         UserDetail userDetail = authService.getUserDetail();
         bugDTO.setProposer(userDetail.getUserId());
-        bugDTO.setProposerName(userDetail.getUserName());
+        bugDTO.setProposerName(Optional.ofNullable(userDetail.getNickName()).orElse(userDetail.getUserName()));
         return bugRepository.createBug(bugDTO) ? bugDTO : null;
     }
 
