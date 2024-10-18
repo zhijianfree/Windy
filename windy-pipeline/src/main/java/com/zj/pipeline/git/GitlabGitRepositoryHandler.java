@@ -52,11 +52,21 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
         try {
             List<GitlabRepository> gitlabRepositories = getGitlabRepositories(accessInfo);
             serviceIdMap = gitlabRepositories.stream()
-                    .collect(Collectors.toMap(repo -> repo.getName().toLowerCase(), GitlabRepository::getId,
-                            (value1, value2) -> value2));
+                    .collect(Collectors.toMap(this::getRepositoryName, GitlabRepository::getId, (value1, value2) -> value2));
         } catch (Exception e) {
             log.info("load gitlab repositories error ={}", e.getMessage());
         }
+    }
+
+    /**
+     * 如果仓库名称与git地址上名称不一致，则使用git地址上的名称
+     */
+    private String getRepositoryName(GitlabRepository repo) {
+        String repositoryName = repo.getName().toLowerCase();
+        if (!Objects.equals(repo.getName().toLowerCase(), repo.getPath().toLowerCase())) {
+            repositoryName = repo.getPath().toLowerCase();
+        }
+        return repositoryName;
     }
 
     @Override
@@ -144,7 +154,7 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
 
     private List<GitlabRepository> getGitlabRepositories(GitAccessInfo accessInfo) {
         Response response = gitRequestProxy.getWithResponse(accessInfo.getGitDomain() + "/api/v4/projects?per_page" +
-                        "=100&page=1", getTokenHeader(accessInfo));
+                "=100&page=1", getTokenHeader(accessInfo));
         try {
             String result = response.body().string();
             List<GitlabRepository> allRepositories = JSON.parseArray(result, GitlabRepository.class);
@@ -180,7 +190,8 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
     }
 
     private List<GitlabRepository> getGitlabRepository(GitAccessInfo accessInfo) {
-        String result = gitRequestProxy.get(accessInfo.getGitDomain() + "/api/v4/projects?search=" + accessInfo.getGitServiceName(),
+        String result =
+                gitRequestProxy.get(accessInfo.getGitDomain() + "/api/v4/projects?search=" + accessInfo.getGitServiceName(),
                 getTokenHeader(accessInfo));
         return JSON.parseArray(result, GitlabRepository.class);
     }
