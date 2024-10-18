@@ -23,4 +23,8 @@ public interface IBugRepository {
     List<BugDTO> getIterationBugs(String iterationId);
 
     List<BugDTO> getBugsByName(String queryName);
+
+    List<BugDTO> getSpaceNotHandleBugs(String spaceId);
+
+    List<BugDTO> getIterationNotHandleBugs(String iterationId);
 }

@@ -32,9 +32,9 @@ public class IterationRest {
         return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.getIterationStatistic(iterationId));
     }
 
-    @GetMapping("/iterations")
-    public ResponseMeta<List<IterationDTO>> getIterationList() {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.getIterationList());
+    @GetMapping("/{spaceId}/iterations")
+    public ResponseMeta<List<IterationDTO>> getSpaceIterationList(@PathVariable("spaceId") String spaceId) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.getSpaceIterationList(spaceId));
     }
 
     @PostMapping("/iterations")
@@ -59,18 +59,17 @@ public class IterationRest {
 
     @GetMapping("/iterations/{iterationId}/members")
     public ResponseMeta<List<UserDto>> queryIterationMembers(@PathVariable("iterationId") String iterationId) {
-        return new ResponseMeta<List<UserDto>>(ErrorCode.SUCCESS, iterationService.queryIterationMembers(iterationId));
+        return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.queryIterationMembers(iterationId));
     }
 
     @PostMapping("/iterations/{iterationId}/members")
     public ResponseMeta<Boolean> addIterationMember(@RequestBody ResourceMemberDto serviceMember) {
-        return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, iterationService.addIterationMember(serviceMember));
+        return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.addIterationMember(serviceMember));
     }
 
     @DeleteMapping("/iterations/{iterationId}/members/{userId}")
     public ResponseMeta<Boolean> deleteIterationMember(@PathVariable("iterationId") String iterationId,
                                                      @PathVariable("userId") String userId) {
-        return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, iterationService.deleteIterationMember(iterationId,
-                userId));
+        return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.deleteIterationMember(iterationId, userId));
     }
 }

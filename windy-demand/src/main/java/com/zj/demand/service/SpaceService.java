@@ -4,9 +4,15 @@ import com.zj.common.auth.IAuthService;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.uuid.UniqueIdService;
+import com.zj.domain.entity.dto.demand.DemandDTO;
+import com.zj.domain.entity.dto.demand.IterationDTO;
 import com.zj.domain.entity.dto.demand.SpaceDTO;
+import com.zj.domain.repository.demand.IBugRepository;
+import com.zj.domain.repository.demand.IDemandRepository;
 import com.zj.domain.repository.demand.ISpaceRepository;
+import com.zj.domain.repository.demand.IterationRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,11 +24,19 @@ public class SpaceService {
 
     private final ISpaceRepository spaceRepository;
     private final UniqueIdService uniqueIdService;
+    private final IDemandRepository demandRepository;
+    private final IBugRepository bugRepository;
+    private final IterationRepository iterationRepository;
     private final IAuthService authService;
 
-    public SpaceService(ISpaceRepository spaceRepository, UniqueIdService uniqueIdService, IAuthService authService) {
+    public SpaceService(ISpaceRepository spaceRepository, UniqueIdService uniqueIdService,
+                        IDemandRepository demandRepository, IBugRepository bugRepository,
+                        IterationRepository iterationRepository, IAuthService authService) {
         this.spaceRepository = spaceRepository;
         this.uniqueIdService = uniqueIdService;
+        this.demandRepository = demandRepository;
+        this.bugRepository = bugRepository;
+        this.iterationRepository = iterationRepository;
         this.authService = authService;
     }
 
@@ -47,6 +61,23 @@ public class SpaceService {
     }
 
     public boolean deleteSpace(String spaceId) {
+        List<IterationDTO> spaceIterationList = iterationRepository.getSpaceNotHandleIterations(spaceId);
+        if (CollectionUtils.isNotEmpty(spaceIterationList)) {
+            log.info("space has iterations can not delete spaceId={}", spaceId);
+            throw new ApiException(ErrorCode.SPACE_HAS_NOT_COMPLETE_ITERATION);
+        }
+
+        List<DemandDTO> notHandleDemands = demandRepository.getSpaceNotHandleDemands(spaceId);
+        if (CollectionUtils.isNotEmpty(notHandleDemands)) {
+            log.info("space has demands can not delete spaceId={}", spaceId);
+            throw new ApiException(ErrorCode.SPACE_HAS_NOT_COMPLETE_DEMAND);
+        }
+
+        bugRepository.getSpaceNotHandleBugs(spaceId);
+        if (CollectionUtils.isNotEmpty(notHandleDemands)) {
+            log.info("space has bugs can not delete spaceId={}", spaceId);
+            throw new ApiException(ErrorCode.SPACE_HAS_NOT_COMPLETE_BUG);
+        }
         return spaceRepository.deleteSpace(spaceId);
     }
 

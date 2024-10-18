@@ -6,6 +6,8 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.demand.entity.IterationStatistic;
 import com.zj.domain.entity.dto.auth.UserDto;
+import com.zj.domain.entity.dto.demand.BugDTO;
+import com.zj.domain.entity.dto.demand.DemandDTO;
 import com.zj.domain.entity.dto.demand.IterationDTO;
 import com.zj.domain.entity.dto.service.ResourceMemberDto;
 import com.zj.domain.entity.po.service.ResourceMember;
@@ -46,14 +48,14 @@ public class IterationService {
         this.memberRepository = memberRepository;
     }
 
-    public List<IterationDTO> getIterationList() {
+    public List<IterationDTO> getSpaceIterationList(String spaceId) {
         String currentUserId = authService.getCurrentUserId();
         List<ResourceMember> resourceMembers = memberRepository.getResourceMembersByUser(currentUserId);
         if (CollectionUtils.isEmpty(resourceMembers)) {
             return Collections.emptyList();
         }
         List<String> iterationIds = resourceMembers.stream().map(ResourceMember::getResourceId).collect(Collectors.toList());
-        return iterationRepository.getIterationList(iterationIds);
+        return iterationRepository.getIterationList(spaceId, iterationIds);
     }
 
     public IterationDTO createIteration(IterationDTO iterationDTO) {
@@ -72,6 +74,16 @@ public class IterationService {
     }
 
     public boolean deleteIteration(String iterationId) {
+        List<BugDTO> notHandleBugs = bugRepository.getIterationNotHandleBugs(iterationId);
+        if (CollectionUtils.isNotEmpty(notHandleBugs)) {
+            log.info("iteration has bugs can not delete iteration={}", iterationId);
+            throw new ApiException(ErrorCode.ITERATION_HAS_NOT_COMPLETE_BUG);
+        }
+        List<DemandDTO> notHandleDemands = demandRepository.getIterationNotHandleDemands(iterationId);
+        if (CollectionUtils.isNotEmpty(notHandleDemands)) {
+            log.info("iteration has demands can not delete iteration={}", iterationId);
+            throw new ApiException(ErrorCode.ITERATION_HAS_NOT_COMPLETE_DEMAND);
+        }
         return iterationRepository.deleteIteration(iterationId);
     }
 

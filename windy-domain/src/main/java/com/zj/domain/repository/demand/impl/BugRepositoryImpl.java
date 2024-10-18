@@ -9,6 +9,7 @@ import com.zj.common.model.PageSize;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.demand.BugDTO;
 import com.zj.domain.entity.dto.demand.BugQuery;
+import com.zj.domain.entity.enums.BugStatus;
 import com.zj.domain.entity.po.demand.Bug;
 import com.zj.domain.mapper.demand.BugMapper;
 import com.zj.domain.repository.demand.IBugRepository;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IBugRepository {
@@ -62,6 +64,7 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
     @Override
     public boolean createBug(BugDTO bugDTO) {
         Bug bug = OrikaUtil.convert(bugDTO, Bug.class);
+        bug.setStatus(BugStatus.NOT_HANDLE.getType());
         bug.setCreateTime(System.currentTimeMillis());
         bug.setUpdateTime(System.currentTimeMillis());
         return save(bug);
@@ -102,6 +105,22 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
     @Override
     public List<BugDTO> getBugsByName(String queryName) {
         List<Bug> list = list(Wrappers.lambdaQuery(Bug.class).like(Bug::getBugName, queryName));
+        return OrikaUtil.convertList(list, BugDTO.class);
+    }
+
+    @Override
+    public List<BugDTO> getSpaceNotHandleBugs(String spaceId) {
+        List<Bug> list = list(Wrappers.lambdaQuery(Bug.class).eq(Bug::getSpaceId, spaceId)
+                .in(Bug::getStatus, BugStatus.getNotHandleBugs().stream().map(BugStatus::getType)
+                        .collect(Collectors.toList())));
+        return OrikaUtil.convertList(list, BugDTO.class);
+    }
+
+    @Override
+    public List<BugDTO> getIterationNotHandleBugs(String iterationId) {
+        List<Bug> list = list(Wrappers.lambdaQuery(Bug.class).eq(Bug::getIterationId, iterationId)
+                .in(Bug::getStatus, BugStatus.getNotHandleBugs().stream().map(BugStatus::getType)
+                        .collect(Collectors.toList())));
         return OrikaUtil.convertList(list, BugDTO.class);
     }
 }

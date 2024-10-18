@@ -5,11 +5,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.common.enums.DemandStatus;
 import com.zj.common.model.PageSize;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.demand.DemandDTO;
 import com.zj.domain.entity.dto.demand.DemandQuery;
+import com.zj.domain.entity.enums.DemandStatus;
 import com.zj.domain.entity.po.demand.Demand;
 import com.zj.domain.mapper.demand.DemandMapper;
 import com.zj.domain.repository.demand.IDemandRepository;
@@ -18,13 +18,14 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> implements IDemandRepository {
     @Override
     public boolean createDemand(DemandDTO demandDTO) {
         Demand demand = OrikaUtil.convert(demandDTO, Demand.class);
-        demand.setStatus(DemandStatus.CREATE.getType());
+        demand.setStatus(DemandStatus.NOT_HANDLE.getType());
         demand.setCreateTime(System.currentTimeMillis());
         demand.setUpdateTime(System.currentTimeMillis());
         return save(demand);
@@ -93,6 +94,22 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
     @Override
     public List<DemandDTO> getDemandsByName(String queryName) {
         List<Demand> list = list(Wrappers.lambdaUpdate(Demand.class).like(Demand::getDemandName, queryName));
+        return OrikaUtil.convertList(list, DemandDTO.class);
+    }
+
+    @Override
+    public List<DemandDTO> getSpaceNotHandleDemands(String spaceId) {
+        List<Demand> list = list(Wrappers.lambdaUpdate(Demand.class).eq(Demand::getSpaceId, spaceId)
+                .in(Demand::getStatus, DemandStatus.getNotHandleDemands().stream().map(DemandStatus::getType)
+                        .collect(Collectors.toList())));
+        return OrikaUtil.convertList(list, DemandDTO.class);
+    }
+
+    @Override
+    public List<DemandDTO> getIterationNotHandleDemands(String iterationId) {
+        List<Demand> list = list(Wrappers.lambdaUpdate(Demand.class).eq(Demand::getIterationId, iterationId)
+                .in(Demand::getStatus, DemandStatus.getNotHandleDemands().stream().map(DemandStatus::getType)
+                        .collect(Collectors.toList())));
         return OrikaUtil.convertList(list, DemandDTO.class);
     }
 

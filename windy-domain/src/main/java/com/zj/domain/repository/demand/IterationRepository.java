@@ -6,7 +6,8 @@ import java.util.List;
 
 public interface IterationRepository {
 
-    List<IterationDTO> getIterationList(List<String> iterationIds);
+    List<IterationDTO> getIterationList(String spaceId, List<String> iterationIds);
+    List<IterationDTO> getSpaceNotHandleIterations(String spaceId);
 
     IterationDTO createIteration(IterationDTO iterationDTO);
 

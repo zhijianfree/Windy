@@ -24,4 +24,8 @@ public interface IDemandRepository {
     List<DemandDTO> getIterationDemand(String iterationId);
 
     List<DemandDTO> getDemandsByName(String queryName);
+
+    List<DemandDTO> getSpaceNotHandleDemands(String spaceId);
+
+    List<DemandDTO> getIterationNotHandleDemands(String iterationId);
 }

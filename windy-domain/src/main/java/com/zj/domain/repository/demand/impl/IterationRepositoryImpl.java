@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.demand.IterationDTO;
 import com.zj.domain.entity.dto.service.ResourceMemberDto;
+import com.zj.domain.entity.enums.IterationStatus;
 import com.zj.domain.entity.po.demand.Iteration;
 import com.zj.domain.mapper.demand.IterationMapper;
 import com.zj.domain.repository.demand.IMemberRepository;
@@ -12,7 +13,9 @@ import com.zj.domain.repository.demand.IterationRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class IterationRepositoryImpl extends ServiceImpl<IterationMapper, Iteration> implements IterationRepository {
@@ -24,9 +27,18 @@ public class IterationRepositoryImpl extends ServiceImpl<IterationMapper, Iterat
     }
 
     @Override
-    public List<IterationDTO> getIterationList(List<String> iterationIds) {
-        List<Iteration> iterations = list(Wrappers.lambdaQuery(Iteration.class).in(Iteration::getIterationId, iterationIds)
-                .orderByDesc(Iteration::getCreateTime));
+    public List<IterationDTO> getIterationList(String spaceId, List<String> iterationIds) {
+        List<Iteration> iterations = list(Wrappers.lambdaQuery(Iteration.class).in(Iteration::getIterationId,
+                        iterationIds)
+                .eq(Iteration::getSpaceId, spaceId).orderByDesc(Iteration::getCreateTime));
+        return OrikaUtil.convertList(iterations, IterationDTO.class);
+    }
+
+    @Override
+    public List<IterationDTO> getSpaceNotHandleIterations(String spaceId) {
+        List<Iteration> iterations = list(Wrappers.lambdaQuery(Iteration.class).eq(Iteration::getSpaceId, spaceId)
+                .in(Iteration::getStatus, IterationStatus.getNotHandleIterations().stream().map(IterationStatus::getType)
+                        .collect(Collectors.toList())));
         return OrikaUtil.convertList(iterations, IterationDTO.class);
     }
 
@@ -61,6 +73,7 @@ public class IterationRepositoryImpl extends ServiceImpl<IterationMapper, Iterat
     public boolean updateIteration(IterationDTO iterationDTO) {
         iterationDTO.setUpdateTime(System.currentTimeMillis());
         Iteration iteration = OrikaUtil.convert(iterationDTO, Iteration.class);
-        return update(iteration, Wrappers.lambdaQuery(Iteration.class).eq(Iteration::getIterationId, iteration.getIterationId()));
+        return update(iteration, Wrappers.lambdaQuery(Iteration.class).eq(Iteration::getIterationId,
+                iteration.getIterationId()));
     }
 }
