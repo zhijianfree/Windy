@@ -1,8 +1,10 @@
 package com.zj.common.utils;
 
+import org.apache.commons.lang.StringUtils;
+
 public class GitUtils {
   public static String getServiceFromUrl(String gitUrl) {
-    if (org.apache.commons.lang.StringUtils.isBlank(gitUrl)) {
+    if (StringUtils.isBlank(gitUrl)) {
       return null;
     }
     String[] strings = gitUrl.split("/");

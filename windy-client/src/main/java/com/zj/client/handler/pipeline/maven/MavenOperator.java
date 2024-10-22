@@ -96,14 +96,11 @@ public class MavenOperator {
     }
 
     Collection<File> shFiles = FileUtils.listFiles(dir, new String[]{"sh"} ,false);
-    if (CollectionUtils.isEmpty(shFiles)) {
-      createDefaultSHFile(destDir, jarName);
+    if (CollectionUtils.isNotEmpty(shFiles)) {
+      log.info("destination dir={} hava sh file, not create default sh file", destDir);
       return;
     }
-
-    for (File file : shFiles) {
-      FileUtils.copyToDirectory(file, dir);
-    }
+    createDefaultSHFile(destDir, jarName);
   }
 
   private void createDefaultSHFile(String destDir, String name) {

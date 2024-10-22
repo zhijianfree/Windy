@@ -17,10 +17,10 @@ import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel.ResponseSta
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.client.handler.pipeline.git.IGitProcessor;
 import com.zj.client.handler.pipeline.maven.MavenOperator;
-import com.zj.common.utils.GitUtils;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.utils.GitUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -72,8 +72,8 @@ public class CodeBuildService {
             try {
                 //从git服务端拉取代码
                 String gitUrl = codeBuildParam.getGitUrl();
-                String serviceName =
-                        Optional.ofNullable(codeBuildParam.getServiceName()).orElseGet(() -> GitUtils.getServiceFromUrl(gitUrl));
+                String serviceName = Optional.ofNullable(codeBuildParam.getServiceName())
+                        .filter(StringUtils::isNoneBlank).orElseGet(() -> GitUtils.getServiceFromUrl(gitUrl));
                 String pipelineWorkspace = globalEnvConfig.getPipelineWorkspace(serviceName,
                         codeBuildParam.getPipelineId());
 
