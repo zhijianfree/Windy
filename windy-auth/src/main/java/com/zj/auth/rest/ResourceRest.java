@@ -34,6 +34,11 @@ public class ResourceRest {
         return new ResponseMeta<>(ErrorCode.SUCCESS, resourceService.getResources(page,size));
     }
 
+    @GetMapping("/auth/menus")
+    public ResponseMeta<List<ResourceDto>> getUserMenuList() {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, resourceService.getUserMenuList());
+    }
+
     @GetMapping("/resource/all")
     public ResponseMeta<List<ResourceDto>> getAllResources() {
         return new ResponseMeta<>(ErrorCode.SUCCESS, resourceService.getAllResources());

@@ -1,6 +1,7 @@
 package com.zj.auth.service;
 
 import com.zj.auth.entity.ResourceBind;
+import com.zj.common.auth.IAuthService;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.PageSize;
@@ -19,11 +20,14 @@ public class ResourceService {
     private final IResourceRepository resourceRepository;
     private final UniqueIdService uniqueIdService;
     private final PermissionService permissionService;
+    private final IAuthService authService;
 
-    public ResourceService(IResourceRepository resourceRepository, UniqueIdService uniqueIdService, PermissionService permissionService) {
+    public ResourceService(IResourceRepository resourceRepository, UniqueIdService uniqueIdService,
+                           PermissionService permissionService, IAuthService authService) {
         this.resourceRepository = resourceRepository;
         this.uniqueIdService = uniqueIdService;
         this.permissionService = permissionService;
+        this.authService = authService;
     }
 
     public PageSize<ResourceDto> getResources(Integer page, Integer size) {
@@ -69,5 +73,9 @@ public class ResourceService {
 
     public List<ResourceDto> getRoleResources(String roleId) {
         return resourceRepository.getRoleResources(roleId);
+    }
+
+    public List<ResourceDto> getUserMenuList() {
+        return resourceRepository.getMenuByUserId(authService.getCurrentUserId());
     }
 }

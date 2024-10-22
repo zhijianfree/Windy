@@ -6,7 +6,8 @@ import com.zj.domain.entity.dto.auth.ResourceDto;
 import java.util.List;
 
 public interface IResourceRepository {
-    List<ResourceDto> getResourceByyUserId(String userId);
+    List<ResourceDto> getResourceByUserId(String userId);
+    List<ResourceDto> getMenuByUserId(String userId);
 
     PageSize<ResourceDto> getResources(Integer page, Integer size);
 

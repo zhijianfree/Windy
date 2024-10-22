@@ -36,6 +36,11 @@ public class ResourceDto {
     private String operate;
 
     /**
+     * 资源类型
+     */
+    private Integer resourceType;
+
+    /**
      * 是否可见
      */
     private boolean visible;

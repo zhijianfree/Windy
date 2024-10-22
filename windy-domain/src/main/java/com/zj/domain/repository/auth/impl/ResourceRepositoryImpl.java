@@ -8,34 +8,42 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.model.PageSize;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.auth.ResourceDto;
+import com.zj.domain.entity.enums.ResourceType;
 import com.zj.domain.entity.po.auth.Resource;
 import com.zj.domain.entity.po.auth.RoleResource;
+import com.zj.domain.entity.po.auth.User;
 import com.zj.domain.entity.po.auth.UserRole;
 import com.zj.domain.mapper.auth.ResourceMapper;
 import com.zj.domain.mapper.auth.RoleResourceMapper;
+import com.zj.domain.mapper.auth.UserMapper;
 import com.zj.domain.mapper.auth.UserRoleMapper;
 import com.zj.domain.repository.auth.IResourceRepository;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Repository
 public class ResourceRepositoryImpl extends ServiceImpl<ResourceMapper, Resource> implements IResourceRepository {
 
     private final UserRoleMapper userRoleMapper;
+
+    private final UserMapper userMapper;
     private final RoleResourceMapper roleResourceMapper;
 
-    public ResourceRepositoryImpl(UserRoleMapper userRoleMapper, RoleResourceMapper roleResourceMapper) {
+    public ResourceRepositoryImpl(UserRoleMapper userRoleMapper, UserMapper userMapper, RoleResourceMapper roleResourceMapper) {
         this.userRoleMapper = userRoleMapper;
+        this.userMapper = userMapper;
         this.roleResourceMapper = roleResourceMapper;
     }
 
     @Override
-    public List<ResourceDto> getResourceByyUserId(String userId) {
+    public List<ResourceDto> getResourceByUserId(String userId) {
         List<UserRole> userRoles =
                 userRoleMapper.selectList(Wrappers.lambdaQuery(UserRole.class).eq(UserRole::getUserId, userId));
         if (CollectionUtils.isEmpty(userRoles)) {
@@ -47,6 +55,16 @@ public class ResourceRepositoryImpl extends ServiceImpl<ResourceMapper, Resource
                 roleResourceMapper.selectList(Wrappers.lambdaQuery(RoleResource.class).in(RoleResource::getRoleId,
                         roleIds));
         return getResourceList(roleResources);
+    }
+
+    @Override
+    public List<ResourceDto> getMenuByUserId(String userId) {
+        List<ResourceDto> resourceList = getResourceByUserId(userId);
+        User user = userMapper.selectOne(Wrappers.lambdaQuery(User.class).eq(User::getUserId, userId));
+        List<ResourceDto> groupResourceList = getResourceByUserId(user.getGroupId());
+        List<ResourceDto> allResources = ListUtils.union(resourceList, groupResourceList);
+        return allResources.stream().filter(resource -> Objects.equals(resource.getResourceType(),
+                ResourceType.MENU.getType())).collect(Collectors.toList());
     }
 
     private List<ResourceDto> getResourceList(List<RoleResource> roleResources) {
@@ -117,14 +135,17 @@ public class ResourceRepositoryImpl extends ServiceImpl<ResourceMapper, Resource
 
     @Override
     public List<ResourceDto> getRoleResources(String roleId) {
-        List<RoleResource> roleResources = roleResourceMapper.selectList(Wrappers.lambdaQuery(RoleResource.class).eq(RoleResource::getRoleId, roleId));
+        List<RoleResource> roleResources =
+                roleResourceMapper.selectList(Wrappers.lambdaQuery(RoleResource.class).eq(RoleResource::getRoleId,
+                        roleId));
         return getResourceList(roleResources);
     }
 
     @Override
     public boolean isResourceBind(String resourceId) {
         List<RoleResource> roleResources =
-                roleResourceMapper.selectList(Wrappers.lambdaQuery(RoleResource.class).eq(RoleResource::getResourceId, resourceId));
+                roleResourceMapper.selectList(Wrappers.lambdaQuery(RoleResource.class).eq(RoleResource::getResourceId
+                        , resourceId));
         return CollectionUtils.isNotEmpty(roleResources);
     }
 

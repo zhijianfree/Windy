@@ -15,10 +15,8 @@ import org.springframework.util.AntPathMatcher;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -30,7 +28,7 @@ public class PermissionService {
             .build(new CacheLoader<String, List<ResourceDto>>() {
                 @Override
                 public List<ResourceDto> load(String userId) {
-                    return resourceRepository.getResourceByyUserId(userId);
+                    return resourceRepository.getResourceByUserId(userId);
                 }
             });
 
