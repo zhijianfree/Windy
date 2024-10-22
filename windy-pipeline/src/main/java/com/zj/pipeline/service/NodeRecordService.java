@@ -9,6 +9,8 @@ import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+
+import com.zj.pipeline.entity.dto.ApprovalInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -22,28 +24,28 @@ public class NodeRecordService {
 
   private final INodeRecordRepository nodeRecordRepository;
 
-  public static final String APPROVAL_TIPS = "审核通过";
-
   public NodeRecordService(INodeRecordRepository nodeRecordRepository) {
     this.nodeRecordRepository = nodeRecordRepository;
   }
 
-  public void updateNodeRecordStatus(String recordId, Integer type, String message) {
-    boolean update = nodeRecordRepository.updateNodeRecordStatus(recordId, type, message);
-    log.info("update result={}", update);
+  public boolean updateNodeRecordStatus(String recordId, Integer type, String message) {
+    return nodeRecordRepository.updateNodeRecordStatus(recordId, type, message);
   }
 
-  public Boolean approval(String historyId, String nodeId, Integer type) {
-    ProcessStatus processStatus = ProcessStatus.exchange(type);
+  public Boolean approval(ApprovalInfo approvalInfo) {
+    ProcessStatus processStatus = ProcessStatus.exchange(approvalInfo.getType());
     if (Objects.isNull(processStatus)) {
-      log.warn("can not parse status type ={}", type);
+      log.warn("can not parse status type ={}", approvalInfo.getType());
       throw new ApiException(ErrorCode.PARAM_VALIDATE_ERROR);
     }
-    NodeRecordDto nodeRecord = nodeRecordRepository.getRecordByNodeAndHistory(historyId, nodeId);
-    log.info("get approval recordId={}", nodeRecord.getNodeId());
-    updateNodeRecordStatus(nodeRecord.getRecordId(), ProcessStatus.SUCCESS.getType(),
-        JSON.toJSONString(Collections.singletonList(APPROVAL_TIPS)));
-    return true;
+    NodeRecordDto nodeRecord = nodeRecordRepository.getRecordByNodeAndHistory(approvalInfo.getHistoryId(),
+            approvalInfo.getNodeId());
+    if (Objects.isNull(nodeRecord)) {
+      log.info("can not find node record historyId={} nodeId={}",approvalInfo.getHistoryId(), approvalInfo.getNodeId());
+      return false;
+    }
+    return updateNodeRecordStatus(nodeRecord.getRecordId(), processStatus.getType(),
+            JSON.toJSONString(Collections.singletonList(approvalInfo.getMessage())));
   }
 
   public List<NodeRecordDto> getNodeRecordsByHistory(String historyId) {

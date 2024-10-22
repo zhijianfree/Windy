@@ -2,10 +2,11 @@ package com.zj.pipeline.rest;
 
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.ResponseMeta;
+import com.zj.pipeline.entity.dto.ApprovalInfo;
 import com.zj.pipeline.service.NodeRecordService;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -22,7 +23,7 @@ public class NodeRecordRest {
   }
 
   @PutMapping("/node/approval")
-  public ResponseMeta<Boolean> approvalNode(@RequestParam("historyId") String historyId, @RequestParam("nodeId") String nodeId, @RequestParam("type") Integer type) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, nodeRecordService.approval(historyId, nodeId, type));
+  public ResponseMeta<Boolean> approvalNode(@RequestBody ApprovalInfo approvalInfo) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, nodeRecordService.approval(approvalInfo));
   }
 }

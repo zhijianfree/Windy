@@ -95,7 +95,7 @@ public class MavenOperator {
       log.debug("creat sh file parent path result={}", result);
     }
 
-    Collection<File> shFiles = FileUtils.listFiles(dir, new String[]{"jar"} ,false);
+    Collection<File> shFiles = FileUtils.listFiles(dir, new String[]{"sh"} ,false);
     if (CollectionUtils.isEmpty(shFiles)) {
       createDefaultSHFile(destDir, jarName);
       return;
