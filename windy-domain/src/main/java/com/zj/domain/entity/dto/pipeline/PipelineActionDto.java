@@ -42,6 +42,11 @@ public class PipelineActionDto {
   private String actionUrl;
 
   /**
+   * post请求方式
+   */
+  private String bodyType;
+
+  /**
    * 触发任务的参数列表
    */
   private List<ActionParam> paramList;

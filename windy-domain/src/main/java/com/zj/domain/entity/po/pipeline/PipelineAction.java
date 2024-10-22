@@ -1,9 +1,6 @@
 package com.zj.domain.entity.po.pipeline;
 
-import com.zj.domain.entity.dto.pipeline.CompareResult;
 import lombok.Data;
-
-import java.util.Map;
 
 /**
  * @author guyuelan
@@ -43,6 +40,11 @@ public class PipelineAction {
    * 执行请求url
    */
   private String actionUrl;
+
+  /**
+   * post请求方式
+   */
+  private String bodyType;
 
   /**
    * 执行请求参数

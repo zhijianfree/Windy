@@ -17,5 +17,7 @@ public class HttpContext extends RequestContext {
 
   private String body;
 
+  private String bodyType;
+
   private Map<String, String> headers;
 }

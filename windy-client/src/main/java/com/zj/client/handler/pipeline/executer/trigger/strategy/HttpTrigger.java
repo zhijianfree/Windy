@@ -19,8 +19,10 @@ import com.zj.common.exception.ExecuteException;
 import com.zj.common.feature.CompareDefine;
 import com.zj.common.utils.OrikaUtil;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.FormBody;
 import okhttp3.Headers;
 import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -44,10 +46,10 @@ import java.util.concurrent.TimeUnit;
 public class HttpTrigger implements INodeTrigger {
     public static final MediaType MEDIA_TYPE = MediaType.parse("application/json;charset=utf-8");
     public static final String RECORD_ID = "recordId";
-    private final OkHttpClient okHttpClient = new OkHttpClient.Builder()
-            .readTimeout(10, TimeUnit.SECONDS)
-            .connectTimeout(5, TimeUnit.SECONDS).build();
+    private final OkHttpClient okHttpClient =
+            new OkHttpClient.Builder().readTimeout(10, TimeUnit.SECONDS).connectTimeout(5, TimeUnit.SECONDS).build();
     private final CompareFactory compareFactory;
+
     public HttpTrigger(CompareFactory compareFactory) {
         this.compareFactory = compareFactory;
     }
@@ -63,7 +65,7 @@ public class HttpTrigger implements INodeTrigger {
         Map<String, Object> param = JSON.parseObject(context.getBody(), new TypeReference<Map<String, Object>>() {
         });
         param.put(RECORD_ID, taskNode.getRecordId());
-        RequestBody requestBody = RequestBody.create(MEDIA_TYPE, JSON.toJSONString(param));
+        RequestBody requestBody = createBody(context.getBodyType(), param);
         Map<String, String> headers = Optional.ofNullable(context.getHeaders()).orElseGet(HashMap::new);
         Request request =
                 new Request.Builder().url(context.getUrl()).post(requestBody).headers(Headers.of(headers)).build();
@@ -71,6 +73,22 @@ public class HttpTrigger implements INodeTrigger {
         if (!response.isSuccessful()) {
             throw new ExecuteException(response.body().string());
         }
+    }
+
+    public RequestBody createBody(String bodyType, Map<String, Object> param) {
+        if (Objects.equals(bodyType, "form-data")) {
+            MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
+            param.forEach((key, value) -> builder.addFormDataPart(key, String.valueOf(value)));
+            return builder.build();
+        }
+
+        if (Objects.equals(bodyType, "x-www-form-urlencoded")) {
+            FormBody.Builder builder = new FormBody.Builder();
+            param.forEach((key, value) -> builder.add(key, String.valueOf(value)));
+            return builder.build();
+        }
+
+        return RequestBody.create(MEDIA_TYPE, JSON.toJSONString(param));
     }
 
     @Override
@@ -81,12 +99,13 @@ public class HttpTrigger implements INodeTrigger {
                     new Request.Builder().url(refreshContext.getUrl()).get().headers(Headers.of(headers)).build();
             Response response = okHttpClient.newCall(request).execute();
             String result = response.body().string();
-            Map<String, Object> resultMap = JSON.parseObject(result, new TypeReference<Map<String, Object>>() {});
+            Map<String, Object> resultMap = JSON.parseObject(result, new TypeReference<Map<String, Object>>() {
+            });
             CompareResult compareResult = handleCompare(resultMap, refreshContext.getLoopExpression());
             QueryResponseModel queryResponseModel = new QueryResponseModel();
             queryResponseModel.setData(resultMap);
             if (Objects.nonNull(compareResult) && compareResult.isCompareSuccess()) {
-                queryResponseModel.setStatus( ProcessStatus.RUNNING.getType());
+                queryResponseModel.setStatus(ProcessStatus.RUNNING.getType());
                 return queryResponseModel;
             }
             queryResponseModel.setStatus(response.isSuccessful() ? ProcessStatus.SUCCESS.getType() :

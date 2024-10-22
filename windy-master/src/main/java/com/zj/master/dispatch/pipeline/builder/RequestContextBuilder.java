@@ -80,7 +80,8 @@ public class RequestContextBuilder {
             actionUrl = warpPathParam(actionDetail, requestContext, actionUrl);
             body = getActionParamsByPosition(actionDetail, Position.Query.name(), requestContext);
         }
-        return HttpContext.builder().body(JSON.toJSONString(body)).url(actionUrl).headers(headers).build();
+        return HttpContext.builder().body(JSON.toJSONString(body)).bodyType(actionDetail.getAction().getBodyType())
+                .url(actionUrl).headers(headers).build();
     }
 
     private static String warpPathParam(ActionDetail actionDetail, Map<String, String> requestContext, String actionUrl) {

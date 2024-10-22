@@ -15,5 +15,7 @@ public class HttpRequestContext {
 
   private String body;
 
+  private String bodyType;
+
   private Map<String, String> headers;
 }
