@@ -20,6 +20,8 @@ public class HistoryNodeDto {
 
   private List<HistoryNodeDto> children;
 
+  private boolean skip;
+
   /**
    * 执行记录Id
    * */

@@ -1,6 +1,7 @@
 package com.zj.feature.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.zj.common.enums.FeatureStatus;
 import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
 import com.zj.domain.entity.dto.feature.FeatureInfoDto;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
@@ -68,17 +69,18 @@ public class TaskRecordService {
     String testCaseId = taskRecord.getTestCaseId();
     List<FeatureInfoDto> featureInfos = featureService.queryFeatureList(testCaseId);
     List<HistoryNodeDto> historyNodes = featureInfos.stream().map(feature -> {
-      HistoryNodeDto historyNodeDTO = new HistoryNodeDto();
-      historyNodeDTO.setParentId(feature.getParentId());
-      historyNodeDTO.setRecordId(recordId);
-      historyNodeDTO.setFeatureId(feature.getFeatureId());
-      historyNodeDTO.setFeatureName(feature.getFeatureName());
+      HistoryNodeDto historyNodeDto = new HistoryNodeDto();
+      historyNodeDto.setParentId(feature.getParentId());
+      historyNodeDto.setRecordId(recordId);
+      historyNodeDto.setSkip(Objects.equals(feature.getStatus(), FeatureStatus.DISABLE.getType()));
+      historyNodeDto.setFeatureId(feature.getFeatureId());
+      historyNodeDto.setFeatureName(feature.getFeatureName());
       FeatureHistoryDto featureHistory = historyMap.get(feature.getFeatureId());
       if (Objects.nonNull(featureHistory)) {
-        historyNodeDTO.setHistoryId(featureHistory.getHistoryId());
-        historyNodeDTO.setExecuteStatus(featureHistory.getExecuteStatus());
+        historyNodeDto.setHistoryId(featureHistory.getHistoryId());
+        historyNodeDto.setExecuteStatus(featureHistory.getExecuteStatus());
       }
-      return historyNodeDTO;
+      return historyNodeDto;
     }).collect(Collectors.toList());
 
     HistoryNodeDto root = new HistoryNodeDto();

@@ -188,9 +188,7 @@ public class FeatureExecuteProxy implements IStopEventListener {
             return;
         }
 
-        ProcessStatus processStatus = ProcessStatus.exchange(history.getExecuteStatus());
-        boolean isTaskEnd = taskEndProcessor.process(taskRecordId, processStatus,
-                featureTask.getLogId());
+        boolean isTaskEnd = taskEndProcessor.process(taskRecordId, featureTask.getLogId());
         if (isTaskEnd) {
             featureTaskMap.remove(taskRecordId);
             return;
