@@ -41,6 +41,12 @@ public class UserRepositoryImpl extends ServiceImpl<UserMapper, User> implements
         return exchangePageSize(pageQuery, wrapper);
     }
 
+    @Override
+    public List<UserDto> getGroupUserList(String groupId) {
+        list(Wrappers.lambdaQuery(User.class).eq(User::getGroupId, groupId));
+        return null;
+    }
+
     private PageSize<UserDto> exchangePageSize(IPage<User> pageQuery, LambdaQueryWrapper<User> wrapper) {
         IPage<User> bugPage = page(pageQuery, wrapper);
         PageSize<UserDto> pageSize = new PageSize<>();

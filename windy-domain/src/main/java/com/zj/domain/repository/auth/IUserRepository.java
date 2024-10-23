@@ -10,6 +10,7 @@ public interface IUserRepository {
 
     UserDto getUserByUserId(String userId);
     PageSize<UserDto> getGroupUserPage(String groupId, Integer page, Integer size);
+    List<UserDto> getGroupUserList(String groupId);
 
     Boolean createUser(UserDto userDto);
 

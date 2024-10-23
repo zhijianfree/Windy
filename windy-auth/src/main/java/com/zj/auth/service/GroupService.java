@@ -5,6 +5,7 @@ import com.zj.common.utils.OrikaUtil;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.auth.GroupDto;
 import com.zj.domain.repository.auth.IGroupRepository;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -25,6 +26,9 @@ public class GroupService {
 
 
     public boolean createGroup(GroupDto groupDto) {
+        if (StringUtils.isNotBlank(groupDto.getParentId())) {
+
+        }
         groupDto.setGroupId(uniqueIdService.getUniqueId());
         return groupRepository.createGroup(groupDto);
     }

@@ -21,7 +21,7 @@ public enum TemplateType {
   }
 
   public static List<Integer> getToolTemplates(){
-    return Arrays.asList(TemplateType.FOR.getType(),
+    return Arrays.asList(TemplateType.FOR.getType(),TemplateType.PLUGIN.getType(),
             TemplateType.IF.getType(), TemplateType.DEFAULT.getType(), TemplateType.SCRIPT.getType(),
             TemplateType.THREAD.getType());
   }
