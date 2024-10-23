@@ -43,8 +43,8 @@ public class UserRepositoryImpl extends ServiceImpl<UserMapper, User> implements
 
     @Override
     public List<UserDto> getGroupUserList(String groupId) {
-        list(Wrappers.lambdaQuery(User.class).eq(User::getGroupId, groupId));
-        return null;
+        List<User> list = list(Wrappers.lambdaQuery(User.class).eq(User::getGroupId, groupId));
+        return OrikaUtil.convertList(list, UserDto.class);
     }
 
     private PageSize<UserDto> exchangePageSize(IPage<User> pageQuery, LambdaQueryWrapper<User> wrapper) {

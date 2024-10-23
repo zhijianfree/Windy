@@ -1,34 +1,40 @@
 package com.zj.auth.service;
 
 import com.zj.auth.entity.GroupTree;
+import com.zj.auth.entity.GroupUserTree;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.auth.GroupDto;
+import com.zj.domain.entity.dto.auth.UserDto;
 import com.zj.domain.repository.auth.IGroupRepository;
+import com.zj.domain.repository.auth.IUserRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class GroupService {
 
     private final IGroupRepository groupRepository;
+    private final IUserRepository userRepository;
     private final UniqueIdService uniqueIdService;
 
-    public GroupService(IGroupRepository groupRepository, UniqueIdService uniqueIdService) {
+    public GroupService(IGroupRepository groupRepository, IUserRepository userRepository, UniqueIdService uniqueIdService) {
         this.groupRepository = groupRepository;
+        this.userRepository = userRepository;
         this.uniqueIdService = uniqueIdService;
     }
 
 
     public boolean createGroup(GroupDto groupDto) {
-        if (StringUtils.isNotBlank(groupDto.getParentId())) {
-
-        }
         groupDto.setGroupId(uniqueIdService.getUniqueId());
         return groupRepository.createGroup(groupDto);
     }
@@ -40,18 +46,18 @@ public class GroupService {
         return rootTree.getChildren();
     }
 
-    private void convertTree(List<GroupTree> featureList, GroupTree parent) {
-        if (CollectionUtils.isEmpty(featureList)) {
+    private void convertTree(List<GroupTree> groupTrees, GroupTree parent) {
+        if (CollectionUtils.isEmpty(groupTrees)) {
             return;
         }
 
-        List<GroupTree> list = featureList.stream()
-                .filter(feature -> Objects.equals(feature.getParentId(), parent.getGroupId()))
+        List<GroupTree> list = groupTrees.stream()
+                .filter(groupTree -> Objects.equals(groupTree.getParentId(), parent.getGroupId()))
                 .collect(Collectors.toList());
         parent.setChildren(list);
 
-        featureList.removeIf(feature -> Objects.equals(feature.getParentId(), parent.getGroupId()));
-        list.forEach(node -> convertTree(featureList, node));
+        groupTrees.removeIf(groupTree -> Objects.equals(groupTree.getParentId(), parent.getGroupId()));
+        list.forEach(node -> convertTree(groupTrees, node));
     }
 
     public boolean updateGroup(String groupId, GroupDto groupDto) {
@@ -65,5 +71,55 @@ public class GroupService {
 
     public GroupDto getGroup(String groupId) {
         return groupRepository.getGroup(groupId);
+    }
+
+    public List<GroupUserTree> getGroupUserTree() {
+        List<GroupTree> groups = getGroups();
+        GroupTree rootGroup = new GroupTree();
+        rootGroup.setChildren(groups);
+        GroupUserTree groupUserTree =  buildGroupUserTree(rootGroup);
+        return groupUserTree.getChildren();
+    }
+
+    // 构建树的方法
+    public GroupUserTree buildGroupUserTree(GroupTree groupTree) {
+        // 构建当前组织节点
+        GroupUserTree groupUserNode = new GroupUserTree();
+        groupUserNode.setUserId(groupTree.getGroupId());
+        groupUserNode.setName(groupTree.getGroupName());
+        groupUserNode.setParentId(groupTree.getParentId());
+        groupUserNode.setIsGroup(true); // 表示这是一个组织
+
+        // 动态查询该组织的用户并加入树中
+        List<GroupUserTree> userNodes = buildUserNodes(groupTree.getGroupId());
+        groupUserNode.getChildren().addAll(userNodes);
+
+        // 递归构建子组织的树结构
+        if (groupTree.getChildren() != null) {
+            for (GroupTree childGroup : groupTree.getChildren()) {
+                GroupUserTree childNode = buildGroupUserTree(childGroup);
+                groupUserNode.getChildren().add(childNode);
+            }
+        }
+
+        return groupUserNode;
+    }
+
+    // 动态根据 groupId 调用接口获取用户，并构建用户节点
+    private List<GroupUserTree> buildUserNodes(String groupId) {
+        List<UserDto> users = userRepository.getGroupUserList(groupId); // 动态获取用户列表
+        List<GroupUserTree> userNodes = new ArrayList<>();
+
+        for (UserDto user : users) {
+            GroupUserTree userNode = new GroupUserTree();
+            userNode.setUserId(user.getUserId());
+            String name =
+                    Optional.ofNullable(user.getNickName()).filter(StringUtils::isNotBlank).orElseGet(user::getUserName);
+            userNode.setName(name);
+            userNode.setParentId(groupId);
+            userNode.setIsGroup(false); // 表示这是一个用户
+            userNodes.add(userNode);
+        }
+        return userNodes;
     }
 }
