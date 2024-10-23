@@ -78,7 +78,7 @@ public class RequestContextBuilder {
             headers = getActionParamsByPosition(actionDetail, Position.Header.name(), requestContext);
             actionDetail.getAction().setHeaders(headers);
             actionUrl = warpPathParam(actionDetail, requestContext, actionUrl);
-            body = getActionParamsByPosition(actionDetail, Position.Query.name(), requestContext);
+            body = getActionParamsByPosition(actionDetail, Position.Body.name(), requestContext);
         }
         return HttpContext.builder().body(JSON.toJSONString(body)).bodyType(actionDetail.getAction().getBodyType())
                 .url(actionUrl).headers(headers).build();
