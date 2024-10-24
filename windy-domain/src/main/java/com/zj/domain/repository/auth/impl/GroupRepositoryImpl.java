@@ -24,7 +24,8 @@ public class GroupRepositoryImpl extends ServiceImpl<GroupMapper, Group> impleme
 
     @Override
     public List<GroupDto> getGroups() {
-        return OrikaUtil.convertList(list(), GroupDto.class);
+        List<Group> groupList = list(Wrappers.lambdaQuery(Group.class).orderByDesc(Group::getCreateTime));
+        return OrikaUtil.convertList(groupList, GroupDto.class);
     }
 
     @Override
@@ -41,7 +42,8 @@ public class GroupRepositoryImpl extends ServiceImpl<GroupMapper, Group> impleme
 
     @Override
     public GroupDto getGroup(String groupId) {
-        Group group = getOne(Wrappers.lambdaUpdate(Group.class).eq(Group::getGroupId, groupId));
+        Group group =
+                getOne(Wrappers.lambdaUpdate(Group.class).eq(Group::getGroupId, groupId).orderByDesc(Group::getCreateTime));
         return OrikaUtil.convert(group, GroupDto.class);
     }
 

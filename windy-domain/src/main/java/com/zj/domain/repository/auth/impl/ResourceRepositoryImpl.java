@@ -78,7 +78,7 @@ public class ResourceRepositoryImpl extends ServiceImpl<ResourceMapper, Resource
 
     @Override
     public PageSize<ResourceDto> getResources(Integer page, Integer size) {
-        LambdaQueryWrapper<Resource> wrapper = Wrappers.lambdaQuery(Resource.class);
+        LambdaQueryWrapper<Resource> wrapper = Wrappers.lambdaQuery(Resource.class).orderByDesc(Resource::getCreateTime);
         IPage<Resource> pageQuery = new Page<>(page, size);
         IPage<Resource> rolePage = page(pageQuery, wrapper);
         PageSize<ResourceDto> pageSize = new PageSize<>();

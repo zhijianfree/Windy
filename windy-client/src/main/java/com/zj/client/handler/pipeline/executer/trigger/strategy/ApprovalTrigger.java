@@ -13,10 +13,13 @@ import com.zj.common.enums.ProcessStatus;
 import com.zj.common.model.ResponseMeta;
 import com.zj.common.monitor.RequestProxy;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 审批节点处理
@@ -50,17 +53,19 @@ public class ApprovalTrigger implements INodeTrigger {
     //审批通过就直接根据数据库的状态即可，因为这个状态变化不在节点执行是用户在ui界面完成
     String result = requestProxy.getApprovalRecord(taskNode.getRecordId());
     ResponseMeta responseMeta = JSONObject.parseObject(result, ResponseMeta.class);
-    NodeRecord record = JSON.parseObject(JSON.toJSONString(responseMeta.getData()),
+    NodeRecord nodeRecord = JSON.parseObject(JSON.toJSONString(responseMeta.getData()),
         NodeRecord.class);
-    log.info("get approval record recordId ={} status={}", taskNode.getRecordId(),
-        record.getStatus());
+    log.info("get approval record recordId ={} status={}", taskNode.getRecordId(), nodeRecord.getStatus());
     QueryResponseModel responseModel = new QueryResponseModel();
-    String msg =
-        Objects.equals(record.getStatus(), ProcessStatus.SUCCESS.getType()) ? MESSAGE_SUCCESS_TIPS
-            : MESSAGE_WAIT_TIPS;
-    responseModel.setMessage(Collections.singletonList(msg));
-    responseModel.setStatus(record.getStatus());
-    responseModel.setData(record);
+    List<String> messageList = getMessageList(nodeRecord);
+    responseModel.setMessage(messageList);
+    responseModel.setStatus(nodeRecord.getStatus());
+    responseModel.setData(nodeRecord);
     return responseModel;
+  }
+
+  private List<String> getMessageList(NodeRecord nodeRecord) {
+      return Optional.ofNullable(nodeRecord.getResult()).filter(StringUtils::isNoneBlank).map(string -> JSON.parseArray(string,
+            String.class)).orElseGet(() -> Collections.singletonList(ProcessStatus.exchange(nodeRecord.getStatus()).getDesc()));
   }
 }

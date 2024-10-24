@@ -30,7 +30,7 @@ public class RoleRepositoryImpl extends ServiceImpl<RoleMapper, Role> implements
 
     @Override
     public PageSize<RoleDto> getRolePage(Integer page, Integer size) {
-        LambdaQueryWrapper<Role> wrapper = Wrappers.lambdaQuery(Role.class);
+        LambdaQueryWrapper<Role> wrapper = Wrappers.lambdaQuery(Role.class).orderByDesc(Role::getCreateTime);
         IPage<Role> pageQuery = new Page<>(page, size);
         return exchangePageSize(pageQuery, wrapper);
     }
@@ -73,12 +73,13 @@ public class RoleRepositoryImpl extends ServiceImpl<RoleMapper, Role> implements
 
     @Override
     public PageSize<RoleDto> getGroupRolePage(String groupId, Integer page, Integer size) {
-        List<UserRole> userRoles = userRoleMapper.selectList(Wrappers.lambdaQuery(UserRole.class).eq(UserRole::getUserId, groupId));
+        List<UserRole> userRoles =
+                userRoleMapper.selectList(Wrappers.lambdaQuery(UserRole.class).eq(UserRole::getUserId, groupId));
         if (CollectionUtils.isEmpty(userRoles)) {
             return new PageSize<>();
         }
         List<String> roleIds = userRoles.stream().map(UserRole::getRoleId).collect(Collectors.toList());
-        LambdaQueryWrapper<Role> wrapper = Wrappers.lambdaQuery(Role.class).in(Role::getRoleId, roleIds);
+        LambdaQueryWrapper<Role> wrapper = Wrappers.lambdaQuery(Role.class).in(Role::getRoleId, roleIds).orderByDesc(Role::getCreateTime);
         IPage<Role> pageQuery = new Page<>(page, size);
 
         IPage<Role> rolePage = page(pageQuery, wrapper);
