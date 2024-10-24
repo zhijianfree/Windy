@@ -228,7 +228,10 @@ public class FeatureService {
 
         //3 复制全局变量
         List<TestCaseConfigDto> caseConfigs = testCaseConfigService.getTestCaseConfigs(copyCaseFeature.getTestCaseId());
-        caseConfigs.forEach(configDTO -> configDTO.setUnionId(newCaseId));
+        caseConfigs.forEach(config -> {
+            config.setUnionId(newCaseId);
+            config.setId(null);
+        });
         testCaseConfigService.addCaseConfigs(caseConfigs);
         log.info("copy global configs={}", JSON.toJSONString(caseConfigs));
         return true;
