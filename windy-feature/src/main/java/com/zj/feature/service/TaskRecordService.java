@@ -13,9 +13,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Service;
+
+@Slf4j
 @Service
 public class TaskRecordService {
 
@@ -30,14 +33,6 @@ public class TaskRecordService {
     this.taskRecordRepository = taskRecordRepository;
   }
 
-  public boolean insert(TaskRecordDto taskRecordDto) {
-    return taskRecordRepository.save(taskRecordDto);
-  }
-
-  public boolean updateRecordStatus(String recordId, int status) {
-    return taskRecordRepository.updateRecordStatus(recordId, status);
-  }
-
   public PageSize<TaskRecordDto> getTaskRecordPage(Integer pageNum, Integer size) {
     IPage<TaskRecordDto> recordIPage = taskRecordRepository.getTaskRecordPage(pageNum, size);
     PageSize<TaskRecordDto> pageSize = new PageSize<>();
@@ -48,9 +43,15 @@ public class TaskRecordService {
 
   public boolean deleteTaskRecord(String recordId) {
     TaskRecordDto taskRecord = taskRecordRepository.getTaskRecord(recordId);
-    boolean executeHistory = featureHistoryService.deleteByRecordId(taskRecord.getTestCaseId());
-    boolean flag = taskRecordRepository.deleteTaskRecord(recordId);
-    return executeHistory && flag;
+    if (Objects.isNull(taskRecord)) {
+      return true;
+    }
+    List<FeatureHistoryDto> histories = featureHistoryService.getHistories(recordId);
+    if (CollectionUtils.isNotEmpty(histories)) {
+      boolean executeHistory = featureHistoryService.deleteByRecordId(recordId);
+      log.info("delete record history result = {}", executeHistory);
+    }
+    return taskRecordRepository.deleteTaskRecord(recordId);
   }
 
   public List<FeatureHistoryDto>  getTaskFeatureHistories(String recordId) {

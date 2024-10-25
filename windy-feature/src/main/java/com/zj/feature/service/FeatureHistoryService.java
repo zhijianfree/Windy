@@ -32,7 +32,7 @@ public class FeatureHistoryService {
     return featureHistoryRepository.getHistoriesByTaskRecordId(taskId);
   }
 
-  public boolean deleteByRecordId(String taskId) {
-    return featureHistoryRepository.deleteByRecordId(taskId);
+  public boolean deleteByRecordId(String taskRecordId) {
+    return featureHistoryRepository.deleteByRecordId(taskRecordId);
   }
 }
