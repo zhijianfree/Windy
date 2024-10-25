@@ -9,7 +9,7 @@ import com.zj.common.utils.OrikaUtil;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.demand.entity.DemandDetail;
 import com.zj.domain.entity.dto.auth.UserDto;
-import com.zj.domain.entity.dto.demand.BusinessStatusDTO;
+import com.zj.domain.entity.dto.demand.BusinessStatusDto;
 import com.zj.domain.entity.dto.demand.DemandDTO;
 import com.zj.domain.entity.dto.demand.DemandQuery;
 import com.zj.domain.repository.auth.IUserRepository;
@@ -102,7 +102,7 @@ public class DemandService {
         return demandRepository.getRelatedDemands(currentUserId, page, size);
     }
 
-    public List<BusinessStatusDTO> getDemandStatuses() {
+    public List<BusinessStatusDto> getDemandStatuses() {
         return businessStatusRepository.getDemandStatuses();
     }
 
@@ -111,7 +111,7 @@ public class DemandService {
         return demandRepository.getIterationDemand(iterationId);
     }
 
-    public List<BusinessStatusDTO> getDemandTags() {
+    public List<BusinessStatusDto> getDemandTags() {
         return businessStatusRepository.getDemandTags();
     }
 }

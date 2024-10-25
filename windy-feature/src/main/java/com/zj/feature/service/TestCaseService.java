@@ -1,17 +1,28 @@
 package com.zj.feature.service;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.zj.common.auth.IAuthService;
+import com.zj.common.enums.LogType;
+import com.zj.common.enums.ProcessStatus;
+import com.zj.common.model.DispatchTaskModel;
+import com.zj.common.monitor.RequestProxy;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.common.model.PageSize;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
 import com.zj.domain.entity.dto.feature.FeatureInfoDto;
+import com.zj.domain.entity.dto.feature.TaskRecordDto;
 import com.zj.domain.entity.dto.feature.TestCaseDto;
 import com.zj.domain.repository.feature.IExecutePointRepository;
 import com.zj.domain.repository.feature.IFeatureRepository;
+import com.zj.domain.repository.feature.ITaskRecordRepository;
 import com.zj.domain.repository.feature.ITestCaseRepository;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.zj.feature.entity.BatchExecuteFeature;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,18 +31,25 @@ import org.springframework.transaction.annotation.Transactional;
  * @author guyuelan
  * @since 2022/12/12
  */
+@Slf4j
 @Service
 public class TestCaseService {
   private final UniqueIdService uniqueIdService;
   private final ITestCaseRepository testCaseRepository;
   private final IFeatureRepository featureRepository;
+  private final RequestProxy requestProxy;
   private final IExecutePointRepository executePointRepository;
+  private final ITaskRecordRepository taskRecordRepository;
+  private final IAuthService authService;
 
-  public TestCaseService(UniqueIdService uniqueIdService, ITestCaseRepository testCaseRepository, IFeatureRepository featureRepository, IExecutePointRepository executePointRepository) {
+  public TestCaseService(UniqueIdService uniqueIdService, ITestCaseRepository testCaseRepository, IFeatureRepository featureRepository, RequestProxy requestProxy, IExecutePointRepository executePointRepository, ITaskRecordRepository taskRecordRepository, IAuthService authService) {
     this.uniqueIdService = uniqueIdService;
     this.testCaseRepository = testCaseRepository;
     this.featureRepository = featureRepository;
+    this.requestProxy = requestProxy;
     this.executePointRepository = executePointRepository;
+    this.taskRecordRepository = taskRecordRepository;
+    this.authService = authService;
   }
 
   public PageSize<TestCaseDto> getE2ECases(Integer page, Integer pageSize) {
@@ -97,5 +115,32 @@ public class TestCaseService {
 
   public List<TestCaseDto> getE2ECases() {
     return testCaseRepository.getE2ECases();
+  }
+
+  public boolean executeFeature(String caseId, BatchExecuteFeature batchExecute) {
+    String taskName = "批量执行 " + authService.getUserDetail().getNickName();
+    TaskRecordDto taskRecord = createTempTaskRecord(caseId, taskName);
+    boolean createRecord = taskRecordRepository.save(taskRecord);
+    if (!createRecord){
+      log.info("create record error, can not execute batch features caseId={}", caseId);
+      return false;
+    }
+
+    DispatchTaskModel dispatchTaskModel = new DispatchTaskModel();
+    dispatchTaskModel.setType(LogType.FEATURE.getType());
+    dispatchTaskModel.setSourceId(JSON.toJSONString(batchExecute.getFeatureIds()));
+    dispatchTaskModel.setSourceName(taskName);
+    dispatchTaskModel.setTriggerId(taskRecord.getRecordId());
+    return requestProxy.runTask(dispatchTaskModel);
+  }
+
+  private TaskRecordDto createTempTaskRecord(String caseId, String taskName) {
+    TaskRecordDto taskRecord = new TaskRecordDto();
+    taskRecord.setRecordId(uniqueIdService.getUniqueId());
+    taskRecord.setTriggerId(caseId);
+    taskRecord.setTestCaseId(caseId);
+    taskRecord.setStatus(ProcessStatus.RUNNING.getType());
+    taskRecord.setTaskName(taskName);
+    return taskRecord;
   }
 }

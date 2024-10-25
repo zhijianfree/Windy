@@ -3,7 +3,7 @@ package com.zj.demand.service;
 import com.zj.common.auth.IAuthService;
 import com.zj.common.model.PageSize;
 import com.zj.common.uuid.UniqueIdService;
-import com.zj.domain.entity.dto.demand.BusinessStatusDTO;
+import com.zj.domain.entity.dto.demand.BusinessStatusDto;
 import com.zj.domain.entity.dto.demand.TaskQuery;
 import com.zj.domain.entity.dto.demand.WorkTaskDTO;
 import com.zj.domain.repository.demand.IBusinessStatusRepository;
@@ -48,7 +48,7 @@ public class WorkTaskService {
         return workTaskRepository.getWorkTask(taskId);
     }
 
-    public List<BusinessStatusDTO> getWorkTaskStatuses() {
+    public List<BusinessStatusDto> getWorkTaskStatuses() {
         return businessStatusRepository.getWorkTaskStatuses();
     }
 

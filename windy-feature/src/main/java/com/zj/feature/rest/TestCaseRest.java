@@ -5,9 +5,12 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.PageSize;
 import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
 import com.zj.domain.entity.dto.feature.TestCaseDto;
+import com.zj.feature.entity.BatchExecuteFeature;
 import com.zj.feature.service.TestCaseConfigService;
 import com.zj.feature.service.TestCaseService;
 import java.util.List;
+
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -58,6 +61,12 @@ public class TestCaseRest {
   public ResponseMeta<String> createTestCases(@RequestBody TestCaseDto testCaseDTO) {
     String testCaseId = testCaseService.createTestCase(testCaseDTO);
     return new ResponseMeta<>(ErrorCode.SUCCESS, testCaseId);
+  }
+
+  @PostMapping("/cases/{caseId}/batch")
+  public ResponseMeta<Boolean> startBatchFeatureTask(@PathVariable("caseId") String caseId,
+                                                    @Validated @RequestBody BatchExecuteFeature batchExecute) {
+    return new ResponseMeta(ErrorCode.SUCCESS, testCaseService.executeFeature(caseId, batchExecute));
   }
 
   @PutMapping("/case")

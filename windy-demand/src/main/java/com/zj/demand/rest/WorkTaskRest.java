@@ -5,7 +5,7 @@ import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseMeta;
 import com.zj.demand.service.WorkTaskService;
 import com.zj.domain.entity.dto.demand.WorkTaskDTO;
-import com.zj.domain.entity.dto.demand.BusinessStatusDTO;
+import com.zj.domain.entity.dto.demand.BusinessStatusDto;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,7 +52,7 @@ public class WorkTaskRest {
     }
 
     @GetMapping("/task/statuses")
-    public ResponseMeta<List<BusinessStatusDTO>> getWorkTaskStatuses() {
+    public ResponseMeta<List<BusinessStatusDto>> getWorkTaskStatuses() {
         return new ResponseMeta<>(ErrorCode.SUCCESS, workTaskService.getWorkTaskStatuses());
     }
 

@@ -11,10 +11,19 @@ import java.util.List;
 @Data
 public class BuildCodeContext extends RequestContext{
 
+  /**
+   * Pom文件的路径
+   */
   private String pomPath;
 
+  /**
+   * 是否是发布流水线构建
+   */
   private Boolean isPublish;
 
+  /**
+   * 合并的分支列表
+   */
   private List<String> branches;
 
   /**
@@ -32,5 +41,13 @@ public class BuildCodeContext extends RequestContext{
    * */
   private String password;
 
+  /**
+   * 发布的版本
+   */
+  private String version;
+
+  /**
+   * 服务名称
+   */
   private String serviceName;
 }

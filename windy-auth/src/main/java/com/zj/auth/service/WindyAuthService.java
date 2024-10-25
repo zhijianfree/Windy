@@ -50,6 +50,7 @@ public class WindyAuthService implements IAuthService {
         return UserDetail.builder()
                 .userId(userSession.getUserId())
                 .userName(userSession.getUsername())
+                .nickName(userSession.getUserDto().getNickName())
                 .groupId(userSession.getUserId())
                 .build();
     }

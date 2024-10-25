@@ -20,6 +20,9 @@ public class TaskRecordDto {
    * */
   private Integer status;
 
+  /**
+   * 状态名称
+   */
   private String statusName;
 
   /**

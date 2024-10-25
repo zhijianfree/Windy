@@ -5,7 +5,7 @@ import com.zj.common.enums.CompareType;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
 import com.zj.domain.repository.feature.IExecutePointRepository;
-import com.zj.feature.entity.dto.ExecutePointVo;
+import com.zj.feature.entity.ExecutePointVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;

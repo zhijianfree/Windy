@@ -25,9 +25,9 @@ public enum ErrorCode {
   PIPELINE_NOT_BIND(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000012", "流水线未绑定分支，无法发布"),
   SERVICE_BRANCH_PUBLISH_EXIST(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000013", "当前分支已推送发布，请查看发布列表"),
   PUBLISH_PIPELINE_EXIST(HttpStatus.BAD_REQUEST, "Pipeline.000014", "当前服务已存在发布流水线,无法创建"),
-
   NOT_FIND_PIPELINE(HttpStatus.BAD_REQUEST, "Pipeline.000015", "当前流水线不存在"),
   CREATE_BRANCH_ERROR(HttpStatus.BAD_REQUEST, "Pipeline.000016", "创建分支失败"),
+  PIPELINE_RUNNING_NOT_DELETE_PUBLISH(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000017", "流水线正在运行，无法删除发布分支"),
 
   /*==================Service服务==================*/
   NOT_FIND_REPO_CONFIG(HttpStatus.BAD_REQUEST, "Service.000001", "git访问失败，请检查系统配置"),
@@ -56,6 +56,7 @@ public enum ErrorCode {
   SPACE_HAS_NOT_COMPLETE_BUG(HttpStatus.BAD_REQUEST, "Space.000008", "空间下有未完成的bug无法删除"),
   ITERATION_HAS_NOT_COMPLETE_DEMAND(HttpStatus.BAD_REQUEST, "Iteration.000009", "迭代下有未完成的需求"),
   ITERATION_HAS_NOT_COMPLETE_BUG(HttpStatus.BAD_REQUEST, "Iteration.000010", "迭代下有未完成的bug无法删除"),
+  UPDATE_ITERATION_STATUS_ERROR(HttpStatus.BAD_REQUEST, "Iteration.000011", "迭代状态更新失败"),
   /*==================Client端构建运行==================*/
   NOT_FIND_JAR(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000001", "构建时未发现JAR包"),
   UNKNOWN_EXECUTE_TYPE(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000002", "未找到节点执行类型"),

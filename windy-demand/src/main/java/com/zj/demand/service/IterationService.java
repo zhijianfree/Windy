@@ -7,11 +7,13 @@ import com.zj.common.uuid.UniqueIdService;
 import com.zj.demand.entity.IterationStatistic;
 import com.zj.domain.entity.dto.auth.UserDto;
 import com.zj.domain.entity.dto.demand.BugDTO;
+import com.zj.domain.entity.dto.demand.BusinessStatusDto;
 import com.zj.domain.entity.dto.demand.DemandDTO;
 import com.zj.domain.entity.dto.demand.IterationDTO;
 import com.zj.domain.entity.dto.service.ResourceMemberDto;
 import com.zj.domain.entity.po.service.ResourceMember;
 import com.zj.domain.repository.demand.IBugRepository;
+import com.zj.domain.repository.demand.IBusinessStatusRepository;
 import com.zj.domain.repository.demand.IDemandRepository;
 import com.zj.domain.repository.demand.IMemberRepository;
 import com.zj.domain.repository.demand.IWorkTaskRepository;
@@ -36,9 +38,10 @@ public class IterationService {
     private final UniqueIdService uniqueIdService;
     private final IAuthService authService;
     private final IMemberRepository memberRepository;
+    private final IBusinessStatusRepository businessStatusRepository;
     public IterationService(IDemandRepository demandRepository, IBugRepository bugRepository,
                             IWorkTaskRepository workTaskRepository, IterationRepository iterationRepository,
-                            UniqueIdService uniqueIdService, IAuthService authService, IMemberRepository memberRepository) {
+                            UniqueIdService uniqueIdService, IAuthService authService, IMemberRepository memberRepository, IBusinessStatusRepository businessStatusRepository) {
         this.demandRepository = demandRepository;
         this.bugRepository = bugRepository;
         this.workTaskRepository = workTaskRepository;
@@ -46,6 +49,7 @@ public class IterationService {
         this.uniqueIdService = uniqueIdService;
         this.authService = authService;
         this.memberRepository = memberRepository;
+        this.businessStatusRepository = businessStatusRepository;
     }
 
     public List<IterationDTO> getSpaceIterationList(String spaceId) {
@@ -69,6 +73,11 @@ public class IterationService {
         if (Objects.isNull(iteration)) {
             log.info("iteration is not exist={}", iterationId);
             throw new ApiException(ErrorCode.ITERATION_NOT_EXIST);
+        }
+
+        if(Objects.nonNull(iterationDTO.getStatus()) && iterationDTO.getStatus() < iteration.getStatus()){
+            log.info("iteration status update error status= {}", iterationDTO.getStatus());
+            throw new ApiException(ErrorCode.UPDATE_ITERATION_STATUS_ERROR);
         }
         return iterationRepository.updateIteration(iterationDTO);
     }
@@ -108,5 +117,9 @@ public class IterationService {
 
     public Boolean deleteIterationMember(String iterationId, String userId) {
         return memberRepository.deleteResourceMember(iterationId, userId);
+    }
+
+    public List<BusinessStatusDto> getIterationStatuses() {
+        return businessStatusRepository.getIterationStatuses();
     }
 }

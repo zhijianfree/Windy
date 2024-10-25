@@ -5,7 +5,7 @@ import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseMeta;
 import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
 import com.zj.domain.entity.dto.feature.TaskRecordDto;
-import com.zj.feature.entity.dto.HistoryNodeDto;
+import com.zj.feature.entity.HistoryNodeDto;
 import com.zj.feature.service.TaskRecordService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,17 +34,19 @@ public class TaskRecordRest {
   }
 
   @GetMapping("/task/record/{recordId}")
-  public ResponseMeta<TaskRecordDto> getTaskRecordDetail(
-      @PathVariable("recordId") String recordId) {
+  public ResponseMeta<TaskRecordDto> getTaskRecordDetail(@PathVariable("recordId") String recordId) {
     return new ResponseMeta<TaskRecordDto>(ErrorCode.SUCCESS,
         taskRecordService.getTaskRecord(recordId));
   }
 
   @GetMapping("/task/{triggerId}/record")
-  public ResponseMeta<TaskRecordDto> getTaskRecordByTrigger(
-          @PathVariable("triggerId") String triggerId) {
-    return new ResponseMeta<TaskRecordDto>(ErrorCode.SUCCESS,
-            taskRecordService.getTaskRecordByTrigger(triggerId));
+  public ResponseMeta<TaskRecordDto> getTaskRecordByTrigger(@PathVariable("triggerId") String triggerId) {
+    return new ResponseMeta<TaskRecordDto>(ErrorCode.SUCCESS, taskRecordService.getTaskRecordByTrigger(triggerId));
+  }
+
+  @GetMapping("/task/{triggerId}/records")
+  public ResponseMeta<List<TaskRecordDto>> getTriggerTaskRecords(@PathVariable("triggerId") String triggerId) {
+    return new ResponseMeta<List<TaskRecordDto>>(ErrorCode.SUCCESS, taskRecordService.getTriggerTaskRecords(triggerId));
   }
 
   @GetMapping("/task/records/{recordId}/histories")

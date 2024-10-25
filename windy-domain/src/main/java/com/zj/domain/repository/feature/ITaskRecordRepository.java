@@ -23,4 +23,6 @@ public interface ITaskRecordRepository {
   List<TaskRecordDto> getTaskRecordsOrderByTime(String taskId);
 
     TaskRecordDto getTaskRecordByTrigger(String triggerId);
+
+  List<TaskRecordDto> getTriggerTaskRecords(String triggerId);
 }

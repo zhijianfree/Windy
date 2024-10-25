@@ -5,7 +5,7 @@ import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseMeta;
 import com.zj.demand.entity.DemandDetail;
 import com.zj.demand.service.DemandService;
-import com.zj.domain.entity.dto.demand.BusinessStatusDTO;
+import com.zj.domain.entity.dto.demand.BusinessStatusDto;
 import com.zj.domain.entity.dto.demand.DemandDTO;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -62,12 +62,12 @@ public class DemandRest {
     }
 
     @GetMapping("/demand/tags")
-    public ResponseMeta<List<BusinessStatusDTO>> getDemandTags() {
+    public ResponseMeta<List<BusinessStatusDto>> getDemandTags() {
         return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getDemandTags());
     }
 
     @GetMapping("/demand/statuses")
-    public ResponseMeta<List<BusinessStatusDTO>> getDemandStatuses() {
+    public ResponseMeta<List<BusinessStatusDto>> getDemandStatuses() {
         return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getDemandStatuses());
     }
 

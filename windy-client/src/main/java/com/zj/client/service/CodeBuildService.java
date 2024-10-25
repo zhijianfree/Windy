@@ -147,11 +147,12 @@ public class CodeBuildService {
         PipelineEventFactory.sendNotifyEvent(statusEvent);
     }
 
-    private String startBuildDocker(String serviceName, String dockerFilePath, CodeBuildParamDto codeBuildParamDto)
+    private String startBuildDocker(String serviceName, String dockerFilePath, CodeBuildParamDto param)
             throws InterruptedException {
-        String dateNow = dateFormat.format(new Date());
+        String version =
+                Optional.ofNullable(param.getVersion()).filter(StringUtils::isNoneBlank).orElseGet(() -> dateFormat.format(new Date()));
         File dockerFile = new File(dockerFilePath);
-        return buildDocker(serviceName.toLowerCase(), dateNow, dockerFile, codeBuildParamDto);
+        return buildDocker(serviceName.toLowerCase(), version, dockerFile, param);
     }
 
     private void pullCodeFrmGit(CodeBuildParamDto codeBuildParamDto, String pipelineWorkspace)

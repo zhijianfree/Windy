@@ -5,7 +5,7 @@ import com.zj.common.enums.FeatureStatus;
 import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
 import com.zj.domain.entity.dto.feature.FeatureInfoDto;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
-import com.zj.feature.entity.dto.HistoryNodeDto;
+import com.zj.feature.entity.HistoryNodeDto;
 import com.zj.common.model.PageSize;
 import com.zj.domain.entity.dto.feature.TaskRecordDto;
 import java.util.Collections;
@@ -117,5 +117,9 @@ public class TaskRecordService {
 
   public TaskRecordDto getTaskRecordByTrigger(String triggerId) {
     return taskRecordRepository.getTaskRecordByTrigger(triggerId);
+  }
+
+  public List<TaskRecordDto> getTriggerTaskRecords(String triggerId) {
+    return taskRecordRepository.getTriggerTaskRecords(triggerId);
   }
 }

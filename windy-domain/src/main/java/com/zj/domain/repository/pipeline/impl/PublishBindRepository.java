@@ -63,4 +63,10 @@ public class PublishBindRepository extends ServiceImpl<PublishBindMapper, Publis
   public boolean deleteServicePublishes(String serviceId) {
     return remove( Wrappers.lambdaQuery(PublishBind.class).eq(PublishBind::getServiceId, serviceId));
   }
+
+  @Override
+  public PublishBindDto getPublishById(String publishId) {
+    PublishBind publishBind = getOne(Wrappers.lambdaQuery(PublishBind.class).eq(PublishBind::getPublishId, publishId));
+    return OrikaUtil.convert(publishBind, PublishBindDto.class);
+  }
 }

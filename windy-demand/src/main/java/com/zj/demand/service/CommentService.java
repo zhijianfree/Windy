@@ -5,9 +5,11 @@ import com.zj.common.auth.UserDetail;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.demand.CommentDTO;
 import com.zj.domain.repository.demand.ICommentRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author falcon
@@ -34,7 +36,9 @@ public class CommentService {
     commentDTO.setCommentId(uniqueIdService.getUniqueId());
     commentDTO.setUserId(authService.getCurrentUserId());
     UserDetail userDetail = authService.getUserDetail();
-    commentDTO.setUserName(userDetail.getUserName());
+    String name = Optional.ofNullable(userDetail.getNickName()).filter(StringUtils::isNoneBlank)
+            .orElseGet(userDetail::getUserName);
+    commentDTO.setUserName(name);
     return commentRepository.saveComment(commentDTO);
   }
 

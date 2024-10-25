@@ -87,4 +87,11 @@ public class TaskRecordRepository extends ServiceImpl<TaskRecordMapper, TaskReco
             Wrappers.lambdaQuery(TaskRecord.class).eq(TaskRecord::getTriggerId, triggerId));
     return OrikaUtil.convert(taskRecord, TaskRecordDto.class);
   }
+
+  @Override
+  public List<TaskRecordDto> getTriggerTaskRecords(String triggerId) {
+    List<TaskRecord> taskRecords = list(
+            Wrappers.lambdaQuery(TaskRecord.class).eq(TaskRecord::getTriggerId, triggerId));
+    return OrikaUtil.convertList(taskRecords, TaskRecordDto.class);
+  }
 }

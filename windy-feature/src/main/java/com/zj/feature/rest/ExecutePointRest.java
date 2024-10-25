@@ -3,7 +3,7 @@ package com.zj.feature.rest;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseMeta;
-import com.zj.feature.entity.dto.ExecutePointVo;
+import com.zj.feature.entity.ExecutePointVo;
 import com.zj.feature.service.ExecutePointService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;

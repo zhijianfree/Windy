@@ -5,6 +5,7 @@ import com.zj.common.model.ResponseMeta;
 import com.zj.demand.entity.IterationStatistic;
 import com.zj.demand.service.IterationService;
 import com.zj.domain.entity.dto.auth.UserDto;
+import com.zj.domain.entity.dto.demand.BusinessStatusDto;
 import com.zj.domain.entity.dto.demand.IterationDTO;
 import com.zj.domain.entity.dto.service.ResourceMemberDto;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -71,5 +72,10 @@ public class IterationRest {
     public ResponseMeta<Boolean> deleteIterationMember(@PathVariable("iterationId") String iterationId,
                                                      @PathVariable("userId") String userId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.deleteIterationMember(iterationId, userId));
+    }
+
+    @GetMapping("/iteration/statuses")
+    public ResponseMeta<List<BusinessStatusDto>> getIterationStatuses() {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.getIterationStatuses());
     }
 }

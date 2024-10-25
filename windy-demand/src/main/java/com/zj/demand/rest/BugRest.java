@@ -6,7 +6,7 @@ import com.zj.common.model.ResponseMeta;
 import com.zj.demand.entity.BugDetail;
 import com.zj.demand.service.BugService;
 import com.zj.domain.entity.dto.demand.BugDTO;
-import com.zj.domain.entity.dto.demand.BusinessStatusDTO;
+import com.zj.domain.entity.dto.demand.BusinessStatusDto;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,6 +49,11 @@ public class BugRest {
         return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getBugPage(page, size, name, status, spaceId, iterationId));
     }
 
+    @GetMapping("/bug/tags")
+    public ResponseMeta<List<BusinessStatusDto>> getBugTags() {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getBugTags());
+    }
+
     @GetMapping("/bugs/{bugId}")
     public ResponseMeta<BugDetail> getBug(@PathVariable("bugId") String bugId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getBug(bugId));
@@ -60,7 +65,7 @@ public class BugRest {
     }
 
     @GetMapping("/bug/statuses")
-    public ResponseMeta<List<BusinessStatusDTO>> getBugStatuses() {
+    public ResponseMeta<List<BusinessStatusDto>> getBugStatuses() {
         return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getBugStatuses());
     }
 

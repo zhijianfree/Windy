@@ -1,15 +1,14 @@
 package com.zj.domain.repository.demand;
 
-import com.zj.domain.entity.dto.demand.BusinessStatusDTO;
+import com.zj.domain.entity.dto.demand.BusinessStatusDto;
 
 import java.util.List;
 
 public interface IBusinessStatusRepository {
-    List<BusinessStatusDTO> getDemandStatuses();
-
-    List<BusinessStatusDTO> getBugStatuses();
-
-    List<BusinessStatusDTO> getWorkTaskStatuses();
-
-    List<BusinessStatusDTO> getDemandTags();
+    List<BusinessStatusDto> getDemandStatuses();
+    List<BusinessStatusDto> getIterationStatuses();
+    List<BusinessStatusDto> getBugStatuses();
+    List<BusinessStatusDto> getWorkTaskStatuses();
+    List<BusinessStatusDto> getDemandTags();
+    List<BusinessStatusDto> getBugTags();
 }

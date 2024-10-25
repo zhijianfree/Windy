@@ -18,8 +18,8 @@ import com.zj.domain.entity.enums.SourceStatus;
 import com.zj.domain.repository.feature.IExecutePointRepository;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import com.zj.domain.repository.feature.IPluginRepository;
-import com.zj.feature.entity.dto.BatchTemplates;
-import com.zj.feature.entity.dto.UploadResultDto;
+import com.zj.feature.entity.BatchTemplates;
+import com.zj.feature.entity.UploadResultDto;
 import com.zj.plugin.loader.Feature;
 import com.zj.plugin.loader.FeatureDefine;
 import com.zj.plugin.loader.ParameterDefine;
@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -215,7 +214,8 @@ public class TemplateService {
             if (!fileDir.exists()) {
                 FileUtils.createParentDirectories(fileDir);
             }
-        } catch (IOException ignore) {
+        } catch (IOException e) {
+            log.info("create jar dir error", e);
         }
     }
 

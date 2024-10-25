@@ -20,4 +20,6 @@ public interface IPublishBindRepository {
   PublishBindDto getServiceBranch(String serviceId, String gitBranch);
 
   boolean deleteServicePublishes(String serviceId);
+
+    PublishBindDto getPublishById(String publishId);
 }

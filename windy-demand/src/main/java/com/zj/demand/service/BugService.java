@@ -11,7 +11,7 @@ import com.zj.demand.entity.BugDetail;
 import com.zj.domain.entity.dto.auth.UserDto;
 import com.zj.domain.entity.dto.demand.BugDTO;
 import com.zj.domain.entity.dto.demand.BugQuery;
-import com.zj.domain.entity.dto.demand.BusinessStatusDTO;
+import com.zj.domain.entity.dto.demand.BusinessStatusDto;
 import com.zj.domain.repository.auth.IUserRepository;
 import com.zj.domain.repository.demand.IBugRepository;
 import com.zj.domain.repository.demand.IBusinessStatusRepository;
@@ -90,11 +90,15 @@ public class BugService {
         return bugRepository.getUserRelatedBugs(bugQuery);
     }
 
-    public List<BusinessStatusDTO> getBugStatuses() {
+    public List<BusinessStatusDto> getBugStatuses() {
         return businessStatusRepository.getBugStatuses();
     }
 
     public List<BugDTO> getIterationBugs(String iterationId) {
         return bugRepository.getIterationBugs(iterationId);
+    }
+
+    public List<BusinessStatusDto> getBugTags() {
+        return businessStatusRepository.getBugTags();
     }
 }
