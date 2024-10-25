@@ -139,7 +139,7 @@ public class TestCaseService {
     taskRecord.setRecordId(uniqueIdService.getUniqueId());
     taskRecord.setTriggerId(caseId);
     taskRecord.setTestCaseId(caseId);
-    taskRecord.setStatus(ProcessStatus.SUCCESS.getType());
+    taskRecord.setStatus(ProcessStatus.RUNNING.getType());
     taskRecord.setTaskName(taskName);
     return taskRecord;
   }
