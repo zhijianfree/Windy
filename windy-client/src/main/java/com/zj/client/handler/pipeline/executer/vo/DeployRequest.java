@@ -18,17 +18,4 @@ public class DeployRequest {
   private String serverPort;
 
   private Integer deployType;
-
-  @Data
-  public static class SSHParams{
-    private String remotePath;
-
-    private String sshIp;
-
-    private Integer sshPort;
-
-    private String user;
-
-    private String password;
-  }
 }

@@ -9,11 +9,11 @@ import com.zj.client.handler.deploy.jar.JarDeployContext;
 import com.zj.client.handler.deploy.k8s.K8sDeployContext;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
 import com.zj.client.handler.pipeline.executer.vo.DeployRequest;
-import com.zj.client.handler.pipeline.executer.vo.DeployRequest.SSHParams;
 import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
+import com.zj.common.model.SSHParams;
 import com.zj.common.utils.GitUtils;
 import com.zj.common.enums.DeployType;
 import com.zj.common.enums.ExecuteType;
@@ -85,7 +85,8 @@ public class DeployTrigger implements INodeTrigger {
         String serviceName = GitUtils.getServiceFromUrl(deployRequest.getGitUrl());
         String filePath =
                 globalEnvConfig.getPipelineWorkspace(serviceName, deployRequest.getPipelineId()) + File.separator + DEPLOY;
-        SSHParams sshParams = JSON.parseObject(JSON.toJSONString(deployRequest.getParams()), SSHParams.class);
+        DeployParams deployParams = JSON.parseObject(JSON.toJSONString(deployRequest.getParams()), DeployParams.class);
+        SSHParams sshParams = deployParams.getSshParams();
         String serverPort = Optional.ofNullable(deployRequest.getServerPort()).orElse("");
         return JarDeployContext.builder().sshUser(sshParams.getUser()).sshPassword(sshParams.getPassword()).remotePath(sshParams.getRemotePath()).sshIp(sshParams.getSshIp()).sshPort(sshParams.getSshPort()).localPath(filePath).servicePort(serverPort).build();
     }

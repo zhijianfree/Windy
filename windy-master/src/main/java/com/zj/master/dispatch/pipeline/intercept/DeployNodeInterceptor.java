@@ -5,12 +5,14 @@ import com.zj.common.enums.DeployType;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.model.DeployParams;
 import com.zj.common.model.K8SAccessParams;
+import com.zj.common.model.SSHParams;
 import com.zj.common.model.ServiceConfig;
 import com.zj.domain.entity.dto.log.DispatchLogDto;
 import com.zj.domain.entity.dto.log.SubDispatchLogDto;
 import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
 import com.zj.domain.entity.dto.service.DeployEnvironmentDto;
 import com.zj.domain.entity.dto.service.MicroserviceDto;
+import com.zj.domain.entity.enums.EnvType;
 import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
@@ -81,21 +83,27 @@ public class DeployNodeInterceptor implements INodeExecuteInterceptor {
         }
 
         DeployEnvironmentDto deployEnvironment = environmentRepository.getEnvironment(deployContext.getEnvId());
-        DeployParams deployParams = getDeployParams(taskNode.getServiceId(), deployEnvironment.getEnvParams(),
-                deployContext.getImageName());
+        DeployParams deployParams = getDeployParams(taskNode.getServiceId(), deployEnvironment, deployContext.getImageName());
         deployContext.setParams(deployParams);
         deployContext.setDeployType(deployEnvironment.getEnvType());
         taskNode.setRequestContext(deployContext);
     }
 
-    public DeployParams getDeployParams(String serviceId, String k8sAccess, String imageName) {
-        K8SAccessParams k8SAccessParams = JSON.parseObject(k8sAccess, K8SAccessParams.class);
-        MicroserviceDto serviceDetail = microServiceRepository.queryServiceDetail(serviceId);
-        ServiceConfig serviceConfig = JSON.parseObject(serviceDetail.getServiceConfig(),
-                ServiceConfig.class);
-        serviceConfig.setImageName(imageName);
+    public DeployParams getDeployParams(String serviceId, DeployEnvironmentDto environment, String imageName) {
         DeployParams deployParams = new DeployParams();
-        deployParams.setK8SAccessParams(k8SAccessParams);
+        if (Objects.equals(environment.getEnvType(), EnvType.K8S.getType())) {
+            K8SAccessParams k8SAccessParams = JSON.parseObject(environment.getEnvParams(), K8SAccessParams.class);
+            deployParams.setK8SAccessParams(k8SAccessParams);
+        }
+
+        if (Objects.equals(environment.getEnvType(), EnvType.SSH.getType())) {
+            SSHParams sshParams = JSON.parseObject(environment.getEnvParams(), SSHParams.class);
+            deployParams.setSshParams(sshParams);
+        }
+
+        MicroserviceDto serviceDetail = microServiceRepository.queryServiceDetail(serviceId);
+        ServiceConfig serviceConfig = JSON.parseObject(serviceDetail.getServiceConfig(), ServiceConfig.class);
+        serviceConfig.setImageName(imageName);
         deployParams.setServiceConfig(serviceConfig);
         return deployParams;
     }
