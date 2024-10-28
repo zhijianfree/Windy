@@ -1,6 +1,7 @@
 package com.zj.feature.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zj.common.enums.FeatureStatus;
 import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
 import com.zj.domain.entity.dto.feature.FeatureInfoDto;
@@ -34,11 +35,7 @@ public class TaskRecordService {
   }
 
   public PageSize<TaskRecordDto> getTaskRecordPage(Integer pageNum, Integer size) {
-    IPage<TaskRecordDto> recordIPage = taskRecordRepository.getTaskRecordPage(pageNum, size);
-    PageSize<TaskRecordDto> pageSize = new PageSize<>();
-    pageSize.setTotal(recordIPage.getTotal());
-    pageSize.setData(recordIPage.getRecords());
-    return pageSize;
+    return taskRecordRepository.getTaskRecordPage(pageNum, size);
   }
 
   public boolean deleteTaskRecord(String recordId) {
@@ -120,7 +117,7 @@ public class TaskRecordService {
     return taskRecordRepository.getTaskRecordByTrigger(triggerId);
   }
 
-  public List<TaskRecordDto> getTriggerTaskRecords(String triggerId) {
-    return taskRecordRepository.getTriggerTaskRecords(triggerId);
+  public PageSize<TaskRecordDto> getTriggerTaskRecords(String triggerId, Integer page, Integer size) {
+    return taskRecordRepository.getTriggerTaskRecords(triggerId, page, size);
   }
 }

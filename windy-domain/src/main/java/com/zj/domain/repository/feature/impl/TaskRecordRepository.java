@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.common.model.PageSize;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.TaskRecordDto;
 import com.zj.domain.entity.po.feature.TaskRecord;
@@ -44,21 +45,11 @@ public class TaskRecordRepository extends ServiceImpl<TaskRecordMapper, TaskReco
   }
 
   @Override
-  public IPage<TaskRecordDto> getTaskRecordPage(Integer pageNum, Integer size) {
+  public PageSize<TaskRecordDto> getTaskRecordPage(Integer pageNum, Integer size) {
     IPage<TaskRecord> page = new Page<>(pageNum, size);
     IPage<TaskRecord> recordIPage = page(page,
         Wrappers.lambdaQuery(TaskRecord.class).orderByDesc(TaskRecord::getUpdateTime));
-
-    List<TaskRecordDto> list = OrikaUtil.convertList(recordIPage.getRecords(), TaskRecordDto.class);
-    list = list.stream().peek(taskRecord -> {
-      String desc = ProcessStatus.exchange(taskRecord.getStatus()).getDesc();
-      taskRecord.setStatusName(desc);
-    }).collect(Collectors.toList());
-
-    Page<TaskRecordDto> recordDtoPage = new Page<>();
-    recordDtoPage.setTotal(recordIPage.getTotal());
-    recordDtoPage.setRecords(list);
-    return recordDtoPage;
+    return convertRecordPage(recordIPage);
   }
 
   @Override
@@ -89,9 +80,24 @@ public class TaskRecordRepository extends ServiceImpl<TaskRecordMapper, TaskReco
   }
 
   @Override
-  public List<TaskRecordDto> getTriggerTaskRecords(String triggerId) {
-    List<TaskRecord> taskRecords = list(
-            Wrappers.lambdaQuery(TaskRecord.class).eq(TaskRecord::getTriggerId, triggerId));
-    return OrikaUtil.convertList(taskRecords, TaskRecordDto.class);
+  public PageSize<TaskRecordDto> getTriggerTaskRecords(String triggerId, Integer pageNum, Integer size) {
+    IPage<TaskRecord> page = new Page<>(pageNum, size);
+    IPage<TaskRecord> recordIPage = page(page,
+            Wrappers.lambdaQuery(TaskRecord.class).eq(TaskRecord::getTriggerId, triggerId).orderByDesc(TaskRecord::getCreateTime));
+
+      return convertRecordPage(recordIPage);
+  }
+
+  private static PageSize<TaskRecordDto> convertRecordPage(IPage<TaskRecord> recordIPage) {
+    List<TaskRecordDto> list = OrikaUtil.convertList(recordIPage.getRecords(), TaskRecordDto.class);
+    list = list.stream().peek(taskRecord -> {
+      String desc = ProcessStatus.exchange(taskRecord.getStatus()).getDesc();
+      taskRecord.setStatusName(desc);
+    }).collect(Collectors.toList());
+
+    PageSize<TaskRecordDto> recordDtoPage = new PageSize<>();
+    recordDtoPage.setTotal(recordIPage.getTotal());
+    recordDtoPage.setData(list);
+    return recordDtoPage;
   }
 }

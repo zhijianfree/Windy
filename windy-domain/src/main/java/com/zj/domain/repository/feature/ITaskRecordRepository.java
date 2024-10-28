@@ -1,7 +1,8 @@
 package com.zj.domain.repository.feature;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.zj.common.model.PageSize;
 import com.zj.domain.entity.dto.feature.TaskRecordDto;
+
 import java.util.List;
 
 /**
@@ -10,19 +11,19 @@ import java.util.List;
  */
 public interface ITaskRecordRepository {
 
-  boolean save(TaskRecordDto taskRecordDTO);
+    boolean save(TaskRecordDto taskRecordDTO);
 
-  boolean updateRecordStatus(String recordId, int status);
+    boolean updateRecordStatus(String recordId, int status);
 
-  IPage<TaskRecordDto> getTaskRecordPage(Integer pageNum, Integer size);
+    PageSize<TaskRecordDto> getTaskRecordPage(Integer pageNum, Integer size);
 
-  TaskRecordDto getTaskRecord(String recordId);
+    TaskRecordDto getTaskRecord(String recordId);
 
-  boolean deleteTaskRecord(String recordId);
+    boolean deleteTaskRecord(String recordId);
 
-  List<TaskRecordDto> getTaskRecordsOrderByTime(String taskId);
+    List<TaskRecordDto> getTaskRecordsOrderByTime(String taskId);
 
     TaskRecordDto getTaskRecordByTrigger(String triggerId);
 
-  List<TaskRecordDto> getTriggerTaskRecords(String triggerId);
+    PageSize<TaskRecordDto> getTriggerTaskRecords(String triggerId, Integer pageNum, Integer size);
 }

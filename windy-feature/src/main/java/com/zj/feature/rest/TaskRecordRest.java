@@ -20,56 +20,59 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/devops/feature")
 public class TaskRecordRest {
-  private final TaskRecordService taskRecordService;
+    private final TaskRecordService taskRecordService;
 
-  public TaskRecordRest(TaskRecordService taskRecordService) {
-    this.taskRecordService = taskRecordService;
-  }
+    public TaskRecordRest(TaskRecordService taskRecordService) {
+        this.taskRecordService = taskRecordService;
+    }
 
-  @GetMapping("/task/records")
-  public ResponseMeta<PageSize<TaskRecordDto>> getTaskRecordList(
-      @RequestParam(value = "page", defaultValue = "1") Integer page,
-      @RequestParam(value = "size", defaultValue = "10") Integer size) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, taskRecordService.getTaskRecordPage(page, size));
-  }
+    @GetMapping("/task/records")
+    public ResponseMeta<PageSize<TaskRecordDto>> getTaskRecordList(
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, taskRecordService.getTaskRecordPage(page, size));
+    }
 
-  @GetMapping("/task/record/{recordId}")
-  public ResponseMeta<TaskRecordDto> getTaskRecordDetail(@PathVariable("recordId") String recordId) {
-    return new ResponseMeta<TaskRecordDto>(ErrorCode.SUCCESS,
-        taskRecordService.getTaskRecord(recordId));
-  }
+    @GetMapping("/task/record/{recordId}")
+    public ResponseMeta<TaskRecordDto> getTaskRecordDetail(@PathVariable("recordId") String recordId) {
+        return new ResponseMeta<TaskRecordDto>(ErrorCode.SUCCESS,
+                taskRecordService.getTaskRecord(recordId));
+    }
 
-  @GetMapping("/task/{triggerId}/record")
-  public ResponseMeta<TaskRecordDto> getTaskRecordByTrigger(@PathVariable("triggerId") String triggerId) {
-    return new ResponseMeta<TaskRecordDto>(ErrorCode.SUCCESS, taskRecordService.getTaskRecordByTrigger(triggerId));
-  }
+    @GetMapping("/task/{triggerId}/record")
+    public ResponseMeta<TaskRecordDto> getTaskRecordByTrigger(@PathVariable("triggerId") String triggerId) {
+        return new ResponseMeta<TaskRecordDto>(ErrorCode.SUCCESS, taskRecordService.getTaskRecordByTrigger(triggerId));
+    }
 
-  @GetMapping("/task/{triggerId}/records")
-  public ResponseMeta<List<TaskRecordDto>> getTriggerTaskRecords(@PathVariable("triggerId") String triggerId) {
-    return new ResponseMeta<List<TaskRecordDto>>(ErrorCode.SUCCESS, taskRecordService.getTriggerTaskRecords(triggerId));
-  }
+    @GetMapping("/task/{triggerId}/records")
+    public ResponseMeta<PageSize<TaskRecordDto>> getTriggerTaskRecords(@PathVariable("triggerId") String triggerId,
+                                                                   @RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                                   @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        return new ResponseMeta<PageSize<TaskRecordDto>>(ErrorCode.SUCCESS,
+                taskRecordService.getTriggerTaskRecords(triggerId, page, size));
+    }
 
-  @GetMapping("/task/records/{recordId}/histories")
-  public ResponseMeta<List<FeatureHistoryDto> > getTaskFeatureHistories(
-          @PathVariable("recordId") String recordId) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, taskRecordService.getTaskFeatureHistories(recordId));
-  }
+    @GetMapping("/task/records/{recordId}/histories")
+    public ResponseMeta<List<FeatureHistoryDto>> getTaskFeatureHistories(
+            @PathVariable("recordId") String recordId) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, taskRecordService.getTaskFeatureHistories(recordId));
+    }
 
-  @GetMapping("/task/records/{recordId}/history/tree")
-  public ResponseMeta<List<HistoryNodeDto>> getTaskFeatureHistoryTree(
-      @PathVariable("recordId") String recordId) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, taskRecordService.getTaskFeatureHistoryTree(recordId));
-  }
+    @GetMapping("/task/records/{recordId}/history/tree")
+    public ResponseMeta<List<HistoryNodeDto>> getTaskFeatureHistoryTree(
+            @PathVariable("recordId") String recordId) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, taskRecordService.getTaskFeatureHistoryTree(recordId));
+    }
 
-  @DeleteMapping("/task/record/{recordId}")
-  public ResponseMeta<Boolean> deleteTaskRecord(@PathVariable("recordId") String recordId) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, taskRecordService.deleteTaskRecord(recordId));
-  }
+    @DeleteMapping("/task/record/{recordId}")
+    public ResponseMeta<Boolean> deleteTaskRecord(@PathVariable("recordId") String recordId) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, taskRecordService.deleteTaskRecord(recordId));
+    }
 
-  @PutMapping("/task/stop/{recordId}")
-  public ResponseMeta<Boolean> stopTaskRecord(
-      @PathVariable("recordId") String recordId) {
-    return new ResponseMeta<Boolean>(ErrorCode.SUCCESS,
-        taskRecordService.stopTaskRecord(recordId));
-  }
+    @PutMapping("/task/stop/{recordId}")
+    public ResponseMeta<Boolean> stopTaskRecord(
+            @PathVariable("recordId") String recordId) {
+        return new ResponseMeta<Boolean>(ErrorCode.SUCCESS,
+                taskRecordService.stopTaskRecord(recordId));
+    }
 }
