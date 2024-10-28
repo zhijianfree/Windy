@@ -10,7 +10,16 @@ import java.util.Objects;
 @Data
 public class ServiceConfig {
 
+    /**
+     * git访问信息
+     */
     private GitAccessInfo gitAccessInfo;
+
+    /**
+     * 服务的上下文
+     */
+    private ServiceContext serviceContext;
+
 
     /**
      * 环境变量参数

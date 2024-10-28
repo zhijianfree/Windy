@@ -50,4 +50,14 @@ public class BuildCodeContext extends RequestContext{
    * 服务名称
    */
   private String serviceName;
+
+  /**
+   * 服务部署方式
+   */
+  private Integer deployType;
+
+  /**
+   * 服务开发代码
+   */
+  private String code;
 }

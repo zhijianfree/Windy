@@ -17,6 +17,7 @@ import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel.ResponseSta
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.client.handler.pipeline.git.IGitProcessor;
 import com.zj.client.handler.pipeline.maven.MavenOperator;
+import com.zj.common.enums.DeployType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.GitUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -112,6 +113,9 @@ public class CodeBuildService {
     }
 
     private boolean checkImageRepository(CodeBuildParamDto codeBuildParam) {
+        if (Objects.equals(codeBuildParam.getDeployType(), DeployType.SSH.getType())){
+            return false;
+        }
         return StringUtils.isNotBlank(codeBuildParam.getRepository()) && StringUtils.isNotBlank(
                 codeBuildParam.getUser()) && StringUtils.isNotBlank(codeBuildParam.getPassword());
     }

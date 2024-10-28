@@ -176,17 +176,25 @@ public class PipelineService {
         }
 
         AtomicInteger atomicInteger = new AtomicInteger(0);
-        pipelineDTO.getStageList().forEach(stageDto -> createNewStage(pipelineId, stageDto, atomicInteger));
+        int sum = pipelineDTO.getStageList().stream()
+                .mapToInt(stageDto -> createNewStage(pipelineId, stageDto, atomicInteger)).sum();
+        log.info("log pipeline create stage count={} pipelineId={}", sum, pipelineId);
 
+        if (Objects.equals(pipelineDTO.getPipelineType(), PipelineType.PUBLISH.getType())) {
+            boolean saveGitBranch = createMasterBranchBind(pipelineId, serviceDetail);
+            log.info("save bind git master branch result={}", saveGitBranch);
+        }
+        return pipelineId;
+    }
+
+    private boolean createMasterBranchBind(String pipelineId, MicroserviceDto serviceDetail) {
         BindBranchDto bindBranchDto = new BindBranchDto();
         bindBranchDto.setBindId(uniqueIdService.getUniqueId());
         bindBranchDto.setPipelineId(pipelineId);
         bindBranchDto.setGitBranch("master");
         bindBranchDto.setGitUrl(serviceDetail.getGitUrl());
         bindBranchDto.setIsChoose(true);
-        boolean saveGitBranch = bindBranchRepository.saveGitBranch(bindBranchDto);
-        log.info("save bind git master branch result={}", saveGitBranch);
-        return pipelineId;
+        return bindBranchRepository.saveGitBranch(bindBranchDto);
     }
 
     private void checkPublishPipelineExist(PipelineDto pipeline) {
