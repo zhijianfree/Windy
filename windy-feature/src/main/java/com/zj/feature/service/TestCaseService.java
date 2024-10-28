@@ -119,7 +119,7 @@ public class TestCaseService {
 
   public boolean executeFeature(String caseId, BatchExecuteFeature batchExecute) {
     String taskName = "批量执行 " + authService.getUserDetail().getNickName();
-    TaskRecordDto taskRecord = createTempTaskRecord(caseId, taskName);
+    TaskRecordDto taskRecord = createTempTaskRecord(caseId, taskName, batchExecute);
     boolean createRecord = taskRecordRepository.save(taskRecord);
     if (!createRecord){
       log.info("create record error, can not execute batch features caseId={}", caseId);
@@ -134,10 +134,11 @@ public class TestCaseService {
     return requestProxy.runTask(dispatchTaskModel);
   }
 
-  private TaskRecordDto createTempTaskRecord(String caseId, String taskName) {
+  private TaskRecordDto createTempTaskRecord(String caseId, String taskName, BatchExecuteFeature batchExecute) {
     TaskRecordDto taskRecord = new TaskRecordDto();
     taskRecord.setRecordId(uniqueIdService.getUniqueId());
     taskRecord.setTriggerId(caseId);
+    taskRecord.setTaskConfig(JSON.toJSONString(batchExecute));
     taskRecord.setTestCaseId(caseId);
     taskRecord.setStatus(ProcessStatus.RUNNING.getType());
     taskRecord.setTaskName(taskName);
