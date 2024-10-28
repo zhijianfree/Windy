@@ -5,6 +5,7 @@ import com.zj.common.enums.ExecuteType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.ServiceConfig;
+import com.zj.common.model.ServiceContext;
 import com.zj.domain.entity.dto.pipeline.BindBranchDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
 import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
@@ -103,6 +104,10 @@ public class BuildCodeInterceptor implements INodeExecuteInterceptor {
         buildCodeContext.setBranches(branches);
         buildCodeContext.setIsPublish(isPublish);
         buildCodeContext.setServiceName(serviceConfig.getAppName());
+        Integer deployType = Optional.ofNullable(serviceConfig.getServiceContext()).map(ServiceContext::getDeployType).orElse(null);
+        buildCodeContext.setDeployType(deployType);
+        String code = Optional.ofNullable(serviceConfig.getServiceContext()).map(ServiceContext::getCode).orElse(null);
+        buildCodeContext.setCode(code);
         if (Objects.nonNull(repository)) {
             buildCodeContext.setUser(repository.getUserName());
             buildCodeContext.setPassword(repository.getPassword());
