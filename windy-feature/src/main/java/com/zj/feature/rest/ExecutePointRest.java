@@ -3,6 +3,7 @@ package com.zj.feature.rest;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseMeta;
+import com.zj.feature.entity.CompareOperator;
 import com.zj.feature.entity.ExecutePointVo;
 import com.zj.feature.service.ExecutePointService;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -63,7 +64,7 @@ public class ExecutePointRest {
     }
 
     @GetMapping("/execute/operators")
-    public ResponseMeta<List<String>> queryExecutePointOperators() {
-        return new ResponseMeta<List<String>>(ErrorCode.SUCCESS, executePointService.queryExecutePointOperators());
+    public ResponseMeta<List<CompareOperator>> queryExecutePointOperators() {
+        return new ResponseMeta<List<CompareOperator>>(ErrorCode.SUCCESS, executePointService.queryExecutePointOperators());
     }
 }

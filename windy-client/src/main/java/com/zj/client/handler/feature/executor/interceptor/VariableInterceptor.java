@@ -182,13 +182,6 @@ public class VariableInterceptor implements IExecuteInterceptor {
         });
     }
 
-    public static void main(String[] args) {
-        JSONObject data = JSON.parseObject("{\"pid\":[\"${pid}\"]}", JSONObject.class);
-        System.out.println("type :array " + (data.get("pid") instanceof Array));
-
-
-    }
-
     private Object generateRandomRule(Object paramValue) {
         RandomEntity randomEntity = RandomType.exchangeRandomType(String.valueOf(paramValue));
         if (Objects.isNull(randomEntity)) {
