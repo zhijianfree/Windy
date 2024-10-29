@@ -101,6 +101,9 @@ public class MethodInvoke implements IExecuteInvoker {
     }
 
     if (Objects.equals(ParamValueType.Array.name(), paramDefine.getType())) {
+      if (paramDefine.getValue() instanceof  String){
+         return JSON.parseArray((String) paramDefine.getValue(), Object.class);
+      }
       return paramDefine.getValue();
     }
 
