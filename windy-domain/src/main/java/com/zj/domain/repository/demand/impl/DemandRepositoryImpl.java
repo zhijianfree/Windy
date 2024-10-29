@@ -34,7 +34,7 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
     @Override
     public PageSize<DemandDTO> getDemandPage(DemandQuery query) {
         IPage<Demand> pageObj = new Page<>(query.getPage(), query.getPageSize());
-        LambdaQueryWrapper<Demand> queryWrapper = Wrappers.lambdaQuery(Demand.class).eq(Demand::getCreator,
+        LambdaQueryWrapper<Demand> queryWrapper = Wrappers.lambdaQuery(Demand.class).eq(Demand::getAcceptor,
                 query.getCreator()).orderByDesc(Demand::getCreateTime);
         Optional.ofNullable(query.getStatus()).ifPresent(status -> queryWrapper.eq(Demand::getStatus, status));
         if (StringUtils.isNotBlank(query.getSpaceId())) {

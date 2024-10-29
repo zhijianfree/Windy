@@ -46,7 +46,6 @@ public class DemandService {
         UserDetail userDetail = authService.getUserDetail();
         demandDTO.setProposer(userDetail.getUserId());
         demandDTO.setProposerName(Optional.ofNullable(userDetail.getNickName()).orElse(userDetail.getUserName()));
-        demandDTO.setCreator(userDetail.getUserId());
         boolean result = demandRepository.createDemand(demandDTO);
         if (!result) {
             log.info("create demand error ={}", demandDTO.getDemandName());
