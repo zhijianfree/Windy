@@ -1,6 +1,7 @@
 package com.zj.client.handler.feature.executor.interceptor;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.zj.client.entity.vo.ExecutePoint;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.client.handler.feature.executor.invoker.invoke.MethodInvoke;
@@ -166,21 +167,26 @@ public class VariableInterceptor implements IExecuteInterceptor {
                 return;
             }
 
-            if (paramValue instanceof String || paramValue instanceof Array) {
+             if (paramValue instanceof Map) {
+                Map<String, String> map = (Map<String, String>) paramValue;
+                Map<String, String> result = map.keySet().stream().collect(Collectors.toMap(strSubstitutor::replace,
+                        key -> strSubstitutor.replace(map.get(key))));
+                param.setValue(result);
+            }else {
                 String stringValue = String.valueOf(paramValue);
                 String replaceResult = strSubstitutor.replace(stringValue);
                 param.setValue(replaceResult);
                 Object value = MethodInvoke.convertDataToType(param);
                 param.setValue(value);
             }
-
-            if (paramValue instanceof Map) {
-                Map<String, String> map = (Map<String, String>) paramValue;
-                Map<String, String> result = map.keySet().stream().collect(Collectors.toMap(strSubstitutor::replace,
-                        key -> strSubstitutor.replace(map.get(key))));
-                param.setValue(result);
-            }
         });
+    }
+
+    public static void main(String[] args) {
+        JSONObject data = JSON.parseObject("{\"pid\":[\"${pid}\"]}", JSONObject.class);
+        System.out.println("type :array " + (data.get("pid") instanceof Array));
+
+
     }
 
     private Object generateRandomRule(Object paramValue) {
