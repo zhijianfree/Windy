@@ -22,6 +22,8 @@ import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -164,7 +166,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
                 return;
             }
 
-            if (paramValue instanceof String) {
+            if (paramValue instanceof String || paramValue instanceof Array) {
                 String stringValue = String.valueOf(paramValue);
                 String replaceResult = strSubstitutor.replace(stringValue);
                 param.setValue(replaceResult);
