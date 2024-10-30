@@ -45,6 +45,7 @@ public enum ErrorCode {
   SYSTEM_EXECUTE_ERROR(HttpStatus.BAD_REQUEST, "Feature.000101", "unknown error occur when execute feature "),
   SUB_FEATURE_EXIST(HttpStatus.BAD_REQUEST, "Feature.000005", "存在子用例不能删除目录"),
   PARSE_PLUGIN_ERROR(HttpStatus.BAD_REQUEST, "Feature.000006", "解析插件错误"),
+  TEMPLATE_NOT_FIND(HttpStatus.NOT_FOUND, "Feature.000007", "未找到模版"),
   /*==================需求缺陷管理======================*/
   DEMAND_CREATE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Demand.000001", "创建需求失败"),
   SPACE_NOT_EXIST(HttpStatus.BAD_REQUEST, "Space.000002", "空间不存在"),

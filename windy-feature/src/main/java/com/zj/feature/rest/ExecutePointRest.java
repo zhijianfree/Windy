@@ -4,6 +4,7 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.PageSize;
 import com.zj.common.model.ResponseMeta;
 import com.zj.feature.entity.CompareOperator;
+import com.zj.feature.entity.ExecutePointTemplate;
 import com.zj.feature.entity.ExecutePointVo;
 import com.zj.feature.service.ExecutePointService;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -51,6 +52,11 @@ public class ExecutePointRest {
     @DeleteMapping("/{featureId}/execute/points")
     public ResponseMeta<Integer> deleteExecutePointByFeatureId(@PathVariable("featureId") String featureId) {
         return new ResponseMeta(ErrorCode.SUCCESS, executePointService.deleteByFeatureId(featureId));
+    }
+
+    @GetMapping("/points/{executePointId}/template")
+    public ResponseMeta<ExecutePointTemplate> queryPointTemplate(@PathVariable("executePointId") String executePointId) {
+        return new ResponseMeta(ErrorCode.SUCCESS, executePointService.queryPointTemplate(executePointId));
     }
 
     @GetMapping("/execute/point/{executePointId}")

@@ -2,10 +2,17 @@ package com.zj.feature.service;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.CompareType;
+import com.zj.common.exception.ApiException;
+import com.zj.common.exception.ErrorCode;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
+import com.zj.domain.entity.dto.feature.ExecuteTemplateDto;
+import com.zj.domain.entity.dto.service.MicroserviceDto;
 import com.zj.domain.repository.feature.IExecutePointRepository;
+import com.zj.domain.repository.feature.IExecuteTemplateRepository;
+import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.feature.entity.CompareOperator;
+import com.zj.feature.entity.ExecutePointTemplate;
 import com.zj.feature.entity.ExecutePointVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,10 +30,14 @@ public class ExecutePointService {
 
     private final UniqueIdService uniqueIdService;
     private final IExecutePointRepository executePointRepository;
+    private final IExecuteTemplateRepository templateRepository;
+    private final IMicroServiceRepository microServiceRepository;
 
-    public ExecutePointService(UniqueIdService uniqueIdService, IExecutePointRepository executePointRepository) {
+    public ExecutePointService(UniqueIdService uniqueIdService, IExecutePointRepository executePointRepository, IExecuteTemplateRepository templateRepository, IMicroServiceRepository microServiceRepository) {
         this.uniqueIdService = uniqueIdService;
         this.executePointRepository = executePointRepository;
+        this.templateRepository = templateRepository;
+        this.microServiceRepository = microServiceRepository;
     }
 
     public boolean updateByPointId(ExecutePointDto executePoint) {
@@ -131,5 +142,30 @@ public class ExecutePointService {
         List<ExecutePointDto> executePoints = executePointRepository.getExecutePointByFeatureId(featureId);
         return executePoints.stream().map(ExecutePointVo::toExecutePointDTO)
                 .sorted(Comparator.comparing(ExecutePointVo::getSortOrder)).collect(Collectors.toList());
+    }
+
+    public ExecutePointTemplate queryPointTemplate(String executePointId) {
+        ExecutePointDto executePoint = executePointRepository.getExecutePoint(executePointId);
+        if (Objects.isNull(executePoint)) {
+            log.info("can not find execute point = {}", executePointId);
+            throw new ApiException(ErrorCode.EXECUTE_POINT_NOT_FIND);
+        }
+
+        ExecuteTemplateDto executeTemplate = templateRepository.getExecuteTemplate(executePoint.getTemplateId());
+        if (Objects.isNull(executeTemplate)) {
+            log.info("can not find template = {}", executePoint.getTemplateId());
+            throw new ApiException(ErrorCode.TEMPLATE_NOT_FIND);
+        }
+
+        ExecutePointTemplate executePointTemplate = new ExecutePointTemplate();
+        executePointTemplate.setInvokeType(executeTemplate.getInvokeType());
+        executePointTemplate.setRequest(executeTemplate.getService());
+        executePointTemplate.setMethod(executeTemplate.getMethod());
+        executePointTemplate.setDescription(executeTemplate.getDescription());
+        MicroserviceDto microserviceDto = microServiceRepository.queryServiceDetail(executeTemplate.getOwner());
+        if (Objects.nonNull(microserviceDto)) {
+            executePointTemplate.setService(microserviceDto.getServiceName());
+        }
+        return executePointTemplate;
     }
 }
