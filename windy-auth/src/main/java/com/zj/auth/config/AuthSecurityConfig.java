@@ -21,11 +21,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
     public final WindyUserDetailsService windyUserDetailsService;
