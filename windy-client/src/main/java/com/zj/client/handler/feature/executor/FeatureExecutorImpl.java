@@ -6,7 +6,7 @@ import com.zj.client.entity.vo.ExecuteRecord;
 import com.zj.client.entity.vo.FeatureHistory;
 import com.zj.client.entity.vo.FeatureResponse;
 import com.zj.client.handler.feature.executor.invoker.strategy.ExecuteStrategyFactory;
-import com.zj.client.handler.feature.executor.vo.ExecuteContext;
+import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
 import com.zj.client.handler.feature.executor.vo.FeatureParam;
 import com.zj.client.handler.notify.IResultEventNotify;
 import com.zj.client.utils.ExceptionUtils;
@@ -69,8 +69,9 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
                     .sorted(Comparator.comparing(ExecutePoint::getSortOrder)).collect(Collectors.toList());
 
             AtomicInteger status = new AtomicInteger(ProcessStatus.SUCCESS.getType());
-            ExecuteContext executeContext = new ExecuteContext();
-            executeContext.bindMap(featureParam.getExecuteContext());
+            FeatureExecuteContext featureExecuteContext = new FeatureExecuteContext();
+            featureExecuteContext.bindMap(featureParam.getExecuteContext());
+            featureExecuteContext.setHistoryId(historyId);
             Map<String, Object> globalContext = new HashMap<>();
             CountDownLatch countDownLatch = null;
             for (ExecutePoint executePoint : executePoints) {
@@ -81,15 +82,15 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
                 executeRecord.setHistoryId(historyId);
                 try {
                     //2 使用策略类执行用例
-                    executeContext.setRecordId(recordId);
-                    executeContext.setLogId(featureParam.getLogId());
+                    featureExecuteContext.setRecordId(recordId);
+                    featureExecuteContext.setLogId(featureParam.getLogId());
 
                     //如果是异步执行模版就需要添加countDown，保证后续任务是串行执行
                     if (Objects.equals(executePoint.getExecuteType(), TemplateType.THREAD.getType())) {
                         countDownLatch = new CountDownLatch(1);
-                        executeContext.setCountDownLatch(countDownLatch);
+                        featureExecuteContext.setCountDownLatch(countDownLatch);
                     }
-                    List<FeatureResponse> responses = executeStrategyFactory.execute(executePoint, executeContext);
+                    List<FeatureResponse> responses = executeStrategyFactory.execute(executePoint, featureExecuteContext);
                     executeRecord.setStatus(judgeRecordStatus(responses));
                     executeRecord.setExecuteResult(JSON.toJSONString(responses));
 
@@ -137,7 +138,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
         }
         try {
             countDownLatch.await();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ignore) {
             log.info("async task not trigger,continue execute next task");
         }
     }

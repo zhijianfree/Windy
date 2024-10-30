@@ -6,7 +6,7 @@ import com.zj.client.entity.vo.FeatureResponse;
 import com.zj.client.handler.feature.executor.compare.CompareHandler;
 import com.zj.client.handler.feature.executor.interceptor.InterceptorProxy;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
-import com.zj.client.handler.feature.executor.vo.ExecuteContext;
+import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
 import com.zj.common.enums.TemplateType;
 import com.zj.common.feature.ExecutePointDto;
 import com.zj.common.feature.ExecutorUnit;
@@ -38,7 +38,7 @@ public class ForExecuteStrategy extends BaseExecuteStrategy{
   }
 
   @Override
-  public List<FeatureResponse> execute(ExecutePoint executePoint, ExecuteContext executeContext) {
+  public List<FeatureResponse> execute(ExecutePoint executePoint, FeatureExecuteContext featureExecuteContext) {
     log.info("start execute ForExecuteStrategy");
     ExecutorUnit executorUnit = JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit
         .class);
@@ -46,13 +46,13 @@ public class ForExecuteStrategy extends BaseExecuteStrategy{
     List<ExecutePointDto> executePoints = executorUnit.getExecutePoints();
     int size = Integer.parseInt(executorUnit.getMethod());
     for (int i = 0; i < size; i++) {
-      executeContext.set("$index", i);
+      featureExecuteContext.set("$index", i);
       List<FeatureResponse> responseList = executePoints.stream().map(executePointDto -> {
         ExecutePoint point = toExecutePoint(executePointDto);
-        return executeFeature(executeContext, point);
+        return executeFeature(featureExecuteContext, point);
       }).collect(Collectors.toList());
 
-      executeContext.remove("$index");
+      featureExecuteContext.remove("$index");
       responses.addAll(responseList);
     }
     return responses;

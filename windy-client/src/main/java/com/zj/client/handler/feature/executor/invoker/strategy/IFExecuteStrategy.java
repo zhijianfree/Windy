@@ -7,7 +7,7 @@ import com.zj.client.handler.feature.executor.compare.CompareHandler;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.client.handler.feature.executor.interceptor.InterceptorProxy;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
-import com.zj.client.handler.feature.executor.vo.ExecuteContext;
+import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
 import com.zj.common.enums.TemplateType;
 import com.zj.common.feature.ExecutePointDto;
 import com.zj.common.feature.ExecutorUnit;
@@ -42,15 +42,15 @@ public class IFExecuteStrategy extends BaseExecuteStrategy {
   }
 
   @Override
-  public List<FeatureResponse> execute(ExecutePoint executePoint, ExecuteContext executeContext) {
-    log.info("start execute IFExecuteStrategy context={}", JSON.toJSONString(executeContext.toMap()));
+  public List<FeatureResponse> execute(ExecutePoint executePoint, FeatureExecuteContext featureExecuteContext) {
+    log.info("start execute IFExecuteStrategy context={}", JSON.toJSONString(featureExecuteContext.toMap()));
     ExecutorUnit executorUnit = JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit
         .class);
     String ognl = executorUnit.getMethod();
-    StrSubstitutor strSubstitutor = new StrSubstitutor(executeContext.toMap());
+    StrSubstitutor strSubstitutor = new StrSubstitutor(featureExecuteContext.toMap());
     String replaceOgnl = strSubstitutor.replace(ognl);
     log.info("replace ognl ={}", replaceOgnl);
-    boolean result = ognlDataParser.judgeExpression(executeContext.toMap(), replaceOgnl);
+    boolean result = ognlDataParser.judgeExpression(featureExecuteContext.toMap(), replaceOgnl);
     if (!result) {
       ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
       executeDetailVo.setStatus(true);
@@ -63,7 +63,7 @@ public class IFExecuteStrategy extends BaseExecuteStrategy {
     List<ExecutePointDto> executePoints = executorUnit.getExecutePoints();
     return executePoints.stream().map(executePointDto -> {
       ExecutePoint point = toExecutePoint(executePointDto);
-      return executeFeature(executeContext, point);
+      return executeFeature(featureExecuteContext, point);
     }).collect(Collectors.toList());
   }
 }

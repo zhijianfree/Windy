@@ -1,14 +1,13 @@
 package com.zj.client.handler.feature.executor.interceptor;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.zj.client.entity.vo.ExecutePoint;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.client.handler.feature.executor.invoker.invoke.MethodInvoke;
 import com.zj.client.handler.feature.executor.random.IRandomGenerator;
 import com.zj.client.handler.feature.executor.random.entity.RandomEntity;
 import com.zj.client.handler.feature.executor.random.entity.RandomType;
-import com.zj.client.handler.feature.executor.vo.ExecuteContext;
+import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
 import com.zj.common.enums.InvokerType;
 import com.zj.common.enums.Position;
 import com.zj.common.feature.CompareDefine;
@@ -23,8 +22,6 @@ import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,12 +43,12 @@ public class VariableInterceptor implements IExecuteInterceptor {
     }
 
     @Override
-    public void beforeExecute(ExecutorUnit executorUnit, ExecuteContext context) {
+    public void beforeExecute(ExecutorUnit executorUnit, FeatureExecuteContext context) {
         filterVariable(executorUnit, context);
     }
 
     @Override
-    public void afterExecute(ExecutePoint executePoint, ExecuteDetailVo executeDetailVo, ExecuteContext context) {
+    public void afterExecute(ExecutePoint executePoint, ExecuteDetailVo executeDetailVo, FeatureExecuteContext context) {
         //将执行完的结果转化为上下文变量的值
         Object responseBody = executeDetailVo.getResponseDetailVo().getResponseBody();
         exchangeVariableContext(context, executePoint, responseBody);
@@ -60,7 +57,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
         exchangeCompareContext(context, executePoint);
     }
 
-    private void exchangeCompareContext(ExecuteContext context, ExecutePoint executePoint) {
+    private void exchangeCompareContext(FeatureExecuteContext context, ExecutePoint executePoint) {
         List<CompareDefine> compareDefines = JSON.parseArray(executePoint.getCompareDefine(), CompareDefine.class);
         if (CollectionUtils.isEmpty(compareDefines)) {
             return;
@@ -80,7 +77,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
         executePoint.setCompareDefine(JSON.toJSONString(compareDefines));
     }
 
-    private void exchangeVariableContext(ExecuteContext context, ExecutePoint executePoint, Object responseBody) {
+    private void exchangeVariableContext(FeatureExecuteContext context, ExecutePoint executePoint, Object responseBody) {
         List<VariableDefine> variableDefines = JSON.parseArray(executePoint.getVariables(), VariableDefine.class);
         if (CollectionUtils.isEmpty(variableDefines)) {
             return;
@@ -101,27 +98,27 @@ public class VariableInterceptor implements IExecuteInterceptor {
     /**
      * 执行点在执行之前将变量值替换为全局配置值
      */
-    public void filterVariable(ExecutorUnit executorUnit, ExecuteContext executeContext) {
+    public void filterVariable(ExecutorUnit executorUnit, FeatureExecuteContext featureExecuteContext) {
         List<ParameterDefine> params = executorUnit.getParams();
         if (CollectionUtils.isNotEmpty(params)) {
-            filterParam(executeContext, params);
+            filterParam(featureExecuteContext, params);
         }
 
         //如果是HTTP请求的方式，还需要给service(url)、header替换变量参数
         if (Objects.equals(executorUnit.getInvokeType(), InvokerType.HTTP.getType()) ||
                 Objects.equals(executorUnit.getInvokeType(), InvokerType.RELATED_TEMPLATE.getType())) {
-            filterHttpInvokerParam(executorUnit, executeContext);
+            filterHttpInvokerParam(executorUnit, featureExecuteContext);
         }
 
         //将关联模版的参数替换变量
         if (Objects.nonNull(executorUnit.getRelatedTemplate())) {
-            filterVariable(executorUnit.getRelatedTemplate(), executeContext);
+            filterVariable(executorUnit.getRelatedTemplate(), featureExecuteContext);
         }
     }
 
-    private void filterHttpInvokerParam(ExecutorUnit executorUnit, ExecuteContext executeContext) {
+    private void filterHttpInvokerParam(ExecutorUnit executorUnit, FeatureExecuteContext featureExecuteContext) {
         //此处使用新的Map是避免ExecuteContext被局部参数污染
-        Map<String, Object> pointContext = new HashMap<>(executeContext.toMap());
+        Map<String, Object> pointContext = new HashMap<>(featureExecuteContext.toMap());
         //service(url)中的存在路径参数，所以需要将路径参数的值替换
         if (CollectionUtils.isNotEmpty(executorUnit.getParams())) {
             Map<String, Object> pointParams = executorUnit.getParams().stream()
@@ -152,9 +149,9 @@ public class VariableInterceptor implements IExecuteInterceptor {
         }
     }
 
-    private void filterParam(ExecuteContext executeContext, List<ParameterDefine> params) {
+    private void filterParam(FeatureExecuteContext featureExecuteContext, List<ParameterDefine> params) {
         //如果执行点的参数使用了环境变量则需要转换变量
-        StrSubstitutor strSubstitutor = new StrSubstitutor(executeContext.toMap());
+        StrSubstitutor strSubstitutor = new StrSubstitutor(featureExecuteContext.toMap());
         params.forEach(param -> {
             Object paramValue = getParamValueWithDefaultValue(param);
             if (!String.valueOf(paramValue).contains(VARIABLE_CHAR)){

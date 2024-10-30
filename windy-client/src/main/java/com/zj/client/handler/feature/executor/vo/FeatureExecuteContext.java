@@ -12,7 +12,7 @@ import java.util.concurrent.CountDownLatch;
  * @since 2023/1/5
  */
 @Data
-public class ExecuteContext {
+public class FeatureExecuteContext {
 
   private final Map<String, Object> contextMap = new ConcurrentHashMap<>();
   private String recordId;

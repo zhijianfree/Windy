@@ -13,7 +13,7 @@ import com.zj.client.handler.feature.executor.compare.CompareResult;
 import com.zj.client.handler.feature.executor.invoker.IExecuteStrategy;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
 import com.zj.client.handler.feature.executor.interceptor.InterceptorProxy;
-import com.zj.client.handler.feature.executor.vo.ExecuteContext;
+import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
 import com.zj.common.feature.ExecutorUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -45,27 +45,27 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
     this.compareHandler = compareHandler;
   }
 
-  public FeatureResponse executeFeature(ExecuteContext executeContext, ExecutePoint executePoint) {
+  public FeatureResponse executeFeature(FeatureExecuteContext featureExecuteContext, ExecutePoint executePoint) {
     //1 执行用例，目前使用反射/http执行，后续考虑使用dubbo调用
     String featureInfo = executePoint.getFeatureInfo();
     ExecutorUnit executorUnit = JSON.parseObject(featureInfo, ExecutorUnit.class);
 
     //2 将全局变量配置给执行点
-    interceptorProxy.beforeExecute(executorUnit, executeContext);
+    interceptorProxy.beforeExecute(executorUnit, featureExecuteContext);
     log.info("step 1 execute before interceptor service={} context={}", executorUnit.getService(),
-            JSON.toJSONString(executeContext.toMap()));
+            JSON.toJSONString(featureExecuteContext.toMap()));
 
     //3 调用方法执行
     Integer invokeType = Optional.ofNullable(executorUnit.getRelatedTemplate())
             .map(executor -> InvokerType.RELATED_TEMPLATE.getType()).orElseGet(executorUnit::getInvokeType);
     IExecuteInvoker executeInvoker = executeInvokerMap.get(invokeType);
-    ExecuteDetailVo executeDetailVo = (ExecuteDetailVo) executeInvoker.invoke(executorUnit, executeContext);
+    ExecuteDetailVo executeDetailVo = (ExecuteDetailVo) executeInvoker.invoke(executorUnit, featureExecuteContext);
     log.info("step 2 execute invoker ={} invoke", executeInvoker.type().name());
 
     //4 将执行之后的响应结果添加到context中，方便后面用例使用
-    interceptorProxy.afterExecute(executePoint, executeDetailVo, executeContext);
+    interceptorProxy.afterExecute(executePoint, executeDetailVo, featureExecuteContext);
     log.info("step 3 execute execute after interceptor service={} context={}", executorUnit.getService(),
-            JSON.toJSONString(executeContext.toMap()));
+            JSON.toJSONString(featureExecuteContext.toMap()));
 
     //5 下面开始对比
     String compareInfo = executePoint.getCompareDefine();
@@ -77,7 +77,7 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
     Map<String, Object> globalContext = new HashMap<>();
     if (CollectionUtils.isNotEmpty(variableDefines)) {
       variableDefines.stream().filter(VariableDefine::isGlobal).forEach(variableDefine -> {
-        Object runtimeValue = executeContext.toMap().get(variableDefine.getVariableKey());
+        Object runtimeValue = featureExecuteContext.toMap().get(variableDefine.getVariableKey());
         globalContext.put(variableDefine.getVariableKey(), runtimeValue);
       });
     }

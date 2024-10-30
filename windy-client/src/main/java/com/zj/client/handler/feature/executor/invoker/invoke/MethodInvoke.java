@@ -1,7 +1,7 @@
 package com.zj.client.handler.feature.executor.invoker.invoke;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.client.handler.feature.executor.vo.ExecuteContext;
+import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
 import com.zj.common.enums.InvokerType;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
@@ -57,7 +57,7 @@ public class MethodInvoke implements IExecuteInvoker {
     return InvokerType.METHOD;
   }
 
-  public Object invoke(ExecutorUnit executorUnit, ExecuteContext executeContext) {
+  public Object invoke(ExecutorUnit executorUnit, FeatureExecuteContext featureExecuteContext) {
     try {
       Object[] objects = null;
       List<ParameterDefine> paramDefines = executorUnit.getParams();

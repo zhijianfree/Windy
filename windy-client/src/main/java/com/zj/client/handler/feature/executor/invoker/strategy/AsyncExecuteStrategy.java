@@ -8,7 +8,7 @@ import com.zj.client.handler.feature.executor.FeatureExecutorImpl;
 import com.zj.client.handler.feature.executor.compare.CompareHandler;
 import com.zj.client.handler.feature.executor.interceptor.InterceptorProxy;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
-import com.zj.client.handler.feature.executor.vo.ExecuteContext;
+import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
 import com.zj.client.handler.notify.IResultEventNotify;
 import com.zj.client.utils.ExceptionUtils;
 import com.zj.common.enums.NotifyType;
@@ -58,19 +58,19 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy {
     }
 
     @Override
-    public List<FeatureResponse> execute(ExecutePoint executePoint, ExecuteContext executeContext) {
-        Map<String, Object> currentContext = executeContext.toMap();
+    public List<FeatureResponse> execute(ExecutePoint executePoint, FeatureExecuteContext featureExecuteContext) {
+        Map<String, Object> currentContext = featureExecuteContext.toMap();
         log.info("start execute AsyncExecuteStrategy context={}", JSON.toJSONString(currentContext));
         ExecutorUnit executorUnit = JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit.class);
         String timeout = executorUnit.getMethod();
         List<ExecutePointDto> executePoints = executorUnit.getExecutePoints();
-        ExecuteContext newContext = OrikaUtil.convert(executeContext, ExecuteContext.class);
+        FeatureExecuteContext newContext = OrikaUtil.convert(featureExecuteContext, FeatureExecuteContext.class);
         executor.execute(() ->{
             CountDownLatch countDownLatch = new CountDownLatch(1);
             CompletableFuture.runAsync(() -> {
-                if (Objects.nonNull(executeContext.getCountDownLatch())) {
+                if (Objects.nonNull(featureExecuteContext.getCountDownLatch())) {
                     log.info("find count down release wait");
-                    executeContext.getCountDownLatch().countDown();
+                    featureExecuteContext.getCountDownLatch().countDown();
                 }
                 List<FeatureResponse> responses = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(executePoints)){
@@ -121,7 +121,7 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy {
         }).collect(Collectors.toList());
     }
 
-    private void notifyError(ExecuteContext executeContext, String errorMessage, String timeout) {
+    private void notifyError(FeatureExecuteContext featureExecuteContext, String errorMessage, String timeout) {
         ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
         executeDetailVo.addRequestInfo("timeout", timeout);
         executeDetailVo.setErrorMessage(errorMessage);
@@ -129,20 +129,20 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy {
         FeatureResponse featureResponse = new FeatureResponse();
         featureResponse.setExecuteDetailVo(executeDetailVo);
         featureResponse.setStatus(ProcessStatus.FAIL.getType());
-        notifyAsyncRecordResult(executeContext, Collections.singletonList(featureResponse));
+        notifyAsyncRecordResult(featureExecuteContext, Collections.singletonList(featureResponse));
     }
 
-    private void notifyAsyncRecordResult(ExecuteContext executeContext, List<FeatureResponse> responses) {
+    private void notifyAsyncRecordResult(FeatureExecuteContext featureExecuteContext, List<FeatureResponse> responses) {
         ExecuteRecord executeRecord = new ExecuteRecord();
-        executeRecord.setHistoryId(executeContext.getHistoryId());
+        executeRecord.setHistoryId(featureExecuteContext.getHistoryId());
         executeRecord.setExecuteType(TemplateType.THREAD.getType());
-        executeRecord.setExecuteRecordId(executeContext.getRecordId());
+        executeRecord.setExecuteRecordId(featureExecuteContext.getRecordId());
         executeRecord.setExecuteResult(JSON.toJSONString(responses));
         executeRecord.setStatus(FeatureExecutorImpl.judgeRecordStatus(responses));
-        ResultEvent resultEvent = new ResultEvent().executeId(executeContext.getRecordId())
+        ResultEvent resultEvent = new ResultEvent().executeId(featureExecuteContext.getRecordId())
                 .notifyType(NotifyType.UPDATE_EXECUTE_POINT_RECORD)
                 .clientIp(IpUtils.getLocalIP())
-                .logId(executeContext.getLogId())
+                .logId(featureExecuteContext.getLogId())
                 .params(executeRecord);
         resultEventNotify.notifyEvent(resultEvent);
     }
