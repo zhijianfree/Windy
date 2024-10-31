@@ -8,7 +8,7 @@ import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.feature.ExecuteTemplateVo;
 import com.zj.common.model.DispatchTaskModel;
-import com.zj.common.monitor.RequestProxy;
+import com.zj.common.monitor.invoker.IMasterInvoker;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.feature.ExecuteTemplateDto;
@@ -57,20 +57,20 @@ public class ApiService {
     public static final String HOST_KEY = "host";
     private final UniqueIdService uniqueIdService;
     private final IServiceApiRepository apiRepository;
-    private final RequestProxy requestProxy;
+    private final IMasterInvoker masterInvoker;
     private final ISystemConfigRepository systemConfigRepository;
     private final IGenerateRepository generateRepository;
     private final IGenerateRecordRepository generateRecordRepository;
     private final ApiImportFactory apiImportFactory;
     private final IExecuteTemplateRepository executeTemplateRepository;
 
-    public ApiService(UniqueIdService uniqueIdService, IServiceApiRepository apiRepository, RequestProxy requestProxy
+    public ApiService(UniqueIdService uniqueIdService, IServiceApiRepository apiRepository, IMasterInvoker masterInvoker
             , ISystemConfigRepository systemConfigRepository, IGenerateRepository generateRepository,
                       IGenerateRecordRepository generateRecordRepository, ApiImportFactory apiImportFactory,
                       IExecuteTemplateRepository executeTemplateRepository) {
         this.uniqueIdService = uniqueIdService;
         this.apiRepository = apiRepository;
-        this.requestProxy = requestProxy;
+        this.masterInvoker = masterInvoker;
         this.systemConfigRepository = systemConfigRepository;
         this.generateRepository = generateRepository;
         this.generateRecordRepository = generateRecordRepository;
@@ -119,7 +119,7 @@ public class ApiService {
         DispatchTaskModel dispatchTaskModel = new DispatchTaskModel();
         dispatchTaskModel.setSourceId(generate.getServiceId());
         dispatchTaskModel.setType(LogType.GENERATE.getType());
-        return requestProxy.runGenerate(dispatchTaskModel);
+        return masterInvoker.runGenerateTask(dispatchTaskModel);
     }
 
     private void checkVersionExist(String serviceId, String version) {

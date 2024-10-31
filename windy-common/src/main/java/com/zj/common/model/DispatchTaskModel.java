@@ -12,7 +12,7 @@ public class DispatchTaskModel {
 
   /**
    * 执行任务来源Id(测试集合Id，流水线Id，用例任务Id)
-   * 如果是测试集那么sourceId就是用例Id列表
+   * 如果是测试集批量执行那么sourceId就是用例Id列表
    * */
   private String sourceId;
 

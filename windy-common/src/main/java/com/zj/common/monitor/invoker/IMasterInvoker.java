@@ -5,7 +5,6 @@ import com.zj.common.model.MasterCollect;
 import com.zj.common.model.PluginInfo;
 import com.zj.common.model.ResponseStatusModel;
 import com.zj.common.model.ResultEvent;
-import com.zj.common.model.StopDispatch;
 
 import java.util.List;
 
@@ -37,7 +36,7 @@ public interface IMasterInvoker {
 
     List<PluginInfo> getAvailablePlugins();
 
-    boolean stopDispatchTask(StopDispatch stopDispatch);
+    boolean stopDispatchTask(DispatchTaskModel dispatchTaskModel);
 
     List<MasterCollect> requestMasterMonitor();
 }

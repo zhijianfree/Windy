@@ -2,17 +2,13 @@ package com.zj.common.monitor.invoker.eureka;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.common.model.ClientCollect;
-import com.zj.common.model.MasterCollect;
 import com.zj.common.model.ResponseMeta;
 import com.zj.common.model.StopDispatch;
 import com.zj.common.monitor.discover.DiscoverService;
 import com.zj.common.monitor.discover.ServiceInstance;
 import com.zj.common.monitor.invoker.IClientInvoker;
-import com.zj.common.monitor.trace.TidInterceptor;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.Request;
 import okhttp3.Response;
-import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
@@ -23,7 +19,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class IEurekaClientInvokerAdapter extends BaseEurekaAdapter implements IClientInvoker {
+public class EurekaClientInvokerAdapter extends BaseEurekaAdapter implements IClientInvoker {
 
     private static final String DISPATCH_GENERATE_TASK = "http://WindyClient/v1/client/dispatch/generate";
     private static final String DISPATCH_PIPELINE_TASK = "http://WindyClient/v1/client/dispatch/pipeline";
@@ -32,7 +28,7 @@ public class IEurekaClientInvokerAdapter extends BaseEurekaAdapter implements IC
     public static final String CLIENT_MONITOR_URL = "http://%s/v1/devops/client/instance";
 
     private final DiscoverService discoverService;
-    public IEurekaClientInvokerAdapter(DiscoverService discoverService, RestTemplate restTemplate) {
+    public EurekaClientInvokerAdapter(DiscoverService discoverService, RestTemplate restTemplate) {
         super(restTemplate);
         this.discoverService = discoverService;
     }
@@ -43,22 +39,12 @@ public class IEurekaClientInvokerAdapter extends BaseEurekaAdapter implements IC
         if (Objects.isNull(response)) {
             return false;
         }
-        log.info("get response status result ={}", response.getBody());
+        log.info("run generate response result ={}", response.getBody());
         return response.getStatusCode().is2xxSuccessful();
     }
 
     @Override
-    public boolean runPipelineTask(Object pipelineTask) {
-        ResponseEntity<String> response = requestPost(DISPATCH_PIPELINE_TASK, pipelineTask);
-        if (Objects.isNull(response)) {
-            return false;
-        }
-        log.info("get response status result ={}", response.getBody());
-        return response.getStatusCode().is2xxSuccessful();
-    }
-
-    @Override
-    public boolean runFeatureTask(Object featureTask, boolean isRequestSingle, String singleIp) {
+    public boolean runPipelineTask(Object pipelineTask, boolean isRequestSingle, String singleIp) {
         if (isRequestSingle) {
             Optional<ServiceInstance> optional = discoverService.getServiceInstances(DiscoverService.WINDY_Client).stream()
                     .filter(service -> Objects.equals(service.getIp(), singleIp)).findAny();
@@ -67,13 +53,23 @@ public class IEurekaClientInvokerAdapter extends BaseEurekaAdapter implements IC
                 return false;
             }
             String url = DISPATCH_FEATURE_TASK.replace(DiscoverService.WINDY_Client, optional.get().getHost());
-            return postWithIp(url, featureTask);
+            return postWithIp(url, pipelineTask);
         }
+        ResponseEntity<String> response = requestPost(DISPATCH_PIPELINE_TASK, pipelineTask);
+        if (Objects.isNull(response)) {
+            return false;
+        }
+        log.info("run pipeline response result ={}", response.getBody());
+        return response.getStatusCode().is2xxSuccessful();
+    }
+
+    @Override
+    public boolean runFeatureTask(Object featureTask) {
         ResponseEntity<String> response = requestPost(DISPATCH_FEATURE_TASK, featureTask);
         if (Objects.isNull(response)) {
             return false;
         }
-        log.info("get response status result ={}", response.getBody());
+        log.info("run feature response status result ={}", response.getBody());
         return response.getStatusCode().is2xxSuccessful();
     }
 

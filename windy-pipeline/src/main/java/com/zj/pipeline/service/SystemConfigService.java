@@ -1,10 +1,11 @@
 package com.zj.pipeline.service;
 
 import com.zj.common.git.GitAccessInfo;
+import com.zj.common.monitor.invoker.IClientInvoker;
+import com.zj.common.monitor.invoker.IMasterInvoker;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.common.model.ClientCollect;
 import com.zj.common.model.MasterCollect;
-import com.zj.common.monitor.RequestProxy;
 import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
@@ -19,13 +20,15 @@ public class SystemConfigService {
 
   private final ISystemConfigRepository systemConfigRepository;
   private final UniqueIdService uniqueIdService;
-  private final RequestProxy requestProxy;
+  private final IMasterInvoker masterInvoker;
+  private final IClientInvoker clientInvoker;
 
   public SystemConfigService(ISystemConfigRepository systemConfigRepository,
-      UniqueIdService uniqueIdService, RequestProxy requestProxy) {
+                             UniqueIdService uniqueIdService, IMasterInvoker masterInvoker, IClientInvoker clientInvoker) {
     this.systemConfigRepository = systemConfigRepository;
     this.uniqueIdService = uniqueIdService;
-    this.requestProxy = requestProxy;
+    this.masterInvoker = masterInvoker;
+    this.clientInvoker = clientInvoker;
   }
 
 
@@ -53,9 +56,9 @@ public class SystemConfigService {
 
   public SystemMonitorDto getSystemMonitor() {
     SystemMonitorDto systemMonitorDto = new SystemMonitorDto();
-    List<ClientCollect> clientMonitor = requestProxy.requestClientMonitor();
+    List<ClientCollect> clientMonitor = clientInvoker.requestClientMonitor();
     systemMonitorDto.setClients(clientMonitor);
-    List<MasterCollect> masterMonitor = requestProxy.requestMasterMonitor();
+    List<MasterCollect> masterMonitor = masterInvoker.requestMasterMonitor();
     systemMonitorDto.setMasters(masterMonitor);
     return systemMonitorDto;
   }

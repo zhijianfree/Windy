@@ -7,7 +7,7 @@ import com.zj.common.enums.DispatchType;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.feature.ExecutorUnit;
-import com.zj.common.monitor.RequestProxy;
+import com.zj.common.monitor.invoker.IClientInvoker;
 import com.zj.common.utils.IpUtils;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
@@ -55,8 +55,6 @@ public class FeatureExecuteProxy implements IStopEventListener {
 
     public static final String TASK_FEATURE_TIPS = "no task need run";
     private final Map<String, FeatureTask> featureTaskMap = new ConcurrentHashMap<>();
-
-    private final RequestProxy requestProxy;
     private final Executor executorService;
     private final TaskEndProcessor taskEndProcessor;
     private final IExecutePointRepository executePointRepository;
@@ -65,17 +63,16 @@ public class FeatureExecuteProxy implements IStopEventListener {
     private final IExecuteTemplateRepository executeTemplateRepository;
     private final ITestCaseConfigRepository caseConfigRepository;
     private final IFeatureRepository featureRepository;
+    private final IClientInvoker clientInvoker;
 
-    public FeatureExecuteProxy(RequestProxy requestProxy,
-                               @Qualifier("featureExecutorPool") Executor executorService,
+    public FeatureExecuteProxy(@Qualifier("featureExecutorPool") Executor executorService,
                                TaskEndProcessor taskEndProcessor,
                                IExecutePointRepository executePointRepository,
                                ITaskRecordRepository taskRecordRepository,
                                IFeatureHistoryRepository featureHistoryRepository,
                                IExecuteTemplateRepository executeTemplateRepository,
                                ITestCaseConfigRepository caseConfigRepository,
-                               IFeatureRepository featureRepository) {
-        this.requestProxy = requestProxy;
+                               IFeatureRepository featureRepository, IClientInvoker clientInvoker) {
         this.executorService = executorService;
         this.taskEndProcessor = taskEndProcessor;
         this.executePointRepository = executePointRepository;
@@ -84,6 +81,7 @@ public class FeatureExecuteProxy implements IStopEventListener {
         this.executeTemplateRepository = executeTemplateRepository;
         this.caseConfigRepository = caseConfigRepository;
         this.featureRepository = featureRepository;
+        this.clientInvoker = clientInvoker;
     }
 
     public void execute(FeatureTask featureTask) {
@@ -107,7 +105,8 @@ public class FeatureExecuteProxy implements IStopEventListener {
             FeatureExecuteParam featureExecuteParam = getFeatureExecuteParam(featureTask, featureId);
             featureExecuteParam.setDispatchType(DispatchType.FEATURE.name());
             featureExecuteParam.setMasterIp(IpUtils.getLocalIP());
-            requestProxy.sendDispatchTask(featureExecuteParam, false, null);
+            boolean result = clientInvoker.runFeatureTask(featureExecuteParam);
+            log.info("run feature task result = {}", result);
             return featureId;
         }, executorService).whenComplete((featureId, e) -> {
             String recordId = Optional.ofNullable(featureId).orElse(TASK_FEATURE_TIPS);

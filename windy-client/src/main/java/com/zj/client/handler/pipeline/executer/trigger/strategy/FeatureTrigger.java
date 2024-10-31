@@ -12,16 +12,17 @@ import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ExecuteException;
 import com.zj.common.model.DispatchTaskModel;
-import com.zj.common.monitor.RequestProxy;
+import com.zj.common.model.ResponseStatusModel;
+import com.zj.common.monitor.invoker.IMasterInvoker;
 import com.zj.common.utils.OrikaUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 用例执行处理
@@ -31,13 +32,10 @@ import java.util.List;
 @Slf4j
 @Component
 public class FeatureTrigger implements INodeTrigger {
-  private static final String TASK_STATUS_URL = "http://WindyMaster/v1/devops/master/task/%s/status";
   public static final String TASK_TIPS = "pipeline feature task";
-
-  private final RequestProxy requestProxy;
-
-  public FeatureTrigger(RequestProxy requestProxy) {
-    this.requestProxy = requestProxy;
+  private final IMasterInvoker masterInvoker;
+  public FeatureTrigger(IMasterInvoker masterInvoker) {
+    this.masterInvoker = masterInvoker;
   }
 
   @Override
@@ -56,15 +54,14 @@ public class FeatureTrigger implements INodeTrigger {
     task.setSourceName(TASK_TIPS);
     task.setType(LogType.FEATURE_TASK.getType());
     task.setTriggerId(taskNode.getRecordId());
-    String recordId = requestProxy.startFeatureTask(task);
+    String recordId = masterInvoker.runFeatureTask(task);
     log.info("get TestFeatureInvoker triggerRun recordId= {}",recordId);
 
     //触发任务执行，将任务的记录Id传递给刷新动作
     if (StringUtils.isBlank(recordId)) {
       throw new ExecuteException("pipeline trigger feature task error");
     }
-    String url = String.format(TASK_STATUS_URL, recordId);
-    taskNode.getRefreshContext().setUrl(url);
+    taskNode.getRefreshContext().setRecordId(recordId);
   }
 
   @Override
@@ -72,17 +69,15 @@ public class FeatureTrigger implements INodeTrigger {
     QueryResponseModel queryResponseModel = new QueryResponseModel();
     try {
       log.info("get refresh url ={}", refreshContext.getUrl());
-      ResponseEntity<Object> responseEntity = requestProxy.getFeatureTaskStatus(
-          refreshContext.getUrl());
-      log.info("get TestFeatureInvoker queryStatus code= {} result={}",
-          responseEntity.getStatusCode(), JSON.toJSONString(responseEntity.getBody()));
-      if (responseEntity.getStatusCode().isError()) {
+      ResponseStatusModel responseStatusModel = masterInvoker.getFeatureTaskStatus(refreshContext.getRecordId());
+      log.info("get TestFeatureInvoker result={}", JSON.toJSONString(responseStatusModel));
+      if (Objects.isNull(responseStatusModel)) {
         queryResponseModel.setStatus(ProcessStatus.FAIL.getType());
         queryResponseModel.setMessage(Collections.singletonList("request http error"));
         return queryResponseModel;
       }
 
-      return JSON.parseObject(JSON.toJSONString(responseEntity.getBody()), QueryResponseModel.class);
+      return JSON.parseObject(JSON.toJSONString(responseStatusModel), QueryResponseModel.class);
     } catch (Exception e) {
       log.error("request dispatch task error", e);
       queryResponseModel.setStatus(ProcessStatus.FAIL.getType());

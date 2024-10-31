@@ -11,11 +11,8 @@ import com.zj.common.model.StopDispatch;
 import com.zj.common.monitor.discover.DiscoverService;
 import com.zj.common.monitor.discover.ServiceInstance;
 import com.zj.common.monitor.invoker.IMasterInvoker;
-import com.zj.common.monitor.trace.TidInterceptor;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.Request;
 import okhttp3.Response;
-import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
@@ -27,7 +24,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class IEurekaMasterInvokerAdapter extends BaseEurekaAdapter implements IMasterInvoker {
+public class EurekaMasterInvokerAdapter extends BaseEurekaAdapter implements IMasterInvoker {
     private static final String DISPATCH_TASK = "http://WindyMaster/v1/devops/dispatch/task";
     private static final String NOTIFY_TASK_RESULT = "http://WindyMaster/v1/devops/dispatch/notify";
     private static final String QUERY_APPROVAL_STATUS = "http://WindyMaster/v1/devops/master/record/%s";
@@ -36,7 +33,7 @@ public class IEurekaMasterInvokerAdapter extends BaseEurekaAdapter implements IM
     public static final String GET_PLUGIN_LIST = "http://WindyMaster/v1/devops/master/plugins";
     private final DiscoverService discoverService;
 
-    public IEurekaMasterInvokerAdapter(RestTemplate restTemplate, DiscoverService discoverService) {
+    public EurekaMasterInvokerAdapter(RestTemplate restTemplate, DiscoverService discoverService) {
         super(restTemplate);
         this.discoverService = discoverService;
     }
@@ -55,7 +52,7 @@ public class IEurekaMasterInvokerAdapter extends BaseEurekaAdapter implements IM
     public Boolean runGenerateTask(DispatchTaskModel dispatchTaskModel) {
         ResponseEntity<String> response = requestPost(DISPATCH_TASK, dispatchTaskModel);
         if (Objects.isNull(response)) {
-            return null;
+            return false;
         }
         ResponseMeta responseMeta = JSON.parseObject(response.getBody(), ResponseMeta.class);
         return Optional.ofNullable(responseMeta).map(res -> Boolean.parseBoolean(String.valueOf(res.getData()))).orElse(null);
@@ -79,7 +76,7 @@ public class IEurekaMasterInvokerAdapter extends BaseEurekaAdapter implements IM
     @Override
     public boolean notifyExecuteEvent(ResultEvent resultEvent) {
         List<ServiceInstance> serviceInstances = discoverService.getServiceInstances(DiscoverService.WINDY_MASTER);
-        Boolean notifySuccess = serviceInstances.stream()
+        boolean notifySuccess = serviceInstances.stream()
                 .filter(serviceInstance -> Objects.equals(serviceInstance.getHost(), resultEvent.getMasterIP()))
                 .findFirst().map(serviceInstance -> {
                     String url = NOTIFY_TASK_RESULT.replace(DiscoverService.WINDY_MASTER, serviceInstance.getHost());
@@ -117,8 +114,8 @@ public class IEurekaMasterInvokerAdapter extends BaseEurekaAdapter implements IM
     }
 
     @Override
-    public boolean stopDispatchTask(StopDispatch stopDispatch) {
-        ResponseEntity<String> response = requestPost(STOP_DISPATCH_TASK, stopDispatch);
+    public boolean stopDispatchTask(DispatchTaskModel dispatchTaskModel) {
+        ResponseEntity<String> response = requestPost(STOP_DISPATCH_TASK, dispatchTaskModel);
         if (Objects.isNull(response)) {
             return false;
         }

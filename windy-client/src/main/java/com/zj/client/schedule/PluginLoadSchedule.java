@@ -1,23 +1,23 @@
 package com.zj.client.schedule;
 
-import com.alibaba.fastjson.JSON;
 import com.zj.client.handler.feature.executor.invoker.invoke.MethodInvoke;
 import com.zj.client.handler.feature.executor.invoker.loader.PluginManager;
 import com.zj.common.model.PluginInfo;
 import com.zj.common.monitor.InstanceMonitor;
-import com.zj.common.monitor.RequestProxy;
+import com.zj.common.monitor.invoker.IMasterInvoker;
 import com.zj.common.monitor.trace.TidInterceptor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.MDC;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.MDC;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
 /**
  * @author guyuelan
@@ -27,14 +27,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class PluginLoadSchedule {
 
-  private final RequestProxy requestProxy;
+  private final IMasterInvoker masterInvoker;
   private final PluginManager pluginManager;
   private final InstanceMonitor instanceMonitor;
   private final MethodInvoke methodInvoke;
 
-  public PluginLoadSchedule(RequestProxy requestProxy, PluginManager pluginManager,
+  public PluginLoadSchedule(IMasterInvoker masterInvoker, PluginManager pluginManager,
       InstanceMonitor instanceMonitor, MethodInvoke methodInvoke) {
-    this.requestProxy = requestProxy;
+    this.masterInvoker = masterInvoker;
     this.pluginManager = pluginManager;
     this.instanceMonitor = instanceMonitor;
     this.methodInvoke = methodInvoke;
@@ -47,7 +47,7 @@ public class PluginLoadSchedule {
     }
 
     initMDC();
-    List<PluginInfo> plugins = requestProxy.getAvailablePlugins();
+    List<PluginInfo> plugins = masterInvoker.getAvailablePlugins();
     if (CollectionUtils.isEmpty(plugins)) {
       return;
     }

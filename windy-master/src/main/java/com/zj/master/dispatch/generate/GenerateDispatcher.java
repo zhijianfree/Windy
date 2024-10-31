@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.DispatchType;
 import com.zj.common.enums.LogType;
 import com.zj.common.model.DispatchTaskModel;
-import com.zj.common.monitor.RequestProxy;
+import com.zj.common.monitor.invoker.IClientInvoker;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.dto.log.DispatchLogDto;
 import com.zj.domain.entity.dto.service.MicroserviceDto;
@@ -28,17 +28,17 @@ public class GenerateDispatcher implements IDispatchExecutor {
   private final IGenerateRepository generateRepository;
   private final IServiceApiRepository serviceApiRepository;
   private final ISystemConfigRepository systemConfigRepository;
-  private final RequestProxy requestProxy;
   private final IMicroServiceRepository serviceRepository;
+  private final IClientInvoker clientInvoker;
 
   public GenerateDispatcher(IGenerateRepository generateRepository,
-      IServiceApiRepository serviceApiRepository, ISystemConfigRepository systemConfigRepository,
-      RequestProxy requestProxy, IMicroServiceRepository serviceRepository) {
+                            IServiceApiRepository serviceApiRepository, ISystemConfigRepository systemConfigRepository,
+                            IMicroServiceRepository serviceRepository, IClientInvoker clientInvoker) {
     this.generateRepository = generateRepository;
     this.serviceApiRepository = serviceApiRepository;
     this.systemConfigRepository = systemConfigRepository;
-    this.requestProxy = requestProxy;
     this.serviceRepository = serviceRepository;
+    this.clientInvoker = clientInvoker;
   }
 
   @Override
@@ -80,7 +80,7 @@ public class GenerateDispatcher implements IDispatchExecutor {
     generateParam.setService(service.getServiceName());
     generateParam.setServiceId(serviceId);
     generateParam.setApiList(models);
-    return requestProxy.sendDispatchTask(generateParam, false, null);
+    return clientInvoker.runGenerateTask(generateParam);
   }
 
   @Override

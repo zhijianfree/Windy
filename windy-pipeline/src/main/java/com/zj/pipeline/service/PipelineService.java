@@ -6,7 +6,7 @@ import com.zj.common.enums.LogType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.DispatchTaskModel;
-import com.zj.common.monitor.RequestProxy;
+import com.zj.common.monitor.invoker.IMasterInvoker;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.pipeline.BindBranchDto;
 import com.zj.domain.entity.dto.pipeline.PipelineDto;
@@ -44,22 +44,22 @@ public class PipelineService {
     private final PipelineHistoryService pipelineHistoryService;
     private final UniqueIdService uniqueIdService;
     private final IPipelineRepository pipelineRepository;
-    private final RequestProxy requestProxy;
     private final IBindBranchRepository bindBranchRepository;
     private final MicroServiceRepository microServiceRepository;
+    private final IMasterInvoker masterInvoker;
 
     public PipelineService(PipelineNodeService pipelineNodeService,
                            PipelineStageService pipelineStageService, PipelineHistoryService pipelineHistoryService,
                            UniqueIdService uniqueIdService, IPipelineRepository pipelineRepository,
-                           RequestProxy requestProxy, IBindBranchRepository bindBranchRepository, MicroServiceRepository microServiceRepository) {
+                           IBindBranchRepository bindBranchRepository, MicroServiceRepository microServiceRepository, IMasterInvoker masterInvoker) {
         this.pipelineNodeService = pipelineNodeService;
         this.pipelineStageService = pipelineStageService;
         this.pipelineHistoryService = pipelineHistoryService;
         this.uniqueIdService = uniqueIdService;
         this.pipelineRepository = pipelineRepository;
-        this.requestProxy = requestProxy;
         this.bindBranchRepository = bindBranchRepository;
         this.microServiceRepository = microServiceRepository;
+        this.masterInvoker = masterInvoker;
     }
 
     @Transactional
@@ -247,7 +247,7 @@ public class PipelineService {
         dispatchTaskModel.setSourceId(pipelineId);
         dispatchTaskModel.setSourceName(pipeline.getPipelineName());
         dispatchTaskModel.setType(LogType.PIPELINE.getType());
-        return requestProxy.runPipeline(dispatchTaskModel);
+        return masterInvoker.runPipelineTask(dispatchTaskModel);
     }
 
     public PipelineDto getPipelineDetail(String pipelineId) {
@@ -278,7 +278,7 @@ public class PipelineService {
         DispatchTaskModel dispatchTaskModel = new DispatchTaskModel();
         dispatchTaskModel.setSourceId(historyId);
         dispatchTaskModel.setType(LogType.PIPELINE.getType());
-        return requestProxy.stopPipeline(dispatchTaskModel);
+        return masterInvoker.stopDispatchTask(dispatchTaskModel);
     }
 
     public List<PipelineDto> getServicePipelines(String serviceId) {

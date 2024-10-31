@@ -12,13 +12,30 @@ import java.util.Map;
 @Data
 public class RefreshContext {
 
+  /**
+   * 刷新的URL
+   */
   private String url;
 
+  /**
+   * 循环查询的条件
+   */
   private CompareInfo loopExpression;
 
+  /**
+   * 状态查询的Header信息
+   */
   private Map<String, String> headers;
 
+  /**
+   * 刷新状态结果比对条件
+   */
   private List<CompareInfo> compareConfig;
+
+  /**
+   * 触发任务的记录ID(在Request的trigger触发的任务关联ID)
+   */
+  private String recordId;
 
   public RefreshContext() {
   }

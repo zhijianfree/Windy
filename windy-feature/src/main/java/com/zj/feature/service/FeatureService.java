@@ -7,7 +7,7 @@ import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.model.DispatchTaskModel;
 import com.zj.common.model.PageSize;
-import com.zj.common.monitor.RequestProxy;
+import com.zj.common.monitor.invoker.IMasterInvoker;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.domain.entity.dto.feature.ExecutePointDto;
@@ -18,11 +18,11 @@ import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.feature.entity.BatchDeleteDto;
 import com.zj.feature.entity.BatchUpdateFeatures;
 import com.zj.feature.entity.CopyCaseFeatureDto;
-import com.zj.feature.entity.PasteFeatureDto;
 import com.zj.feature.entity.ExecutePointVo;
 import com.zj.feature.entity.FeatureInfoVo;
 import com.zj.feature.entity.FeatureNodeDto;
 import com.zj.feature.entity.FeatureOrder;
+import com.zj.feature.entity.PasteFeatureDto;
 import com.zj.feature.entity.TagFilterDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -52,19 +52,18 @@ public class FeatureService {
     private final FeatureTagService featureTagService;
     private final UniqueIdService uniqueIdService;
     private final IFeatureRepository featureRepository;
-    private final RequestProxy requestProxy;
+    private final IMasterInvoker masterInvoker;
 
     public FeatureService(ExecutePointService executePointService, TestCaseService testCaseService,
                           TestCaseConfigService testCaseConfigService, FeatureTagService featureTagService,
-                          UniqueIdService uniqueIdService, IFeatureRepository featureRepository,
-                          RequestProxy requestProxy) {
+                          UniqueIdService uniqueIdService, IFeatureRepository featureRepository, IMasterInvoker masterInvoker) {
         this.executePointService = executePointService;
         this.testCaseService = testCaseService;
         this.testCaseConfigService = testCaseConfigService;
         this.featureTagService = featureTagService;
         this.uniqueIdService = uniqueIdService;
         this.featureRepository = featureRepository;
-        this.requestProxy = requestProxy;
+        this.masterInvoker = masterInvoker;
     }
 
     public List<FeatureNodeDto> getFeatureTreeList(String testCaseId) {
@@ -283,7 +282,8 @@ public class FeatureService {
         dispatchTaskModel.setType(LogType.FEATURE.getType());
         dispatchTaskModel.setSourceId(JSON.toJSONString(Collections.singletonList(featureId)));
         dispatchTaskModel.setSourceName(feature.getFeatureName());
-        return requestProxy.runTask(dispatchTaskModel);
+        String recordId = masterInvoker.runFeatureTask(dispatchTaskModel);
+        return Objects.nonNull(recordId);
     }
 
     public Boolean pasteFeatures(PasteFeatureDto copyFeature) {
