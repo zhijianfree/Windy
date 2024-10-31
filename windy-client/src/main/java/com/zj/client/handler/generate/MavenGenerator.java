@@ -3,7 +3,6 @@ package com.zj.client.handler.generate;
 import com.alibaba.fastjson.JSON;
 import com.zj.client.config.GlobalEnvConfig;
 import com.zj.client.entity.dto.GenerateDto;
-import com.zj.client.entity.enuns.HttpParamType;
 import com.zj.client.entity.vo.ApiItem;
 import com.zj.client.entity.vo.ApiItem.MethodParam;
 import com.zj.client.entity.vo.ApiModel;
@@ -19,6 +18,7 @@ import com.zj.common.enums.ProcessStatus;
 import com.zj.common.uuid.UniqueIdService;
 import com.zj.common.model.ResultEvent;
 import com.zj.common.utils.OrikaUtil;
+import com.zj.plugin.loader.ParamValueType;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import java.io.BufferedWriter;
@@ -325,7 +325,7 @@ public class MavenGenerator {
         propertyItem.setName(apiParamModel.getParamKey());
         propertyItem.setType(apiParamModel.getObjectName());
         propertyItem.setNameUpper(capitalize(apiParamModel.getParamKey(), true));
-        if (Objects.equals(apiParamModel.getType(), HttpParamType.Object.name())) {
+        if (Objects.equals(apiParamModel.getType(), ParamValueType.Object.name())) {
           List<ApiParamModel> children = apiParamModel.getChildren();
           createEntity(projectPath, children, apiParamModel.getObjectName(), packageName);
         }

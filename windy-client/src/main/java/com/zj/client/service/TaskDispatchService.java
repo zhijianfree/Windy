@@ -23,14 +23,10 @@ import java.util.function.Function;
  */
 @Service
 public class TaskDispatchService {
-
-  public static final String DISPATCH_TYPE_KEY = "dispatchType";
   private final IFeatureExecutor featureExecutor;
   private final ExecuteProxy executeProxy;
   private final NodeStatusQueryLooper nodeStatusQueryLooper;
   private final MavenGenerator mavenGenerator;
-
-  private final Map<String, Function<JSONObject, Boolean>> funcMap = new HashMap<>();
 
   public TaskDispatchService(IFeatureExecutor featureExecutor, ExecuteProxy executeProxy,
       NodeStatusQueryLooper nodeStatusQueryLooper, MavenGenerator mavenGenerator) {
@@ -38,33 +34,20 @@ public class TaskDispatchService {
     this.executeProxy = executeProxy;
     this.nodeStatusQueryLooper = nodeStatusQueryLooper;
     this.mavenGenerator = mavenGenerator;
-    funcMap.put(DispatchType.FEATURE.name(), this::runFeature);
-    funcMap.put(DispatchType.PIPELINE.name(), this::runPipeline);
-    funcMap.put(DispatchType.GENERATE.name(), this::runGenerate);
+
   }
 
-
-  public Boolean dispatch(JSONObject params) {
-    String dispatchType = params.getString(DISPATCH_TYPE_KEY);
-    Function<JSONObject, Boolean> func = funcMap.get(dispatchType);
-    return func.apply(params);
-  }
-
-
-  private boolean runFeature(JSONObject params) {
-    FeatureParam featureParam = JSON.parseObject(JSON.toJSONString(params), FeatureParam.class);
+  public boolean runFeature(FeatureParam featureParam) {
     featureExecutor.execute(featureParam);
     return true;
   }
 
-  private boolean runPipeline(JSONObject params) {
-    TaskNode taskNode = JSON.toJavaObject(params, TaskNode.class);
+  public boolean runPipeline(TaskNode taskNode) {
     executeProxy.runNode(taskNode);
     return true;
   }
 
-  private boolean runGenerate(JSONObject params) {
-    GenerateDto generate = JSON.toJavaObject(params, GenerateDto.class);
+  public boolean runGenerate(GenerateDto generate) {
     mavenGenerator.startGenerate(generate);
     return true;
   }

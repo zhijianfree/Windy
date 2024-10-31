@@ -54,6 +54,8 @@ public class TaskNode {
    * */
   private Long executeTime;
 
+  private Long expireTime;
+
   /**
    * 主节点IP
    * */

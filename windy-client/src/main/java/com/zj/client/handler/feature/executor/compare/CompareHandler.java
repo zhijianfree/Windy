@@ -22,7 +22,7 @@ public class CompareHandler {
     public static final String RESPONSE_CODE = "$code";
     public static final String RESPONSE_BODY = "$body";
     public static final String TIP_FORMAT = "compare key[%s] expect value is[%s] but find [%s]";
-    private OgnlDataParser ognlDataParser = new OgnlDataParser();
+    private final OgnlDataParser ognlDataParser = new OgnlDataParser();
 
     private final CompareFactory compareFactory;
 

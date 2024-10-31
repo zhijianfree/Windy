@@ -68,22 +68,30 @@ public class RequestProxy {
   }
 
 
+
+
   /**
    * master向client分发子任务
    */
-  public boolean sendDispatchTask(Object data, boolean isRequestSingle, String singleIp) {
+  public boolean sendDispatchTask(String url , Object data, boolean isRequestSingle, String singleIp) {
     if (isRequestSingle) {
-      ServiceInstance serviceInstance = discoverService.getServiceInstances(
-              DiscoverService.WINDY_Client).stream()
-          .filter(service -> Objects.equals(service.getIp(), singleIp)).findAny().orElse(null);
-      return requestWithIp(data, serviceInstance);
+      Optional<ServiceInstance> optional = discoverService.getServiceInstances(DiscoverService.WINDY_Client).stream()
+          .filter(service -> Objects.equals(service.getIp(), singleIp)).findAny();
+      if (!optional.isPresent()){
+        log.info("send single request error, service not find ={}", singleIp);
+        return false;
+      }
+
+      ServiceInstance serviceInstance = optional.get();
+      url = MASTER_DISPATCH_TASK.replace(WINDY_CLIENT, serviceInstance.getHost());
+      return requestWithIp(url, data, serviceInstance);
     }
 
     wrapTraceHeader();
     HttpEntity<Object> http = new HttpEntity<>(data, headers);
     log.info("request body={}", JSON.toJSONString(data));
     try {
-      ResponseEntity<String> response = restTemplate.postForEntity(MASTER_DISPATCH_TASK, http,
+      ResponseEntity<String> response = restTemplate.postForEntity(url, http,
           String.class);
       log.info("get response status result ={}", response.getBody());
       return response.getStatusCode().is2xxSuccessful();
@@ -102,14 +110,13 @@ public class RequestProxy {
     }
   }
 
-  private boolean requestWithIp(Object data, ServiceInstance serviceInstance) {
+  private boolean requestWithIp(String url, Object data, ServiceInstance serviceInstance) {
     if (Objects.isNull(serviceInstance)) {
       log.warn("can not find service instance");
       return false;
     }
 
     String traceId = MDC.get(TidInterceptor.MDC_TID_KEY);
-    String url = MASTER_DISPATCH_TASK.replace(WINDY_CLIENT, serviceInstance.getHost());
     Request request = new Request.Builder().url(url)
         .header(TidInterceptor.HTTP_HEADER_TRACE_ID, traceId)
         .post(RequestBody.create(mediaType, JSON.toJSONString(data))).build();

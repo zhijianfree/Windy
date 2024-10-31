@@ -18,11 +18,13 @@ import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import javax.swing.text.html.Option;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -178,7 +180,7 @@ public class NodeStatusQueryLooper implements Runnable {
   }
 
   private void cycleRunTask(TaskNode node) {
-    if (checkRunTimeout(node.getExecuteTime())) {
+    if (checkRunTimeout(node)) {
       log.info("node record run timeout recordId={}", node.getRecordId());
       QueryResponseModel queryResponseModel = new QueryResponseModel();
       queryResponseModel.setStatus(ProcessStatus.TIMEOUT.getType());
@@ -193,10 +195,10 @@ public class NodeStatusQueryLooper implements Runnable {
   /**
    * 任务执行超过最大超时时间退出循环查询
    */
-  private boolean checkRunTimeout(long executeTime) {
+  private boolean checkRunTimeout(TaskNode taskNode) {
     long dateNow = System.currentTimeMillis();
-    long mills = dateNow - executeTime;
-    Integer timeout = globalEnvConfig.getLoopQueryTimeout();
+    long mills = dateNow - taskNode.getExecuteTime();
+    Long timeout = Optional.ofNullable(taskNode.getExpireTime()).orElseGet(globalEnvConfig::getLoopQueryTimeout) ;
     return mills >= timeout;
   }
 

@@ -2,6 +2,8 @@ package com.zj.client.handler.pipeline.executer.trigger.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.zj.client.entity.dto.CodeBuildParamDto;
+import com.zj.client.entity.vo.ApprovalParameter;
 import com.zj.client.entity.vo.NodeRecord;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
 import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
@@ -46,6 +48,8 @@ public class ApprovalTrigger implements INodeTrigger {
   @Override
   public void triggerRun(TriggerContext triggerContext, TaskNode taskNode) {
     log.info("approval trigger run, no need to do");
+    ApprovalParameter approvalParameter = JSON.parseObject(JSON.toJSONString(triggerContext.getData()), ApprovalParameter.class);
+    taskNode.setExpireTime(approvalParameter.getMaxWait() * 1000);
   }
 
   @Override
