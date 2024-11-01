@@ -90,6 +90,7 @@ public class PipelineExecuteProxy implements IStopEventListener {
                     requestContext.getSingleClientIp());
             if (!dispatchResult) {
                 log.info("dispatch pipeline task to client fail logId={}", logId);
+                //todo 这个地方需要将错误描述添加进来，否则控制台不知道什原因
                 NodeStatusChange change = buildStatusChange(pipelineTask, taskNode.getHistoryId(),
                         taskNode.getNodeId(), ProcessStatus.FAIL);
                 pipelineEndProcessor.statusChange(change);
@@ -101,6 +102,7 @@ public class PipelineExecuteProxy implements IStopEventListener {
             log.info("complete trigger action recordId = {}", recordId);
         }).exceptionally(e -> {
             log.error("handle task error", e);
+            //todo 这个地方需要将错误描述添加进来，否则控制台不知道什原因
             NodeStatusChange change = buildStatusChange(pipelineTask, taskNode.getHistoryId(),
                     taskNode.getNodeId(), ProcessStatus.FAIL);
             pipelineEndProcessor.statusChange(change);
