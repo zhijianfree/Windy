@@ -12,6 +12,7 @@ import okhttp3.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -28,6 +29,7 @@ public class EurekaClientInvokerAdapter extends BaseEurekaAdapter implements ICl
     public static final String CLIENT_MONITOR_URL = "http://%s/v1/devops/client/instance";
 
     private final DiscoverService discoverService;
+
     public EurekaClientInvokerAdapter(DiscoverService discoverService, RestTemplate restTemplate) {
         super(restTemplate);
         this.discoverService = discoverService;
@@ -46,9 +48,10 @@ public class EurekaClientInvokerAdapter extends BaseEurekaAdapter implements ICl
     @Override
     public boolean runPipelineTask(Object pipelineTask, boolean isRequestSingle, String singleIp) {
         if (isRequestSingle) {
-            Optional<ServiceInstance> optional = discoverService.getServiceInstances(DiscoverService.WINDY_Client).stream()
+            Optional<ServiceInstance> optional =
+                    discoverService.getServiceInstances(DiscoverService.WINDY_Client).stream()
                     .filter(service -> Objects.equals(service.getIp(), singleIp)).findAny();
-            if (!optional.isPresent()){
+            if (!optional.isPresent()) {
                 log.info("send single request error, service not find ={}", singleIp);
                 return false;
             }
@@ -96,10 +99,15 @@ public class EurekaClientInvokerAdapter extends BaseEurekaAdapter implements ICl
             if (Objects.isNull(response)) {
                 return null;
             }
-            String resultString = response.body().toString();
-            log.info("request master monitor result={}", resultString);
-            ResponseMeta result = JSON.parseObject(resultString, ResponseMeta.class);
-            return JSON.parseObject(JSON.toJSONString(result.getData()), ClientCollect.class);
+            try {
+                String resultString = response.body().string();
+                log.info("request client monitor result={}", resultString);
+                ResponseMeta result = JSON.parseObject(resultString, ResponseMeta.class);
+                return JSON.parseObject(JSON.toJSONString(result.getData()), ClientCollect.class);
+            } catch (IOException e) {
+                log.info("handle client monitor result error");
+            }
+            return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 }

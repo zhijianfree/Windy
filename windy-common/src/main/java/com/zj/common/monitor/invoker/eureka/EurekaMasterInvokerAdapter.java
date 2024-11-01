@@ -7,7 +7,6 @@ import com.zj.common.model.PluginInfo;
 import com.zj.common.model.ResponseMeta;
 import com.zj.common.model.ResponseStatusModel;
 import com.zj.common.model.ResultEvent;
-import com.zj.common.model.StopDispatch;
 import com.zj.common.monitor.discover.DiscoverService;
 import com.zj.common.monitor.discover.ServiceInstance;
 import com.zj.common.monitor.invoker.IMasterInvoker;
@@ -16,6 +15,7 @@ import okhttp3.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -96,7 +96,7 @@ public class EurekaMasterInvokerAdapter extends BaseEurekaAdapter implements IMa
 
     @Override
     public ResponseStatusModel getApprovalRecord(String recordId) {
-        String url = String.format(QUERY_APPROVAL_STATUS , recordId);
+        String url = String.format(QUERY_APPROVAL_STATUS, recordId);
         ResponseEntity<String> response = requestGet(url);
         return Optional.ofNullable(response).map(res -> JSON.parseObject(res.getBody(), ResponseStatusModel.class))
                 .orElse(null);
@@ -132,10 +132,15 @@ public class EurekaMasterInvokerAdapter extends BaseEurekaAdapter implements IMa
             if (Objects.isNull(response)) {
                 return null;
             }
-            String resultString = response.body().toString();
-            log.info("request master monitor result={}", resultString);
-            ResponseMeta result = JSON.parseObject(resultString, ResponseMeta.class);
-            return JSON.parseObject(JSON.toJSONString(result.getData()), MasterCollect.class);
+            try {
+                String resultString = response.body().string();
+                log.info("request master monitor result={}", resultString);
+                ResponseMeta result = JSON.parseObject(resultString, ResponseMeta.class);
+                return JSON.parseObject(JSON.toJSONString(result.getData()), MasterCollect.class);
+            } catch (IOException e) {
+                log.info("handle master monitor error", e);
+            }
+            return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 }
