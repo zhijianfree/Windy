@@ -58,7 +58,6 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
 
     @Override
     public void execute(FeatureParam featureParam) {
-        log.info("execute get token ={}", featureParam.getExecuteContext().get("accessToken"));
         String historyId = uniqueIdService.getUniqueId();
         FeatureHistory featureHistory = saveFeatureHistory(featureParam.getFeatureId(), historyId,
                 featureParam.getTaskRecordId());

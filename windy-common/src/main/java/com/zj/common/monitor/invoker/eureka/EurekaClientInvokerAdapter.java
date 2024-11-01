@@ -55,7 +55,7 @@ public class EurekaClientInvokerAdapter extends BaseEurekaAdapter implements ICl
                 log.info("send single request error, service not find ={}", singleIp);
                 return false;
             }
-            String url = DISPATCH_FEATURE_TASK.replace(DiscoverService.WINDY_Client, optional.get().getHost());
+            String url = DISPATCH_PIPELINE_TASK.replace(DiscoverService.WINDY_Client, optional.get().getHost());
             return postWithIp(url, pipelineTask);
         }
         ResponseEntity<String> response = requestPost(DISPATCH_PIPELINE_TASK, pipelineTask);

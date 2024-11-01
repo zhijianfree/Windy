@@ -107,12 +107,14 @@ public class FeatureExecuteProxy implements IStopEventListener {
             featureExecuteParam.setMasterIp(IpUtils.getLocalIP());
             boolean result = clientInvoker.runFeatureTask(featureExecuteParam);
             log.info("run feature task result = {}", result);
+            //todo 执行用例失败的情况下需要修改用例的状态
             return featureId;
         }, executorService).whenComplete((featureId, e) -> {
             String recordId = Optional.ofNullable(featureId).orElse(TASK_FEATURE_TIPS);
             log.info("complete trigger action recordId = {}", recordId);
         }).exceptionally(e -> {
             log.error("handle task error", e);
+            //todo 执行用例失败的情况下需要修改用例的状态
             return null;
         });
     }
