@@ -126,7 +126,8 @@ public class NodeStatusQueryLooper implements Runnable {
   private void compareResultWithExpect(TaskNode node, QueryResponseModel responseModel) {
     //如果没有断言比较直接退出
     List<CompareInfo> compareConfigs = node.getRefreshContext().getCompareConfig();
-    if (CollectionUtils.isEmpty(compareConfigs)) {
+    if (CollectionUtils.isEmpty(compareConfigs) || Objects.isNull(responseModel.getData())) {
+      log.info("compare info is empty or response data is null");
       return;
     }
 
@@ -213,7 +214,7 @@ public class NodeStatusQueryLooper implements Runnable {
 
       try {
         Thread.sleep(5000);
-      } catch (InterruptedException e) {
+      } catch (InterruptedException ignore) {
       }
 
       if (Objects.nonNull(taskNode)) {

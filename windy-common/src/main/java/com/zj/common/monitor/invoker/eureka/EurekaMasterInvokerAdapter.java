@@ -12,6 +12,8 @@ import com.zj.common.monitor.discover.ServiceInstance;
 import com.zj.common.monitor.invoker.IMasterInvoker;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
@@ -31,6 +33,7 @@ public class EurekaMasterInvokerAdapter extends BaseEurekaAdapter implements IMa
     public static final String STOP_DISPATCH_TASK = "http://WindyMaster/v1/devops/dispatch/stop";
     public static final String MASTER_MONITOR_URL = "http://%s/v1/devops/master/instance";
     public static final String GET_PLUGIN_LIST = "http://WindyMaster/v1/devops/master/plugins";
+    public static final String GET_FEATURE_TASK_STATUS = "http://WindyMaster/v1/devops/master/task/%s/status";
     private final DiscoverService discoverService;
 
     public EurekaMasterInvokerAdapter(RestTemplate restTemplate, DiscoverService discoverService) {
@@ -70,7 +73,10 @@ public class EurekaMasterInvokerAdapter extends BaseEurekaAdapter implements IMa
 
     @Override
     public ResponseStatusModel getFeatureTaskStatus(String taskRecordId) {
-        return null;
+        String url = String.format(GET_FEATURE_TASK_STATUS, taskRecordId);
+        ResponseEntity<String> response = requestGet(url);
+        return Optional.ofNullable(response).map(res -> JSON.parseObject(res.getBody(), ResponseStatusModel.class))
+                .orElse(null);
     }
 
     @Override
