@@ -8,7 +8,10 @@ public enum CompareType {
     SAME("equal", "等值比对"),
     /** 字符串内容不能为空*/
     NOT_EMPTY("not_null", "值不为空"),
+    /** 对象数组内容匹配*/
     ARRAY_ITEM_MATCH("array_item_match", "数组内容匹配"),
+    /**枚举匹配*/
+    ENUM_MATCH("enum_match", "枚举匹配(逗号隔开)"),
     /** json对比*/
     JSON("json_equal", "json对象比对"),
     /** json数组比较*/
