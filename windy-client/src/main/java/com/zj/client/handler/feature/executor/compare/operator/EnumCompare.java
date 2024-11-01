@@ -20,16 +20,16 @@ public class EnumCompare extends BaseCompare {
     @Override
     public CompareResult compare(CompareDefine compareDefine) {
         CompareResult compareResult = createSuccessResult();
-        String expectValue = String.valueOf(compareDefine.getExpectValue());
-        if (StringUtils.isBlank(expectValue)) {
+        if (StringUtils.isBlank(compareDefine.getExpectValue())) {
             compareResult.setErrorMessage("expect value is empty");
             compareResult.setErrorType(ErrorCode.COMPARE_ERROR);
             return compareResult;
         }
-        String[] strings = expectValue.split(",");
-        boolean anyMatch = Arrays.asList(strings).contains(expectValue);
+        String responseValue = String.valueOf(compareDefine.getResponseValue());
+        String[] strings = compareDefine.getExpectValue().split(",");
+        boolean anyMatch = Arrays.asList(strings).contains(responseValue);
         if (!anyMatch) {
-            compareResult.setErrorMessage("response data [" + expectValue + "] is not int expect value ["
+            compareResult.setErrorMessage("response data [" + compareDefine.getExpectValue() + "] is not int expect value ["
                     + compareDefine.getExpectValue() + "]");
             compareResult.setErrorType(ErrorCode.COMPARE_ERROR);
         }
