@@ -33,17 +33,17 @@ public class ExecutePointBO {
     /**
      * 执行点信息(包含参数信息)
      * */
-    private ExecutorUnit featureInfo;
+    private ExecutorUnit executorUnit;
 
     /**
      * 包含比较信息
      * */
-    private List<CompareDefine> compareDefine;
+    private List<CompareDefine> compareDefines;
 
     /**
      * 包含变量声明
      * */
-    private List<VariableDefine> variables;
+    private List<VariableDefine> variableDefines;
 
     /**
      * 执行点功能描述，自定义

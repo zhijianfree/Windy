@@ -1,6 +1,5 @@
 package com.zj.feature.entity;
 
-import com.alibaba.fastjson.JSON;
 import com.zj.common.entity.feature.CompareDefine;
 import com.zj.common.entity.feature.ExecutorUnit;
 import com.zj.common.entity.feature.VariableDefine;
@@ -66,18 +65,18 @@ public class ExecutePointVo {
   private Integer sortOrder;
 
   public static ExecutePointVo toExecutePointDTO(ExecutePointBO executePoint) {
-    ExecutePointVo dto = new ExecutePointVo();
-    dto.setDescription(executePoint.getDescription());
-    dto.setPointId(executePoint.getPointId());
-    dto.setExecuteType(executePoint.getExecuteType());
-    dto.setFeatureId(executePoint.getFeatureId());
-    dto.setTestStage(executePoint.getTestStage());
-    dto.setSortOrder(executePoint.getSortOrder());
-    dto.setTemplateId(executePoint.getTemplateId());
-    dto.setExecutorUnit(executePoint.getFeatureInfo());
-    dto.setCompareDefine(executePoint.getCompareDefine());
-    dto.setVariableDefine(executePoint.getVariables());
-    return dto;
+    ExecutePointVo executePointVo = new ExecutePointVo();
+    executePointVo.setDescription(executePoint.getDescription());
+    executePointVo.setPointId(executePoint.getPointId());
+    executePointVo.setExecuteType(executePoint.getExecuteType());
+    executePointVo.setFeatureId(executePoint.getFeatureId());
+    executePointVo.setTestStage(executePoint.getTestStage());
+    executePointVo.setSortOrder(executePoint.getSortOrder());
+    executePointVo.setTemplateId(executePoint.getTemplateId());
+    executePointVo.setExecutorUnit(executePoint.getExecutorUnit());
+    executePointVo.setCompareDefine(executePoint.getCompareDefines());
+    executePointVo.setVariableDefine(executePoint.getVariableDefines());
+    return executePointVo;
   }
 
 }

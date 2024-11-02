@@ -134,14 +134,14 @@ public class FeatureExecuteProxy implements IStopEventListener {
         //将用例关联模版信息也添加到用例信息中
         executePoints.forEach(executePoint -> {
             ExecutorUnit executorUnit = wrapExecutorUnitTemplate(executePoint);
-            executePoint.setFeatureInfo(executorUnit);
+            executePoint.setExecutorUnit(executorUnit);
         });
         featureExecuteParam.setExecutePointList(executePoints);
         return featureExecuteParam;
     }
 
     private ExecutorUnit wrapExecutorUnitTemplate(ExecutePointBO executePoint) {
-        ExecutorUnit executorUnit = executePoint.getFeatureInfo();
+        ExecutorUnit executorUnit = executePoint.getExecutorUnit();
         wrapSubExecutePoints(executorUnit);
         if (StringUtils.isBlank(executorUnit.getRelatedId())) {
             return executorUnit;
@@ -151,7 +151,7 @@ public class FeatureExecuteProxy implements IStopEventListener {
             return executorUnit;
         }
         ExecutorUnit related = OrikaUtil.convert(executeTemplate, ExecutorUnit.class);
-        related.setParams(executeTemplate.getParam());
+        related.setParams(executeTemplate.getParameterDefines());
         related.setHeaders((Map<String, String>) JSON.parse(executeTemplate.getHeader()));
         executorUnit.setRelatedTemplate(related);
         return executorUnit;
@@ -174,7 +174,7 @@ public class FeatureExecuteProxy implements IStopEventListener {
                 return;
             }
             ExecutorUnit related = OrikaUtil.convert(executeTemplate, ExecutorUnit.class);
-            related.setParams(executeTemplate.getParam());
+            related.setParams(executeTemplate.getParameterDefines());
             related.setHeaders((Map<String, String>) JSON.parse(executeTemplate.getHeader()));
             point.getExecutorUnit().setRelatedTemplate(related);
         });

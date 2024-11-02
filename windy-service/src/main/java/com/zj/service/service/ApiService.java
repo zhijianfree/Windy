@@ -218,7 +218,7 @@ public class ApiService {
             return parameterDefine;
         }).filter(Objects::nonNull).collect(Collectors.toList());
         parameterDefines.add(createHostParam());
-        executeTemplateBO.setParam(parameterDefines);
+        executeTemplateBO.setParameterDefines(parameterDefines);
         executeTemplateBO.setHeader(JSON.toJSONString(header));
 
         String assembledUrl = assembledApiUrl(serviceApi.getResource(), apiVariables);
@@ -304,7 +304,7 @@ public class ApiService {
 
     public ExecuteTemplateVo toExecuteTemplateDTO(ExecuteTemplateBO executeTemplate) {
         ExecuteTemplateVo templateVo = OrikaUtil.convert(executeTemplate, ExecuteTemplateVo.class);
-        templateVo.setParams(executeTemplate.getParam());
+        templateVo.setParams(executeTemplate.getParameterDefines());
         templateVo.setHeaders((Map<String, String>) JSON.parse(executeTemplate.getHeader()));
         return templateVo;
     }

@@ -77,9 +77,9 @@ public class ExecutePointService {
         point.setTemplateId(dto.getTemplateId());
         point.setTestStage(dto.getTestStage());
         point.setExecuteType(dto.getExecuteType());
-        point.setCompareDefine(dto.getCompareDefine());
-        point.setVariables(dto.getVariableDefine());
-        point.setFeatureInfo(dto.getExecutorUnit());
+        point.setCompareDefines(dto.getCompareDefine());
+        point.setVariableDefines(dto.getVariableDefine());
+        point.setExecutorUnit(dto.getExecutorUnit());
         return point;
     }
 
@@ -93,9 +93,9 @@ public class ExecutePointService {
         executePoint.setDescription(executePointVo.getDescription());
         executePoint.setSortOrder(executePointVo.getSortOrder());
         executePoint.setExecuteType(executePointVo.getExecuteType());
-        executePoint.setFeatureInfo(executePointVo.getExecutorUnit());
-        executePoint.setCompareDefine(executePointVo.getCompareDefine());
-        executePoint.setVariables(executePointVo.getVariableDefine());
+        executePoint.setExecutorUnit(executePointVo.getExecutorUnit());
+        executePoint.setCompareDefines(executePointVo.getCompareDefine());
+        executePoint.setVariableDefines(executePointVo.getVariableDefine());
         executePoint.setUpdateTime(System.currentTimeMillis());
         boolean result = updateByPointId(executePoint);
 

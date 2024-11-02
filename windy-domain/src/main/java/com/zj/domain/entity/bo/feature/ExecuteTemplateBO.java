@@ -52,7 +52,7 @@ public class ExecuteTemplateBO {
     /**
      * 模版请求参数
      */
-    private List<ParameterDefine> param;
+    private List<ParameterDefine> parameterDefines;
 
     /**
      * 模版拥有者

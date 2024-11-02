@@ -97,7 +97,7 @@ public class TemplateService {
         ExecuteTemplateBO executeTemplate = OrikaUtil.convert(executeTemplateVo,
                 ExecuteTemplateBO.class);
         executeTemplate.setUpdateTime(System.currentTimeMillis());
-        executeTemplate.setParam(executeTemplateVo.getParams());
+        executeTemplate.setParameterDefines(executeTemplateVo.getParams());
         executeTemplate.setHeader(JSON.toJSONString(executeTemplateVo.getHeaders()));
         return templateRepository.updateTemplate(executeTemplate)
                 ? executeTemplate.getTemplateId() : "";
@@ -125,14 +125,14 @@ public class TemplateService {
         ExecuteTemplateBO executeTemplate = templateRepository.getExecuteTemplate(templateId);
         List<ExecutePointBO> updatePoints = executePoints.stream().peek(executePoint -> {
             ExecutorUnit executorUnit = exchangeTemplate(executePoint, executeTemplate);
-            executePoint.setFeatureInfo(executorUnit);
+            executePoint.setExecutorUnit(executorUnit);
         }).collect(Collectors.toList());
 
         return executePointRepository.updateBatch(updatePoints);
     }
 
     private ExecutorUnit exchangeTemplate(ExecutePointBO executePoint, ExecuteTemplateBO executeTemplate) {
-        ExecutorUnit executorUnit = executePoint.getFeatureInfo();
+        ExecutorUnit executorUnit = executePoint.getExecutorUnit();
         executorUnit.setService(executeTemplate.getService());
         executorUnit.setMethod(executeTemplate.getMethod());
         executorUnit.setInvokeType(executeTemplate.getInvokeType());
@@ -142,7 +142,7 @@ public class TemplateService {
                 Collectors.toMap(ParameterDefine::getParamKey, param -> param));
 
         //存量执行点的执行菜单使用最新模版的配置，只需替换value即可
-        List<ParameterDefine> parameterDefines = executeTemplate.getParam();
+        List<ParameterDefine> parameterDefines = executeTemplate.getParameterDefines();
         parameterDefines.forEach(param -> {
             ParameterDefine parameterDefine = pointParameterMap.get(param.getParamKey());
             if (Objects.nonNull(parameterDefine)) {
@@ -278,7 +278,7 @@ public class TemplateService {
         executeTemplate.setCreateTime(System.currentTimeMillis());
         executeTemplate.setUpdateTime(System.currentTimeMillis());
         executeTemplate.setHeader(JSON.toJSONString(executeTemplateVo.getHeaders()));
-        executeTemplate.setParam(executeTemplateVo.getParams());
+        executeTemplate.setParameterDefines(executeTemplateVo.getParams());
         return executeTemplate;
     }
 
@@ -294,7 +294,7 @@ public class TemplateService {
 
     public ExecuteTemplateVo toExecuteTemplateDTO(ExecuteTemplateBO executeTemplate) {
         ExecuteTemplateVo templateVo = OrikaUtil.convert(executeTemplate, ExecuteTemplateVo.class);
-        templateVo.setParams(executeTemplate.getParam());
+        templateVo.setParams(executeTemplate.getParameterDefines());
         templateVo.setHeaders((Map<String, String>) JSON.parse(executeTemplate.getHeader()));
         return templateVo;
     }

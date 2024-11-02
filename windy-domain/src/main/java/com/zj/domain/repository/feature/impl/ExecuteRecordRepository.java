@@ -47,7 +47,7 @@ public class ExecuteRecordRepository extends
     ExecuteRecord executeRecord = new ExecuteRecord();
     executeRecord.setExecuteRecordId(executeRecordBO.getExecuteRecordId());
     executeRecord.setStatus(executeRecordBO.getStatus());
-    executeRecord.setExecuteResult(JSON.toJSONString(executeRecordBO.getExecuteResult()));
+    executeRecord.setExecuteResult(JSON.toJSONString(executeRecordBO.getRecordResult()));
     executeRecord.setUpdateTime(System.currentTimeMillis());
     return update(executeRecord, Wrappers.lambdaUpdate(ExecuteRecord.class).eq(ExecuteRecord::getExecuteRecordId,
             executeRecordBO.getExecuteRecordId()));
@@ -68,13 +68,13 @@ public class ExecuteRecordRepository extends
 
   private static ExecuteRecordBO convertExecuteRecordBO(ExecuteRecord executeRecord) {
     ExecuteRecordBO executeRecordBO = OrikaUtil.convert(executeRecord, ExecuteRecordBO.class);
-    executeRecordBO.setExecuteResult(JSON.parseArray(executeRecord.getExecuteResult(), FeatureResponse.class));
+    executeRecordBO.setRecordResult(JSON.parseArray(executeRecord.getExecuteResult(), FeatureResponse.class));
     return executeRecordBO;
   }
 
   private static ExecuteRecord convertExecuteRecord(ExecuteRecordBO executeRecordBO) {
     ExecuteRecord executeRecord = OrikaUtil.convert(executeRecordBO, ExecuteRecord.class);
-    executeRecord.setExecuteResult(JSON.toJSONString(executeRecordBO.getExecuteResult()));
+    executeRecord.setExecuteResult(JSON.toJSONString(executeRecordBO.getRecordResult()));
     return executeRecord;
   }
 }

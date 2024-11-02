@@ -122,7 +122,7 @@ public class ExecuteTemplateRepository extends
 
   private ExecuteTemplateBO convertExecuteTemplateBO(ExecuteTemplate executeTemplate) {
     ExecuteTemplateBO executeTemplateBO = OrikaUtil.convert(executeTemplate, ExecuteTemplateBO.class);
-    executeTemplateBO.setParam(JSON.parseArray(executeTemplate.getParam(), ParameterDefine.class));
+    executeTemplateBO.setParameterDefines(JSON.parseArray(executeTemplate.getParam(), ParameterDefine.class));
     return executeTemplateBO;
   }
 

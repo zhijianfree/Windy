@@ -110,17 +110,17 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
   }
   public ExecutePointBO convertExecutePointBO(ExecutePoint executePoint){
     ExecutePointBO executePointBO = OrikaUtil.convert(executePoint, ExecutePointBO.class);
-    executePointBO.setCompareDefine(JSON.parseArray(executePoint.getCompareDefine(), CompareDefine.class));
-    executePointBO.setFeatureInfo(JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit.class));
-    executePointBO.setVariables(JSON.parseArray(executePoint.getVariables(), VariableDefine.class));
+    executePointBO.setCompareDefines(JSON.parseArray(executePoint.getCompareDefine(), CompareDefine.class));
+    executePointBO.setExecutorUnit(JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit.class));
+    executePointBO.setVariableDefines(JSON.parseArray(executePoint.getVariables(), VariableDefine.class));
     return executePointBO;
   }
 
   public ExecutePoint convertExecutePoint(ExecutePointBO executePointBO){
     ExecutePoint executePoint = OrikaUtil.convert(executePointBO, ExecutePoint.class);
-    executePoint.setCompareDefine(JSON.toJSONString(executePointBO.getCompareDefine()));
-    executePoint.setFeatureInfo(JSON.toJSONString(executePointBO.getFeatureInfo()));
-    executePoint.setVariables(JSON.toJSONString(executePointBO.getVariables()));
+    executePoint.setCompareDefine(JSON.toJSONString(executePointBO.getCompareDefines()));
+    executePoint.setFeatureInfo(JSON.toJSONString(executePointBO.getExecutorUnit()));
+    executePoint.setVariables(JSON.toJSONString(executePointBO.getVariableDefines()));
     return executePoint;
   }
 

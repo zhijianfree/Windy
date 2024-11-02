@@ -46,7 +46,7 @@ public class ExecuteRecordBO {
     /**
      * 执行结果
      */
-    private List<FeatureResponse> executeResult;
+    private List<FeatureResponse> recordResult;
 
     /**
      * 创建时间
