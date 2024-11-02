@@ -16,6 +16,10 @@ public class ExecuteDetailVo {
    */
   private ResponseDetailVo responseDetailVo = new ResponseDetailVo();
 
+  public void setResponseDetailVo(ResponseDetailVo responseDetailVo) {
+    this.responseDetailVo = responseDetailVo;
+  }
+
   public void setStatus(Boolean status) {
     responseDetailVo.setResponseStatus(status);
   }
