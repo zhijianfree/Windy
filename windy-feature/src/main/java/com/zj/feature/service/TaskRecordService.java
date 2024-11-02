@@ -1,14 +1,12 @@
 package com.zj.feature.service;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zj.common.enums.FeatureStatus;
-import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
-import com.zj.domain.entity.dto.feature.FeatureInfoDto;
+import com.zj.domain.entity.bo.feature.FeatureHistoryBO;
+import com.zj.domain.entity.bo.feature.FeatureInfoBO;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
 import com.zj.feature.entity.HistoryNodeDto;
-import com.zj.common.model.PageSize;
-import com.zj.domain.entity.dto.feature.TaskRecordDto;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.domain.entity.bo.feature.TaskRecordBO;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -34,16 +32,16 @@ public class TaskRecordService {
     this.taskRecordRepository = taskRecordRepository;
   }
 
-  public PageSize<TaskRecordDto> getTaskRecordPage(Integer pageNum, Integer size) {
+  public PageSize<TaskRecordBO> getTaskRecordPage(Integer pageNum, Integer size) {
     return taskRecordRepository.getTaskRecordPage(pageNum, size);
   }
 
   public boolean deleteTaskRecord(String recordId) {
-    TaskRecordDto taskRecord = taskRecordRepository.getTaskRecord(recordId);
+    TaskRecordBO taskRecord = taskRecordRepository.getTaskRecord(recordId);
     if (Objects.isNull(taskRecord)) {
       return true;
     }
-    List<FeatureHistoryDto> histories = featureHistoryService.getHistories(recordId);
+    List<FeatureHistoryBO> histories = featureHistoryService.getHistories(recordId);
     if (CollectionUtils.isNotEmpty(histories)) {
       boolean executeHistory = featureHistoryService.deleteByRecordId(recordId);
       log.info("delete record history result = {}", executeHistory);
@@ -51,21 +49,21 @@ public class TaskRecordService {
     return taskRecordRepository.deleteTaskRecord(recordId);
   }
 
-  public List<FeatureHistoryDto>  getTaskFeatureHistories(String recordId) {
+  public List<FeatureHistoryBO>  getTaskFeatureHistories(String recordId) {
     return  featureHistoryService.getHistories(recordId);
   }
 
   public List<HistoryNodeDto> getTaskFeatureHistoryTree(String recordId) {
-    List<FeatureHistoryDto> histories = featureHistoryService.getHistories(recordId);
+    List<FeatureHistoryBO> histories = featureHistoryService.getHistories(recordId);
     if (CollectionUtils.isEmpty(histories)) {
       return Collections.emptyList();
     }
 
-    Map<String, FeatureHistoryDto> historyMap = histories.stream()
-        .collect(Collectors.toMap(FeatureHistoryDto::getFeatureId, history -> history));
-    TaskRecordDto taskRecord = getTaskRecord(recordId);
+    Map<String, FeatureHistoryBO> historyMap = histories.stream()
+        .collect(Collectors.toMap(FeatureHistoryBO::getFeatureId, history -> history));
+    TaskRecordBO taskRecord = getTaskRecord(recordId);
     String testCaseId = taskRecord.getTestCaseId();
-    List<FeatureInfoDto> featureInfos = featureService.queryFeatureList(testCaseId);
+    List<FeatureInfoBO> featureInfos = featureService.queryFeatureList(testCaseId);
     List<HistoryNodeDto> historyNodes = featureInfos.stream().map(feature -> {
       HistoryNodeDto historyNodeDto = new HistoryNodeDto();
       historyNodeDto.setParentId(feature.getParentId());
@@ -73,7 +71,7 @@ public class TaskRecordService {
       historyNodeDto.setSkip(Objects.equals(feature.getStatus(), FeatureStatus.DISABLE.getType()));
       historyNodeDto.setFeatureId(feature.getFeatureId());
       historyNodeDto.setFeatureName(feature.getFeatureName());
-      FeatureHistoryDto featureHistory = historyMap.get(feature.getFeatureId());
+      FeatureHistoryBO featureHistory = historyMap.get(feature.getFeatureId());
       if (Objects.nonNull(featureHistory)) {
         historyNodeDto.setHistoryId(featureHistory.getHistoryId());
         historyNodeDto.setExecuteStatus(featureHistory.getExecuteStatus());
@@ -100,11 +98,11 @@ public class TaskRecordService {
     list.forEach(node -> convertTree(featureList, node));
   }
 
-  public TaskRecordDto getTaskRecord(String recordId) {
+  public TaskRecordBO getTaskRecord(String recordId) {
     return taskRecordRepository.getTaskRecord(recordId);
   }
 
-  public List<TaskRecordDto> getTaskRecordsByTaskId(String taskId) {
+  public List<TaskRecordBO> getTaskRecordsByTaskId(String taskId) {
     return taskRecordRepository.getTaskRecordsOrderByTime(taskId);
   }
 
@@ -113,11 +111,11 @@ public class TaskRecordService {
     return taskRecordRepository.deleteTaskRecord(recordId);
   }
 
-  public TaskRecordDto getTaskRecordByTrigger(String triggerId) {
+  public TaskRecordBO getTaskRecordByTrigger(String triggerId) {
     return taskRecordRepository.getTaskRecordByTrigger(triggerId);
   }
 
-  public PageSize<TaskRecordDto> getTriggerTaskRecords(String triggerId, Integer page, Integer size) {
+  public PageSize<TaskRecordBO> getTriggerTaskRecords(String triggerId, Integer page, Integer size) {
     return taskRecordRepository.getTriggerTaskRecords(triggerId, page, size);
   }
 }

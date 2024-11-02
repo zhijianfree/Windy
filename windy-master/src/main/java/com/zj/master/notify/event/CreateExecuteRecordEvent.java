@@ -2,8 +2,8 @@ package com.zj.master.notify.event;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.NotifyType;
-import com.zj.common.model.ResultEvent;
-import com.zj.domain.entity.dto.feature.ExecuteRecordDto;
+import com.zj.common.entity.dto.ResultEvent;
+import com.zj.domain.entity.bo.feature.ExecuteRecordBO;
 import com.zj.domain.repository.feature.IExecuteRecordRepository;
 import com.zj.master.notify.INotifyEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +32,8 @@ public class CreateExecuteRecordEvent implements INotifyEvent {
   public boolean handle(ResultEvent resultEvent) {
     log.info("receive execute record create event id = {} event={}", resultEvent.getExecuteId(),
         JSON.toJSONString(resultEvent.getParams()));
-    ExecuteRecordDto executeRecordDto = JSON.parseObject(JSON.toJSONString(resultEvent.getParams()),
-        ExecuteRecordDto.class);
-    return executeRecordRepository.saveRecord(executeRecordDto);
+    ExecuteRecordBO executeRecordBO = JSON.parseObject(JSON.toJSONString(resultEvent.getParams()),
+        ExecuteRecordBO.class);
+    return executeRecordRepository.saveRecord(executeRecordBO);
   }
 }

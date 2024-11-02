@@ -1,11 +1,11 @@
 package com.zj.demand.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.PageSize;
-import com.zj.common.model.ResponseMeta;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.demand.service.WorkTaskService;
-import com.zj.domain.entity.dto.demand.WorkTaskDTO;
-import com.zj.domain.entity.dto.demand.BusinessStatusDto;
+import com.zj.domain.entity.bo.demand.WorkTaskBO;
+import com.zj.domain.entity.bo.demand.BusinessStatusBO;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,30 +29,30 @@ public class WorkTaskRest {
     }
 
     @PostMapping("/tasks")
-    public ResponseMeta<WorkTaskDTO> createWorkTask(@Validated @RequestBody WorkTaskDTO bugDTO) {
+    public ResponseMeta<WorkTaskBO> createWorkTask(@Validated @RequestBody WorkTaskBO bugDTO) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, workTaskService.createWorkTask(bugDTO));
     }
 
     @PutMapping("/task")
-    public ResponseMeta<Boolean> updateWorkTask(@Validated @RequestBody WorkTaskDTO bugDTO) {
+    public ResponseMeta<Boolean> updateWorkTask(@Validated @RequestBody WorkTaskBO bugDTO) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, workTaskService.updateWorkTask(bugDTO));
     }
 
     @GetMapping("/tasks")
-    public ResponseMeta<PageSize<WorkTaskDTO>> getWorkTaskPage(@RequestParam(value = "page", defaultValue = "1") Integer page,
-                                                     @RequestParam(value = "size", defaultValue = "10") Integer size,
-                                                     @RequestParam(value = "name", required = false) String name,
-                                                     @RequestParam(value = "status", required = false) Integer status) {
+    public ResponseMeta<PageSize<WorkTaskBO>> getWorkTaskPage(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                              @RequestParam(value = "size", defaultValue = "10") Integer size,
+                                                              @RequestParam(value = "name", required = false) String name,
+                                                              @RequestParam(value = "status", required = false) Integer status) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, workTaskService.getWorkTaskPage(page, size, name, status));
     }
 
     @GetMapping("/tasks/{taskId}")
-    public ResponseMeta<WorkTaskDTO> getWorkTask(@PathVariable("taskId") String taskId) {
+    public ResponseMeta<WorkTaskBO> getWorkTask(@PathVariable("taskId") String taskId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, workTaskService.getWorkTask(taskId));
     }
 
     @GetMapping("/task/statuses")
-    public ResponseMeta<List<BusinessStatusDto>> getWorkTaskStatuses() {
+    public ResponseMeta<List<BusinessStatusBO>> getWorkTaskStatuses() {
         return new ResponseMeta<>(ErrorCode.SUCCESS, workTaskService.getWorkTaskStatuses());
     }
 

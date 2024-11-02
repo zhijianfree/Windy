@@ -1,9 +1,13 @@
 package com.zj.domain.repository.feature.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.entity.feature.CompareDefine;
+import com.zj.common.entity.feature.ExecutorUnit;
+import com.zj.common.entity.feature.VariableDefine;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.feature.ExecutePointDto;
+import com.zj.domain.entity.bo.feature.ExecutePointBO;
 import com.zj.domain.entity.po.feature.ExecutePoint;
 import com.zj.domain.mapper.feeature.ExecutePointMapper;
 import com.zj.domain.repository.feature.IExecutePointRepository;
@@ -12,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author guyuelan
@@ -23,33 +28,23 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
     IExecutePointRepository {
 
   @Override
-  public ExecutePointDto getExecutePoint(String executePointId) {
+  public ExecutePointBO getExecutePoint(String executePointId) {
     ExecutePoint executePoint = getOne(
         Wrappers.lambdaQuery(ExecutePoint.class).eq(ExecutePoint::getPointId, executePointId));
-    return OrikaUtil.convert(executePoint, ExecutePointDto.class);
+    return convertExecutePointBO(executePoint);
   }
 
   @Override
-  public List<ExecutePointDto> getExecutePointByFeatureIds(List<String> featureIds) {
-    List<ExecutePoint> pointList = list(
-        Wrappers.lambdaQuery(ExecutePoint.class).in(ExecutePoint::getFeatureId, featureIds)
-            .orderByDesc(ExecutePoint::getCreateTime));
-
-    return OrikaUtil.convertList(pointList, ExecutePointDto.class);
-  }
-
-  @Override
-  public List<ExecutePointDto> getExecutePointByFeatureId(String featureId) {
+  public List<ExecutePointBO> getExecutePointByFeatureId(String featureId) {
     List<ExecutePoint> pointList = list(
         Wrappers.lambdaQuery(ExecutePoint.class).eq(ExecutePoint::getFeatureId, featureId)
             .orderByDesc(ExecutePoint::getCreateTime));
-
-    return OrikaUtil.convertList(pointList, ExecutePointDto.class);
+    return convertExecutePointBOList(pointList);
   }
 
   @Override
-  public boolean updateExecutePoint(ExecutePointDto executePointDto) {
-    ExecutePoint executePoint = OrikaUtil.convert(executePointDto, ExecutePoint.class);
+  public boolean updateExecutePoint(ExecutePointBO executePointBO) {
+    ExecutePoint executePoint = convertExecutePoint(executePointBO);
     executePoint.setUpdateTime(System.currentTimeMillis());
     return update(executePoint, Wrappers.lambdaUpdate(ExecutePoint.class)
         .eq(ExecutePoint::getPointId, executePoint.getPointId()));
@@ -73,16 +68,16 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
   }
 
   @Override
-  public List<ExecutePointDto> getPointsByFeatureIds(List<String> featureIds) {
-    List<ExecutePoint> executePoints = list(
+  public List<ExecutePointBO> getPointsByFeatureIds(List<String> featureIds) {
+    List<ExecutePoint> pointList = list(
         Wrappers.lambdaQuery(ExecutePoint.class).in(ExecutePoint::getFeatureId, featureIds)
             .orderByDesc(ExecutePoint::getCreateTime));
-    return OrikaUtil.convertList(executePoints, ExecutePointDto.class);
+    return convertExecutePointBOList(pointList);
   }
 
   @Override
-  public boolean saveExecutePoint(ExecutePointDto executePointDto) {
-    ExecutePoint executePoint = OrikaUtil.convert(executePointDto, ExecutePoint.class);
+  public boolean saveExecutePoint(ExecutePointBO executePointBO) {
+    ExecutePoint executePoint = convertExecutePoint(executePointBO);
     long dateNow = System.currentTimeMillis();
     executePoint.setCreateTime(dateNow);
     executePoint.setUpdateTime(dateNow);
@@ -90,23 +85,46 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
   }
 
   @Override
-  public boolean saveBatch(List<ExecutePointDto> executePoints) {
-    List<ExecutePoint> pointList = OrikaUtil.convertList(executePoints, ExecutePoint.class);
+  public boolean saveBatch(List<ExecutePointBO> executePoints) {
+    List<ExecutePoint> pointList = convertExecutePointList(executePoints);
     return saveBatch(pointList);
   }
 
 
   @Override
   @Transactional
-  public boolean updateBatch(List<ExecutePointDto> newExecutePoints) {
-    List<ExecutePoint> pointList = OrikaUtil.convertList(newExecutePoints, ExecutePoint.class);
+  public boolean updateBatch(List<ExecutePointBO> executePointBOList) {
+    List<ExecutePoint> pointList = convertExecutePointList(executePointBOList);
     return updateBatchById(pointList);
   }
 
   @Override
-  public List<ExecutePointDto> getTemplateExecutePoints(String templateId) {
+  public List<ExecutePointBO> getTemplateExecutePoints(String templateId) {
     List<ExecutePoint> executePoints = list(
         Wrappers.lambdaQuery(ExecutePoint.class).eq(ExecutePoint::getTemplateId, templateId));
-    return OrikaUtil.convertList(executePoints, ExecutePointDto.class);
+    return convertExecutePointBOList(executePoints);
+  }
+
+  public List<ExecutePointBO> convertExecutePointBOList(List<ExecutePoint> executePoints){
+    return executePoints.stream().map(this::convertExecutePointBO).collect(Collectors.toList());
+  }
+  public ExecutePointBO convertExecutePointBO(ExecutePoint executePoint){
+    ExecutePointBO executePointBO = OrikaUtil.convert(executePoint, ExecutePointBO.class);
+    executePointBO.setCompareDefine(JSON.parseArray(executePoint.getCompareDefine(), CompareDefine.class));
+    executePointBO.setFeatureInfo(JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit.class));
+    executePointBO.setVariables(JSON.parseArray(executePoint.getVariables(), VariableDefine.class));
+    return executePointBO;
+  }
+
+  public ExecutePoint convertExecutePoint(ExecutePointBO executePointBO){
+    ExecutePoint executePoint = OrikaUtil.convert(executePointBO, ExecutePoint.class);
+    executePoint.setCompareDefine(JSON.toJSONString(executePointBO.getCompareDefine()));
+    executePoint.setFeatureInfo(JSON.toJSONString(executePointBO.getFeatureInfo()));
+    executePoint.setVariables(JSON.toJSONString(executePointBO.getVariables()));
+    return executePoint;
+  }
+
+  private List<ExecutePoint> convertExecutePointList(List<ExecutePointBO> executePoints) {
+    return executePoints.stream().map(this::convertExecutePoint).collect(Collectors.toList());
   }
 }

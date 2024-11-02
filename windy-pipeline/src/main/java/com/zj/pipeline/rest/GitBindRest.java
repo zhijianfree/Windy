@@ -1,8 +1,8 @@
 package com.zj.pipeline.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.ResponseMeta;
-import com.zj.domain.entity.dto.pipeline.BindBranchDto;
+import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.domain.entity.bo.pipeline.BindBranchDto;
 import com.zj.pipeline.service.GitBindService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -46,23 +46,20 @@ public class GitBindRest {
   @GetMapping("/{pipelineId}/git/binds")
   public ResponseMeta<List<BindBranchDto>> listGitBinds(
       @PathVariable("pipelineId") String pipelineId) {
-    return new ResponseMeta<List<BindBranchDto>>(ErrorCode.SUCCESS,
-        gitBindService.listGitBinds(pipelineId));
+    return new ResponseMeta<List<BindBranchDto>>(ErrorCode.SUCCESS, gitBindService.listGitBinds(pipelineId));
   }
 
   @ResponseBody
   @PutMapping("/git/bind")
   public ResponseMeta<Boolean> updatePipeline(@RequestBody BindBranchDto bindBranchDto) {
-    return new ResponseMeta<Boolean>(ErrorCode.SUCCESS,
-        gitBindService.updateGitBind(bindBranchDto));
+    return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, gitBindService.updateGitBind(bindBranchDto));
   }
 
   @ResponseBody
   @DeleteMapping("/{pipelineId}/git/bind/{bindId}")
   public ResponseMeta<Boolean> deletePipeline(@PathVariable("bindId") String bindId,
       @PathVariable("pipelineId") String pipelineId) {
-    return new ResponseMeta<Boolean>(ErrorCode.SUCCESS,
-        gitBindService.deleteGitBind(pipelineId,bindId));
+    return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, gitBindService.deleteGitBind(pipelineId,bindId));
   }
 
   @GetMapping("/{serviceId}/branches")

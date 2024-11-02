@@ -5,13 +5,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.zj.common.enums.FeatureStatus;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.common.model.DispatchTaskModel;
-import com.zj.domain.entity.dto.feature.FeatureInfoDto;
-import com.zj.domain.entity.dto.feature.TaskInfoDto;
-import com.zj.domain.entity.dto.feature.TaskRecordDto;
-import com.zj.domain.entity.dto.log.DispatchLogDto;
-import com.zj.domain.entity.dto.log.SubDispatchLogDto;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.entity.dto.DispatchTaskModel;
+import com.zj.domain.entity.bo.feature.FeatureInfoBO;
+import com.zj.domain.entity.bo.feature.TaskInfoBO;
+import com.zj.domain.entity.bo.feature.TaskRecordBO;
+import com.zj.domain.entity.bo.log.DispatchLogDto;
+import com.zj.domain.entity.bo.log.SubDispatchLogDto;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
 import com.zj.domain.repository.feature.ITaskRepository;
@@ -69,31 +69,31 @@ public class TaskDispatch implements IDispatchExecutor {
 
   @Override
   public String dispatch(DispatchTaskModel task, String logId) {
-    TaskInfoDto taskDetail = taskRepository.getTaskDetail(task.getSourceId());
+    TaskInfoBO taskDetail = taskRepository.getTaskDetail(task.getSourceId());
     if (Objects.isNull(taskDetail)) {
       log.info("can not find task={}", task.getSourceId());
       return null;
     }
 
     String testCaseId = taskDetail.getTestCaseId();
-    List<FeatureInfoDto> featureList = featureRepository.queryNotContainFolder(testCaseId);
+    List<FeatureInfoBO> featureList = featureRepository.queryNotContainFolder(testCaseId);
     if (CollectionUtils.isEmpty(featureList)) {
       log.info("can not find feature list by testCaseId={}", testCaseId);
       return "";
     }
 
-    TaskRecordDto taskRecordDto = buildTaskRecordDTO(taskDetail, task.getTriggerId());
-    taskRecordRepository.save(taskRecordDto);
+    TaskRecordBO taskRecordBO = buildTaskRecordDTO(taskDetail, task.getTriggerId());
+    taskRecordRepository.save(taskRecordBO);
 
-    dispatchLogRepository.updateLogSourceRecord(logId, taskRecordDto.getRecordId());
+    dispatchLogRepository.updateLogSourceRecord(logId, taskRecordBO.getRecordId());
 
     List<String> featureIds =
             featureList.stream().filter(feature -> Objects.equals(feature.getStatus(), FeatureStatus.NORMAL.getType()))
-                    .map(FeatureInfoDto::getFeatureId).collect(Collectors.toList());
-    FeatureTask featureTask = buildFeatureTask(task, logId, featureIds, taskRecordDto);
+                    .map(FeatureInfoBO::getFeatureId).collect(Collectors.toList());
+    FeatureTask featureTask = buildFeatureTask(task, logId, featureIds, taskRecordBO);
     saveSubTaskLog(featureIds, featureTask.getLogId());
     featureExecuteProxy.execute(featureTask);
-    return taskRecordDto.getRecordId();
+    return taskRecordBO.getRecordId();
   }
 
   private List<SubDispatchLogDto> saveSubTaskLog(List<String> featureIds, String logId) {
@@ -116,13 +116,13 @@ public class TaskDispatch implements IDispatchExecutor {
   }
 
   private FeatureTask buildFeatureTask(DispatchTaskModel task, String logId, List<String> featureIds,
-      TaskRecordDto taskRecordDto) {
+      TaskRecordBO taskRecordBO) {
     FeatureTask featureTask = new FeatureTask();
-    ExecuteContext executeContext = buildTaskConfig(taskRecordDto.getTaskConfig());
+    ExecuteContext executeContext = buildTaskConfig(taskRecordBO.getTaskConfig());
     featureTask.setExecuteContext(executeContext);
     featureTask.addAll(featureIds);
 
-    featureTask.setTaskRecordId(taskRecordDto.getRecordId());
+    featureTask.setTaskRecordId(taskRecordBO.getRecordId());
     featureTask.setTaskId(task.getSourceId());
     featureTask.setLogId(logId);
     return featureTask;
@@ -141,31 +141,31 @@ public class TaskDispatch implements IDispatchExecutor {
     return executeContext;
   }
 
-  private TaskRecordDto buildTaskRecordDTO(TaskInfoDto taskDetail, String triggerId) {
-    TaskRecordDto taskRecordDTO = new TaskRecordDto();
-    taskRecordDTO.setTaskConfig(taskDetail.getTaskConfig());
-    taskRecordDTO.setTaskName(taskDetail.getTaskName());
-    taskRecordDTO.setTaskId(taskDetail.getTaskId());
-    taskRecordDTO.setRecordId(uniqueIdService.getUniqueId());
-    taskRecordDTO.setTriggerId(triggerId);
-    taskRecordDTO.setStatus(ProcessStatus.RUNNING.getType());
-    taskRecordDTO.setMachines(taskDetail.getMachines());
-    taskRecordDTO.setTestCaseId(taskDetail.getTestCaseId());
-    taskRecordDTO.setCreateTime(System.currentTimeMillis());
-    taskRecordDTO.setUpdateTime(System.currentTimeMillis());
-    return taskRecordDTO;
+  private TaskRecordBO buildTaskRecordDTO(TaskInfoBO taskDetail, String triggerId) {
+    TaskRecordBO taskRecordBO = new TaskRecordBO();
+    taskRecordBO.setTaskConfig(taskDetail.getTaskConfig());
+    taskRecordBO.setTaskName(taskDetail.getTaskName());
+    taskRecordBO.setTaskId(taskDetail.getTaskId());
+    taskRecordBO.setRecordId(uniqueIdService.getUniqueId());
+    taskRecordBO.setTriggerId(triggerId);
+    taskRecordBO.setStatus(ProcessStatus.RUNNING.getType());
+    taskRecordBO.setMachines(taskDetail.getMachines());
+    taskRecordBO.setTestCaseId(taskDetail.getTestCaseId());
+    taskRecordBO.setCreateTime(System.currentTimeMillis());
+    taskRecordBO.setUpdateTime(System.currentTimeMillis());
+    return taskRecordBO;
   }
 
   @Override
   public boolean resume(DispatchLogDto dispatchLog) {
-    TaskInfoDto taskDetail = taskRepository.getTaskDetail(dispatchLog.getSourceId());
+    TaskInfoBO taskDetail = taskRepository.getTaskDetail(dispatchLog.getSourceId());
     if (Objects.isNull(taskDetail)) {
       log.info("can not find task={}", dispatchLog.getSourceId());
       return false;
     }
 
     String testCaseId = taskDetail.getTestCaseId();
-    List<FeatureInfoDto> featureList = featureRepository.queryNotContainFolder(testCaseId);
+    List<FeatureInfoBO> featureList = featureRepository.queryNotContainFolder(testCaseId);
     if (CollectionUtils.isEmpty(featureList)) {
       log.info("can not find feature list by testCaseId={}", testCaseId);
       return false;
@@ -174,7 +174,7 @@ public class TaskDispatch implements IDispatchExecutor {
     List<SubDispatchLogDto> subLogs = subTaskLogRepository.getSubLogByLogId(dispatchLog.getLogId());
     if (CollectionUtils.isEmpty(subLogs)) {
       //如果找不到子任务执行记录，那么就需要重新创建
-      List<String> featureIds = featureList.stream().map(FeatureInfoDto::getFeatureId)
+      List<String> featureIds = featureList.stream().map(FeatureInfoBO::getFeatureId)
           .collect(Collectors.toList());
       subLogs = saveSubTaskLog(featureIds, dispatchLog.getLogId());
     }
@@ -187,23 +187,23 @@ public class TaskDispatch implements IDispatchExecutor {
     FeatureTask featureTask = buildResumeFeatureTask(dispatchLog, taskDetail,
         featureList, completedFeatures);
     if (StringUtils.isBlank(dispatchLog.getSourceRecordId())) {
-      TaskRecordDto taskRecordDto = buildTaskRecordDTO(taskDetail, null);
-      taskRecordRepository.save(taskRecordDto);
-      featureTask.setTaskRecordId(taskRecordDto.getRecordId());
+      TaskRecordBO taskRecordBO = buildTaskRecordDTO(taskDetail, null);
+      taskRecordRepository.save(taskRecordBO);
+      featureTask.setTaskRecordId(taskRecordBO.getRecordId());
     }
     featureExecuteProxy.execute(featureTask);
     return true;
   }
 
-  private FeatureTask buildResumeFeatureTask(DispatchLogDto taskLog, TaskInfoDto taskDetail,
-      List<FeatureInfoDto> featureList, List<String> completedFeatures) {
+  private FeatureTask buildResumeFeatureTask(DispatchLogDto taskLog, TaskInfoBO taskDetail,
+                                             List<FeatureInfoBO> featureList, List<String> completedFeatures) {
     FeatureTask featureTask = new FeatureTask();
     ExecuteContext executeContext = buildTaskConfig(taskDetail.getTaskConfig());
     featureTask.setExecuteContext(executeContext);
 
     //已执行完成状态的任务无需在恢复
     List<String> featureIds = featureList.stream()
-        .map(FeatureInfoDto::getFeatureId)
+        .map(FeatureInfoBO::getFeatureId)
         .filter(featureId -> !completedFeatures.contains(featureId))
         .collect(Collectors.toList());
     featureTask.addAll(featureIds);

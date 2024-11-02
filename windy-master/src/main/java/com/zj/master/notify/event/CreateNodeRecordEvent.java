@@ -2,8 +2,8 @@ package com.zj.master.notify.event;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.NotifyType;
-import com.zj.common.model.ResultEvent;
-import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
+import com.zj.common.entity.dto.ResultEvent;
+import com.zj.domain.entity.bo.pipeline.NodeRecordDto;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.master.notify.INotifyEvent;

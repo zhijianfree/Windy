@@ -1,10 +1,10 @@
 package com.zj.feature.rest;
 
-import com.zj.common.model.ResponseMeta;
-import com.zj.common.model.ResponseStatusModel;
+import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.common.entity.dto.ResponseStatusModel;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.PageSize;
-import com.zj.domain.entity.dto.feature.TaskInfoDto;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.domain.entity.bo.feature.TaskInfoBO;
 import com.zj.feature.service.TaskInfoService;
 import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,25 +32,25 @@ public class TaskInfoRest {
   }
 
   @GetMapping("/tasks")
-  public ResponseMeta<PageSize<TaskInfoDto>> getTaskList(@RequestParam(value = "page", defaultValue = "1") Integer page,
-      @RequestParam(value = "size", defaultValue = "10") Integer size, @RequestParam(value = "name", defaultValue = "") String name) {
+  public ResponseMeta<PageSize<TaskInfoBO>> getTaskList(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                        @RequestParam(value = "size", defaultValue = "10") Integer size, @RequestParam(value = "name", defaultValue = "") String name) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, taskInfoService.getTaskList(name, page, size));
   }
 
   @GetMapping("/{serviceId}/tasks")
-  public ResponseMeta<List<TaskInfoDto>> getAllTaskList(@PathVariable(value = "serviceId") String serviceId) {
+  public ResponseMeta<List<TaskInfoBO>> getAllTaskList(@PathVariable(value = "serviceId") String serviceId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, taskInfoService.getAllTaskList(serviceId));
   }
 
   @PostMapping("/task")
-  public ResponseMeta<Boolean> createTask(@RequestBody TaskInfoDto taskInfoDTO) {
-    Boolean result = taskInfoService.createTask(taskInfoDTO);
+  public ResponseMeta<Boolean> createTask(@RequestBody TaskInfoBO taskInfoBO) {
+    Boolean result = taskInfoService.createTask(taskInfoBO);
     return new ResponseMeta<>(ErrorCode.SUCCESS, result);
   }
 
   @PutMapping("/task")
-  public ResponseMeta<Boolean> updateTask(@RequestBody TaskInfoDto taskInfoDTO) {
-    Boolean result = taskInfoService.updateTask(taskInfoDTO);
+  public ResponseMeta<Boolean> updateTask(@RequestBody TaskInfoBO taskInfoBO) {
+    Boolean result = taskInfoService.updateTask(taskInfoBO);
     return new ResponseMeta<>(ErrorCode.SUCCESS, result);
   }
 
@@ -61,8 +61,8 @@ public class TaskInfoRest {
   }
 
   @GetMapping("/task/{taskId}")
-  public ResponseMeta<TaskInfoDto> getTaskDetail(@PathVariable("taskId") String taskId) {
-    TaskInfoDto taskDetail = taskInfoService.getTaskDetail(taskId);
+  public ResponseMeta<TaskInfoBO> getTaskDetail(@PathVariable("taskId") String taskId) {
+    TaskInfoBO taskDetail = taskInfoService.getTaskDetail(taskId);
     return new ResponseMeta<>(ErrorCode.SUCCESS, taskDetail);
   }
 

@@ -1,12 +1,12 @@
 package com.zj.service.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.PageSize;
-import com.zj.common.model.ResponseMeta;
-import com.zj.domain.entity.dto.auth.UserDto;
-import com.zj.domain.entity.dto.service.MicroserviceDto;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.domain.entity.bo.auth.UserBO;
+import com.zj.domain.entity.bo.service.MicroserviceDto;
 import com.zj.service.entity.ServiceDto;
-import com.zj.domain.entity.dto.service.ResourceMemberDto;
+import com.zj.domain.entity.bo.service.ResourceMemberDto;
 import com.zj.service.service.MicroserviceService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,8 +50,8 @@ public class MicroserviceRest {
     }
 
     @GetMapping("/services/{serviceId}/members")
-    public ResponseMeta<List<UserDto>> queryServiceMembers(@PathVariable("serviceId") String serviceId) {
-        return new ResponseMeta<List<UserDto>>(ErrorCode.SUCCESS, microservice.queryServiceMembers(serviceId));
+    public ResponseMeta<List<UserBO>> queryServiceMembers(@PathVariable("serviceId") String serviceId) {
+        return new ResponseMeta<List<UserBO>>(ErrorCode.SUCCESS, microservice.queryServiceMembers(serviceId));
     }
 
     @PostMapping("/services/{serviceId}/members")

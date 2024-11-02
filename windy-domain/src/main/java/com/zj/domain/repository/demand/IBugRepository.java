@@ -1,30 +1,30 @@
 package com.zj.domain.repository.demand;
 
-import com.zj.common.model.PageSize;
-import com.zj.domain.entity.dto.demand.BugDTO;
-import com.zj.domain.entity.dto.demand.BugQuery;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.domain.entity.bo.demand.BugBO;
+import com.zj.domain.entity.bo.demand.BugQueryBO;
 
 import java.util.List;
 
 public interface IBugRepository {
-    PageSize<BugDTO> getUserBugs(BugQuery bugQuery);
-    PageSize<BugDTO> getUserRelatedBugs(BugQuery bugQuery);
+    PageSize<BugBO> getUserBugs(BugQueryBO bugQueryBO);
+    PageSize<BugBO> getUserRelatedBugs(BugQueryBO bugQueryBO);
 
-    boolean createBug(BugDTO bugDTO);
+    boolean createBug(BugBO bugBO);
 
-    boolean updateBug(BugDTO bugDTO);
+    boolean updateBug(BugBO bugBO);
 
-    BugDTO getBug(String bugId);
+    BugBO getBug(String bugId);
 
     boolean deleteBug(String bugId);
 
     Integer countIteration(String iterationId);
 
-    List<BugDTO> getIterationBugs(String iterationId);
+    List<BugBO> getIterationBugs(String iterationId);
 
-    List<BugDTO> getBugsByName(String queryName);
+    List<BugBO> getBugsByName(String queryName);
 
-    List<BugDTO> getSpaceNotHandleBugs(String spaceId);
+    List<BugBO> getSpaceNotHandleBugs(String spaceId);
 
-    List<BugDTO> getIterationNotHandleBugs(String iterationId);
+    List<BugBO> getIterationNotHandleBugs(String iterationId);
 }

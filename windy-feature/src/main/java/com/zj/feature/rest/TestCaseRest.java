@@ -1,10 +1,10 @@
 package com.zj.feature.rest;
 
-import com.zj.common.model.ResponseMeta;
+import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.PageSize;
-import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
-import com.zj.domain.entity.dto.feature.TestCaseDto;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.domain.entity.bo.feature.TestCaseConfigBO;
+import com.zj.domain.entity.bo.feature.TestCaseBO;
 import com.zj.feature.entity.BatchExecuteFeature;
 import com.zj.feature.service.TestCaseConfigService;
 import com.zj.feature.service.TestCaseService;
@@ -38,28 +38,28 @@ public class TestCaseRest {
   }
 
   @GetMapping("/{serviceId}/cases")
-  public ResponseMeta<PageSize<TestCaseDto>> getTestCases(@PathVariable("serviceId") String serviceId, @RequestParam("page") Integer page,
-      @RequestParam("pageSize") Integer pageSize) {
-    PageSize<TestCaseDto> testCaseDTOS = testCaseService.getTestCaseList(serviceId, page, pageSize);
+  public ResponseMeta<PageSize<TestCaseBO>> getTestCases(@PathVariable("serviceId") String serviceId, @RequestParam("page") Integer page,
+                                                         @RequestParam("pageSize") Integer pageSize) {
+    PageSize<TestCaseBO> testCaseDTOS = testCaseService.getTestCaseList(serviceId, page, pageSize);
     return new ResponseMeta<>(ErrorCode.SUCCESS, testCaseDTOS);
   }
 
   @RequestMapping("/e2e/page")
-  public ResponseMeta<PageSize<TestCaseDto>> getE2ECases( @RequestParam("page") Integer page,
-                                                          @RequestParam("pageSize") Integer pageSize) {
-    PageSize<TestCaseDto> testCaseDTOS = testCaseService.getE2ECases(page, pageSize);
+  public ResponseMeta<PageSize<TestCaseBO>> getE2ECases(@RequestParam("page") Integer page,
+                                                        @RequestParam("pageSize") Integer pageSize) {
+    PageSize<TestCaseBO> testCaseDTOS = testCaseService.getE2ECases(page, pageSize);
     return new ResponseMeta<>(ErrorCode.SUCCESS, testCaseDTOS);
   }
 
   @GetMapping("/e2e/cases")
-  public ResponseMeta<List<TestCaseDto>> getE2ECases() {
-    List<TestCaseDto> e2eCases = testCaseService.getE2ECases();
+  public ResponseMeta<List<TestCaseBO>> getE2ECases() {
+    List<TestCaseBO> e2eCases = testCaseService.getE2ECases();
     return new ResponseMeta<>(ErrorCode.SUCCESS, e2eCases);
   }
 
   @PostMapping("/case")
-  public ResponseMeta<String> createTestCases(@RequestBody TestCaseDto testCaseDTO) {
-    String testCaseId = testCaseService.createTestCase(testCaseDTO);
+  public ResponseMeta<String> createTestCases(@RequestBody TestCaseBO testCaseBO) {
+    String testCaseId = testCaseService.createTestCase(testCaseBO);
     return new ResponseMeta<>(ErrorCode.SUCCESS, testCaseId);
   }
 
@@ -70,14 +70,14 @@ public class TestCaseRest {
   }
 
   @PutMapping("/case")
-  public ResponseMeta<Boolean> updateTestCase(@RequestBody TestCaseDto testCaseDTO) {
-    Boolean result = testCaseService.updateTestCase(testCaseDTO);
+  public ResponseMeta<Boolean> updateTestCase(@RequestBody TestCaseBO testCaseBO) {
+    Boolean result = testCaseService.updateTestCase(testCaseBO);
     return new ResponseMeta<>(ErrorCode.SUCCESS, result);
   }
 
   @GetMapping("/case/{caseId}")
-  public ResponseMeta<TestCaseDto> getTestCase(@PathVariable("caseId") String caseId) {
-    TestCaseDto testCase = testCaseService.getTestCase(caseId);
+  public ResponseMeta<TestCaseBO> getTestCase(@PathVariable("caseId") String caseId) {
+    TestCaseBO testCase = testCaseService.getTestCase(caseId);
     return new ResponseMeta<>(ErrorCode.SUCCESS, testCase);
   }
 
@@ -88,19 +88,19 @@ public class TestCaseRest {
   }
 
   @GetMapping("/case/{caseId}/configs")
-  public ResponseMeta<List<TestCaseConfigDto>> getTestCaseConfigs(@PathVariable("caseId") String caseId) {
-    List<TestCaseConfigDto> result = testCaseConfigService.getTestCaseConfigs(caseId);
+  public ResponseMeta<List<TestCaseConfigBO>> getTestCaseConfigs(@PathVariable("caseId") String caseId) {
+    List<TestCaseConfigBO> result = testCaseConfigService.getTestCaseConfigs(caseId);
     return new ResponseMeta<>(ErrorCode.SUCCESS, result);
   }
 
   @PostMapping("/case/config")
-  public ResponseMeta<Integer> addCaseConfig(@RequestBody List<TestCaseConfigDto> configs) {
+  public ResponseMeta<Integer> addCaseConfig(@RequestBody List<TestCaseConfigBO> configs) {
     Integer result = testCaseConfigService.addCaseConfigs(configs);
     return new ResponseMeta<>(ErrorCode.SUCCESS, result);
   }
 
   @PutMapping("/case/config")
-  public ResponseMeta<Boolean> updateCaseConfig(@RequestBody TestCaseConfigDto configDTO) {
+  public ResponseMeta<Boolean> updateCaseConfig(@RequestBody TestCaseConfigBO configDTO) {
     Boolean result = testCaseConfigService.updateCaseConfigs(configDTO);
     return new ResponseMeta<>(ErrorCode.SUCCESS, result);
   }

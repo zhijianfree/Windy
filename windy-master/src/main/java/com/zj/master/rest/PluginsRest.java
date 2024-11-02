@@ -1,8 +1,8 @@
 package com.zj.master.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.ResponseMeta;
-import com.zj.domain.entity.dto.feature.PluginInfoDto;
+import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.domain.entity.bo.feature.PluginInfoBO;
 import com.zj.master.service.PluginsService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +25,7 @@ public class PluginsRest {
   }
 
   @GetMapping(value = "/plugins")
-  public ResponseMeta<List<PluginInfoDto>> getPlugins() {
+  public ResponseMeta<List<PluginInfoBO>> getPlugins() {
     return new ResponseMeta(ErrorCode.SUCCESS, pluginsService.getPlugins());
   }
 

@@ -1,6 +1,6 @@
 package com.zj.master.entity.vo;
 
-import com.zj.domain.entity.dto.pipeline.CompareResult;
+import com.zj.domain.entity.bo.pipeline.CompareResult;
 import lombok.Builder;
 import lombok.Data;
 

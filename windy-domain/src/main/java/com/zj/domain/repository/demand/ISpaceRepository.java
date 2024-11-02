@@ -1,18 +1,18 @@
 package com.zj.domain.repository.demand;
 
-import com.zj.domain.entity.dto.demand.SpaceDTO;
+import com.zj.domain.entity.bo.demand.SpaceBO;
 
 import java.util.List;
 
 public interface ISpaceRepository {
 
-    List<SpaceDTO> getSpaceList();
+    List<SpaceBO> getSpaceList();
 
-    SpaceDTO createSpace(SpaceDTO spaceDTO);
+    SpaceBO createSpace(SpaceBO spaceBO);
 
-    SpaceDTO getSpace(String spaceId);
+    SpaceBO getSpace(String spaceId);
 
-    boolean updateSpace(SpaceDTO spaceDTO);
+    boolean updateSpace(SpaceBO spaceBO);
 
     boolean deleteSpace(String spaceId);
 }

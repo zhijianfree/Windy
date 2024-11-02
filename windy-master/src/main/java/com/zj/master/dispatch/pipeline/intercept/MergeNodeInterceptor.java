@@ -2,9 +2,9 @@ package com.zj.master.dispatch.pipeline.intercept;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.ExecuteType;
-import com.zj.domain.entity.dto.pipeline.PipelineDto;
-import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
-import com.zj.domain.entity.dto.pipeline.PublishBindDto;
+import com.zj.domain.entity.bo.pipeline.PipelineDto;
+import com.zj.domain.entity.bo.pipeline.PipelineNodeDto;
+import com.zj.domain.entity.bo.pipeline.PublishBindDto;
 import com.zj.domain.repository.pipeline.IPipelineNodeRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.domain.repository.pipeline.IPublishBindRepository;

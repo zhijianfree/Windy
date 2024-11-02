@@ -1,6 +1,6 @@
 package com.zj.pipeline.git;
 
-import com.zj.common.git.IGitRepositoryHandler;
+import com.zj.common.adapter.git.IGitRepositoryHandler;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

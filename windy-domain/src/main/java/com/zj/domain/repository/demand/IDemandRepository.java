@@ -1,31 +1,31 @@
 package com.zj.domain.repository.demand;
 
-import com.zj.common.model.PageSize;
-import com.zj.domain.entity.dto.demand.DemandDTO;
-import com.zj.domain.entity.dto.demand.DemandQuery;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.domain.entity.bo.demand.DemandBO;
+import com.zj.domain.entity.bo.demand.DemandQueryBO;
 
 import java.util.List;
 
 public interface IDemandRepository {
-    boolean createDemand(DemandDTO demand);
+    boolean createDemand(DemandBO demand);
 
-    PageSize<DemandDTO> getDemandPage(DemandQuery demandQuery);
+    PageSize<DemandBO> getDemandPage(DemandQueryBO demandQueryBO);
 
-    boolean updateDemand(DemandDTO demand);
+    boolean updateDemand(DemandBO demand);
 
-    DemandDTO getDemand(String demandId);
+    DemandBO getDemand(String demandId);
 
     boolean deleteDemand(String demandId);
 
-    PageSize<DemandDTO> getRelatedDemands(String proposer, Integer page, Integer size);
+    PageSize<DemandBO> getRelatedDemands(String proposer, Integer page, Integer size);
 
     Integer countIteration(String iterationId);
 
-    List<DemandDTO> getIterationDemand(String iterationId);
+    List<DemandBO> getIterationDemand(String iterationId);
 
-    List<DemandDTO> getDemandsByName(String queryName);
+    List<DemandBO> getDemandsByName(String queryName);
 
-    List<DemandDTO> getSpaceNotHandleDemands(String spaceId);
+    List<DemandBO> getSpaceNotHandleDemands(String spaceId);
 
-    List<DemandDTO> getIterationNotHandleDemands(String iterationId);
+    List<DemandBO> getIterationNotHandleDemands(String iterationId);
 }

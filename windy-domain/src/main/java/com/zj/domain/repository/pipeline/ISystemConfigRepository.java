@@ -1,7 +1,7 @@
 package com.zj.domain.repository.pipeline;
 
-import com.zj.common.git.GitAccessInfo;
-import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
+import com.zj.common.adapter.git.GitAccessInfo;
+import com.zj.domain.entity.bo.pipeline.SystemConfigDto;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
 import com.zj.domain.entity.vo.MavenConfigVo;

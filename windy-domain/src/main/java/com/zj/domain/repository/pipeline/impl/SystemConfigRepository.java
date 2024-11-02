@@ -3,9 +3,9 @@ package com.zj.domain.repository.pipeline.impl;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.common.git.GitAccessInfo;
+import com.zj.common.adapter.git.GitAccessInfo;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
+import com.zj.domain.entity.bo.pipeline.SystemConfigDto;
 import com.zj.domain.entity.po.pipeline.SystemConfig;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
@@ -71,7 +71,7 @@ public class SystemConfigRepository extends ServiceImpl<SystemConfigMapper, Syst
 
     @Override
     public GitAccessInfo getGitAccess() {
-        com.zj.common.git.GitAccessInfo gitAccess = getGlobalConfig(GIT_ACCESS, com.zj.common.git.GitAccessInfo.class);
+        GitAccessInfo gitAccess = getGlobalConfig(GIT_ACCESS, GitAccessInfo.class);
         return Optional.ofNullable(gitAccess).orElse(new GitAccessInfo());
     }
 

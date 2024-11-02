@@ -2,9 +2,9 @@ package com.zj.client.handler.pipeline.executer.notify;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.client.config.GlobalEnvConfig;
-import com.zj.common.feature.CompareDefine;
+import com.zj.common.entity.feature.CompareDefine;
 import com.zj.client.handler.feature.executor.compare.CompareOperator;
-import com.zj.client.handler.feature.executor.compare.CompareResult;
+import com.zj.common.entity.feature.CompareResult;
 import com.zj.client.handler.feature.executor.compare.operator.CompareFactory;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
 import com.zj.client.handler.pipeline.executer.vo.CompareInfo;
@@ -18,7 +18,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import javax.swing.text.html.Option;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;

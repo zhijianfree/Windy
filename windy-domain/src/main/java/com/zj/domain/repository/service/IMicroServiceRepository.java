@@ -1,7 +1,7 @@
 package com.zj.domain.repository.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.zj.domain.entity.dto.service.MicroserviceDto;
+import com.zj.domain.entity.bo.service.MicroserviceDto;
 
 import java.util.List;
 

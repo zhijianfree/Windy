@@ -1,9 +1,9 @@
 package com.zj.master.dispatch.pipeline.listener;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.domain.entity.dto.pipeline.CodeChangeDto;
-import com.zj.domain.entity.dto.pipeline.PipelineDto;
-import com.zj.domain.entity.dto.pipeline.PublishBindDto;
+import com.zj.domain.entity.bo.pipeline.CodeChangeDto;
+import com.zj.domain.entity.bo.pipeline.PipelineDto;
+import com.zj.domain.entity.bo.pipeline.PublishBindDto;
 import com.zj.domain.entity.enums.PipelineType;
 import com.zj.domain.repository.pipeline.ICodeChangeRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;

@@ -1,8 +1,8 @@
 package com.zj.client.handler.notify;
 
-import com.zj.common.model.ResultEvent;
-import com.zj.common.monitor.InstanceMonitor;
-import com.zj.common.monitor.invoker.IMasterInvoker;
+import com.zj.common.entity.dto.ResultEvent;
+import com.zj.common.adapter.monitor.InstanceMonitor;
+import com.zj.common.adapter.invoker.IMasterInvoker;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.scheduling.annotation.Scheduled;

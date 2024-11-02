@@ -5,7 +5,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.CharSink;
 import com.google.common.io.FileWriteMode;
 import com.google.common.io.Files;
-import com.zj.common.model.ResultEvent;
+import com.zj.common.entity.dto.ResultEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.DisposableBean;
@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -37,11 +38,9 @@ public class OptimizePersistLocal implements DisposableBean {
   public static final String NOTIFY_ERROR_MAX_SIZE = "notify.error.max.size";
   public static final String DEFAULT_SIZE = "10";
   private final CopyOnWriteArrayList<ResultEvent> unPersistEventList = new CopyOnWriteArrayList<>();
-
-  private final Integer maxSaveSize = 50;
   private File file;
 
-  private Environment environment;
+  private final Environment environment;
 
   public OptimizePersistLocal(Environment environment) {
     this.environment = environment;
@@ -103,7 +102,7 @@ public class OptimizePersistLocal implements DisposableBean {
 
   public List<ResultEvent> readEventsFromFile() {
     try {
-      List<String> list = Files.readLines(file, Charsets.UTF_8);
+      List<String> list = Files.readLines(file, StandardCharsets.UTF_8);
       if (CollectionUtils.isEmpty(list)) {
         return Collections.emptyList();
       }
@@ -117,7 +116,7 @@ public class OptimizePersistLocal implements DisposableBean {
 
   public void clearFileContent() {
     try {
-      BufferedWriter writer = Files.newWriter(file, Charsets.UTF_8);
+      BufferedWriter writer = Files.newWriter(file, StandardCharsets.UTF_8);
       writer.write("");
       writer.flush();
       writer.close();
@@ -128,11 +127,9 @@ public class OptimizePersistLocal implements DisposableBean {
 
   private void saveEventFile() {
     StringBuilder stringBuilder = new StringBuilder();
-    unPersistEventList.forEach(event -> {
-      stringBuilder.append(JSON.toJSONString(event)).append("\r\n");
-    });
+    unPersistEventList.forEach(event -> stringBuilder.append(JSON.toJSONString(event)).append("\r\n"));
 
-    CharSink sink = Files.asCharSink(file, Charsets.UTF_8, FileWriteMode.APPEND);
+    CharSink sink = Files.asCharSink(file, StandardCharsets.UTF_8, FileWriteMode.APPEND);
     try {
       sink.write(stringBuilder.toString());
     } catch (IOException e) {

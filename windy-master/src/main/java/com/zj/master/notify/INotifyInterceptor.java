@@ -1,6 +1,6 @@
 package com.zj.master.notify;
 
-import com.zj.common.model.ResultEvent;
+import com.zj.common.entity.dto.ResultEvent;
 
 public interface INotifyInterceptor {
 

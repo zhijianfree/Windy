@@ -1,17 +1,11 @@
 package com.zj.pipeline.service;
 
-import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.zj.common.model.PageSize;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.pipeline.ActionParam;
-import com.zj.domain.entity.dto.pipeline.CompareResult;
-import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
-import com.zj.domain.entity.po.pipeline.PipelineAction;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.domain.entity.bo.pipeline.PipelineActionDto;
 import com.zj.domain.repository.pipeline.IPipelineActionRepository;
 import java.util.List;
-import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 
 /**

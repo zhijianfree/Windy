@@ -1,7 +1,7 @@
 package com.zj.domain.repository.feature;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.zj.domain.entity.dto.feature.FeatureInfoDto;
+import com.zj.domain.entity.bo.feature.FeatureInfoBO;
 
 import java.util.List;
 
@@ -11,29 +11,29 @@ import java.util.List;
  */
 public interface IFeatureRepository {
 
-  List<FeatureInfoDto> queryFeatureList(String testCaseId);
+  List<FeatureInfoBO> queryFeatureList(String testCaseId);
 
-  List<FeatureInfoDto> queryNotContainFolder(String testCaseId);
+  List<FeatureInfoBO> queryNotContainFolder(String testCaseId);
 
-  FeatureInfoDto getFeatureById(String featureId);
+  FeatureInfoBO getFeatureById(String featureId);
 
-  boolean createFeature(FeatureInfoDto featureInfoDto);
+  boolean createFeature(FeatureInfoBO featureInfoBO);
 
-  boolean updateFeatureInfo(FeatureInfoDto featureInfoDto);
+  boolean updateFeatureInfo(FeatureInfoBO featureInfoBO);
 
   boolean deleteByFeatureId(String featureId);
 
-  List<FeatureInfoDto> queryFeatureList(List<String> featureIds);
+  List<FeatureInfoBO> queryFeatureList(List<String> featureIds);
 
   Boolean batchDeleteByFeatureId(List<String> featureIds);
 
-  IPage<FeatureInfoDto> queryFeaturePage(String testCaseId, int page, int size);
+  IPage<FeatureInfoBO> queryFeaturePage(String testCaseId, int page, int size);
 
-  boolean saveBatch(List<FeatureInfoDto> infoList);
+  boolean saveBatch(List<FeatureInfoBO> infoList);
 
-  List<FeatureInfoDto> getSubFeatures(String featureId);
+  List<FeatureInfoBO> getSubFeatures(String featureId);
 
-  Boolean batchUpdate(List<FeatureInfoDto> features);
+  Boolean batchUpdate(List<FeatureInfoBO> features);
 
-    List<FeatureInfoDto> getCaseFeatures(String testCaseId);
+    List<FeatureInfoBO> getCaseFeatures(String testCaseId);
 }

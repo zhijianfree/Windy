@@ -1,6 +1,6 @@
 package com.zj.service.entity;
 
-import com.zj.domain.entity.dto.service.ServiceApiDto;
+import com.zj.domain.entity.bo.service.ServiceApiDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

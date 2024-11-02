@@ -3,9 +3,9 @@ package com.zj.auth.service;
 import com.zj.auth.entity.GroupTree;
 import com.zj.auth.entity.GroupUserTree;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.domain.entity.dto.auth.GroupDto;
-import com.zj.domain.entity.dto.auth.UserDto;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.domain.entity.bo.auth.GroupBO;
+import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.repository.auth.IGroupRepository;
 import com.zj.domain.repository.auth.IUserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -34,13 +34,13 @@ public class GroupService {
     }
 
 
-    public boolean createGroup(GroupDto groupDto) {
-        groupDto.setGroupId(uniqueIdService.getUniqueId());
-        return groupRepository.createGroup(groupDto);
+    public boolean createGroup(GroupBO groupBO) {
+        groupBO.setGroupId(uniqueIdService.getUniqueId());
+        return groupRepository.createGroup(groupBO);
     }
 
     public List<GroupTree> getGroups() {
-        List<GroupDto> groups = groupRepository.getGroups();
+        List<GroupBO> groups = groupRepository.getGroups();
         GroupTree rootTree = new GroupTree();
         convertTree(OrikaUtil.convertList(groups, GroupTree.class), rootTree);
         return rootTree.getChildren();
@@ -60,16 +60,16 @@ public class GroupService {
         list.forEach(node -> convertTree(groupTrees, node));
     }
 
-    public boolean updateGroup(String groupId, GroupDto groupDto) {
-        groupDto.setGroupId(groupId);
-        return groupRepository.updateGroup(groupDto);
+    public boolean updateGroup(String groupId, GroupBO groupBO) {
+        groupBO.setGroupId(groupId);
+        return groupRepository.updateGroup(groupBO);
     }
 
     public boolean deleteGroup(String groupId) {
         return groupRepository.deleteGroup(groupId);
     }
 
-    public GroupDto getGroup(String groupId) {
+    public GroupBO getGroup(String groupId) {
         return groupRepository.getGroup(groupId);
     }
 
@@ -107,10 +107,10 @@ public class GroupService {
 
     // 动态根据 groupId 调用接口获取用户，并构建用户节点
     private List<GroupUserTree> buildUserNodes(String groupId) {
-        List<UserDto> users = userRepository.getGroupUserList(groupId); // 动态获取用户列表
+        List<UserBO> users = userRepository.getGroupUserList(groupId); // 动态获取用户列表
         List<GroupUserTree> userNodes = new ArrayList<>();
 
-        for (UserDto user : users) {
+        for (UserBO user : users) {
             GroupUserTree userNode = new GroupUserTree();
             userNode.setUserId(user.getUserId());
             String name =

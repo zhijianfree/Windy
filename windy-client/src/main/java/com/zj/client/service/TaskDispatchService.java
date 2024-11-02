@@ -1,21 +1,14 @@
 package com.zj.client.service;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.zj.client.entity.dto.GenerateDto;
-import com.zj.common.enums.DispatchType;
 import com.zj.client.handler.feature.executor.IFeatureExecutor;
 import com.zj.client.handler.feature.executor.vo.FeatureParam;
 import com.zj.client.handler.generate.MavenGenerator;
 import com.zj.client.handler.pipeline.executer.ExecuteProxy;
 import com.zj.client.handler.pipeline.executer.notify.NodeStatusQueryLooper;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
-import com.zj.common.model.StopDispatch;
+import com.zj.common.entity.dto.StopDispatch;
 import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
 
 /**
  * @author guyuelan

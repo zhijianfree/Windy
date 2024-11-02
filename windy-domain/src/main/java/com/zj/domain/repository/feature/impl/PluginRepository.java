@@ -3,7 +3,7 @@ package com.zj.domain.repository.feature.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.feature.PluginInfoDto;
+import com.zj.domain.entity.bo.feature.PluginInfoBO;
 import com.zj.domain.entity.enums.SourceStatus;
 import com.zj.domain.entity.po.feature.PluginInfo;
 import com.zj.domain.mapper.feeature.PluginInfoMapper;
@@ -16,14 +16,14 @@ public class PluginRepository extends ServiceImpl<PluginInfoMapper, PluginInfo> 
     IPluginRepository {
 
   @Override
-  public List<PluginInfoDto> getAllPlugins() {
+  public List<PluginInfoBO> getAllPlugins() {
     List<PluginInfo> list = list(Wrappers.lambdaQuery(PluginInfo.class)
         .eq(PluginInfo::getStatus, SourceStatus.AVAILABLE.getType()));
-    return OrikaUtil.convertList(list, PluginInfoDto.class);
+    return OrikaUtil.convertList(list, PluginInfoBO.class);
   }
 
   @Override
-  public boolean addPlugin(PluginInfoDto pluginInfo) {
+  public boolean addPlugin(PluginInfoBO pluginInfo) {
     PluginInfo plugin = OrikaUtil.convert(pluginInfo, PluginInfo.class);
     plugin.setCreateTime(System.currentTimeMillis());
     plugin.setUpdateTime(System.currentTimeMillis());
@@ -46,9 +46,9 @@ public class PluginRepository extends ServiceImpl<PluginInfoMapper, PluginInfo> 
   }
 
   @Override
-  public PluginInfoDto getPlugin(String pluginId) {
+  public PluginInfoBO getPlugin(String pluginId) {
     PluginInfo pluginInfo = getOne(
         Wrappers.lambdaQuery(PluginInfo.class).eq(PluginInfo::getPluginId, pluginId));
-    return OrikaUtil.convert(pluginInfo, PluginInfoDto.class);
+    return OrikaUtil.convert(pluginInfo, PluginInfoBO.class);
   }
 }

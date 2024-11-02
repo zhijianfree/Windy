@@ -1,7 +1,7 @@
 package com.zj.domain.repository.demand;
 
-import com.zj.domain.entity.dto.auth.UserDto;
-import com.zj.domain.entity.dto.service.ResourceMemberDto;
+import com.zj.domain.entity.bo.auth.UserBO;
+import com.zj.domain.entity.bo.service.ResourceMemberDto;
 import com.zj.domain.entity.po.service.ResourceMember;
 
 import java.util.List;
@@ -10,7 +10,7 @@ public interface IMemberRepository {
 
     List<ResourceMember> getResourceMembersByUser(String userId);
 
-    List<UserDto> queryResourceMembers(String resourceId);
+    List<UserBO> queryResourceMembers(String resourceId);
 
     boolean addResourceMember(ResourceMemberDto resourceMemberDto);
 

@@ -5,9 +5,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.common.model.PageSize;
+import com.zj.common.entity.dto.PageSize;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.auth.ResourceDto;
+import com.zj.domain.entity.bo.auth.ResourceBO;
 import com.zj.domain.entity.enums.ResourceType;
 import com.zj.domain.entity.po.auth.Resource;
 import com.zj.domain.entity.po.auth.RoleResource;
@@ -43,7 +43,7 @@ public class ResourceRepositoryImpl extends ServiceImpl<ResourceMapper, Resource
     }
 
     @Override
-    public List<ResourceDto> getResourceByUserId(String userId) {
+    public List<ResourceBO> getResourceByUserId(String userId) {
         List<UserRole> userRoles =
                 userRoleMapper.selectList(Wrappers.lambdaQuery(UserRole.class).eq(UserRole::getUserId, userId));
         if (CollectionUtils.isEmpty(userRoles)) {
@@ -58,53 +58,53 @@ public class ResourceRepositoryImpl extends ServiceImpl<ResourceMapper, Resource
     }
 
     @Override
-    public List<ResourceDto> getMenuByUserId(String userId) {
-        List<ResourceDto> resourceList = getResourceByUserId(userId);
+    public List<ResourceBO> getMenuByUserId(String userId) {
+        List<ResourceBO> resourceList = getResourceByUserId(userId);
         User user = userMapper.selectOne(Wrappers.lambdaQuery(User.class).eq(User::getUserId, userId));
-        List<ResourceDto> groupResourceList = getResourceByUserId(user.getGroupId());
-        List<ResourceDto> allResources = ListUtils.union(resourceList, groupResourceList);
+        List<ResourceBO> groupResourceList = getResourceByUserId(user.getGroupId());
+        List<ResourceBO> allResources = ListUtils.union(resourceList, groupResourceList);
         return allResources.stream().filter(resource -> Objects.equals(resource.getResourceType(),
                 ResourceType.MENU.getType())).collect(Collectors.toList());
     }
 
-    private List<ResourceDto> getResourceList(List<RoleResource> roleResources) {
+    private List<ResourceBO> getResourceList(List<RoleResource> roleResources) {
         if (CollectionUtils.isEmpty(roleResources)) {
             return Collections.emptyList();
         }
         List<String> resourceIds = roleResources.stream().map(RoleResource::getResourceId).collect(Collectors.toList());
         List<Resource> resources = list(Wrappers.lambdaQuery(Resource.class).in(Resource::getResourceId, resourceIds));
-        return OrikaUtil.convertList(resources, ResourceDto.class);
+        return OrikaUtil.convertList(resources, ResourceBO.class);
     }
 
     @Override
-    public PageSize<ResourceDto> getResources(Integer page, Integer size) {
+    public PageSize<ResourceBO> getResources(Integer page, Integer size) {
         LambdaQueryWrapper<Resource> wrapper = Wrappers.lambdaQuery(Resource.class).orderByDesc(Resource::getCreateTime);
         IPage<Resource> pageQuery = new Page<>(page, size);
         IPage<Resource> rolePage = page(pageQuery, wrapper);
-        PageSize<ResourceDto> pageSize = new PageSize<>();
+        PageSize<ResourceBO> pageSize = new PageSize<>();
         pageSize.setTotal(rolePage.getTotal());
         if (CollectionUtils.isNotEmpty(rolePage.getRecords())) {
-            pageSize.setData(OrikaUtil.convertList(rolePage.getRecords(), ResourceDto.class));
+            pageSize.setData(OrikaUtil.convertList(rolePage.getRecords(), ResourceBO.class));
         }
         return pageSize;
     }
 
     @Override
-    public List<ResourceDto> getAllResources() {
-        return OrikaUtil.convertList(list(), ResourceDto.class);
+    public List<ResourceBO> getAllResources() {
+        return OrikaUtil.convertList(list(), ResourceBO.class);
     }
 
     @Override
-    public Boolean createResource(ResourceDto resourceDto) {
-        Resource resource = OrikaUtil.convert(resourceDto, Resource.class);
+    public Boolean createResource(ResourceBO resourceBO) {
+        Resource resource = OrikaUtil.convert(resourceBO, Resource.class);
         resource.setCreateTime(System.currentTimeMillis());
         resource.setUpdateTime(System.currentTimeMillis());
         return save(resource);
     }
 
     @Override
-    public Boolean updateResource(ResourceDto resourceDto) {
-        Resource resource = OrikaUtil.convert(resourceDto, Resource.class);
+    public Boolean updateResource(ResourceBO resourceBO) {
+        Resource resource = OrikaUtil.convert(resourceBO, Resource.class);
         resource.setUpdateTime(System.currentTimeMillis());
         return update(resource, Wrappers.lambdaUpdate(Resource.class).eq(Resource::getResourceId,
                 resource.getResourceId()));
@@ -116,9 +116,9 @@ public class ResourceRepositoryImpl extends ServiceImpl<ResourceMapper, Resource
     }
 
     @Override
-    public ResourceDto getResource(String resourceId) {
+    public ResourceBO getResource(String resourceId) {
         Resource resource = getOne(Wrappers.lambdaUpdate(Resource.class).eq(Resource::getResourceId, resourceId));
-        return OrikaUtil.convert(resource, ResourceDto.class);
+        return OrikaUtil.convert(resource, ResourceBO.class);
     }
 
     @Override
@@ -134,7 +134,7 @@ public class ResourceRepositoryImpl extends ServiceImpl<ResourceMapper, Resource
     }
 
     @Override
-    public List<ResourceDto> getRoleResources(String roleId) {
+    public List<ResourceBO> getRoleResources(String roleId) {
         List<RoleResource> roleResources =
                 roleResourceMapper.selectList(Wrappers.lambdaQuery(RoleResource.class).eq(RoleResource::getRoleId,
                         roleId));

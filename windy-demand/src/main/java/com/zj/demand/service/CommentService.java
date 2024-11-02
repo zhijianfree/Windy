@@ -1,9 +1,9 @@
 package com.zj.demand.service;
 
-import com.zj.common.auth.IAuthService;
-import com.zj.common.auth.UserDetail;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.domain.entity.dto.demand.CommentDTO;
+import com.zj.common.adapter.auth.IAuthService;
+import com.zj.common.adapter.auth.UserDetail;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.domain.entity.bo.demand.CommentBO;
 import com.zj.domain.repository.demand.ICommentRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -28,22 +28,22 @@ public class CommentService {
     this.authService = authService;
   }
 
-  public List<CommentDTO> getRelativeComments(String relativeId) {
+  public List<CommentBO> getRelativeComments(String relativeId) {
     return commentRepository.getRelativeComments(relativeId);
   }
 
-  public boolean addComment(CommentDTO commentDTO) {
-    commentDTO.setCommentId(uniqueIdService.getUniqueId());
-    commentDTO.setUserId(authService.getCurrentUserId());
+  public boolean addComment(CommentBO commentBO) {
+    commentBO.setCommentId(uniqueIdService.getUniqueId());
+    commentBO.setUserId(authService.getCurrentUserId());
     UserDetail userDetail = authService.getUserDetail();
     String name = Optional.ofNullable(userDetail.getNickName()).filter(StringUtils::isNoneBlank)
             .orElseGet(userDetail::getUserName);
-    commentDTO.setUserName(name);
-    return commentRepository.saveComment(commentDTO);
+    commentBO.setUserName(name);
+    return commentRepository.saveComment(commentBO);
   }
 
-  public Boolean updateComment(CommentDTO commentDTO) {
-    return commentRepository.updateComment(commentDTO);
+  public Boolean updateComment(CommentBO commentBO) {
+    return commentRepository.updateComment(commentBO);
   }
 
   public Boolean deleteComment(String commentId) {

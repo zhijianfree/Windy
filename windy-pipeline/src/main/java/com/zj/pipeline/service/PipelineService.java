@@ -5,15 +5,15 @@ import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.zj.common.enums.LogType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.DispatchTaskModel;
-import com.zj.common.monitor.invoker.IMasterInvoker;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.domain.entity.dto.pipeline.BindBranchDto;
-import com.zj.domain.entity.dto.pipeline.PipelineDto;
-import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
-import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
-import com.zj.domain.entity.dto.pipeline.PipelineStageDto;
-import com.zj.domain.entity.dto.service.MicroserviceDto;
+import com.zj.common.entity.dto.DispatchTaskModel;
+import com.zj.common.adapter.invoker.IMasterInvoker;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.domain.entity.bo.pipeline.BindBranchDto;
+import com.zj.domain.entity.bo.pipeline.PipelineDto;
+import com.zj.domain.entity.bo.pipeline.PipelineHistoryDto;
+import com.zj.domain.entity.bo.pipeline.PipelineNodeDto;
+import com.zj.domain.entity.bo.pipeline.PipelineStageDto;
+import com.zj.domain.entity.bo.service.MicroserviceDto;
 import com.zj.domain.entity.enums.PipelineType;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
@@ -247,7 +247,7 @@ public class PipelineService {
         dispatchTaskModel.setSourceId(pipelineId);
         dispatchTaskModel.setSourceName(pipeline.getPipelineName());
         dispatchTaskModel.setType(LogType.PIPELINE.getType());
-        return masterInvoker.runPipelineTask(dispatchTaskModel);
+        return masterInvoker.startPipelineTask(dispatchTaskModel);
     }
 
     public PipelineDto getPipelineDetail(String pipelineId) {

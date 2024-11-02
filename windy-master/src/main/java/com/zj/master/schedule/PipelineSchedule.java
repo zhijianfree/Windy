@@ -2,8 +2,8 @@ package com.zj.master.schedule;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.LogType;
-import com.zj.common.model.DispatchTaskModel;
-import com.zj.domain.entity.dto.pipeline.PipelineDto;
+import com.zj.common.entity.dto.DispatchTaskModel;
+import com.zj.domain.entity.bo.pipeline.PipelineDto;
 import com.zj.domain.repository.pipeline.IOptimisticLockRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.master.entity.vo.PipelineConfig;

@@ -2,9 +2,9 @@ package com.zj.service.service.imports.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.common.enums.ApiType;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.domain.entity.dto.service.ServiceApiDto;
+import com.zj.domain.entity.bo.service.ServiceApiDto;
 import com.zj.domain.repository.service.IServiceApiRepository;
 import com.zj.plugin.loader.ParamValueType;
 import com.zj.service.entity.ApiRequestVariable;
@@ -35,6 +35,7 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
     public static final String PROPERTIES_KEY = "properties";
     public static final String SPLIT_PREFIX = "_";
     public static final String HTTP_API_TYPE = "http";
+    public static final String REQUIRED_KEY = "required";
     private final IServiceApiRepository serviceApiRepository;
     private final UniqueIdService uniqueIdService;
     private final Map<String, String> variableMap = new HashMap<>();
@@ -139,7 +140,7 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
             JSONObject jsonObject = JSON.parseObject(apiModel.getRequestBody());
             List<String> requirdList =
                     Optional.ofNullable(jsonObject).map(json -> JSON.parseArray(JSON.toJSONString(json.getJSONArray(
-                            "required")), String.class)).orElseGet(Collections::emptyList);
+                            REQUIRED_KEY)), String.class)).orElseGet(Collections::emptyList);
             if (CollectionUtils.isNotEmpty(apiModel.getQueryParams())) {
                 apiRequestVariables = apiModel.getQueryParams().stream().map(queryParam -> {
                     ApiRequestVariable apiRequestVariable = new ApiRequestVariable();
@@ -193,8 +194,7 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
             if (Objects.equals(type, ParamValueType.Object.name())) {
                 JSONObject subProperties = typeJSON.getJSONObject(PROPERTIES_KEY);
                 List<String> subRequirdList =
-                        Optional.of(typeJSON).map(json -> JSON.parseArray(JSON.toJSONString(json.getJSONArray(
-                        "required")), String.class)).orElseGet(Collections::emptyList);
+                        Optional.of(typeJSON).map(json -> JSON.parseArray(JSON.toJSONString(json.getJSONArray(REQUIRED_KEY)), String.class)).orElseGet(Collections::emptyList);
                 List<ApiRequestVariable> apiRequestVariables = convertProperties(subProperties, subRequirdList);
                 apiRequestVariable.setChildren(apiRequestVariables);
             }
@@ -202,10 +202,10 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
             if (Objects.equals(type, ParamValueType.Array.name())) {
                 JSONObject item = typeJSON.getJSONObject("items");
                 String itemType = convertVariableType(item.getString("type"));
-                if (Objects.equals(itemType,  ParamValueType.Object.name())){
+                if (Objects.equals(itemType, ParamValueType.Object.name())) {
                     List<String> subRequirdList =
                             Optional.of(item).map(json -> JSON.parseArray(JSON.toJSONString(json.getJSONArray(
-                                    "required")), String.class)).orElseGet(Collections::emptyList);
+                                    REQUIRED_KEY)), String.class)).orElseGet(Collections::emptyList);
                     JSONObject subProperties = item.getJSONObject(PROPERTIES_KEY);
                     List<ApiRequestVariable> apiRequestVariables = convertProperties(subProperties, subRequirdList);
                     apiRequestVariable.setChildren(apiRequestVariables);

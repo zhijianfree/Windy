@@ -2,19 +2,19 @@ package com.zj.service.service;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.zj.common.auth.IAuthService;
+import com.zj.common.adapter.auth.IAuthService;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.git.GitAccessInfo;
-import com.zj.common.git.IGitRepositoryHandler;
-import com.zj.common.model.ServiceConfig;
-import com.zj.common.model.PageSize;
+import com.zj.common.adapter.git.GitAccessInfo;
+import com.zj.common.adapter.git.IGitRepositoryHandler;
+import com.zj.common.entity.pipeline.ServiceConfig;
+import com.zj.common.entity.dto.PageSize;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.domain.entity.dto.auth.UserDto;
-import com.zj.domain.entity.dto.feature.TestCaseDto;
-import com.zj.domain.entity.dto.pipeline.PipelineDto;
-import com.zj.domain.entity.dto.service.MicroserviceDto;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.domain.entity.bo.auth.UserBO;
+import com.zj.domain.entity.bo.feature.TestCaseBO;
+import com.zj.domain.entity.bo.pipeline.PipelineDto;
+import com.zj.domain.entity.bo.service.MicroserviceDto;
 import com.zj.domain.entity.po.service.ResourceMember;
 import com.zj.domain.repository.demand.IMemberRepository;
 import com.zj.domain.repository.feature.ITestCaseRepository;
@@ -22,11 +22,8 @@ import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.service.entity.ServiceDto;
-import com.zj.domain.entity.dto.service.ResourceMemberDto;
+import com.zj.domain.entity.bo.service.ResourceMemberDto;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
@@ -140,7 +137,7 @@ public class MicroserviceService {
             throw new ApiException(ErrorCode.SERVICE_EXIST_PIPELINE);
         }
 
-        List<TestCaseDto> serviceCases = testCaseRepository.getServiceCases(serviceId);
+        List<TestCaseBO> serviceCases = testCaseRepository.getServiceCases(serviceId);
         if (CollectionUtils.isNotEmpty(serviceCases)) {
             throw new ApiException(ErrorCode.SERVICE_EXIST_FEATURE);
         }
@@ -162,7 +159,7 @@ public class MicroserviceService {
                         Collectors.toList());
     }
 
-    public List<UserDto> queryServiceMembers(String serviceId) {
+    public List<UserBO> queryServiceMembers(String serviceId) {
         return memberRepository.queryResourceMembers(serviceId);
     }
 

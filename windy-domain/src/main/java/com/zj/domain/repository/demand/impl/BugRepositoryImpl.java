@@ -5,10 +5,10 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.common.model.PageSize;
+import com.zj.common.entity.dto.PageSize;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.demand.BugDTO;
-import com.zj.domain.entity.dto.demand.BugQuery;
+import com.zj.domain.entity.bo.demand.BugBO;
+import com.zj.domain.entity.bo.demand.BugQueryBO;
 import com.zj.domain.entity.enums.BugStatus;
 import com.zj.domain.entity.po.demand.Bug;
 import com.zj.domain.mapper.demand.BugMapper;
@@ -26,44 +26,44 @@ import java.util.stream.Collectors;
 public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IBugRepository {
 
     @Override
-    public PageSize<BugDTO> getUserBugs(BugQuery bugQuery) {
-        LambdaQueryWrapper<Bug> wrapper = Wrappers.lambdaQuery(Bug.class).eq(Bug::getProposer, bugQuery.getUserId());
-        Optional.ofNullable(bugQuery.getStatus()).ifPresent(status -> wrapper.eq(Bug::getStatus, status));
-        if (StringUtils.isNotBlank(bugQuery.getIterationId())){
-            wrapper.eq(Bug::getIterationId, bugQuery.getIterationId());
+    public PageSize<BugBO> getUserBugs(BugQueryBO bugQueryBO) {
+        LambdaQueryWrapper<Bug> wrapper = Wrappers.lambdaQuery(Bug.class).eq(Bug::getProposer, bugQueryBO.getUserId());
+        Optional.ofNullable(bugQueryBO.getStatus()).ifPresent(status -> wrapper.eq(Bug::getStatus, status));
+        if (StringUtils.isNotBlank(bugQueryBO.getIterationId())){
+            wrapper.eq(Bug::getIterationId, bugQueryBO.getIterationId());
         }
-        if (StringUtils.isNotBlank(bugQuery.getSpaceId())){
-            wrapper.eq(Bug::getSpaceId, bugQuery.getSpaceId());
+        if (StringUtils.isNotBlank(bugQueryBO.getSpaceId())){
+            wrapper.eq(Bug::getSpaceId, bugQueryBO.getSpaceId());
         }
-        if (StringUtils.isNotBlank(bugQuery.getName())){
-            wrapper.eq(Bug::getBugName, bugQuery.getName());
+        if (StringUtils.isNotBlank(bugQueryBO.getName())){
+            wrapper.eq(Bug::getBugName, bugQueryBO.getName());
         }
         wrapper.orderByDesc(Bug::getCreateTime);
-        IPage<Bug> pageQuery = new Page<>(bugQuery.getPage(), bugQuery.getSize());
+        IPage<Bug> pageQuery = new Page<>(bugQueryBO.getPage(), bugQueryBO.getSize());
         return exchangePageSize(pageQuery, wrapper);
     }
 
     @Override
-    public PageSize<BugDTO> getUserRelatedBugs(BugQuery bugQuery) {
-        LambdaQueryWrapper<Bug> wrapper = Wrappers.lambdaQuery(Bug.class).eq(Bug::getAcceptor, bugQuery.getUserId());
-        Optional.ofNullable(bugQuery.getStatus()).ifPresent(status -> wrapper.eq(Bug::getStatus, status));
-        IPage<Bug> pageQuery = new Page<>(bugQuery.getPage(), bugQuery.getSize());
+    public PageSize<BugBO> getUserRelatedBugs(BugQueryBO bugQueryBO) {
+        LambdaQueryWrapper<Bug> wrapper = Wrappers.lambdaQuery(Bug.class).eq(Bug::getAcceptor, bugQueryBO.getUserId());
+        Optional.ofNullable(bugQueryBO.getStatus()).ifPresent(status -> wrapper.eq(Bug::getStatus, status));
+        IPage<Bug> pageQuery = new Page<>(bugQueryBO.getPage(), bugQueryBO.getSize());
         return exchangePageSize(pageQuery, wrapper);
     }
 
-    private PageSize<BugDTO> exchangePageSize(IPage<Bug> pageQuery, LambdaQueryWrapper<Bug> wrapper) {
+    private PageSize<BugBO> exchangePageSize(IPage<Bug> pageQuery, LambdaQueryWrapper<Bug> wrapper) {
         IPage<Bug> bugPage = page(pageQuery, wrapper);
-        PageSize<BugDTO> pageSize = new PageSize<>();
+        PageSize<BugBO> pageSize = new PageSize<>();
         pageSize.setTotal(bugPage.getTotal());
         if (CollectionUtils.isNotEmpty(bugPage.getRecords())) {
-            pageSize.setData(OrikaUtil.convertList(bugPage.getRecords(), BugDTO.class));
+            pageSize.setData(OrikaUtil.convertList(bugPage.getRecords(), BugBO.class));
         }
         return pageSize;
     }
 
     @Override
-    public boolean createBug(BugDTO bugDTO) {
-        Bug bug = OrikaUtil.convert(bugDTO, Bug.class);
+    public boolean createBug(BugBO bugBO) {
+        Bug bug = OrikaUtil.convert(bugBO, Bug.class);
         bug.setStatus(BugStatus.NOT_HANDLE.getType());
         bug.setCreateTime(System.currentTimeMillis());
         bug.setUpdateTime(System.currentTimeMillis());
@@ -71,19 +71,19 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
     }
 
     @Override
-    public boolean updateBug(BugDTO bugDTO) {
-        Bug bug = OrikaUtil.convert(bugDTO, Bug.class);
+    public boolean updateBug(BugBO bugBO) {
+        Bug bug = OrikaUtil.convert(bugBO, Bug.class);
         bug.setUpdateTime(System.currentTimeMillis());
         return update(bug, Wrappers.lambdaUpdate(Bug.class).eq(Bug::getBugId, bug.getBugId()));
     }
 
     @Override
-    public BugDTO getBug(String bugId) {
+    public BugBO getBug(String bugId) {
         Bug bug = getOne(Wrappers.lambdaQuery(Bug.class).eq(Bug::getBugId, bugId));
         if (Objects.isNull(bug)) {
             return null;
         }
-        return OrikaUtil.convert(bug, BugDTO.class);
+        return OrikaUtil.convert(bug, BugBO.class);
     }
 
     @Override
@@ -97,30 +97,30 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
     }
 
     @Override
-    public List<BugDTO> getIterationBugs(String iterationId) {
+    public List<BugBO> getIterationBugs(String iterationId) {
         List<Bug> list = list(Wrappers.lambdaQuery(Bug.class).eq(Bug::getIterationId, iterationId));
-        return OrikaUtil.convertList(list, BugDTO.class);
+        return OrikaUtil.convertList(list, BugBO.class);
     }
 
     @Override
-    public List<BugDTO> getBugsByName(String queryName) {
+    public List<BugBO> getBugsByName(String queryName) {
         List<Bug> list = list(Wrappers.lambdaQuery(Bug.class).like(Bug::getBugName, queryName));
-        return OrikaUtil.convertList(list, BugDTO.class);
+        return OrikaUtil.convertList(list, BugBO.class);
     }
 
     @Override
-    public List<BugDTO> getSpaceNotHandleBugs(String spaceId) {
+    public List<BugBO> getSpaceNotHandleBugs(String spaceId) {
         List<Bug> list = list(Wrappers.lambdaQuery(Bug.class).eq(Bug::getSpaceId, spaceId)
                 .in(Bug::getStatus, BugStatus.getNotHandleBugs().stream().map(BugStatus::getType)
                         .collect(Collectors.toList())));
-        return OrikaUtil.convertList(list, BugDTO.class);
+        return OrikaUtil.convertList(list, BugBO.class);
     }
 
     @Override
-    public List<BugDTO> getIterationNotHandleBugs(String iterationId) {
+    public List<BugBO> getIterationNotHandleBugs(String iterationId) {
         List<Bug> list = list(Wrappers.lambdaQuery(Bug.class).eq(Bug::getIterationId, iterationId)
                 .in(Bug::getStatus, BugStatus.getNotHandleBugs().stream().map(BugStatus::getType)
                         .collect(Collectors.toList())));
-        return OrikaUtil.convertList(list, BugDTO.class);
+        return OrikaUtil.convertList(list, BugBO.class);
     }
 }

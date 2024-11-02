@@ -2,9 +2,9 @@ package com.zj.master.notify.event;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.NotifyType;
-import com.zj.common.model.ResultEvent;
-import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
-import com.zj.domain.entity.dto.feature.FeatureInfoDto;
+import com.zj.common.entity.dto.ResultEvent;
+import com.zj.domain.entity.bo.feature.FeatureHistoryBO;
+import com.zj.domain.entity.bo.feature.FeatureInfoBO;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
@@ -42,15 +42,15 @@ public class CreateFeatureHistoryEvent implements INotifyEvent {
   public boolean handle(ResultEvent resultEvent) {
     log.info("receive feature history create event id = {} event={}", resultEvent.getExecuteId(),
         JSON.toJSONString(resultEvent.getParams()));
-    FeatureHistoryDto featureHistoryDto = JSON.parseObject(
-        JSON.toJSONString(resultEvent.getParams()), FeatureHistoryDto.class);
-    FeatureInfoDto feature = featureRepository.getFeatureById(featureHistoryDto.getFeatureId());
-    Optional.ofNullable(feature).ifPresent(f -> featureHistoryDto.setFeatureName(f.getFeatureName()));
+    FeatureHistoryBO featureHistoryBO = JSON.parseObject(
+        JSON.toJSONString(resultEvent.getParams()), FeatureHistoryBO.class);
+    FeatureInfoBO feature = featureRepository.getFeatureById(featureHistoryBO.getFeatureId());
+    Optional.ofNullable(feature).ifPresent(f -> featureHistoryBO.setFeatureName(f.getFeatureName()));
 
     subDispatchLogRepository.updateSubLogClientIp(resultEvent.getLogId(),
-        featureHistoryDto.getFeatureId(), resultEvent.getClientIp());
+        featureHistoryBO.getFeatureId(), resultEvent.getClientIp());
 
-    featureHistoryDto.setExecuteStatus(resultEvent.getStatus().getType());
-    return featureHistoryRepository.saveHistory(featureHistoryDto);
+    featureHistoryBO.setExecuteStatus(resultEvent.getStatus().getType());
+    return featureHistoryRepository.saveHistory(featureHistoryBO);
   }
 }

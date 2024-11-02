@@ -1,9 +1,9 @@
 package com.zj.pipeline.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.ResponseMeta;
-import com.zj.domain.entity.dto.pipeline.PipelineExecuteInfo;
-import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
+import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.domain.entity.bo.pipeline.PipelineExecuteInfo;
+import com.zj.domain.entity.bo.pipeline.PipelineHistoryDto;
 import com.zj.pipeline.service.PipelineHistoryService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;

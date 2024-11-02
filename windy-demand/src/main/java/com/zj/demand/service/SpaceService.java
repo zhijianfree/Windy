@@ -1,12 +1,12 @@
 package com.zj.demand.service;
 
-import com.zj.common.auth.IAuthService;
+import com.zj.common.adapter.auth.IAuthService;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.domain.entity.dto.demand.DemandDTO;
-import com.zj.domain.entity.dto.demand.IterationDTO;
-import com.zj.domain.entity.dto.demand.SpaceDTO;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.domain.entity.bo.demand.DemandBO;
+import com.zj.domain.entity.bo.demand.IterationBO;
+import com.zj.domain.entity.bo.demand.SpaceBO;
 import com.zj.domain.repository.demand.IBugRepository;
 import com.zj.domain.repository.demand.IDemandRepository;
 import com.zj.domain.repository.demand.ISpaceRepository;
@@ -40,34 +40,34 @@ public class SpaceService {
         this.authService = authService;
     }
 
-    public List<SpaceDTO> getSpaceList() {
+    public List<SpaceBO> getSpaceList() {
         return spaceRepository.getSpaceList();
     }
 
-    public SpaceDTO createSpace(SpaceDTO spaceDTO) {
-        spaceDTO.setUserId(authService.getCurrentUserId());
-        spaceDTO.setSpaceId(uniqueIdService.getUniqueId());
-        return spaceRepository.createSpace(spaceDTO);
+    public SpaceBO createSpace(SpaceBO spaceBO) {
+        spaceBO.setUserId(authService.getCurrentUserId());
+        spaceBO.setSpaceId(uniqueIdService.getUniqueId());
+        return spaceRepository.createSpace(spaceBO);
     }
 
-    public boolean updateSpace(String spaceId, SpaceDTO spaceDTO) {
-        SpaceDTO space = spaceRepository.getSpace(spaceId);
+    public boolean updateSpace(String spaceId, SpaceBO spaceBO) {
+        SpaceBO space = spaceRepository.getSpace(spaceId);
         if (Objects.isNull(space)) {
             log.info("space not exist = {}", spaceId);
             throw new ApiException(ErrorCode.SPACE_NOT_EXIST);
         }
-        spaceDTO.setSpaceId(spaceId);
-        return spaceRepository.updateSpace(spaceDTO);
+        spaceBO.setSpaceId(spaceId);
+        return spaceRepository.updateSpace(spaceBO);
     }
 
     public boolean deleteSpace(String spaceId) {
-        List<IterationDTO> spaceIterationList = iterationRepository.getSpaceNotHandleIterations(spaceId);
+        List<IterationBO> spaceIterationList = iterationRepository.getSpaceNotHandleIterations(spaceId);
         if (CollectionUtils.isNotEmpty(spaceIterationList)) {
             log.info("space has iterations can not delete spaceId={}", spaceId);
             throw new ApiException(ErrorCode.SPACE_HAS_NOT_COMPLETE_ITERATION);
         }
 
-        List<DemandDTO> notHandleDemands = demandRepository.getSpaceNotHandleDemands(spaceId);
+        List<DemandBO> notHandleDemands = demandRepository.getSpaceNotHandleDemands(spaceId);
         if (CollectionUtils.isNotEmpty(notHandleDemands)) {
             log.info("space has demands can not delete spaceId={}", spaceId);
             throw new ApiException(ErrorCode.SPACE_HAS_NOT_COMPLETE_DEMAND);
@@ -81,7 +81,7 @@ public class SpaceService {
         return spaceRepository.deleteSpace(spaceId);
     }
 
-    public SpaceDTO getSpace(String spaceId) {
+    public SpaceBO getSpace(String spaceId) {
         return spaceRepository.getSpace(spaceId);
     }
 }

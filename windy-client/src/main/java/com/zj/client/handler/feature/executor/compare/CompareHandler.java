@@ -3,8 +3,9 @@ package com.zj.client.handler.feature.executor.compare;
 import com.alibaba.fastjson.JSON;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.client.handler.feature.executor.compare.operator.CompareFactory;
+import com.zj.common.entity.feature.CompareDefine;
+import com.zj.common.entity.feature.CompareResult;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.feature.CompareDefine;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -89,7 +90,7 @@ public class CompareHandler {
 
         compareDefines.stream().filter(
                 compare -> StringUtils.isNoneBlank(compare.getCompareKey()) && StringUtils.isNoneBlank(
-                        compare.getCompareKey())).forEach(compareDefine -> {
+                        compare.getExpectValue())).forEach(compareDefine -> {
             String key = compareDefine.getCompareKey();
             if (Objects.equals(key, RESPONSE_CODE)) {
                 compareDefine.setResponseValue(String.valueOf(executeDetailVo.responseStatus()));

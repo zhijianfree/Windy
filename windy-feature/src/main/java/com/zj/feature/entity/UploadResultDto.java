@@ -2,7 +2,7 @@ package com.zj.feature.entity;
 
 import java.util.List;
 
-import com.zj.common.feature.ExecuteTemplateVo;
+import com.zj.common.entity.feature.ExecuteTemplateVo;
 import lombok.Data;
 
 /**

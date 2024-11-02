@@ -1,17 +1,17 @@
 package com.zj.demand.service;
 
-import com.zj.common.auth.IAuthService;
-import com.zj.common.auth.UserDetail;
+import com.zj.common.adapter.auth.IAuthService;
+import com.zj.common.adapter.auth.UserDetail;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.PageSize;
+import com.zj.common.entity.dto.PageSize;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.common.uuid.UniqueIdService;
+import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.demand.entity.DemandDetail;
-import com.zj.domain.entity.dto.auth.UserDto;
-import com.zj.domain.entity.dto.demand.BusinessStatusDto;
-import com.zj.domain.entity.dto.demand.DemandDTO;
-import com.zj.domain.entity.dto.demand.DemandQuery;
+import com.zj.domain.entity.bo.auth.UserBO;
+import com.zj.domain.entity.bo.demand.BusinessStatusBO;
+import com.zj.domain.entity.bo.demand.DemandBO;
+import com.zj.domain.entity.bo.demand.DemandQueryBO;
 import com.zj.domain.repository.auth.IUserRepository;
 import com.zj.domain.repository.demand.IBusinessStatusRepository;
 import com.zj.domain.repository.demand.IDemandRepository;
@@ -41,22 +41,22 @@ public class DemandService {
         this.businessStatusRepository = businessStatusRepository;
     }
 
-    public DemandDTO createDemand(DemandDTO demandDTO) {
-        demandDTO.setDemandId(uniqueIdService.getUniqueId());
+    public DemandBO createDemand(DemandBO demandBO) {
+        demandBO.setDemandId(uniqueIdService.getUniqueId());
         UserDetail userDetail = authService.getUserDetail();
-        demandDTO.setProposer(userDetail.getUserId());
-        demandDTO.setProposerName(Optional.ofNullable(userDetail.getNickName()).orElse(userDetail.getUserName()));
-        boolean result = demandRepository.createDemand(demandDTO);
+        demandBO.setProposer(userDetail.getUserId());
+        demandBO.setProposerName(Optional.ofNullable(userDetail.getNickName()).orElse(userDetail.getUserName()));
+        boolean result = demandRepository.createDemand(demandBO);
         if (!result) {
-            log.info("create demand error ={}", demandDTO.getDemandName());
+            log.info("create demand error ={}", demandBO.getDemandName());
             throw new ApiException(ErrorCode.DEMAND_CREATE_ERROR);
         }
-        return demandDTO;
+        return demandBO;
     }
 
-    public PageSize<DemandDTO> getDemandPage(Integer page, Integer size, String name, Integer status, String spaceId, String iterationId) {
+    public PageSize<DemandBO> getDemandPage(Integer page, Integer size, String name, Integer status, String spaceId, String iterationId) {
         String currentUserId = authService.getCurrentUserId();
-        DemandQuery demandQuery = DemandQuery.builder()
+        DemandQueryBO demandQueryBO = DemandQueryBO.builder()
                 .pageSize(size)
                 .page(page)
                 .name(name)
@@ -64,30 +64,30 @@ public class DemandService {
                 .spaceId(spaceId)
                 .iterationId(iterationId)
                 .creator(currentUserId).build();
-        return demandRepository.getDemandPage(demandQuery);
+        return demandRepository.getDemandPage(demandQueryBO);
     }
 
-    public PageSize<DemandDTO> getUserDemands(Integer page, Integer size, Integer status) {
+    public PageSize<DemandBO> getUserDemands(Integer page, Integer size, Integer status) {
         String currentUserId = authService.getCurrentUserId();
-        DemandQuery demandQuery =
-                DemandQuery.builder().pageSize(size).page(page).status(status).creator(currentUserId).build();
-        return demandRepository.getDemandPage(demandQuery);
+        DemandQueryBO demandQueryBO =
+                DemandQueryBO.builder().pageSize(size).page(page).status(status).creator(currentUserId).build();
+        return demandRepository.getDemandPage(demandQueryBO);
     }
 
-    public boolean updateDemand(DemandDTO demandDTO) {
-        return demandRepository.updateDemand(demandDTO);
+    public boolean updateDemand(DemandBO demandBO) {
+        return demandRepository.updateDemand(demandBO);
     }
 
     public DemandDetail getDemand(String demandId) {
-        DemandDTO demand = demandRepository.getDemand(demandId);
+        DemandBO demand = demandRepository.getDemand(demandId);
         if (Objects.isNull(demand)) {
             log.info("can not find demand ={}", demandId);
             throw new ApiException(ErrorCode.DEMAND_NOT_EXIST);
         }
         DemandDetail demandDetail = OrikaUtil.convert(demand, DemandDetail.class);
-        UserDto proposer = userRepository.getUserByUserId(demand.getProposer());
+        UserBO proposer = userRepository.getUserByUserId(demand.getProposer());
         Optional.ofNullable(proposer).ifPresent(p -> demandDetail.setProposerName(p.getUserName()));
-        UserDto acceptor = userRepository.getUserByUserId(demand.getAcceptor());
+        UserBO acceptor = userRepository.getUserByUserId(demand.getAcceptor());
         Optional.ofNullable(acceptor).ifPresent(a -> demandDetail.setAcceptorName(a.getUserName()));
         return demandDetail;
     }
@@ -96,21 +96,21 @@ public class DemandService {
         return demandRepository.deleteDemand(demandId);
     }
 
-    public PageSize<DemandDTO> getRelatedDemands(Integer page, Integer size) {
+    public PageSize<DemandBO> getRelatedDemands(Integer page, Integer size) {
         String currentUserId = authService.getCurrentUserId();
         return demandRepository.getRelatedDemands(currentUserId, page, size);
     }
 
-    public List<BusinessStatusDto> getDemandStatuses() {
+    public List<BusinessStatusBO> getDemandStatuses() {
         return businessStatusRepository.getDemandStatuses();
     }
 
 
-    public List<DemandDTO> getIterationDemands(String iterationId) {
+    public List<DemandBO> getIterationDemands(String iterationId) {
         return demandRepository.getIterationDemand(iterationId);
     }
 
-    public List<BusinessStatusDto> getDemandTags() {
+    public List<BusinessStatusBO> getDemandTags() {
         return businessStatusRepository.getDemandTags();
     }
 }

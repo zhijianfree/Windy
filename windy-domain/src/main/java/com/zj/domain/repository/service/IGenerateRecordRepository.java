@@ -1,6 +1,6 @@
 package com.zj.domain.repository.service;
 
-import com.zj.domain.entity.dto.service.GenerateRecordDto;
+import com.zj.domain.entity.bo.service.GenerateRecordDto;
 import java.util.List;
 
 public interface IGenerateRecordRepository {

@@ -1,9 +1,9 @@
 package com.zj.pipeline.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.ResponseMeta;
-import com.zj.domain.entity.dto.pipeline.CodeChangeDto;
-import com.zj.domain.entity.dto.pipeline.RelationDemandBug;
+import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.domain.entity.bo.pipeline.CodeChangeDto;
+import com.zj.domain.entity.bo.pipeline.RelationDemandBug;
 import com.zj.pipeline.service.CodeChangeService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;

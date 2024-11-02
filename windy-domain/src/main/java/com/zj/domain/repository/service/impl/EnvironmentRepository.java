@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.service.DeployEnvironmentDto;
+import com.zj.domain.entity.bo.service.DeployEnvironmentDto;
 import com.zj.domain.entity.enums.SourceStatus;
 import com.zj.domain.entity.po.service.DeployEnvironment;
 import com.zj.domain.mapper.service.EnvironmentMapper;

@@ -1,6 +1,6 @@
 package com.zj.domain.repository.pipeline;
 
-import com.zj.domain.entity.dto.pipeline.CodeChangeDto;
+import com.zj.domain.entity.bo.pipeline.CodeChangeDto;
 import java.util.List;
 
 /**

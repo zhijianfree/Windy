@@ -1,6 +1,6 @@
 package com.zj.client.config;
 
-import com.zj.common.monitor.pool.WindyThreadPool;
+import com.zj.common.adapter.pool.WindyThreadPool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

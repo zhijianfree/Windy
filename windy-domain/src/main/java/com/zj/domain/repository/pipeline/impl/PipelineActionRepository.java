@@ -1,18 +1,17 @@
 package com.zj.domain.repository.pipeline.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.common.model.PageSize;
+import com.zj.common.entity.dto.PageSize;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.pipeline.ActionParam;
-import com.zj.domain.entity.dto.pipeline.CompareResult;
-import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
+import com.zj.domain.entity.bo.pipeline.ActionParam;
+import com.zj.domain.entity.bo.pipeline.CompareResult;
+import com.zj.domain.entity.bo.pipeline.PipelineActionDto;
 import com.zj.domain.entity.po.pipeline.PipelineAction;
 import com.zj.domain.mapper.pipeline.PipelineActionMapper;
 import com.zj.domain.repository.pipeline.IPipelineActionRepository;
@@ -54,7 +53,7 @@ public class PipelineActionRepository extends
 
     private PipelineActionDto convertActionDto(PipelineAction action) {
         PipelineActionDto actionDto = OrikaUtil.convert(action, PipelineActionDto.class);
-        actionDto.setHeaders(JSONObject.parseObject(action.getHeaders(), new TypeReference<Map<String, String>>() {
+        actionDto.setHeaders(JSON.parseObject(action.getHeaders(), new TypeReference<Map<String, String>>() {
         }));
         actionDto.setCompareResults(JSON.parseArray(action.getResult(), CompareResult.class));
         actionDto.setParamList(JSON.parseArray(action.getParamDetail(), ActionParam.class));

@@ -3,7 +3,7 @@ package com.zj.domain.repository.log.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.log.SubDispatchLogDto;
+import com.zj.domain.entity.bo.log.SubDispatchLogDto;
 import com.zj.domain.entity.po.log.SubDispatchLog;
 import com.zj.domain.mapper.log.SubTaskLogMapper;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;

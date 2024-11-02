@@ -1,29 +1,29 @@
 package com.zj.domain.repository.auth;
 
-import com.zj.common.model.PageSize;
-import com.zj.domain.entity.dto.auth.ResourceDto;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.domain.entity.bo.auth.ResourceBO;
 
 import java.util.List;
 
 public interface IResourceRepository {
-    List<ResourceDto> getResourceByUserId(String userId);
-    List<ResourceDto> getMenuByUserId(String userId);
+    List<ResourceBO> getResourceByUserId(String userId);
+    List<ResourceBO> getMenuByUserId(String userId);
 
-    PageSize<ResourceDto> getResources(Integer page, Integer size);
+    PageSize<ResourceBO> getResources(Integer page, Integer size);
 
-    List<ResourceDto> getAllResources();
+    List<ResourceBO> getAllResources();
 
-    Boolean createResource(ResourceDto resourceDto);
+    Boolean createResource(ResourceBO resourceBO);
 
-    Boolean updateResource(ResourceDto resourceDto);
+    Boolean updateResource(ResourceBO resourceBO);
 
     Boolean deleteResource(String resourceId);
 
-    ResourceDto getResource(String resourceId);
+    ResourceBO getResource(String resourceId);
 
     boolean resourceBind(String relationId, List<String> resourceIds);
 
-    List<ResourceDto> getRoleResources(String roleId);
+    List<ResourceBO> getRoleResources(String roleId);
 
     boolean isResourceBind(String resourceId);
 

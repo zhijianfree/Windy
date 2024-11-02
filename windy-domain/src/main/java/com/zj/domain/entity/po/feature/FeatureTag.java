@@ -9,9 +9,18 @@ import lombok.Data;
 @Data
 public class FeatureTag {
 
+  /**
+   * 用例ID
+   */
   private String featureId;
 
+  /**
+   * 标签值
+   */
   private String tagValue;
 
+  /**
+   * 创建时间
+   */
   private Long createTime;
 }

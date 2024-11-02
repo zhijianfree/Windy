@@ -1,6 +1,6 @@
 package com.zj.master.dispatch.task;
 
-import com.zj.domain.entity.dto.feature.ExecutePointDto;
+import com.zj.domain.entity.bo.feature.ExecutePointBO;
 import com.zj.master.entity.vo.BaseDispatch;
 import lombok.Data;
 
@@ -17,7 +17,7 @@ public class FeatureExecuteParam extends BaseDispatch {
    * 用例的执行点列表，要将这个参数传递过来，
    * 这样设计就可以保证client端最轻量化，不连接数据库，只做任务执行
    * */
-  private List<ExecutePointDto> executePointList;
+  private List<ExecutePointBO> executePointList;
   /**
    * 用例ID
    * */

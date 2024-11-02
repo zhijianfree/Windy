@@ -3,8 +3,8 @@ package com.zj.master.notify.event;
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.NotifyType;
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.model.ResultEvent;
-import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
+import com.zj.common.entity.dto.ResultEvent;
+import com.zj.domain.entity.bo.feature.FeatureHistoryBO;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.master.dispatch.task.FeatureExecuteProxy;
@@ -42,8 +42,8 @@ public class UpdateFeatureHistoryEvent implements INotifyEvent {
   public boolean handle(ResultEvent resultEvent) {
     log.info("receive update feature history event id = {} event={}", resultEvent.getExecuteId(),
         resultEvent.getExecuteType());
-    FeatureHistoryDto history = JSON.parseObject(JSON.toJSONString(resultEvent.getParams()), FeatureHistoryDto.class);
-    FeatureHistoryDto featureHistory = featureHistoryRepository.getFeatureHistory(
+    FeatureHistoryBO history = JSON.parseObject(JSON.toJSONString(resultEvent.getParams()), FeatureHistoryBO.class);
+    FeatureHistoryBO featureHistory = featureHistoryRepository.getFeatureHistory(
         history.getHistoryId());
     if (ProcessStatus.isCompleteStatus(featureHistory.getExecuteStatus())) {
       log.info("feature history status completed,not update historyId={}", history.getHistoryId());

@@ -3,7 +3,7 @@ package com.zj.domain.repository.service.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.service.GenerateRecordDto;
+import com.zj.domain.entity.bo.service.GenerateRecordDto;
 import com.zj.domain.entity.po.service.GenerateRecord;
 import com.zj.domain.mapper.service.GenerateRecordMapper;
 import com.zj.domain.repository.service.IGenerateRecordRepository;

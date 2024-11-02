@@ -1,9 +1,9 @@
 package com.zj.master.notify.event;
 
 import com.zj.common.enums.NotifyType;
-import com.zj.common.model.ResultEvent;
+import com.zj.common.entity.dto.ResultEvent;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.service.GenerateRecordDto;
+import com.zj.domain.entity.bo.service.GenerateRecordDto;
 import com.zj.domain.repository.service.IGenerateRecordRepository;
 import java.util.Objects;
 

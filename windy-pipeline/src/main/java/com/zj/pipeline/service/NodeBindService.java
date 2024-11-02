@@ -1,11 +1,10 @@
 package com.zj.pipeline.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.common.model.PageSize;
-import com.zj.domain.entity.dto.pipeline.NodeBindDto;
-import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
-import com.zj.domain.entity.po.pipeline.PipelineAction;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.domain.entity.bo.pipeline.NodeBindDto;
+import com.zj.domain.entity.bo.pipeline.PipelineActionDto;
 import com.zj.domain.repository.pipeline.INodeBindRepository;
 import java.util.List;
 import java.util.stream.Collectors;

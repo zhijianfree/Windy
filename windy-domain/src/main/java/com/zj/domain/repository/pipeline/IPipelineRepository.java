@@ -1,6 +1,6 @@
 package com.zj.domain.repository.pipeline;
 
-import com.zj.domain.entity.dto.pipeline.PipelineDto;
+import com.zj.domain.entity.bo.pipeline.PipelineDto;
 import java.util.List;
 
 /**

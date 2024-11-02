@@ -3,9 +3,9 @@ package com.zj.pipeline.git.hook;
 import com.alibaba.fastjson.JSON;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.domain.entity.dto.pipeline.BindBranchDto;
-import com.zj.domain.entity.dto.pipeline.PipelineDto;
-import com.zj.domain.entity.dto.service.MicroserviceDto;
+import com.zj.domain.entity.bo.pipeline.BindBranchDto;
+import com.zj.domain.entity.bo.pipeline.PipelineDto;
+import com.zj.domain.entity.bo.service.MicroserviceDto;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.pipeline.entity.enums.PipelineExecuteType;
@@ -33,7 +33,7 @@ public abstract class AbstractWebhook implements IGitWebhook {
   private final IBindBranchRepository gitBindRepository;
   private final Executor executorService;
 
-  public AbstractWebhook(IMicroServiceRepository serviceRepository, PipelineService pipelineService,
+  protected AbstractWebhook(IMicroServiceRepository serviceRepository, PipelineService pipelineService,
       Executor executorService, IBindBranchRepository gitBindRepository) {
     this.serviceRepository = serviceRepository;
     this.pipelineService = pipelineService;

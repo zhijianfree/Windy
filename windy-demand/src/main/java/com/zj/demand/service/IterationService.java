@@ -1,16 +1,16 @@
 package com.zj.demand.service;
 
-import com.zj.common.auth.IAuthService;
+import com.zj.common.adapter.auth.IAuthService;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.uuid.UniqueIdService;
+import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.demand.entity.IterationStatistic;
-import com.zj.domain.entity.dto.auth.UserDto;
-import com.zj.domain.entity.dto.demand.BugDTO;
-import com.zj.domain.entity.dto.demand.BusinessStatusDto;
-import com.zj.domain.entity.dto.demand.DemandDTO;
-import com.zj.domain.entity.dto.demand.IterationDTO;
-import com.zj.domain.entity.dto.service.ResourceMemberDto;
+import com.zj.domain.entity.bo.auth.UserBO;
+import com.zj.domain.entity.bo.demand.BugBO;
+import com.zj.domain.entity.bo.demand.BusinessStatusBO;
+import com.zj.domain.entity.bo.demand.DemandBO;
+import com.zj.domain.entity.bo.demand.IterationBO;
+import com.zj.domain.entity.bo.service.ResourceMemberDto;
 import com.zj.domain.entity.po.service.ResourceMember;
 import com.zj.domain.repository.demand.IBugRepository;
 import com.zj.domain.repository.demand.IBusinessStatusRepository;
@@ -52,7 +52,7 @@ public class IterationService {
         this.businessStatusRepository = businessStatusRepository;
     }
 
-    public List<IterationDTO> getSpaceIterationList(String spaceId) {
+    public List<IterationBO> getSpaceIterationList(String spaceId) {
         String currentUserId = authService.getCurrentUserId();
         List<ResourceMember> resourceMembers = memberRepository.getResourceMembersByUser(currentUserId);
         if (CollectionUtils.isEmpty(resourceMembers)) {
@@ -62,33 +62,33 @@ public class IterationService {
         return iterationRepository.getIterationList(spaceId, iterationIds);
     }
 
-    public IterationDTO createIteration(IterationDTO iterationDTO) {
-        iterationDTO.setIterationId(uniqueIdService.getUniqueId());
-        iterationDTO.setUserId(authService.getCurrentUserId());
-        return iterationRepository.createIteration(iterationDTO);
+    public IterationBO createIteration(IterationBO iterationBO) {
+        iterationBO.setIterationId(uniqueIdService.getUniqueId());
+        iterationBO.setUserId(authService.getCurrentUserId());
+        return iterationRepository.createIteration(iterationBO);
     }
 
-    public Boolean updateIteration(String iterationId, IterationDTO iterationDTO) {
-        IterationDTO iteration = getIteration(iterationId);
+    public Boolean updateIteration(String iterationId, IterationBO iterationBO) {
+        IterationBO iteration = getIteration(iterationId);
         if (Objects.isNull(iteration)) {
             log.info("iteration is not exist={}", iterationId);
             throw new ApiException(ErrorCode.ITERATION_NOT_EXIST);
         }
 
-        if(Objects.nonNull(iterationDTO.getStatus()) && iterationDTO.getStatus() < iteration.getStatus()){
-            log.info("iteration status update error status= {}", iterationDTO.getStatus());
+        if(Objects.nonNull(iterationBO.getStatus()) && iterationBO.getStatus() < iteration.getStatus()){
+            log.info("iteration status update error status= {}", iterationBO.getStatus());
             throw new ApiException(ErrorCode.UPDATE_ITERATION_STATUS_ERROR);
         }
-        return iterationRepository.updateIteration(iterationDTO);
+        return iterationRepository.updateIteration(iterationBO);
     }
 
     public boolean deleteIteration(String iterationId) {
-        List<BugDTO> notHandleBugs = bugRepository.getIterationNotHandleBugs(iterationId);
+        List<BugBO> notHandleBugs = bugRepository.getIterationNotHandleBugs(iterationId);
         if (CollectionUtils.isNotEmpty(notHandleBugs)) {
             log.info("iteration has bugs can not delete iteration={}", iterationId);
             throw new ApiException(ErrorCode.ITERATION_HAS_NOT_COMPLETE_BUG);
         }
-        List<DemandDTO> notHandleDemands = demandRepository.getIterationNotHandleDemands(iterationId);
+        List<DemandBO> notHandleDemands = demandRepository.getIterationNotHandleDemands(iterationId);
         if (CollectionUtils.isNotEmpty(notHandleDemands)) {
             log.info("iteration has demands can not delete iteration={}", iterationId);
             throw new ApiException(ErrorCode.ITERATION_HAS_NOT_COMPLETE_DEMAND);
@@ -96,7 +96,7 @@ public class IterationService {
         return iterationRepository.deleteIteration(iterationId);
     }
 
-    public IterationDTO getIteration(String iterationId) {
+    public IterationBO getIteration(String iterationId) {
         return iterationRepository.getIteration(iterationId);
     }
 
@@ -107,7 +107,7 @@ public class IterationService {
         return new IterationStatistic(demandCount, bugCount, workCount, 0);
     }
 
-    public List<UserDto> queryIterationMembers(String iterationId) {
+    public List<UserBO> queryIterationMembers(String iterationId) {
         return memberRepository.queryResourceMembers(iterationId);
     }
 
@@ -119,7 +119,7 @@ public class IterationService {
         return memberRepository.deleteResourceMember(iterationId, userId);
     }
 
-    public List<BusinessStatusDto> getIterationStatuses() {
+    public List<BusinessStatusBO> getIterationStatuses() {
         return businessStatusRepository.getIterationStatuses();
     }
 }

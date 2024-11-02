@@ -3,11 +3,11 @@ package com.zj.master.dispatch.feature;
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.model.DispatchTaskModel;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.domain.entity.dto.feature.FeatureInfoDto;
-import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
-import com.zj.domain.entity.dto.log.DispatchLogDto;
+import com.zj.common.entity.dto.DispatchTaskModel;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.domain.entity.bo.feature.FeatureInfoBO;
+import com.zj.domain.entity.bo.feature.TestCaseConfigBO;
+import com.zj.domain.entity.bo.log.DispatchLogDto;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.domain.repository.feature.ITestCaseConfigRepository;
 import com.zj.domain.repository.log.IDispatchLogRepository;
@@ -63,8 +63,8 @@ public class FeatureDispatch implements IDispatchExecutor {
     public String dispatch(DispatchTaskModel task, String logId) {
         String featureString = task.getSourceId();
         List<String> featureIds = JSON.parseArray(featureString, String.class);
-        FeatureInfoDto feature = featureRepository.getFeatureById(featureIds.get(0));
-        List<TestCaseConfigDto> caseConfigs = testCaseConfigRepository.getCaseConfigs(
+        FeatureInfoBO feature = featureRepository.getFeatureById(featureIds.get(0));
+        List<TestCaseConfigBO> caseConfigs = testCaseConfigRepository.getCaseConfigs(
                 feature.getTestCaseId());
         ExecuteContext executeContext = buildTaskConfig(caseConfigs);
         FeatureTask featureTask = new FeatureTask();
@@ -88,13 +88,13 @@ public class FeatureDispatch implements IDispatchExecutor {
         return false;
     }
 
-    private ExecuteContext buildTaskConfig(List<TestCaseConfigDto> configs) {
+    private ExecuteContext buildTaskConfig(List<TestCaseConfigBO> configs) {
         ExecuteContext executeContext = new ExecuteContext();
         if (CollectionUtils.isEmpty(configs)) {
             return executeContext;
         }
 
-        for (TestCaseConfigDto config : configs) {
+        for (TestCaseConfigBO config : configs) {
             executeContext.set(config.getParamKey(), config.getValue());
         }
         return executeContext;

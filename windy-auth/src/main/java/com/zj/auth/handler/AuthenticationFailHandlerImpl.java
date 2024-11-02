@@ -3,7 +3,7 @@ package com.zj.auth.handler;
 import com.alibaba.fastjson2.JSON;
 import com.zj.auth.entity.Constants;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.ResponseMeta;
+import com.zj.common.entity.dto.ResponseMeta;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;

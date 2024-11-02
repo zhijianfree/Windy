@@ -1,9 +1,9 @@
 package com.zj.client.handler.feature.executor.compare.operator;
 
-import com.zj.client.handler.feature.executor.compare.CompareResult;
+import com.zj.common.entity.feature.CompareResult;
 import com.zj.common.enums.CompareType;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.feature.CompareDefine;
+import com.zj.common.entity.feature.CompareDefine;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 

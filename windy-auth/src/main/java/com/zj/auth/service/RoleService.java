@@ -3,9 +3,9 @@ package com.zj.auth.service;
 import com.zj.auth.entity.RoleBind;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.PageSize;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.domain.entity.dto.auth.RoleDto;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.domain.entity.bo.auth.RoleBO;
 import com.zj.domain.repository.auth.IRoleRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,18 +27,18 @@ public class RoleService {
         this.permissionService = permissionService;
     }
 
-    public PageSize<RoleDto> getRoles(Integer page, Integer size) {
+    public PageSize<RoleBO> getRoles(Integer page, Integer size) {
         return roleRepository.getRolePage(page, size);
     }
 
-    public Boolean createRole(RoleDto roleDto) {
-        roleDto.setRoleId(uniqueIdService.getUniqueId());
-        return roleRepository.createRole(roleDto);
+    public Boolean createRole(RoleBO roleBO) {
+        roleBO.setRoleId(uniqueIdService.getUniqueId());
+        return roleRepository.createRole(roleBO);
     }
 
-    public Boolean updateRole(String roleId, RoleDto roleDto) {
-        roleDto.setRoleId(roleId);
-        return roleRepository.updateRole(roleDto);
+    public Boolean updateRole(String roleId, RoleBO roleBO) {
+        roleBO.setRoleId(roleId);
+        return roleRepository.updateRole(roleBO);
     }
 
     public Boolean deleteRole(String roleId) {
@@ -50,15 +50,15 @@ public class RoleService {
         return roleRepository.deleteRole(roleId);
     }
 
-    public RoleDto getRole(String roleId) {
+    public RoleBO getRole(String roleId) {
         return roleRepository.getRole(roleId);
     }
 
-    public PageSize<RoleDto> getGroupRoles(String groupId, Integer page, Integer size) {
+    public PageSize<RoleBO> getGroupRoles(String groupId, Integer page, Integer size) {
         return roleRepository.getGroupRolePage(groupId, page, size);
     }
 
-    public List<RoleDto> getAllRoles() {
+    public List<RoleBO> getAllRoles() {
         return roleRepository.getAllRoles();
     }
 

@@ -5,16 +5,16 @@ import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.git.GitAccessInfo;
-import com.zj.common.git.IGitRepositoryHandler;
-import com.zj.common.model.ServiceConfig;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.domain.entity.dto.demand.BugDTO;
-import com.zj.domain.entity.dto.demand.DemandDTO;
-import com.zj.domain.entity.dto.demand.WorkTaskDTO;
-import com.zj.domain.entity.dto.pipeline.CodeChangeDto;
-import com.zj.domain.entity.dto.pipeline.RelationDemandBug;
-import com.zj.domain.entity.dto.service.MicroserviceDto;
+import com.zj.common.adapter.git.GitAccessInfo;
+import com.zj.common.adapter.git.IGitRepositoryHandler;
+import com.zj.common.entity.pipeline.ServiceConfig;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.domain.entity.bo.demand.BugBO;
+import com.zj.domain.entity.bo.demand.DemandBO;
+import com.zj.domain.entity.bo.demand.WorkTaskBO;
+import com.zj.domain.entity.bo.pipeline.CodeChangeDto;
+import com.zj.domain.entity.bo.pipeline.RelationDemandBug;
+import com.zj.domain.entity.bo.service.MicroserviceDto;
 import com.zj.domain.repository.demand.IBugRepository;
 import com.zj.domain.repository.demand.IDemandRepository;
 import com.zj.domain.repository.demand.IWorkTaskRepository;
@@ -113,11 +113,11 @@ public class CodeChangeService {
     }
 
     public List<RelationDemandBug> queryRelationIds(String queryName) {
-        CompletableFuture<List<BugDTO>> bugFuture =
+        CompletableFuture<List<BugBO>> bugFuture =
                 CompletableFuture.supplyAsync(() -> bugRepository.getBugsByName(queryName));
-        CompletableFuture<List<DemandDTO>> demandFuture =
+        CompletableFuture<List<DemandBO>> demandFuture =
                 CompletableFuture.supplyAsync(() -> demandRepository.getDemandsByName(queryName));
-        CompletableFuture<List<WorkTaskDTO>> workFuture =
+        CompletableFuture<List<WorkTaskBO>> workFuture =
                 CompletableFuture.supplyAsync(() -> workTaskRepository.getWorkTaskByName(queryName));
         CompletableFuture.allOf(bugFuture, demandFuture, workFuture).join();
         try {

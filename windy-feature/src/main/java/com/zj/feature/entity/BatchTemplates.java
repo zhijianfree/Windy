@@ -1,6 +1,6 @@
 package com.zj.feature.entity;
 
-import com.zj.common.feature.ExecuteTemplateVo;
+import com.zj.common.entity.feature.ExecuteTemplateVo;
 import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;

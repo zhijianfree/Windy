@@ -1,6 +1,6 @@
 package com.zj.master.entity.vo;
 
-import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
+import com.zj.domain.entity.bo.pipeline.PipelineActionDto;
 import lombok.Data;
 
 /**

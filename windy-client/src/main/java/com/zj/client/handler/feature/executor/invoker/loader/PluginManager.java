@@ -1,7 +1,7 @@
 package com.zj.client.handler.feature.executor.invoker.loader;
 
 import com.zj.client.config.GlobalEnvConfig;
-import com.zj.common.model.PluginInfo;
+import com.zj.common.entity.dto.PluginInfo;
 import com.zj.plugin.loader.Feature;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;

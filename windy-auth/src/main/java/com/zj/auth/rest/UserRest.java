@@ -5,9 +5,9 @@ import com.zj.auth.entity.LoginUser;
 import com.zj.auth.entity.UpdatePassword;
 import com.zj.auth.service.UserService;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.PageSize;
-import com.zj.common.model.ResponseMeta;
-import com.zj.domain.entity.dto.auth.UserDto;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.domain.entity.bo.auth.UserBO;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,13 +36,13 @@ public class UserRest {
     }
 
     @PostMapping("/users")
-    public ResponseMeta<Boolean> createUser(@RequestBody UserDto userDto) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, userService.createUser(userDto));
+    public ResponseMeta<Boolean> createUser(@RequestBody UserBO userBO) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, userService.createUser(userBO));
     }
 
     @PutMapping("/users/{userId}")
-    public ResponseMeta<Boolean> updateUser(@PathVariable("userId") String userId, @RequestBody UserDto userDto) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, userService.updateUser(userId, userDto));
+    public ResponseMeta<Boolean> updateUser(@PathVariable("userId") String userId, @RequestBody UserBO userBO) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, userService.updateUser(userId, userBO));
     }
 
     @PutMapping("/users/{userId}/reset")
@@ -62,24 +62,24 @@ public class UserRest {
     }
 
     @GetMapping("/user")
-    public ResponseMeta<List<UserDto>> getUserByName(@RequestParam("name") String name) {
+    public ResponseMeta<List<UserBO>> getUserByName(@RequestParam("name") String name) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, userService.getUserByName(name));
     }
 
     @GetMapping("/users/{userId}")
-    public ResponseMeta<UserDto> getUser(@PathVariable("userId") String userId) {
+    public ResponseMeta<UserBO> getUser(@PathVariable("userId") String userId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, userService.getUser(userId));
     }
 
     @GetMapping("/groups/{groupId}/users")
-    public ResponseMeta<PageSize<UserDto>> getGroupUsers(@PathVariable("groupId") String groupId,
-                                                         @RequestParam(value = "page", defaultValue = "1") Integer page,
-                                                         @RequestParam(value = "size", defaultValue = "10") Integer size) {
+    public ResponseMeta<PageSize<UserBO>> getGroupUsers(@PathVariable("groupId") String groupId,
+                                                        @RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                        @RequestParam(value = "size", defaultValue = "10") Integer size) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, userService.getGroupUsers(groupId, page, size));
     }
 
     @GetMapping("/user/detail")
-    public ResponseMeta<UserDto> login() {
+    public ResponseMeta<UserBO> login() {
         return new ResponseMeta<>(ErrorCode.SUCCESS, userService.getUser());
     }
 }

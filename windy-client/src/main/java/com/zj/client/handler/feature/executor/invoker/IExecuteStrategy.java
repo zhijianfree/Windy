@@ -1,7 +1,7 @@
 package com.zj.client.handler.feature.executor.invoker;
 
 import com.zj.client.entity.vo.ExecutePoint;
-import com.zj.client.entity.vo.FeatureResponse;
+import com.zj.common.entity.feature.FeatureResponse;
 import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
 import com.zj.common.enums.TemplateType;
 

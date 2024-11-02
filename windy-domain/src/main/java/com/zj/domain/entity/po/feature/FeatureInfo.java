@@ -46,7 +46,13 @@ public class FeatureInfo {
      */
     private Integer sortOrder;
 
+    /**
+     * 创建时间
+     */
     private Long createTime;
 
+    /**
+     * 修改时间
+     */
     private Long updateTime;
 }

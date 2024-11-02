@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
+import com.zj.domain.entity.bo.feature.FeatureHistoryBO;
 import com.zj.domain.entity.po.feature.FeatureHistory;
 import com.zj.domain.mapper.feeature.FeatureHistoryMapper;
 import com.zj.domain.repository.feature.IExecuteRecordRepository;
@@ -33,15 +33,15 @@ public class FeatureHistoryRepository extends
   }
 
   @Override
-  public FeatureHistoryDto getFeatureHistory(String historyId) {
+  public FeatureHistoryBO getFeatureHistory(String historyId) {
     FeatureHistory featureHistory = getOne(
         Wrappers.lambdaQuery(FeatureHistory.class).eq(FeatureHistory::getHistoryId, historyId));
 
-    return OrikaUtil.convert(featureHistory, FeatureHistoryDto.class);
+    return OrikaUtil.convert(featureHistory, FeatureHistoryBO.class);
   }
 
   @Override
-  public List<FeatureHistoryDto> featureHistories(String featureId) {
+  public List<FeatureHistoryBO> featureHistories(String featureId) {
     List<FeatureHistory> featureHistories = list(
         Wrappers.lambdaQuery(FeatureHistory.class).eq(FeatureHistory::getFeatureId, featureId)
             .orderByDesc(FeatureHistory::getCreateTime));
@@ -51,12 +51,12 @@ public class FeatureHistoryRepository extends
     }
 
     return featureHistories.stream()
-        .map(history -> OrikaUtil.convert(history, FeatureHistoryDto.class))
+        .map(history -> OrikaUtil.convert(history, FeatureHistoryBO.class))
         .collect(Collectors.toList());
   }
 
   @Override
-  public boolean saveHistory(FeatureHistoryDto featureHistory) {
+  public boolean saveHistory(FeatureHistoryBO featureHistory) {
     FeatureHistory history = OrikaUtil.convert(featureHistory, FeatureHistory.class);
     long dateNow = System.currentTimeMillis();
     history.setCreateTime(dateNow);
@@ -74,14 +74,14 @@ public class FeatureHistoryRepository extends
   }
 
   @Override
-  public List<FeatureHistoryDto> getHistoriesByTaskRecordId(String taskRecordId) {
+  public List<FeatureHistoryBO> getHistoriesByTaskRecordId(String taskRecordId) {
     List<FeatureHistory> histories = list(
         Wrappers.lambdaQuery(FeatureHistory.class).eq(FeatureHistory::getRecordId, taskRecordId));
     if (CollectionUtils.isEmpty(histories)) {
       return Collections.emptyList();
     }
 
-    return histories.stream().map(history -> OrikaUtil.convert(history, FeatureHistoryDto.class))
+    return histories.stream().map(history -> OrikaUtil.convert(history, FeatureHistoryBO.class))
         .collect(Collectors.toList());
   }
 
@@ -116,10 +116,10 @@ public class FeatureHistoryRepository extends
   }
 
   @Override
-  public List<FeatureHistoryDto> getTaskRecordFeatures(String taskRecordId) {
+  public List<FeatureHistoryBO> getTaskRecordFeatures(String taskRecordId) {
     List<FeatureHistory> histories = list(
         Wrappers.lambdaQuery(FeatureHistory.class).eq(FeatureHistory::getRecordId, taskRecordId));
-    return OrikaUtil.convertList(histories, FeatureHistoryDto.class);
+    return OrikaUtil.convertList(histories, FeatureHistoryBO.class);
   }
 
   @Override

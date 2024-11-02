@@ -1,13 +1,13 @@
 package com.zj.demand.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.ResponseMeta;
+import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.demand.entity.IterationStatistic;
 import com.zj.demand.service.IterationService;
-import com.zj.domain.entity.dto.auth.UserDto;
-import com.zj.domain.entity.dto.demand.BusinessStatusDto;
-import com.zj.domain.entity.dto.demand.IterationDTO;
-import com.zj.domain.entity.dto.service.ResourceMemberDto;
+import com.zj.domain.entity.bo.auth.UserBO;
+import com.zj.domain.entity.bo.demand.BusinessStatusBO;
+import com.zj.domain.entity.bo.demand.IterationBO;
+import com.zj.domain.entity.bo.service.ResourceMemberDto;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,18 +34,18 @@ public class IterationRest {
     }
 
     @GetMapping("/{spaceId}/iterations")
-    public ResponseMeta<List<IterationDTO>> getSpaceIterationList(@PathVariable("spaceId") String spaceId) {
+    public ResponseMeta<List<IterationBO>> getSpaceIterationList(@PathVariable("spaceId") String spaceId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.getSpaceIterationList(spaceId));
     }
 
     @PostMapping("/iterations")
-    public ResponseMeta<IterationDTO> createIteration(@RequestBody IterationDTO iterationDTO) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.createIteration(iterationDTO));
+    public ResponseMeta<IterationBO> createIteration(@RequestBody IterationBO iterationBO) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.createIteration(iterationBO));
     }
 
     @PutMapping("/iterations/{iterationId}")
-    public ResponseMeta<Boolean> updateIteration(@PathVariable("iterationId") String iterationId, @RequestBody IterationDTO iterationDTO) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.updateIteration(iterationId, iterationDTO));
+    public ResponseMeta<Boolean> updateIteration(@PathVariable("iterationId") String iterationId, @RequestBody IterationBO iterationBO) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.updateIteration(iterationId, iterationBO));
     }
 
     @DeleteMapping("/iterations/{iterationId}")
@@ -54,12 +54,12 @@ public class IterationRest {
     }
 
     @GetMapping("/iterations/{iterationId}")
-    public ResponseMeta<IterationDTO> getIteration(@PathVariable("iterationId") String iterationId) {
+    public ResponseMeta<IterationBO> getIteration(@PathVariable("iterationId") String iterationId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.getIteration(iterationId));
     }
 
     @GetMapping("/iterations/{iterationId}/members")
-    public ResponseMeta<List<UserDto>> queryIterationMembers(@PathVariable("iterationId") String iterationId) {
+    public ResponseMeta<List<UserBO>> queryIterationMembers(@PathVariable("iterationId") String iterationId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.queryIterationMembers(iterationId));
     }
 
@@ -75,7 +75,7 @@ public class IterationRest {
     }
 
     @GetMapping("/iteration/statuses")
-    public ResponseMeta<List<BusinessStatusDto>> getIterationStatuses() {
+    public ResponseMeta<List<BusinessStatusBO>> getIterationStatuses() {
         return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.getIterationStatuses());
     }
 }

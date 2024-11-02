@@ -1,9 +1,9 @@
 package com.zj.demand.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.ResponseMeta;
+import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.demand.service.SpaceService;
-import com.zj.domain.entity.dto.demand.SpaceDTO;
+import com.zj.domain.entity.bo.demand.SpaceBO;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,18 +26,18 @@ public class SpaceRest {
     }
 
     @GetMapping("/spaces")
-    public ResponseMeta<List<SpaceDTO>> getSpaceList() {
+    public ResponseMeta<List<SpaceBO>> getSpaceList() {
         return new ResponseMeta<>(ErrorCode.SUCCESS, spaceService.getSpaceList());
     }
 
     @PostMapping("/spaces")
-    public ResponseMeta<SpaceDTO> createSpace(@RequestBody SpaceDTO spaceDTO) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, spaceService.createSpace(spaceDTO));
+    public ResponseMeta<SpaceBO> createSpace(@RequestBody SpaceBO spaceBO) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, spaceService.createSpace(spaceBO));
     }
 
     @PutMapping("/spaces/{spaceId}")
-    public ResponseMeta<Boolean> updateSpace(@PathVariable("spaceId") String spaceId, @RequestBody SpaceDTO spaceDTO) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, spaceService.updateSpace(spaceId, spaceDTO));
+    public ResponseMeta<Boolean> updateSpace(@PathVariable("spaceId") String spaceId, @RequestBody SpaceBO spaceBO) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, spaceService.updateSpace(spaceId, spaceBO));
     }
 
     @DeleteMapping("/spaces/{spaceId}")
@@ -46,7 +46,7 @@ public class SpaceRest {
     }
 
     @GetMapping("/spaces/{spaceId}")
-    public ResponseMeta<SpaceDTO> getSpace(@PathVariable("spaceId") String spaceId) {
+    public ResponseMeta<SpaceBO> getSpace(@PathVariable("spaceId") String spaceId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, spaceService.getSpace(spaceId));
     }
 }

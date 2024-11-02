@@ -1,8 +1,8 @@
 package com.zj.feature.rest;
 
-import com.zj.common.model.ResponseMeta;
+import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
-import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
+import com.zj.domain.entity.bo.feature.FeatureHistoryBO;
 import com.zj.feature.service.FeatureHistoryService;
 import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,8 +22,8 @@ public class FeatureHistoryRest {
     }
 
     @GetMapping("/{featureId}/histories")
-    public ResponseMeta<List<FeatureHistoryDto>> queryFeatureHistories(@PathVariable("featureId") String featureId) {
-        return new ResponseMeta<List<FeatureHistoryDto>>(ErrorCode.SUCCESS, featureHistoryService.featureHistories(featureId));
+    public ResponseMeta<List<FeatureHistoryBO>> queryFeatureHistories(@PathVariable("featureId") String featureId) {
+        return new ResponseMeta<List<FeatureHistoryBO>>(ErrorCode.SUCCESS, featureHistoryService.featureHistories(featureId));
     }
 
 

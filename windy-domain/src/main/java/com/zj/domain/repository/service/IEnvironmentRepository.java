@@ -1,7 +1,7 @@
 package com.zj.domain.repository.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.zj.domain.entity.dto.service.DeployEnvironmentDto;
+import com.zj.domain.entity.bo.service.DeployEnvironmentDto;
 import java.util.List;
 
 public interface IEnvironmentRepository {

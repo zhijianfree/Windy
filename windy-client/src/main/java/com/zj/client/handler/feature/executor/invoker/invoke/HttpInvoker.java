@@ -5,7 +5,7 @@ import com.zj.client.handler.feature.ability.http.HttpFeature;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
 import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
 import com.zj.common.enums.Position;
-import com.zj.common.feature.ExecutorUnit;
+import com.zj.common.entity.feature.ExecutorUnit;
 import com.zj.client.utils.ExceptionUtils;
 import com.zj.common.enums.InvokerType;
 import com.zj.plugin.loader.ExecuteDetailVo;

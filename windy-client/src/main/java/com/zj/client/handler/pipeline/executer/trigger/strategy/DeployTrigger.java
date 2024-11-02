@@ -13,14 +13,14 @@ import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
-import com.zj.common.model.SSHParams;
+import com.zj.common.entity.pipeline.SSHParams;
 import com.zj.common.utils.GitUtils;
 import com.zj.common.enums.DeployType;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.exception.ExecuteException;
-import com.zj.common.model.DeployParams;
-import com.zj.common.model.K8SAccessParams;
-import com.zj.common.model.ServiceConfig;
+import com.zj.common.entity.pipeline.DeployParams;
+import com.zj.common.entity.pipeline.K8SAccessParams;
+import com.zj.common.entity.pipeline.ServiceConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

@@ -1,10 +1,10 @@
 package com.zj.feature.entity;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.common.feature.CompareDefine;
-import com.zj.common.feature.ExecutorUnit;
-import com.zj.common.feature.VariableDefine;
-import com.zj.domain.entity.dto.feature.ExecutePointDto;
+import com.zj.common.entity.feature.CompareDefine;
+import com.zj.common.entity.feature.ExecutorUnit;
+import com.zj.common.entity.feature.VariableDefine;
+import com.zj.domain.entity.bo.feature.ExecutePointBO;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
@@ -65,7 +65,7 @@ public class ExecutePointVo {
    */
   private Integer sortOrder;
 
-  public static ExecutePointVo toExecutePointDTO(ExecutePointDto executePoint) {
+  public static ExecutePointVo toExecutePointDTO(ExecutePointBO executePoint) {
     ExecutePointVo dto = new ExecutePointVo();
     dto.setDescription(executePoint.getDescription());
     dto.setPointId(executePoint.getPointId());
@@ -74,9 +74,9 @@ public class ExecutePointVo {
     dto.setTestStage(executePoint.getTestStage());
     dto.setSortOrder(executePoint.getSortOrder());
     dto.setTemplateId(executePoint.getTemplateId());
-    dto.setExecutorUnit(JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit.class));
-    dto.setCompareDefine(JSON.parseArray(executePoint.getCompareDefine(), CompareDefine.class));
-    dto.setVariableDefine(JSON.parseArray(executePoint.getVariables(), VariableDefine.class));
+    dto.setExecutorUnit(executePoint.getFeatureInfo());
+    dto.setCompareDefine(executePoint.getCompareDefine());
+    dto.setVariableDefine(executePoint.getVariables());
     return dto;
   }
 

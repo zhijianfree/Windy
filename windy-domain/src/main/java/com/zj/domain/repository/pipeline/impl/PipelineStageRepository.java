@@ -3,7 +3,7 @@ package com.zj.domain.repository.pipeline.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.pipeline.PipelineStageDto;
+import com.zj.domain.entity.bo.pipeline.PipelineStageDto;
 import com.zj.domain.entity.po.pipeline.PipelineStage;
 import com.zj.domain.mapper.pipeline.PipelineStageMapper;
 import com.zj.domain.repository.pipeline.IPipelineStageRepository;

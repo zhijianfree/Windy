@@ -6,15 +6,15 @@ import com.zj.common.enums.Position;
 import com.zj.common.enums.TemplateType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.feature.ExecuteTemplateVo;
-import com.zj.common.model.DispatchTaskModel;
-import com.zj.common.monitor.invoker.IMasterInvoker;
+import com.zj.common.entity.feature.ExecuteTemplateVo;
+import com.zj.common.entity.dto.DispatchTaskModel;
+import com.zj.common.adapter.invoker.IMasterInvoker;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.domain.entity.dto.feature.ExecuteTemplateDto;
-import com.zj.domain.entity.dto.service.GenerateRecordDto;
-import com.zj.domain.entity.dto.service.ServiceApiDto;
-import com.zj.domain.entity.dto.service.ServiceGenerateDto;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.domain.entity.bo.feature.ExecuteTemplateBO;
+import com.zj.domain.entity.bo.service.GenerateRecordDto;
+import com.zj.domain.entity.bo.service.ServiceApiDto;
+import com.zj.domain.entity.bo.service.ServiceGenerateDto;
 import com.zj.domain.entity.vo.MavenConfigVo;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
@@ -183,7 +183,7 @@ public class ApiService {
 
         List<String> templateIds = serviceApis.stream().map(ServiceApiDto::getApiId).collect(Collectors.toList());
         List<String> existTemplateIds =
-                executeTemplateRepository.getTemplateByIds(templateIds).stream().map(ExecuteTemplateDto::getTemplateId).collect(Collectors.toList());
+                executeTemplateRepository.getTemplateByIds(templateIds).stream().map(ExecuteTemplateBO::getTemplateId).collect(Collectors.toList());
 
         return serviceApis.stream().filter(serviceApi -> generateTemplate.getCover() || !existTemplateIds.contains(serviceApi.getApiId())).map(serviceApi -> convertApi2Template(serviceApi, generateTemplate.getInvokeType(), generateTemplate.getRelatedId())).filter(Objects::nonNull).collect(Collectors.toList());
     }
@@ -193,15 +193,15 @@ public class ApiService {
             return null;
         }
 
-        ExecuteTemplateDto templateDto = new ExecuteTemplateDto();
-        templateDto.setTemplateId(serviceApi.getApiId());
-        templateDto.setName(serviceApi.getApiName());
-        templateDto.setMethod(serviceApi.getMethod());
-        templateDto.setInvokeType(invokeType);
-        templateDto.setTemplateType(TemplateType.NORMAL.getType());
-        templateDto.setDescription(serviceApi.getDescription());
-        templateDto.setOwner(serviceApi.getServiceId());
-        templateDto.setRelatedId(relatedId);
+        ExecuteTemplateBO executeTemplateBO = new ExecuteTemplateBO();
+        executeTemplateBO.setTemplateId(serviceApi.getApiId());
+        executeTemplateBO.setName(serviceApi.getApiName());
+        executeTemplateBO.setMethod(serviceApi.getMethod());
+        executeTemplateBO.setInvokeType(invokeType);
+        executeTemplateBO.setTemplateType(TemplateType.NORMAL.getType());
+        executeTemplateBO.setDescription(serviceApi.getDescription());
+        executeTemplateBO.setOwner(serviceApi.getServiceId());
+        executeTemplateBO.setRelatedId(relatedId);
 
         List<ApiRequestVariable> apiVariables = JSON.parseArray(serviceApi.getRequestParams(),
                 ApiRequestVariable.class);
@@ -218,12 +218,12 @@ public class ApiService {
             return parameterDefine;
         }).filter(Objects::nonNull).collect(Collectors.toList());
         parameterDefines.add(createHostParam());
-        templateDto.setParam(JSON.toJSONString(parameterDefines));
-        templateDto.setHeader(JSON.toJSONString(header));
+        executeTemplateBO.setParam(parameterDefines);
+        executeTemplateBO.setHeader(JSON.toJSONString(header));
 
         String assembledUrl = assembledApiUrl(serviceApi.getResource(), apiVariables);
-        templateDto.setService(assembledUrl);
-        return toExecuteTemplateDTO(templateDto);
+        executeTemplateBO.setService(assembledUrl);
+        return toExecuteTemplateDTO(executeTemplateBO);
     }
 
     private ParameterDefine createHostParam() {
@@ -302,9 +302,9 @@ public class ApiService {
         return HOST_VARIABLE_LABEL + uri;
     }
 
-    public ExecuteTemplateVo toExecuteTemplateDTO(ExecuteTemplateDto executeTemplate) {
+    public ExecuteTemplateVo toExecuteTemplateDTO(ExecuteTemplateBO executeTemplate) {
         ExecuteTemplateVo templateVo = OrikaUtil.convert(executeTemplate, ExecuteTemplateVo.class);
-        templateVo.setParams(JSON.parseArray(executeTemplate.getParam(), ParameterDefine.class));
+        templateVo.setParams(executeTemplate.getParam());
         templateVo.setHeaders((Map<String, String>) JSON.parse(executeTemplate.getHeader()));
         return templateVo;
     }

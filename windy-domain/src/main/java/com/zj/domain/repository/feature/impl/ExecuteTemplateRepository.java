@@ -1,5 +1,6 @@
 package com.zj.domain.repository.feature.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -7,10 +8,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.enums.TemplateType;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.feature.ExecuteTemplateDto;
+import com.zj.domain.entity.bo.feature.ExecuteTemplateBO;
 import com.zj.domain.entity.po.feature.ExecuteTemplate;
 import com.zj.domain.mapper.feeature.ExecuteTemplateMapper;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
+import com.zj.plugin.loader.ParameterDefine;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
@@ -26,15 +28,15 @@ public class ExecuteTemplateRepository extends
     ServiceImpl<ExecuteTemplateMapper, ExecuteTemplate> implements IExecuteTemplateRepository {
 
   @Override
-  public ExecuteTemplateDto getExecuteTemplate(String templateId) {
+  public ExecuteTemplateBO getExecuteTemplate(String templateId) {
     ExecuteTemplate executeTemplate = getOne(
         Wrappers.lambdaQuery(ExecuteTemplate.class).eq(ExecuteTemplate::getTemplateId, templateId));
-    return OrikaUtil.convert(executeTemplate, ExecuteTemplateDto.class);
+    return convertExecuteTemplateBO(executeTemplate);
   }
 
   @Override
-  public boolean save(ExecuteTemplateDto executeTemplateDto) {
-    ExecuteTemplate executeTemplate = OrikaUtil.convert(executeTemplateDto, ExecuteTemplate.class);
+  public boolean save(ExecuteTemplateBO executeTemplateBO) {
+    ExecuteTemplate executeTemplate = convertExecuteTemplate(executeTemplateBO);
     long dateNow = System.currentTimeMillis();
     executeTemplate.setCreateTime(dateNow);
     executeTemplate.setUpdateTime(dateNow);
@@ -42,8 +44,8 @@ public class ExecuteTemplateRepository extends
   }
 
   @Override
-  public boolean updateTemplate(ExecuteTemplateDto executeTemplateDto) {
-    ExecuteTemplate executeTemplate = OrikaUtil.convert(executeTemplateDto, ExecuteTemplate.class);
+  public boolean updateTemplate(ExecuteTemplateBO executeTemplateBO) {
+    ExecuteTemplate executeTemplate = convertExecuteTemplate(executeTemplateBO);
     executeTemplate.setUpdateTime(System.currentTimeMillis());
     return update(executeTemplate, Wrappers.lambdaUpdate(ExecuteTemplate.class)
         .eq(ExecuteTemplate::getTemplateId, executeTemplate.getTemplateId()));
@@ -56,34 +58,34 @@ public class ExecuteTemplateRepository extends
   }
 
   @Override
-  public List<ExecuteTemplateDto> getTemplatesByType(List<Integer> templateTypes) {
+  public List<ExecuteTemplateBO> getTemplatesByType(List<Integer> templateTypes) {
     List<ExecuteTemplate> executeTemplates = list(Wrappers.lambdaQuery(ExecuteTemplate.class)
             .in(ExecuteTemplate::getTemplateType, templateTypes));
-    return OrikaUtil.convertList(executeTemplates, ExecuteTemplateDto.class);
+    return convertExecuteTemplateBOList(executeTemplates);
   }
 
   @Override
-  public List<ExecuteTemplateDto> getToolTemplates() {
+  public List<ExecuteTemplateBO> getToolTemplates() {
     List<Integer> typeList = TemplateType.getToolTemplates();
     List<ExecuteTemplate> executeTemplates = list(Wrappers.lambdaQuery(ExecuteTemplate.class)
             .in(ExecuteTemplate::getTemplateType, typeList));
-    return OrikaUtil.convertList(executeTemplates, ExecuteTemplateDto.class);
+    return convertExecuteTemplateBOList(executeTemplates);
   }
 
   @Override
-  public List<ExecuteTemplateDto> getServiceTemplates(String serviceId) {
+  public List<ExecuteTemplateBO> getServiceTemplates(String serviceId) {
     List<ExecuteTemplate> executeTemplates = list(Wrappers.lambdaQuery(ExecuteTemplate.class).eq(ExecuteTemplate::getOwner, serviceId));
-    return OrikaUtil.convertList(executeTemplates, ExecuteTemplateDto.class);
+    return convertExecuteTemplateBOList(executeTemplates);
   }
 
   @Override
-  public List<ExecuteTemplateDto> getAllTemplates() {
+  public List<ExecuteTemplateBO> getAllTemplates() {
     List<ExecuteTemplate> executeTemplates = list();
-    return OrikaUtil.convertList(executeTemplates, ExecuteTemplateDto.class);
+    return convertExecuteTemplateBOList(executeTemplates);
   }
 
   @Override
-  public IPage<ExecuteTemplateDto> getPage(String serviceId, Integer pageNo, Integer size, String name) {
+  public IPage<ExecuteTemplateBO> getPage(String serviceId, Integer pageNo, Integer size, String name) {
     IPage<ExecuteTemplate> page = new Page<>(pageNo, size);
     LambdaQueryWrapper<ExecuteTemplate> queryWrapper =
             Wrappers.lambdaQuery(ExecuteTemplate. class).eq(ExecuteTemplate::getOwner, serviceId);
@@ -93,17 +95,16 @@ public class ExecuteTemplateRepository extends
     queryWrapper.orderByDesc(ExecuteTemplate::getCreateTime);
     IPage<ExecuteTemplate> templateIPage = page(page, queryWrapper);
 
-    IPage<ExecuteTemplateDto> templateDtoIPage = new Page<>();
+    IPage<ExecuteTemplateBO> templateDtoIPage = new Page<>();
     templateDtoIPage.setTotal(templateIPage.getTotal());
-    templateDtoIPage.setRecords(
-        OrikaUtil.convertList(templateIPage.getRecords(), ExecuteTemplateDto.class));
+    templateDtoIPage.setRecords(convertExecuteTemplateBOList(templateIPage.getRecords()));
     return templateDtoIPage;
   }
 
   @Override
-  public Boolean batchAddTemplates(List<ExecuteTemplateDto> templates) {
-    List<ExecuteTemplate> templateList = templates.stream().map(dto -> {
-      ExecuteTemplate executeTemplate = OrikaUtil.convert(dto, ExecuteTemplate.class);
+  public Boolean batchAddTemplates(List<ExecuteTemplateBO> templates) {
+    List<ExecuteTemplate> templateList = templates.stream().map(executeTemplateBO -> {
+      ExecuteTemplate executeTemplate = convertExecuteTemplate(executeTemplateBO);
       executeTemplate.setCreateTime(System.currentTimeMillis());
       executeTemplate.setUpdateTime(System.currentTimeMillis());
       return executeTemplate;
@@ -112,11 +113,26 @@ public class ExecuteTemplateRepository extends
   }
 
 
-
   @Override
-  public List<ExecuteTemplateDto> getTemplateByIds(List<String> templateIds) {
+  public List<ExecuteTemplateBO> getTemplateByIds(List<String> templateIds) {
     List<ExecuteTemplate> executeTemplates =
             list(Wrappers.lambdaQuery(ExecuteTemplate.class).in(ExecuteTemplate::getTemplateId, templateIds));
-    return OrikaUtil.convertList(executeTemplates, ExecuteTemplateDto.class);
+    return convertExecuteTemplateBOList(executeTemplates);
+  }
+
+  private ExecuteTemplateBO convertExecuteTemplateBO(ExecuteTemplate executeTemplate) {
+    ExecuteTemplateBO executeTemplateBO = OrikaUtil.convert(executeTemplate, ExecuteTemplateBO.class);
+    executeTemplateBO.setParam(JSON.parseArray(executeTemplate.getParam(), ParameterDefine.class));
+    return executeTemplateBO;
+  }
+
+  private ExecuteTemplate convertExecuteTemplate(ExecuteTemplateBO executeTemplateBO) {
+    ExecuteTemplate executeTemplate = OrikaUtil.convert(executeTemplateBO, ExecuteTemplate.class);
+    executeTemplate.setParam(JSON.toJSONString(executeTemplate.getParam()));
+    return executeTemplate;
+  }
+
+  private List<ExecuteTemplateBO> convertExecuteTemplateBOList(List<ExecuteTemplate> executeTemplates) {
+    return executeTemplates.stream().map(this::convertExecuteTemplateBO).collect(Collectors.toList());
   }
 }

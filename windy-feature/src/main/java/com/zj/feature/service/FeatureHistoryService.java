@@ -1,26 +1,22 @@
 package com.zj.feature.service;
 
-import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
+import com.zj.domain.entity.bo.feature.FeatureHistoryBO;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
-
-import java.util.List;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Slf4j
 @Service
 public class FeatureHistoryService {
-
-  private final FeatureService featureService;
   private final IFeatureHistoryRepository featureHistoryRepository;
 
-  public FeatureHistoryService(FeatureService featureService, IFeatureHistoryRepository featureHistoryRepository) {
-    this.featureService = featureService;
+  public FeatureHistoryService(IFeatureHistoryRepository featureHistoryRepository) {
     this.featureHistoryRepository = featureHistoryRepository;
   }
 
-  public List<FeatureHistoryDto> featureHistories(String featureId) {
+  public List<FeatureHistoryBO> featureHistories(String featureId) {
     return featureHistoryRepository.featureHistories(featureId);
   }
 
@@ -28,7 +24,7 @@ public class FeatureHistoryService {
     return featureHistoryRepository.deleteHistory(historyId);
   }
 
-  public List<FeatureHistoryDto> getHistories(String taskId) {
+  public List<FeatureHistoryBO> getHistories(String taskId) {
     return featureHistoryRepository.getHistoriesByTaskRecordId(taskId);
   }
 

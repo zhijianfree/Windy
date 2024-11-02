@@ -1,9 +1,9 @@
 package com.zj.master.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.ResponseMeta;
-import com.zj.common.model.ResponseStatusModel;
-import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
+import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.common.entity.dto.ResponseStatusModel;
+import com.zj.domain.entity.bo.pipeline.NodeRecordDto;
 import com.zj.master.service.RecordQueryService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,12 +25,12 @@ public class RecordQueryRest {
   }
 
   @GetMapping("/record/{recordId}")
-  private ResponseMeta<NodeRecordDto> createTask(@PathVariable("recordId") String recordId) {
+  public ResponseMeta<NodeRecordDto> createTask(@PathVariable("recordId") String recordId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, recordQueryService.getRecord(recordId));
   }
 
   @GetMapping("/task/{taskRecordId}/status")
-  private ResponseStatusModel getTaskStatus(@PathVariable("taskRecordId") String taskRecordId) {
+  public ResponseStatusModel getTaskStatus(@PathVariable("taskRecordId") String taskRecordId) {
     return recordQueryService.getTaskStatus(taskRecordId);
   }
 

@@ -1,6 +1,6 @@
 package com.zj.auth.entity;
 
-import com.zj.domain.entity.dto.auth.UserDto;
+import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.enums.UserStatus;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,18 +13,18 @@ import java.util.Objects;
 @Data
 public class UserSession implements UserDetails {
 
-    private UserDto userDto;
+    private UserBO userBO;
 
     private String token;
 
     private Long expireTime;
 
-    public UserSession(UserDto userDto) {
-        this.userDto = userDto;
+    public UserSession(UserBO userBO) {
+        this.userBO = userBO;
     }
 
     public String getUserId(){
-        return userDto.getUserId();
+        return userBO.getUserId();
     }
 
     @Override
@@ -34,12 +34,12 @@ public class UserSession implements UserDetails {
 
     @Override
     public String getPassword() {
-        return userDto.getPassword();
+        return userBO.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return userDto.getUserName();
+        return userBO.getUserName();
     }
 
     @Override
@@ -62,6 +62,6 @@ public class UserSession implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return Objects.equals(userDto.getStatus(), UserStatus.NORMAL.getType());
+        return Objects.equals(userBO.getStatus(), UserStatus.NORMAL.getType());
     }
 }

@@ -1,11 +1,11 @@
 package com.zj.client.handler.feature.executor.compare.operator;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.client.handler.feature.executor.compare.CompareResult;
+import com.zj.common.entity.feature.CompareResult;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.common.enums.CompareType;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.feature.CompareDefine;
+import com.zj.common.entity.feature.CompareDefine;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
+import com.zj.domain.entity.bo.pipeline.NodeRecordDto;
 import com.zj.domain.entity.po.pipeline.NodeRecord;
 import com.zj.domain.mapper.pipeline.NodeRecordMapper;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;

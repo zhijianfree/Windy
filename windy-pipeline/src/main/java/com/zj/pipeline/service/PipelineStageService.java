@@ -1,6 +1,6 @@
 package com.zj.pipeline.service;
 
-import com.zj.domain.entity.dto.pipeline.PipelineStageDto;
+import com.zj.domain.entity.bo.pipeline.PipelineStageDto;
 import com.zj.domain.repository.pipeline.IPipelineStageRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;

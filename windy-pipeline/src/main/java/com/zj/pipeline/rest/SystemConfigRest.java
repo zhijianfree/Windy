@@ -1,9 +1,9 @@
 package com.zj.pipeline.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.git.GitAccessInfo;
-import com.zj.common.model.ResponseMeta;
-import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
+import com.zj.common.adapter.git.GitAccessInfo;
+import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.domain.entity.bo.pipeline.SystemConfigDto;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
 import com.zj.domain.entity.vo.MavenConfigVo;

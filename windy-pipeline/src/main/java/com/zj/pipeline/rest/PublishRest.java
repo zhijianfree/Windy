@@ -1,8 +1,8 @@
 package com.zj.pipeline.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.ResponseMeta;
-import com.zj.domain.entity.dto.pipeline.PublishBindDto;
+import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.domain.entity.bo.pipeline.PublishBindDto;
 import com.zj.pipeline.service.PublishService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;

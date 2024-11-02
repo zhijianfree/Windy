@@ -1,8 +1,8 @@
 package com.zj.master.schedule;
 
-import com.zj.common.monitor.InstanceMonitor;
+import com.zj.common.adapter.monitor.InstanceMonitor;
 import com.zj.common.utils.IpUtils;
-import com.zj.domain.entity.dto.log.DispatchLogDto;
+import com.zj.domain.entity.bo.log.DispatchLogDto;
 import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.master.dispatch.Dispatcher;

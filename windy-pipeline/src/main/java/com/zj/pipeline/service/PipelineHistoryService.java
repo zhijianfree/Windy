@@ -2,11 +2,11 @@ package com.zj.pipeline.service;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
-import com.zj.domain.entity.dto.pipeline.NodeStatus;
-import com.zj.domain.entity.dto.pipeline.PipelineExecuteInfo;
-import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.domain.entity.bo.pipeline.NodeRecordDto;
+import com.zj.domain.entity.bo.pipeline.NodeStatus;
+import com.zj.domain.entity.bo.pipeline.PipelineExecuteInfo;
+import com.zj.domain.entity.bo.pipeline.PipelineHistoryDto;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import java.util.List;
 import java.util.stream.Collectors;

@@ -2,10 +2,10 @@ package com.zj.client.schedule;
 
 import com.zj.client.handler.feature.executor.invoker.invoke.MethodInvoke;
 import com.zj.client.handler.feature.executor.invoker.loader.PluginManager;
-import com.zj.common.model.PluginInfo;
-import com.zj.common.monitor.InstanceMonitor;
-import com.zj.common.monitor.invoker.IMasterInvoker;
-import com.zj.common.monitor.trace.TidInterceptor;
+import com.zj.common.entity.dto.PluginInfo;
+import com.zj.common.adapter.monitor.InstanceMonitor;
+import com.zj.common.adapter.invoker.IMasterInvoker;
+import com.zj.common.adapter.trace.TidInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.MDC;

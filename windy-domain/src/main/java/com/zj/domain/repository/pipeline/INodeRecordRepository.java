@@ -1,8 +1,8 @@
 package com.zj.domain.repository.pipeline;
 
 import com.zj.common.enums.ProcessStatus;
-import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
-import com.zj.domain.entity.po.pipeline.NodeRecord;
+import com.zj.domain.entity.bo.pipeline.NodeRecordDto;
+
 import java.util.List;
 
 /**

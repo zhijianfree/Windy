@@ -1,6 +1,6 @@
 package com.zj.service.entity;
 
-import com.zj.common.model.ServiceConfig;
+import com.zj.common.entity.pipeline.ServiceConfig;
 import lombok.Data;
 
 @Data

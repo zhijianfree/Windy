@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.log.DispatchLogDto;
+import com.zj.domain.entity.bo.log.DispatchLogDto;
 import com.zj.domain.entity.po.log.DispatchLog;
 import com.zj.domain.mapper.log.DispatchLogMapper;
 import com.zj.domain.repository.log.IDispatchLogRepository;

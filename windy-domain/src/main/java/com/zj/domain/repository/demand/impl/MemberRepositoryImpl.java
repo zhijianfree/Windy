@@ -3,8 +3,8 @@ package com.zj.domain.repository.demand.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.auth.UserDto;
-import com.zj.domain.entity.dto.service.ResourceMemberDto;
+import com.zj.domain.entity.bo.auth.UserBO;
+import com.zj.domain.entity.bo.service.ResourceMemberDto;
 import com.zj.domain.entity.po.service.ResourceMember;
 import com.zj.domain.mapper.service.ResourceMemberMapper;
 import com.zj.domain.repository.auth.IUserRepository;
@@ -26,7 +26,7 @@ public class MemberRepositoryImpl extends ServiceImpl<ResourceMemberMapper, Reso
     }
 
     @Override
-    public List<UserDto> queryResourceMembers(String resourceId) {
+    public List<UserBO> queryResourceMembers(String resourceId) {
         List<ResourceMember> members = list(Wrappers.lambdaQuery(ResourceMember.class).eq(ResourceMember::getResourceId, resourceId));
         if (CollectionUtils.isEmpty(members)) {
             return Collections.emptyList();

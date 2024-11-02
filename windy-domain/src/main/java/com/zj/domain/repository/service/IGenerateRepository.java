@@ -1,6 +1,6 @@
 package com.zj.domain.repository.service;
 
-import com.zj.domain.entity.dto.service.ServiceGenerateDto;
+import com.zj.domain.entity.bo.service.ServiceGenerateDto;
 
 public interface IGenerateRepository {
 

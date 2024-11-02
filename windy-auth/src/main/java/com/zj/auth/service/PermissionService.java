@@ -5,7 +5,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.zj.auth.entity.Constants;
 import com.zj.auth.entity.UserSession;
-import com.zj.domain.entity.dto.auth.ResourceDto;
+import com.zj.domain.entity.bo.auth.ResourceBO;
 import com.zj.domain.repository.auth.IResourceRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -23,11 +23,11 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class PermissionService {
 
-    LoadingCache<String, List<ResourceDto>> cacheLoader = CacheBuilder.newBuilder()
+    LoadingCache<String, List<ResourceBO>> cacheLoader = CacheBuilder.newBuilder()
             .expireAfterWrite(1, TimeUnit.HOURS)
-            .build(new CacheLoader<String, List<ResourceDto>>() {
+            .build(new CacheLoader<String, List<ResourceBO>>() {
                 @Override
-                public List<ResourceDto> load(String userId) {
+                public List<ResourceBO> load(String userId) {
                     return resourceRepository.getResourceByUserId(userId);
                 }
             });
@@ -80,10 +80,10 @@ public class PermissionService {
             return true;
         }
 
-        List<ResourceDto> userResources = getResourcesFromCache(userSession.getUserId());
-        String groupId = userSession.getUserDto().getGroupId();
-        List<ResourceDto> groupResources = getResourcesFromCache(groupId);
-        Collection<ResourceDto> resources = CollectionUtils.union(userResources, groupResources);
+        List<ResourceBO> userResources = getResourcesFromCache(userSession.getUserId());
+        String groupId = userSession.getUserBO().getGroupId();
+        List<ResourceBO> groupResources = getResourcesFromCache(groupId);
+        Collection<ResourceBO> resources = CollectionUtils.union(userResources, groupResources);
         resources.addAll(groupResources);
         if (CollectionUtils.isEmpty(resources)) {
             return false;
@@ -103,7 +103,7 @@ public class PermissionService {
         return matchURI;
     }
 
-    private List<ResourceDto> getResourcesFromCache(String userId) {
+    private List<ResourceBO> getResourcesFromCache(String userId) {
         return cacheLoader.getUnchecked(userId);
     }
 }

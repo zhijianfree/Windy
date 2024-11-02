@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.pipeline.PipelineDto;
+import com.zj.domain.entity.bo.pipeline.PipelineDto;
 import com.zj.domain.entity.enums.PipelineType;
 import com.zj.domain.entity.po.pipeline.Pipeline;
 import com.zj.domain.mapper.pipeline.PipelineMapper;

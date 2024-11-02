@@ -1,17 +1,17 @@
 package com.zj.demand.service;
 
-import com.zj.common.auth.IAuthService;
-import com.zj.common.auth.UserDetail;
+import com.zj.common.adapter.auth.IAuthService;
+import com.zj.common.adapter.auth.UserDetail;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.PageSize;
+import com.zj.common.entity.dto.PageSize;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.common.uuid.UniqueIdService;
+import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.demand.entity.BugDetail;
-import com.zj.domain.entity.dto.auth.UserDto;
-import com.zj.domain.entity.dto.demand.BugDTO;
-import com.zj.domain.entity.dto.demand.BugQuery;
-import com.zj.domain.entity.dto.demand.BusinessStatusDto;
+import com.zj.domain.entity.bo.auth.UserBO;
+import com.zj.domain.entity.bo.demand.BugBO;
+import com.zj.domain.entity.bo.demand.BugQueryBO;
+import com.zj.domain.entity.bo.demand.BusinessStatusBO;
 import com.zj.domain.repository.auth.IUserRepository;
 import com.zj.domain.repository.demand.IBugRepository;
 import com.zj.domain.repository.demand.IBusinessStatusRepository;
@@ -41,21 +41,21 @@ public class BugService {
         this.businessStatusRepository = businessStatusRepository;
     }
 
-    public BugDTO createBug(BugDTO bugDTO) {
-        bugDTO.setBugId(uniqueIdService.getUniqueId());
+    public BugBO createBug(BugBO bugBO) {
+        bugBO.setBugId(uniqueIdService.getUniqueId());
         UserDetail userDetail = authService.getUserDetail();
-        bugDTO.setProposer(userDetail.getUserId());
-        bugDTO.setProposerName(Optional.ofNullable(userDetail.getNickName()).orElse(userDetail.getUserName()));
-        return bugRepository.createBug(bugDTO) ? bugDTO : null;
+        bugBO.setProposer(userDetail.getUserId());
+        bugBO.setProposerName(Optional.ofNullable(userDetail.getNickName()).orElse(userDetail.getUserName()));
+        return bugRepository.createBug(bugBO) ? bugBO : null;
     }
 
-    public Boolean updateBug(BugDTO bugDTO) {
-        return bugRepository.updateBug(bugDTO);
+    public Boolean updateBug(BugBO bugBO) {
+        return bugRepository.updateBug(bugBO);
     }
 
-    public PageSize<BugDTO> getBugPage(Integer page, Integer size, String name, Integer status, String spaceId, String iterationId) {
+    public PageSize<BugBO> getBugPage(Integer page, Integer size, String name, Integer status, String spaceId, String iterationId) {
         String userId = authService.getCurrentUserId();
-        BugQuery bugQuery = BugQuery.builder()
+        BugQueryBO bugQueryBO = BugQueryBO.builder()
                 .userId(userId)
                 .page(page)
                 .size(size)
@@ -63,19 +63,19 @@ public class BugService {
                 .iterationId(iterationId)
                 .status(status)
                 .spaceId(spaceId).build();
-        return bugRepository.getUserBugs(bugQuery);
+        return bugRepository.getUserBugs(bugQueryBO);
     }
 
     public BugDetail getBug(String bugId) {
-        BugDTO bug = bugRepository.getBug(bugId);
+        BugBO bug = bugRepository.getBug(bugId);
         if (Objects.isNull(bug)) {
             log.info("bug detail not find ={}", bugId);
             throw new ApiException(ErrorCode.BUG_NOT_EXIST);
         }
         BugDetail bugDetail = OrikaUtil.convert(bug, BugDetail.class);
-        UserDto proposer = userRepository.getUserByUserId(bug.getProposer());
+        UserBO proposer = userRepository.getUserByUserId(bug.getProposer());
         Optional.ofNullable(proposer).ifPresent(p -> bugDetail.setProposerName(p.getUserName()));
-        UserDto acceptor = userRepository.getUserByUserId(bug.getAcceptor());
+        UserBO acceptor = userRepository.getUserByUserId(bug.getAcceptor());
         Optional.ofNullable(acceptor).ifPresent(a -> bugDetail.setAcceptorName(a.getUserName()));
         return bugDetail;
     }
@@ -84,21 +84,21 @@ public class BugService {
         return bugRepository.deleteBug(bugId);
     }
 
-    public PageSize<BugDTO> getRelatedBugs(Integer page, Integer size, Integer status) {
+    public PageSize<BugBO> getRelatedBugs(Integer page, Integer size, Integer status) {
         String userId = authService.getCurrentUserId();
-        BugQuery bugQuery = BugQuery.builder().page(page).size(size).userId(userId).status(status).build();
-        return bugRepository.getUserRelatedBugs(bugQuery);
+        BugQueryBO bugQueryBO = BugQueryBO.builder().page(page).size(size).userId(userId).status(status).build();
+        return bugRepository.getUserRelatedBugs(bugQueryBO);
     }
 
-    public List<BusinessStatusDto> getBugStatuses() {
+    public List<BusinessStatusBO> getBugStatuses() {
         return businessStatusRepository.getBugStatuses();
     }
 
-    public List<BugDTO> getIterationBugs(String iterationId) {
+    public List<BugBO> getIterationBugs(String iterationId) {
         return bugRepository.getIterationBugs(iterationId);
     }
 
-    public List<BusinessStatusDto> getBugTags() {
+    public List<BusinessStatusBO> getBugTags() {
         return businessStatusRepository.getBugTags();
     }
 }

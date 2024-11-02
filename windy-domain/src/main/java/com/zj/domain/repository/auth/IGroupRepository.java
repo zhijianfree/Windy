@@ -1,17 +1,17 @@
 package com.zj.domain.repository.auth;
 
-import com.zj.domain.entity.dto.auth.GroupDto;
+import com.zj.domain.entity.bo.auth.GroupBO;
 
 import java.util.List;
 
 public interface IGroupRepository {
-    boolean createGroup(GroupDto groupDto);
+    boolean createGroup(GroupBO groupBO);
 
-    List<GroupDto> getGroups();
+    List<GroupBO> getGroups();
 
-    boolean updateGroup(GroupDto groupDto);
+    boolean updateGroup(GroupBO groupBO);
 
     boolean deleteGroup(String groupId);
 
-    GroupDto getGroup(String groupId);
+    GroupBO getGroup(String groupId);
 }

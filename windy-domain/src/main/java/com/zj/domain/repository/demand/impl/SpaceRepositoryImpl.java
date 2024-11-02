@@ -3,7 +3,7 @@ package com.zj.domain.repository.demand.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.demand.SpaceDTO;
+import com.zj.domain.entity.bo.demand.SpaceBO;
 import com.zj.domain.entity.po.demand.Space;
 import com.zj.domain.mapper.demand.SpaceMapper;
 import com.zj.domain.repository.demand.ISpaceRepository;
@@ -15,28 +15,28 @@ import java.util.List;
 public class SpaceRepositoryImpl extends ServiceImpl<SpaceMapper, Space> implements ISpaceRepository {
 
     @Override
-    public List<SpaceDTO> getSpaceList() {
+    public List<SpaceBO> getSpaceList() {
         List<Space> list = list();
-        return OrikaUtil.convertList(list, SpaceDTO.class);
+        return OrikaUtil.convertList(list, SpaceBO.class);
     }
 
     @Override
-    public SpaceDTO createSpace(SpaceDTO spaceDTO) {
-        spaceDTO.setCreateTime(System.currentTimeMillis());
-        spaceDTO.setUpdateTime(System.currentTimeMillis());
-        Space space = OrikaUtil.convert(spaceDTO, Space.class);
-        return save(space) ? spaceDTO : null;
+    public SpaceBO createSpace(SpaceBO spaceBO) {
+        spaceBO.setCreateTime(System.currentTimeMillis());
+        spaceBO.setUpdateTime(System.currentTimeMillis());
+        Space space = OrikaUtil.convert(spaceBO, Space.class);
+        return save(space) ? spaceBO : null;
     }
 
     @Override
-    public SpaceDTO getSpace(String spaceId) {
+    public SpaceBO getSpace(String spaceId) {
         Space space = getOne(Wrappers.lambdaQuery(Space.class).eq(Space::getSpaceId, spaceId));
-        return OrikaUtil.convert(space, SpaceDTO.class);
+        return OrikaUtil.convert(space, SpaceBO.class);
     }
 
     @Override
-    public boolean updateSpace(SpaceDTO spaceDTO) {
-        Space space = OrikaUtil.convert(spaceDTO, Space.class);
+    public boolean updateSpace(SpaceBO spaceBO) {
+        Space space = OrikaUtil.convert(spaceBO, Space.class);
         space.setUpdateTime(System.currentTimeMillis());
         return update(space, Wrappers.lambdaUpdate(Space.class).eq(Space::getSpaceId, space.getSpaceId()));
     }

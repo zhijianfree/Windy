@@ -1,8 +1,8 @@
 package com.zj.master.dispatch.pipeline;
 
 import com.zj.common.enums.ProcessStatus;
-import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
-import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
+import com.zj.domain.entity.bo.pipeline.NodeRecordDto;
+import com.zj.domain.entity.bo.pipeline.PipelineNodeDto;
 import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
@@ -55,7 +55,7 @@ public class PipelineEndProcessor {
     //2 节点运行成功状态，找到流水线历史下所有节点的执行记录
     List<NodeRecordDto> recordList = nodeRecordRepository.getRecordsByHistoryId(change.getHistoryId());
     List<String> recordNodeIds = recordList.stream()
-        .filter(record -> ProcessStatus.isCompleteStatus(record.getStatus()))
+        .filter(nodeRecordDto -> ProcessStatus.isCompleteStatus(nodeRecordDto.getStatus()))
         .map(NodeRecordDto::getNodeId).collect(Collectors.toList());
 
     //3 如果所有节点执行都是成功则流水线执行完成

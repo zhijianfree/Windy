@@ -1,12 +1,12 @@
 package com.zj.auth.handler;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.zj.auth.entity.Constants;
 import com.zj.auth.entity.UserSession;
 import com.zj.auth.service.TokenHolder;
+import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.ResponseMeta;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
@@ -40,7 +40,7 @@ public class LogoutSuccessHandlerImpl implements LogoutSuccessHandler {
         response.setContentType(Constants.JSON_MEDIA_TYPE);
         PrintWriter writer = response.getWriter();
         ResponseMeta responseMeta = new ResponseMeta(ErrorCode.SUCCESS);
-        writer.print(JSONObject.toJSONString(responseMeta, SerializerFeature.WriteMapNullValue));
+        writer.print(JSON.toJSONString(responseMeta, SerializerFeature.WriteMapNullValue));
         writer.flush();
     }
 }

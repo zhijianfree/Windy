@@ -1,10 +1,10 @@
 package com.zj.pipeline.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.PageSize;
-import com.zj.common.model.ResponseMeta;
-import com.zj.domain.entity.dto.pipeline.NodeBindDto;
-import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.domain.entity.bo.pipeline.NodeBindDto;
+import com.zj.domain.entity.bo.pipeline.PipelineActionDto;
 import com.zj.pipeline.service.NodeBindService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;

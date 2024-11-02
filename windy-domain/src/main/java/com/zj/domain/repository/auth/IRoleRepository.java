@@ -1,24 +1,24 @@
 package com.zj.domain.repository.auth;
 
-import com.zj.common.model.PageSize;
-import com.zj.domain.entity.dto.auth.RoleDto;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.domain.entity.bo.auth.RoleBO;
 
 import java.util.List;
 
 public interface IRoleRepository {
-    PageSize<RoleDto> getRolePage(Integer page, Integer size);
+    PageSize<RoleBO> getRolePage(Integer page, Integer size);
 
-    Boolean createRole(RoleDto roleDto);
+    Boolean createRole(RoleBO roleBO);
 
-    Boolean updateRole(RoleDto roleDto);
+    Boolean updateRole(RoleBO roleBO);
 
     Boolean deleteRole(String roleId);
 
-    RoleDto getRole(String roleId);
+    RoleBO getRole(String roleId);
 
-    PageSize<RoleDto> getGroupRolePage(String groupId, Integer page, Integer size);
+    PageSize<RoleBO> getGroupRolePage(String groupId, Integer page, Integer size);
 
-    List<RoleDto> getAllRoles();
+    List<RoleBO> getAllRoles();
 
     boolean bindRole(String relationId, List<String> roleIds);
 

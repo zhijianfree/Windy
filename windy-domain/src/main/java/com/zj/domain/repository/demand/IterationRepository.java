@@ -1,19 +1,19 @@
 package com.zj.domain.repository.demand;
 
-import com.zj.domain.entity.dto.demand.IterationDTO;
+import com.zj.domain.entity.bo.demand.IterationBO;
 
 import java.util.List;
 
 public interface IterationRepository {
 
-    List<IterationDTO> getIterationList(String spaceId, List<String> iterationIds);
-    List<IterationDTO> getSpaceNotHandleIterations(String spaceId);
+    List<IterationBO> getIterationList(String spaceId, List<String> iterationIds);
+    List<IterationBO> getSpaceNotHandleIterations(String spaceId);
 
-    IterationDTO createIteration(IterationDTO iterationDTO);
+    IterationBO createIteration(IterationBO iterationBO);
 
-    IterationDTO getIteration(String iterationId);
+    IterationBO getIteration(String iterationId);
 
     boolean deleteIteration(String iterationId);
 
-    boolean updateIteration(IterationDTO iterationDTO);
+    boolean updateIteration(IterationBO iterationBO);
 }

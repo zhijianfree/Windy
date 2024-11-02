@@ -4,13 +4,12 @@ import com.zj.auth.entity.LoginResult;
 import com.zj.auth.entity.LoginUser;
 import com.zj.auth.entity.UpdatePassword;
 import com.zj.auth.entity.UserSession;
-import com.zj.common.auth.IAuthService;
+import com.zj.common.adapter.auth.IAuthService;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.PageSize;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.domain.entity.dto.auth.GroupDto;
-import com.zj.domain.entity.dto.auth.UserDto;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.repository.auth.IUserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -60,39 +59,39 @@ public class UserService {
         return tokenHolder.createToken(userSession);
     }
 
-    public UserDto getUser() {
+    public UserBO getUser() {
         String currentUserId = authService.getCurrentUserId();
         return userRepository.getUserByUserId(currentUserId);
     }
 
-    public UserDto getUser(String userId) {
+    public UserBO getUser(String userId) {
         return userRepository.getUserByUserId(userId);
     }
 
-    public PageSize<UserDto> getGroupUsers(String groupId, Integer page, Integer size) {
+    public PageSize<UserBO> getGroupUsers(String groupId, Integer page, Integer size) {
         return userRepository.getGroupUserPage(groupId, page, size);
     }
 
-    public Boolean createUser(UserDto userDto) {
-        userDto.setUserId(uniqueIdService.getUniqueId());
-        return userRepository.createUser(userDto);
+    public Boolean createUser(UserBO userBO) {
+        userBO.setUserId(uniqueIdService.getUniqueId());
+        return userRepository.createUser(userBO);
     }
 
-    public Boolean updateUser(String userId, UserDto userDto) {
-        userDto.setUserId(userId);
-        return userRepository.updateUser(userDto);
+    public Boolean updateUser(String userId, UserBO userBO) {
+        userBO.setUserId(userId);
+        return userRepository.updateUser(userBO);
     }
 
     public Boolean deleteUser(String userId) {
         return userRepository.deleteUser(userId);
     }
 
-    public List<UserDto> getUserByName(String name) {
+    public List<UserBO> getUserByName(String name) {
         return userRepository.fuzzyQueryUserName(name);
     }
 
     public Boolean updatePassword(String userId, UpdatePassword updatePassword) {
-        UserDto user = getUser(userId);
+        UserBO user = getUser(userId);
         if (Objects.isNull(user)) {
             log.info("user id not find = {}", userId);
             throw new ApiException(ErrorCode.USER_NOT_FIND);
@@ -107,7 +106,7 @@ public class UserService {
     }
 
     public Boolean resetPassword(String userId) {
-        UserDto user = getUser(userId);
+        UserBO user = getUser(userId);
         if (Objects.isNull(user)) {
             log.info("user id not find = {}", userId);
             throw new ApiException(ErrorCode.USER_NOT_FIND);

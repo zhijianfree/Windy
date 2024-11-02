@@ -1,6 +1,6 @@
 package com.zj.feature.service;
 
-import com.zj.domain.entity.dto.feature.ExecuteRecordDto;
+import com.zj.domain.entity.bo.feature.ExecuteRecordBO;
 import com.zj.domain.repository.feature.IExecuteRecordRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -14,11 +14,11 @@ public class ExecuteRecordService {
     this.executeRecordRepository = executeRecordRepository;
   }
 
-  public List<ExecuteRecordDto> getExecuteRecords(String historyId) {
+  public List<ExecuteRecordBO> getExecuteRecords(String historyId) {
     return executeRecordRepository.getExecuteRecords(historyId);
   }
 
-  public void save(ExecuteRecordDto executeRecord) {
+  public void save(ExecuteRecordBO executeRecord) {
     executeRecordRepository.saveRecord(executeRecord);
   }
 }

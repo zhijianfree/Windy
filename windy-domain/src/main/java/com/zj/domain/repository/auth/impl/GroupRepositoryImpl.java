@@ -3,7 +3,7 @@ package com.zj.domain.repository.auth.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.auth.GroupDto;
+import com.zj.domain.entity.bo.auth.GroupBO;
 import com.zj.domain.entity.po.auth.Group;
 import com.zj.domain.mapper.auth.GroupMapper;
 import com.zj.domain.repository.auth.IGroupRepository;
@@ -15,22 +15,22 @@ import java.util.List;
 public class GroupRepositoryImpl extends ServiceImpl<GroupMapper, Group> implements IGroupRepository {
 
     @Override
-    public boolean createGroup(GroupDto groupDto) {
-        Group group = OrikaUtil.convert(groupDto, Group.class);
+    public boolean createGroup(GroupBO groupBO) {
+        Group group = OrikaUtil.convert(groupBO, Group.class);
         group.setCreateTime(System.currentTimeMillis());
         group.setUpdateTime(System.currentTimeMillis());
         return save(group);
     }
 
     @Override
-    public List<GroupDto> getGroups() {
+    public List<GroupBO> getGroups() {
         List<Group> groupList = list(Wrappers.lambdaQuery(Group.class).orderByDesc(Group::getCreateTime));
-        return OrikaUtil.convertList(groupList, GroupDto.class);
+        return OrikaUtil.convertList(groupList, GroupBO.class);
     }
 
     @Override
-    public boolean updateGroup(GroupDto groupDto) {
-        Group group = OrikaUtil.convert(groupDto, Group.class);
+    public boolean updateGroup(GroupBO groupBO) {
+        Group group = OrikaUtil.convert(groupBO, Group.class);
         group.setUpdateTime(System.currentTimeMillis());
         return update(group, Wrappers.lambdaUpdate(Group.class).eq(Group::getGroupId, group.getGroupId()));
     }
@@ -41,10 +41,10 @@ public class GroupRepositoryImpl extends ServiceImpl<GroupMapper, Group> impleme
     }
 
     @Override
-    public GroupDto getGroup(String groupId) {
+    public GroupBO getGroup(String groupId) {
         Group group =
                 getOne(Wrappers.lambdaUpdate(Group.class).eq(Group::getGroupId, groupId).orderByDesc(Group::getCreateTime));
-        return OrikaUtil.convert(group, GroupDto.class);
+        return OrikaUtil.convert(group, GroupBO.class);
     }
 
 

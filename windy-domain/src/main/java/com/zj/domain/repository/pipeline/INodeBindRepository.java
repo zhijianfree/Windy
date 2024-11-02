@@ -1,8 +1,8 @@
 package com.zj.domain.repository.pipeline;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.zj.domain.entity.dto.pipeline.NodeBindDto;
-import com.zj.domain.entity.po.pipeline.NodeBind;
+import com.zj.domain.entity.bo.pipeline.NodeBindDto;
+
 import java.util.List;
 
 /**

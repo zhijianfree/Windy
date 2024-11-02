@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
+import com.zj.domain.entity.bo.pipeline.NodeRecordDto;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import java.util.Collections;
 import java.util.List;

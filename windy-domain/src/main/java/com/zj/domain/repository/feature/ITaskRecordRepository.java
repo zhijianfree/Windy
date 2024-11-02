@@ -1,7 +1,7 @@
 package com.zj.domain.repository.feature;
 
-import com.zj.common.model.PageSize;
-import com.zj.domain.entity.dto.feature.TaskRecordDto;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.domain.entity.bo.feature.TaskRecordBO;
 
 import java.util.List;
 
@@ -11,19 +11,19 @@ import java.util.List;
  */
 public interface ITaskRecordRepository {
 
-    boolean save(TaskRecordDto taskRecordDTO);
+    boolean save(TaskRecordBO taskRecordBO);
 
     boolean updateRecordStatus(String recordId, int status);
 
-    PageSize<TaskRecordDto> getTaskRecordPage(Integer pageNum, Integer size);
+    PageSize<TaskRecordBO> getTaskRecordPage(Integer pageNum, Integer size);
 
-    TaskRecordDto getTaskRecord(String recordId);
+    TaskRecordBO getTaskRecord(String recordId);
 
     boolean deleteTaskRecord(String recordId);
 
-    List<TaskRecordDto> getTaskRecordsOrderByTime(String taskId);
+    List<TaskRecordBO> getTaskRecordsOrderByTime(String taskId);
 
-    TaskRecordDto getTaskRecordByTrigger(String triggerId);
+    TaskRecordBO getTaskRecordByTrigger(String triggerId);
 
-    PageSize<TaskRecordDto> getTriggerTaskRecords(String triggerId, Integer pageNum, Integer size);
+    PageSize<TaskRecordBO> getTriggerTaskRecords(String triggerId, Integer pageNum, Integer size);
 }

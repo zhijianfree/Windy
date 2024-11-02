@@ -3,12 +3,11 @@ package com.zj.domain.repository.feature.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
+import com.zj.domain.entity.bo.feature.TestCaseConfigBO;
 import com.zj.domain.entity.po.feature.TestCaseConfig;
 import com.zj.domain.mapper.feeature.TestCaseConfigMapper;
 import com.zj.domain.repository.feature.ITestCaseConfigRepository;
 import java.util.List;
-import java.util.Objects;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
@@ -23,14 +22,14 @@ public class TestCaseConfigRepository extends
     ServiceImpl<TestCaseConfigMapper, TestCaseConfig> implements ITestCaseConfigRepository {
 
   @Override
-  public List<TestCaseConfigDto> getCaseConfigs(String caseId) {
+  public List<TestCaseConfigBO> getCaseConfigs(String caseId) {
     List<TestCaseConfig> configs = list(
         Wrappers.lambdaQuery(TestCaseConfig.class).eq(TestCaseConfig::getUnionId, caseId));
-    return OrikaUtil.convertList(configs, TestCaseConfigDto.class);
+    return OrikaUtil.convertList(configs, TestCaseConfigBO.class);
   }
 
   @Override
-  public boolean saveConfig(TestCaseConfigDto caseConfig) {
+  public boolean saveConfig(TestCaseConfigBO caseConfig) {
     TestCaseConfig testCaseConfig = OrikaUtil.convert(caseConfig, TestCaseConfig.class);
     long dateNow = System.currentTimeMillis();
     testCaseConfig.setUpdateTime(dateNow);
@@ -39,7 +38,7 @@ public class TestCaseConfigRepository extends
   }
 
   @Override
-  public boolean updateCaseConfig(TestCaseConfigDto configDto) {
+  public boolean updateCaseConfig(TestCaseConfigBO configDto) {
     TestCaseConfig testCaseConfig = OrikaUtil.convert(configDto, TestCaseConfig.class);
     return update(testCaseConfig, Wrappers.lambdaUpdate(TestCaseConfig.class)
         .eq(TestCaseConfig::getConfigId, configDto.getConfigId()));
@@ -53,7 +52,7 @@ public class TestCaseConfigRepository extends
 
   @Override
   @Transactional
-  public boolean batchUpdateCaseConfig(List<TestCaseConfigDto> updateList) {
+  public boolean batchUpdateCaseConfig(List<TestCaseConfigBO> updateList) {
     if (CollectionUtils.isEmpty(updateList)) {
       return false;
     }

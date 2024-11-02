@@ -1,7 +1,7 @@
 package com.zj.domain.repository.feature;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.zj.domain.entity.dto.feature.ExecuteTemplateDto;
+import com.zj.domain.entity.bo.feature.ExecuteTemplateBO;
 
 import java.util.List;
 
@@ -11,25 +11,25 @@ import java.util.List;
  */
 public interface IExecuteTemplateRepository {
 
-  ExecuteTemplateDto getExecuteTemplate(String templateId);
+  ExecuteTemplateBO getExecuteTemplate(String templateId);
 
-  boolean save(ExecuteTemplateDto executeTemplate);
+  boolean save(ExecuteTemplateBO executeTemplate);
 
-  boolean updateTemplate(ExecuteTemplateDto executeTemplate);
+  boolean updateTemplate(ExecuteTemplateBO executeTemplate);
 
   Boolean deleteTemplate(String templateId);
 
-  IPage<ExecuteTemplateDto> getPage(String serviceId, Integer pageNo, Integer size, String name);
+  IPage<ExecuteTemplateBO> getPage(String serviceId, Integer pageNo, Integer size, String name);
 
-  Boolean batchAddTemplates(List<ExecuteTemplateDto> templates);
+  Boolean batchAddTemplates(List<ExecuteTemplateBO> templates);
 
-  List<ExecuteTemplateDto> getServiceTemplates(String serviceId);
+  List<ExecuteTemplateBO> getServiceTemplates(String serviceId);
 
-  List<ExecuteTemplateDto> getAllTemplates();
+  List<ExecuteTemplateBO> getAllTemplates();
 
-  List<ExecuteTemplateDto> getTemplatesByType(List<Integer> templateTypes);
+  List<ExecuteTemplateBO> getTemplatesByType(List<Integer> templateTypes);
 
-  List<ExecuteTemplateDto> getToolTemplates();
+  List<ExecuteTemplateBO> getToolTemplates();
 
-  List<ExecuteTemplateDto> getTemplateByIds(List<String> templateIds);
+  List<ExecuteTemplateBO> getTemplateByIds(List<String> templateIds);
 }

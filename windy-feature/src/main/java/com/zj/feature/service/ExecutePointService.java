@@ -1,13 +1,12 @@
 package com.zj.feature.service;
 
-import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.CompareType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.domain.entity.dto.feature.ExecutePointDto;
-import com.zj.domain.entity.dto.feature.ExecuteTemplateDto;
-import com.zj.domain.entity.dto.service.MicroserviceDto;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.domain.entity.bo.feature.ExecutePointBO;
+import com.zj.domain.entity.bo.feature.ExecuteTemplateBO;
+import com.zj.domain.entity.bo.service.MicroserviceDto;
 import com.zj.domain.repository.feature.IExecutePointRepository;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
@@ -40,7 +39,7 @@ public class ExecutePointService {
         this.microServiceRepository = microServiceRepository;
     }
 
-    public boolean updateByPointId(ExecutePointDto executePoint) {
+    public boolean updateByPointId(ExecutePointBO executePoint) {
         return executePointRepository.updateExecutePoint(executePoint);
     }
 
@@ -52,16 +51,16 @@ public class ExecutePointService {
         return executePointRepository.deleteByFeatureId(featureId);
     }
 
-    private ExecutePointDto getExecutePointById(String executePointId) {
+    private ExecutePointBO getExecutePointById(String executePointId) {
         return executePointRepository.getExecutePoint(executePointId);
     }
 
-    public List<ExecutePointDto> getExecutePointByFeatureIds(List<String> featureIds) {
+    public List<ExecutePointBO> getExecutePointByFeatureIds(List<String> featureIds) {
         return executePointRepository.getPointsByFeatureIds(featureIds);
     }
 
     public String createExecutePoint(ExecutePointVo executePointVo) {
-        ExecutePointDto executePoint = toExecutePoint(executePointVo);
+        ExecutePointBO executePoint = toExecutePoint(executePointVo);
         executePoint.setPointId(uniqueIdService.getUniqueId());
         boolean result = executePointRepository.saveExecutePoint(executePoint);
 
@@ -69,8 +68,8 @@ public class ExecutePointService {
         return executePoint.getPointId();
     }
 
-    public  ExecutePointDto toExecutePoint(ExecutePointVo dto) {
-        ExecutePointDto point = new ExecutePointDto();
+    public ExecutePointBO toExecutePoint(ExecutePointVo dto) {
+        ExecutePointBO point = new ExecutePointBO();
         point.setFeatureId(dto.getFeatureId());
         point.setPointId(dto.getPointId());
         point.setDescription(dto.getDescription());
@@ -78,14 +77,14 @@ public class ExecutePointService {
         point.setTemplateId(dto.getTemplateId());
         point.setTestStage(dto.getTestStage());
         point.setExecuteType(dto.getExecuteType());
-        point.setCompareDefine(JSON.toJSONString(dto.getCompareDefine()));
-        point.setVariables(JSON.toJSONString(dto.getVariableDefine()));
-        point.setFeatureInfo(JSON.toJSONString(dto.getExecutorUnit()));
+        point.setCompareDefine(dto.getCompareDefine());
+        point.setVariables(dto.getVariableDefine());
+        point.setFeatureInfo(dto.getExecutorUnit());
         return point;
     }
 
     public String updateExecutePoint(ExecutePointVo executePointVo) {
-        ExecutePointDto executePoint = getExecutePointById(executePointVo.getPointId());
+        ExecutePointBO executePoint = getExecutePointById(executePointVo.getPointId());
         if (Objects.isNull(executePoint)) {
             return null;
         }
@@ -94,9 +93,9 @@ public class ExecutePointService {
         executePoint.setDescription(executePointVo.getDescription());
         executePoint.setSortOrder(executePointVo.getSortOrder());
         executePoint.setExecuteType(executePointVo.getExecuteType());
-        executePoint.setFeatureInfo(JSON.toJSONString(executePointVo.getExecutorUnit()));
-        executePoint.setCompareDefine(JSON.toJSONString(executePointVo.getCompareDefine()));
-        executePoint.setVariables(JSON.toJSONString(executePointVo.getVariableDefine()));
+        executePoint.setFeatureInfo(executePointVo.getExecutorUnit());
+        executePoint.setCompareDefine(executePointVo.getCompareDefine());
+        executePoint.setVariables(executePointVo.getVariableDefine());
         executePoint.setUpdateTime(System.currentTimeMillis());
         boolean result = updateByPointId(executePoint);
 
@@ -111,7 +110,7 @@ public class ExecutePointService {
         }
 
         executePoints.forEach(executePointDTO -> {
-            ExecutePointDto executePoint = getExecutePointById(executePointDTO.getPointId());
+            ExecutePointBO executePoint = getExecutePointById(executePointDTO.getPointId());
             if (Objects.isNull(executePoint)) {
                 createExecutePoint(executePointDTO);
             } else {
@@ -129,29 +128,29 @@ public class ExecutePointService {
         }).collect(Collectors.toList());
     }
 
-    public void saveBatch(List<ExecutePointDto> newExecutePoints) {
+    public void saveBatch(List<ExecutePointBO> newExecutePoints) {
         executePointRepository.saveBatch(newExecutePoints);
     }
 
     public ExecutePointVo getExecutePoint(String executePointId) {
-        ExecutePointDto executePoint = getExecutePointById(executePointId);
+        ExecutePointBO executePoint = getExecutePointById(executePointId);
         return ExecutePointVo.toExecutePointDTO(executePoint);
     }
 
     public List<ExecutePointVo> getExecutePointsByFeatureId(String featureId) {
-        List<ExecutePointDto> executePoints = executePointRepository.getExecutePointByFeatureId(featureId);
+        List<ExecutePointBO> executePoints = executePointRepository.getExecutePointByFeatureId(featureId);
         return executePoints.stream().map(ExecutePointVo::toExecutePointDTO)
                 .sorted(Comparator.comparing(ExecutePointVo::getSortOrder)).collect(Collectors.toList());
     }
 
     public ExecutePointTemplate queryPointTemplate(String executePointId) {
-        ExecutePointDto executePoint = executePointRepository.getExecutePoint(executePointId);
+        ExecutePointBO executePoint = executePointRepository.getExecutePoint(executePointId);
         if (Objects.isNull(executePoint)) {
             log.info("can not find execute point = {}", executePointId);
             throw new ApiException(ErrorCode.EXECUTE_POINT_NOT_FIND);
         }
 
-        ExecuteTemplateDto executeTemplate = templateRepository.getExecuteTemplate(executePoint.getTemplateId());
+        ExecuteTemplateBO executeTemplate = templateRepository.getExecuteTemplate(executePoint.getTemplateId());
         if (Objects.isNull(executeTemplate)) {
             log.info("can not find template = {}", executePoint.getTemplateId());
             throw new ApiException(ErrorCode.TEMPLATE_NOT_FIND);

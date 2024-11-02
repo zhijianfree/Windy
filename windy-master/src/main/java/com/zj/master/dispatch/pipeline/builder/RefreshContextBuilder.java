@@ -1,11 +1,11 @@
 package com.zj.master.dispatch.pipeline.builder;
 
-import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
+import com.zj.domain.entity.bo.pipeline.PipelineActionDto;
 import com.zj.common.enums.ExecuteType;
 import com.zj.master.entity.vo.ActionDetail;
 import com.zj.master.entity.vo.ConfigDetail;
 import com.zj.master.entity.vo.RefreshContext;
-import java.util.HashMap;
+
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 

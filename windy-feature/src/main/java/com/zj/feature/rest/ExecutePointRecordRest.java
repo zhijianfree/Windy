@@ -1,8 +1,8 @@
 package com.zj.feature.rest;
 
-import com.zj.common.model.ResponseMeta;
+import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
-import com.zj.domain.entity.dto.feature.ExecuteRecordDto;
+import com.zj.domain.entity.bo.feature.ExecuteRecordBO;
 import com.zj.feature.service.ExecuteRecordService;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +21,7 @@ public class ExecutePointRecordRest {
     }
 
     @GetMapping("/{historyId}/records")
-    public ResponseMeta<List<ExecuteRecordDto>> queryFeatureHistories(@PathVariable("historyId") String historyId) {
-        return new ResponseMeta<List<ExecuteRecordDto>>(ErrorCode.SUCCESS, executeRecordService.getExecuteRecords(historyId));
+    public ResponseMeta<List<ExecuteRecordBO>> queryFeatureHistories(@PathVariable("historyId") String historyId) {
+        return new ResponseMeta<List<ExecuteRecordBO>>(ErrorCode.SUCCESS, executeRecordService.getExecuteRecords(historyId));
     }
 }

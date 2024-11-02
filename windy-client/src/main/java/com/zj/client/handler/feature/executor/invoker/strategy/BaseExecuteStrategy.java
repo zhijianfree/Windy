@@ -2,19 +2,19 @@ package com.zj.client.handler.feature.executor.invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.InvokerType;
-import com.zj.common.feature.ExecutePointDto;
+import com.zj.common.entity.feature.ExecutePointDto;
 import com.zj.client.entity.vo.ExecutePoint;
-import com.zj.common.feature.VariableDefine;
+import com.zj.common.entity.feature.VariableDefine;
 import com.zj.plugin.loader.ExecuteDetailVo;
-import com.zj.client.entity.vo.FeatureResponse;
-import com.zj.common.feature.CompareDefine;
+import com.zj.common.entity.feature.FeatureResponse;
+import com.zj.common.entity.feature.CompareDefine;
 import com.zj.client.handler.feature.executor.compare.CompareHandler;
-import com.zj.client.handler.feature.executor.compare.CompareResult;
+import com.zj.common.entity.feature.CompareResult;
 import com.zj.client.handler.feature.executor.invoker.IExecuteStrategy;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
 import com.zj.client.handler.feature.executor.interceptor.InterceptorProxy;
 import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
-import com.zj.common.feature.ExecutorUnit;
+import com.zj.common.entity.feature.ExecutorUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 

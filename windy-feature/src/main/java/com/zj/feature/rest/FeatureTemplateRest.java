@@ -1,10 +1,10 @@
 package com.zj.feature.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.PageSize;
-import com.zj.common.model.ResponseMeta;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.feature.entity.BatchTemplates;
-import com.zj.common.feature.ExecuteTemplateVo;
+import com.zj.common.entity.feature.ExecuteTemplateVo;
 import com.zj.feature.entity.UploadResultDto;
 import com.zj.feature.service.TemplateService;
 import org.springframework.validation.annotation.Validated;

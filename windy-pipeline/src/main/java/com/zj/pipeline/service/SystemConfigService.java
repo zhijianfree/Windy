@@ -1,12 +1,12 @@
 package com.zj.pipeline.service;
 
-import com.zj.common.git.GitAccessInfo;
-import com.zj.common.monitor.invoker.IClientInvoker;
-import com.zj.common.monitor.invoker.IMasterInvoker;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.common.model.ClientCollect;
-import com.zj.common.model.MasterCollect;
-import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
+import com.zj.common.adapter.git.GitAccessInfo;
+import com.zj.common.adapter.invoker.IClientInvoker;
+import com.zj.common.adapter.invoker.IMasterInvoker;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.entity.dto.ClientCollect;
+import com.zj.common.entity.dto.MasterCollect;
+import com.zj.domain.entity.bo.pipeline.SystemConfigDto;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
 import com.zj.domain.entity.vo.MavenConfigVo;

@@ -1,9 +1,8 @@
 package com.zj.domain.repository.pipeline;
 
 import com.zj.common.enums.ProcessStatus;
-import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
+import com.zj.domain.entity.bo.pipeline.PipelineHistoryDto;
 import java.util.List;
-import org.springframework.stereotype.Repository;
 
 /**
  * @author guyuelan

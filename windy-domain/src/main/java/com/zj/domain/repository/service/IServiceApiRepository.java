@@ -1,6 +1,6 @@
 package com.zj.domain.repository.service;
 
-import com.zj.domain.entity.dto.service.ServiceApiDto;
+import com.zj.domain.entity.bo.service.ServiceApiDto;
 import java.util.List;
 
 /**

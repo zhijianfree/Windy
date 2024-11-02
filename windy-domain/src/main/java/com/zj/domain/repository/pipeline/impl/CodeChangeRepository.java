@@ -3,7 +3,7 @@ package com.zj.domain.repository.pipeline.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.pipeline.CodeChangeDto;
+import com.zj.domain.entity.bo.pipeline.CodeChangeDto;
 import com.zj.domain.entity.po.pipeline.CodeChange;
 import com.zj.domain.mapper.pipeline.CodeChangeMapper;
 import com.zj.domain.repository.pipeline.ICodeChangeRepository;

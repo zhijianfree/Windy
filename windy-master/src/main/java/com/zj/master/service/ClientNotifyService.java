@@ -1,6 +1,6 @@
 package com.zj.master.service;
 
-import com.zj.common.model.ResultEvent;
+import com.zj.common.entity.dto.ResultEvent;
 import com.zj.master.notify.INotifyEvent;
 import com.zj.master.notify.INotifyInterceptor;
 import lombok.extern.slf4j.Slf4j;

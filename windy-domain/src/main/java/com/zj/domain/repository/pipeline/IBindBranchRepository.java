@@ -1,6 +1,6 @@
 package com.zj.domain.repository.pipeline;
 
-import com.zj.domain.entity.dto.pipeline.BindBranchDto;
+import com.zj.domain.entity.bo.pipeline.BindBranchDto;
 import java.util.List;
 
 /**

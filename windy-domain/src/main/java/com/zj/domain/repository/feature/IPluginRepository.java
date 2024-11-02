@@ -1,6 +1,6 @@
 package com.zj.domain.repository.feature;
 
-import com.zj.domain.entity.dto.feature.PluginInfoDto;
+import com.zj.domain.entity.bo.feature.PluginInfoBO;
 import java.util.List;
 
 /**
@@ -9,11 +9,11 @@ import java.util.List;
  */
 public interface IPluginRepository {
 
-  List<PluginInfoDto> getAllPlugins();
+  List<PluginInfoBO> getAllPlugins();
 
-  boolean addPlugin(PluginInfoDto pluginInfo);
+  boolean addPlugin(PluginInfoBO pluginInfo);
 
-  PluginInfoDto getPlugin(String pluginId);
+  PluginInfoBO getPlugin(String pluginId);
 
   boolean deletePlugin(String pluginId);
 
