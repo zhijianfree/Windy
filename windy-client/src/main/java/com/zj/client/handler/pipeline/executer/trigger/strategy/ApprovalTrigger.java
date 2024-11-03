@@ -62,7 +62,6 @@ public class ApprovalTrigger implements INodeTrigger {
   }
 
   private List<String> getMessageList(NodeRecord nodeRecord) {
-      return Optional.ofNullable(nodeRecord.getResult()).filter(StringUtils::isNoneBlank).map(string -> JSON.parseArray(string,
-            String.class)).orElseGet(() -> Collections.singletonList(ProcessStatus.exchange(nodeRecord.getStatus()).getDesc()));
+      return Optional.ofNullable(nodeRecord.getResult()).orElseGet(() -> Collections.singletonList(ProcessStatus.exchange(nodeRecord.getStatus()).getDesc()));
   }
 }
