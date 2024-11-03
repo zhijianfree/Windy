@@ -73,8 +73,7 @@ public class ExecuteProxy implements IPipelineStatusListener {
         nodeRecord.setRecordId(taskNode.getRecordId());
         nodeRecord.setNodeId(taskNode.getNodeId());
         nodeRecord.setHistoryId(taskNode.getHistoryId());
-        String message = JSON.toJSONString(event.getErrorMsg());
-        nodeRecord.setResult(message);
+        nodeRecord.setResult(event.getErrorMsg());
 
         ResultEvent resultEvent = new ResultEvent().executeId(taskNode.getRecordId())
                 .notifyType(NotifyType.UPDATE_NODE_RECORD)

@@ -2,6 +2,8 @@ package com.zj.client.entity.vo;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class NodeRecord {
 
@@ -15,7 +17,7 @@ public class NodeRecord {
 
   private Integer code;
 
-  private String result;
+  private List<String> result;
 
   private Integer status;
 
