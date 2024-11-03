@@ -13,7 +13,7 @@ import com.zj.common.utils.OrikaUtil;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.feature.TestCaseBO;
-import com.zj.domain.entity.bo.pipeline.PipelineDto;
+import com.zj.domain.entity.bo.pipeline.PipelineBO;
 import com.zj.domain.entity.bo.service.MicroserviceDto;
 import com.zj.domain.entity.po.service.ResourceMember;
 import com.zj.domain.repository.demand.IMemberRepository;
@@ -132,7 +132,7 @@ public class MicroserviceService {
     }
 
     public Boolean deleteService(String serviceId) {
-        List<PipelineDto> servicePipelines = pipelineRepository.getServicePipelines(serviceId);
+        List<PipelineBO> servicePipelines = pipelineRepository.getServicePipelines(serviceId);
         if (CollectionUtils.isNotEmpty(servicePipelines)) {
             throw new ApiException(ErrorCode.SERVICE_EXIST_PIPELINE);
         }

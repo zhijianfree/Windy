@@ -10,8 +10,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.entity.dto.PageSize;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.bo.pipeline.ActionParam;
-import com.zj.domain.entity.bo.pipeline.CompareResult;
-import com.zj.domain.entity.bo.pipeline.PipelineActionDto;
+import com.zj.common.entity.pipeline.CompareParameter;
+import com.zj.domain.entity.bo.pipeline.PipelineActionBO;
 import com.zj.domain.entity.po.pipeline.PipelineAction;
 import com.zj.domain.mapper.pipeline.PipelineActionMapper;
 import com.zj.domain.repository.pipeline.IPipelineActionRepository;
@@ -33,7 +33,7 @@ public class PipelineActionRepository extends
         ServiceImpl<PipelineActionMapper, PipelineAction> implements IPipelineActionRepository {
 
     @Override
-    public Boolean createAction(PipelineActionDto actionDto) {
+    public Boolean createAction(PipelineActionBO actionDto) {
         PipelineAction pipelineAction = OrikaUtil.convert(actionDto, PipelineAction.class);
         long dateNow = System.currentTimeMillis();
         pipelineAction.setCreateTime(dateNow);
@@ -45,28 +45,15 @@ public class PipelineActionRepository extends
     }
 
     @Override
-    public PipelineActionDto getAction(String actionId) {
+    public PipelineActionBO getAction(String actionId) {
         PipelineAction action = getOne(
                 Wrappers.lambdaQuery(PipelineAction.class).eq(PipelineAction::getActionId, actionId));
-        return Optional.ofNullable(action).map(this::convertActionDto).orElse(null);
-    }
-
-    private PipelineActionDto convertActionDto(PipelineAction action) {
-        PipelineActionDto actionDto = OrikaUtil.convert(action, PipelineActionDto.class);
-        actionDto.setHeaders(JSON.parseObject(action.getHeaders(), new TypeReference<Map<String, String>>() {
-        }));
-        actionDto.setCompareResults(JSON.parseArray(action.getResult(), CompareResult.class));
-        actionDto.setParamList(JSON.parseArray(action.getParamDetail(), ActionParam.class));
-        actionDto.setLoopExpression(JSON.parseObject(action.getQueryExpression(), CompareResult.class));
-        return actionDto;
+        return Optional.ofNullable(action).map(this::convertActionBO).orElse(null);
     }
 
     @Override
-    public Boolean updateAction(PipelineActionDto actionDto) {
-        PipelineAction pipelineAction = OrikaUtil.convert(actionDto, PipelineAction.class);
-        Optional.ofNullable(actionDto.getHeaders()).ifPresent(headers -> pipelineAction.setHeaders(JSON.toJSONString(headers)));
-        Optional.ofNullable(actionDto.getParamList()).ifPresent(params -> pipelineAction.setParamDetail(JSON.toJSONString(params)));
-        Optional.ofNullable(actionDto.getCompareResults()).ifPresent(compareResults -> pipelineAction.setResult(JSON.toJSONString(compareResults)));
+    public Boolean updateAction(PipelineActionBO actionDto) {
+        PipelineAction pipelineAction = convertPipelineAction(actionDto);
         return update(pipelineAction, Wrappers.lambdaUpdate(PipelineAction.class)
                 .eq(PipelineAction::getActionId, actionDto.getActionId()));
     }
@@ -86,7 +73,7 @@ public class PipelineActionRepository extends
     }
 
     @Override
-    public PageSize<PipelineActionDto> getActions(Integer page, Integer size, String name) {
+    public PageSize<PipelineActionBO> getActions(Integer page, Integer size, String name) {
         LambdaQueryWrapper<PipelineAction> queryWrapper = Wrappers.lambdaQuery(PipelineAction.class)
                 .orderByDesc(PipelineAction::getCreateTime);
         if (!StringUtils.isEmpty(name)) {
@@ -94,16 +81,16 @@ public class PipelineActionRepository extends
         }
         IPage<PipelineAction> actionIPage = new Page<>(page, size);
         IPage<PipelineAction> queryPage = page(actionIPage, queryWrapper);
-        PageSize<PipelineActionDto> pageSize = new PageSize<>();
+        PageSize<PipelineActionBO> pageSize = new PageSize<>();
         pageSize.setTotal(queryPage.getTotal());
-        pageSize.setData(queryPage.getRecords().stream().map(this::convertActionDto).collect(Collectors.toList()));
+        pageSize.setData(queryPage.getRecords().stream().map(this::convertActionBO).collect(Collectors.toList()));
         return pageSize;
     }
 
     @Override
-    public List<PipelineActionDto> getActionsByNodeId(String nodeId) {
+    public List<PipelineActionBO> getActionsByNodeId(String nodeId) {
         List<PipelineAction> actions = list(Wrappers.lambdaQuery(PipelineAction.class).eq(PipelineAction::getNodeId, nodeId));
-        return Optional.ofNullable(actions).map(actionList -> actionList.stream().map(this::convertActionDto)
+        return Optional.ofNullable(actions).map(actionList -> actionList.stream().map(this::convertActionBO)
                 .collect(Collectors.toList())).orElseGet(ArrayList::new);
     }
 
@@ -111,5 +98,23 @@ public class PipelineActionRepository extends
     public boolean batchDelete(List<String> removeList) {
         return remove(
                 Wrappers.lambdaQuery(PipelineAction.class).in(PipelineAction::getActionId, removeList));
+    }
+
+    private PipelineActionBO convertActionBO(PipelineAction action) {
+        PipelineActionBO actionDto = OrikaUtil.convert(action, PipelineActionBO.class);
+        actionDto.setHeaders(JSON.parseObject(action.getHeaders(), new TypeReference<Map<String, String>>() {
+        }));
+        actionDto.setCompareResults(JSON.parseArray(action.getResult(), CompareParameter.class));
+        actionDto.setParamList(JSON.parseArray(action.getParamDetail(), ActionParam.class));
+        actionDto.setLoopExpression(JSON.parseObject(action.getQueryExpression(), CompareParameter.class));
+        return actionDto;
+    }
+    private static PipelineAction convertPipelineAction(PipelineActionBO actionDto) {
+        PipelineAction pipelineAction = OrikaUtil.convert(actionDto, PipelineAction.class);
+        Optional.ofNullable(actionDto.getHeaders()).ifPresent(headers -> pipelineAction.setHeaders(JSON.toJSONString(headers)));
+        Optional.ofNullable(actionDto.getLoopExpression()).ifPresent(loopExpression -> pipelineAction.setQueryExpression(JSON.toJSONString(loopExpression)));
+        Optional.ofNullable(actionDto.getParamList()).ifPresent(params -> pipelineAction.setParamDetail(JSON.toJSONString(params)));
+        Optional.ofNullable(actionDto.getCompareResults()).ifPresent(compareResults -> pipelineAction.setResult(JSON.toJSONString(compareResults)));
+        return pipelineAction;
     }
 }

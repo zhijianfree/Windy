@@ -10,7 +10,7 @@ import javax.validation.constraints.NotEmpty;
  */
 
 @Data
-public class CodeChangeDto {
+public class CodeChangeBO {
 
     /**
      * 变更ID

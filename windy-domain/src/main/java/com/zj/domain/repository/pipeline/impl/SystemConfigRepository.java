@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.adapter.git.GitAccessInfo;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.bo.pipeline.SystemConfigDto;
+import com.zj.domain.entity.bo.pipeline.SystemConfigBO;
 import com.zj.domain.entity.po.pipeline.SystemConfig;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
@@ -35,14 +35,14 @@ public class SystemConfigRepository extends ServiceImpl<SystemConfigMapper, Syst
     public static final Integer GLOBAL = 1;
 
     @Override
-    public List<SystemConfigDto> getAllConfigs() {
+    public List<SystemConfigBO> getAllConfigs() {
         List<SystemConfig> systemConfigs = list();
-        return OrikaUtil.convertList(systemConfigs, SystemConfigDto.class);
+        return OrikaUtil.convertList(systemConfigs, SystemConfigBO.class);
     }
 
     @Override
-    public boolean saveConfig(SystemConfigDto systemConfigDto) {
-        SystemConfig systemConfig = OrikaUtil.convert(systemConfigDto, SystemConfig.class);
+    public boolean saveConfig(SystemConfigBO systemConfigBO) {
+        SystemConfig systemConfig = OrikaUtil.convert(systemConfigBO, SystemConfig.class);
         long dateNow = System.currentTimeMillis();
         systemConfig.setCreateTime(dateNow);
         systemConfig.setUpdateTime(dateNow);
@@ -50,8 +50,8 @@ public class SystemConfigRepository extends ServiceImpl<SystemConfigMapper, Syst
     }
 
     @Override
-    public boolean updateConfig(SystemConfigDto systemConfigDto) {
-        SystemConfig systemConfig = OrikaUtil.convert(systemConfigDto, SystemConfig.class);
+    public boolean updateConfig(SystemConfigBO systemConfigBO) {
+        SystemConfig systemConfig = OrikaUtil.convert(systemConfigBO, SystemConfig.class);
         systemConfig.setUpdateTime(System.currentTimeMillis());
         return update(systemConfig, Wrappers.lambdaUpdate(SystemConfig.class)
                 .eq(SystemConfig::getConfigId, systemConfig.getConfigId()));
@@ -63,10 +63,10 @@ public class SystemConfigRepository extends ServiceImpl<SystemConfigMapper, Syst
     }
 
     @Override
-    public SystemConfigDto getSystemConfig(String configId) {
+    public SystemConfigBO getSystemConfig(String configId) {
         SystemConfig systemConfig = getOne(
                 Wrappers.lambdaQuery(SystemConfig.class).eq(SystemConfig::getConfigId, configId));
-        return OrikaUtil.convert(systemConfig, SystemConfigDto.class);
+        return OrikaUtil.convert(systemConfig, SystemConfigBO.class);
     }
 
     @Override

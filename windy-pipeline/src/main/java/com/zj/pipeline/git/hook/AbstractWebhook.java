@@ -3,8 +3,8 @@ package com.zj.pipeline.git.hook;
 import com.alibaba.fastjson.JSON;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.domain.entity.bo.pipeline.BindBranchDto;
-import com.zj.domain.entity.bo.pipeline.PipelineDto;
+import com.zj.domain.entity.bo.pipeline.BindBranchBO;
+import com.zj.domain.entity.bo.pipeline.PipelineBO;
 import com.zj.domain.entity.bo.service.MicroserviceDto;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
@@ -53,13 +53,13 @@ public abstract class AbstractWebhook implements IGitWebhook {
 
     MicroserviceDto microservice = serviceRepository.queryServiceByName(
         parseResult.getRepository());
-    List<PipelineDto> pipelines = pipelineService.getServicePipelines(microservice.getServiceId());
+    List<PipelineBO> pipelines = pipelineService.getServicePipelines(microservice.getServiceId());
     if (CollectionUtils.isEmpty(pipelines)) {
       log.info("can not find pipelines service={}", parseResult.getRepository());
       return;
     }
 
-    List<PipelineDto> pushPipelines = pipelines.stream().filter(
+    List<PipelineBO> pushPipelines = pipelines.stream().filter(
             pipeline -> Objects.equals(PipelineExecuteType.PUSH.getType(), pipeline.getExecuteType()))
         .collect(Collectors.toList());
     if (CollectionUtils.isEmpty(pushPipelines)) {
@@ -68,8 +68,8 @@ public abstract class AbstractWebhook implements IGitWebhook {
       return;
     }
     pushPipelines.forEach(pipeline -> executorService.execute(() -> {
-      List<BindBranchDto> gitBinds = listGitBinds(pipeline.getPipelineId());
-      Optional<BindBranchDto> optional = gitBinds.stream().filter(BindBranchDto::getIsChoose)
+      List<BindBranchBO> gitBinds = listGitBinds(pipeline.getPipelineId());
+      Optional<BindBranchBO> optional = gitBinds.stream().filter(BindBranchBO::getIsChoose)
           .filter(gitBind -> Objects.equals(gitBind.getGitBranch(), parseResult.getBranch()))
           .findAny();
       if (optional.isPresent()) {
@@ -81,14 +81,14 @@ public abstract class AbstractWebhook implements IGitWebhook {
 
   public abstract GitParseResult parseData(Object data);
 
-  public List<BindBranchDto> listGitBinds(String pipelineId) {
+  public List<BindBranchBO> listGitBinds(String pipelineId) {
     checkPipelineExist(pipelineId);
     return gitBindRepository.getPipelineRelatedBranches(pipelineId);
   }
 
   private void checkPipelineExist(String pipelineId) {
-    PipelineDto pipelineDTO = pipelineService.getPipeline(pipelineId);
-    if (Objects.isNull(pipelineDTO)) {
+    PipelineBO pipelineBO = pipelineService.getPipeline(pipelineId);
+    if (Objects.isNull(pipelineBO)) {
       throw new ApiException(ErrorCode.NOT_FOUND_PIPELINE);
     }
   }

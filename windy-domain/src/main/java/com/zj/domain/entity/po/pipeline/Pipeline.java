@@ -39,7 +39,7 @@ public class Pipeline {
   /**
    * 流水线配置
    * */
-  private String pipelineConfig;
+  private String config;
 
   /**
    * 流水线状态

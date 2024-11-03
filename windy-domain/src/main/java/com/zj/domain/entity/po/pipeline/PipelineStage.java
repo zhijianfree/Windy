@@ -12,7 +12,7 @@ public class PipelineStage {
   private Long id;
 
   /**
-   * 唯一Id
+   * 阶段Id
    * */
   private String stageId;
 
@@ -26,6 +26,9 @@ public class PipelineStage {
    * */
   private Integer type;
 
+  /**
+   * 排序
+   */
   private Integer sortOrder;
 
   /**
@@ -38,8 +41,14 @@ public class PipelineStage {
    * */
   private String pipelineId;
 
+  /**
+   * 创建时间
+   * */
   private Long createTime;
 
+  /**
+   * 创建时间
+   * */
   private Long updateTime;
 
 }

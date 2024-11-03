@@ -1,6 +1,6 @@
 package com.zj.domain.repository.pipeline;
 
-import com.zj.domain.entity.bo.pipeline.PipelineStageDto;
+import com.zj.domain.entity.bo.pipeline.PipelineStageBO;
 import java.util.List;
 
 /**
@@ -11,13 +11,13 @@ public interface IPipelineStageRepository {
 
   void deletePipelineStages(List<String> stageIds);
 
-  PipelineStageDto getPipelineStage(String stageId);
+  PipelineStageBO getPipelineStage(String stageId);
 
-  boolean updateStage(PipelineStageDto stageDto);
+  boolean updateStage(PipelineStageBO stageDto);
 
   boolean deleteStagesByPipelineId(String pipelineId);
 
-  void saveStage(PipelineStageDto pipelineStage);
+  void saveStage(PipelineStageBO pipelineStage);
 
-  List<PipelineStageDto> sortPipelineNodes(String pipelineId);
+  List<PipelineStageBO> sortPipelineNodes(String pipelineId);
 }

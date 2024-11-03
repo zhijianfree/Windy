@@ -6,10 +6,10 @@ import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.entity.pipeline.ServiceConfig;
 import com.zj.common.entity.pipeline.ServiceContext;
-import com.zj.domain.entity.bo.pipeline.BindBranchDto;
-import com.zj.domain.entity.bo.pipeline.PipelineDto;
-import com.zj.domain.entity.bo.pipeline.PipelineNodeDto;
-import com.zj.domain.entity.bo.pipeline.PublishBindDto;
+import com.zj.domain.entity.bo.pipeline.BindBranchBO;
+import com.zj.domain.entity.bo.pipeline.PipelineBO;
+import com.zj.domain.entity.bo.pipeline.PipelineNodeBO;
+import com.zj.domain.entity.bo.pipeline.PublishBindBO;
 import com.zj.domain.entity.bo.service.MicroserviceDto;
 import com.zj.domain.entity.enums.PipelineType;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
@@ -20,7 +20,7 @@ import com.zj.domain.repository.pipeline.IPublishBindRepository;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.master.entity.vo.BuildCodeContext;
-import com.zj.master.entity.vo.PipelineConfig;
+import com.zj.common.entity.pipeline.PipelineConfig;
 import com.zj.master.entity.vo.TaskNode;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
@@ -69,17 +69,17 @@ public class BuildCodeInterceptor implements INodeExecuteInterceptor {
         }
 
         ImageRepositoryVo repository = configRepository.getRepository();
-        PipelineNodeDto pipelineNode = pipelineNodeRepository.getPipelineNode(taskNode.getNodeId());
-        PipelineDto pipeline = pipelineRepository.getPipeline(pipelineNode.getPipelineId());
+        PipelineNodeBO pipelineNode = pipelineNodeRepository.getPipelineNode(taskNode.getNodeId());
+        PipelineBO pipeline = pipelineRepository.getPipeline(pipelineNode.getPipelineId());
         MicroserviceDto serviceDetail = microServiceRepository.queryServiceDetail(pipeline.getServiceId());
         String config = serviceDetail.getServiceConfig();
         ServiceConfig serviceConfig = JSON.parseObject(config, ServiceConfig.class);
         if (Objects.equals(pipeline.getPipelineType(), PipelineType.PUBLISH.getType())) {
             //如果是发布流水线，则要查询发布的流水线分支
-            List<PublishBindDto> servicePublishes = publishBindRepository.getServicePublishes(pipeline.getServiceId());
+            List<PublishBindBO> servicePublishes = publishBindRepository.getServicePublishes(pipeline.getServiceId());
             List<String> branches =
-                    servicePublishes.stream().map(PublishBindDto::getBranch).collect(Collectors.toList());
-            PipelineConfig pipelineConfig = JSON.parseObject(pipeline.getPipelineConfig(), PipelineConfig.class);
+                    servicePublishes.stream().map(PublishBindBO::getBranch).collect(Collectors.toList());
+            PipelineConfig pipelineConfig = pipeline.getPipelineConfig();
             String version = null;
             if (Objects.nonNull(pipelineConfig) && MapUtils.isNotEmpty(pipelineConfig.getParamList())) {
                 version =
@@ -89,7 +89,7 @@ public class BuildCodeInterceptor implements INodeExecuteInterceptor {
             return;
         }
 
-        BindBranchDto bindBranch = gitBindRepository.getPipelineBindBranch(pipelineNode.getPipelineId());
+        BindBranchBO bindBranch = gitBindRepository.getPipelineBindBranch(pipelineNode.getPipelineId());
         if (Objects.isNull(bindBranch)) {
             throw new ApiException(ErrorCode.NOT_FIND_BRANCH);
         }

@@ -5,7 +5,7 @@ import com.zj.common.entity.dto.ResponseStatusModel;
 import com.zj.common.entity.dto.ResponseStatusModel.PercentStatics;
 import com.zj.domain.entity.bo.feature.FeatureHistoryBO;
 import com.zj.domain.entity.bo.feature.TaskRecordBO;
-import com.zj.domain.entity.bo.pipeline.NodeRecordDto;
+import com.zj.domain.entity.bo.pipeline.NodeRecordBO;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
@@ -56,7 +56,7 @@ public class RecordQueryService {
     return responseStatusModel;
   }
 
-  public NodeRecordDto getRecord(String recordId) {
+  public NodeRecordBO getRecord(String recordId) {
     return nodeRecordRepository.getRecordById(recordId);
   }
 }

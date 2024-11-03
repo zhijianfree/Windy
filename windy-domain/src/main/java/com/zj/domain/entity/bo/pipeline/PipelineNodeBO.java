@@ -1,6 +1,8 @@
 package com.zj.domain.entity.bo.pipeline;
 
 import javax.validation.constraints.NotEmpty;
+
+import com.zj.common.entity.pipeline.ConfigDetail;
 import lombok.Data;
 
 /**
@@ -8,7 +10,7 @@ import lombok.Data;
  * @since 2022/6/22
  */
 @Data
-public class PipelineNodeDto {
+public class PipelineNodeBO {
   /**
    * 节点Id
    * */
@@ -30,6 +32,9 @@ public class PipelineNodeDto {
    * */
   private Integer type;
 
+  /**
+   * 排序
+   */
   private Integer sortOrder;
 
   /**
@@ -40,5 +45,5 @@ public class PipelineNodeDto {
   /**
    * 配置信息
    * */
-  private String configDetail;
+  private ConfigDetail configDetail;
 }

@@ -1,6 +1,5 @@
-package com.zj.master.entity.vo;
+package com.zj.common.entity.pipeline;
 
-import com.zj.domain.entity.bo.pipeline.CompareResult;
 import lombok.Data;
 
 import java.util.List;
@@ -22,5 +21,5 @@ public class ConfigDetail {
   /**
    * node执行的参数
    * */
-  private List<CompareResult> compareInfo;
+  private List<CompareParameter> compareInfo;
 }

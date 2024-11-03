@@ -9,7 +9,7 @@ import com.zj.common.entity.pipeline.SSHParams;
 import com.zj.common.entity.pipeline.ServiceConfig;
 import com.zj.domain.entity.bo.log.DispatchLogDto;
 import com.zj.domain.entity.bo.log.SubDispatchLogDto;
-import com.zj.domain.entity.bo.pipeline.NodeRecordDto;
+import com.zj.domain.entity.bo.pipeline.NodeRecordBO;
 import com.zj.domain.entity.bo.service.DeployEnvironmentDto;
 import com.zj.domain.entity.bo.service.MicroserviceDto;
 import com.zj.domain.entity.enums.EnvType;
@@ -113,9 +113,9 @@ public class DeployNodeInterceptor implements INodeExecuteInterceptor {
                 subDispatchLogDto.getLogId());
         String nodeId = subDispatchLogDto.getExecuteId();
         String pipelineHistoryId = dispatchLog.getSourceRecordId();
-        NodeRecordDto nodeRecord = nodeRecordRepository.getRecordByNodeAndHistory(pipelineHistoryId,
+        NodeRecordBO nodeRecord = nodeRecordRepository.getRecordByNodeAndHistory(pipelineHistoryId,
                 nodeId);
-        Map<String, Object> context = JSON.parseObject(nodeRecord.getPipelineContext());
+        Map<String, Object> context = nodeRecord.getPipelineContext();
         if (Objects.nonNull(context)) {
             deployContext.setImageName(String.valueOf(context.get(IMAGE_NAME)));
         }

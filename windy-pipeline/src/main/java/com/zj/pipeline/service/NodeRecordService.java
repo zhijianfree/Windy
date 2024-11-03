@@ -1,10 +1,9 @@
 package com.zj.pipeline.service;
 
-import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.domain.entity.bo.pipeline.NodeRecordDto;
+import com.zj.domain.entity.bo.pipeline.NodeRecordBO;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import java.util.Collections;
 import java.util.List;
@@ -28,8 +27,8 @@ public class NodeRecordService {
     this.nodeRecordRepository = nodeRecordRepository;
   }
 
-  public boolean updateNodeRecordStatus(String recordId, Integer type, String message) {
-    return nodeRecordRepository.updateNodeRecordStatus(recordId, type, message);
+  public boolean updateNodeRecordStatus(String recordId, Integer type, List<String> messageList) {
+    return nodeRecordRepository.updateNodeRecordStatus(recordId, type, messageList);
   }
 
   public Boolean approval(ApprovalInfo approvalInfo) {
@@ -38,17 +37,17 @@ public class NodeRecordService {
       log.warn("can not parse status type ={}", approvalInfo.getType());
       throw new ApiException(ErrorCode.PARAM_VALIDATE_ERROR);
     }
-    NodeRecordDto nodeRecord = nodeRecordRepository.getRecordByNodeAndHistory(approvalInfo.getHistoryId(),
+    NodeRecordBO nodeRecord = nodeRecordRepository.getRecordByNodeAndHistory(approvalInfo.getHistoryId(),
             approvalInfo.getNodeId());
     if (Objects.isNull(nodeRecord)) {
       log.info("can not find node record historyId={} nodeId={}",approvalInfo.getHistoryId(), approvalInfo.getNodeId());
       return false;
     }
     return updateNodeRecordStatus(nodeRecord.getRecordId(), processStatus.getType(),
-            JSON.toJSONString(Collections.singletonList(approvalInfo.getMessage())));
+            Collections.singletonList(approvalInfo.getMessage()));
   }
 
-  public List<NodeRecordDto> getNodeRecordsByHistory(String historyId) {
+  public List<NodeRecordBO> getNodeRecordsByHistory(String historyId) {
     return nodeRecordRepository.getRecordsByHistoryId(historyId);
   }
 }

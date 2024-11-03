@@ -2,8 +2,11 @@ package com.zj.domain.entity.bo.pipeline;
 
 import lombok.Data;
 
+import java.util.List;
+import java.util.Map;
+
 @Data
-public class NodeRecordDto {
+public class NodeRecordBO {
 
   /**
    * 流水线节点Id
@@ -28,12 +31,12 @@ public class NodeRecordDto {
   /**
    * 执行的结果
    * */
-  private String result;
+  private List<String> result;
 
   /**
    * 任务执行上下文,作用域整个流水线
    * */
-  private String pipelineContext;
+  private Map<String, Object> pipelineContext;
 
   /**
    * 记录状态

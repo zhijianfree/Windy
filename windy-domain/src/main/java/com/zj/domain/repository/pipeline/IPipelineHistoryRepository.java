@@ -1,7 +1,7 @@
 package com.zj.domain.repository.pipeline;
 
 import com.zj.common.enums.ProcessStatus;
-import com.zj.domain.entity.bo.pipeline.PipelineHistoryDto;
+import com.zj.domain.entity.bo.pipeline.PipelineHistoryBO;
 import java.util.List;
 
 /**
@@ -10,13 +10,13 @@ import java.util.List;
  */
 public interface IPipelineHistoryRepository {
 
-  PipelineHistoryDto getPipelineHistory(String historyId);
+  PipelineHistoryBO getPipelineHistory(String historyId);
 
-  boolean createPipelineHistory(PipelineHistoryDto pipelineHistoryDto);
+  boolean createPipelineHistory(PipelineHistoryBO pipelineHistoryBO);
 
-  List<PipelineHistoryDto> listPipelineHistories(String pipelineId);
+  List<PipelineHistoryBO> listPipelineHistories(String pipelineId);
 
-  PipelineHistoryDto getLatestPipelineHistory(String pipelineId);
+  PipelineHistoryBO getLatestPipelineHistory(String pipelineId);
 
   boolean updateStatus(String historyId, ProcessStatus processStatus);
 }

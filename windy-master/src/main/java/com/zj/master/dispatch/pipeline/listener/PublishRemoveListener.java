@@ -1,9 +1,9 @@
 package com.zj.master.dispatch.pipeline.listener;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.domain.entity.bo.pipeline.CodeChangeDto;
-import com.zj.domain.entity.bo.pipeline.PipelineDto;
-import com.zj.domain.entity.bo.pipeline.PublishBindDto;
+import com.zj.domain.entity.bo.pipeline.CodeChangeBO;
+import com.zj.domain.entity.bo.pipeline.PipelineBO;
+import com.zj.domain.entity.bo.pipeline.PublishBindBO;
 import com.zj.domain.entity.enums.PipelineType;
 import com.zj.domain.repository.pipeline.ICodeChangeRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
@@ -38,7 +38,7 @@ public class PublishRemoveListener implements IPipelineEndListener {
 
   @Override
   public void handleEnd(NodeStatusChange statusChange) {
-    PipelineDto pipeline = pipelineRepository.getPipeline(statusChange.getPipelineId());
+    PipelineBO pipeline = pipelineRepository.getPipeline(statusChange.getPipelineId());
     if (Objects.isNull(pipeline)) {
       return;
     }
@@ -46,12 +46,12 @@ public class PublishRemoveListener implements IPipelineEndListener {
     log.info("pipeline info = {}", JSON.toJSONString(pipeline));
     if (Objects.equals(pipeline.getPipelineType(), PipelineType.PUBLISH.getType())
         && statusChange.getProcessStatus().isSuccess()) {
-      List<PublishBindDto> pipelinePublishes = publishBindRepository.getServicePublishes(pipeline.getServiceId());
-      List<String> branches = pipelinePublishes.stream().map(PublishBindDto::getBranch).collect(Collectors.toList());
+      List<PublishBindBO> pipelinePublishes = publishBindRepository.getServicePublishes(pipeline.getServiceId());
+      List<String> branches = pipelinePublishes.stream().map(PublishBindBO::getBranch).collect(Collectors.toList());
       log.info("get publish branches ={}", branches);
       List<String> serviceChanges = codeChangeRepository.getServiceChanges(pipeline.getServiceId())
               .stream().filter(codeChange -> branches.contains(codeChange.getChangeBranch()))
-              .map(CodeChangeDto::getChangeId).collect(Collectors.toList());
+              .map(CodeChangeBO::getChangeId).collect(Collectors.toList());
       log.info("code changes id ={}", serviceChanges);
       boolean batchDeleteCodeChange = codeChangeRepository.batchDeleteCodeChange(serviceChanges);
       boolean deletePublishLine = publishBindRepository.deleteServicePublishes(pipeline.getServiceId());

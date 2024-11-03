@@ -9,8 +9,8 @@ import com.zj.common.enums.ProcessStatus;
 import com.zj.common.entity.dto.StopDispatch;
 import com.zj.common.adapter.invoker.IClientInvoker;
 import com.zj.common.utils.IpUtils;
-import com.zj.domain.entity.bo.pipeline.NodeRecordDto;
-import com.zj.domain.entity.bo.pipeline.PipelineHistoryDto;
+import com.zj.domain.entity.bo.pipeline.NodeRecordBO;
+import com.zj.domain.entity.bo.pipeline.PipelineHistoryBO;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import com.zj.master.dispatch.listener.IStopEventListener;
@@ -129,7 +129,7 @@ public class PipelineExecuteProxy implements IStopEventListener {
             return null;
         }
 
-        PipelineHistoryDto pipelineHistory = pipelineHistoryRepository.getPipelineHistory(
+        PipelineHistoryBO pipelineHistory = pipelineHistoryRepository.getPipelineHistory(
                 taskNode.getHistoryId());
         if (Objects.isNull(pipelineHistory) || ProcessStatus.isCompleteStatus(
                 pipelineHistory.getPipelineStatus())) {
@@ -141,7 +141,7 @@ public class PipelineExecuteProxy implements IStopEventListener {
     }
 
 
-    public void statusChange(NodeRecordDto nodeRecord) {
+    public void statusChange(NodeRecordBO nodeRecord) {
         //1 获取流水线关联的任务
         PipelineTask pipelineTask = pipelineTaskMap.get(nodeRecord.getHistoryId());
         if (Objects.isNull(pipelineTask)) {
@@ -150,9 +150,9 @@ public class PipelineExecuteProxy implements IStopEventListener {
         }
 
         //2 节点执行完成是否触发整个流水线结束
-        NodeRecordDto nodeRecordDto = nodeRecordRepository.getRecordById(nodeRecord.getRecordId());
+        NodeRecordBO nodeRecordBO = nodeRecordRepository.getRecordById(nodeRecord.getRecordId());
         NodeStatusChange statusChange = buildStatusChange(pipelineTask, nodeRecord.getHistoryId(),
-                nodeRecordDto.getNodeId(), ProcessStatus.exchange(nodeRecord.getStatus()));
+                nodeRecordBO.getNodeId(), ProcessStatus.exchange(nodeRecord.getStatus()));
         pipelineEndProcessor.statusChange(statusChange);
 
         //3 继续递归执行下一个任务

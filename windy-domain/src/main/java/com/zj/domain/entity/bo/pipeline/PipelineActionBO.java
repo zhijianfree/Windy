@@ -1,5 +1,6 @@
 package com.zj.domain.entity.bo.pipeline;
 
+import com.zj.common.entity.pipeline.CompareParameter;
 import lombok.Data;
 
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.Map;
  * @since 2023/3/27
  */
 @Data
-public class PipelineActionDto {
+public class PipelineActionBO {
   /**
    * 执行动作Id
    */
@@ -56,12 +57,12 @@ public class PipelineActionDto {
    */
   private String queryUrl;
 
-  private CompareResult loopExpression;
+  private CompareParameter loopExpression;
 
   /**
    * 查询结果状态比较逻辑
    */
-  private List<CompareResult> compareResults;
+  private List<CompareParameter> compareResults;
 
   /**
    * 节点执行方式

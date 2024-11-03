@@ -2,7 +2,7 @@ package com.zj.pipeline.rest;
 
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.entity.dto.ResponseMeta;
-import com.zj.domain.entity.bo.pipeline.PipelineDto;
+import com.zj.domain.entity.bo.pipeline.PipelineBO;
 import com.zj.pipeline.service.PipelineService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,28 +33,28 @@ public class PipelineRest {
 
   @ResponseBody
   @GetMapping("/detail/{pipelineId}")
-  public ResponseMeta<PipelineDto> queryPipeline(@PathVariable("pipelineId") String pipelineId) {
+  public ResponseMeta<PipelineBO> queryPipeline(@PathVariable("pipelineId") String pipelineId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, pipelineService.getPipelineDetail(pipelineId));
   }
 
   @ResponseBody
   @PostMapping("")
-  public ResponseMeta<String> createPipeline(@Validated @RequestBody PipelineDto pipelineDTO) {
-    return new ResponseMeta<String>(ErrorCode.SUCCESS, pipelineService.createPipeline(pipelineDTO));
+  public ResponseMeta<String> createPipeline(@Validated @RequestBody PipelineBO pipelineBO) {
+    return new ResponseMeta<String>(ErrorCode.SUCCESS, pipelineService.createPipeline(pipelineBO));
   }
 
   @ResponseBody
   @PutMapping("/{service}/{pipelineId}")
   public ResponseMeta<Boolean> updatePipeline(@PathVariable("service") String service,
       @PathVariable("pipelineId") String pipelineId,
-      @RequestBody PipelineDto pipelineDTO) {
+      @RequestBody PipelineBO pipelineBO) {
     return new ResponseMeta<Boolean>(ErrorCode.SUCCESS,
-        pipelineService.updatePipeline(service, pipelineId, pipelineDTO));
+        pipelineService.updatePipeline(service, pipelineId, pipelineBO));
   }
 
   @ResponseBody
   @GetMapping("/{serviceId}/list")
-  public ResponseMeta<List<PipelineDto>> listPipelines(
+  public ResponseMeta<List<PipelineBO>> listPipelines(
       @PathVariable("serviceId") String serviceId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, pipelineService.listPipelines(serviceId));
   }

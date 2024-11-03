@@ -5,7 +5,7 @@ import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.NotifyType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.entity.dto.ResultEvent;
-import com.zj.domain.entity.bo.pipeline.NodeRecordDto;
+import com.zj.domain.entity.bo.pipeline.NodeRecordBO;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.master.dispatch.pipeline.PipelineExecuteProxy;
@@ -45,18 +45,18 @@ public class UpdateNodeRecordEvent implements INotifyEvent {
     String string = JSON.toJSONString(resultEvent.getParams());
     log.info("receive node record update event id = {} event={}", resultEvent.getExecuteId(),
         resultEvent.getExecuteType());
-    NodeRecordDto oldNodeRecord = nodeRecordRepository.getRecordById(resultEvent.getExecuteId());
+    NodeRecordBO oldNodeRecord = nodeRecordRepository.getRecordById(resultEvent.getExecuteId());
     if (ProcessStatus.isCompleteStatus(oldNodeRecord.getStatus()) && !Objects.equals(
         ExecuteType.APPROVAL.name(), resultEvent.getExecuteType())) {
       log.info("node record status completed,not update recordId={}", oldNodeRecord.getRecordId());
       return true;
     }
 
-    NodeRecordDto nodeRecord = JSON.parseObject(string, NodeRecordDto.class);
+    NodeRecordBO nodeRecord = JSON.parseObject(string, NodeRecordBO.class);
     nodeRecord.setRecordId(resultEvent.getExecuteId());
     nodeRecord.setStatus(resultEvent.getStatus().getType());
     Optional.ofNullable(resultEvent.getContext()).ifPresent(
-        context -> nodeRecord.setPipelineContext(JSON.toJSONString(resultEvent.getContext())));
+        context -> nodeRecord.setPipelineContext(resultEvent.getContext()));
 
     boolean updateStatus = nodeRecordRepository.updateNodeRecord(nodeRecord);
     subTaskLogRepository.updateLogStatus(resultEvent.getLogId(), nodeRecord.getNodeId(),

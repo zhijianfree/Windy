@@ -2,7 +2,7 @@ package com.zj.pipeline.service;
 
 import com.zj.common.entity.dto.PageSize;
 import com.zj.common.adapter.uuid.UniqueIdService;
-import com.zj.domain.entity.bo.pipeline.PipelineActionDto;
+import com.zj.domain.entity.bo.pipeline.PipelineActionBO;
 import com.zj.domain.repository.pipeline.IPipelineActionRepository;
 import java.util.List;
 
@@ -24,16 +24,16 @@ public class PipelineActionService {
     this.pipelineActionRepository = pipelineActionRepository;
   }
 
-  public Boolean createAction(PipelineActionDto actionDto) {
+  public Boolean createAction(PipelineActionBO actionDto) {
     actionDto.setActionId(uniqueIdService.getUniqueId());
     return pipelineActionRepository.createAction(actionDto);
   }
 
-  public PipelineActionDto getAction(String actionId) {
+  public PipelineActionBO getAction(String actionId) {
     return pipelineActionRepository.getAction(actionId);
   }
 
-  public Boolean updateAction(PipelineActionDto actionDto) {
+  public Boolean updateAction(PipelineActionBO actionDto) {
     return pipelineActionRepository.updateAction(actionDto);
   }
 
@@ -45,11 +45,11 @@ public class PipelineActionService {
     return pipelineActionRepository.deleteAction(actionId);
   }
 
-  public PageSize<PipelineActionDto> getActions(Integer page, Integer size, String name) {
+  public PageSize<PipelineActionBO> getActions(Integer page, Integer size, String name) {
     return pipelineActionRepository.getActions(page, size, name);
   }
 
-  public List<PipelineActionDto> getActionsByNodeId(String nodeId) {
+  public List<PipelineActionBO> getActionsByNodeId(String nodeId) {
     return pipelineActionRepository.getActionsByNodeId(nodeId);
   }
 

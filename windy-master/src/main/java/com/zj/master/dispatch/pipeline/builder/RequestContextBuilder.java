@@ -4,11 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.Position;
 import com.zj.domain.entity.bo.pipeline.ActionParam;
-import com.zj.domain.entity.bo.pipeline.PipelineActionDto;
+import com.zj.domain.entity.bo.pipeline.PipelineActionBO;
 import com.zj.master.entity.vo.ActionDetail;
 import com.zj.master.entity.vo.ApprovalContext;
 import com.zj.master.entity.vo.BuildCodeContext;
-import com.zj.master.entity.vo.ConfigDetail;
+import com.zj.common.entity.pipeline.ConfigDetail;
 import com.zj.master.entity.vo.DeployContext;
 import com.zj.master.entity.vo.FeatureContext;
 import com.zj.master.entity.vo.HttpContext;
@@ -47,7 +47,7 @@ public class RequestContextBuilder {
     }
 
     public static RequestContext createContext(ActionDetail actionDetail) {
-        PipelineActionDto action = actionDetail.getAction();
+        PipelineActionBO action = actionDetail.getAction();
         Function<ActionDetail, RequestContext> contextFunc = factoryMap.get(action.getExecuteType());
         if (Objects.isNull(contextFunc)) {
             log.info("can not find context function type={}", action.getExecuteType());

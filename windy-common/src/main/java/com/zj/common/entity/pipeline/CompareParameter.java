@@ -1,4 +1,4 @@
-package com.zj.domain.entity.bo.pipeline;
+package com.zj.common.entity.pipeline;
 
 import lombok.Data;
 
@@ -7,7 +7,7 @@ import lombok.Data;
  * @since 2023/3/29
  */
 @Data
-public class CompareResult {
+public class CompareParameter {
 
   private String compareKey;
 

@@ -6,7 +6,7 @@ import com.zj.common.adapter.invoker.IMasterInvoker;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.common.entity.dto.ClientCollect;
 import com.zj.common.entity.dto.MasterCollect;
-import com.zj.domain.entity.bo.pipeline.SystemConfigDto;
+import com.zj.domain.entity.bo.pipeline.SystemConfigBO;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
 import com.zj.domain.entity.vo.MavenConfigVo;
@@ -32,17 +32,17 @@ public class SystemConfigService {
   }
 
 
-  public List<SystemConfigDto> listSystemConfigs() {
+  public List<SystemConfigBO> listSystemConfigs() {
     return systemConfigRepository.getAllConfigs();
   }
 
-  public String createSystemConfig(SystemConfigDto systemConfigDto) {
-    systemConfigDto.setConfigId(uniqueIdService.getUniqueId());
-    return systemConfigRepository.saveConfig(systemConfigDto) ? systemConfigDto.getConfigId()
+  public String createSystemConfig(SystemConfigBO systemConfigBO) {
+    systemConfigBO.setConfigId(uniqueIdService.getUniqueId());
+    return systemConfigRepository.saveConfig(systemConfigBO) ? systemConfigBO.getConfigId()
         : null;
   }
 
-  public Boolean updateSystemConfig(SystemConfigDto systemConfig) {
+  public Boolean updateSystemConfig(SystemConfigBO systemConfig) {
     return systemConfigRepository.updateConfig(systemConfig);
   }
 
@@ -50,7 +50,7 @@ public class SystemConfigService {
     return systemConfigRepository.deleteConfig(configId);
   }
 
-  public SystemConfigDto getSystemConfig(String configId) {
+  public SystemConfigBO getSystemConfig(String configId) {
     return systemConfigRepository.getSystemConfig(configId);
   }
 

@@ -3,7 +3,7 @@ package com.zj.domain.entity.bo.pipeline;
 import lombok.Data;
 
 @Data
-public class SystemConfigDto {
+public class SystemConfigBO {
     /**
      * 配置Id
      * */

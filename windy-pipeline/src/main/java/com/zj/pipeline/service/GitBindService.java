@@ -7,8 +7,8 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.adapter.git.GitAccessInfo;
 import com.zj.common.entity.pipeline.ServiceConfig;
 import com.zj.common.adapter.uuid.UniqueIdService;
-import com.zj.domain.entity.bo.pipeline.BindBranchDto;
-import com.zj.domain.entity.bo.pipeline.PipelineDto;
+import com.zj.domain.entity.bo.pipeline.BindBranchBO;
+import com.zj.domain.entity.bo.pipeline.PipelineBO;
 import com.zj.domain.entity.bo.service.MicroserviceDto;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
 import com.zj.common.adapter.git.IGitRepositoryHandler;
@@ -54,48 +54,48 @@ public class GitBindService {
     webhookMap = webhooks.stream().collect(Collectors.toMap(IGitWebhook::platform, webhook -> webhook));
   }
 
-  public String createGitBind(BindBranchDto bindBranchDto) {
-    List<BindBranchDto> bindDtoList = listGitBinds(bindBranchDto.getPipelineId());
-    Optional<BindBranchDto> optional = bindDtoList.stream()
-        .filter(gitBind -> Objects.equals(gitBind.getGitBranch(), bindBranchDto.getGitBranch()))
+  public String createGitBind(BindBranchBO bindBranchBO) {
+    List<BindBranchBO> bindDtoList = listGitBinds(bindBranchBO.getPipelineId());
+    Optional<BindBranchBO> optional = bindDtoList.stream()
+        .filter(gitBind -> Objects.equals(gitBind.getGitBranch(), bindBranchBO.getGitBranch()))
         .findAny();
     if (optional.isPresent()) {
       throw new ApiException(ErrorCode.BRANCH_ALREADY_BIND);
     }
 
-    bindBranchDto.setBindId(uniqueIdService.getUniqueId());
-    boolean result = gitBindRepository.saveGitBranch(bindBranchDto);
-    return result ? bindBranchDto.getBindId() : "";
+    bindBranchBO.setBindId(uniqueIdService.getUniqueId());
+    boolean result = gitBindRepository.saveGitBranch(bindBranchBO);
+    return result ? bindBranchBO.getBindId() : "";
   }
 
-  public List<BindBranchDto> listGitBinds(String pipelineId) {
+  public List<BindBranchBO> listGitBinds(String pipelineId) {
     checkPipelineExist(pipelineId);
     return gitBindRepository.getPipelineRelatedBranches(pipelineId);
   }
 
   @Transactional
-  public Boolean updateGitBind(BindBranchDto bindBranchDto) {
-    checkPipelineExist(bindBranchDto.getPipelineId());
+  public Boolean updateGitBind(BindBranchBO bindBranchBO) {
+    checkPipelineExist(bindBranchBO.getPipelineId());
 
     //解绑其他分支
-    List<BindBranchDto> branches = gitBindRepository.getPipelineRelatedBranches(
-        bindBranchDto.getPipelineId());
+    List<BindBranchBO> branches = gitBindRepository.getPipelineRelatedBranches(
+        bindBranchBO.getPipelineId());
     List<String> unbindBranches = branches.stream().filter(
             branch -> branch.getIsChoose() && !Objects.equals(branch.getGitBranch(),
-                bindBranchDto.getGitBranch())).map(BindBranchDto::getBindId)
+                bindBranchBO.getGitBranch())).map(BindBranchBO::getBindId)
         .collect(Collectors.toList());
     if (CollectionUtils.isNotEmpty(unbindBranches)) {
       gitBindRepository.batchUnbindBranches(unbindBranches);
     }
 
-    BindBranchDto gitBind = getGitBind(bindBranchDto.getBindId());
+    BindBranchBO gitBind = getGitBind(bindBranchBO.getBindId());
     if (Objects.isNull(gitBind)) {
       throw new ApiException(ErrorCode.NOT_FOUND_PIPELINE_GIT_BIND);
     }
-    return gitBindRepository.updateGitBranch(bindBranchDto);
+    return gitBindRepository.updateGitBranch(bindBranchBO);
   }
 
-  private BindBranchDto getGitBind(String bindId) {
+  private BindBranchBO getGitBind(String bindId) {
     return gitBindRepository.getGitBranch(bindId);
   }
 
@@ -105,8 +105,8 @@ public class GitBindService {
   }
 
   private void checkPipelineExist(String pipelineId) {
-    PipelineDto pipelineDTO = pipelineService.getPipeline(pipelineId);
-    if (Objects.isNull(pipelineDTO)) {
+    PipelineBO pipelineBO = pipelineService.getPipeline(pipelineId);
+    if (Objects.isNull(pipelineBO)) {
       throw new ApiException(ErrorCode.NOT_FOUND_PIPELINE);
     }
   }

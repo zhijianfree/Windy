@@ -9,17 +9,32 @@ import lombok.Data;
  * @since 2022/6/22
  */
 @Data
-public class PipelineStageDto {
+public class PipelineStageBO {
 
+  /**
+   * 阶段ID
+   */
   private String stageId;
 
+  /**
+   * 阶段名称
+   */
   @NotEmpty
   private String stageName;
 
+  /**
+   * 阶段类型
+   */
   private Integer type;
 
+  /**
+   * 流水线ID
+   */
   private String pipelineId;
 
+  /**
+   * 排序
+   */
   private Integer sortOrder;
 
   /**
@@ -28,6 +43,6 @@ public class PipelineStageDto {
   private String configId;
 
   @NotEmpty
-  private List<PipelineNodeDto> nodes;
+  private List<PipelineNodeBO> nodes;
 
 }

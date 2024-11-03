@@ -12,7 +12,7 @@ import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.domain.entity.bo.demand.BugBO;
 import com.zj.domain.entity.bo.demand.DemandBO;
 import com.zj.domain.entity.bo.demand.WorkTaskBO;
-import com.zj.domain.entity.bo.pipeline.CodeChangeDto;
+import com.zj.domain.entity.bo.pipeline.CodeChangeBO;
 import com.zj.domain.entity.bo.pipeline.RelationDemandBug;
 import com.zj.domain.entity.bo.service.MicroserviceDto;
 import com.zj.domain.repository.demand.IBugRepository;
@@ -64,12 +64,12 @@ public class CodeChangeService {
         this.workTaskRepository = workTaskRepository;
     }
 
-    public CodeChangeDto getCodeChange(String serviceId, String codeChangeId) {
+    public CodeChangeBO getCodeChange(String serviceId, String codeChangeId) {
         Assert.notEmpty(serviceId, "serviceId can not be null");
         return codeChangeRepository.getCodeChange(codeChangeId);
     }
 
-    public String createCodeChange(CodeChangeDto codeChange) {
+    public String createCodeChange(CodeChangeBO codeChange) {
         MicroserviceDto service = checkServiceExist(codeChange.getServiceId());
         GitAccessInfo gitAccessInfo = Optional.ofNullable(service.getServiceConfig())
                 .map(config -> JSON.parseObject(config, ServiceConfig.class))
@@ -83,8 +83,8 @@ public class CodeChangeService {
         return codeChangeRepository.saveCodeChange(codeChange) ? codeChange.getChangeId() : "";
     }
 
-    public boolean updateCodeChange(String serviceId, String codeChangeId, CodeChangeDto codeChange) {
-        CodeChangeDto changeDto = getCodeChange(serviceId, codeChangeId);
+    public boolean updateCodeChange(String serviceId, String codeChangeId, CodeChangeBO codeChange) {
+        CodeChangeBO changeDto = getCodeChange(serviceId, codeChangeId);
         if (Objects.isNull(changeDto)) {
             throw new ApiException(ErrorCode.NOT_FOUND_CODE_CHANGE);
         }
@@ -94,14 +94,14 @@ public class CodeChangeService {
         return codeChangeRepository.updateCodeChange(codeChange);
     }
 
-    public List<CodeChangeDto> listCodeChanges(String serviceId) {
+    public List<CodeChangeBO> listCodeChanges(String serviceId) {
         checkServiceExist(serviceId);
         return codeChangeRepository.getServiceChanges(serviceId);
     }
 
     public Boolean deleteCodeChange(String serviceId, String codeChangeId) {
         MicroserviceDto service = checkServiceExist(serviceId);
-        CodeChangeDto codeChange = getCodeChange(serviceId, codeChangeId);
+        CodeChangeBO codeChange = getCodeChange(serviceId, codeChangeId);
         GitAccessInfo gitAccessInfo = Optional.ofNullable(service.getServiceConfig())
                 .map(config -> JSON.parseObject(config, ServiceConfig.class))
                 .map(ServiceConfig::getGitAccessInfo).filter(access -> StringUtils.isNotBlank(access.getAccessToken()))

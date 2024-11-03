@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
  */
 
 @Data
-public class BindBranchDto {
+public class BindBranchBO {
 
     /**
      * 绑定Id

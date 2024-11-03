@@ -1,5 +1,6 @@
 package com.zj.domain.entity.bo.pipeline;
 
+import com.zj.common.entity.pipeline.PipelineConfig;
 import lombok.Data;
 import javax.validation.constraints.NotEmpty;
 
@@ -8,7 +9,7 @@ import javax.validation.constraints.NotEmpty;
  * @since 2021/10/15
  */
 @Data
-public class PipelineHistoryDto {
+public class PipelineHistoryBO {
 
   /**
    * 流水线Id
@@ -16,6 +17,9 @@ public class PipelineHistoryDto {
   @NotEmpty
   private String pipelineId;
 
+  /**
+   * 历史ID
+   */
   private String historyId;
 
   /**
@@ -33,7 +37,7 @@ public class PipelineHistoryDto {
   /**
    * 流水线配置
    * */
-  private String pipelineConfig;
+  private PipelineConfig pipelineConfig;
 
   /**
    * 流水线结果
@@ -46,5 +50,8 @@ public class PipelineHistoryDto {
    * */
   private Long createTime;
 
+  /**
+   * 修改时间
+   */
   private Long updateTime;
 }

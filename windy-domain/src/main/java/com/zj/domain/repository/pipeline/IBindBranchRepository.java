@@ -1,6 +1,6 @@
 package com.zj.domain.repository.pipeline;
 
-import com.zj.domain.entity.bo.pipeline.BindBranchDto;
+import com.zj.domain.entity.bo.pipeline.BindBranchBO;
 import java.util.List;
 
 /**
@@ -9,18 +9,18 @@ import java.util.List;
  */
 public interface IBindBranchRepository {
 
-  boolean saveGitBranch(BindBranchDto bindBranchDto);
+  boolean saveGitBranch(BindBranchBO bindBranchBO);
 
-  List<BindBranchDto> getPipelineRelatedBranches(String pipelineId);
+  List<BindBranchBO> getPipelineRelatedBranches(String pipelineId);
 
   /**
    * 获取流水线绑定的分支
    * */
-  BindBranchDto getPipelineBindBranch(String pipelineId);
+  BindBranchBO getPipelineBindBranch(String pipelineId);
 
-  BindBranchDto getGitBranch(String bindId);
+  BindBranchBO getGitBranch(String bindId);
 
-  Boolean updateGitBranch(BindBranchDto bindBranchDto);
+  Boolean updateGitBranch(BindBranchBO bindBranchBO);
 
   Boolean deleteGitBranch(String bindId);
 

@@ -1,6 +1,6 @@
 package com.zj.domain.repository.pipeline;
 
-import com.zj.domain.entity.bo.pipeline.CodeChangeDto;
+import com.zj.domain.entity.bo.pipeline.CodeChangeBO;
 import java.util.List;
 
 /**
@@ -9,13 +9,13 @@ import java.util.List;
  */
 public interface ICodeChangeRepository {
 
-  CodeChangeDto getCodeChange(String codeChangeId);
+  CodeChangeBO getCodeChange(String codeChangeId);
 
-  boolean saveCodeChange(CodeChangeDto codeChange);
+  boolean saveCodeChange(CodeChangeBO codeChange);
 
-  boolean updateCodeChange(CodeChangeDto codeChange);
+  boolean updateCodeChange(CodeChangeBO codeChange);
 
-  List<CodeChangeDto> getServiceChanges(String serviceId);
+  List<CodeChangeBO> getServiceChanges(String serviceId);
 
   boolean deleteCodeChange(String codeChangeId);
 

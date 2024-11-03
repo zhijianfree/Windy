@@ -41,7 +41,7 @@ public class PipelineNode {
   /**
    * 配置信息
    * */
-  private String configDetail;
+  private String config;
 
   private Long createTime;
 

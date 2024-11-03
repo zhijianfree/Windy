@@ -3,7 +3,7 @@ package com.zj.domain.repository.pipeline.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.bo.pipeline.CodeChangeDto;
+import com.zj.domain.entity.bo.pipeline.CodeChangeBO;
 import com.zj.domain.entity.po.pipeline.CodeChange;
 import com.zj.domain.mapper.pipeline.CodeChangeMapper;
 import com.zj.domain.repository.pipeline.ICodeChangeRepository;
@@ -23,14 +23,14 @@ public class CodeChangeRepository extends ServiceImpl<CodeChangeMapper, CodeChan
     ICodeChangeRepository {
 
   @Override
-  public CodeChangeDto getCodeChange(String codeChangeId) {
+  public CodeChangeBO getCodeChange(String codeChangeId) {
     CodeChange codeChange = getOne(
         Wrappers.lambdaQuery(CodeChange.class).eq(CodeChange::getChangeId, codeChangeId));
-    return OrikaUtil.convert(codeChange, CodeChangeDto.class);
+    return OrikaUtil.convert(codeChange, CodeChangeBO.class);
   }
 
   @Override
-  public boolean saveCodeChange(CodeChangeDto codeChange) {
+  public boolean saveCodeChange(CodeChangeBO codeChange) {
     CodeChange change = OrikaUtil.convert(codeChange, CodeChange.class);
     long dateNow = System.currentTimeMillis();
     change.setCreateTime(dateNow);
@@ -39,18 +39,18 @@ public class CodeChangeRepository extends ServiceImpl<CodeChangeMapper, CodeChan
   }
 
   @Override
-  public boolean updateCodeChange(CodeChangeDto codeChangeDto) {
-    CodeChange codeChange = OrikaUtil.convert(codeChangeDto, CodeChange.class);
+  public boolean updateCodeChange(CodeChangeBO codeChangeBO) {
+    CodeChange codeChange = OrikaUtil.convert(codeChangeBO, CodeChange.class);
     codeChange.setUpdateTime(System.currentTimeMillis());
     return update(codeChange, Wrappers.lambdaUpdate(CodeChange.class)
         .eq(CodeChange::getChangeId, codeChange.getChangeId()));
   }
 
   @Override
-  public List<CodeChangeDto> getServiceChanges(String serviceId) {
+  public List<CodeChangeBO> getServiceChanges(String serviceId) {
     List<CodeChange> codeChanges = list(
         Wrappers.lambdaQuery(CodeChange.class).eq(CodeChange::getServiceId, serviceId));
-    return OrikaUtil.convertList(codeChanges, CodeChangeDto.class);
+    return OrikaUtil.convertList(codeChanges, CodeChangeBO.class);
   }
 
   @Override

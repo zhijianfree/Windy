@@ -1,13 +1,15 @@
 package com.zj.domain.repository.pipeline.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.entity.pipeline.PipelineConfig;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.bo.pipeline.PipelineDto;
-import com.zj.domain.entity.bo.pipeline.PipelineHistoryDto;
+import com.zj.domain.entity.bo.pipeline.PipelineBO;
+import com.zj.domain.entity.bo.pipeline.PipelineHistoryBO;
 import com.zj.domain.entity.po.pipeline.PipelineHistory;
 import com.zj.domain.mapper.pipeline.PipelineHistoryMapper;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
@@ -15,6 +17,7 @@ import com.zj.domain.repository.pipeline.IPipelineRepository;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
@@ -36,27 +39,27 @@ public class PipelineHistoryRepository extends
   }
 
   @Override
-  public PipelineHistoryDto getPipelineHistory(String historyId) {
+  public PipelineHistoryBO getPipelineHistory(String historyId) {
     PipelineHistory pipelineHistory = getOne(
         Wrappers.lambdaQuery(PipelineHistory.class).eq(PipelineHistory::getHistoryId, historyId));
     if (Objects.isNull(pipelineHistory)) {
       return null;
     }
 
-    return OrikaUtil.convert(pipelineHistory, PipelineHistoryDto.class);
+    return cenvertPipelineHistoryBO(pipelineHistory);
   }
 
   @Override
-  public boolean createPipelineHistory(PipelineHistoryDto pipelineHistoryDto) {
-    PipelineHistory history = OrikaUtil.convert(pipelineHistoryDto, PipelineHistory.class);
+  public boolean createPipelineHistory(PipelineHistoryBO pipelineHistoryBO) {
+    PipelineHistory history = convertPipelineHistory(pipelineHistoryBO);
     history.setCreateTime(System.currentTimeMillis());
     history.setUpdateTime(System.currentTimeMillis());
     return save(history);
   }
 
   @Override
-  public List<PipelineHistoryDto> listPipelineHistories(String pipelineId) {
-    PipelineDto pipeline = pipelineRepository.getPipeline(pipelineId);
+  public List<PipelineHistoryBO> listPipelineHistories(String pipelineId) {
+    PipelineBO pipeline = pipelineRepository.getPipeline(pipelineId);
     if (Objects.isNull(pipeline)) {
       throw new ApiException(ErrorCode.NOT_FOUND_PIPELINE);
     }
@@ -69,12 +72,12 @@ public class PipelineHistoryRepository extends
     }
 
     return pipelineHistories.stream()
-        .map(pipelineHistory -> OrikaUtil.convert(pipelineHistory, PipelineHistoryDto.class))
+        .map(PipelineHistoryRepository::cenvertPipelineHistoryBO)
         .collect(Collectors.toList());
   }
 
   @Override
-  public PipelineHistoryDto getLatestPipelineHistory(String pipelineId) {
+  public PipelineHistoryBO getLatestPipelineHistory(String pipelineId) {
     PipelineHistory pipelineHistory = getOne(
         Wrappers.lambdaQuery(PipelineHistory.class).eq(PipelineHistory::getPipelineId, pipelineId)
             .orderByDesc(PipelineHistory::getCreateTime).last(LAST_SQL));
@@ -82,7 +85,7 @@ public class PipelineHistoryRepository extends
       return null;
     }
 
-    return OrikaUtil.convert(pipelineHistory, PipelineHistoryDto.class);
+    return cenvertPipelineHistoryBO(pipelineHistory);
   }
 
   @Override
@@ -93,5 +96,18 @@ public class PipelineHistoryRepository extends
     pipelineHistory.setUpdateTime(System.currentTimeMillis());
     return update(pipelineHistory,
         Wrappers.lambdaUpdate(PipelineHistory.class).eq(PipelineHistory::getHistoryId, historyId));
+  }
+
+  private static PipelineHistoryBO cenvertPipelineHistoryBO(PipelineHistory pipelineHistory) {
+    PipelineHistoryBO pipelineHistoryBO = OrikaUtil.convert(pipelineHistory, PipelineHistoryBO.class);
+    pipelineHistoryBO.setPipelineConfig(JSON.parseObject(pipelineHistory.getConfig(), PipelineConfig.class));
+    return pipelineHistoryBO;
+  }
+
+  private static PipelineHistory convertPipelineHistory(PipelineHistoryBO pipelineHistoryBO) {
+    PipelineHistory pipelineHistory = OrikaUtil.convert(pipelineHistoryBO, PipelineHistory.class);
+    Optional.ofNullable(pipelineHistoryBO.getPipelineConfig()).ifPresent(config ->
+            pipelineHistory.setConfig(JSON.toJSONString(config)));
+    return pipelineHistory;
   }
 }

@@ -1,5 +1,6 @@
 package com.zj.domain.entity.bo.pipeline;
 
+import com.zj.common.entity.pipeline.PipelineConfig;
 import lombok.Data;
 
 import javax.validation.constraints.Max;
@@ -13,7 +14,7 @@ import java.util.List;
  * @since 2021/9/28
  */
 @Data
-public class PipelineDto {
+public class PipelineBO {
 
   /**
    * 流水线Id
@@ -56,7 +57,7 @@ public class PipelineDto {
   /**
    * 流水线配置
    */
-  private String pipelineConfig;
+  private PipelineConfig pipelineConfig;
 
   /**
    * 流水线状态
@@ -64,5 +65,5 @@ public class PipelineDto {
   private Integer pipelineStatus;
 
   @NotEmpty
-  private List<PipelineStageDto> stageList;
+  private List<PipelineStageBO> stageList;
 }

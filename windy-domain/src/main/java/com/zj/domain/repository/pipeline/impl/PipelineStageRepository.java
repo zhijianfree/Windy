@@ -3,7 +3,7 @@ package com.zj.domain.repository.pipeline.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.bo.pipeline.PipelineStageDto;
+import com.zj.domain.entity.bo.pipeline.PipelineStageBO;
 import com.zj.domain.entity.po.pipeline.PipelineStage;
 import com.zj.domain.mapper.pipeline.PipelineStageMapper;
 import com.zj.domain.repository.pipeline.IPipelineStageRepository;
@@ -25,14 +25,14 @@ public class PipelineStageRepository extends
   }
 
   @Override
-  public PipelineStageDto getPipelineStage(String stageId) {
+  public PipelineStageBO getPipelineStage(String stageId) {
     PipelineStage pipelineStage = getOne(Wrappers.lambdaQuery(PipelineStage.class)
         .eq(PipelineStage::getStageId, stageId));
-    return OrikaUtil.convert(pipelineStage, PipelineStageDto.class);
+    return OrikaUtil.convert(pipelineStage, PipelineStageBO.class);
   }
 
   @Override
-  public boolean updateStage(PipelineStageDto stageDto) {
+  public boolean updateStage(PipelineStageBO stageDto) {
     PipelineStage pipelineStage = OrikaUtil.convert(stageDto, PipelineStage.class);
     pipelineStage.setUpdateTime(System.currentTimeMillis());
     return update(pipelineStage, Wrappers.lambdaUpdate(PipelineStage.class)
@@ -46,8 +46,8 @@ public class PipelineStageRepository extends
   }
 
   @Override
-  public void saveStage(PipelineStageDto pipelineStageDto) {
-    PipelineStage pipelineStage = OrikaUtil.convert(pipelineStageDto, PipelineStage.class);
+  public void saveStage(PipelineStageBO pipelineStageBO) {
+    PipelineStage pipelineStage = OrikaUtil.convert(pipelineStageBO, PipelineStage.class);
     Long currentTime = System.currentTimeMillis();
     pipelineStage.setCreateTime(currentTime);
     pipelineStage.setUpdateTime(currentTime);
@@ -55,11 +55,11 @@ public class PipelineStageRepository extends
   }
 
   @Override
-  public List<PipelineStageDto> sortPipelineNodes(String pipelineId) {
+  public List<PipelineStageBO> sortPipelineNodes(String pipelineId) {
     List<PipelineStage> pipelineStages = list(
         Wrappers.lambdaQuery(PipelineStage.class).eq(PipelineStage::getPipelineId, pipelineId)
             .orderByAsc(PipelineStage::getType));
 
-    return OrikaUtil.convertList(pipelineStages, PipelineStageDto.class);
+    return OrikaUtil.convertList(pipelineStages, PipelineStageBO.class);
   }
 }

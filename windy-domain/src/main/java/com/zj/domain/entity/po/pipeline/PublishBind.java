@@ -41,7 +41,13 @@ public class PublishBind {
    */
   private Integer status;
 
+  /**
+   * 创建时间
+   * */
   private Long createTime;
 
+  /**
+   * 创建时间
+   * */
   private Long updateTime;
 }

@@ -1,6 +1,6 @@
 package com.zj.pipeline.service;
 
-import com.zj.domain.entity.bo.pipeline.PipelineNodeDto;
+import com.zj.domain.entity.bo.pipeline.PipelineNodeBO;
 import com.zj.domain.repository.pipeline.IPipelineNodeRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ public class PipelineNodeService {
     pipelineNodeRepository.deleteNodeIds(nodeIds);
   }
 
-  public void updateNode(PipelineNodeDto dto) {
+  public void updateNode(PipelineNodeBO dto) {
     pipelineNodeRepository.updateNode(dto);
   }
 
@@ -30,11 +30,11 @@ public class PipelineNodeService {
     pipelineNodeRepository.deleteByPipelineId(pipelineId);
   }
 
-  public void saveNode(PipelineNodeDto pipelineNode) {
+  public void saveNode(PipelineNodeBO pipelineNode) {
     pipelineNodeRepository.saveNode(pipelineNode);
   }
 
-  public List<PipelineNodeDto> getPipelineNodes(String pipelineId) {
+  public List<PipelineNodeBO> getPipelineNodes(String pipelineId) {
     return pipelineNodeRepository.getPipelineNodes(pipelineId);
   }
 }
