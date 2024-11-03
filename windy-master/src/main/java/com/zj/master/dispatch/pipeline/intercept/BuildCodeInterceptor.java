@@ -1,16 +1,16 @@
 package com.zj.master.dispatch.pipeline.intercept;
 
-import com.alibaba.fastjson.JSON;
+import com.zj.common.entity.pipeline.PipelineConfig;
+import com.zj.common.entity.pipeline.ServiceConfig;
+import com.zj.common.entity.pipeline.ServiceContext;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.entity.pipeline.ServiceConfig;
-import com.zj.common.entity.pipeline.ServiceContext;
 import com.zj.domain.entity.bo.pipeline.BindBranchBO;
 import com.zj.domain.entity.bo.pipeline.PipelineBO;
 import com.zj.domain.entity.bo.pipeline.PipelineNodeBO;
 import com.zj.domain.entity.bo.pipeline.PublishBindBO;
-import com.zj.domain.entity.bo.service.MicroserviceDto;
+import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.domain.entity.enums.PipelineType;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
@@ -20,7 +20,6 @@ import com.zj.domain.repository.pipeline.IPublishBindRepository;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.master.entity.vo.BuildCodeContext;
-import com.zj.common.entity.pipeline.PipelineConfig;
 import com.zj.master.entity.vo.TaskNode;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
@@ -71,9 +70,8 @@ public class BuildCodeInterceptor implements INodeExecuteInterceptor {
         ImageRepositoryVo repository = configRepository.getRepository();
         PipelineNodeBO pipelineNode = pipelineNodeRepository.getPipelineNode(taskNode.getNodeId());
         PipelineBO pipeline = pipelineRepository.getPipeline(pipelineNode.getPipelineId());
-        MicroserviceDto serviceDetail = microServiceRepository.queryServiceDetail(pipeline.getServiceId());
-        String config = serviceDetail.getServiceConfig();
-        ServiceConfig serviceConfig = JSON.parseObject(config, ServiceConfig.class);
+        MicroserviceBO serviceDetail = microServiceRepository.queryServiceDetail(pipeline.getServiceId());
+        ServiceConfig serviceConfig = serviceDetail.getServiceConfig();
         if (Objects.equals(pipeline.getPipelineType(), PipelineType.PUBLISH.getType())) {
             //如果是发布流水线，则要查询发布的流水线分支
             List<PublishBindBO> servicePublishes = publishBindRepository.getServicePublishes(pipeline.getServiceId());

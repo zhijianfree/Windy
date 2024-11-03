@@ -3,7 +3,7 @@ package com.zj.service.rest;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.entity.dto.PageSize;
 import com.zj.common.entity.dto.ResponseMeta;
-import com.zj.domain.entity.bo.service.DeployEnvironmentDto;
+import com.zj.domain.entity.bo.service.DeployEnvironmentBO;
 import com.zj.service.entity.NodeInfo;
 import com.zj.service.service.EnvironmentService;
 import java.util.List;
@@ -28,23 +28,23 @@ public class EnvironmentRest {
   }
 
   @GetMapping("/environments")
-  public ResponseMeta<PageSize<DeployEnvironmentDto>> getEnvironments(@RequestParam(value = "page", defaultValue = "1") Integer page,
-      @RequestParam(value = "size", defaultValue = "10") Integer size, @RequestParam(value = "name", defaultValue = "") String name) {
+  public ResponseMeta<PageSize<DeployEnvironmentBO>> getEnvironments(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                                     @RequestParam(value = "size", defaultValue = "10") Integer size, @RequestParam(value = "name", defaultValue = "") String name) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, environmentService.getEnvironments(page, size, name));
   }
 
   @GetMapping("/environments/all")
-  public ResponseMeta<List<DeployEnvironmentDto>> getAllEnvironments() {
+  public ResponseMeta<List<DeployEnvironmentBO>> getAllEnvironments() {
     return new ResponseMeta<>(ErrorCode.SUCCESS, environmentService.getAvailableEnvs());
   }
 
   @PostMapping("/environments")
-  public ResponseMeta<Boolean> createEnvironment(@RequestBody DeployEnvironmentDto deployEnvironment) {
+  public ResponseMeta<Boolean> createEnvironment(@RequestBody DeployEnvironmentBO deployEnvironment) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, environmentService.createEnvironment(deployEnvironment));
   }
 
   @PutMapping("/environment")
-  public ResponseMeta<Boolean> updateEnvironment(@RequestBody DeployEnvironmentDto deployEnvironment) {
+  public ResponseMeta<Boolean> updateEnvironment(@RequestBody DeployEnvironmentBO deployEnvironment) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, environmentService.updateEnvironment(deployEnvironment));
   }
 
@@ -54,7 +54,7 @@ public class EnvironmentRest {
   }
 
   @GetMapping("/environments/{envId}")
-  public ResponseMeta<DeployEnvironmentDto> getEnvironment(@PathVariable("envId") String envId) {
+  public ResponseMeta<DeployEnvironmentBO> getEnvironment(@PathVariable("envId") String envId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, environmentService.getEnvironment(envId));
   }
 

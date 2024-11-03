@@ -1,8 +1,10 @@
 package com.zj.domain.entity.bo.service;
 
+import com.zj.common.entity.service.ApiParamModel;
 import com.zj.common.enums.ApiType;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -10,7 +12,7 @@ import java.util.Objects;
  * @since 2023/8/8
  */
 @Data
-public class ServiceApiDto {
+public class ServiceApiBO {
 
     private String apiId;
 
@@ -59,12 +61,12 @@ public class ServiceApiDto {
     /**
      * 请求参数
      */
-    private String requestParams;
+    private List<ApiParamModel> requestParams;
 
     /**
      * 响应参数
      */
-    private String responseParams;
+    private List<ApiParamModel> responseParams;
 
     /**
      * 请求的body类名

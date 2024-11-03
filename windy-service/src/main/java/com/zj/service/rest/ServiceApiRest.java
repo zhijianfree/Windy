@@ -3,9 +3,9 @@ package com.zj.service.rest;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.entity.feature.ExecuteTemplateVo;
 import com.zj.common.entity.dto.ResponseMeta;
-import com.zj.domain.entity.bo.service.GenerateRecordDto;
-import com.zj.domain.entity.bo.service.ServiceApiDto;
-import com.zj.domain.entity.bo.service.ServiceGenerateDto;
+import com.zj.common.entity.generate.GenerateRecordBO;
+import com.zj.domain.entity.bo.service.ServiceApiBO;
+import com.zj.domain.entity.bo.service.ServiceGenerateBO;
 import com.zj.service.entity.ApiModel;
 import com.zj.service.entity.GenerateTemplate;
 import com.zj.service.entity.ImportApiResult;
@@ -39,12 +39,12 @@ public class ServiceApiRest {
   }
 
   @GetMapping("/service/resources/{apiId}")
-  public ResponseMeta<ServiceApiDto> getServiceApi(@PathVariable("apiId") String apiId) {
+  public ResponseMeta<ServiceApiBO> getServiceApi(@PathVariable("apiId") String apiId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.getServiceApi(apiId));
   }
 
   @GetMapping("/service/{serviceId}/resources")
-  public ResponseMeta<List<ServiceApiDto>> getServiceApis(
+  public ResponseMeta<List<ServiceApiBO>> getServiceApis(
       @PathVariable("serviceId") String serviceId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.getServiceApis(serviceId));
   }
@@ -75,17 +75,17 @@ public class ServiceApiRest {
   }
 
   @PostMapping("/service/resources/generate")
-  public ResponseMeta<Boolean> generateServiceApi(@RequestBody ServiceGenerateDto generate) {
+  public ResponseMeta<Boolean> generateServiceApi(@RequestBody ServiceGenerateBO generate) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.generateServiceApi(generate));
   }
 
   @GetMapping("/service/{serviceId}/generate")
-  public ResponseMeta<ServiceGenerateDto> getGenerateParams(@PathVariable("serviceId") String serviceId) {
+  public ResponseMeta<ServiceGenerateBO> getGenerateParams(@PathVariable("serviceId") String serviceId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.getGenerateParams(serviceId));
   }
 
   @GetMapping("/service/{serviceId}/generate/log")
-  public ResponseMeta<List<GenerateRecordDto>> getLatestGenerateLog(@PathVariable("serviceId") String serviceId) {
+  public ResponseMeta<List<GenerateRecordBO>> getLatestGenerateLog(@PathVariable("serviceId") String serviceId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.getLatestGenerateLog(serviceId));
   }
 

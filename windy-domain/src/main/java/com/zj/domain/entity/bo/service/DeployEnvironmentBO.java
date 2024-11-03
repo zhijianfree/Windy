@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @TableName("environment")
-public class DeployEnvironmentDto {
+public class DeployEnvironmentBO {
 
   /**
    * 环境Id

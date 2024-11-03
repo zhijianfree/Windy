@@ -14,7 +14,7 @@ import com.zj.domain.entity.bo.demand.DemandBO;
 import com.zj.domain.entity.bo.demand.WorkTaskBO;
 import com.zj.domain.entity.bo.pipeline.CodeChangeBO;
 import com.zj.domain.entity.bo.pipeline.RelationDemandBug;
-import com.zj.domain.entity.bo.service.MicroserviceDto;
+import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.domain.repository.demand.IBugRepository;
 import com.zj.domain.repository.demand.IDemandRepository;
 import com.zj.domain.repository.demand.IWorkTaskRepository;
@@ -70,9 +70,8 @@ public class CodeChangeService {
     }
 
     public String createCodeChange(CodeChangeBO codeChange) {
-        MicroserviceDto service = checkServiceExist(codeChange.getServiceId());
+        MicroserviceBO service = checkServiceExist(codeChange.getServiceId());
         GitAccessInfo gitAccessInfo = Optional.ofNullable(service.getServiceConfig())
-                .map(config -> JSON.parseObject(config, ServiceConfig.class))
                 .map(ServiceConfig::getGitAccessInfo).filter(access -> StringUtils.isNotBlank(access.getAccessToken()))
                 .orElseGet(systemConfigRepository::getGitAccess);
         gitAccessInfo.setGitUrl(service.getGitUrl());
@@ -100,10 +99,9 @@ public class CodeChangeService {
     }
 
     public Boolean deleteCodeChange(String serviceId, String codeChangeId) {
-        MicroserviceDto service = checkServiceExist(serviceId);
+        MicroserviceBO service = checkServiceExist(serviceId);
         CodeChangeBO codeChange = getCodeChange(serviceId, codeChangeId);
         GitAccessInfo gitAccessInfo = Optional.ofNullable(service.getServiceConfig())
-                .map(config -> JSON.parseObject(config, ServiceConfig.class))
                 .map(ServiceConfig::getGitAccessInfo).filter(access -> StringUtils.isNotBlank(access.getAccessToken()))
                 .orElseGet(systemConfigRepository::getGitAccess);
         IGitRepositoryHandler repository = repositoryFactory.getRepository(gitAccessInfo.getGitType());
@@ -139,8 +137,8 @@ public class CodeChangeService {
         return Collections.emptyList();
     }
 
-    private MicroserviceDto checkServiceExist(String serviceId) {
-        MicroserviceDto serviceDetail = serviceRepository.queryServiceDetail(serviceId);
+    private MicroserviceBO checkServiceExist(String serviceId) {
+        MicroserviceBO serviceDetail = serviceRepository.queryServiceDetail(serviceId);
         if (Objects.isNull(serviceDetail)) {
             log.warn("can not find serviceId ={}", serviceId);
             throw new ApiException(ErrorCode.NOT_FOUND_SERVICE);

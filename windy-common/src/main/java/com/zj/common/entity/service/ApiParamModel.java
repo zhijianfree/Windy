@@ -1,4 +1,4 @@
-package com.zj.master.dispatch.generate;
+package com.zj.common.entity.service;
 
 import java.util.List;
 

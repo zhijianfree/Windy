@@ -34,7 +34,7 @@ public class Microservice {
     /**
      * 服务配置
      */
-    private String serviceConfig;
+    private String config;
 
     /**
      * 创建时间

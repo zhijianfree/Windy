@@ -5,7 +5,7 @@ import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.domain.entity.bo.pipeline.BindBranchBO;
 import com.zj.domain.entity.bo.pipeline.PipelineBO;
-import com.zj.domain.entity.bo.service.MicroserviceDto;
+import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.pipeline.entity.enums.PipelineExecuteType;
@@ -51,7 +51,7 @@ public abstract class AbstractWebhook implements IGitWebhook {
       return;
     }
 
-    MicroserviceDto microservice = serviceRepository.queryServiceByName(
+    MicroserviceBO microservice = serviceRepository.queryServiceByName(
         parseResult.getRepository());
     List<PipelineBO> pipelines = pipelineService.getServicePipelines(microservice.getServiceId());
     if (CollectionUtils.isEmpty(pipelines)) {

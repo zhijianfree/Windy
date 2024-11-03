@@ -10,8 +10,8 @@ import com.zj.common.entity.pipeline.ServiceConfig;
 import com.zj.domain.entity.bo.log.DispatchLogDto;
 import com.zj.domain.entity.bo.log.SubDispatchLogDto;
 import com.zj.domain.entity.bo.pipeline.NodeRecordBO;
-import com.zj.domain.entity.bo.service.DeployEnvironmentDto;
-import com.zj.domain.entity.bo.service.MicroserviceDto;
+import com.zj.domain.entity.bo.service.DeployEnvironmentBO;
+import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.domain.entity.enums.EnvType;
 import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
@@ -82,14 +82,14 @@ public class DeployNodeInterceptor implements INodeExecuteInterceptor {
             deployContext.setRequestSingle(true);
         }
 
-        DeployEnvironmentDto deployEnvironment = environmentRepository.getEnvironment(deployContext.getEnvId());
+        DeployEnvironmentBO deployEnvironment = environmentRepository.getEnvironment(deployContext.getEnvId());
         DeployParams deployParams = getDeployParams(taskNode.getServiceId(), deployEnvironment, deployContext.getImageName());
         deployContext.setParams(deployParams);
         deployContext.setDeployType(deployEnvironment.getEnvType());
         taskNode.setRequestContext(deployContext);
     }
 
-    public DeployParams getDeployParams(String serviceId, DeployEnvironmentDto environment, String imageName) {
+    public DeployParams getDeployParams(String serviceId, DeployEnvironmentBO environment, String imageName) {
         DeployParams deployParams = new DeployParams();
         if (Objects.equals(environment.getEnvType(), EnvType.K8S.getType())) {
             K8SAccessParams k8SAccessParams = JSON.parseObject(environment.getEnvParams(), K8SAccessParams.class);
@@ -101,8 +101,8 @@ public class DeployNodeInterceptor implements INodeExecuteInterceptor {
             deployParams.setSshParams(sshParams);
         }
 
-        MicroserviceDto serviceDetail = microServiceRepository.queryServiceDetail(serviceId);
-        ServiceConfig serviceConfig = JSON.parseObject(serviceDetail.getServiceConfig(), ServiceConfig.class);
+        MicroserviceBO serviceDetail = microServiceRepository.queryServiceDetail(serviceId);
+        ServiceConfig serviceConfig = serviceDetail.getServiceConfig();
         serviceConfig.setImageName(imageName);
         deployParams.setServiceConfig(serviceConfig);
         return deployParams;

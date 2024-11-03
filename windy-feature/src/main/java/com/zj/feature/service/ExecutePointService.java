@@ -6,7 +6,7 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.domain.entity.bo.feature.ExecutePointBO;
 import com.zj.domain.entity.bo.feature.ExecuteTemplateBO;
-import com.zj.domain.entity.bo.service.MicroserviceDto;
+import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.domain.repository.feature.IExecutePointRepository;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
@@ -161,9 +161,9 @@ public class ExecutePointService {
         executePointTemplate.setRequest(executeTemplate.getService());
         executePointTemplate.setMethod(executeTemplate.getMethod());
         executePointTemplate.setDescription(executeTemplate.getDescription());
-        MicroserviceDto microserviceDto = microServiceRepository.queryServiceDetail(executeTemplate.getOwner());
-        if (Objects.nonNull(microserviceDto)) {
-            executePointTemplate.setService(microserviceDto.getServiceName());
+        MicroserviceBO microserviceBO = microServiceRepository.queryServiceDetail(executeTemplate.getOwner());
+        if (Objects.nonNull(microserviceBO)) {
+            executePointTemplate.setService(microserviceBO.getServiceName());
         }
         return executePointTemplate;
     }

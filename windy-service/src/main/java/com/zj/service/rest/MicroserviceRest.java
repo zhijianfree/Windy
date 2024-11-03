@@ -4,7 +4,7 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.entity.dto.PageSize;
 import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.domain.entity.bo.auth.UserBO;
-import com.zj.domain.entity.bo.service.MicroserviceDto;
+import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.service.entity.ServiceDto;
 import com.zj.domain.entity.bo.service.ResourceMemberDto;
 import com.zj.service.service.MicroserviceService;
@@ -33,8 +33,8 @@ public class MicroserviceRest {
 
     @ResponseBody
     @GetMapping("/services")
-    public ResponseMeta<List<MicroserviceDto>> queryServices() {
-        return new ResponseMeta<List<MicroserviceDto>>(ErrorCode.SUCCESS, microservice.getServices());
+    public ResponseMeta<List<MicroserviceBO>> queryServices() {
+        return new ResponseMeta<List<MicroserviceBO>>(ErrorCode.SUCCESS, microservice.getServices());
     }
 
     @ResponseBody
@@ -45,8 +45,8 @@ public class MicroserviceRest {
     }
 
     @GetMapping("/service/{serviceId}/detail")
-    public ResponseMeta<MicroserviceDto> queryServiceDetail(@PathVariable("serviceId") String serviceId) {
-        return new ResponseMeta<MicroserviceDto>(ErrorCode.SUCCESS, microservice.queryServiceDetail(serviceId));
+    public ResponseMeta<MicroserviceBO> queryServiceDetail(@PathVariable("serviceId") String serviceId) {
+        return new ResponseMeta<MicroserviceBO>(ErrorCode.SUCCESS, microservice.queryServiceDetail(serviceId));
     }
 
     @GetMapping("/services/{serviceId}/members")

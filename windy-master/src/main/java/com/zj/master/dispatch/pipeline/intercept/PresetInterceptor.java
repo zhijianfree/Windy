@@ -1,11 +1,10 @@
 package com.zj.master.dispatch.pipeline.intercept;
 
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.zj.common.enums.GitType;
 import com.zj.common.adapter.git.GitAccessInfo;
 import com.zj.common.entity.pipeline.ServiceConfig;
-import com.zj.domain.entity.bo.service.MicroserviceDto;
+import com.zj.common.enums.GitType;
+import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.master.entity.vo.TaskNode;
@@ -38,14 +37,13 @@ public class PresetInterceptor implements INodeExecuteInterceptor {
 
   @Override
   public void beforeExecute(TaskNode taskNode) {
-    MicroserviceDto service = microServiceRepository.queryServiceDetail(taskNode.getServiceId());
+    MicroserviceBO service = microServiceRepository.queryServiceDetail(taskNode.getServiceId());
     if (Objects.isNull(service)) {
       return;
     }
 
     taskNode.getRequestContext().setGitUrl(service.getGitUrl());
     GitAccessInfo gitAccess = Optional.ofNullable(service.getServiceConfig())
-            .map(config -> JSON.parseObject(config, ServiceConfig.class))
             .map(ServiceConfig::getGitAccessInfo).filter(access -> StringUtils.isNotBlank(access.getAccessToken()))
             .orElseGet(systemConfigRepository::getGitAccess);
     GitType gitType = GitType.exchange(gitAccess.getGitType());

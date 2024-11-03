@@ -1,9 +1,10 @@
 package com.zj.domain.entity.bo.service;
 
+import com.zj.common.entity.pipeline.ServiceConfig;
 import lombok.Data;
 
 @Data
-public class MicroserviceDto {
+public class MicroserviceBO {
 
     /**
      * 服务Id
@@ -33,7 +34,7 @@ public class MicroserviceDto {
     /**
      * 服务配置
      */
-    private String serviceConfig;
+    private ServiceConfig serviceConfig;
 
     /**
      * 创建时间

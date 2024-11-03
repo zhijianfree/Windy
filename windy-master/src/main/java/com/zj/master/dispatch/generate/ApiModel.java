@@ -1,6 +1,8 @@
 package com.zj.master.dispatch.generate;
 
 import java.util.List;
+
+import com.zj.common.entity.service.ApiParamModel;
 import lombok.Data;
 
 /**

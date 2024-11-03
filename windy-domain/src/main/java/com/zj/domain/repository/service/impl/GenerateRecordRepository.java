@@ -1,9 +1,11 @@
 package com.zj.domain.repository.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.entity.generate.GenerateDetail;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.bo.service.GenerateRecordDto;
+import com.zj.common.entity.generate.GenerateRecordBO;
 import com.zj.domain.entity.po.service.GenerateRecord;
 import com.zj.domain.mapper.service.GenerateRecordMapper;
 import com.zj.domain.repository.service.IGenerateRecordRepository;
@@ -15,33 +17,47 @@ import java.util.List;
 public class GenerateRecordRepository extends ServiceImpl<GenerateRecordMapper, GenerateRecord> implements IGenerateRecordRepository {
 
     @Override
-    public List<GenerateRecordDto> getServiceRecords(String serviceId) {
+    public List<GenerateRecordBO> getServiceRecords(String serviceId) {
         List<GenerateRecord> records =
                 list(Wrappers.lambdaQuery(GenerateRecord.class).eq(GenerateRecord::getServiceId, serviceId));
-        return OrikaUtil.convertList(records, GenerateRecordDto.class);
+        return OrikaUtil.convertList(records, GenerateRecordBO.class);
     }
 
     @Override
-    public GenerateRecordDto getGenerateRecord(String serviceId, String version) {
+    public GenerateRecordBO getGenerateRecord(String serviceId, String version) {
         GenerateRecord generateRecord =
                 getOne(Wrappers.lambdaQuery(GenerateRecord.class).eq(GenerateRecord::getServiceId, serviceId)
                         .eq(GenerateRecord::getVersion, version));
-        return OrikaUtil.convert(generateRecord, GenerateRecordDto.class);
+        return convertGenerateRecordBO(generateRecord);
     }
 
     @Override
-    public boolean create(GenerateRecordDto generateRecordDto) {
-        GenerateRecord generateRecord = OrikaUtil.convert(generateRecordDto, GenerateRecord.class);
+    public boolean create(GenerateRecordBO generateRecordBO) {
+        GenerateRecord generateRecord = convertGenerateRecord(generateRecordBO);
         generateRecord.setCreateTime(System.currentTimeMillis());
         generateRecord.setUpdateTime(System.currentTimeMillis());
         return save(generateRecord);
     }
 
     @Override
-    public boolean update(GenerateRecordDto generateRecordDto) {
-        GenerateRecord generateRecord = OrikaUtil.convert(generateRecordDto, GenerateRecord.class);
+    public boolean update(GenerateRecordBO generateRecordBO) {
+        GenerateRecord generateRecord = convertGenerateRecord(generateRecordBO);
         generateRecord.setUpdateTime(System.currentTimeMillis());
         return update(generateRecord, Wrappers.lambdaUpdate(GenerateRecord.class).eq(GenerateRecord::getRecordId,
                 generateRecord.getRecordId()));
+    }
+
+    private static GenerateRecord convertGenerateRecord(GenerateRecordBO generateRecordBO) {
+        GenerateRecord generateRecord = OrikaUtil.convert(generateRecordBO, GenerateRecord.class);
+        generateRecord.setExecuteParams(JSON.toJSONString(generateRecordBO.getGenerateParams()));
+        generateRecord.setResult(JSON.toJSONString(generateRecordBO.getGenerateResult()));
+        return generateRecord;
+    }
+
+    private static GenerateRecordBO convertGenerateRecordBO(GenerateRecord generateRecord) {
+        GenerateRecordBO generateRecordBO = OrikaUtil.convert(generateRecord, GenerateRecordBO.class);
+        generateRecordBO.setGenerateResult(JSON.parseArray(generateRecord.getResult(), String.class));
+        generateRecordBO.setGenerateParams(JSON.parseObject(generateRecord.getExecuteParams(), GenerateDetail.class));
+        return generateRecordBO;
     }
 }

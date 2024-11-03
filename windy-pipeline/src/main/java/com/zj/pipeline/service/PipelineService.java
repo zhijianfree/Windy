@@ -13,7 +13,7 @@ import com.zj.domain.entity.bo.pipeline.PipelineBO;
 import com.zj.domain.entity.bo.pipeline.PipelineHistoryBO;
 import com.zj.domain.entity.bo.pipeline.PipelineNodeBO;
 import com.zj.domain.entity.bo.pipeline.PipelineStageBO;
-import com.zj.domain.entity.bo.service.MicroserviceDto;
+import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.domain.entity.enums.PipelineType;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
@@ -159,7 +159,7 @@ public class PipelineService {
     @Transactional
     public String createPipeline(PipelineBO pipelineBO) {
         String serviceId = pipelineBO.getServiceId();
-        MicroserviceDto serviceDetail = microServiceRepository.queryServiceDetail(serviceId);
+        MicroserviceBO serviceDetail = microServiceRepository.queryServiceDetail(serviceId);
         if (Objects.isNull(serviceDetail)) {
             log.info("can not find service ={}", serviceId);
             throw new ApiException(ErrorCode.NOT_FOUND_SERVICE);
@@ -187,7 +187,7 @@ public class PipelineService {
         return pipelineId;
     }
 
-    private boolean createMasterBranchBind(String pipelineId, MicroserviceDto serviceDetail) {
+    private boolean createMasterBranchBind(String pipelineId, MicroserviceBO serviceDetail) {
         BindBranchBO bindBranchBO = new BindBranchBO();
         bindBranchBO.setBindId(uniqueIdService.getUniqueId());
         bindBranchBO.setPipelineId(pipelineId);

@@ -1,30 +1,30 @@
 package com.zj.pipeline.service;
 
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.zj.common.adapter.git.GitAccessInfo;
+import com.zj.common.adapter.git.IGitRepositoryHandler;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.entity.pipeline.ServiceConfig;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.adapter.git.GitAccessInfo;
-import com.zj.common.entity.pipeline.ServiceConfig;
-import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.domain.entity.bo.pipeline.BindBranchBO;
 import com.zj.domain.entity.bo.pipeline.PipelineBO;
-import com.zj.domain.entity.bo.service.MicroserviceDto;
+import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
-import com.zj.common.adapter.git.IGitRepositoryHandler;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
-import com.zj.pipeline.git.hook.IGitWebhook;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.pipeline.git.RepositoryFactory;
+import com.zj.pipeline.git.hook.IGitWebhook;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author guyuelan
@@ -119,9 +119,8 @@ public class GitBindService {
 
 
   public List<String> getServiceBranch(String serviceId) {
-    MicroserviceDto service = microServiceRepository.queryServiceDetail(serviceId);
+    MicroserviceBO service = microServiceRepository.queryServiceDetail(serviceId);
     GitAccessInfo gitAccessInfo = Optional.ofNullable(service.getServiceConfig())
-            .map(config -> JSON.parseObject(config, ServiceConfig.class))
             .map(ServiceConfig::getGitAccessInfo).filter(access -> StringUtils.isNotBlank(access.getAccessToken()))
             .orElseGet(systemConfigRepository::getGitAccess);
     IGitRepositoryHandler repository = repositoryFactory.getRepository(gitAccessInfo.getGitType());

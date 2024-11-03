@@ -1,12 +1,14 @@
 package com.zj.domain.repository.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zj.common.entity.pipeline.ServiceConfig;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.bo.service.MicroserviceDto;
+import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.domain.entity.bo.service.ResourceMemberDto;
 import com.zj.domain.entity.po.service.Microservice;
 import com.zj.domain.entity.po.service.ResourceMember;
@@ -43,8 +45,8 @@ public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Micr
 
   @Override
   @Transactional
-  public String createService(String userId, MicroserviceDto microserviceDto) {
-    Microservice microservice = OrikaUtil.convert(microserviceDto, Microservice.class);
+  public String createService(String userId, MicroserviceBO microserviceBO) {
+    Microservice microservice = convertService(microserviceBO);
     microservice.setCreateTime(System.currentTimeMillis());
     microservice.setUpdateTime(System.currentTimeMillis());
     boolean save = save(microservice);
@@ -59,12 +61,12 @@ public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Micr
   }
 
   @Override
-  public String updateService(MicroserviceDto microserviceDto) {
-    Microservice microservice = OrikaUtil.convert(microserviceDto, Microservice.class);
+  public String updateService(MicroserviceBO microserviceBO) {
+    Microservice microservice = convertService(microserviceBO);
     microservice.setUpdateTime(System.currentTimeMillis());
     boolean update = update(microservice, Wrappers.lambdaUpdate(Microservice.class)
         .eq(Microservice::getServiceId, microservice.getServiceId()));
-    return update ? microserviceDto.getServiceId() : null;
+    return update ? microserviceBO.getServiceId() : null;
   }
 
   @Override
@@ -74,26 +76,26 @@ public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Micr
   }
 
   @Override
-  public MicroserviceDto queryServiceDetail(String serviceId) {
+  public MicroserviceBO queryServiceDetail(String serviceId) {
     Microservice microservice = getOne(
         Wrappers.lambdaQuery(Microservice.class).eq(Microservice::getServiceId, serviceId));
-    return OrikaUtil.convert(microservice, MicroserviceDto.class);
+    return convertServiceBO(microservice);
   }
 
   @Override
-  public List<MicroserviceDto> getServices(String currentUserId) {
+  public List<MicroserviceBO> getServices(String currentUserId) {
     List<ResourceMember> resourceMembers = memberRepository.getResourceMembersByUser(currentUserId);
     if (CollectionUtils.isEmpty(resourceMembers)) {
       return Collections.emptyList();
     }
     List<String> serviceIds = resourceMembers.stream().map(ResourceMember::getResourceId).collect(Collectors.toList());
     return list(Wrappers.lambdaQuery(Microservice.class).in(Microservice::getServiceId, serviceIds)).stream()
-        .map(microservice -> OrikaUtil.convert(microservice, MicroserviceDto.class))
+        .map(MicroServiceRepository::convertServiceBO)
         .collect(Collectors.toList());
   }
 
   @Override
-  public IPage<MicroserviceDto> getServices(Integer pageNo, Integer size, String name, List<String> serviceIds) {
+  public IPage<MicroserviceBO> getServices(Integer pageNo, Integer size, String name, List<String> serviceIds) {
     IPage<Microservice> iPage = new Page<>(pageNo, size);
     LambdaQueryWrapper<Microservice> queryWrapper = Wrappers.lambdaQuery(Microservice.class);
     if (!StringUtils.isEmpty(name)) {
@@ -105,22 +107,38 @@ public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Micr
     }
 
     IPage<Microservice> pageList = page(iPage, queryWrapper);
-    IPage<MicroserviceDto> page = new Page<>();
+    IPage<MicroserviceBO> page = new Page<>();
     page.setTotal(pageList.getTotal());
-    page.setRecords(OrikaUtil.convertList(pageList.getRecords(), MicroserviceDto.class));
+    page.setRecords(convertServiceBOList(pageList.getRecords()));
     return page;
   }
 
   @Override
-  public MicroserviceDto queryServiceByName(String serviceName) {
+  public MicroserviceBO queryServiceByName(String serviceName) {
     Microservice microservice = getOne(
         Wrappers.lambdaQuery(Microservice.class).eq(Microservice::getServiceName, serviceName));
-    return OrikaUtil.convert(microservice, MicroserviceDto.class);
+    return convertServiceBO(microservice);
   }
 
   @Override
-  public List<MicroserviceDto> getAllServices() {
+  public List<MicroserviceBO> getAllServices() {
     List<Microservice> list = list();
-    return OrikaUtil.convertList(list, MicroserviceDto.class);
+    return convertServiceBOList(list);
+  }
+
+  private static Microservice convertService(MicroserviceBO microserviceBO) {
+    Microservice microservice = OrikaUtil.convert(microserviceBO, Microservice.class);
+    microservice.setConfig(JSON.toJSONString(microserviceBO.getServiceConfig()));
+    return microservice;
+  }
+
+  private static MicroserviceBO convertServiceBO(Microservice microservice) {
+    MicroserviceBO microserviceBO = OrikaUtil.convert(microservice, MicroserviceBO.class);
+    microserviceBO.setServiceConfig(JSON.parseObject(microservice.getConfig(), ServiceConfig.class));
+    return microserviceBO;
+  }
+
+  private static List<MicroserviceBO> convertServiceBOList(List<Microservice> serviceList) {
+    return serviceList.stream().map(MicroServiceRepository::convertServiceBO).collect(Collectors.toList());
   }
 }

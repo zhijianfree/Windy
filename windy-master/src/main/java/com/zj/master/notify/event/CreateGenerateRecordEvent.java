@@ -1,16 +1,15 @@
 package com.zj.master.notify.event;
 
-import com.alibaba.fastjson.JSON;
-import com.zj.common.enums.NotifyType;
-import com.zj.common.entity.generate.GenerateDetail;
 import com.zj.common.entity.dto.ResultEvent;
+import com.zj.common.entity.generate.GenerateDetail;
+import com.zj.common.entity.generate.GenerateRecordBO;
+import com.zj.common.enums.NotifyType;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.bo.service.GenerateRecordDto;
 import com.zj.domain.repository.service.IGenerateRecordRepository;
-import java.util.Objects;
-
 import com.zj.master.notify.INotifyEvent;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 @Component
 public class CreateGenerateRecordEvent implements INotifyEvent {
@@ -28,11 +27,11 @@ public class CreateGenerateRecordEvent implements INotifyEvent {
 
   @Override
   public boolean handle(ResultEvent resultEvent) {
-    GenerateRecordDto recordDto = OrikaUtil.convert(resultEvent.getParams(), GenerateRecordDto.class);
+    GenerateRecordBO recordDto = OrikaUtil.convert(resultEvent.getParams(), GenerateRecordBO.class);
     if (Objects.isNull(recordDto)) {
       return false;
     }
-    GenerateDetail generateDetail = JSON.parseObject(recordDto.getExecuteParams(), GenerateDetail.class);
+    GenerateDetail generateDetail = recordDto.getGenerateParams();
     recordDto.setVersion(generateDetail.getVersion());
     return generateRecordRepository.create(recordDto);
   }

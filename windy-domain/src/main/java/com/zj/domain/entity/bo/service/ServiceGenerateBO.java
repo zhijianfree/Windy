@@ -3,7 +3,7 @@ package com.zj.domain.entity.bo.service;
 import lombok.Data;
 
 @Data
-public class ServiceGenerateDto {
+public class ServiceGenerateBO {
 
   private String generateId;
 

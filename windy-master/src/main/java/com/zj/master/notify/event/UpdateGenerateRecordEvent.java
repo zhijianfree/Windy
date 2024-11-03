@@ -3,7 +3,7 @@ package com.zj.master.notify.event;
 import com.zj.common.enums.NotifyType;
 import com.zj.common.entity.dto.ResultEvent;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.bo.service.GenerateRecordDto;
+import com.zj.common.entity.generate.GenerateRecordBO;
 import com.zj.domain.repository.service.IGenerateRecordRepository;
 import java.util.Objects;
 
@@ -26,14 +26,14 @@ public class UpdateGenerateRecordEvent implements INotifyEvent {
 
   @Override
   public boolean handle(ResultEvent resultEvent) {
-    GenerateRecordDto recordDto = OrikaUtil.convert(resultEvent.getParams(), GenerateRecordDto.class);
+    GenerateRecordBO recordDto = OrikaUtil.convert(resultEvent.getParams(), GenerateRecordBO.class);
     if (Objects.isNull(recordDto)) {
       return false;
     }
 
-    GenerateRecordDto update = new GenerateRecordDto();
+    GenerateRecordBO update = new GenerateRecordBO();
     update.setRecordId(resultEvent.getExecuteId());
-    update.setResult(recordDto.getResult());
+    update.setGenerateResult(recordDto.getGenerateResult());
     update.setStatus(resultEvent.getStatus().getType());
     return generateRecordRepository.update(update);
   }

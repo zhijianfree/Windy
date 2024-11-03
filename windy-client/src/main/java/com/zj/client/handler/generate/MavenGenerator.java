@@ -1,6 +1,5 @@
 package com.zj.client.handler.generate;
 
-import com.alibaba.fastjson.JSON;
 import com.zj.client.config.GlobalEnvConfig;
 import com.zj.client.entity.dto.GenerateDto;
 import com.zj.client.entity.vo.ApiItem;
@@ -9,48 +8,18 @@ import com.zj.client.entity.vo.ApiModel;
 import com.zj.client.entity.vo.ApiParamModel;
 import com.zj.client.entity.vo.EntityItem.PropertyItem;
 import com.zj.client.entity.vo.FreemarkerContext;
-import com.zj.common.entity.generate.GenerateDetail;
-import com.zj.client.entity.vo.GenerateParam;
 import com.zj.client.handler.notify.IResultEventNotify;
 import com.zj.client.utils.FreemarkerUtils;
-import com.zj.common.enums.NotifyType;
-import com.zj.common.enums.ProcessStatus;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.common.entity.dto.ResultEvent;
+import com.zj.common.entity.generate.GenerateDetail;
+import com.zj.common.entity.generate.GenerateRecordBO;
+import com.zj.common.enums.NotifyType;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.plugin.loader.ParamValueType;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -74,6 +43,37 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -120,13 +120,13 @@ public class MavenGenerator {
   }
 
   private void saveGenerateRecord(GenerateDto generateDto, String recordId) {
-    GenerateParam generateParam = new GenerateParam();
+    GenerateRecordBO generateParam = new GenerateRecordBO();
     generateParam.setServiceId(generateDto.getServiceId());
     generateParam.setRecordId(recordId);
-    generateParam.setResult(JSON.toJSONString(Collections.singleton("start generate maven version")));
+    generateParam.setGenerateResult(Collections.singletonList("start generate maven version"));
     generateParam.setStatus(ProcessStatus.RUNNING.getType());
     GenerateDetail params = OrikaUtil.convert(generateDto, GenerateDetail.class);
-    generateParam.setExecuteParams(JSON.toJSONString(params));
+    generateParam.setGenerateParams(params);
 
     ResultEvent resultEvent = new ResultEvent().executeId(recordId)
         .notifyType(NotifyType.CREATE_GENERATE_MAVEN).status(ProcessStatus.RUNNING)
@@ -199,9 +199,9 @@ public class MavenGenerator {
   public void updateMessage(String recordId, ProcessStatus status, String message) {
     List<String> messages = Optional.ofNullable(recordMap.get(recordId)).orElseGet(ArrayList::new);
     messages.add(message);
-    GenerateParam generateParam = new GenerateParam();
+    GenerateRecordBO generateParam = new GenerateRecordBO();
     generateParam.setRecordId(recordId);
-    generateParam.setResult(JSON.toJSONString(messages));
+    generateParam.setGenerateResult(messages);
     ResultEvent resultEvent = new ResultEvent().executeId(recordId)
         .notifyType(NotifyType.UPDATE_GENERATE_MAVEN).status(status).params(generateParam);
     resultEventNotify.notifyEvent(resultEvent);

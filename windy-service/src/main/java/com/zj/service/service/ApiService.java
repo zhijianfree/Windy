@@ -1,6 +1,7 @@
 package com.zj.service.service;
 
 import com.alibaba.fastjson.JSON;
+import com.zj.common.entity.service.ApiParamModel;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.Position;
 import com.zj.common.enums.TemplateType;
@@ -12,9 +13,9 @@ import com.zj.common.adapter.invoker.IMasterInvoker;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.domain.entity.bo.feature.ExecuteTemplateBO;
-import com.zj.domain.entity.bo.service.GenerateRecordDto;
-import com.zj.domain.entity.bo.service.ServiceApiDto;
-import com.zj.domain.entity.bo.service.ServiceGenerateDto;
+import com.zj.common.entity.generate.GenerateRecordBO;
+import com.zj.domain.entity.bo.service.ServiceApiBO;
+import com.zj.domain.entity.bo.service.ServiceGenerateBO;
 import com.zj.domain.entity.vo.MavenConfigVo;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
@@ -78,28 +79,33 @@ public class ApiService {
         this.executeTemplateRepository = executeTemplateRepository;
     }
 
-    public ServiceApiDto getServiceApi(String apiId) {
+    public ServiceApiBO getServiceApi(String apiId) {
         return apiRepository.getServiceApi(apiId);
     }
 
-    public List<ServiceApiDto> getServiceApis(String serviceId) {
+    public List<ServiceApiBO> getServiceApis(String serviceId) {
         return apiRepository.getApiByService(serviceId);
     }
 
     public boolean createServiceApi(ApiModel apiModel) {
-        ServiceApiDto serviceApi = OrikaUtil.convert(apiModel, ServiceApiDto.class);
-        String requestParams = Optional.ofNullable(apiModel.getRequestParams()).map(JSON::toJSONString).orElse(null);
+        ServiceApiBO serviceApi = OrikaUtil.convert(apiModel, ServiceApiBO.class);
+        List<ApiParamModel> requestParams =
+                Optional.ofNullable(apiModel.getRequestParams()).map(params -> OrikaUtil.convertList(params,
+                        ApiParamModel.class)).orElse(null);
         serviceApi.setRequestParams(requestParams);
-        String responseParams = Optional.ofNullable(apiModel.getResponseParams()).map(JSON::toJSONString).orElse(null);
+        List<ApiParamModel> responseParams = Optional.ofNullable(apiModel.getResponseParams()).map(params -> OrikaUtil.convertList(params,
+                ApiParamModel.class)).orElse(null);
         serviceApi.setResponseParams(responseParams);
         serviceApi.setApiId(uniqueIdService.getUniqueId());
         return apiRepository.saveApi(serviceApi);
     }
 
     public boolean updateServiceApi(ApiModel apiModel) {
-        ServiceApiDto serviceApi = OrikaUtil.convert(apiModel, ServiceApiDto.class);
-        serviceApi.setRequestParams(JSON.toJSONString(apiModel.getRequestParams()));
-        serviceApi.setResponseParams(JSON.toJSONString(apiModel.getResponseParams()));
+        ServiceApiBO serviceApi = OrikaUtil.convert(apiModel, ServiceApiBO.class);
+        serviceApi.setRequestParams(OrikaUtil.convertList(apiModel.getRequestParams(),
+                ApiParamModel.class));
+        serviceApi.setResponseParams(OrikaUtil.convertList(apiModel.getResponseParams(),
+                ApiParamModel.class));
         return apiRepository.updateApi(serviceApi);
     }
 
@@ -111,7 +117,7 @@ public class ApiService {
         return apiRepository.batchDeleteApi(apiIds);
     }
 
-    public Boolean generateServiceApi(ServiceGenerateDto generate) {
+    public Boolean generateServiceApi(ServiceGenerateBO generate) {
         checkMavenConfig();
         checkVersionExist(generate.getServiceId(), generate.getVersion());
         saveOrUpdateParams(generate);
@@ -123,7 +129,7 @@ public class ApiService {
     }
 
     private void checkVersionExist(String serviceId, String version) {
-        GenerateRecordDto generateRecord = generateRecordRepository.getGenerateRecord(serviceId, version);
+        GenerateRecordBO generateRecord = generateRecordRepository.getGenerateRecord(serviceId, version);
         if (Objects.nonNull(generateRecord)) {
             log.info("generate version exist, can not execute serviceId={} version={}", serviceId, version);
             throw new ApiException(ErrorCode.GENERATE_VERSION_EXIST);
@@ -137,9 +143,9 @@ public class ApiService {
         }
     }
 
-    private void saveOrUpdateParams(ServiceGenerateDto generate) {
-        ServiceGenerateDto serviceGenerateDto = generateRepository.getByService(generate.getServiceId());
-        if (Objects.isNull(serviceGenerateDto)) {
+    private void saveOrUpdateParams(ServiceGenerateBO generate) {
+        ServiceGenerateBO serviceGenerateBO = generateRepository.getByService(generate.getServiceId());
+        if (Objects.isNull(serviceGenerateBO)) {
             generate.setGenerateId(uniqueIdService.getUniqueId());
             generateRepository.create(generate);
         } else {
@@ -147,16 +153,16 @@ public class ApiService {
         }
     }
 
-    public ServiceGenerateDto getGenerateParams(String serviceId) {
+    public ServiceGenerateBO getGenerateParams(String serviceId) {
         return generateRepository.getByService(serviceId);
     }
 
-    public List<GenerateRecordDto> getLatestGenerateLog(String serviceId) {
-        List<GenerateRecordDto> serviceRecords = generateRecordRepository.getServiceRecords(serviceId);
+    public List<GenerateRecordBO> getLatestGenerateLog(String serviceId) {
+        List<GenerateRecordBO> serviceRecords = generateRecordRepository.getServiceRecords(serviceId);
         if (CollectionUtils.isEmpty(serviceRecords)) {
             return Collections.emptyList();
         }
-        return serviceRecords.stream().sorted(Comparator.comparing(GenerateRecordDto::getUpdateTime).reversed()).collect(Collectors.toList());
+        return serviceRecords.stream().sorted(Comparator.comparing(GenerateRecordBO::getUpdateTime).reversed()).collect(Collectors.toList());
     }
 
     public ImportApiResult importApiFile(MultipartFile file, String importType, String serviceId) {
@@ -167,7 +173,7 @@ public class ApiService {
                 log.info("can not support import type={}", importType);
                 return null;
             }
-            List<ServiceApiDto> serviceApiList = importStrategy.importContent(serviceId, fileContent);
+            List<ServiceApiBO> serviceApiList = importStrategy.importContent(serviceId, fileContent);
             return new ImportApiResult(serviceApiList);
         } catch (IOException exception) {
             log.error("import api error importType={}", importType, exception);
@@ -176,19 +182,19 @@ public class ApiService {
     }
 
     public List<ExecuteTemplateVo> apiGenerateTemplate(GenerateTemplate generateTemplate) {
-        List<ServiceApiDto> serviceApis = apiRepository.getServiceApiList(generateTemplate.getApiIds());
+        List<ServiceApiBO> serviceApis = apiRepository.getServiceApiList(generateTemplate.getApiIds());
         if (CollectionUtils.isEmpty(serviceApis)) {
             return Collections.emptyList();
         }
 
-        List<String> templateIds = serviceApis.stream().map(ServiceApiDto::getApiId).collect(Collectors.toList());
+        List<String> templateIds = serviceApis.stream().map(ServiceApiBO::getApiId).collect(Collectors.toList());
         List<String> existTemplateIds =
                 executeTemplateRepository.getTemplateByIds(templateIds).stream().map(ExecuteTemplateBO::getTemplateId).collect(Collectors.toList());
 
         return serviceApis.stream().filter(serviceApi -> generateTemplate.getCover() || !existTemplateIds.contains(serviceApi.getApiId())).map(serviceApi -> convertApi2Template(serviceApi, generateTemplate.getInvokeType(), generateTemplate.getRelatedId())).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    private ExecuteTemplateVo convertApi2Template(ServiceApiDto serviceApi, Integer invokeType, String relatedId) {
+    private ExecuteTemplateVo convertApi2Template(ServiceApiBO serviceApi, Integer invokeType, String relatedId) {
         if (!serviceApi.isApi()) {
             return null;
         }
@@ -203,7 +209,7 @@ public class ApiService {
         executeTemplateBO.setOwner(serviceApi.getServiceId());
         executeTemplateBO.setRelatedId(relatedId);
 
-        List<ApiRequestVariable> apiVariables = JSON.parseArray(serviceApi.getRequestParams(),
+        List<ApiRequestVariable> apiVariables = OrikaUtil.convertList(serviceApi.getRequestParams(),
                 ApiRequestVariable.class);
         Map<String, String> header = new HashMap<>();
         List<ParameterDefine> parameterDefines = apiVariables.stream().map(variable -> {

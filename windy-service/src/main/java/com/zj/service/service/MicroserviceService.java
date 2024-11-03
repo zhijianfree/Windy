@@ -14,7 +14,7 @@ import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.feature.TestCaseBO;
 import com.zj.domain.entity.bo.pipeline.PipelineBO;
-import com.zj.domain.entity.bo.service.MicroserviceDto;
+import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.domain.entity.po.service.ResourceMember;
 import com.zj.domain.repository.demand.IMemberRepository;
 import com.zj.domain.repository.feature.ITestCaseRepository;
@@ -76,7 +76,7 @@ public class MicroserviceService {
         }
 
         List<String> serviceIds = resourceMembers.stream().map(ResourceMember::getResourceId).collect(Collectors.toList());
-        IPage<MicroserviceDto> page = microServiceRepository.getServices(pageNo, size, name, serviceIds);
+        IPage<MicroserviceBO> page = microServiceRepository.getServices(pageNo, size, name, serviceIds);
         PageSize<ServiceDto> pageSize = new PageSize<>();
         if (CollectionUtils.isEmpty(page.getRecords())) {
             pageSize.setTotal(0);
@@ -86,8 +86,7 @@ public class MicroserviceService {
         List<ServiceDto> microservices = page.getRecords().stream()
                 .map(microservice -> {
                     ServiceDto serviceDto = OrikaUtil.convert(microservice, ServiceDto.class);
-                    serviceDto.setServiceConfig(JSON.parseObject(microservice.getServiceConfig(),
-                            ServiceConfig.class));
+                    serviceDto.setServiceConfig(microservice.getServiceConfig());
                     return serviceDto;
                 })
                 .collect(Collectors.toList());
@@ -110,10 +109,10 @@ public class MicroserviceService {
         gitAccessInfo.setGitUrl(serviceDto.getGitUrl());
         repositoryBranch.checkRepository(gitAccessInfo);
 
-        MicroserviceDto microserviceDto = OrikaUtil.convert(serviceDto, MicroserviceDto.class);
-        microserviceDto.setServiceConfig(JSON.toJSONString(serviceDto.getServiceConfig()));
-        microserviceDto.setServiceId(uniqueIdService.getUniqueId());
-        return microServiceRepository.createService(authService.getCurrentUserId(), microserviceDto);
+        MicroserviceBO microserviceBO = OrikaUtil.convert(serviceDto, MicroserviceBO.class);
+        microserviceBO.setServiceConfig(serviceDto.getServiceConfig());
+        microserviceBO.setServiceId(uniqueIdService.getUniqueId());
+        return microServiceRepository.createService(authService.getCurrentUserId(), microserviceBO);
     }
 
     private String chooseGitType(ServiceDto serviceDto) {
@@ -125,10 +124,9 @@ public class MicroserviceService {
     }
 
     public String updateService(ServiceDto update) {
-        MicroserviceDto microserviceDto = OrikaUtil.convert(update, MicroserviceDto.class);
-        Optional.ofNullable(update.getServiceConfig()).ifPresent(params ->
-                microserviceDto.setServiceConfig(JSON.toJSONString(params)));
-        return microServiceRepository.updateService(microserviceDto);
+        MicroserviceBO microserviceBO = OrikaUtil.convert(update, MicroserviceBO.class);
+        Optional.ofNullable(update.getServiceConfig()).ifPresent(microserviceBO::setServiceConfig);
+        return microServiceRepository.updateService(microserviceBO);
     }
 
     public Boolean deleteService(String serviceId) {
@@ -144,18 +142,18 @@ public class MicroserviceService {
         return microServiceRepository.deleteService(serviceId);
     }
 
-    public MicroserviceDto queryServiceDetail(String serviceId) {
+    public MicroserviceBO queryServiceDetail(String serviceId) {
         return microServiceRepository.queryServiceDetail(serviceId);
     }
 
-    public MicroserviceDto queryServiceByName(String serviceName) {
+    public MicroserviceBO queryServiceByName(String serviceName) {
         return microServiceRepository.queryServiceByName(serviceName);
     }
 
-    public List<MicroserviceDto> getServices() {
+    public List<MicroserviceBO> getServices() {
         String currentUserId = authService.getCurrentUserId();
         return microServiceRepository.getServices(currentUserId).stream()
-                .sorted(Comparator.comparing(MicroserviceDto::getPriority).reversed()).collect(
+                .sorted(Comparator.comparing(MicroserviceBO::getPriority).reversed()).collect(
                         Collectors.toList());
     }
 

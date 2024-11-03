@@ -3,8 +3,10 @@ package com.zj.service.service.imports.strategy;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.entity.service.ApiParamModel;
 import com.zj.common.enums.ApiType;
-import com.zj.domain.entity.bo.service.ServiceApiDto;
+import com.zj.common.utils.OrikaUtil;
+import com.zj.domain.entity.bo.service.ServiceApiBO;
 import com.zj.domain.repository.service.IServiceApiRepository;
 import com.zj.plugin.loader.ParamValueType;
 import com.zj.service.entity.ApiRequestVariable;
@@ -58,49 +60,49 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
 
     @Transactional
     @Override
-    public List<ServiceApiDto> importContent(String serviceId, String fileContent) {
+    public List<ServiceApiBO> importContent(String serviceId, String fileContent) {
         List<YapiImportApi> yapiImportApis = JSON.parseArray(fileContent, YapiImportApi.class);
-        Map<String, ServiceApiDto> serviceExistApi = getServiceExistApi(serviceId);
+        Map<String, ServiceApiBO> serviceExistApi = getServiceExistApi(serviceId);
         return yapiImportApis.stream().map(yapiImportApi -> {
-            ServiceApiDto serviceApiDto = new ServiceApiDto();
-            serviceApiDto.setApiId(uniqueIdService.getUniqueId());
-            serviceApiDto.setApiName(yapiImportApi.getName());
-            serviceApiDto.setApiType(ApiType.DIR.getType());
-            serviceApiDto.setServiceId(serviceId);
-            saveOrUpdateApi(yapiImportApi.getName(), serviceExistApi, serviceApiDto);
+            ServiceApiBO serviceApiBO = new ServiceApiBO();
+            serviceApiBO.setApiId(uniqueIdService.getUniqueId());
+            serviceApiBO.setApiName(yapiImportApi.getName());
+            serviceApiBO.setApiType(ApiType.DIR.getType());
+            serviceApiBO.setServiceId(serviceId);
+            saveOrUpdateApi(yapiImportApi.getName(), serviceExistApi, serviceApiBO);
 
 
             List<YapiImportApi.YapiApiModel> list = yapiImportApi.getList();
             if (CollectionUtils.isEmpty(list)) {
-                return Collections.singletonList(serviceApiDto);
+                return Collections.singletonList(serviceApiBO);
             }
-            return list.stream().map(apiModel -> convertApiAndSave(serviceId, apiModel, serviceApiDto, serviceExistApi))
+            return list.stream().map(apiModel -> convertApiAndSave(serviceId, apiModel, serviceApiBO, serviceExistApi))
                     .filter(Objects::nonNull).collect(Collectors.toList());
         }).filter(CollectionUtils::isNotEmpty).flatMap(Collection::stream).collect(Collectors.toList());
     }
 
-    private boolean saveOrUpdateApi(String apiName, Map<String, ServiceApiDto> serviceExistApi,
-                                    ServiceApiDto serviceApiDto) {
-        String compareKey = getCompareKey(serviceApiDto.isApi(), serviceApiDto.getResource(),
-                serviceApiDto.getMethod(), apiName);
-        ServiceApiDto existApi = serviceExistApi.get(compareKey);
+    private boolean saveOrUpdateApi(String apiName, Map<String, ServiceApiBO> serviceExistApi,
+                                    ServiceApiBO serviceApiBO) {
+        String compareKey = getCompareKey(serviceApiBO.isApi(), serviceApiBO.getResource(),
+                serviceApiBO.getMethod(), apiName);
+        ServiceApiBO existApi = serviceExistApi.get(compareKey);
         if (Objects.isNull(existApi)) {
-            boolean result = serviceApiRepository.saveApi(serviceApiDto);
-            log.info("create service api={} method={} result={}", serviceApiDto.getResource(),
-                    serviceApiDto.getMethod(), result);
+            boolean result = serviceApiRepository.saveApi(serviceApiBO);
+            log.info("create service api={} method={} result={}", serviceApiBO.getResource(),
+                    serviceApiBO.getMethod(), result);
             return result;
         }
 
-        serviceApiDto.setApiId(existApi.getApiId());
-        boolean result = serviceApiRepository.updateApi(serviceApiDto);
+        serviceApiBO.setApiId(existApi.getApiId());
+        boolean result = serviceApiRepository.updateApi(serviceApiBO);
         log.info("update service api={} method=" +
-                "{} result={}", serviceApiDto.isApi() ? serviceApiDto.getResource() :
-                serviceApiDto.getApiName(), serviceApiDto.getMethod(), result);
+                "{} result={}", serviceApiBO.isApi() ? serviceApiBO.getResource() :
+                serviceApiBO.getApiName(), serviceApiBO.getMethod(), result);
         return result;
     }
 
-    private Map<String, ServiceApiDto> getServiceExistApi(String serviceId) {
-        List<ServiceApiDto> apiList = serviceApiRepository.getApiByService(serviceId);
+    private Map<String, ServiceApiBO> getServiceExistApi(String serviceId) {
+        List<ServiceApiBO> apiList = serviceApiRepository.getApiByService(serviceId);
         return apiList.stream().collect(Collectors.toMap(api -> getCompareKey(api.isApi(), api.getResource(),
                 api.getMethod(), api.getApiName()), api -> api));
     }
@@ -109,16 +111,16 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
         return isApi ? resource + SPLIT_PREFIX + method : apiName;
     }
 
-    private ServiceApiDto convertApiAndSave(String serviceId, YapiImportApi.YapiApiModel apiModel,
-                                            ServiceApiDto serviceApiDto, Map<String, ServiceApiDto> serviceExistApi) {
+    private ServiceApiBO convertApiAndSave(String serviceId, YapiImportApi.YapiApiModel apiModel,
+                                           ServiceApiBO serviceApiBO, Map<String, ServiceApiBO> serviceExistApi) {
         try {
-            ServiceApiDto serviceApi = new ServiceApiDto();
+            ServiceApiBO serviceApi = new ServiceApiBO();
             serviceApi.setApiId(uniqueIdService.getUniqueId());
             serviceApi.setApiType(ApiType.API.getType());
             serviceApi.setApiName(apiModel.getTitle());
             serviceApi.setMethod(apiModel.getMethod());
             serviceApi.setServiceId(serviceId);
-            serviceApi.setParentId(serviceApiDto.getApiId());
+            serviceApi.setParentId(serviceApiBO.getApiId());
             serviceApi.setDescription(apiModel.getTitle());
             serviceApi.setType(HTTP_API_TYPE);
             serviceApi.setResource(apiModel.getPath());
@@ -159,7 +161,7 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
                 List<ApiRequestVariable> bodyRequests = convertProperties(properties, requirdList);
                 apiRequestVariables.addAll(bodyRequests);
             }
-            serviceApi.setRequestParams(JSON.toJSONString(apiRequestVariables));
+            serviceApi.setRequestParams(OrikaUtil.convertList(apiRequestVariables, ApiParamModel.class));
 
             JSONObject responseObject = JSON.parseObject(apiModel.getResBody());
             if (Objects.nonNull(responseObject) && Objects.nonNull(responseObject.getJSONObject(PROPERTIES_KEY))) {
@@ -171,7 +173,8 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
                     apiResponse.setType(convertVariableType(typeJSON.getString("type")));
                     return apiResponse;
                 }).collect(Collectors.toList());
-                serviceApi.setResponseParams(JSON.toJSONString(apiResponses));
+
+                serviceApi.setResponseParams(OrikaUtil.convertList(apiResponses, ApiParamModel.class));
             }
             return saveOrUpdateApi(apiModel.getTitle(), serviceExistApi, serviceApi) ? serviceApi : null;
         } catch (Exception e) {

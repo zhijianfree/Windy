@@ -1,9 +1,11 @@
-package com.zj.domain.entity.bo.service;
+package com.zj.common.entity.generate;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
-public class GenerateRecordDto {
+public class GenerateRecordBO {
 
   private String recordId;
 
@@ -15,12 +17,12 @@ public class GenerateRecordDto {
   /**
    * 执行参数
    * */
-  private String executeParams;
+  private GenerateDetail generateParams;
 
   /**
    * 执行结果记录
    * */
-  private String result;
+  private List<String> generateResult;
 
   /**
    * 构建的版本号
