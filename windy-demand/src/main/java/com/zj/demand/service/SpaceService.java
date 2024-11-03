@@ -59,8 +59,9 @@ public class SpaceService {
             log.info("space not exist = {}", spaceId);
             throw new ApiException(ErrorCode.SPACE_NOT_EXIST);
         }
-        spaceDto.setSpaceId(spaceId);
-        return spaceRepository.updateSpace(OrikaUtil.convert(spaceDto, SpaceBO.class));
+        SpaceBO spaceBO = OrikaUtil.convert(spaceDto, SpaceBO.class);
+        spaceBO.setSpaceId(spaceId);
+        return spaceRepository.updateSpace(spaceBO);
     }
 
     public boolean deleteSpace(String spaceId) {
