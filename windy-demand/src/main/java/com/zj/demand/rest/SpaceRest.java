@@ -2,8 +2,12 @@ package com.zj.demand.rest;
 
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.demand.entity.SpaceDto;
 import com.zj.demand.service.SpaceService;
 import com.zj.domain.entity.bo.demand.SpaceBO;
+import com.zj.domain.entity.vo.Create;
+import com.zj.domain.entity.vo.Update;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,13 +35,14 @@ public class SpaceRest {
     }
 
     @PostMapping("/spaces")
-    public ResponseMeta<SpaceBO> createSpace(@RequestBody SpaceBO spaceBO) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, spaceService.createSpace(spaceBO));
+    public ResponseMeta<SpaceBO> createSpace(@Validated(Create.class) @RequestBody SpaceDto spaceDto) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, spaceService.createSpace(spaceDto));
     }
 
     @PutMapping("/spaces/{spaceId}")
-    public ResponseMeta<Boolean> updateSpace(@PathVariable("spaceId") String spaceId, @RequestBody SpaceBO spaceBO) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, spaceService.updateSpace(spaceId, spaceBO));
+    public ResponseMeta<Boolean> updateSpace(@PathVariable("spaceId") String spaceId,
+                                             @Validated(Update.class) @RequestBody SpaceDto spaceDto) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, spaceService.updateSpace(spaceId, spaceDto));
     }
 
     @DeleteMapping("/spaces/{spaceId}")

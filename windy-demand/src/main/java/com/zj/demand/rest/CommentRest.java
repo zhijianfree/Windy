@@ -5,6 +5,7 @@ import com.zj.common.exception.ErrorCode;
 import java.util.List;
 
 import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.demand.entity.CommentDto;
 import com.zj.demand.service.CommentService;
 import com.zj.domain.entity.bo.demand.CommentBO;
 import org.springframework.validation.annotation.Validated;
@@ -38,13 +39,13 @@ public class CommentRest {
   }
 
   @PostMapping("/comments")
-  public ResponseMeta<Boolean> createComment(@Validated @RequestBody CommentBO commentBO) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, commentService.addComment(commentBO));
+  public ResponseMeta<Boolean> createComment(@Validated @RequestBody CommentDto commentDto) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, commentService.addComment(commentDto));
   }
 
   @PutMapping("/comments")
-  public ResponseMeta<Boolean> updateComment(@Validated @RequestBody CommentBO commentBO) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, commentService.updateComment(commentBO));
+  public ResponseMeta<Boolean> updateComment(@Validated @RequestBody CommentDto commentDto) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, commentService.updateComment(commentDto));
   }
 
   @DeleteMapping("/{commentId}/comment")

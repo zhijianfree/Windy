@@ -1,9 +1,10 @@
 package com.zj.demand.rest;
 
-import com.zj.common.exception.ErrorCode;
 import com.zj.common.entity.dto.PageSize;
 import com.zj.common.entity.dto.ResponseMeta;
-import com.zj.demand.entity.BugDetail;
+import com.zj.common.exception.ErrorCode;
+import com.zj.demand.entity.BugDetailDto;
+import com.zj.demand.entity.BugDto;
 import com.zj.demand.service.BugService;
 import com.zj.domain.entity.bo.demand.BugBO;
 import com.zj.domain.entity.bo.demand.BusinessStatusBO;
@@ -30,13 +31,13 @@ public class BugRest {
     }
 
     @PostMapping("/bugs")
-    public ResponseMeta<BugBO> createBug(@Validated @RequestBody BugBO bugBO) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.createBug(bugBO));
+    public ResponseMeta<BugDto> createBug(@Validated @RequestBody BugDto bugDto) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.createBug(bugDto));
     }
 
     @PutMapping("/bug")
-    public ResponseMeta<Boolean> updateBug(@Validated @RequestBody BugBO bugBO) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.updateBug(bugBO));
+    public ResponseMeta<Boolean> updateBug(@Validated @RequestBody BugDto bugDto) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.updateBug(bugDto));
     }
 
     @GetMapping("/bugs")
@@ -55,7 +56,7 @@ public class BugRest {
     }
 
     @GetMapping("/bugs/{bugId}")
-    public ResponseMeta<BugDetail> getBug(@PathVariable("bugId") String bugId) {
+    public ResponseMeta<BugDetailDto> getBug(@PathVariable("bugId") String bugId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getBug(bugId));
     }
 

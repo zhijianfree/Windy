@@ -2,12 +2,16 @@ package com.zj.demand.rest;
 
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.entity.dto.ResponseMeta;
-import com.zj.demand.entity.IterationStatistic;
+import com.zj.demand.entity.IterationDto;
+import com.zj.demand.entity.IterationStatisticDto;
 import com.zj.demand.service.IterationService;
 import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.demand.BusinessStatusBO;
 import com.zj.domain.entity.bo.demand.IterationBO;
 import com.zj.domain.entity.bo.service.ResourceMemberDto;
+import com.zj.domain.entity.vo.Create;
+import com.zj.domain.entity.vo.Update;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,7 +33,7 @@ public class IterationRest {
     }
 
     @GetMapping("/iterations/{iterationId}/statistic")
-    public ResponseMeta<IterationStatistic> getIterationStatistic(@PathVariable("iterationId") String iterationId) {
+    public ResponseMeta<IterationStatisticDto> getIterationStatistic(@PathVariable("iterationId") String iterationId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.getIterationStatistic(iterationId));
     }
 
@@ -39,13 +43,14 @@ public class IterationRest {
     }
 
     @PostMapping("/iterations")
-    public ResponseMeta<IterationBO> createIteration(@RequestBody IterationBO iterationBO) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.createIteration(iterationBO));
+    public ResponseMeta<IterationBO> createIteration(@Validated(Create.class) @RequestBody IterationDto iterationDto) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.createIteration(iterationDto));
     }
 
     @PutMapping("/iterations/{iterationId}")
-    public ResponseMeta<Boolean> updateIteration(@PathVariable("iterationId") String iterationId, @RequestBody IterationBO iterationBO) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.updateIteration(iterationId, iterationBO));
+    public ResponseMeta<Boolean> updateIteration(@PathVariable("iterationId") String iterationId,
+                                                 @Validated(Update.class) @RequestBody IterationDto iterationDto) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.updateIteration(iterationId, iterationDto));
     }
 
     @DeleteMapping("/iterations/{iterationId}")

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class IterationStatistic {
+public class IterationStatisticDto {
 
     /**
      * 未完成需求个数

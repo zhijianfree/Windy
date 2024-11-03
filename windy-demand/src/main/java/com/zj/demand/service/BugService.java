@@ -7,7 +7,8 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.entity.dto.PageSize;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.common.adapter.uuid.UniqueIdService;
-import com.zj.demand.entity.BugDetail;
+import com.zj.demand.entity.BugDetailDto;
+import com.zj.demand.entity.BugDto;
 import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.demand.BugBO;
 import com.zj.domain.entity.bo.demand.BugQueryBO;
@@ -41,16 +42,17 @@ public class BugService {
         this.businessStatusRepository = businessStatusRepository;
     }
 
-    public BugBO createBug(BugBO bugBO) {
-        bugBO.setBugId(uniqueIdService.getUniqueId());
+    public BugDto createBug(BugDto bugDto) {
+        bugDto.setBugId(uniqueIdService.getUniqueId());
         UserDetail userDetail = authService.getUserDetail();
-        bugBO.setProposer(userDetail.getUserId());
-        bugBO.setProposerName(Optional.ofNullable(userDetail.getNickName()).orElse(userDetail.getUserName()));
-        return bugRepository.createBug(bugBO) ? bugBO : null;
+        bugDto.setProposer(userDetail.getUserId());
+        bugDto.setProposerName(Optional.ofNullable(userDetail.getNickName()).orElse(userDetail.getUserName()));
+        BugBO bugBO = OrikaUtil.convert(bugDto, BugBO.class);
+        return bugRepository.createBug(bugBO) ? bugDto : null;
     }
 
-    public Boolean updateBug(BugBO bugBO) {
-        return bugRepository.updateBug(bugBO);
+    public Boolean updateBug(BugDto bugDto) {
+        return bugRepository.updateBug(OrikaUtil.convert(bugDto, BugBO.class));
     }
 
     public PageSize<BugBO> getBugPage(Integer page, Integer size, String name, Integer status, String spaceId, String iterationId) {
@@ -66,18 +68,18 @@ public class BugService {
         return bugRepository.getUserBugs(bugQueryBO);
     }
 
-    public BugDetail getBug(String bugId) {
+    public BugDetailDto getBug(String bugId) {
         BugBO bug = bugRepository.getBug(bugId);
         if (Objects.isNull(bug)) {
             log.info("bug detail not find ={}", bugId);
             throw new ApiException(ErrorCode.BUG_NOT_EXIST);
         }
-        BugDetail bugDetail = OrikaUtil.convert(bug, BugDetail.class);
+        BugDetailDto bugDetailDto = OrikaUtil.convert(bug, BugDetailDto.class);
         UserBO proposer = userRepository.getUserByUserId(bug.getProposer());
-        Optional.ofNullable(proposer).ifPresent(p -> bugDetail.setProposerName(p.getUserName()));
+        Optional.ofNullable(proposer).ifPresent(p -> bugDetailDto.setProposerName(p.getUserName()));
         UserBO acceptor = userRepository.getUserByUserId(bug.getAcceptor());
-        Optional.ofNullable(acceptor).ifPresent(a -> bugDetail.setAcceptorName(a.getUserName()));
-        return bugDetail;
+        Optional.ofNullable(acceptor).ifPresent(a -> bugDetailDto.setAcceptorName(a.getUserName()));
+        return bugDetailDto;
     }
 
     public Boolean deleteBug(String bugId) {

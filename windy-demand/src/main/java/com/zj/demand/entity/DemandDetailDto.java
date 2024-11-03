@@ -3,7 +3,7 @@ package com.zj.demand.entity;
 import lombok.Data;
 
 @Data
-public class DemandDetail {
+public class DemandDetailDto {
 
     /**
      * 需求Id

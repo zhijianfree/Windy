@@ -1,11 +1,8 @@
 package com.zj.domain.entity.bo.demand;
 
 import com.zj.domain.entity.vo.Create;
-import com.zj.domain.entity.vo.Update;
 import lombok.Data;
-import org.hibernate.validator.constraints.Length;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
@@ -14,14 +11,11 @@ public class BugBO {
   /**
    * bug名称
    * */
-  @Length(min = 10)
-  @NotBlank(message = "缺陷名称不能为空", groups = Create.class)
   private String bugName;
 
   /**
    * bug的ID
    * */
-  @NotBlank(groups = Update.class)
   private String bugId;
 
   /**
@@ -93,7 +87,6 @@ public class BugBO {
   /**
    * 需求ID
    */
-  @NotBlank(message = "缺陷关联的需求ID不能为空",groups = Create.class)
   private String demandId;
 
   /**

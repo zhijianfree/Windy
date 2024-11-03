@@ -4,7 +4,9 @@ import com.zj.common.adapter.auth.IAuthService;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.adapter.uuid.UniqueIdService;
-import com.zj.demand.entity.IterationStatistic;
+import com.zj.common.utils.OrikaUtil;
+import com.zj.demand.entity.IterationDto;
+import com.zj.demand.entity.IterationStatisticDto;
 import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.demand.BugBO;
 import com.zj.domain.entity.bo.demand.BusinessStatusBO;
@@ -62,24 +64,25 @@ public class IterationService {
         return iterationRepository.getIterationList(spaceId, iterationIds);
     }
 
-    public IterationBO createIteration(IterationBO iterationBO) {
+    public IterationBO createIteration(IterationDto iterationDto) {
+        IterationBO iterationBO = OrikaUtil.convert(iterationDto, IterationBO.class);
         iterationBO.setIterationId(uniqueIdService.getUniqueId());
         iterationBO.setUserId(authService.getCurrentUserId());
         return iterationRepository.createIteration(iterationBO);
     }
 
-    public Boolean updateIteration(String iterationId, IterationBO iterationBO) {
+    public Boolean updateIteration(String iterationId, IterationDto iterationDto) {
         IterationBO iteration = getIteration(iterationId);
         if (Objects.isNull(iteration)) {
             log.info("iteration is not exist={}", iterationId);
             throw new ApiException(ErrorCode.ITERATION_NOT_EXIST);
         }
 
-        if(Objects.nonNull(iterationBO.getStatus()) && iterationBO.getStatus() < iteration.getStatus()){
-            log.info("iteration status update error status= {}", iterationBO.getStatus());
+        if(Objects.nonNull(iterationDto.getStatus()) && iterationDto.getStatus() < iteration.getStatus()){
+            log.info("iteration status update error status= {}", iterationDto.getStatus());
             throw new ApiException(ErrorCode.UPDATE_ITERATION_STATUS_ERROR);
         }
-        return iterationRepository.updateIteration(iterationBO);
+        return iterationRepository.updateIteration(OrikaUtil.convert(iterationDto, IterationBO.class));
     }
 
     public boolean deleteIteration(String iterationId) {
@@ -100,11 +103,11 @@ public class IterationService {
         return iterationRepository.getIteration(iterationId);
     }
 
-    public IterationStatistic getIterationStatistic(String iterationId) {
+    public IterationStatisticDto getIterationStatistic(String iterationId) {
         Integer demandCount = demandRepository.countIteration(iterationId);
         Integer bugCount = bugRepository.countIteration(iterationId);
         Integer workCount = workTaskRepository.countIteration(iterationId);
-        return new IterationStatistic(demandCount, bugCount, workCount, 0);
+        return new IterationStatisticDto(demandCount, bugCount, workCount, 0);
     }
 
     public List<UserBO> queryIterationMembers(String iterationId) {

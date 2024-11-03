@@ -3,10 +3,14 @@ package com.zj.demand.rest;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.entity.dto.PageSize;
 import com.zj.common.entity.dto.ResponseMeta;
-import com.zj.demand.entity.DemandDetail;
+import com.zj.demand.entity.DemandDetailDto;
+import com.zj.demand.entity.DemandDto;
 import com.zj.demand.service.DemandService;
 import com.zj.domain.entity.bo.demand.BusinessStatusBO;
 import com.zj.domain.entity.bo.demand.DemandBO;
+import com.zj.domain.entity.vo.Create;
+import com.zj.domain.entity.vo.Update;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,13 +34,13 @@ public class DemandRest {
     }
 
     @PostMapping("/demands")
-    public ResponseMeta<DemandBO> createDemand(@RequestBody DemandBO demandBO) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.createDemand(demandBO));
+    public ResponseMeta<DemandBO> createDemand(@Validated(Create.class) @RequestBody DemandDto demandDto) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.createDemand(demandDto));
     }
 
     @PutMapping("/demand")
-    public ResponseMeta<Boolean> updateDemand(@RequestBody DemandBO demandBO) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.updateDemand(demandBO));
+    public ResponseMeta<Boolean> updateDemand(@Validated(Update.class) @RequestBody DemandDto demandDto) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.updateDemand(demandDto));
     }
 
     @GetMapping("/demands")
@@ -72,7 +76,7 @@ public class DemandRest {
     }
 
     @GetMapping("/demands/{demandId}")
-    public ResponseMeta<DemandDetail> getDemand(@PathVariable("demandId") String demandId) {
+    public ResponseMeta<DemandDetailDto> getDemand(@PathVariable("demandId") String demandId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getDemand(demandId));
     }
 

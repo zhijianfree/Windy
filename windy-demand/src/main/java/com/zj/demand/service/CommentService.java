@@ -3,6 +3,8 @@ package com.zj.demand.service;
 import com.zj.common.adapter.auth.IAuthService;
 import com.zj.common.adapter.auth.UserDetail;
 import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.utils.OrikaUtil;
+import com.zj.demand.entity.CommentDto;
 import com.zj.domain.entity.bo.demand.CommentBO;
 import com.zj.domain.repository.demand.ICommentRepository;
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +34,8 @@ public class CommentService {
     return commentRepository.getRelativeComments(relativeId);
   }
 
-  public boolean addComment(CommentBO commentBO) {
+  public boolean addComment(CommentDto commentDto) {
+    CommentBO commentBO = OrikaUtil.convert(commentDto, CommentBO.class);
     commentBO.setCommentId(uniqueIdService.getUniqueId());
     commentBO.setUserId(authService.getCurrentUserId());
     UserDetail userDetail = authService.getUserDetail();
@@ -42,8 +45,8 @@ public class CommentService {
     return commentRepository.saveComment(commentBO);
   }
 
-  public Boolean updateComment(CommentBO commentBO) {
-    return commentRepository.updateComment(commentBO);
+  public Boolean updateComment(CommentDto commentDto) {
+    return commentRepository.updateComment(OrikaUtil.convert(commentDto, CommentBO.class));
   }
 
   public Boolean deleteComment(String commentId) {

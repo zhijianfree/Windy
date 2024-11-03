@@ -4,6 +4,8 @@ import com.zj.common.adapter.auth.IAuthService;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.utils.OrikaUtil;
+import com.zj.demand.entity.SpaceDto;
 import com.zj.domain.entity.bo.demand.DemandBO;
 import com.zj.domain.entity.bo.demand.IterationBO;
 import com.zj.domain.entity.bo.demand.SpaceBO;
@@ -44,20 +46,21 @@ public class SpaceService {
         return spaceRepository.getSpaceList();
     }
 
-    public SpaceBO createSpace(SpaceBO spaceBO) {
+    public SpaceBO createSpace(SpaceDto spaceDto) {
+        SpaceBO spaceBO = OrikaUtil.convert(spaceDto, SpaceBO.class);
         spaceBO.setUserId(authService.getCurrentUserId());
         spaceBO.setSpaceId(uniqueIdService.getUniqueId());
         return spaceRepository.createSpace(spaceBO);
     }
 
-    public boolean updateSpace(String spaceId, SpaceBO spaceBO) {
+    public boolean updateSpace(String spaceId, SpaceDto spaceDto) {
         SpaceBO space = spaceRepository.getSpace(spaceId);
         if (Objects.isNull(space)) {
             log.info("space not exist = {}", spaceId);
             throw new ApiException(ErrorCode.SPACE_NOT_EXIST);
         }
-        spaceBO.setSpaceId(spaceId);
-        return spaceRepository.updateSpace(spaceBO);
+        spaceDto.setSpaceId(spaceId);
+        return spaceRepository.updateSpace(OrikaUtil.convert(spaceDto, SpaceBO.class));
     }
 
     public boolean deleteSpace(String spaceId) {

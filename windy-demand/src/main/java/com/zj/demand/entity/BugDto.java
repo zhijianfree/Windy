@@ -9,7 +9,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
-public class BugDetail {
+public class BugDto {
+
     /**
      * bug名称
      * */
@@ -49,18 +50,24 @@ public class BugDetail {
     private String realResult;
 
     /**
+     * 提出人名称
+     * */
+    private String proposerName;
+
+    /**
      * 提出人
      * */
     private String proposer;
 
-    private String proposerName;
+    /**
+     * 接受人名称
+     * */
+    private String acceptorName;
 
     /**
      *
      * 接受人*/
     private String acceptor;
-
-    private String acceptorName;
 
     /**
      * bug处理开始时间

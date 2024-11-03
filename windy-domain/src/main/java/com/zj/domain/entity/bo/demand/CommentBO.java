@@ -2,8 +2,6 @@ package com.zj.domain.entity.bo.demand;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotEmpty;
-
 /**
  * @author falcon
  * @since 2023/4/17
@@ -21,13 +19,11 @@ public class CommentBO {
   /**
    * 关联Id（需求或者缺陷Id）
    */
-  @NotEmpty(message = "关联Id不能为空")
   private String relativeId;
 
   /**
    * 评论内容
    */
-  @NotEmpty(message = "评论内容不能为空")
   private String comment;
 
   /**

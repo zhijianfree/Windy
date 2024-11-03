@@ -7,7 +7,8 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.entity.dto.PageSize;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.common.adapter.uuid.UniqueIdService;
-import com.zj.demand.entity.DemandDetail;
+import com.zj.demand.entity.DemandDetailDto;
+import com.zj.demand.entity.DemandDto;
 import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.demand.BusinessStatusBO;
 import com.zj.domain.entity.bo.demand.DemandBO;
@@ -41,7 +42,8 @@ public class DemandService {
         this.businessStatusRepository = businessStatusRepository;
     }
 
-    public DemandBO createDemand(DemandBO demandBO) {
+    public DemandBO createDemand(DemandDto demandDto) {
+        DemandBO demandBO = OrikaUtil.convert(demandDto, DemandBO.class);
         demandBO.setDemandId(uniqueIdService.getUniqueId());
         UserDetail userDetail = authService.getUserDetail();
         demandBO.setProposer(userDetail.getUserId());
@@ -74,22 +76,22 @@ public class DemandService {
         return demandRepository.getDemandPage(demandQueryBO);
     }
 
-    public boolean updateDemand(DemandBO demandBO) {
-        return demandRepository.updateDemand(demandBO);
+    public boolean updateDemand(DemandDto demandDto) {
+        return demandRepository.updateDemand(OrikaUtil.convert(demandDto, DemandBO.class));
     }
 
-    public DemandDetail getDemand(String demandId) {
+    public DemandDetailDto getDemand(String demandId) {
         DemandBO demand = demandRepository.getDemand(demandId);
         if (Objects.isNull(demand)) {
             log.info("can not find demand ={}", demandId);
             throw new ApiException(ErrorCode.DEMAND_NOT_EXIST);
         }
-        DemandDetail demandDetail = OrikaUtil.convert(demand, DemandDetail.class);
+        DemandDetailDto demandDetailDto = OrikaUtil.convert(demand, DemandDetailDto.class);
         UserBO proposer = userRepository.getUserByUserId(demand.getProposer());
-        Optional.ofNullable(proposer).ifPresent(p -> demandDetail.setProposerName(p.getUserName()));
+        Optional.ofNullable(proposer).ifPresent(p -> demandDetailDto.setProposerName(p.getUserName()));
         UserBO acceptor = userRepository.getUserByUserId(demand.getAcceptor());
-        Optional.ofNullable(acceptor).ifPresent(a -> demandDetail.setAcceptorName(a.getUserName()));
-        return demandDetail;
+        Optional.ofNullable(acceptor).ifPresent(a -> demandDetailDto.setAcceptorName(a.getUserName()));
+        return demandDetailDto;
     }
 
     public Boolean deleteDemand(String demandId) {

@@ -3,9 +3,12 @@ package com.zj.demand.rest;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.entity.dto.PageSize;
 import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.demand.entity.WorkTaskDto;
 import com.zj.demand.service.WorkTaskService;
 import com.zj.domain.entity.bo.demand.WorkTaskBO;
 import com.zj.domain.entity.bo.demand.BusinessStatusBO;
+import com.zj.domain.entity.vo.Create;
+import com.zj.domain.entity.vo.Update;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,13 +32,13 @@ public class WorkTaskRest {
     }
 
     @PostMapping("/tasks")
-    public ResponseMeta<WorkTaskBO> createWorkTask(@Validated @RequestBody WorkTaskBO bugDTO) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, workTaskService.createWorkTask(bugDTO));
+    public ResponseMeta<WorkTaskBO> createWorkTask(@Validated(Create.class) @RequestBody WorkTaskDto workTaskDto) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, workTaskService.createWorkTask(workTaskDto));
     }
 
     @PutMapping("/task")
-    public ResponseMeta<Boolean> updateWorkTask(@Validated @RequestBody WorkTaskBO bugDTO) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, workTaskService.updateWorkTask(bugDTO));
+    public ResponseMeta<Boolean> updateWorkTask(@Validated(Update.class) @RequestBody WorkTaskDto workTaskDto) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, workTaskService.updateWorkTask(workTaskDto));
     }
 
     @GetMapping("/tasks")
