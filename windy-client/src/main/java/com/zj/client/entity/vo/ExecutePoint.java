@@ -1,6 +1,8 @@
 package com.zj.client.entity.vo;
 
 import java.io.Serializable;
+
+import com.zj.common.entity.feature.ExecutorUnit;
 import lombok.Data;
 
 @Data
@@ -24,7 +26,7 @@ public class ExecutePoint implements Serializable {
     /**
      * 执行点信息(包含参数信息)
      * */
-    private String featureInfo;
+    private ExecutorUnit executorUnit;
 
     /**
      * 包含比较信息

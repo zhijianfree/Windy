@@ -40,8 +40,7 @@ public class ForExecuteStrategy extends BaseExecuteStrategy{
   @Override
   public List<FeatureResponse> execute(ExecutePoint executePoint, FeatureExecuteContext featureExecuteContext) {
     log.info("start execute ForExecuteStrategy");
-    ExecutorUnit executorUnit = JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit
-        .class);
+    ExecutorUnit executorUnit = executePoint.getExecutorUnit();
     List<FeatureResponse> responses = new ArrayList<>();
     List<ExecutePointDto> executePoints = executorUnit.getExecutePoints();
     int size = Integer.parseInt(executorUnit.getMethod());

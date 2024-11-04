@@ -61,7 +61,7 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy {
     public List<FeatureResponse> execute(ExecutePoint executePoint, FeatureExecuteContext featureExecuteContext) {
         Map<String, Object> currentContext = featureExecuteContext.toMap();
         log.info("start execute AsyncExecuteStrategy context={}", JSON.toJSONString(currentContext));
-        ExecutorUnit executorUnit = JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit.class);
+        ExecutorUnit executorUnit = executePoint.getExecutorUnit();
         String timeout = executorUnit.getMethod();
         List<ExecutePointDto> executePoints = executorUnit.getExecutePoints();
         FeatureExecuteContext newContext = OrikaUtil.convert(featureExecuteContext, FeatureExecuteContext.class);

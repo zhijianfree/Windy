@@ -45,8 +45,7 @@ public class ScriptExecuteStrategy extends BaseExecuteStrategy {
     public List<FeatureResponse> execute(ExecutePoint executePoint, FeatureExecuteContext featureExecuteContext) {
         log.info("start handle script context={}", JSON.toJSONString(featureExecuteContext.toMap()));
         FeatureResponse response;
-        String featureInfo = executePoint.getFeatureInfo();
-        ExecutorUnit executorUnit = JSON.parseObject(featureInfo, ExecutorUnit.class);
+        ExecutorUnit executorUnit = executePoint.getExecutorUnit();
         try {
             String script = executorUnit.getService();
             if (StringUtils.isBlank(script)) {

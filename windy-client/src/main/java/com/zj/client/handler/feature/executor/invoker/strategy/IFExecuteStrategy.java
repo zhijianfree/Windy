@@ -44,8 +44,7 @@ public class IFExecuteStrategy extends BaseExecuteStrategy {
   @Override
   public List<FeatureResponse> execute(ExecutePoint executePoint, FeatureExecuteContext featureExecuteContext) {
     log.info("start execute IFExecuteStrategy context={}", JSON.toJSONString(featureExecuteContext.toMap()));
-    ExecutorUnit executorUnit = JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit
-        .class);
+    ExecutorUnit executorUnit = executePoint.getExecutorUnit();
     String ognl = executorUnit.getMethod();
     StrSubstitutor strSubstitutor = new StrSubstitutor(featureExecuteContext.toMap());
     String replaceOgnl = strSubstitutor.replace(ognl);

@@ -47,8 +47,7 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
 
   public FeatureResponse executeFeature(FeatureExecuteContext featureExecuteContext, ExecutePoint executePoint) {
     //1 执行用例，目前使用反射/http执行，后续考虑使用dubbo调用
-    String featureInfo = executePoint.getFeatureInfo();
-    ExecutorUnit executorUnit = JSON.parseObject(featureInfo, ExecutorUnit.class);
+    ExecutorUnit executorUnit = executePoint.getExecutorUnit();
 
     //2 将全局变量配置给执行点
     interceptorProxy.beforeExecute(executorUnit, featureExecuteContext);
@@ -96,7 +95,7 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
     point.setDescription(dto.getDescription());
     point.setCompareDefine(JSON.toJSONString(dto.getCompareDefine()));
     point.setVariables(JSON.toJSONString(dto.getVariableDefine()));
-    point.setFeatureInfo(JSON.toJSONString(dto.getExecutorUnit()));
+    point.setExecutorUnit(dto.getExecutorUnit());
     point.setSortOrder(dto.getSortOrder());
     point.setTestStage(dto.getTestStage());
     point.setExecuteType(dto.getExecuteType());
