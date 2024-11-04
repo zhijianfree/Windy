@@ -3,7 +3,7 @@ package com.zj.client.handler.pipeline.executer;
 import com.alibaba.fastjson.JSON;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
-import com.zj.client.entity.vo.NodeRecord;
+import com.zj.client.entity.bo.NodeRecord;
 import com.zj.client.handler.notify.IResultEventNotify;
 import com.zj.client.handler.pipeline.executer.notify.IPipelineStatusListener;
 import com.zj.client.handler.pipeline.executer.vo.PipelineStatusEvent;

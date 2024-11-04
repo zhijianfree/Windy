@@ -38,8 +38,7 @@ public class HistoryDataCleanSchedule {
         this.executeRecordRepository = executeRecordRepository;
     }
 
-    //    @Scheduled(cron = "0 0 23 * * ?")
-    @Scheduled(cron = "0/5 * * * * ? ")
+    @Scheduled(cron = "0 0 23 * * ?")
     public void cleanPipelineHistory() {
         log.info("start scan clean pipeline history");
         long oldTime = new DateTime().minusHours(cleanPipelineTime).getMillis();
@@ -57,8 +56,7 @@ public class HistoryDataCleanSchedule {
         }
     }
 
-    //    @Scheduled(cron = "0 0 1 * * ?")
-    @Scheduled(cron = "0/5 * * * * ? ")
+    @Scheduled(cron = "0 0 1 * * ?")
     public void cleanFeatureHistory() {
         log.info("start scan clean feature history");
         long featureOldTime = new DateTime().minusHours(cleanFeatureTime).getMillis();

@@ -41,7 +41,7 @@ public class UpdateFeatureHistoryEvent implements INotifyEvent {
   @Override
   public boolean handle(ResultEvent resultEvent) {
     log.info("receive update feature history event id = {} event={}", resultEvent.getExecuteId(),
-        resultEvent.getExecuteType());
+        JSON.toJSONString(resultEvent));
     FeatureHistoryBO history = JSON.parseObject(JSON.toJSONString(resultEvent.getParams()), FeatureHistoryBO.class);
     FeatureHistoryBO featureHistory = featureHistoryRepository.getFeatureHistory(
         history.getHistoryId());
@@ -55,8 +55,7 @@ public class UpdateFeatureHistoryEvent implements INotifyEvent {
     subTaskLogRepository.updateLogStatus(resultEvent.getLogId(), history.getHistoryId(),
         history.getExecuteStatus());
 
-    Map<String, Object> context = resultEvent.getContext();
-    featureExecuteProxy.featureStatusChange(resultEvent.getExecuteId(), history, context);
+    featureExecuteProxy.featureStatusChange(resultEvent.getExecuteId(), history,  resultEvent.getContext());
     return updateStatus;
   }
 }

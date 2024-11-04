@@ -200,7 +200,7 @@ public class FeatureExecuteProxy implements IStopEventListener {
             InternalEventFactory.sendNotifyEvent(new InternalEvent(EventType.RECOVER_CONTEXT, history.getFeatureId(),
                     context));
         }
-        log.info("execute get token ={}", context.get("accessToken"));
+
         log.info("feature task start cycle run");
         execute(featureTask);
     }

@@ -1,9 +1,8 @@
 package com.zj.client.handler.feature.executor;
 
-import com.alibaba.fastjson.JSON;
-import com.zj.client.entity.vo.ExecutePoint;
-import com.zj.client.entity.vo.ExecuteRecord;
-import com.zj.client.entity.vo.FeatureHistory;
+import com.zj.client.entity.bo.ExecutePoint;
+import com.zj.client.entity.bo.ExecuteRecord;
+import com.zj.client.entity.bo.FeatureHistory;
 import com.zj.common.entity.feature.FeatureResponse;
 import com.zj.client.handler.feature.executor.invoker.strategy.ExecuteStrategyFactory;
 import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
@@ -94,7 +93,8 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
                     executeRecord.setRecordResult(responses);
 
                     Map<String, Object> pointGlobalContext =
-                            responses.stream().map(FeatureResponse::getContext).filter(Objects::nonNull).flatMap(map -> map.entrySet().stream())
+                            responses.stream().map(FeatureResponse::getContext).filter(Objects::nonNull)
+                                    .flatMap(map -> map.entrySet().stream())
                                     .filter(entry -> Objects.nonNull(entry.getValue()))
                                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
                     globalContext.putAll(pointGlobalContext);

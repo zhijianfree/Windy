@@ -1,6 +1,6 @@
 package com.zj.client.entity.dto;
 
-import com.zj.client.entity.vo.ApiModel;
+import com.zj.client.entity.bo.ApiModel;
 import java.util.List;
 import lombok.Data;
 

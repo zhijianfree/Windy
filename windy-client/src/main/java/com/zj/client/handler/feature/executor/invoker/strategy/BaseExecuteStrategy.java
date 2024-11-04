@@ -3,7 +3,7 @@ package com.zj.client.handler.feature.executor.invoker.strategy;
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.InvokerType;
 import com.zj.common.entity.feature.ExecutePointDto;
-import com.zj.client.entity.vo.ExecutePoint;
+import com.zj.client.entity.bo.ExecutePoint;
 import com.zj.common.entity.feature.VariableDefine;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import com.zj.common.entity.feature.FeatureResponse;

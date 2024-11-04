@@ -1,10 +1,10 @@
-package com.zj.client.entity.vo;
+package com.zj.client.entity.bo;
 
 import lombok.Data;
 
 @Data
 public class FeatureHistory {
-    private Long id;
+
 
     private String historyId;
     /**

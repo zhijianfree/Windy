@@ -1,4 +1,4 @@
-package com.zj.client.entity.vo;
+package com.zj.client.entity.bo;
 
 import java.io.Serializable;
 

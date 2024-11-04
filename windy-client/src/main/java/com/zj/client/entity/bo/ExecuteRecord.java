@@ -1,4 +1,4 @@
-package com.zj.client.entity.vo;
+package com.zj.client.entity.bo;
 
 import com.zj.common.entity.feature.FeatureResponse;
 import lombok.Data;

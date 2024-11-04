@@ -42,8 +42,7 @@ public class CreateFeatureHistoryEvent implements INotifyEvent {
   public boolean handle(ResultEvent resultEvent) {
     log.info("receive feature history create event id = {} event={}", resultEvent.getExecuteId(),
         JSON.toJSONString(resultEvent.getParams()));
-    FeatureHistoryBO featureHistoryBO = JSON.parseObject(
-        JSON.toJSONString(resultEvent.getParams()), FeatureHistoryBO.class);
+    FeatureHistoryBO featureHistoryBO = JSON.parseObject(JSON.toJSONString(resultEvent.getParams()), FeatureHistoryBO.class);
     FeatureInfoBO feature = featureRepository.getFeatureById(featureHistoryBO.getFeatureId());
     Optional.ofNullable(feature).ifPresent(f -> featureHistoryBO.setFeatureName(f.getFeatureName()));
 

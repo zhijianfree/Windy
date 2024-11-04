@@ -1,7 +1,7 @@
 package com.zj.client.handler.feature.executor.interceptor;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.client.entity.vo.ExecutePoint;
+import com.zj.client.entity.bo.ExecutePoint;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.client.handler.feature.executor.invoker.invoke.MethodInvoke;
 import com.zj.client.handler.feature.executor.random.IRandomGenerator;

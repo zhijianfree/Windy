@@ -1,8 +1,8 @@
 package com.zj.client.handler.pipeline.executer.trigger.strategy;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.client.entity.vo.ApprovalParameter;
-import com.zj.client.entity.vo.NodeRecord;
+import com.zj.client.entity.bo.ApprovalParameter;
+import com.zj.client.entity.bo.NodeRecord;
 import com.zj.client.handler.pipeline.executer.trigger.INodeTrigger;
 import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
@@ -13,7 +13,6 @@ import com.zj.common.enums.ProcessStatus;
 import com.zj.common.entity.dto.ResponseStatusModel;
 import com.zj.common.adapter.invoker.IMasterInvoker;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;

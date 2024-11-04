@@ -1,6 +1,6 @@
-package com.zj.client.entity.vo;
+package com.zj.client.entity.bo;
 
-import com.zj.client.entity.vo.EntityItem.PropertyItem;
+import com.zj.client.entity.bo.EntityItem.PropertyItem;
 import java.util.List;
 import lombok.Data;
 

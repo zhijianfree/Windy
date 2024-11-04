@@ -2,12 +2,12 @@ package com.zj.client.handler.generate;
 
 import com.zj.client.config.GlobalEnvConfig;
 import com.zj.client.entity.dto.GenerateDto;
-import com.zj.client.entity.vo.ApiItem;
-import com.zj.client.entity.vo.ApiItem.MethodParam;
-import com.zj.client.entity.vo.ApiModel;
-import com.zj.client.entity.vo.ApiParamModel;
-import com.zj.client.entity.vo.EntityItem.PropertyItem;
-import com.zj.client.entity.vo.FreemarkerContext;
+import com.zj.client.entity.bo.ApiItem;
+import com.zj.client.entity.bo.ApiItem.MethodParam;
+import com.zj.client.entity.bo.ApiModel;
+import com.zj.client.entity.bo.ApiParamModel;
+import com.zj.client.entity.bo.EntityItem.PropertyItem;
+import com.zj.client.entity.bo.FreemarkerContext;
 import com.zj.client.handler.notify.IResultEventNotify;
 import com.zj.client.utils.FreemarkerUtils;
 import com.zj.common.adapter.uuid.UniqueIdService;
