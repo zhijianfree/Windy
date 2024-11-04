@@ -1,10 +1,12 @@
 package com.zj.client.handler.feature.executor.compare;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.client.handler.feature.executor.compare.operator.CompareFactory;
 import com.zj.common.entity.feature.CompareDefine;
 import com.zj.common.entity.feature.CompareResult;
+import com.zj.common.enums.CompareType;
 import com.zj.common.exception.ErrorCode;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import lombok.extern.slf4j.Slf4j;
@@ -88,9 +90,7 @@ public class CompareHandler {
             return;
         }
 
-        compareDefines.stream().filter(
-                compare -> StringUtils.isNoneBlank(compare.getCompareKey()) && StringUtils.isNoneBlank(
-                        compare.getExpectValue())).forEach(compareDefine -> {
+        compareDefines.stream().filter(CompareHandler::isNeedWrapResponseData).forEach(compareDefine -> {
             String key = compareDefine.getCompareKey();
             if (Objects.equals(key, RESPONSE_CODE)) {
                 compareDefine.setResponseValue(String.valueOf(executeDetailVo.responseStatus()));
@@ -107,4 +107,32 @@ public class CompareHandler {
         });
     }
 
+    private static boolean isNeedWrapResponseData(CompareDefine compare) {
+        //CompareType.NOT_EMPTY 操作符不需要expectValue
+        if (StringUtils.isNoneBlank(compare.getCompareKey()) && Objects.equals(CompareType.NOT_EMPTY.getOperator(),
+                compare.getOperator())) {
+            return true;
+        }
+        return StringUtils.isNoneBlank(compare.getCompareKey()) && StringUtils.isNoneBlank(
+                compare.getExpectValue());
+    }
+
+    public static void main(String[] args) {
+        OgnlDataParser ognlDataParser = new OgnlDataParser();
+        JSONObject data = JSON.parseObject("{\"result\":{\"total\":3,\"list\":[{\"topo_type\":0," +
+                "\"description\":\"设备描述\",\"pid\":\"lt9wfbbyly7w8qpb\",\"comport_id\":3,\"gmt_modified\":1730708964," +
+                "\"product_name\":\"DP数据类型测试\",\"dev_id\":\"\",\"connected\":0,\"extend\":\"\",\"dev_addr\":1," +
+                "\"name\":\"设备\",\"online\":0,\"third_device_id\":\"\",\"activation\":0,\"category\":\"料理机\"," +
+                "\"gmt_created\":1730708964,\"cid\":\"s_c_2_3_1\"},{\"topo_type\":0,\"description\":\"设备描述2\"," +
+                "\"pid\":\"lt9wfbbyly7w8qpb\",\"comport_id\":3,\"gmt_modified\":1730708964," +
+                "\"product_name\":\"DP数据类型测试\",\"dev_id\":\"\",\"connected\":0,\"extend\":\"\",\"dev_addr\":2," +
+                "\"name\":\"设备2\",\"online\":0,\"third_device_id\":\"\",\"activation\":0,\"category\":\"料理机\"," +
+                "\"gmt_created\":1730708964,\"cid\":\"s_c_2_3_2\"},{\"topo_type\":0,\"description\":\"设备描述3\"," +
+                "\"pid\":\"lt9wfbbyly7w8qpb\",\"comport_id\":3,\"gmt_modified\":1730708964," +
+                "\"product_name\":\"DP数据类型测试\",\"dev_id\":\"\",\"connected\":0,\"extend\":\"\",\"dev_addr\":3," +
+                "\"name\":\"设备3\",\"online\":0,\"third_device_id\":\"\",\"activation\":0,\"category\":\"料理机\"," +
+                "\"gmt_created\":1730708964,\"cid\":\"s_c_2_3_3\"}]}}");
+        Object result = ognlDataParser.exchangeOgnlParamValue(data, "$body.result.list[0].dev_addr");
+        System.out.println(String.valueOf(result));
+    }
 }
