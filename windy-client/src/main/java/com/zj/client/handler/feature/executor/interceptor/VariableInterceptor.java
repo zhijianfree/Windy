@@ -1,6 +1,5 @@
 package com.zj.client.handler.feature.executor.interceptor;
 
-import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.bo.ExecutePoint;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.client.handler.feature.executor.invoker.invoke.MethodInvoke;
@@ -8,11 +7,11 @@ import com.zj.client.handler.feature.executor.random.IRandomGenerator;
 import com.zj.client.handler.feature.executor.random.entity.RandomEntity;
 import com.zj.client.handler.feature.executor.random.entity.RandomType;
 import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
-import com.zj.common.enums.InvokerType;
-import com.zj.common.enums.Position;
 import com.zj.common.entity.feature.CompareDefine;
 import com.zj.common.entity.feature.ExecutorUnit;
 import com.zj.common.entity.feature.VariableDefine;
+import com.zj.common.enums.InvokerType;
+import com.zj.common.enums.Position;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import com.zj.plugin.loader.ParameterDefine;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +57,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
     }
 
     private void exchangeCompareContext(FeatureExecuteContext context, ExecutePoint executePoint) {
-        List<CompareDefine> compareDefines = JSON.parseArray(executePoint.getCompareDefine(), CompareDefine.class);
+        List<CompareDefine> compareDefines = executePoint.getCompareDefines();
         if (CollectionUtils.isEmpty(compareDefines)) {
             return;
         }
@@ -74,11 +73,11 @@ public class VariableInterceptor implements IExecuteInterceptor {
             compareDefine.setExpectValue(replaceResult);
         });
 
-        executePoint.setCompareDefine(JSON.toJSONString(compareDefines));
+        executePoint.setCompareDefines(compareDefines);
     }
 
     private void exchangeVariableContext(FeatureExecuteContext context, ExecutePoint executePoint, Object responseBody) {
-        List<VariableDefine> variableDefines = JSON.parseArray(executePoint.getVariables(), VariableDefine.class);
+        List<VariableDefine> variableDefines = executePoint.getVariableDefines();
         if (CollectionUtils.isEmpty(variableDefines)) {
             return;
         }

@@ -1,20 +1,20 @@
 package com.zj.client.handler.feature.executor.invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.common.enums.InvokerType;
-import com.zj.common.entity.feature.ExecutePointDto;
 import com.zj.client.entity.bo.ExecutePoint;
-import com.zj.common.entity.feature.VariableDefine;
-import com.zj.plugin.loader.ExecuteDetailVo;
-import com.zj.common.entity.feature.FeatureResponse;
-import com.zj.common.entity.feature.CompareDefine;
 import com.zj.client.handler.feature.executor.compare.CompareHandler;
-import com.zj.common.entity.feature.CompareResult;
-import com.zj.client.handler.feature.executor.invoker.IExecuteStrategy;
-import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
 import com.zj.client.handler.feature.executor.interceptor.InterceptorProxy;
+import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
+import com.zj.client.handler.feature.executor.invoker.IExecuteStrategy;
 import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
+import com.zj.common.entity.feature.CompareDefine;
+import com.zj.common.entity.feature.CompareResult;
+import com.zj.common.entity.feature.ExecutePointDto;
 import com.zj.common.entity.feature.ExecutorUnit;
+import com.zj.common.entity.feature.FeatureResponse;
+import com.zj.common.entity.feature.VariableDefine;
+import com.zj.common.enums.InvokerType;
+import com.zj.plugin.loader.ExecuteDetailVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -67,12 +67,11 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
             JSON.toJSONString(featureExecuteContext.toMap()));
 
     //5 下面开始对比
-    String compareInfo = executePoint.getCompareDefine();
-    List<CompareDefine> compareDefines = JSON.parseArray(compareInfo, CompareDefine.class);
+    List<CompareDefine> compareDefines = executePoint.getCompareDefines();
     CompareResult compareResult = compareHandler.compare(executeDetailVo, compareDefines);
 
     //6 获取临时全局环境变量
-    List<VariableDefine> variableDefines = JSON.parseArray(executePoint.getVariables(), VariableDefine.class);
+    List<VariableDefine> variableDefines = executePoint.getVariableDefines();
     Map<String, Object> globalContext = new HashMap<>();
     if (CollectionUtils.isNotEmpty(variableDefines)) {
       variableDefines.stream().filter(VariableDefine::isGlobal).forEach(variableDefine -> {
@@ -93,8 +92,8 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
     point.setFeatureId(dto.getFeatureId());
     point.setPointId(dto.getPointId());
     point.setDescription(dto.getDescription());
-    point.setCompareDefine(JSON.toJSONString(dto.getCompareDefine()));
-    point.setVariables(JSON.toJSONString(dto.getVariableDefine()));
+    point.setCompareDefines(dto.getCompareDefine());
+    point.setVariableDefines(dto.getVariableDefine());
     point.setExecutorUnit(dto.getExecutorUnit());
     point.setSortOrder(dto.getSortOrder());
     point.setTestStage(dto.getTestStage());

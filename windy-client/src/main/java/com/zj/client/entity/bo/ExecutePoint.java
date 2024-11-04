@@ -1,13 +1,15 @@
 package com.zj.client.entity.bo;
 
-import java.io.Serializable;
-
+import com.zj.common.entity.feature.CompareDefine;
 import com.zj.common.entity.feature.ExecutorUnit;
+import com.zj.common.entity.feature.VariableDefine;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
-public class ExecutePoint implements Serializable {
-    private Long id;
+public class ExecutePoint {
+
     /**
      * 执行点Id
      * */
@@ -27,16 +29,15 @@ public class ExecutePoint implements Serializable {
      * 执行点信息(包含参数信息)
      * */
     private ExecutorUnit executorUnit;
-
     /**
      * 包含比较信息
      * */
-    private String compareDefine;
+    private List<CompareDefine> compareDefines;
 
     /**
      * 包含变量声明
      * */
-    private String variables;
+    private List<VariableDefine> variableDefines;
 
     /**
      * 执行点功能描述，自定义
