@@ -137,7 +137,7 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy {
         executeRecord.setHistoryId(featureExecuteContext.getHistoryId());
         executeRecord.setExecuteType(TemplateType.THREAD.getType());
         executeRecord.setExecuteRecordId(featureExecuteContext.getRecordId());
-        executeRecord.setExecuteResult(JSON.toJSONString(responses));
+        executeRecord.setRecordResult(responses);
         executeRecord.setStatus(FeatureExecutorImpl.judgeRecordStatus(responses));
         ResultEvent resultEvent = new ResultEvent().executeId(featureExecuteContext.getRecordId())
                 .notifyType(NotifyType.UPDATE_EXECUTE_POINT_RECORD)

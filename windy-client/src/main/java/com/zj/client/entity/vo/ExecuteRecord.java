@@ -1,6 +1,9 @@
 package com.zj.client.entity.vo;
 
+import com.zj.common.entity.feature.FeatureResponse;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class ExecuteRecord {
@@ -45,7 +48,7 @@ public class ExecuteRecord {
     /**
      * 执行结果
      */
-    private String executeResult;
+    private List<FeatureResponse> recordResult;
 
     /**
      * 创建时间

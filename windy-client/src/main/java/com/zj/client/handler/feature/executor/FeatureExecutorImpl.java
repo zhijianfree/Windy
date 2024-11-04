@@ -91,7 +91,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
                     }
                     List<FeatureResponse> responses = executeStrategyFactory.execute(executePoint, featureExecuteContext);
                     executeRecord.setStatus(judgeRecordStatus(responses));
-                    executeRecord.setExecuteResult(JSON.toJSONString(responses));
+                    executeRecord.setRecordResult(responses);
 
                     Map<String, Object> pointGlobalContext =
                             responses.stream().map(FeatureResponse::getContext).filter(Objects::nonNull).flatMap(map -> map.entrySet().stream())
@@ -102,8 +102,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
                     log.error("execute error", e);
                     FeatureResponse featureResponse = createFailResponse(executePoint, e);
                     executeRecord.setStatus(ProcessStatus.FAIL.getType());
-                    executeRecord.setExecuteResult(
-                            JSON.toJSONString(Collections.singletonList(featureResponse)));
+                    executeRecord.setRecordResult(Collections.singletonList(featureResponse));
                 }
 
                 //3 保存执行点记录
