@@ -18,10 +18,10 @@ import java.util.List;
 @Component
 public class HistoryDataCleanSchedule {
 
-    @Value("windy.feature.clean")
+    @Value("${windy.clean.feature}")
     private Integer cleanFeatureTime;
 
-    @Value("windy.pipeline.clean")
+    @Value("${windy.clean.pipeline}")
     private Integer cleanPipelineTime;
     private final IPipelineHistoryRepository pipelineHistoryRepository;
     private final INodeRecordRepository nodeRecordRepository;
