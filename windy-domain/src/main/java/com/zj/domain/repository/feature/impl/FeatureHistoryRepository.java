@@ -26,7 +26,7 @@ import org.springframework.util.CollectionUtils;
 public class FeatureHistoryRepository extends
     ServiceImpl<FeatureHistoryMapper, FeatureHistory> implements IFeatureHistoryRepository {
 
-  private IExecuteRecordRepository executeRecordRepository;
+  private final IExecuteRecordRepository executeRecordRepository;
 
   public FeatureHistoryRepository(IExecuteRecordRepository executeRecordRepository) {
     this.executeRecordRepository = executeRecordRepository;
@@ -130,5 +130,11 @@ public class FeatureHistoryRepository extends
     update(featureHistory,
         Wrappers.lambdaUpdate(FeatureHistory.class).eq(FeatureHistory::getRecordId, taskRecordId)
             .eq(FeatureHistory::getExecuteStatus, ProcessStatus.RUNNING.getType()));
+  }
+
+  @Override
+  public List<FeatureHistoryBO> getOldFeatureHistory(long queryTime) {
+    List<FeatureHistory> histories = list(Wrappers.lambdaQuery(FeatureHistory.class).le(FeatureHistory::getCreateTime, queryTime));
+    return OrikaUtil.convertList(histories, FeatureHistoryBO.class);
   }
 }

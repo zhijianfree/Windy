@@ -19,4 +19,8 @@ public interface IPipelineHistoryRepository {
   PipelineHistoryBO getLatestPipelineHistory(String pipelineId);
 
   boolean updateStatus(String historyId, ProcessStatus processStatus);
+
+  List<PipelineHistoryBO> getOldPipelineHistory(long queryTime);
+
+  boolean deleteByHistoryId(String historyId);
 }

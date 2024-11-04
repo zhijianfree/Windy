@@ -2,13 +2,12 @@ package com.zj.client.schedule;
 
 import com.zj.client.handler.feature.executor.invoker.invoke.MethodInvoke;
 import com.zj.client.handler.feature.executor.invoker.loader.PluginManager;
-import com.zj.common.entity.dto.PluginInfo;
-import com.zj.common.adapter.monitor.InstanceMonitor;
 import com.zj.common.adapter.invoker.IMasterInvoker;
-import com.zj.common.adapter.trace.TidInterceptor;
+import com.zj.common.adapter.monitor.InstanceMonitor;
+import com.zj.common.entity.dto.PluginInfo;
+import com.zj.common.utils.TraceUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.MDC;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -43,12 +42,14 @@ public class PluginLoadSchedule {
   @Scheduled(cron = "0/5 * * * * ? ")
   public void loadSchedule() {
     if (instanceMonitor.isUnStable()) {
+      log.info("server is not unstable");
       return;
     }
 
-    initMDC();
+    initTraceId();
     List<PluginInfo> plugins = masterInvoker.getAvailablePlugins();
     if (CollectionUtils.isEmpty(plugins)) {
+      log.info("get plugin list is empty");
       return;
     }
 
@@ -57,6 +58,7 @@ public class PluginLoadSchedule {
         .filter(plugin -> !localNames.contains(plugin.getPluginName()))
         .collect(Collectors.toList());
     if (CollectionUtils.isEmpty(needLoad)) {
+      log.info("not plugin is need load ");
       return;
     }
 
@@ -66,8 +68,8 @@ public class PluginLoadSchedule {
     methodInvoke.loadPluginFromDisk();
   }
 
-  private static void initMDC() {
-    MDC.put(TidInterceptor.MDC_TID_KEY, UUID.randomUUID().toString().replace("-",""));
+  private static void initTraceId() {
+    TraceUtils.putTrace(UUID.randomUUID().toString().replace("-",""));
   }
 
   private List<String> loadLocalJarFiles() {

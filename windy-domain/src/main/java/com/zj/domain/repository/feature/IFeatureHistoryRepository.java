@@ -27,4 +27,6 @@ public interface IFeatureHistoryRepository {
   List<FeatureHistoryBO> getTaskRecordFeatures(String taskRecordId);
 
   void stopTaskFeatures(String taskRecordId, ProcessStatus stop);
+
+    List<FeatureHistoryBO> getOldFeatureHistory(long queryTime);
 }

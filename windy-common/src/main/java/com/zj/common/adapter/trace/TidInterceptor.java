@@ -1,7 +1,7 @@
 package com.zj.common.adapter.trace;
 
+import com.zj.common.utils.TraceUtils;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.Filter;
@@ -22,7 +22,6 @@ import java.util.UUID;
 @WebFilter(urlPatterns = "/**", filterName = "requestTraceFilter")
 public class TidInterceptor implements Filter {
 
-  public static final String MDC_TID_KEY = "tid";
   public static final String HTTP_HEADER_TRACE_ID = "REQUEST-TRACE-ID";
 
   @Override
@@ -33,11 +32,11 @@ public class TidInterceptor implements Filter {
       if (StringUtils.isBlank(tid)) {
         tid = UUID.randomUUID().toString().replace("-","");
       }
-      MDC.put(MDC_TID_KEY, tid);
+      TraceUtils.putTrace(tid);
       chain.doFilter(request, response);
     } finally {
       // 清除MDC的traceId值，确保在请求结束后不会影响其他请求的日志
-      MDC.remove(MDC_TID_KEY);
+      TraceUtils.removeTrace();
     }
   }
 }

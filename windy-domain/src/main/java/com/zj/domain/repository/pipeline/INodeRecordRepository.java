@@ -26,4 +26,6 @@ public interface INodeRecordRepository {
   NodeRecordBO getRecordByNodeAndHistory(String historyId, String nodeId);
 
   void updateRunningNodeStatus(String historyId, ProcessStatus stop);
+
+  boolean deleteRecordByHistoryId(String historyId);
 }

@@ -2,12 +2,12 @@ package com.zj.common.adapter.invoker.eureka;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.common.adapter.trace.TidInterceptor;
+import com.zj.common.utils.TraceUtils;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.slf4j.MDC;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -58,7 +58,7 @@ public class BaseEurekaAdapter {
     }
 
     protected void wrapTraceHeader() {
-        String traceId = MDC.get(TidInterceptor.MDC_TID_KEY);
+        String traceId = TraceUtils.getTraceId();
         boolean existTrace = headers.toSingleValueMap().containsKey(TidInterceptor.HTTP_HEADER_TRACE_ID);
         if (!existTrace) {
             headers.add(TidInterceptor.HTTP_HEADER_TRACE_ID, traceId);
@@ -66,7 +66,7 @@ public class BaseEurekaAdapter {
     }
 
     protected boolean postWithIp(String url, Object data) {
-        String traceId = MDC.get(TidInterceptor.MDC_TID_KEY);
+        String traceId = TraceUtils.getTraceId();
         Request request = new Request.Builder().url(url).header(TidInterceptor.HTTP_HEADER_TRACE_ID, traceId)
                 .post(RequestBody.create(mediaType, JSON.toJSONString(data))).build();
         try {
@@ -80,7 +80,7 @@ public class BaseEurekaAdapter {
     }
 
     protected Response getWithIp(String url) {
-        String traceId = MDC.get(TidInterceptor.MDC_TID_KEY);
+        String traceId = TraceUtils.getTraceId();
         Request request =
                 new Request.Builder().url(url).get().header(TidInterceptor.HTTP_HEADER_TRACE_ID, traceId).build();
         try {

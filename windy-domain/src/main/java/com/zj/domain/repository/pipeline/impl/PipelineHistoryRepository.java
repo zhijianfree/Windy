@@ -32,7 +32,7 @@ public class PipelineHistoryRepository extends
 
   public static final String LAST_SQL = "limit 1";
 
-  private IPipelineRepository pipelineRepository;
+  private final IPipelineRepository pipelineRepository;
 
   public PipelineHistoryRepository(IPipelineRepository pipelineRepository) {
     this.pipelineRepository = pipelineRepository;
@@ -109,5 +109,16 @@ public class PipelineHistoryRepository extends
     Optional.ofNullable(pipelineHistoryBO.getPipelineConfig()).ifPresent(config ->
             pipelineHistory.setConfig(JSON.toJSONString(config)));
     return pipelineHistory;
+  }
+
+  @Override
+  public List<PipelineHistoryBO> getOldPipelineHistory(long queryTime) {
+    List<PipelineHistory> pipelineHistories = list(Wrappers.lambdaQuery(PipelineHistory.class).le(PipelineHistory::getCreateTime, queryTime));
+    return OrikaUtil.convertList(pipelineHistories, PipelineHistoryBO.class);
+  }
+
+  @Override
+  public boolean deleteByHistoryId(String historyId) {
+    return remove(Wrappers.lambdaQuery(PipelineHistory.class).eq(PipelineHistory::getHistoryId, historyId));
   }
 }

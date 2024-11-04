@@ -38,3 +38,10 @@ logging:
 mybatis-plus:
   global-config:
     banner: false
+
+windy:
+  clean:
+    #用例执行历史记录删除时间默认7天，单位小时
+    feature: 168
+    #流水线执行历史记录删除时间默认7天，单位小时
+    pipeline: 168

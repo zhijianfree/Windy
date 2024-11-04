@@ -8,13 +8,12 @@ import com.zj.client.handler.notify.IResultEventNotify;
 import com.zj.client.handler.pipeline.executer.notify.IPipelineStatusListener;
 import com.zj.client.handler.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
+import com.zj.common.entity.dto.ResultEvent;
 import com.zj.common.enums.NotifyType;
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.entity.dto.ResultEvent;
-import com.zj.common.adapter.trace.TidInterceptor;
 import com.zj.common.utils.IpUtils;
+import com.zj.common.utils.TraceUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -45,7 +44,7 @@ public class ExecuteProxy implements IPipelineStatusListener {
      * 流水线的执行应该是每个节点做为一个任务，这样就可以充分使用client的扩展性
      */
     public void runNode(TaskNode taskNode) {
-        String traceId = MDC.get(TidInterceptor.MDC_TID_KEY);
+        String traceId = TraceUtils.getTraceId();
         CompletableFuture.supplyAsync(() -> {
             if (Objects.isNull(taskNode)) {
                 return null;

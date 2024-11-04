@@ -99,6 +99,11 @@ public class NodeRecordRepository extends ServiceImpl<NodeRecordMapper, NodeReco
             .eq(NodeRecord::getStatus, ProcessStatus.RUNNING.getType()));
   }
 
+  @Override
+  public boolean deleteRecordByHistoryId(String historyId) {
+    return remove(Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getHistoryId, historyId));
+  }
+
   private static NodeRecord convertNodeRecord(NodeRecordBO nodeRecordBO) {
     NodeRecord nodeRecord = OrikaUtil.convert(nodeRecordBO, NodeRecord.class);
 
