@@ -1,4 +1,4 @@
-package com.zj.client.handler.deploy;
+package com.zj.client.handler.pipeline.deploy;
 
 import lombok.Data;
 

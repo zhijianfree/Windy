@@ -1,4 +1,4 @@
-package com.zj.client.handler.pipeline.maven;
+package com.zj.client.handler.pipeline.build.maven;
 
 import com.google.common.base.Preconditions;
 import com.zj.client.config.GlobalEnvConfig;

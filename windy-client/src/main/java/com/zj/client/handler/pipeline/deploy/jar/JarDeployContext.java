@@ -1,6 +1,6 @@
-package com.zj.client.handler.deploy.jar;
+package com.zj.client.handler.pipeline.deploy.jar;
 
-import com.zj.client.handler.deploy.DeployContext;
+import com.zj.client.handler.pipeline.deploy.DeployContext;
 import lombok.Builder;
 import lombok.Data;
 

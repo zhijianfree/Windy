@@ -16,7 +16,7 @@ import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel.ResponseStatus;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.client.handler.pipeline.git.IGitProcessor;
-import com.zj.client.handler.pipeline.maven.MavenOperator;
+import com.zj.client.handler.pipeline.build.maven.MavenOperator;
 import com.zj.common.enums.DeployType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.GitUtils;
