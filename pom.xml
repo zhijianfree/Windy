@@ -42,6 +42,7 @@
     <commons-codec.version>1.15</commons-codec.version>
     <commons-text.version>1.10.0</commons-text.version>
     <commons-lang.version>2.6</commons-lang.version>
+    <commons-exec.version>1.4.0</commons-exec.version>
     <maven-invoker.version>3.0.1</maven-invoker.version>
     <git-client.version>5.3.0.201903130848-r</git-client.version>
     <common-io.version>2.11.0</common-io.version>
@@ -201,6 +202,11 @@
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-collections4</artifactId>
         <version>${commons-collections4.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-exec</artifactId>
+        <version>${commons-exec.version}</version>
       </dependency>
       <dependency>
         <groupId>commons-codec</groupId>

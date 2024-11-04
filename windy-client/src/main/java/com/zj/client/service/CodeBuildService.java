@@ -10,13 +10,15 @@ import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.zj.client.config.GlobalEnvConfig;
 import com.zj.client.entity.dto.CodeBuildParamDto;
+import com.zj.client.handler.pipeline.build.CodeBuildContext;
+import com.zj.client.handler.pipeline.build.CodeBuildFactory;
+import com.zj.client.handler.pipeline.build.ICodeBuilder;
 import com.zj.client.handler.pipeline.executer.notify.PipelineEventFactory;
 import com.zj.client.handler.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel.ResponseStatus;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.client.handler.pipeline.git.IGitProcessor;
-import com.zj.client.handler.pipeline.build.maven.MavenOperator;
 import com.zj.common.enums.DeployType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.GitUtils;
@@ -53,18 +55,18 @@ public class CodeBuildService {
     public static final String IMAGE_NAME = "imageName";
 
     private final IGitProcessor gitProcessor;
-    private final MavenOperator mavenOperator;
     private final Executor executorService;
     private final GlobalEnvConfig globalEnvConfig;
+    private final CodeBuildFactory codeBuildFactory;
 
     private final Map<String, QueryResponseModel> statusMap = new ConcurrentHashMap<>();
 
-    public CodeBuildService(IGitProcessor gitProcessor, MavenOperator mavenOperator,
-                            @Qualifier("gitOperatePool") Executor executorService, GlobalEnvConfig globalEnvConfig) {
+    public CodeBuildService(IGitProcessor gitProcessor, @Qualifier("gitOperatePool") Executor executorService,
+                            GlobalEnvConfig globalEnvConfig, CodeBuildFactory codeBuildFactory) {
         this.gitProcessor = gitProcessor;
-        this.mavenOperator = mavenOperator;
         this.executorService = executorService;
         this.globalEnvConfig = globalEnvConfig;
+        this.codeBuildFactory = codeBuildFactory;
     }
 
     public void buildCode(CodeBuildParamDto codeBuildParam, TaskNode taskNode) {
@@ -84,13 +86,16 @@ public class CodeBuildService {
                 pullCodeFrmGit(codeBuildParam, pipelineWorkspace);
                 updateProcessMsg(taskNode, "拉取代码完成");
 
-                //2 本地maven构建
+                //开始构建代码产物
                 String pomPath = getTargetPomPath(pipelineWorkspace, codeBuildParam.getPomPath());
-                updateProcessMsg(taskNode, "开始maven打包: " + pomPath);
-                Integer exitCode = mavenOperator.build(pomPath, pipelineWorkspace,
-                        line -> notifyMessage(taskNode, line));
+                ICodeBuilder codeBuilder = codeBuildFactory.getCodeBuilder(codeBuildParam.getCode());
+                CodeBuildContext context = new CodeBuildContext();
+                context.setBuildFile(pomPath);
+                context.setTargetDir(pipelineWorkspace);
+                context.setServiceName(serviceName);
+                Integer exitCode = codeBuilder.build(context, message -> notifyMessage(taskNode, message));
                 log.info("get maven exit code={}", exitCode);
-                updateProcessMsg(taskNode, "maven构建完成 状态码: " + exitCode);
+                updateProcessMsg(taskNode, "代码产物构建完成 状态码: " + exitCode);
 
                 //3 构建docker镜像
                 String remoteImage = "";
@@ -113,7 +118,7 @@ public class CodeBuildService {
     }
 
     private boolean checkImageRepository(CodeBuildParamDto codeBuildParam) {
-        if (Objects.equals(codeBuildParam.getDeployType(), DeployType.SSH.getType())){
+        if (Objects.equals(codeBuildParam.getDeployType(), DeployType.SSH.getType())) {
             return false;
         }
         return StringUtils.isNotBlank(codeBuildParam.getRepository()) && StringUtils.isNotBlank(

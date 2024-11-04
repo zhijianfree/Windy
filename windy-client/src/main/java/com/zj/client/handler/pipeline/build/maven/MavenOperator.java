@@ -2,7 +2,11 @@ package com.zj.client.handler.pipeline.build.maven;
 
 import com.google.common.base.Preconditions;
 import com.zj.client.config.GlobalEnvConfig;
+import com.zj.client.handler.pipeline.build.CodeBuildContext;
+import com.zj.client.handler.pipeline.build.IBuildNotifyListener;
+import com.zj.client.handler.pipeline.build.ICodeBuilder;
 import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
+import com.zj.common.enums.CodeType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +32,7 @@ import java.util.*;
  */
 @Slf4j
 @Component
-public class MavenOperator {
+public class MavenOperator implements ICodeBuilder {
 
   public static final String DEPLOY = "deploy";
   public static final String SH_COMMAND_FORMAT = "nohup java -jar %s > app.log 2>&1 &";
@@ -46,6 +50,21 @@ public class MavenOperator {
     } catch (Exception e) {
       log.warn("load template sh file error", e);
     }
+  }
+
+  @Override
+  public String codeType() {
+    return CodeType.GO.getType();
+  }
+
+  @Override
+  public Integer build(CodeBuildContext context, IBuildNotifyListener notifyListener) {
+    try {
+      return build(context.getBuildFile(), context.getTargetDir(), notifyListener::notifyMessage);
+    } catch (Exception e) {
+      log.info("execute maven error", e);
+    }
+    return -1;
   }
 
   public Integer build(String pomPath, String servicePath, InvocationOutputHandler outputHandler)
