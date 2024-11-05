@@ -1,5 +1,6 @@
 package com.zj.client.handler.pipeline.build.maven;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.zj.client.config.GlobalEnvConfig;
 import com.zj.client.handler.pipeline.build.CodeBuildContext;
@@ -60,6 +61,7 @@ public class MavenOperator implements ICodeBuilder {
   @Override
   public Integer build(CodeBuildContext context, IBuildNotifyListener notifyListener) {
     try {
+      log.info("start build java code = {}", JSON.toJSONString(context));
       return build(context.getBuildFile(), context.getTargetDir(), notifyListener::notifyMessage);
     } catch (Exception e) {
       log.info("execute maven error", e);

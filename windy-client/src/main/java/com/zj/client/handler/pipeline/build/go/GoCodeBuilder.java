@@ -1,5 +1,6 @@
 package com.zj.client.handler.pipeline.build.go;
 
+import com.alibaba.fastjson.JSON;
 import com.zj.client.handler.pipeline.build.CodeBuildContext;
 import com.zj.client.handler.pipeline.build.IBuildNotifyListener;
 import com.zj.client.handler.pipeline.build.ICodeBuilder;
@@ -30,13 +31,14 @@ public class GoCodeBuilder implements ICodeBuilder {
     }
 
     @Override
-    public Integer build(CodeBuildContext codeBuildContext, IBuildNotifyListener notifyListener) {
-        File targetFile = new File(codeBuildContext.getBuildFile());
+    public Integer build(CodeBuildContext context, IBuildNotifyListener notifyListener) {
+        log.info("start build go code = {}", JSON.toJSONString(context));
+        File targetFile = new File(context.getBuildFile());
         String targetPath = targetFile.getParentFile().getAbsolutePath() + File.separator + "docker" + File.separator +
                 "go_build.sh";
         copyBuildFile(targetPath);
-        String goPath = buildVersionPath + File.separator + "go" + File.separator + codeBuildContext.getBuildVersion();
-        ProcessBuilder processBuilder = new ProcessBuilder(targetPath, codeBuildContext.getServiceName(), "1.0.0",
+        String goPath = buildVersionPath + File.separator + "go" + File.separator + context.getBuildVersion();
+        ProcessBuilder processBuilder = new ProcessBuilder(targetPath, context.getServiceName(), "1.0.0",
                 targetFile.getAbsolutePath(), goPath);
         processBuilder.redirectErrorStream(true); // 合并标准错误流和标准输出流
         try {
