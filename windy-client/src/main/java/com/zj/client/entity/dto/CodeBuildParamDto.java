@@ -72,4 +72,6 @@ public class CodeBuildParamDto extends GitMeta {
    * 服务开发代码
    */
   private String code;
+
+  private String buildVersion;
 }

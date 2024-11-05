@@ -6,6 +6,7 @@ import com.zj.client.handler.pipeline.build.ICodeBuilder;
 import com.zj.common.enums.CodeType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,10 @@ import java.io.InputStreamReader;
 @Slf4j
 @Component
 public class GoCodeBuilder implements ICodeBuilder {
+
+    @Value("${windy.build.path:/opt/windy/build}")
+    private String buildVersionPath;
+
     @Override
     public String codeType() {
         return CodeType.GO.getType();
@@ -27,8 +32,9 @@ public class GoCodeBuilder implements ICodeBuilder {
     public Integer build(CodeBuildContext codeBuildContext, IBuildNotifyListener notifyListener) {
         String targetPath = codeBuildContext.getTargetDir() + File.separator + "go_build.sh";
         copyBuildFile(targetPath);
+        String goPath = buildVersionPath + File.separator + "go" + File.separator + codeBuildContext.getBuildVersion();
         ProcessBuilder processBuilder = new ProcessBuilder(targetPath, codeBuildContext.getServiceName(), "1.0.0",
-                codeBuildContext.getBuildFile());
+                codeBuildContext.getBuildFile(), goPath);
         processBuilder.redirectErrorStream(true); // 合并标准错误流和标准输出流
         try {
             // 启动进程

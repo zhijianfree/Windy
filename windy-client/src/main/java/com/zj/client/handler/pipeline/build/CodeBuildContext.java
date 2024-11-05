@@ -18,4 +18,9 @@ public class CodeBuildContext {
      * 服务的目录
      */
     private String targetDir;
+
+    /**
+     * 构建的版本目录
+     */
+    private String buildVersion;
 }
