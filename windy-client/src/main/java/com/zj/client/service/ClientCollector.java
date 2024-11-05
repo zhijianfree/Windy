@@ -7,6 +7,7 @@ import com.zj.common.adapter.monitor.collector.PhysicsCollect;
 import com.zj.common.entity.dto.ClientCollectDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -21,6 +22,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class ClientCollector {
+
+  @Value("${windy.build.path:/opt/windy/build}")
+  private String buildVersionPath;
 
   private final NodeStatusQueryLooper nodeStatusQueryLooper;
 
@@ -38,10 +42,12 @@ public class ClientCollector {
   }
 
   public LanguageVersionDto getLanguageVersions() {
-    File javaDir = new File("/opt/windy/build/java");
+    String javaPath = buildVersionPath + File.separator + "java";
+    File javaDir = new File(javaPath);
     List<String> javaList = getVersionsFromDir(javaDir);
 
-    File goDir = new File("/opt/windy/build/java");
+    String goPath = buildVersionPath + File.separator + "go";
+    File goDir = new File(goPath);
     List<String> goList = getVersionsFromDir(goDir);
     LanguageVersionDto languageVersionDto = new LanguageVersionDto();
     languageVersionDto.setJavaVersions(javaList);
@@ -50,7 +56,7 @@ public class ClientCollector {
   }
 
   private static List<String> getVersionsFromDir(File dir) {
-    Collection<File> javaVersions = FileUtils.listFiles(dir, new String[]{}, false);
-      return javaVersions.stream().map(File::getName).collect(Collectors.toList());
+    Collection<File> javaVersions = FileUtils.listFiles(dir, null, true);
+      return javaVersions.stream().filter(File::isDirectory).map(File::getName).collect(Collectors.toList());
   }
 }
