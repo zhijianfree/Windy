@@ -106,6 +106,8 @@ public class BuildCodeInterceptor implements INodeExecuteInterceptor {
         buildCodeContext.setDeployType(deployType);
         String code = Optional.ofNullable(serviceConfig.getServiceContext()).map(ServiceContext::getCode).orElse(null);
         buildCodeContext.setCode(code);
+        String buildVersion = Optional.ofNullable(serviceConfig.getServiceContext()).map(ServiceContext::getBuildVersion).orElse(null);
+        buildCodeContext.setBuildVersion(buildVersion);
         if (Objects.nonNull(repository)) {
             buildCodeContext.setUser(repository.getUserName());
             buildCodeContext.setPassword(repository.getPassword());

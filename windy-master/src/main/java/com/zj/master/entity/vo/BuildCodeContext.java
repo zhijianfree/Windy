@@ -57,7 +57,12 @@ public class BuildCodeContext extends RequestContext{
   private Integer deployType;
 
   /**
-   * 服务开发代码
+   * 服务开发代码类型
    */
   private String code;
+
+  /**
+   * 开发语言构建版本
+   */
+  private String buildVersion;
 }
