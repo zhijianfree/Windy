@@ -23,8 +23,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class EurekaClientInvokerAdapter extends BaseEurekaAdapter implements IClientInvoker {
 
-    private static final String DISPATCH_GENERATE_TASK = "http://WindyClient/v1/devops/client/dispatch/generate";
-    private static final String GET_LANGUAGE_VERSION = "http://WindyClient/v1/client/languages/version";
+    private static final String DISPATCH_GENERATE_TASK = "http://WindyClient/v1/client/dispatch/generate";
+    private static final String GET_LANGUAGE_VERSION = "http://WindyClient/v1/devops/client/languages/version";
     private static final String DISPATCH_PIPELINE_TASK = "http://WindyClient/v1/client/dispatch/pipeline";
     private static final String DISPATCH_FEATURE_TASK = "http://WindyClient/v1/client/dispatch/feature";
     private static final String MASTER_NOTIFY_CLIENT_STOP = "http://%s/v1/client/task/stop";
