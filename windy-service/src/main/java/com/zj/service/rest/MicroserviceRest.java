@@ -84,7 +84,7 @@ public class MicroserviceRest {
         return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, microservice.deleteService(serviceId));
     }
 
-    @PostMapping(value = "/service/build/versions")
+    @GetMapping(value = "/service/build/versions")
     public ResponseMeta<LanguageVersionDto> getSupportVersions() {
         return new ResponseMeta<>(ErrorCode.SUCCESS, microservice.getSupportVersions());
     }
