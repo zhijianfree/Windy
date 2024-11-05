@@ -1,5 +1,6 @@
 package com.zj.service.rest;
 
+import com.zj.common.entity.service.LanguageVersionDto;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.entity.dto.PageSize;
 import com.zj.common.entity.dto.ResponseMeta;
@@ -81,5 +82,10 @@ public class MicroserviceRest {
     @DeleteMapping("/service/{serviceId}")
     public ResponseMeta<Boolean> deleteService(@PathVariable("serviceId") String serviceId) {
         return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, microservice.deleteService(serviceId));
+    }
+
+    @PostMapping(value = "/service/build/versions")
+    public ResponseMeta<LanguageVersionDto> getSupportVersions() {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, microservice.getSupportVersions());
     }
 }

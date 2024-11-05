@@ -4,7 +4,7 @@ import com.zj.common.adapter.git.GitAccessInfo;
 import com.zj.common.adapter.invoker.IClientInvoker;
 import com.zj.common.adapter.invoker.IMasterInvoker;
 import com.zj.common.adapter.uuid.UniqueIdService;
-import com.zj.common.entity.dto.ClientCollect;
+import com.zj.common.entity.dto.ClientCollectDto;
 import com.zj.common.entity.dto.MasterCollect;
 import com.zj.domain.entity.bo.pipeline.SystemConfigBO;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
@@ -56,7 +56,7 @@ public class SystemConfigService {
 
   public SystemMonitorDto getSystemMonitor() {
     SystemMonitorDto systemMonitorDto = new SystemMonitorDto();
-    List<ClientCollect> clientMonitor = clientInvoker.requestClientMonitor();
+    List<ClientCollectDto> clientMonitor = clientInvoker.requestClientMonitor();
     systemMonitorDto.setClients(clientMonitor);
     List<MasterCollect> masterMonitor = masterInvoker.requestMasterMonitor();
     systemMonitorDto.setMasters(masterMonitor);

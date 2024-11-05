@@ -136,10 +136,6 @@
       <groupId>io.fabric8</groupId>
       <artifactId>kubernetes-client</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-exec</artifactId>
-    </dependency>
     <!--    外部依赖结束-->
   </dependencies>
 

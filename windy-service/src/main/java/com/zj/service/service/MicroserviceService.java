@@ -1,8 +1,9 @@
 package com.zj.service.service;
 
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.common.adapter.auth.IAuthService;
+import com.zj.common.adapter.invoker.IClientInvoker;
+import com.zj.common.entity.service.LanguageVersionDto;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.adapter.git.GitAccessInfo;
@@ -46,12 +47,13 @@ public class MicroserviceService {
     private final List<IGitRepositoryHandler> repositoryBranches;
     private final ISystemConfigRepository systemConfig;
     private final IMemberRepository memberRepository;
+    private final IClientInvoker clientInvoker;
 
     public MicroserviceService(IMicroServiceRepository microServiceRepository,
                                UniqueIdService uniqueIdService, IAuthService authService,
                                List<IGitRepositoryHandler> gitRepositories,
                                ISystemConfigRepository systemConfig, IPipelineRepository pipelineRepository,
-                               ITestCaseRepository testCaseRepository, IMemberRepository memberRepository) {
+                               ITestCaseRepository testCaseRepository, IMemberRepository memberRepository, IClientInvoker clientInvoker) {
         this.microServiceRepository = microServiceRepository;
         this.uniqueIdService = uniqueIdService;
         this.authService = authService;
@@ -60,6 +62,7 @@ public class MicroserviceService {
         this.repositoryBranches = gitRepositories;
         this.systemConfig = systemConfig;
         this.memberRepository = memberRepository;
+        this.clientInvoker = clientInvoker;
     }
 
     private IGitRepositoryHandler getRepositoryBranch(String type) {
@@ -167,5 +170,9 @@ public class MicroserviceService {
 
     public Boolean deleteServiceMember(String serviceId, String userId) {
         return memberRepository.deleteResourceMember(serviceId, userId);
+    }
+
+    public LanguageVersionDto getSupportVersions() {
+        return clientInvoker.getSupportVersions();
     }
 }

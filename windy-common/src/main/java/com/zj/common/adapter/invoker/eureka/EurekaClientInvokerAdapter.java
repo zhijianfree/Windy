@@ -1,12 +1,13 @@
 package com.zj.common.adapter.invoker.eureka;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.common.entity.dto.ClientCollect;
+import com.zj.common.entity.dto.ClientCollectDto;
 import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.common.entity.dto.StopDispatch;
 import com.zj.common.adapter.discover.DiscoverService;
 import com.zj.common.adapter.discover.ServiceInstance;
 import com.zj.common.adapter.invoker.IClientInvoker;
+import com.zj.common.entity.service.LanguageVersionDto;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 public class EurekaClientInvokerAdapter extends BaseEurekaAdapter implements IClientInvoker {
 
     private static final String DISPATCH_GENERATE_TASK = "http://WindyClient/v1/client/dispatch/generate";
+    private static final String GET_LANGUAGE_VERSION = "http://WindyClient/v1/client/languages/version";
     private static final String DISPATCH_PIPELINE_TASK = "http://WindyClient/v1/client/dispatch/pipeline";
     private static final String DISPATCH_FEATURE_TASK = "http://WindyClient/v1/client/dispatch/feature";
     private static final String MASTER_NOTIFY_CLIENT_STOP = "http://%s/v1/client/task/stop";
@@ -90,7 +92,15 @@ public class EurekaClientInvokerAdapter extends BaseEurekaAdapter implements ICl
     }
 
     @Override
-    public List<ClientCollect> requestClientMonitor() {
+    public LanguageVersionDto getSupportVersions() {
+        ResponseEntity<String> response = requestGet(GET_LANGUAGE_VERSION);
+        ResponseMeta responseMeta = JSON.parseObject(response.getBody(), ResponseMeta.class);
+        return Optional.ofNullable(responseMeta).map(data -> JSON.parseObject(JSON.toJSONString(data.getData()),
+                LanguageVersionDto.class)).orElse(null) ;
+    }
+
+    @Override
+    public List<ClientCollectDto> requestClientMonitor() {
         List<ServiceInstance> serviceInstances = discoverService.getServiceInstances(DiscoverService.WINDY_Client);
         return serviceInstances.stream().map(service -> {
             String url = String.format(CLIENT_MONITOR_URL, service.getHost());
@@ -103,7 +113,7 @@ public class EurekaClientInvokerAdapter extends BaseEurekaAdapter implements ICl
                 String resultString = response.body().string();
                 log.info("request client monitor result={}", resultString);
                 ResponseMeta result = JSON.parseObject(resultString, ResponseMeta.class);
-                return JSON.parseObject(JSON.toJSONString(result.getData()), ClientCollect.class);
+                return JSON.parseObject(JSON.toJSONString(result.getData()), ClientCollectDto.class);
             } catch (IOException e) {
                 log.info("handle client monitor result error");
             }

@@ -8,7 +8,7 @@ import lombok.Data;
  * @since 2023/7/4
  */
 @Data
-public class ClientCollect {
+public class ClientCollectDto {
 
   private PhysicsCollect physics;
 

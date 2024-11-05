@@ -1,6 +1,6 @@
 package com.zj.pipeline.entity.dto;
 
-import com.zj.common.entity.dto.ClientCollect;
+import com.zj.common.entity.dto.ClientCollectDto;
 import com.zj.common.entity.dto.MasterCollect;
 import lombok.Data;
 
@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 public class SystemMonitorDto {
 
-  private List<ClientCollect> clients;
+  private List<ClientCollectDto> clients;
 
   private List<MasterCollect> masters;
 }

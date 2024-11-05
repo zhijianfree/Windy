@@ -1,7 +1,8 @@
 package com.zj.common.adapter.invoker;
 
-import com.zj.common.entity.dto.ClientCollect;
+import com.zj.common.entity.dto.ClientCollectDto;
 import com.zj.common.entity.dto.StopDispatch;
+import com.zj.common.entity.service.LanguageVersionDto;
 
 import java.util.List;
 
@@ -14,5 +15,7 @@ public interface IClientInvoker {
 
     void stopTaskLoopQuery(StopDispatch stopDispatch);
 
-    List<ClientCollect> requestClientMonitor();
+    List<ClientCollectDto> requestClientMonitor();
+
+    LanguageVersionDto getSupportVersions();
 }
