@@ -54,7 +54,7 @@ public class MavenOperator implements ICodeBuilder {
 
   @Override
   public String codeType() {
-    return CodeType.GO.getType();
+    return CodeType.JAVA.getType();
   }
 
   @Override
