@@ -56,6 +56,10 @@ public class ClientCollector {
   }
 
   private static List<String> getVersionsFromDir(File dir) {
+    if (!dir.exists()){
+      dir.mkdirs();
+    }
+    log.info("get list from url = {}", dir.getAbsolutePath());
     Collection<File> javaVersions = FileUtils.listFiles(dir, null, true);
       return javaVersions.stream().filter(File::isDirectory).map(File::getName).collect(Collectors.toList());
   }
