@@ -3,6 +3,7 @@ package com.zj.client.handler.pipeline.build.go;
 import com.zj.client.handler.pipeline.build.CodeBuildContext;
 import com.zj.client.handler.pipeline.build.IBuildNotifyListener;
 import com.zj.client.handler.pipeline.build.ICodeBuilder;
+import com.zj.client.utils.ExceptionUtils;
 import com.zj.common.enums.CodeType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -30,11 +31,13 @@ public class GoCodeBuilder implements ICodeBuilder {
 
     @Override
     public Integer build(CodeBuildContext codeBuildContext, IBuildNotifyListener notifyListener) {
-        String targetPath = codeBuildContext.getTargetDir() + File.separator + "go_build.sh";
+        File targetFile = new File(codeBuildContext.getTargetDir() + File.separator + codeBuildContext.getBuildFile());
+        String targetPath = targetFile.getParentFile().getAbsolutePath() + File.separator + "docker" + File.separator +
+                "go_build.sh";
         copyBuildFile(targetPath);
         String goPath = buildVersionPath + File.separator + "go" + File.separator + codeBuildContext.getBuildVersion();
         ProcessBuilder processBuilder = new ProcessBuilder(targetPath, codeBuildContext.getServiceName(), "1.0.0",
-                codeBuildContext.getBuildFile(), goPath);
+                targetFile.getAbsolutePath(), goPath);
         processBuilder.redirectErrorStream(true); // 合并标准错误流和标准输出流
         try {
             // 启动进程
@@ -51,6 +54,7 @@ public class GoCodeBuilder implements ICodeBuilder {
             return exitCode;
         } catch (IOException | InterruptedException e) {
             log.info("execute shell error", e);
+            notifyListener.notifyMessage(ExceptionUtils.getSimplifyError(e));
         }
         return -1;
     }
@@ -61,6 +65,9 @@ public class GoCodeBuilder implements ICodeBuilder {
             File targetFile = new File(targetPath);
             // 确保目标目录存在
             targetFile.getParentFile().mkdirs();
+            FileUtils.touch(targetFile);
+            boolean isExecutable = targetFile.setExecutable(true, false);
+            log.info("config shell file access model result={}", isExecutable);
             FileUtils.copyInputStreamToFile(resource.getInputStream(), targetFile);
         } catch (IOException e) {
             log.info("can not copy go build file", e);

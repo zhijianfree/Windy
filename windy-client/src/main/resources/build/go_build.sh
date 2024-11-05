@@ -12,7 +12,7 @@ EXECUTE_PATH=$EXECUTE_PATH"
 
 # 下载依赖项
 echo "Downloading dependencies..."
-go mod tidy
+"$EXECUTE_PATH/bin/go" mod tidy
 
 # 构建函数
 os="linux"
@@ -22,7 +22,7 @@ output_name="${PROJECT_NAME}-${os}/${arch}"
 echo "Building for ${os}/${arch}..."
 
 # 设置环境变量以匹配目标平台
-GOOS="$os" GOARCH="$arch" "$EXECUTE_PATH"/go build -o "$OUTPUT_DIR/$output_name" -ldflags "-X main.version=$VERSION"
+GOOS="$os" GOARCH="$arch" "$EXECUTE_PATH/bin/go" build -o "$OUTPUT_DIR/$output_name" -ldflags "-X main.version=$VERSION"
 "$TARGET_FILE"
 
 # 检查构建是否成功
