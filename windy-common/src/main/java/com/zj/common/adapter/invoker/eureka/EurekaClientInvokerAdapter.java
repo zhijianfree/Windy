@@ -1,12 +1,12 @@
 package com.zj.common.adapter.invoker.eureka;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.common.entity.dto.ClientCollectDto;
-import com.zj.common.entity.dto.ResponseMeta;
-import com.zj.common.entity.dto.StopDispatch;
 import com.zj.common.adapter.discover.DiscoverService;
 import com.zj.common.adapter.discover.ServiceInstance;
 import com.zj.common.adapter.invoker.IClientInvoker;
+import com.zj.common.entity.dto.ClientCollectDto;
+import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.common.entity.dto.StopDispatch;
 import com.zj.common.entity.service.LanguageVersionDto;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
@@ -52,7 +52,7 @@ public class EurekaClientInvokerAdapter extends BaseEurekaAdapter implements ICl
         if (isRequestSingle) {
             Optional<ServiceInstance> optional =
                     discoverService.getServiceInstances(DiscoverService.WINDY_Client).stream()
-                    .filter(service -> Objects.equals(service.getIp(), singleIp)).findAny();
+                            .filter(service -> Objects.equals(service.getIp(), singleIp)).findAny();
             if (!optional.isPresent()) {
                 log.info("send single request error, service not find ={}", singleIp);
                 return false;
@@ -94,9 +94,10 @@ public class EurekaClientInvokerAdapter extends BaseEurekaAdapter implements ICl
     @Override
     public LanguageVersionDto getSupportVersions() {
         ResponseEntity<String> response = requestGet(GET_LANGUAGE_VERSION);
+        log.info("get support versions = {}", response.getBody());
         ResponseMeta responseMeta = JSON.parseObject(response.getBody(), ResponseMeta.class);
         return Optional.ofNullable(responseMeta).map(data -> JSON.parseObject(JSON.toJSONString(data.getData()),
-                LanguageVersionDto.class)).orElse(null) ;
+                LanguageVersionDto.class)).orElse(null);
     }
 
     @Override
