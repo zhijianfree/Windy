@@ -16,4 +16,9 @@ public class ServiceContext {
      * 代码开发语言:{@link CodeType}
      */
     private String code;
+
+    /**
+     * 开发语言的构建版本
+     */
+    private String buildVersion;
 }
