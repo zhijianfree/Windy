@@ -31,7 +31,7 @@ public class GoCodeBuilder implements ICodeBuilder {
 
     @Override
     public Integer build(CodeBuildContext codeBuildContext, IBuildNotifyListener notifyListener) {
-        File targetFile = new File(codeBuildContext.getTargetDir() + File.separator + codeBuildContext.getBuildFile());
+        File targetFile = new File(codeBuildContext.getBuildFile());
         String targetPath = targetFile.getParentFile().getAbsolutePath() + File.separator + "docker" + File.separator +
                 "go_build.sh";
         copyBuildFile(targetPath);
