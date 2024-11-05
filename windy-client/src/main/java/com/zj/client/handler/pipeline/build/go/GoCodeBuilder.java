@@ -20,7 +20,7 @@ import java.io.InputStreamReader;
 public class GoCodeBuilder implements ICodeBuilder {
     @Override
     public String codeType() {
-        return CodeType.JAVA.getType();
+        return CodeType.GO.getType();
     }
 
     @Override
