@@ -32,6 +32,11 @@ public class MicroserviceBO {
     private Integer priority;
 
     /**
+     * 接口覆盖率
+     */
+    private Integer apiCoverage;
+
+    /**
      * 服务配置
      */
     private ServiceConfig serviceConfig;

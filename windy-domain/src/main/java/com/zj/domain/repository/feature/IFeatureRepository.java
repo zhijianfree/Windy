@@ -36,4 +36,5 @@ public interface IFeatureRepository {
   Boolean batchUpdate(List<FeatureInfoBO> features);
 
     List<FeatureInfoBO> getCaseFeatures(String testCaseId);
+  List<FeatureInfoBO> getFeatureByCases(List<String> testCaseIds);
 }

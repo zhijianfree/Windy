@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.common.adapter.auth.IAuthService;
 import com.zj.common.adapter.invoker.IClientInvoker;
 import com.zj.common.entity.service.LanguageVersionDto;
+import com.zj.common.enums.ApiType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.adapter.git.GitAccessInfo;
@@ -16,14 +17,17 @@ import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.feature.TestCaseBO;
 import com.zj.domain.entity.bo.pipeline.PipelineBO;
 import com.zj.domain.entity.bo.service.MicroserviceBO;
+import com.zj.domain.entity.bo.service.ServiceApiBO;
 import com.zj.domain.entity.po.service.ResourceMember;
 import com.zj.domain.repository.demand.IMemberRepository;
 import com.zj.domain.repository.feature.ITestCaseRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
+import com.zj.domain.repository.service.IServiceApiRepository;
 import com.zj.service.entity.ServiceDto;
 import com.zj.domain.entity.bo.service.ResourceMemberDto;
+import com.zj.service.entity.ServiceStaticsDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -48,12 +52,13 @@ public class MicroserviceService {
     private final ISystemConfigRepository systemConfig;
     private final IMemberRepository memberRepository;
     private final IClientInvoker clientInvoker;
+    private final IServiceApiRepository serviceApiRepository;
 
     public MicroserviceService(IMicroServiceRepository microServiceRepository,
                                UniqueIdService uniqueIdService, IAuthService authService,
                                List<IGitRepositoryHandler> gitRepositories,
                                ISystemConfigRepository systemConfig, IPipelineRepository pipelineRepository,
-                               ITestCaseRepository testCaseRepository, IMemberRepository memberRepository, IClientInvoker clientInvoker) {
+                               ITestCaseRepository testCaseRepository, IMemberRepository memberRepository, IClientInvoker clientInvoker, IServiceApiRepository serviceApiRepository) {
         this.microServiceRepository = microServiceRepository;
         this.uniqueIdService = uniqueIdService;
         this.authService = authService;
@@ -63,6 +68,7 @@ public class MicroserviceService {
         this.systemConfig = systemConfig;
         this.memberRepository = memberRepository;
         this.clientInvoker = clientInvoker;
+        this.serviceApiRepository = serviceApiRepository;
     }
 
     private IGitRepositoryHandler getRepositoryBranch(String type) {
@@ -129,7 +135,7 @@ public class MicroserviceService {
     public String updateService(ServiceDto update) {
         MicroserviceBO microserviceBO = OrikaUtil.convert(update, MicroserviceBO.class);
         Optional.ofNullable(update.getServiceConfig()).ifPresent(microserviceBO::setServiceConfig);
-        return microServiceRepository.updateService(microserviceBO);
+        return microServiceRepository.updateService(microserviceBO) ? microserviceBO.getServiceId() : null;
     }
 
     public Boolean deleteService(String serviceId) {
@@ -155,7 +161,7 @@ public class MicroserviceService {
 
     public List<MicroserviceBO> getServices() {
         String currentUserId = authService.getCurrentUserId();
-        return microServiceRepository.getServices(currentUserId).stream()
+        return microServiceRepository.getUserRelatedServices(currentUserId).stream()
                 .sorted(Comparator.comparing(MicroserviceBO::getPriority).reversed()).collect(
                         Collectors.toList());
     }
@@ -174,5 +180,16 @@ public class MicroserviceService {
 
     public LanguageVersionDto getSupportVersions() {
         return clientInvoker.getSupportVersions();
+    }
+
+    public ServiceStaticsDto getServiceStatics(String serviceId) {
+        MicroserviceBO microserviceBO = microServiceRepository.queryServiceDetail(serviceId);
+        if (Objects.isNull(microserviceBO)){
+            log.info("can not find service = {}", serviceId);
+            throw new ApiException(ErrorCode.NOT_FOUND_SERVICE);
+        }
+        Integer serviceApiCount = (int) serviceApiRepository.getApiByService(serviceId)
+                .stream().filter(api -> Objects.equals(ApiType.API.getType(), api.getApiType())).count();
+        return new ServiceStaticsDto(serviceApiCount, microserviceBO.getApiCoverage());
     }
 }

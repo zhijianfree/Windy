@@ -13,13 +13,13 @@ public interface IMicroServiceRepository {
 
   String createService(String userId, MicroserviceBO microserviceBO);
 
-  String updateService(MicroserviceBO microserviceBO);
+  boolean updateService(MicroserviceBO microserviceBO);
 
   Boolean deleteService(String serviceId);
 
   MicroserviceBO queryServiceDetail(String serviceId);
 
-  List<MicroserviceBO> getServices(String currentUserId);
+  List<MicroserviceBO> getUserRelatedServices(String currentUserId);
 
   IPage<MicroserviceBO> getServices(Integer pageNo, Integer size, String name, List<String> serviceIds);
 

@@ -8,6 +8,7 @@ import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.service.entity.ServiceDto;
 import com.zj.domain.entity.bo.service.ResourceMemberDto;
+import com.zj.service.entity.ServiceStaticsDto;
 import com.zj.service.service.MicroserviceService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,6 +49,11 @@ public class MicroserviceRest {
     @GetMapping("/service/{serviceId}/detail")
     public ResponseMeta<MicroserviceBO> queryServiceDetail(@PathVariable("serviceId") String serviceId) {
         return new ResponseMeta<MicroserviceBO>(ErrorCode.SUCCESS, microservice.queryServiceDetail(serviceId));
+    }
+
+    @GetMapping("/services/{serviceId}/statics")
+    public ResponseMeta<ServiceStaticsDto> queryServiceStatics(@PathVariable("serviceId") String serviceId) {
+        return new ResponseMeta<ServiceStaticsDto>(ErrorCode.SUCCESS, microservice.getServiceStatics(serviceId));
     }
 
     @GetMapping("/services/{serviceId}/members")

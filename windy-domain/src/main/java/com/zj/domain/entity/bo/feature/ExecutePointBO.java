@@ -18,11 +18,9 @@ public class ExecutePointBO {
     private String pointId;
 
     /**
-     *
-     *
+     * 执行类型
      * */
     private Integer executeType;
-
     /**
      * 用例Id
      * */

@@ -37,6 +37,11 @@ public class Microservice {
     private String config;
 
     /**
+     * 接口覆盖率
+     */
+    private Integer apiCoverage;
+
+    /**
      * 创建时间
      * */
     private Long createTime;

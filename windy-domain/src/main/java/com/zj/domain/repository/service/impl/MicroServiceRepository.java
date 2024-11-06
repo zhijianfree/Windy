@@ -61,12 +61,11 @@ public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Micr
   }
 
   @Override
-  public String updateService(MicroserviceBO microserviceBO) {
+  public boolean updateService(MicroserviceBO microserviceBO) {
     Microservice microservice = convertService(microserviceBO);
     microservice.setUpdateTime(System.currentTimeMillis());
-    boolean update = update(microservice, Wrappers.lambdaUpdate(Microservice.class)
-        .eq(Microservice::getServiceId, microservice.getServiceId()));
-    return update ? microserviceBO.getServiceId() : null;
+    return update(microservice, Wrappers.lambdaUpdate(Microservice.class)
+            .eq(Microservice::getServiceId, microservice.getServiceId()));
   }
 
   @Override
@@ -83,7 +82,7 @@ public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Micr
   }
 
   @Override
-  public List<MicroserviceBO> getServices(String currentUserId) {
+  public List<MicroserviceBO> getUserRelatedServices(String currentUserId) {
     List<ResourceMember> resourceMembers = memberRepository.getResourceMembersByUser(currentUserId);
     if (CollectionUtils.isEmpty(resourceMembers)) {
       return Collections.emptyList();
