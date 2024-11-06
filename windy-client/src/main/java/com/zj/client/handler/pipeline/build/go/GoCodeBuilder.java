@@ -35,6 +35,7 @@ public class GoCodeBuilder implements ICodeBuilder {
         log.info("start build go code = {}", JSON.toJSONString(context));
         File targetFile = new File(context.getBuildFile());
         String buildFilePath = context.getTargetDir() + File.separator + "go_build.sh";
+        notifyListener.notifyMessage("执行构建文件目录:" + buildFilePath);
         copyBuildFile(buildFilePath);
         String goPath = buildVersionPath + File.separator + "go" + File.separator + context.getBuildVersion();
         ProcessBuilder processBuilder = new ProcessBuilder(buildFilePath, context.getServiceName(), "1.0.0",
