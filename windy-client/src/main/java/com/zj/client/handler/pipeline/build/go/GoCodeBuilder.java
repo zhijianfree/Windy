@@ -34,12 +34,11 @@ public class GoCodeBuilder implements ICodeBuilder {
     public Integer build(CodeBuildContext context, IBuildNotifyListener notifyListener) {
         log.info("start build go code = {}", JSON.toJSONString(context));
         File targetFile = new File(context.getBuildFile());
-        String targetPath = targetFile.getParentFile().getAbsolutePath() + File.separator + "docker" + File.separator +
-                "go_build.sh";
-        copyBuildFile(targetPath);
+        String buildFilePath = context.getTargetDir() + File.separator + "go_build.sh";
+        copyBuildFile(buildFilePath);
         String goPath = buildVersionPath + File.separator + "go" + File.separator + context.getBuildVersion();
-        ProcessBuilder processBuilder = new ProcessBuilder(targetPath, context.getServiceName(), "1.0.0",
-                targetFile.getAbsolutePath(), goPath, context.getTargetDir());
+        ProcessBuilder processBuilder = new ProcessBuilder(buildFilePath, context.getServiceName(), "1.0.0",
+                targetFile.getParentFile().getAbsolutePath(), goPath, context.getTargetDir());
         processBuilder.redirectErrorStream(true); // 合并标准错误流和标准输出流
         try {
             // 启动进程
