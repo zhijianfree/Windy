@@ -24,7 +24,7 @@ cd "$ROOT_PATH" || { echo "无法进入目录 $ROOT_PATH. 退出构建."; exit 2
 # 构建函数
 os="linux"
 arch="amd64"
-output_name="${PROJECT_NAME}-${VERSION}"
+output_name="${PROJECT_NAME}"
 
 echo "开始构建项目的执行文件 ${output_name}..."
 
