@@ -94,7 +94,11 @@ public class CodeBuildService {
                 context.setTargetDir(pipelineWorkspace);
                 context.setServiceName(serviceName);
                 context.setBuildVersion(codeBuildParam.getBuildVersion());
-                Integer exitCode = codeBuilder.build(context, message -> notifyMessage(taskNode, message));
+                Integer exitCode = codeBuilder.build(context, message -> {
+                    if (StringUtils.isNotBlank(message)){
+                        notifyMessage(taskNode, message);
+                    }
+                });
                 log.info("get maven exit code={}", exitCode);
                 updateProcessMsg(taskNode, "代码产物构建完成 状态码: " + exitCode);
 

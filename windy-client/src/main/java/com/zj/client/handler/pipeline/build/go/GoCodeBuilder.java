@@ -39,7 +39,7 @@ public class GoCodeBuilder implements ICodeBuilder {
         copyBuildFile(targetPath);
         String goPath = buildVersionPath + File.separator + "go" + File.separator + context.getBuildVersion();
         ProcessBuilder processBuilder = new ProcessBuilder(targetPath, context.getServiceName(), "1.0.0",
-                targetFile.getAbsolutePath(), goPath);
+                targetFile.getAbsolutePath(), goPath, context.getTargetDir());
         processBuilder.redirectErrorStream(true); // 合并标准错误流和标准输出流
         try {
             // 启动进程
