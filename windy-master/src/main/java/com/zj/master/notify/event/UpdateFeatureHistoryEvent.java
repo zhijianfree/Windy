@@ -47,6 +47,7 @@ public class UpdateFeatureHistoryEvent implements INotifyEvent {
         history.getHistoryId());
     if (ProcessStatus.isCompleteStatus(featureHistory.getExecuteStatus())) {
       log.info("feature history status completed,not update historyId={}", history.getHistoryId());
+      featureExecuteProxy.featureStatusChange(resultEvent.getExecuteId(), history,  resultEvent.getContext());
       return true;
     }
 
