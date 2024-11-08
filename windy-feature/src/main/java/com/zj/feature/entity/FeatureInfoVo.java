@@ -1,6 +1,7 @@
 package com.zj.feature.entity;
 
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -58,9 +59,11 @@ public class FeatureInfoVo {
      */
     private Integer sortOrder;
 
-    private Long createTime;
-
-    private Long updateTime;
+    /**
+     * 用例描述
+     */
+    @Length(max = 256, message = "用例长度最大256个字符")
+    private String description;
 
     /**
      * 用例状态

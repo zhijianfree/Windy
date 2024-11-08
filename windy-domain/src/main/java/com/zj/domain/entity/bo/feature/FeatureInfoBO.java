@@ -43,6 +43,11 @@ public class FeatureInfoBO {
     private Integer status;
 
     /**
+     * 用例描述
+     */
+    private String description;
+
+    /**
      * 排序
      */
     private Integer sortOrder;

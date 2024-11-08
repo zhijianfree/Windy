@@ -50,6 +50,11 @@ public class FeatureNodeDto {
    */
   private String parentId;
 
+  /**
+   * 用例描述
+   */
+  private String description;
+
   private Long createTime;
 
   private Long updateTime;
