@@ -1,5 +1,7 @@
 package com.zj.domain.entity.po.feature;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
 @Data
@@ -24,6 +26,7 @@ public class FeatureInfo {
     /**
      * 父节点Id
      */
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String parentId;
 
     /**
