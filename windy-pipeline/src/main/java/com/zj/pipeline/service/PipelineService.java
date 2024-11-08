@@ -2,12 +2,13 @@ package com.zj.pipeline.service;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
+import com.zj.common.adapter.invoker.IMasterInvoker;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.entity.dto.DispatchTaskModel;
 import com.zj.common.enums.LogType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.entity.dto.DispatchTaskModel;
-import com.zj.common.adapter.invoker.IMasterInvoker;
-import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.bo.pipeline.BindBranchBO;
 import com.zj.domain.entity.bo.pipeline.PipelineBO;
 import com.zj.domain.entity.bo.pipeline.PipelineHistoryBO;
@@ -18,6 +19,7 @@ import com.zj.domain.entity.enums.PipelineType;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.domain.repository.service.impl.MicroServiceRepository;
+import com.zj.pipeline.entity.dto.PipelineDto;
 import com.zj.pipeline.entity.enums.PipelineStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -51,7 +53,8 @@ public class PipelineService {
     public PipelineService(PipelineNodeService pipelineNodeService,
                            PipelineStageService pipelineStageService, PipelineHistoryService pipelineHistoryService,
                            UniqueIdService uniqueIdService, IPipelineRepository pipelineRepository,
-                           IBindBranchRepository bindBranchRepository, MicroServiceRepository microServiceRepository, IMasterInvoker masterInvoker) {
+                           IBindBranchRepository bindBranchRepository, MicroServiceRepository microServiceRepository,
+                           IMasterInvoker masterInvoker) {
         this.pipelineNodeService = pipelineNodeService;
         this.pipelineStageService = pipelineStageService;
         this.pipelineHistoryService = pipelineHistoryService;
@@ -63,13 +66,14 @@ public class PipelineService {
     }
 
     @Transactional
-    public boolean updatePipeline(String service, String pipelineId, PipelineBO pipelineBO) {
+    public boolean updatePipeline(String service, String pipelineId, PipelineDto pipelineDto) {
         Assert.notEmpty(service, "service can not be empty");
         PipelineBO oldPipeline = getPipelineDetail(pipelineId);
         if (Objects.isNull(oldPipeline)) {
             throw new ApiException(ErrorCode.NOT_FOUND_PIPELINE);
         }
 
+        PipelineBO pipelineBO = OrikaUtil.convert(pipelineDto, PipelineBO.class);
         boolean result = pipelineRepository.updatePipeline(pipelineBO);
         if (!result) {
             throw new ApiException(ErrorCode.UPDATE_PIPELINE_ERROR);
@@ -86,7 +90,7 @@ public class PipelineService {
 
     private void deleteNotExistStageAndNodes(PipelineBO oldPipeline, List<PipelineStageBO> stageList) {
         if (CollectionUtils.isEmpty(stageList)) {
-           return;
+            return;
         }
         List<String> nodeIds = stageList.stream().map(PipelineStageBO::getNodes)
                 .flatMap(Collection::stream).filter(Objects::nonNull).map(PipelineNodeBO::getNodeId)
@@ -146,24 +150,39 @@ public class PipelineService {
     }
 
     @Transactional
-    public Boolean deletePipeline(String service, String pipelineId) {
+    public Boolean deletePipeline(String serviceId, String pipelineId) {
         try {
-            pipelineStageService.deleteStagesByPipelineId(pipelineId);
-            pipelineNodeService.deleteByPipeline(pipelineId);
+            checkPipelineAndService(serviceId, pipelineId);
+
+            boolean deleteStage = pipelineStageService.deleteStagesByPipelineId(pipelineId);
+            boolean deletePipelineNode = pipelineNodeService.deleteByPipeline(pipelineId);
+            log.info("delete stage and node result stage = {} node={}", deleteStage, deletePipelineNode);
             return pipelineRepository.deletePipeline(pipelineId);
         } catch (Exception e) {
             throw new ApiException(ErrorCode.DELETE_PIPELINE_ERROR);
         }
     }
 
-    @Transactional
-    public String createPipeline(PipelineBO pipelineBO) {
-        String serviceId = pipelineBO.getServiceId();
-        MicroserviceBO serviceDetail = microServiceRepository.queryServiceDetail(serviceId);
-        if (Objects.isNull(serviceDetail)) {
-            log.info("can not find service ={}", serviceId);
-            throw new ApiException(ErrorCode.NOT_FOUND_SERVICE);
+    private void checkPipelineAndService(String serviceId, String pipelineId) {
+        checkService(serviceId);
+
+        PipelineBO pipeline = pipelineRepository.getPipeline(pipelineId);
+        if (Objects.isNull(pipeline)) {
+            log.info("can not find pipeline = {}", pipelineId);
+            throw new ApiException(ErrorCode.PIPELINE_NOT_BIND);
         }
+
+        if (!Objects.equals(pipeline.getServiceId(), serviceId)) {
+            log.info("pipeline not belong service pipelineId={} serviceId={}", pipelineId, serviceId);
+            throw new ApiException(ErrorCode.PIPELINE_NOT_BIND_SERVICE);
+        }
+    }
+
+    @Transactional
+    public String createPipeline(PipelineDto pipelineDto) {
+        PipelineBO pipelineBO = OrikaUtil.convert(pipelineDto, PipelineBO.class);
+        String serviceId = pipelineBO.getServiceId();
+        MicroserviceBO serviceDetail = checkService(serviceId);
 
         checkPublishPipelineExist(pipelineBO);
 
@@ -185,6 +204,15 @@ public class PipelineService {
             log.info("save bind git master branch result={}", saveGitBranch);
         }
         return pipelineId;
+    }
+
+    private MicroserviceBO checkService(String serviceId) {
+        MicroserviceBO serviceDetail = microServiceRepository.queryServiceDetail(serviceId);
+        if (Objects.isNull(serviceDetail)) {
+            log.info("can not find service ={}", serviceId);
+            throw new ApiException(ErrorCode.NOT_FOUND_SERVICE);
+        }
+        return serviceDetail;
     }
 
     private boolean createMasterBranchBind(String pipelineId, MicroserviceBO serviceDetail) {

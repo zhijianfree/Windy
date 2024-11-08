@@ -26,8 +26,8 @@ public class PipelineNodeService {
     pipelineNodeRepository.updateNode(dto);
   }
 
-  public void deleteByPipeline(String pipelineId) {
-    pipelineNodeRepository.deleteByPipelineId(pipelineId);
+  public boolean deleteByPipeline(String pipelineId) {
+    return pipelineNodeRepository.deleteByPipelineId(pipelineId);
   }
 
   public void saveNode(PipelineNodeBO pipelineNode) {
