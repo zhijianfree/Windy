@@ -1,5 +1,6 @@
 package com.zj.client.handler.feature.executor.interceptor;
 
+import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.bo.ExecutePoint;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.client.handler.feature.executor.invoker.invoke.MethodInvoke;
@@ -13,6 +14,7 @@ import com.zj.common.entity.feature.VariableDefine;
 import com.zj.common.enums.InvokerType;
 import com.zj.common.enums.Position;
 import com.zj.plugin.loader.ExecuteDetailVo;
+import com.zj.plugin.loader.ParamValueType;
 import com.zj.plugin.loader.ParameterDefine;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -163,18 +165,30 @@ public class VariableInterceptor implements IExecuteInterceptor {
                 return;
             }
 
-             if (paramValue instanceof Map) {
+             if (Objects.equals(param.getType(), ParamValueType.Map.name())) {
                 Map<String, String> map = (Map<String, String>) paramValue;
                 Map<String, String> result = map.keySet().stream().collect(Collectors.toMap(strSubstitutor::replace,
                         key -> strSubstitutor.replace(map.get(key))));
                 param.setValue(result);
-            }else {
+            } else if (Objects.equals(param.getType(), ParamValueType.Array.name())) {
+                 String arrayString = JSON.toJSONString(paramValue);
+                 String replaceResult = strSubstitutor.replace(arrayString);
+                 List<Object> objects = JSON.parseArray(replaceResult, Object.class);
+                 param.setValue(objects);
+             } else if (Objects.equals(param.getType(), ParamValueType.Object.name())) {
+                 String arrayString = JSON.toJSONString(paramValue);
+                 String replaceResult = strSubstitutor.replace(arrayString);
+                 Object object = JSON.parseObject(replaceResult, Object.class);
+                 param.setValue(object);
+             }else {
                 String stringValue = String.valueOf(paramValue);
                 String replaceResult = strSubstitutor.replace(stringValue);
                 param.setValue(replaceResult);
                 Object value = MethodInvoke.convertDataToType(param);
                 param.setValue(value);
             }
+            log.info("convert param key={} type={} convertResult={}", param.getParamKey(), param.getType(),
+                    param.getValue());
         });
     }
 
