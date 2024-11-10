@@ -12,6 +12,7 @@ import com.zj.domain.repository.service.IGenerateRecordRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
@@ -27,8 +28,7 @@ public class GenerateRecordRepository extends ServiceImpl<GenerateRecordMapper, 
     @Override
     public List<GenerateRecordBO> getGenerateRecord(String serviceId, String version) {
         List<GenerateRecord> generateRecords =
-                list(Wrappers.lambdaQuery(GenerateRecord.class).eq(GenerateRecord::getServiceId, serviceId)
-                        .eq(GenerateRecord::getVersion, version));
+                list(Wrappers.lambdaQuery(GenerateRecord.class).eq(GenerateRecord::getServiceId, serviceId).eq(GenerateRecord::getVersion, version));
         return generateRecords.stream().map(GenerateRecordRepository::convertGenerateRecordBO).collect(Collectors.toList());
     }
 
@@ -50,8 +50,8 @@ public class GenerateRecordRepository extends ServiceImpl<GenerateRecordMapper, 
 
     private static GenerateRecord convertGenerateRecord(GenerateRecordBO generateRecordBO) {
         GenerateRecord generateRecord = OrikaUtil.convert(generateRecordBO, GenerateRecord.class);
-        generateRecord.setExecuteParams(JSON.toJSONString(generateRecordBO.getGenerateParams()));
-        generateRecord.setResult(JSON.toJSONString(generateRecordBO.getGenerateResult()));
+        Optional.ofNullable(generateRecordBO.getGenerateParams()).ifPresent(params -> generateRecord.setExecuteParams(JSON.toJSONString(params)));
+        Optional.ofNullable(generateRecordBO.getGenerateResult()).ifPresent(result -> generateRecord.setResult(JSON.toJSONString(result)));
         return generateRecord;
     }
 

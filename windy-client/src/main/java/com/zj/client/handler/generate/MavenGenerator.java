@@ -134,7 +134,6 @@ public class MavenGenerator {
         .notifyType(NotifyType.CREATE_GENERATE_MAVEN).status(ProcessStatus.RUNNING)
         .params(generateRecordBO);
     resultEventNotify.notifyEvent(resultEvent);
-    resultEventNotify.notifyEvent(resultEvent);
   }
 
   public void runGenerate(GenerateDto generateDto, String recordId) {
