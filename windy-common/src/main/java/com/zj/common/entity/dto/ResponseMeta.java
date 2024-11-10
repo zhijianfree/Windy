@@ -22,6 +22,11 @@ public class ResponseMeta<T> {
     this.data = data;
   }
 
+  public ResponseMeta(String code, String message) {
+    this.code = code;
+    this.message = message;
+  }
+
   public ResponseMeta(ErrorCode code, T data) {
     this.code = code.getCode();
     this.message = code.getMessage();

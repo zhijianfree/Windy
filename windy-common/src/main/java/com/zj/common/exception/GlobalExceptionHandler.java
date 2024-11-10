@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
   @ResponseBody
   public ResponseEntity<ResponseMeta> handleBusinessException(CommonException commonException) {
     log.warn("common error", commonException);
-    return new ResponseEntity<>(new ResponseMeta(commonException.getErrorCode()),
-        commonException.getErrorCode().getHttpStatus());
+    return new ResponseEntity<>(new ResponseMeta(commonException.getCode(), commonException.getMessage()),
+        commonException.getHttpStatus());
   }
 }

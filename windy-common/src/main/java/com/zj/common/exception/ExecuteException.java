@@ -11,7 +11,9 @@ public class ExecuteException extends CommonException {
   private String message;
 
   public ExecuteException(ErrorCode errorCode) {
-    super(errorCode);
+    super(errorCode.getCode(), errorCode.getMessage(), errorCode.getHttpStatus());
+    this.message = errorCode.getMessage();
+
   }
 
   public ExecuteException(String message) {
@@ -21,10 +23,10 @@ public class ExecuteException extends CommonException {
 
   @Override
   public String getMessage() {
-    if (Objects.isNull(getErrorCode())) {
+    if (Objects.isNull(getMsg())) {
       return message;
     }
 
-    return getErrorCode().getMessage();
+    return getMsg();
   }
 }

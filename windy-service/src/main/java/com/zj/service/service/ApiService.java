@@ -1,19 +1,20 @@
 package com.zj.service.service;
 
 import com.alibaba.fastjson.JSON;
+import com.zj.common.adapter.invoker.IMasterInvoker;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.entity.dto.DispatchTaskModel;
+import com.zj.common.entity.feature.ExecuteTemplateVo;
+import com.zj.common.entity.generate.GenerateRecordBO;
 import com.zj.common.entity.service.ApiParamModel;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.Position;
 import com.zj.common.enums.TemplateType;
 import com.zj.common.exception.ApiException;
+import com.zj.common.exception.CommonException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.entity.feature.ExecuteTemplateVo;
-import com.zj.common.entity.dto.DispatchTaskModel;
-import com.zj.common.adapter.invoker.IMasterInvoker;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.domain.entity.bo.feature.ExecuteTemplateBO;
-import com.zj.common.entity.generate.GenerateRecordBO;
 import com.zj.domain.entity.bo.service.ServiceApiBO;
 import com.zj.domain.entity.bo.service.ServiceGenerateBO;
 import com.zj.domain.entity.vo.MavenConfigVo;
@@ -33,6 +34,7 @@ import com.zj.service.service.imports.ApiImportFactory;
 import com.zj.service.service.imports.IApiImportStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -93,7 +95,8 @@ public class ApiService {
                 Optional.ofNullable(apiModel.getRequestParams()).map(params -> OrikaUtil.convertList(params,
                         ApiParamModel.class)).orElse(null);
         serviceApi.setRequestParams(requestParams);
-        List<ApiParamModel> responseParams = Optional.ofNullable(apiModel.getResponseParams()).map(params -> OrikaUtil.convertList(params,
+        List<ApiParamModel> responseParams =
+                Optional.ofNullable(apiModel.getResponseParams()).map(params -> OrikaUtil.convertList(params,
                 ApiParamModel.class)).orElse(null);
         serviceApi.setResponseParams(responseParams);
         serviceApi.setApiId(uniqueIdService.getUniqueId());
@@ -121,16 +124,65 @@ public class ApiService {
         checkMavenConfig();
         checkVersionExist(generate.getServiceId(), generate.getVersion());
         saveOrUpdateParams(generate);
-
+        checkGenerateClassName(generate);
         DispatchTaskModel dispatchTaskModel = new DispatchTaskModel();
         dispatchTaskModel.setSourceId(generate.getServiceId());
         dispatchTaskModel.setType(LogType.GENERATE.getType());
         return masterInvoker.runGenerateTask(dispatchTaskModel);
     }
 
+    private void checkGenerateClassName(ServiceGenerateBO generate) {
+        List<ServiceApiBO> serviceApiList = apiRepository.getApiByService(generate.getServiceId())
+                .stream().filter(ServiceApiBO::isApi).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(serviceApiList)) {
+            log.info("service do not have api = {}", generate.getServiceId());
+            throw new ApiException(ErrorCode.SERVICE_API_NOT_FIND);
+        }
+        serviceApiList.forEach(serviceApi -> {
+            if (StringUtils.isBlank(serviceApi.getClassName()) || StringUtils.isBlank(serviceApi.getClassMethod())) {
+                log.info("service not config class name or method name ={}", serviceApi.getApiId());
+                throw new CommonException(ErrorCode.SERVICE_GENERATE_NAME_EMPTY, serviceApi.getApiName());
+            }
+
+            if (StringUtils.isBlank(serviceApi.getResultClass())) {
+                log.info("api request body name is empty={}", serviceApi.getApiName());
+                throw new CommonException(ErrorCode.SERVICE_GENERATE_RESPONSE_NAME_EMPTY, serviceApi.getApiName());
+            }
+
+            Optional<ApiParamModel> optional =
+                    serviceApi.getRequestParams().stream().filter(param -> Objects.equals(param.getPosition(),
+                    Position.Body.name())).findFirst();
+            if (optional.isPresent() && StringUtils.isBlank(serviceApi.getBodyClass())) {
+                log.info("api request body name is empty={}", serviceApi.getApiName());
+                throw new CommonException(ErrorCode.SERVICE_GENERATE_BODY_NAME_EMPTY, serviceApi.getApiName());
+            }
+
+            Optional<ApiParamModel> requestOptional =
+                    serviceApi.getRequestParams().stream().filter(param -> Objects.equals(param.getPosition(),
+                            Position.Body.name()) && StringUtils.isBlank(param.getObjectName())).findFirst();
+            if (requestOptional.isPresent()) {
+                ApiParamModel requestParam = requestOptional.get();
+                log.info("api request body param name is empty api={} param key = {}", serviceApi.getApiName(),
+                        requestParam.getParamKey());
+                throw new CommonException(ErrorCode.SERVICE_GENERATE_BODY_PARAM_NAME_EMPTY, serviceApi.getApiName());
+            }
+
+            Optional<ApiParamModel> responseOptional =
+                    serviceApi.getResponseParams().stream().filter(param -> Objects.equals(param.getPosition(),
+                            Position.Body.name()) && StringUtils.isBlank(param.getObjectName())).findFirst();
+            if (responseOptional.isPresent()) {
+                ApiParamModel responseParam = responseOptional.get();
+                log.info("api response body param name is empty api={} param key = {}", serviceApi.getApiName(),
+                        responseParam.getParamKey());
+                throw new CommonException(ErrorCode.SERVICE_GENERATE_RESPONSE_PARAM_NAME_EMPTY, serviceApi.getApiName());
+            }
+
+        });
+    }
+
     private void checkVersionExist(String serviceId, String version) {
-        GenerateRecordBO generateRecord = generateRecordRepository.getGenerateRecord(serviceId, version);
-        if (Objects.nonNull(generateRecord)) {
+        List<GenerateRecordBO> generateRecords = generateRecordRepository.getGenerateRecord(serviceId, version);
+        if (CollectionUtils.isNotEmpty(generateRecords)) {
             log.info("generate version exist, can not execute serviceId={} version={}", serviceId, version);
             throw new ApiException(ErrorCode.GENERATE_VERSION_EXIST);
         }

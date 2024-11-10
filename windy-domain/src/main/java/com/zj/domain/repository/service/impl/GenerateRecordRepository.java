@@ -4,14 +4,15 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.entity.generate.GenerateDetail;
-import com.zj.common.utils.OrikaUtil;
 import com.zj.common.entity.generate.GenerateRecordBO;
+import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.po.service.GenerateRecord;
 import com.zj.domain.mapper.service.GenerateRecordMapper;
 import com.zj.domain.repository.service.IGenerateRecordRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class GenerateRecordRepository extends ServiceImpl<GenerateRecordMapper, GenerateRecord> implements IGenerateRecordRepository {
@@ -24,11 +25,11 @@ public class GenerateRecordRepository extends ServiceImpl<GenerateRecordMapper, 
     }
 
     @Override
-    public GenerateRecordBO getGenerateRecord(String serviceId, String version) {
-        GenerateRecord generateRecord =
-                getOne(Wrappers.lambdaQuery(GenerateRecord.class).eq(GenerateRecord::getServiceId, serviceId)
+    public List<GenerateRecordBO> getGenerateRecord(String serviceId, String version) {
+        List<GenerateRecord> generateRecords =
+                list(Wrappers.lambdaQuery(GenerateRecord.class).eq(GenerateRecord::getServiceId, serviceId)
                         .eq(GenerateRecord::getVersion, version));
-        return convertGenerateRecordBO(generateRecord);
+        return generateRecords.stream().map(GenerateRecordRepository::convertGenerateRecordBO).collect(Collectors.toList());
     }
 
     @Override

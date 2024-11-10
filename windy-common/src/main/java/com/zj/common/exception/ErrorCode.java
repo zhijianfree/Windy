@@ -36,6 +36,12 @@ public enum ErrorCode {
   USER_NO_PERMISSION(HttpStatus.BAD_REQUEST, "Service.000006", "用户未被授权访问当前git地址"),
   MAVEN_NOT_CONFIG(HttpStatus.BAD_REQUEST, "Service.000007", "系统未配置maven仓库地址，请先配置再尝试生成"),
   GENERATE_VERSION_EXIST(HttpStatus.BAD_REQUEST, "Service.000008", "构建Maven而方包失败，版本号已存在"),
+  SERVICE_GENERATE_NAME_EMPTY(HttpStatus.BAD_REQUEST, "Service.000009", "[%s]接口转化的类名、方法名为空"),
+  SERVICE_GENERATE_BODY_NAME_EMPTY(HttpStatus.BAD_REQUEST, "Service.000010", "[%s]接口转化的请求体类名为空"),
+  SERVICE_GENERATE_BODY_PARAM_NAME_EMPTY(HttpStatus.BAD_REQUEST, "Service.000011", "[%s]接口请求参数类名为空"),
+  SERVICE_GENERATE_RESPONSE_PARAM_NAME_EMPTY(HttpStatus.BAD_REQUEST, "Service.000012", "[%s]接口响应参数类名为空"),
+  SERVICE_GENERATE_RESPONSE_NAME_EMPTY(HttpStatus.BAD_REQUEST, "Service.000013", "[%s]接口转化的响应类名为空"),
+  SERVICE_API_NOT_FIND(HttpStatus.BAD_REQUEST, "Service.000014", "未发现服务API列表"),
   /*==================用例服务==================*/
   COMPARE_ERROR(HttpStatus.FORBIDDEN, "Feature.000002", "feature compare error"),
   EXECUTE_POINT_NOT_FIND(HttpStatus.NOT_FOUND, "Feature.000003", "can not find execute point"),

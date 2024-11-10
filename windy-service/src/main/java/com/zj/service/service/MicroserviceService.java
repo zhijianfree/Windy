@@ -2,39 +2,49 @@ package com.zj.service.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.common.adapter.auth.IAuthService;
-import com.zj.common.adapter.invoker.IClientInvoker;
-import com.zj.common.entity.service.LanguageVersionDto;
-import com.zj.common.enums.ApiType;
-import com.zj.common.exception.ApiException;
-import com.zj.common.exception.ErrorCode;
 import com.zj.common.adapter.git.GitAccessInfo;
 import com.zj.common.adapter.git.IGitRepositoryHandler;
-import com.zj.common.entity.pipeline.ServiceConfig;
-import com.zj.common.entity.dto.PageSize;
-import com.zj.common.utils.OrikaUtil;
+import com.zj.common.adapter.invoker.IClientInvoker;
 import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.common.entity.pipeline.ServiceConfig;
+import com.zj.common.entity.service.LanguageVersionDto;
+import com.zj.common.enums.ApiType;
+import com.zj.common.enums.InvokerType;
+import com.zj.common.exception.ApiException;
+import com.zj.common.exception.ErrorCode;
+import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.bo.auth.UserBO;
+import com.zj.domain.entity.bo.feature.ExecutePointBO;
+import com.zj.domain.entity.bo.feature.ExecuteTemplateBO;
+import com.zj.domain.entity.bo.feature.FeatureInfoBO;
 import com.zj.domain.entity.bo.feature.TestCaseBO;
 import com.zj.domain.entity.bo.pipeline.PipelineBO;
 import com.zj.domain.entity.bo.service.MicroserviceBO;
+import com.zj.domain.entity.bo.service.ResourceMemberDto;
 import com.zj.domain.entity.bo.service.ServiceApiBO;
+import com.zj.domain.entity.enums.FeatureType;
 import com.zj.domain.entity.po.service.ResourceMember;
 import com.zj.domain.repository.demand.IMemberRepository;
+import com.zj.domain.repository.feature.IExecutePointRepository;
+import com.zj.domain.repository.feature.IExecuteTemplateRepository;
+import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.domain.repository.feature.ITestCaseRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.domain.repository.service.IServiceApiRepository;
 import com.zj.service.entity.ServiceDto;
-import com.zj.domain.entity.bo.service.ResourceMemberDto;
 import com.zj.service.entity.ServiceStaticsDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -53,12 +63,18 @@ public class MicroserviceService {
     private final IMemberRepository memberRepository;
     private final IClientInvoker clientInvoker;
     private final IServiceApiRepository serviceApiRepository;
+    private final IFeatureRepository featureRepository;
+    private final IExecutePointRepository executePointRepository;
+    private final IExecuteTemplateRepository executeTemplateRepository;
 
     public MicroserviceService(IMicroServiceRepository microServiceRepository,
                                UniqueIdService uniqueIdService, IAuthService authService,
                                List<IGitRepositoryHandler> gitRepositories,
                                ISystemConfigRepository systemConfig, IPipelineRepository pipelineRepository,
-                               ITestCaseRepository testCaseRepository, IMemberRepository memberRepository, IClientInvoker clientInvoker, IServiceApiRepository serviceApiRepository) {
+                               ITestCaseRepository testCaseRepository, IMemberRepository memberRepository,
+                               IClientInvoker clientInvoker, IServiceApiRepository serviceApiRepository,
+                               IFeatureRepository featureRepository, IExecutePointRepository executePointRepository,
+                               IExecuteTemplateRepository executeTemplateRepository) {
         this.microServiceRepository = microServiceRepository;
         this.uniqueIdService = uniqueIdService;
         this.authService = authService;
@@ -69,6 +85,9 @@ public class MicroserviceService {
         this.memberRepository = memberRepository;
         this.clientInvoker = clientInvoker;
         this.serviceApiRepository = serviceApiRepository;
+        this.featureRepository = featureRepository;
+        this.executePointRepository = executePointRepository;
+        this.executeTemplateRepository = executeTemplateRepository;
     }
 
     private IGitRepositoryHandler getRepositoryBranch(String type) {
@@ -80,11 +99,12 @@ public class MicroserviceService {
     public PageSize<ServiceDto> getServices(Integer pageNo, Integer size, String name) {
         String currentUserId = authService.getCurrentUserId();
         List<ResourceMember> resourceMembers = memberRepository.getResourceMembersByUser(currentUserId);
-        if (CollectionUtils.isEmpty(resourceMembers)){
+        if (CollectionUtils.isEmpty(resourceMembers)) {
             return new PageSize<>();
         }
 
-        List<String> serviceIds = resourceMembers.stream().map(ResourceMember::getResourceId).collect(Collectors.toList());
+        List<String> serviceIds =
+                resourceMembers.stream().map(ResourceMember::getResourceId).collect(Collectors.toList());
         IPage<MicroserviceBO> page = microServiceRepository.getServices(pageNo, size, name, serviceIds);
         PageSize<ServiceDto> pageSize = new PageSize<>();
         if (CollectionUtils.isEmpty(page.getRecords())) {
@@ -184,12 +204,42 @@ public class MicroserviceService {
 
     public ServiceStaticsDto getServiceStatics(String serviceId) {
         MicroserviceBO microserviceBO = microServiceRepository.queryServiceDetail(serviceId);
-        if (Objects.isNull(microserviceBO)){
+        if (Objects.isNull(microserviceBO)) {
             log.info("can not find service = {}", serviceId);
             throw new ApiException(ErrorCode.NOT_FOUND_SERVICE);
         }
-        Integer serviceApiCount = (int) serviceApiRepository.getApiByService(serviceId)
-                .stream().filter(api -> Objects.equals(ApiType.API.getType(), api.getApiType())).count();
-        return new ServiceStaticsDto(serviceApiCount, microserviceBO.getApiCoverage());
+        List<ServiceApiBO> serviceApiList = serviceApiRepository.getApiByService(serviceId).stream().filter(api ->
+                Objects.equals(ApiType.API.getType(), api.getApiType())).collect(Collectors.toList());
+
+        Map<Boolean, List<ServiceApiBO>> serviceApiPartMap = getServiceApiPartMap(serviceId, serviceApiList);
+        Integer serviceApiCount = serviceApiList.size();
+        return new ServiceStaticsDto(serviceApiCount, microserviceBO.getApiCoverage(), serviceApiPartMap.get(false));
+    }
+
+    public Map<Boolean, List<ServiceApiBO>> getServiceApiPartMap(String serviceId, List<ServiceApiBO> serviceApiList) {
+        List<ExecuteTemplateBO> templates = getServiceAllExecuteTemplate(serviceId);
+        List<String> templateApiList =
+                templates.stream().map(ExecuteTemplateBO::getService).collect(Collectors.toList());
+        return serviceApiList.stream().collect(Collectors.partitioningBy(serviceApi ->
+                templateApiList.stream().anyMatch(templateApi -> templateApi.contains(serviceApi.getResource()))));
+    }
+
+    private List<ExecuteTemplateBO> getServiceAllExecuteTemplate(String serviceId) {
+        List<String> caseIds =
+                testCaseRepository.getServiceCases(serviceId).stream().map(TestCaseBO::getTestCaseId).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(caseIds)) {
+            return Collections.emptyList();
+        }
+        List<String> featureIds = featureRepository.getFeatureByCases(caseIds).stream()
+                .filter(feature -> Objects.equals(feature.getFeatureType(), FeatureType.ITEM.getType()))
+                .map(FeatureInfoBO::getFeatureId).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(featureIds)) {
+            return Collections.emptyList();
+        }
+        List<String> templateIds = executePointRepository.getPointsByFeatureIds(featureIds).stream()
+                .map(ExecutePointBO::getTemplateId).distinct().collect(Collectors.toList());
+        return executeTemplateRepository.getTemplateByIds(templateIds).stream()
+                .filter(executeTemplate -> Objects.equals(executeTemplate.getInvokeType(),
+                        InvokerType.HTTP.getType())).collect(Collectors.toList());
     }
 }

@@ -11,5 +11,5 @@ public interface IGenerateRecordRepository {
 
   boolean update(GenerateRecordBO generateRecordBO);
 
-  GenerateRecordBO getGenerateRecord(String serviceId, String version);
+  List<GenerateRecordBO> getGenerateRecord(String serviceId, String version);
 }
