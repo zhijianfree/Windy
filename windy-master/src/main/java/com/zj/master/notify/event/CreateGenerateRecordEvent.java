@@ -1,5 +1,6 @@
 package com.zj.master.notify.event;
 
+import com.alibaba.fastjson.JSON;
 import com.zj.common.entity.dto.ResultEvent;
 import com.zj.common.entity.generate.GenerateDetail;
 import com.zj.common.entity.generate.GenerateRecordBO;
@@ -7,10 +8,12 @@ import com.zj.common.enums.NotifyType;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.repository.service.IGenerateRecordRepository;
 import com.zj.master.notify.INotifyEvent;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+@Slf4j
 @Component
 public class CreateGenerateRecordEvent implements INotifyEvent {
 
@@ -27,6 +30,7 @@ public class CreateGenerateRecordEvent implements INotifyEvent {
 
   @Override
   public boolean handle(ResultEvent resultEvent) {
+    log.info("receive generate create record ={}", JSON.toJSONString(resultEvent.getParams()));
     GenerateRecordBO recordDto = OrikaUtil.convert(resultEvent.getParams(), GenerateRecordBO.class);
     if (Objects.isNull(recordDto)) {
       return false;

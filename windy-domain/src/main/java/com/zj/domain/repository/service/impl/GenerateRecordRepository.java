@@ -21,7 +21,7 @@ public class GenerateRecordRepository extends ServiceImpl<GenerateRecordMapper, 
     public List<GenerateRecordBO> getServiceRecords(String serviceId) {
         List<GenerateRecord> records =
                 list(Wrappers.lambdaQuery(GenerateRecord.class).eq(GenerateRecord::getServiceId, serviceId));
-        return OrikaUtil.convertList(records, GenerateRecordBO.class);
+        return records.stream().map(GenerateRecordRepository::convertGenerateRecordBO).collect(Collectors.toList());
     }
 
     @Override
