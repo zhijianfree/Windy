@@ -11,6 +11,7 @@ import com.zj.master.notify.INotifyEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Objects;
 
 @Slf4j
@@ -35,8 +36,12 @@ public class CreateGenerateRecordEvent implements INotifyEvent {
     if (Objects.isNull(recordDto)) {
       return false;
     }
-    GenerateDetail generateDetail = recordDto.getGenerateParams();
-    recordDto.setVersion(generateDetail.getVersion());
-    return generateRecordRepository.create(recordDto);
+    List<GenerateRecordBO> generateRecord = generateRecordRepository.getGenerateRecord(recordDto.getServiceId(), recordDto.getVersion());
+    if (Objects.isNull(generateRecord)){
+      GenerateDetail generateDetail = recordDto.getGenerateParams();
+      recordDto.setVersion(generateDetail.getVersion());
+      return generateRecordRepository.create(recordDto);
+    }
+    return true;
   }
 }
