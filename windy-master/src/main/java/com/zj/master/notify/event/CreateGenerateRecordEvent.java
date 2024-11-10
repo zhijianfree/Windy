@@ -9,6 +9,7 @@ import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.repository.service.IGenerateRecordRepository;
 import com.zj.master.notify.INotifyEvent;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -36,8 +37,9 @@ public class CreateGenerateRecordEvent implements INotifyEvent {
     if (Objects.isNull(recordDto)) {
       return false;
     }
-    List<GenerateRecordBO> generateRecord = generateRecordRepository.getGenerateRecord(recordDto.getServiceId(), recordDto.getVersion());
-    if (Objects.isNull(generateRecord)){
+    List<GenerateRecordBO> generateRecords = generateRecordRepository.getGenerateRecord(recordDto.getServiceId(),
+            recordDto.getVersion());
+    if (CollectionUtils.isEmpty(generateRecords)){
       GenerateDetail generateDetail = recordDto.getGenerateParams();
       recordDto.setVersion(generateDetail.getVersion());
       return generateRecordRepository.create(recordDto);
