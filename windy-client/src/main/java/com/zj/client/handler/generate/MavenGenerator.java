@@ -120,17 +120,19 @@ public class MavenGenerator {
   }
 
   private void saveGenerateRecord(GenerateDto generateDto, String recordId) {
-    GenerateRecordBO generateParam = new GenerateRecordBO();
-    generateParam.setServiceId(generateDto.getServiceId());
-    generateParam.setRecordId(recordId);
-    generateParam.setGenerateResult(Collections.singletonList("start generate maven version"));
-    generateParam.setStatus(ProcessStatus.RUNNING.getType());
+    GenerateRecordBO generateRecordBO = new GenerateRecordBO();
+    generateRecordBO.setServiceId(generateDto.getServiceId());
+    generateRecordBO.setRecordId(recordId);
+    generateRecordBO.setCreateTime(System.currentTimeMillis());
+    generateRecordBO.setUpdateTime(System.currentTimeMillis());
+    generateRecordBO.setGenerateResult(Collections.singletonList("start generate maven version"));
+    generateRecordBO.setStatus(ProcessStatus.RUNNING.getType());
     GenerateDetail params = OrikaUtil.convert(generateDto, GenerateDetail.class);
-    generateParam.setGenerateParams(params);
+    generateRecordBO.setGenerateParams(params);
 
     ResultEvent resultEvent = new ResultEvent().executeId(recordId)
         .notifyType(NotifyType.CREATE_GENERATE_MAVEN).status(ProcessStatus.RUNNING)
-        .params(generateParam);
+        .params(generateRecordBO);
     resultEventNotify.notifyEvent(resultEvent);
     resultEventNotify.notifyEvent(resultEvent);
   }
