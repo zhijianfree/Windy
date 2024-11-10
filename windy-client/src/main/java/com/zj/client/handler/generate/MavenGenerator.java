@@ -93,6 +93,7 @@ public class MavenGenerator {
   private final String ENTITY_FILE_PATH = File.separator + "model" + File.separator + "%s.java";
   private final String REST_FILE_PATH = File.separator + "rest" + File.separator + "%sRest.java";
   private final Map<String, List<String>> recordMap = new ConcurrentHashMap<>();
+  private final List<String> paramList = Arrays.asList("Long", "Boolean", "String", "Float", "Double","Integer");
   private final GlobalEnvConfig globalEnvConfig;
   private final UniqueIdService uniqueIdService;
   private final IResultEventNotify resultEventNotify;
@@ -317,7 +318,7 @@ public class MavenGenerator {
 
   public void createEntity(String projectPath, List<ApiParamModel> apiParamModels, String className,
       String packageName) {
-    if (StringUtils.isEmpty(className)) {
+    if (StringUtils.isEmpty(className) || isNativeClass(className)) {
       return;
     }
     try {
@@ -343,6 +344,9 @@ public class MavenGenerator {
     } catch (Exception e) {
       log.error("generate model error", e);
     }
+  }
+  private boolean isNativeClass(String className) {
+    return paramList.contains(className);
   }
 
   private List<ApiItem> convertApiItems(List<ApiModel> apiModels) {
