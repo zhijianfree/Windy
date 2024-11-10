@@ -31,7 +31,7 @@ public class CreateGenerateRecordEvent implements INotifyEvent {
   @Override
   public boolean handle(ResultEvent resultEvent) {
     log.info("receive generate create record ={}", JSON.toJSONString(resultEvent.getParams()));
-    GenerateRecordBO recordDto = OrikaUtil.convert(resultEvent.getParams(), GenerateRecordBO.class);
+    GenerateRecordBO recordDto = JSON.parseObject(JSON.toJSONString(resultEvent.getParams()), GenerateRecordBO.class);
     if (Objects.isNull(recordDto)) {
       return false;
     }
