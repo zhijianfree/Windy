@@ -21,15 +21,14 @@
 
 
 ### Global Design
-  Windy提供Web端页面，可以在页面端完成用例的设计以及流水线的编排。当要执行流水线或者用例时，用户在页面点击运行即可。分配器会从数据库中拉取任务，拉取到任务之后分配给子节点然后由子节点运行。<br/>
-  Master节点设计内含了eureka，提供了注册中心能力。这样可以管理和维护子节点信息。其中master节点和client节点都是高可用设计，保证任务执行的连贯性。
   <br/>
-![整体设计-整体设计 drawio](https://user-images.githubusercontent.com/21210211/236386934-c0d7d62f-32aa-45ef-ab0d-33874d9caf7a.png)
+  Master节点设计内含了eureka，提供了注册中心能力。这样可以管理和维护子节点信息。其中master节点和client节点都是高可用设计，保证任务执行的连贯性。
+  在整体设计上，分为三个部分:
+  - Windy Console: console承载了所有任务数据维护的责任，可以认为是数据的创建者，比如：用例任务编写、流水线创建、以及API维护等
+  - Windy Master: 作为一个调度者将所有数据组装成具体的子任务，然后负责分发给Client执行。并且接收client子任务执行的状态变化通知，用来改变整个任务的状态
+  - Windy Client: 作为任务的实际执行者，根据任务类型执行不同的子任务。CLient服务在设计上要求不依赖任何三方组件，因此子任务的所有的数据都来自master节点，执行的过程是完全独立的，也就是说可在任意linux系统中执行。
 
-
-
-### 模版
-模版是用例编写的最小单元，模版去除了代码开发，只将必要的字段作为参数让使用者填充整个功能在模版内实现。模版目前都是内置的，后续支持第三方dubbo、http、或者jar插件的方式实现。
-<img width="1433" alt="image" src="https://user-images.githubusercontent.com/21210211/233955404-c05dd560-f10b-4a4c-b7d3-0beaf453f3d2.png">
-
+  在整体架构上，Console服务的任何数据都不会受到Master和CLient服务的影响，也就是说即使Master与CLient服务挂掉都不会影响用户数据存储保存。因为在设计上保证了独立性，所以在实际部署的时候可以根据实际使用情况动态扩容每个服务组件。
+  <br/>
+![design](https://github.com/user-attachments/assets/241296aa-0ead-469a-809d-b5e037aad315)
 
