@@ -6,6 +6,7 @@ import com.zj.common.adapter.git.GitAccessInfo;
 import com.zj.common.adapter.git.IGitRepositoryHandler;
 import com.zj.common.adapter.invoker.IClientInvoker;
 import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.entity.WindyConstants;
 import com.zj.common.entity.dto.PageSize;
 import com.zj.common.entity.pipeline.ServiceConfig;
 import com.zj.common.entity.service.LanguageVersionDto;
@@ -67,9 +68,8 @@ public class MicroserviceService {
     private final IExecutePointRepository executePointRepository;
     private final IExecuteTemplateRepository executeTemplateRepository;
 
-    public MicroserviceService(IMicroServiceRepository microServiceRepository,
-                               UniqueIdService uniqueIdService, IAuthService authService,
-                               List<IGitRepositoryHandler> gitRepositories,
+    public MicroserviceService(IMicroServiceRepository microServiceRepository, UniqueIdService uniqueIdService,
+                               IAuthService authService, List<IGitRepositoryHandler> gitRepositories,
                                ISystemConfigRepository systemConfig, IPipelineRepository pipelineRepository,
                                ITestCaseRepository testCaseRepository, IMemberRepository memberRepository,
                                IClientInvoker clientInvoker, IServiceApiRepository serviceApiRepository,
@@ -91,9 +91,7 @@ public class MicroserviceService {
     }
 
     private IGitRepositoryHandler getRepositoryBranch(String type) {
-        return repositoryBranches.stream()
-                .filter(repository -> Objects.equals(repository.gitType(), type))
-                .findAny().orElse(null);
+        return repositoryBranches.stream().filter(repository -> Objects.equals(repository.gitType(), type)).findAny().orElse(null);
     }
 
     public PageSize<ServiceDto> getServices(Integer pageNo, Integer size, String name) {
@@ -112,13 +110,11 @@ public class MicroserviceService {
             return pageSize;
         }
 
-        List<ServiceDto> microservices = page.getRecords().stream()
-                .map(microservice -> {
-                    ServiceDto serviceDto = OrikaUtil.convert(microservice, ServiceDto.class);
-                    serviceDto.setServiceConfig(microservice.getServiceConfig());
-                    return serviceDto;
-                })
-                .collect(Collectors.toList());
+        List<ServiceDto> microservices = page.getRecords().stream().map(microservice -> {
+            ServiceDto serviceDto = OrikaUtil.convert(microservice, ServiceDto.class);
+            serviceDto.setServiceConfig(microservice.getServiceConfig());
+            return serviceDto;
+        }).collect(Collectors.toList());
 
         pageSize.setData(microservices);
         pageSize.setTotal(page.getTotal());
@@ -132,9 +128,8 @@ public class MicroserviceService {
             throw new ApiException(ErrorCode.NOT_FIND_REPO_CONFIG);
         }
 
-        GitAccessInfo gitAccessInfo = Optional.ofNullable(serviceDto.getServiceConfig())
-                .map(ServiceConfig::getGitAccessInfo).filter(access -> StringUtils.isNotBlank(access.getAccessToken()))
-                .orElseGet(systemConfig::getGitAccess);
+        GitAccessInfo gitAccessInfo =
+                Optional.ofNullable(serviceDto.getServiceConfig()).map(ServiceConfig::getGitAccessInfo).filter(access -> StringUtils.isNotBlank(access.getAccessToken())).orElseGet(systemConfig::getGitAccess);
         gitAccessInfo.setGitUrl(serviceDto.getGitUrl());
         repositoryBranch.checkRepository(gitAccessInfo);
 
@@ -145,8 +140,7 @@ public class MicroserviceService {
     }
 
     private String chooseGitType(ServiceDto serviceDto) {
-        if (Objects.isNull(serviceDto.getServiceConfig()) || Objects.isNull(serviceDto.getServiceConfig().getGitAccessInfo())
-                || StringUtils.isBlank(serviceDto.getServiceConfig().getGitAccessInfo().getAccessToken())) {
+        if (Objects.isNull(serviceDto.getServiceConfig()) || Objects.isNull(serviceDto.getServiceConfig().getGitAccessInfo()) || StringUtils.isBlank(serviceDto.getServiceConfig().getGitAccessInfo().getAccessToken())) {
             return systemConfig.getGitAccess().getGitType();
         }
         return serviceDto.getServiceConfig().getGitAccessInfo().getGitType();
@@ -181,9 +175,7 @@ public class MicroserviceService {
 
     public List<MicroserviceBO> getServices() {
         String currentUserId = authService.getCurrentUserId();
-        return microServiceRepository.getUserRelatedServices(currentUserId).stream()
-                .sorted(Comparator.comparing(MicroserviceBO::getPriority).reversed()).collect(
-                        Collectors.toList());
+        return microServiceRepository.getUserRelatedServices(currentUserId).stream().sorted(Comparator.comparing(MicroserviceBO::getPriority).reversed()).collect(Collectors.toList());
     }
 
     public List<UserBO> queryServiceMembers(String serviceId) {
@@ -208,8 +200,8 @@ public class MicroserviceService {
             log.info("can not find service = {}", serviceId);
             throw new ApiException(ErrorCode.NOT_FOUND_SERVICE);
         }
-        List<ServiceApiBO> serviceApiList = serviceApiRepository.getApiByService(serviceId).stream().filter(api ->
-                Objects.equals(ApiType.API.getType(), api.getApiType())).collect(Collectors.toList());
+        List<ServiceApiBO> serviceApiList =
+                serviceApiRepository.getApiByService(serviceId).stream().filter(api -> Objects.equals(ApiType.API.getType(), api.getApiType())).collect(Collectors.toList());
 
         Map<Boolean, List<ServiceApiBO>> serviceApiPartMap = getServiceApiPartMap(serviceId, serviceApiList);
         Integer serviceApiCount = serviceApiList.size();
@@ -219,9 +211,16 @@ public class MicroserviceService {
     public Map<Boolean, List<ServiceApiBO>> getServiceApiPartMap(String serviceId, List<ServiceApiBO> serviceApiList) {
         List<ExecuteTemplateBO> templates = getServiceAllExecuteTemplate(serviceId);
         List<String> templateApiList =
-                templates.stream().map(ExecuteTemplateBO::getService).collect(Collectors.toList());
-        return serviceApiList.stream().collect(Collectors.partitioningBy(serviceApi ->
-                templateApiList.stream().anyMatch(templateApi -> templateApi.contains(serviceApi.getResource()))));
+                templates.stream().map(template -> template.getMethod().toUpperCase() + "_" + template.getService()).map(uri -> uri.replace(WindyConstants.VARIABLE_CHAR, "")).collect(Collectors.toList());
+        return serviceApiList.stream().collect(Collectors.partitioningBy(serviceApi -> templateApiList.stream().anyMatch(templateApi -> {
+            int index = templateApi.indexOf("_");
+            String method = templateApi.substring(0, index);
+            String api = templateApi.substring(index + 1);
+            if (!Objects.equals(method, serviceApi.getMethod().toUpperCase())) {
+                return false;
+            }
+            return arePathsEqual(api, serviceApi.getResource());
+        })));
     }
 
     private List<ExecuteTemplateBO> getServiceAllExecuteTemplate(String serviceId) {
@@ -230,16 +229,34 @@ public class MicroserviceService {
         if (CollectionUtils.isEmpty(caseIds)) {
             return Collections.emptyList();
         }
-        List<String> featureIds = featureRepository.getFeatureByCases(caseIds).stream()
-                .filter(feature -> Objects.equals(feature.getFeatureType(), FeatureType.ITEM.getType()))
-                .map(FeatureInfoBO::getFeatureId).collect(Collectors.toList());
+        List<String> featureIds =
+                featureRepository.getFeatureByCases(caseIds).stream().filter(feature -> Objects.equals(feature.getFeatureType(), FeatureType.ITEM.getType())).map(FeatureInfoBO::getFeatureId).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(featureIds)) {
             return Collections.emptyList();
         }
-        List<String> templateIds = executePointRepository.getPointsByFeatureIds(featureIds).stream()
-                .map(ExecutePointBO::getTemplateId).distinct().collect(Collectors.toList());
-        return executeTemplateRepository.getTemplateByIds(templateIds).stream()
-                .filter(executeTemplate -> Objects.equals(executeTemplate.getInvokeType(),
-                        InvokerType.HTTP.getType())).collect(Collectors.toList());
+        List<String> templateIds =
+                executePointRepository.getPointsByFeatureIds(featureIds).stream().map(ExecutePointBO::getTemplateId).distinct().collect(Collectors.toList());
+        return executeTemplateRepository.getTemplateByIds(templateIds).stream().filter(executeTemplate -> Objects.equals(executeTemplate.getInvokeType(), InvokerType.HTTP.getType())).collect(Collectors.toList());
+    }
+
+
+    public boolean arePathsEqual(String templatePath, String apiPath) {
+        // 去掉路径前缀（例如 {host}/ 或 ${host}/）
+        String path = "/";
+        templatePath = StringUtils.removeStart(templatePath,
+                StringUtils.substringBetween(templatePath, "{", "}") + path);
+        templatePath = StringUtils.removeStart(templatePath,
+                StringUtils.substringBetween(templatePath, "${", "}") + path);
+
+        apiPath = StringUtils.removeStart(apiPath, StringUtils.substringBetween(apiPath, "{", "}") + path);
+        apiPath = StringUtils.removeStart(apiPath, StringUtils.substringBetween(apiPath, "${", "}") + path);
+
+        String variableName = "{var}";
+        // 使用正则表达式将动态参数替换为统一的标记
+        templatePath = templatePath.replaceAll("\\$\\{[^}]+}", variableName).replaceAll("\\{[^}]+}", variableName);
+        apiPath = apiPath.replaceAll("\\$\\{[^}]+}", variableName).replaceAll("\\{[^}]+}", variableName);
+
+        // 比较路径
+        return templatePath.contains(apiPath);
     }
 }

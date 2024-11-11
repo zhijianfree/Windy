@@ -8,6 +8,7 @@ import com.zj.client.handler.feature.executor.random.IRandomGenerator;
 import com.zj.client.handler.feature.executor.random.entity.RandomEntity;
 import com.zj.client.handler.feature.executor.random.entity.RandomType;
 import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
+import com.zj.common.entity.WindyConstants;
 import com.zj.common.entity.feature.CompareDefine;
 import com.zj.common.entity.feature.ExecutorUnit;
 import com.zj.common.entity.feature.VariableDefine;
@@ -33,7 +34,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class VariableInterceptor implements IExecuteInterceptor {
-    private static final String VARIABLE_CHAR = "$";
     private final OgnlDataParser ognlDataParser = new OgnlDataParser();
 
     private final Map<RandomType, IRandomGenerator> randomGeneratorMap;
@@ -132,7 +132,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
                         }
                         return p;
                     })
-                    .filter(p -> Objects.nonNull(p.getValue()) && !String.valueOf(p.getValue()).contains(VARIABLE_CHAR))
+                    .filter(p -> Objects.nonNull(p.getValue()) && !String.valueOf(p.getValue()).contains(WindyConstants.VARIABLE_CHAR))
                     .collect(Collectors.toMap(ParameterDefine::getParamKey, ParameterDefine::getValue));
             pointContext.putAll(pointParams);
         }
@@ -155,7 +155,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
         StrSubstitutor strSubstitutor = new StrSubstitutor(featureExecuteContext.toMap());
         params.forEach(param -> {
             Object paramValue = getParamValueWithDefaultValue(param);
-            if (!String.valueOf(paramValue).contains(VARIABLE_CHAR)){
+            if (!String.valueOf(paramValue).contains(WindyConstants.VARIABLE_CHAR)){
                 return;
             }
 

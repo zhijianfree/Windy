@@ -1,9 +1,9 @@
 package com.zj.client.handler.feature.executor.compare;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.client.handler.feature.executor.compare.operator.CompareFactory;
+import com.zj.common.entity.WindyConstants;
 import com.zj.common.entity.feature.CompareDefine;
 import com.zj.common.entity.feature.CompareResult;
 import com.zj.common.enums.CompareType;
@@ -21,9 +21,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class CompareHandler {
-
-    public static final String RESPONSE_CODE = "$code";
-    public static final String RESPONSE_BODY = "$body";
     public static final String TIP_FORMAT = "compare key[%s] expect value is[%s] but find [%s]";
     private final OgnlDataParser ognlDataParser = new OgnlDataParser();
 
@@ -92,12 +89,12 @@ public class CompareHandler {
 
         compareDefines.stream().filter(CompareHandler::isNeedWrapResponseData).forEach(compareDefine -> {
             String key = compareDefine.getCompareKey();
-            if (Objects.equals(key, RESPONSE_CODE)) {
+            if (Objects.equals(key, WindyConstants.RESPONSE_CODE)) {
                 compareDefine.setResponseValue(String.valueOf(executeDetailVo.responseStatus()));
                 return;
             }
 
-            if (Objects.equals(key, RESPONSE_BODY)) {
+            if (Objects.equals(key, WindyConstants.RESPONSE_BODY)) {
                 compareDefine.setResponseValue(executeDetailVo.responseBody());
                 return;
             }
@@ -115,24 +112,5 @@ public class CompareHandler {
         }
         return StringUtils.isNoneBlank(compare.getCompareKey()) && StringUtils.isNoneBlank(
                 compare.getExpectValue());
-    }
-
-    public static void main(String[] args) {
-        OgnlDataParser ognlDataParser = new OgnlDataParser();
-        JSONObject data = JSON.parseObject("{\"result\":{\"total\":3,\"list\":[{\"topo_type\":0," +
-                "\"description\":\"设备描述\",\"pid\":\"lt9wfbbyly7w8qpb\",\"comport_id\":3,\"gmt_modified\":1730708964," +
-                "\"product_name\":\"DP数据类型测试\",\"dev_id\":\"\",\"connected\":0,\"extend\":\"\",\"dev_addr\":1," +
-                "\"name\":\"设备\",\"online\":0,\"third_device_id\":\"\",\"activation\":0,\"category\":\"料理机\"," +
-                "\"gmt_created\":1730708964,\"cid\":\"s_c_2_3_1\"},{\"topo_type\":0,\"description\":\"设备描述2\"," +
-                "\"pid\":\"lt9wfbbyly7w8qpb\",\"comport_id\":3,\"gmt_modified\":1730708964," +
-                "\"product_name\":\"DP数据类型测试\",\"dev_id\":\"\",\"connected\":0,\"extend\":\"\",\"dev_addr\":2," +
-                "\"name\":\"设备2\",\"online\":0,\"third_device_id\":\"\",\"activation\":0,\"category\":\"料理机\"," +
-                "\"gmt_created\":1730708964,\"cid\":\"s_c_2_3_2\"},{\"topo_type\":0,\"description\":\"设备描述3\"," +
-                "\"pid\":\"lt9wfbbyly7w8qpb\",\"comport_id\":3,\"gmt_modified\":1730708964," +
-                "\"product_name\":\"DP数据类型测试\",\"dev_id\":\"\",\"connected\":0,\"extend\":\"\",\"dev_addr\":3," +
-                "\"name\":\"设备3\",\"online\":0,\"third_device_id\":\"\",\"activation\":0,\"category\":\"料理机\"," +
-                "\"gmt_created\":1730708964,\"cid\":\"s_c_2_3_3\"}]}}");
-        Object result = ognlDataParser.exchangeOgnlParamValue(data, "$body.result.list[0].dev_addr");
-        System.out.println(String.valueOf(result));
     }
 }

@@ -3,6 +3,7 @@ package com.zj.service.service;
 import com.alibaba.fastjson.JSON;
 import com.zj.common.adapter.invoker.IMasterInvoker;
 import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.entity.WindyConstants;
 import com.zj.common.entity.dto.DispatchTaskModel;
 import com.zj.common.entity.feature.ExecuteTemplateVo;
 import com.zj.common.entity.generate.GenerateRecordBO;
@@ -97,7 +98,7 @@ public class ApiService {
         serviceApi.setRequestParams(requestParams);
         List<ApiParamModel> responseParams =
                 Optional.ofNullable(apiModel.getResponseParams()).map(params -> OrikaUtil.convertList(params,
-                ApiParamModel.class)).orElse(null);
+                        ApiParamModel.class)).orElse(null);
         serviceApi.setResponseParams(responseParams);
         serviceApi.setApiId(uniqueIdService.getUniqueId());
         return apiRepository.saveApi(serviceApi);
@@ -151,7 +152,7 @@ public class ApiService {
 
             Optional<ApiParamModel> optional =
                     serviceApi.getRequestParams().stream().filter(param -> Objects.equals(param.getPosition(),
-                    Position.Body.name())).findFirst();
+                            Position.Body.name())).findFirst();
             if (optional.isPresent() && StringUtils.isBlank(serviceApi.getBodyClass())) {
                 log.info("api request body name is empty={}", serviceApi.getApiName());
                 throw new CommonException(ErrorCode.SERVICE_GENERATE_BODY_NAME_EMPTY, serviceApi.getApiName());
@@ -174,7 +175,8 @@ public class ApiService {
                 ApiParamModel responseParam = responseOptional.get();
                 log.info("api response body param name is empty api={} param key = {}", serviceApi.getApiName(),
                         responseParam.getParamKey());
-                throw new CommonException(ErrorCode.SERVICE_GENERATE_RESPONSE_PARAM_NAME_EMPTY, serviceApi.getApiName());
+                throw new CommonException(ErrorCode.SERVICE_GENERATE_RESPONSE_PARAM_NAME_EMPTY,
+                        serviceApi.getApiName());
             }
 
         });
@@ -353,7 +355,7 @@ public class ApiService {
             }
             if (Objects.equals(variable.getPosition(), Position.Path.name())) {
                 uriBuilder = new StringBuilder(uriBuilder.toString().replace("{" + variable.getParamKey() + "}",
-                        "${" + variable.getParamKey() + "}"));
+                        WindyConstants.VARIABLE_CHAR + "{" + variable.getParamKey() + "}"));
             }
         }
         uri = uriBuilder.toString();

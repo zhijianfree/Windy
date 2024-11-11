@@ -1,6 +1,7 @@
 package com.zj.client.handler.feature.executor.compare.operator;
 
 import com.alibaba.fastjson.JSON;
+import com.zj.common.entity.WindyConstants;
 import com.zj.common.entity.feature.CompareResult;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.common.enums.CompareType;
@@ -39,7 +40,8 @@ public class ArrayMatchCompare extends BaseCompare{
                 if (StringUtils.isBlank(pattenEntry.propertyKey)) {
                     return Objects.equals(pattenEntry.getExpectValue(), String.valueOf(obj));
                 }
-                Object value = ognlDataParser.exchangeOgnlParamValue(obj, "$body." + pattenEntry.propertyKey);
+                Object value = ognlDataParser.exchangeOgnlParamValue(obj,
+                        WindyConstants.RESPONSE_BODY +"." + pattenEntry.propertyKey);
                 return Objects.equals(pattenEntry.getExpectValue(), String.valueOf(value));
             });
             if (!anyMatch){
