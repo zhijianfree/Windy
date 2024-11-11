@@ -1,9 +1,9 @@
 package com.zj.client.handler.feature.executor.invoker;
 
-import com.zj.client.entity.enuns.ExecutePointType;
-import com.zj.client.entity.vo.ExecutePoint;
-import com.zj.client.entity.vo.FeatureResponse;
-import com.zj.client.handler.feature.executor.vo.ExecuteContext;
+import com.zj.client.entity.bo.ExecutePoint;
+import com.zj.common.entity.feature.FeatureResponse;
+import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
+import com.zj.common.enums.TemplateType;
 
 import java.util.List;
 
@@ -13,8 +13,8 @@ import java.util.List;
  */
 public interface IExecuteStrategy {
 
-  List<ExecutePointType> getType();
+  List<TemplateType> getType();
 
   List<FeatureResponse> execute(ExecutePoint executePoint,
-      ExecuteContext executeContext);
+      FeatureExecuteContext featureExecuteContext);
 }

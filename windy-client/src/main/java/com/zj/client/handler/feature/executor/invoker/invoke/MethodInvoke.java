@@ -1,12 +1,12 @@
 package com.zj.client.handler.feature.executor.invoker.invoke;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.client.handler.feature.executor.vo.ExecuteContext;
+import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
 import com.zj.common.enums.InvokerType;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
 import com.zj.client.handler.feature.executor.invoker.loader.PluginManager;
-import com.zj.common.feature.ExecutorUnit;
+import com.zj.common.entity.feature.ExecutorUnit;
 import com.zj.plugin.loader.Feature;
 import com.zj.plugin.loader.FeatureDefine;
 import com.zj.plugin.loader.ParamValueType;
@@ -57,7 +57,7 @@ public class MethodInvoke implements IExecuteInvoker {
     return InvokerType.METHOD;
   }
 
-  public Object invoke(ExecutorUnit executorUnit, ExecuteContext executeContext) {
+  public Object invoke(ExecutorUnit executorUnit, FeatureExecuteContext featureExecuteContext) {
     try {
       Object[] objects = null;
       List<ParameterDefine> paramDefines = executorUnit.getParams();
@@ -101,6 +101,9 @@ public class MethodInvoke implements IExecuteInvoker {
     }
 
     if (Objects.equals(ParamValueType.Array.name(), paramDefine.getType())) {
+      if (paramDefine.getValue() instanceof  String){
+         return JSON.parseArray((String) paramDefine.getValue(), Object.class);
+      }
       return paramDefine.getValue();
     }
 

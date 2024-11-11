@@ -1,9 +1,8 @@
 package com.zj.client.handler.notify;
 
-import com.alibaba.fastjson.JSON;
-import com.zj.common.model.ResultEvent;
-import com.zj.common.monitor.InstanceMonitor;
-import com.zj.common.monitor.RequestProxy;
+import com.zj.common.entity.dto.ResultEvent;
+import com.zj.common.adapter.monitor.InstanceMonitor;
+import com.zj.common.adapter.invoker.IMasterInvoker;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,24 +18,23 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class ClientEventProcessor implements IResultEventNotify {
-
-  private final RequestProxy requestProxy;
   private final InstanceMonitor instanceMonitor;
   private final OptimizePersistLocal optimizePersistLocal;
+  private final IMasterInvoker masterInvoker;
 
-  public ClientEventProcessor(RequestProxy requestProxy, InstanceMonitor instanceMonitor,
-      OptimizePersistLocal optimizePersistLocal) {
-    this.requestProxy = requestProxy;
+  public ClientEventProcessor(InstanceMonitor instanceMonitor,
+                              OptimizePersistLocal optimizePersistLocal, IMasterInvoker masterInvoker) {
     this.instanceMonitor = instanceMonitor;
     this.optimizePersistLocal = optimizePersistLocal;
+    this.masterInvoker = masterInvoker;
   }
 
   @Override
   public boolean notifyEvent(ResultEvent resultEvent) {
-    log.info("start notify client event={} executeId={}", resultEvent.getExecuteType(),
+    log.info("start notify client event type={} executeId={}", resultEvent.getNotifyType(),
         resultEvent.getExecuteId());
     try {
-      return requestProxy.clientNotifyEvent(resultEvent);
+      return masterInvoker.notifyExecuteEvent(resultEvent);
     } catch (Exception e) {
       log.error("notify event error save to file", e);
       optimizePersistLocal.persistNotify(resultEvent);

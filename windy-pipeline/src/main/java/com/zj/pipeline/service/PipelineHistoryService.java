@@ -1,12 +1,11 @@
 package com.zj.pipeline.service;
 
-import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
-import com.zj.domain.entity.dto.pipeline.NodeStatus;
-import com.zj.domain.entity.dto.pipeline.PipelineExecuteInfo;
-import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.domain.entity.bo.pipeline.NodeRecordBO;
+import com.zj.domain.entity.bo.pipeline.NodeStatus;
+import com.zj.domain.entity.bo.pipeline.PipelineExecuteInfo;
+import com.zj.domain.entity.bo.pipeline.PipelineHistoryBO;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,21 +30,21 @@ public class PipelineHistoryService {
     this.pipelineHistoryRepository = pipelineHistoryRepository;
   }
 
-  public PipelineHistoryDto getPipelineHistory(String historyId) {
+  public PipelineHistoryBO getPipelineHistory(String historyId) {
     return pipelineHistoryRepository.getPipelineHistory(historyId);
   }
 
-  public String createPipelineHistory(PipelineHistoryDto pipelineHistoryDto) {
+  public String createPipelineHistory(PipelineHistoryBO pipelineHistoryBO) {
     String historyId = uniqueIdService.getUniqueId();
-    pipelineHistoryDto.setHistoryId(historyId);
-    return pipelineHistoryRepository.createPipelineHistory(pipelineHistoryDto) ? historyId : "";
+    pipelineHistoryBO.setHistoryId(historyId);
+    return pipelineHistoryRepository.createPipelineHistory(pipelineHistoryBO) ? historyId : "";
   }
 
-  public List<PipelineHistoryDto> listPipelineHistories(String pipelineId) {
+  public List<PipelineHistoryBO> listPipelineHistories(String pipelineId) {
     return pipelineHistoryRepository.listPipelineHistories(pipelineId);
   }
 
-  public PipelineHistoryDto getLatestPipelineHistory(String pipelineId) {
+  public PipelineHistoryBO getLatestPipelineHistory(String pipelineId) {
     return pipelineHistoryRepository.getLatestPipelineHistory(pipelineId);
   }
 
@@ -54,14 +53,14 @@ public class PipelineHistoryService {
   }
 
   public PipelineExecuteInfo getPipeLineStatusDetail(String historyId) {
-    PipelineHistoryDto pipelineHistory = getPipelineHistory(historyId);
-    List<NodeRecordDto> nodeRecords = recordService.getNodeRecordsByHistory(historyId);
+    PipelineHistoryBO pipelineHistory = getPipelineHistory(historyId);
+    List<NodeRecordBO> nodeRecords = recordService.getNodeRecordsByHistory(historyId);
     List<NodeStatus> statusList = nodeRecords.stream().map(nodeRecord -> {
       NodeStatus nodeStatus = new NodeStatus();
       nodeStatus.setRecordId(nodeRecord.getRecordId());
       nodeStatus.setNodeId(nodeRecord.getNodeId());
       nodeStatus.setStatus(nodeRecord.getStatus());
-      nodeStatus.setMessage(JSON.parseArray(nodeRecord.getResult(), String.class));
+      nodeStatus.setMessage(nodeRecord.getResult());
       return nodeStatus;
     }).collect(Collectors.toList());
 

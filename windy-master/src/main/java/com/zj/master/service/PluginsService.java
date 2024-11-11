@@ -1,6 +1,6 @@
 package com.zj.master.service;
 
-import com.zj.domain.entity.dto.feature.PluginInfoDto;
+import com.zj.domain.entity.bo.feature.PluginInfoBO;
 import com.zj.domain.repository.feature.IPluginRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class PluginsService {
     this.pluginRepository = pluginRepository;
   }
 
-  public List<PluginInfoDto> getPlugins() {
+  public List<PluginInfoBO> getPlugins() {
     return pluginRepository.getAllPlugins();
   }
 }

@@ -1,6 +1,6 @@
 package com.zj.domain.repository.pipeline;
 
-import com.zj.domain.entity.dto.pipeline.PipelineDto;
+import com.zj.domain.entity.bo.pipeline.PipelineBO;
 import java.util.List;
 
 /**
@@ -12,17 +12,17 @@ public interface IPipelineRepository {
   /**
    * 修改流水线
    * */
-  boolean updatePipeline(PipelineDto pipelineDTO);
+  boolean updatePipeline(PipelineBO pipelineBO);
 
   /**
    * 创建流水线
    * */
-  boolean createPipeline(PipelineDto pipelineDTO);
+  boolean createPipeline(PipelineBO pipelineBO);
 
   /**
    * 获取流水线
    * */
-  PipelineDto getPipeline(String pipelineId);
+  PipelineBO getPipeline(String pipelineId);
 
   /**
    * 删除流水线
@@ -32,13 +32,13 @@ public interface IPipelineRepository {
   /**
    * 获取服务流水线列表
    * */
-  List<PipelineDto> listPipelines(String serviceId);
+  List<PipelineBO> listPipelines(String serviceId);
 
-  List<PipelineDto> getServicePipelines(String serviceId);
+  List<PipelineBO> getServicePipelines(String serviceId);
 
-  PipelineDto getPublishPipeline(String serviceId);
+  PipelineBO getPublishPipeline(String serviceId);
 
-  List<PipelineDto> getSchedulePipelines();
+  List<PipelineBO> getSchedulePipelines();
 
   Integer countAll();
 }

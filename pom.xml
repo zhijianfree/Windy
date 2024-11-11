@@ -26,6 +26,7 @@
     <module>windy-domain</module>
     <module>windy-plugin</module>
     <module>windy-demand</module>
+      <module>windy-auth</module>
   </modules>
 
 
@@ -41,6 +42,7 @@
     <commons-codec.version>1.15</commons-codec.version>
     <commons-text.version>1.10.0</commons-text.version>
     <commons-lang.version>2.6</commons-lang.version>
+    <commons-exec.version>1.4.0</commons-exec.version>
     <maven-invoker.version>3.0.1</maven-invoker.version>
     <git-client.version>5.3.0.201903130848-r</git-client.version>
     <common-io.version>2.11.0</common-io.version>
@@ -53,6 +55,7 @@
     <transmittable-thread.version>2.14.2</transmittable-thread.version>
     <freemarker.version>2.3.30</freemarker.version>
     <maven-model.version>3.0</maven-model.version>
+    <hutool.version>5.8.25</hutool.version>
   </properties>
 
   <dependencyManagement>
@@ -93,9 +96,19 @@
         <artifactId>windy-demand</artifactId>
         <version>${revision}</version>
       </dependency>
+      <dependency>
+        <groupId>com.zj</groupId>
+        <artifactId>windy-auth</artifactId>
+        <version>${revision}</version>
+      </dependency>
       <!--内部模块结束-->
 
       <!--外部模块开始-->
+      <dependency>
+        <groupId>cn.hutool</groupId>
+        <artifactId>hutool-all</artifactId>
+        <version>${hutool.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.freemarker</groupId>
         <artifactId>freemarker</artifactId>
@@ -191,6 +204,11 @@
         <version>${commons-collections4.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-exec</artifactId>
+        <version>${commons-exec.version}</version>
+      </dependency>
+      <dependency>
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
         <version>${commons-codec.version}</version>
@@ -224,11 +242,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
-        <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-        </configuration>
+        <version>3.8.1</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

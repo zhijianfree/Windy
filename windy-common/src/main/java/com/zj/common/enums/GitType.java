@@ -7,7 +7,9 @@ import java.util.stream.Stream;
 
 @Getter
 public enum GitType {
-  Gitlab("Private-Token"), Gitea("token");
+  Gitlab("Private-Token"),
+  Gitea("token"),
+  Github("");
   private final String tokenName;
 
   GitType(String tokenName) {

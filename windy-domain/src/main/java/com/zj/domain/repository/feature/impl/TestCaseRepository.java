@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.feature.TestCaseDto;
+import com.zj.domain.entity.bo.feature.TestCaseBO;
 import com.zj.domain.entity.enums.CaseType;
 import com.zj.domain.entity.po.feature.TestCase;
 import com.zj.domain.mapper.feeature.TestCaseMapper;
@@ -22,15 +22,15 @@ public class TestCaseRepository extends ServiceImpl<TestCaseMapper, TestCase> im
     ITestCaseRepository {
 
   @Override
-  public TestCaseDto getTestCaseById(String caseId) {
+  public TestCaseBO getTestCaseById(String caseId) {
     TestCase testCase = getOne(
         Wrappers.lambdaQuery(TestCase.class).eq(TestCase::getTestCaseId, caseId));
-    return OrikaUtil.convert(testCase, TestCaseDto.class);
+    return OrikaUtil.convert(testCase, TestCaseBO.class);
   }
 
   @Override
-  public boolean saveCase(TestCaseDto testCaseDto) {
-    TestCase testCase = OrikaUtil.convert(testCaseDto, TestCase.class);
+  public boolean saveCase(TestCaseBO testCaseBO) {
+    TestCase testCase = OrikaUtil.convert(testCaseBO, TestCase.class);
     long dateNow = System.currentTimeMillis();
     testCase.setCreateTime(dateNow);
     testCase.setUpdateTime(dateNow);
@@ -38,8 +38,8 @@ public class TestCaseRepository extends ServiceImpl<TestCaseMapper, TestCase> im
   }
 
   @Override
-  public Boolean updateCase(TestCaseDto testCaseDto) {
-    TestCase testCase = OrikaUtil.convert(testCaseDto, TestCase.class);
+  public Boolean updateCase(TestCaseBO testCaseBO) {
+    TestCase testCase = OrikaUtil.convert(testCaseBO, TestCase.class);
     testCase.setUpdateTime(System.currentTimeMillis());
     return update(testCase, Wrappers.lambdaUpdate(TestCase.class)
         .eq(TestCase::getTestCaseId, testCase.getTestCaseId()));
@@ -51,38 +51,38 @@ public class TestCaseRepository extends ServiceImpl<TestCaseMapper, TestCase> im
   }
 
   @Override
-  public List<TestCaseDto> getServiceCases(String serviceId) {
+  public List<TestCaseBO> getServiceCases(String serviceId) {
     List<TestCase> testCases = list(
         Wrappers.lambdaQuery(TestCase.class).eq(TestCase::getServiceId, serviceId));
-    return OrikaUtil.convertList(testCases, TestCaseDto.class);
+    return OrikaUtil.convertList(testCases, TestCaseBO.class);
   }
 
   @Override
-  public IPage<TestCaseDto> getCasePage(String serviceId, Integer page, Integer pageSize) {
+  public IPage<TestCaseBO> getCasePage(String serviceId, Integer page, Integer pageSize) {
     IPage<TestCase> pageObj = page(new Page<>(page, pageSize),
         Wrappers.lambdaQuery(TestCase.class).eq(TestCase::getServiceId, serviceId));
 
-    IPage<TestCaseDto> caseDtoPage = new Page<>();
+    IPage<TestCaseBO> caseDtoPage = new Page<>();
     caseDtoPage.setTotal(pageObj.getTotal());
-    caseDtoPage.setRecords(OrikaUtil.convertList(pageObj.getRecords(), TestCaseDto.class));
+    caseDtoPage.setRecords(OrikaUtil.convertList(pageObj.getRecords(), TestCaseBO.class));
     return caseDtoPage;
   }
 
   @Override
-  public IPage<TestCaseDto> getE2ECasesPage(Integer page, Integer pageSize) {
+  public IPage<TestCaseBO> getE2ECasesPage(Integer page, Integer pageSize) {
     IPage<TestCase> pageObj = page(new Page<>(page, pageSize),
             Wrappers.lambdaQuery(TestCase.class).eq(TestCase::getCaseType, CaseType.E2E.getType()));
 
-    IPage<TestCaseDto> caseDtoPage = new Page<>();
+    IPage<TestCaseBO> caseDtoPage = new Page<>();
     caseDtoPage.setTotal(pageObj.getTotal());
-    caseDtoPage.setRecords(OrikaUtil.convertList(pageObj.getRecords(), TestCaseDto.class));
+    caseDtoPage.setRecords(OrikaUtil.convertList(pageObj.getRecords(), TestCaseBO.class));
     return caseDtoPage;
   }
 
   @Override
-  public List<TestCaseDto> getE2ECases() {
+  public List<TestCaseBO> getE2ECases() {
     List<TestCase> testCases = list(
             Wrappers.lambdaQuery(TestCase.class).eq(TestCase::getCaseType, CaseType.E2E.getType()));
-    return OrikaUtil.convertList(testCases, TestCaseDto.class);
+    return OrikaUtil.convertList(testCases, TestCaseBO.class);
   }
 }

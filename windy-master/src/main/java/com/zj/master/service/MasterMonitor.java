@@ -1,8 +1,8 @@
 package com.zj.master.service;
 
-import com.zj.common.model.MasterCollect;
-import com.zj.common.monitor.collector.InstanceCollector;
-import com.zj.common.monitor.collector.PhysicsCollect;
+import com.zj.common.entity.dto.MasterCollect;
+import com.zj.common.adapter.monitor.collector.InstanceCollector;
+import com.zj.common.adapter.monitor.collector.PhysicsCollect;
 import com.zj.master.dispatch.IDispatchExecutor;
 import org.springframework.stereotype.Service;
 

@@ -1,8 +1,8 @@
 package com.zj.master.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.DispatchTaskModel;
-import com.zj.common.model.ResponseMeta;
+import com.zj.common.entity.dto.DispatchTaskModel;
+import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.master.service.TaskLogService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

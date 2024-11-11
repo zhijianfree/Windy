@@ -1,6 +1,6 @@
 package com.zj.feature.service;
 
-import com.zj.domain.entity.dto.feature.FeatureTagDto;
+import com.zj.domain.entity.bo.feature.FeatureTagBO;
 import com.zj.domain.repository.feature.IFeatureTagRepository;
 import java.util.Collections;
 import java.util.List;
@@ -23,8 +23,8 @@ public class FeatureTagService{
 
   public void batchAddTag(String featureId, List<String> tags) {
     long currentTime = System.currentTimeMillis();
-    List<FeatureTagDto> tagList = tags.stream().distinct().map(tag -> {
-      FeatureTagDto featureTag = new FeatureTagDto();
+    List<FeatureTagBO> tagList = tags.stream().distinct().map(tag -> {
+      FeatureTagBO featureTag = new FeatureTagBO();
       featureTag.setFeatureId(featureId);
       featureTag.setTagValue(tag);
       featureTag.setCreateTime(currentTime);
@@ -42,20 +42,20 @@ public class FeatureTagService{
   }
 
   public List<String> getFeatureTags(String featureId) {
-    List<FeatureTagDto> featureTags = featureTagRepository.getFeatureTags(featureId);
+    List<FeatureTagBO> featureTags = featureTagRepository.getFeatureTags(featureId);
     if (CollectionUtils.isEmpty(featureTags)) {
       return Collections.emptyList();
     }
 
-    return featureTags.stream().map(FeatureTagDto::getTagValue).collect(Collectors.toList());
+    return featureTags.stream().map(FeatureTagBO::getTagValue).collect(Collectors.toList());
   }
 
   public List<String> getFeaturesByTag(List<String> tags) {
-    List<FeatureTagDto> featureTags = featureTagRepository.getFeaturesByTag(tags);
+    List<FeatureTagBO> featureTags = featureTagRepository.getFeaturesByTag(tags);
     if (CollectionUtils.isEmpty(featureTags)) {
       return Collections.emptyList();
     }
 
-    return featureTags.stream().map(FeatureTagDto::getFeatureId).collect(Collectors.toList());
+    return featureTags.stream().map(FeatureTagBO::getFeatureId).collect(Collectors.toList());
   }
 }

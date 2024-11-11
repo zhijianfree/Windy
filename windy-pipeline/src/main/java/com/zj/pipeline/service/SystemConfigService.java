@@ -1,12 +1,13 @@
 package com.zj.pipeline.service;
 
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.common.model.ClientCollect;
-import com.zj.common.model.MasterCollect;
-import com.zj.common.monitor.RequestProxy;
-import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
+import com.zj.common.adapter.git.GitAccessInfo;
+import com.zj.common.adapter.invoker.IClientInvoker;
+import com.zj.common.adapter.invoker.IMasterInvoker;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.entity.dto.ClientCollectDto;
+import com.zj.common.entity.dto.MasterCollect;
+import com.zj.domain.entity.bo.pipeline.SystemConfigBO;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
-import com.zj.domain.entity.vo.GitAccessVo;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
 import com.zj.domain.entity.vo.MavenConfigVo;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
@@ -19,27 +20,29 @@ public class SystemConfigService {
 
   private final ISystemConfigRepository systemConfigRepository;
   private final UniqueIdService uniqueIdService;
-  private final RequestProxy requestProxy;
+  private final IMasterInvoker masterInvoker;
+  private final IClientInvoker clientInvoker;
 
   public SystemConfigService(ISystemConfigRepository systemConfigRepository,
-      UniqueIdService uniqueIdService, RequestProxy requestProxy) {
+                             UniqueIdService uniqueIdService, IMasterInvoker masterInvoker, IClientInvoker clientInvoker) {
     this.systemConfigRepository = systemConfigRepository;
     this.uniqueIdService = uniqueIdService;
-    this.requestProxy = requestProxy;
+    this.masterInvoker = masterInvoker;
+    this.clientInvoker = clientInvoker;
   }
 
 
-  public List<SystemConfigDto> listSystemConfigs() {
+  public List<SystemConfigBO> listSystemConfigs() {
     return systemConfigRepository.getAllConfigs();
   }
 
-  public String createSystemConfig(SystemConfigDto systemConfigDto) {
-    systemConfigDto.setConfigId(uniqueIdService.getUniqueId());
-    return systemConfigRepository.saveConfig(systemConfigDto) ? systemConfigDto.getConfigId()
+  public String createSystemConfig(SystemConfigBO systemConfigBO) {
+    systemConfigBO.setConfigId(uniqueIdService.getUniqueId());
+    return systemConfigRepository.saveConfig(systemConfigBO) ? systemConfigBO.getConfigId()
         : null;
   }
 
-  public Boolean updateSystemConfig(SystemConfigDto systemConfig) {
+  public Boolean updateSystemConfig(SystemConfigBO systemConfig) {
     return systemConfigRepository.updateConfig(systemConfig);
   }
 
@@ -47,25 +50,25 @@ public class SystemConfigService {
     return systemConfigRepository.deleteConfig(configId);
   }
 
-  public SystemConfigDto getSystemConfig(String configId) {
+  public SystemConfigBO getSystemConfig(String configId) {
     return systemConfigRepository.getSystemConfig(configId);
   }
 
   public SystemMonitorDto getSystemMonitor() {
     SystemMonitorDto systemMonitorDto = new SystemMonitorDto();
-    List<ClientCollect> clientMonitor = requestProxy.requestClientMonitor();
+    List<ClientCollectDto> clientMonitor = clientInvoker.requestClientMonitor();
     systemMonitorDto.setClients(clientMonitor);
-    List<MasterCollect> masterMonitor = requestProxy.requestMasterMonitor();
+    List<MasterCollect> masterMonitor = masterInvoker.requestMasterMonitor();
     systemMonitorDto.setMasters(masterMonitor);
     return systemMonitorDto;
   }
 
-  public GitAccessVo getGitConfig() {
+  public GitAccessInfo getGitConfig() {
     return systemConfigRepository.getGitAccess();
   }
 
-  public boolean updateGitConfig(GitAccessVo gitAccessVo) {
-    return systemConfigRepository.updateGitAccess(gitAccessVo);
+  public boolean updateGitConfig(GitAccessInfo gitAccessInfo) {
+    return systemConfigRepository.updateGitAccess(gitAccessInfo);
   }
 
   public ImageRepositoryVo getImageRepository() {

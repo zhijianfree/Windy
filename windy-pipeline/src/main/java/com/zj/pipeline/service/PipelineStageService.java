@@ -1,6 +1,6 @@
 package com.zj.pipeline.service;
 
-import com.zj.domain.entity.dto.pipeline.PipelineStageDto;
+import com.zj.domain.entity.bo.pipeline.PipelineStageBO;
 import com.zj.domain.repository.pipeline.IPipelineStageRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -22,11 +22,11 @@ public class PipelineStageService{
     pipelineStageRepository.deletePipelineStages(notExistStages);
   }
 
-  public PipelineStageDto getPipelineStage(String stageId) {
+  public PipelineStageBO getPipelineStage(String stageId) {
     return pipelineStageRepository.getPipelineStage(stageId);
   }
 
-  public boolean updateStage(PipelineStageDto stageDto) {
+  public boolean updateStage(PipelineStageBO stageDto) {
     return pipelineStageRepository.updateStage(stageDto);
   }
 
@@ -34,11 +34,11 @@ public class PipelineStageService{
     return pipelineStageRepository.deleteStagesByPipelineId(pipelineId);
   }
 
-  public void saveStage(PipelineStageDto pipelineStage) {
+  public void saveStage(PipelineStageBO pipelineStage) {
     pipelineStageRepository.saveStage(pipelineStage);
   }
 
-  public List<PipelineStageDto> sortPipelineNodes(String pipelineId) {
+  public List<PipelineStageBO> sortPipelineNodes(String pipelineId) {
     return pipelineStageRepository.sortPipelineNodes(pipelineId);
   }
 }

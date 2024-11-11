@@ -1,6 +1,6 @@
 package com.zj.domain.repository.pipeline;
 
-import com.zj.domain.entity.dto.pipeline.PublishBindDto;
+import com.zj.domain.entity.bo.pipeline.PublishBindBO;
 import java.util.List;
 
 /**
@@ -9,15 +9,17 @@ import java.util.List;
  */
 public interface IPublishBindRepository {
 
-  boolean createPublish(PublishBindDto publishBind);
+  boolean createPublish(PublishBindBO publishBind);
 
-  boolean updatePublish(PublishBindDto publishBind);
+  boolean updatePublish(PublishBindBO publishBind);
 
   boolean deletePublish(String publishId);
 
-  List<PublishBindDto> getServicePublishes(String serviceId);
+  List<PublishBindBO> getServicePublishes(String serviceId);
 
-  PublishBindDto getServiceBranch(String serviceId, String gitBranch);
+  PublishBindBO getServiceBranch(String serviceId, String gitBranch);
 
-  boolean deletePublishLine(String masterLineId);
+  boolean deleteServicePublishes(String serviceId);
+
+    PublishBindBO getPublishById(String publishId);
 }

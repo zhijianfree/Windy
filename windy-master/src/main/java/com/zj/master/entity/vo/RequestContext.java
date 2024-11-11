@@ -9,6 +9,8 @@ import lombok.Data;
 @Data
 public class RequestContext {
 
+  private String version = "1.0";
+
   /**
    * 是否请求单个节点，不是用负载均衡的能力。因为在流水线的场景下
    * git操作的文件处理需要在同一个节点执行完成，所以添加这个标志来

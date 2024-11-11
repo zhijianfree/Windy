@@ -1,6 +1,6 @@
 package com.zj.domain.repository.service;
 
-import com.zj.domain.entity.dto.service.ServiceApiDto;
+import com.zj.domain.entity.bo.service.ServiceApiBO;
 import java.util.List;
 
 /**
@@ -9,19 +9,19 @@ import java.util.List;
  */
 public interface IServiceApiRepository {
 
-  boolean saveApi(ServiceApiDto serviceApi);
+  boolean saveApi(ServiceApiBO serviceApi);
 
-  boolean saveBatch(List<ServiceApiDto> serviceApis);
+  boolean saveBatch(List<ServiceApiBO> serviceApis);
 
-  boolean updateApi(ServiceApiDto serviceApi);
+  boolean updateApi(ServiceApiBO serviceApi);
 
   boolean deleteApi(String apiId);
 
   boolean batchDeleteApi(List<String> apiIds);
 
-  ServiceApiDto getServiceApi(String apiId);
+  ServiceApiBO getServiceApi(String apiId);
 
-  List<ServiceApiDto> getApiByService(String serviceId);
+  List<ServiceApiBO> getApiByService(String serviceId);
 
-  List<ServiceApiDto> getServiceApiList(List<String> apiIds);
+  List<ServiceApiBO> getServiceApiList(List<String> apiIds);
 }

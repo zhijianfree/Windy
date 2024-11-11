@@ -1,11 +1,16 @@
 package com.zj.demand.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.PageSize;
-import com.zj.common.model.ResponseMeta;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.demand.entity.DemandDetailDto;
+import com.zj.demand.entity.DemandDto;
 import com.zj.demand.service.DemandService;
-import com.zj.domain.entity.dto.demand.BusinessStatusDTO;
-import com.zj.domain.entity.dto.demand.DemandDTO;
+import com.zj.domain.entity.bo.demand.BusinessStatusBO;
+import com.zj.domain.entity.bo.demand.DemandBO;
+import com.zj.domain.entity.vo.Create;
+import com.zj.domain.entity.vo.Update;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,37 +34,49 @@ public class DemandRest {
     }
 
     @PostMapping("/demands")
-    public ResponseMeta<DemandDTO> createDemand(@RequestBody DemandDTO demandDTO) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.createDemand(demandDTO));
+    public ResponseMeta<DemandBO> createDemand(@Validated(Create.class) @RequestBody DemandDto demandDto) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.createDemand(demandDto));
     }
 
     @PutMapping("/demand")
-    public ResponseMeta<Boolean> updateDemand(@RequestBody DemandDTO demandDTO) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.updateDemand(demandDTO));
+    public ResponseMeta<Boolean> updateDemand(@Validated(Update.class) @RequestBody DemandDto demandDto) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.updateDemand(demandDto));
     }
 
     @GetMapping("/demands")
-    public ResponseMeta<PageSize<DemandDTO>> getDemandPage(@RequestParam(value = "page", defaultValue = "1") Integer page,
-                                                           @RequestParam(value = "size", defaultValue = "10") Integer size,
-                                                           @RequestParam(value = "name", required = false) String name,
-                                                           @RequestParam(value = "status", required = false) Integer status) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getDemandPage(page, size, name, status));
+    public ResponseMeta<PageSize<DemandBO>> getDemandPage(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                          @RequestParam(value = "size", defaultValue = "10") Integer size,
+                                                          @RequestParam(value = "name", required = false) String name,
+                                                          @RequestParam(value = "spaceId", required = false) String spaceId,
+                                                          @RequestParam(value = "iterationId", required = false) String iterationId,
+                                                          @RequestParam(value = "status", required = false) Integer status) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getDemandPage(page, size, name, status, spaceId, iterationId));
+    }
+
+    @GetMapping("/iterations/{iterationId}/demands")
+    public ResponseMeta<List<DemandBO>> getIterationDemands(@PathVariable("iterationId") String iterationId) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getIterationDemands(iterationId));
     }
 
     @GetMapping("/user/demands")
-    public ResponseMeta<PageSize<DemandDTO>> getUserDemands(@RequestParam(value = "page", defaultValue = "1") Integer page,
-                                                            @RequestParam(value = "size", defaultValue = "10") Integer size,
-                                                            @RequestParam(value = "status", required = false) Integer status) {
+    public ResponseMeta<PageSize<DemandBO>> getUserDemands(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                           @RequestParam(value = "size", defaultValue = "10") Integer size,
+                                                           @RequestParam(value = "status", required = false) Integer status) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getUserDemands(page, size, status));
     }
 
+    @GetMapping("/demand/tags")
+    public ResponseMeta<List<BusinessStatusBO>> getDemandTags() {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getDemandTags());
+    }
+
     @GetMapping("/demand/statuses")
-    public ResponseMeta<List<BusinessStatusDTO>> getDemandStatuses() {
+    public ResponseMeta<List<BusinessStatusBO>> getDemandStatuses() {
         return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getDemandStatuses());
     }
 
     @GetMapping("/demands/{demandId}")
-    public ResponseMeta<DemandDTO> getDemand(@PathVariable("demandId") String demandId) {
+    public ResponseMeta<DemandDetailDto> getDemand(@PathVariable("demandId") String demandId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getDemand(demandId));
     }
 
@@ -69,8 +86,8 @@ public class DemandRest {
     }
 
     @GetMapping("/related/demands")
-    public ResponseMeta<PageSize<DemandDTO>> getRelatedDemands(@RequestParam(value = "page", defaultValue = "1") Integer page,
-                                                               @RequestParam(value = "size", defaultValue = "10") Integer size) {
+    public ResponseMeta<PageSize<DemandBO>> getRelatedDemands(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                              @RequestParam(value = "size", defaultValue = "10") Integer size) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getRelatedDemands(page, size));
     }
 }

@@ -1,12 +1,12 @@
 package com.zj.domain.repository.service;
 
-import com.zj.domain.entity.dto.service.ServiceGenerateDto;
+import com.zj.domain.entity.bo.service.ServiceGenerateBO;
 
 public interface IGenerateRepository {
 
-  ServiceGenerateDto getByService(String serviceId);
+  ServiceGenerateBO getByService(String serviceId);
 
-  boolean create(ServiceGenerateDto serviceGenerateDto);
+  boolean create(ServiceGenerateBO serviceGenerateBO);
 
-  boolean update(ServiceGenerateDto serviceGenerateDto);
+  boolean update(ServiceGenerateBO serviceGenerateBO);
 }

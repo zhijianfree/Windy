@@ -1,17 +1,18 @@
 package com.zj.master.dispatch.pipeline;
 
 import com.alibaba.fastjson.JSON;
+import com.zj.common.entity.pipeline.ConfigDetail;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.common.model.DispatchTaskModel;
-import com.zj.domain.entity.dto.log.DispatchLogDto;
-import com.zj.domain.entity.dto.log.SubDispatchLogDto;
-import com.zj.domain.entity.dto.pipeline.BindBranchDto;
-import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
-import com.zj.domain.entity.dto.pipeline.PipelineDto;
-import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
-import com.zj.domain.entity.dto.pipeline.PipelineNodeDto;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.entity.dto.DispatchTaskModel;
+import com.zj.domain.entity.bo.log.DispatchLogDto;
+import com.zj.domain.entity.bo.log.SubDispatchLogDto;
+import com.zj.domain.entity.bo.pipeline.BindBranchBO;
+import com.zj.domain.entity.bo.pipeline.PipelineActionBO;
+import com.zj.domain.entity.bo.pipeline.PipelineBO;
+import com.zj.domain.entity.bo.pipeline.PipelineHistoryBO;
+import com.zj.domain.entity.bo.pipeline.PipelineNodeBO;
 import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
@@ -81,14 +82,14 @@ public class PipelineDispatch implements IDispatchExecutor {
 
   @Override
   public String dispatch(DispatchTaskModel task, String logId) {
-    PipelineDto pipeline = pipelineRepository.getPipeline(task.getSourceId());
+    PipelineBO pipeline = pipelineRepository.getPipeline(task.getSourceId());
     if (Objects.isNull(pipeline)) {
       log.info("can not find pipeline name={} pipelineId={}", task.getSourceName(),
           task.getSourceId());
       return null;
     }
 
-    List<PipelineNodeDto> pipelineNodes = pipelineNodeRepository.getPipelineNodes(
+    List<PipelineNodeBO> pipelineNodes = pipelineNodeRepository.getPipelineNodes(
         pipeline.getPipelineId());
     if (CollectionUtils.isEmpty(pipelineNodes)) {
       log.info("can not find pipeline nodes name={} pipelineId={}", task.getSourceName(),
@@ -109,7 +110,7 @@ public class PipelineDispatch implements IDispatchExecutor {
     pipelineTask.setLogId(logId);
 
     List<TaskNode> taskNodeList = pipelineNodes.stream()
-        .sorted(Comparator.comparing(PipelineNodeDto::getSortOrder))
+        .sorted(Comparator.comparing(PipelineNodeBO::getSortOrder))
         .map(node -> buildTaskNode(node, historyId, pipeline.getServiceId()))
         .filter(Objects::nonNull)
         .collect(Collectors.toList());
@@ -122,8 +123,8 @@ public class PipelineDispatch implements IDispatchExecutor {
     return historyId;
   }
 
-  private void createSubTaskLog(List<PipelineNodeDto> pipelineNodes, String logId,
-      Map<String, String> executeTypeMap) {
+  private void createSubTaskLog(List<PipelineNodeBO> pipelineNodes, String logId,
+                                Map<String, String> executeTypeMap) {
     List<SubDispatchLogDto> logList = pipelineNodes.stream().map(pipelineNode -> {
       SubDispatchLogDto subTaskLog = new SubDispatchLogDto();
       subTaskLog.setSubTaskId(uniqueIdService.getUniqueId());
@@ -141,20 +142,20 @@ public class PipelineDispatch implements IDispatchExecutor {
   }
 
   private void saveHistory(String pipelineId, String historyId) {
-    PipelineHistoryDto pipelineHistory = new PipelineHistoryDto();
+    PipelineHistoryBO pipelineHistory = new PipelineHistoryBO();
     pipelineHistory.setHistoryId(historyId);
     pipelineHistory.setPipelineId(pipelineId);
     pipelineHistory.setPipelineStatus(ProcessStatus.RUNNING.getType());
-    pipelineHistory.setPipelineConfig("");
+    pipelineHistory.setPipelineConfig(null);
     pipelineHistory.setCreateTime(System.currentTimeMillis());
     pipelineHistory.setUpdateTime(System.currentTimeMillis());
-    BindBranchDto bindBranch = bindBranchRepository.getPipelineBindBranch(pipelineId);
+    BindBranchBO bindBranch = bindBranchRepository.getPipelineBindBranch(pipelineId);
     pipelineHistory.setBranch(bindBranch.getGitBranch());
     pipelineHistoryRepository.createPipelineHistory(pipelineHistory);
   }
 
 
-  private TaskNode buildTaskNode(PipelineNodeDto pipelineNode, String historyId, String serviceId) {
+  private TaskNode buildTaskNode(PipelineNodeBO pipelineNode, String historyId, String serviceId) {
     log.info("start build taskNode ={}", JSON.toJSONString(pipelineNode));
     TaskNode taskNode = new TaskNode();
     taskNode.setNodeId(pipelineNode.getNodeId());
@@ -163,9 +164,8 @@ public class PipelineDispatch implements IDispatchExecutor {
     taskNode.setHistoryId(historyId);
     taskNode.setServiceId(serviceId);
 
-    ConfigDetail configDetail = JSON.parseObject(pipelineNode.getConfigDetail(),
-        ConfigDetail.class);
-    PipelineActionDto action = pipelineActionRepository.getAction(configDetail.getActionId());
+    ConfigDetail configDetail = pipelineNode.getConfigDetail();
+    PipelineActionBO action = pipelineActionRepository.getAction(configDetail.getActionId());
     if (Objects.isNull(action)) {
       return null;
     }
@@ -187,14 +187,14 @@ public class PipelineDispatch implements IDispatchExecutor {
   @Override
   public boolean resume(DispatchLogDto dispatchLog) {
     String pipelineId = dispatchLog.getSourceId();
-    PipelineDto pipeline = pipelineRepository.getPipeline(pipelineId);
+    PipelineBO pipeline = pipelineRepository.getPipeline(pipelineId);
     if (Objects.isNull(pipeline)) {
       log.info("resume task not find pipeline name={} pipelineId={}", dispatchLog.getSourceName(),
           pipelineId);
       return false;
     }
 
-    List<PipelineNodeDto> pipelineNodes = pipelineNodeRepository.getPipelineNodes(
+    List<PipelineNodeBO> pipelineNodes = pipelineNodeRepository.getPipelineNodes(
         pipeline.getPipelineId());
     if (CollectionUtils.isEmpty(pipelineNodes)) {
       log.info("can not find pipeline nodes name={} pipelineId={}", dispatchLog.getSourceName(),

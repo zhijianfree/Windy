@@ -1,9 +1,9 @@
 package com.zj.pipeline.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.ResponseMeta;
-import com.zj.domain.entity.dto.pipeline.CodeChangeDto;
-import com.zj.domain.entity.dto.pipeline.RelationDemandBug;
+import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.domain.entity.bo.pipeline.CodeChangeBO;
+import com.zj.domain.entity.bo.pipeline.RelationDemandBug;
 import com.zj.pipeline.service.CodeChangeService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,10 +37,10 @@ public class CodeChangeRest {
 
   @ResponseBody
   @GetMapping("/{serviceId}/change/{codeChangeId}")
-  public ResponseMeta<CodeChangeDto> queryCodeChange(
+  public ResponseMeta<CodeChangeBO> queryCodeChange(
       @NotNull @PathVariable("codeChangeId") String codeChangeId,
       @NotNull @PathVariable("serviceId") String serviceId) {
-    return new ResponseMeta<CodeChangeDto>(ErrorCode.SUCCESS, codeChangeService.getCodeChange(serviceId, codeChangeId));
+    return new ResponseMeta<CodeChangeBO>(ErrorCode.SUCCESS, codeChangeService.getCodeChange(serviceId, codeChangeId));
   }
 
   @ResponseBody
@@ -53,8 +53,8 @@ public class CodeChangeRest {
   @ResponseBody
   @PostMapping("/change")
   public ResponseMeta<String> createCodeChange(
-      @NotNull @Validated @RequestBody CodeChangeDto codeChangeDto) {
-    return new ResponseMeta<String>(ErrorCode.SUCCESS, codeChangeService.createCodeChange(codeChangeDto));
+      @NotNull @Validated @RequestBody CodeChangeBO codeChangeBO) {
+    return new ResponseMeta<String>(ErrorCode.SUCCESS, codeChangeService.createCodeChange(codeChangeBO));
   }
 
   @ResponseBody
@@ -62,15 +62,15 @@ public class CodeChangeRest {
   public ResponseMeta<Boolean> updateCodeChange(
       @NotNull @PathVariable("serviceId") String serviceId,
       @NotNull @PathVariable("codeChangeId") String codeChangeId,
-      @NotNull @RequestBody CodeChangeDto codeChangeDto) {
-    return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, codeChangeService.updateCodeChange(serviceId, codeChangeId, codeChangeDto));
+      @NotNull @RequestBody CodeChangeBO codeChangeBO) {
+    return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, codeChangeService.updateCodeChange(serviceId, codeChangeId, codeChangeBO));
   }
 
   @ResponseBody
   @GetMapping("/{serviceId}/changes")
-  public ResponseMeta<List<CodeChangeDto>> listCodeChanges(
+  public ResponseMeta<List<CodeChangeBO>> listCodeChanges(
       @NotNull @PathVariable("serviceId") String serviceId) {
-    return new ResponseMeta<List<CodeChangeDto>>(ErrorCode.SUCCESS,
+    return new ResponseMeta<List<CodeChangeBO>>(ErrorCode.SUCCESS,
         codeChangeService.listCodeChanges(serviceId));
   }
 

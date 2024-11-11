@@ -1,8 +1,8 @@
 package com.zj.master.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.MasterCollect;
-import com.zj.common.model.ResponseMeta;
+import com.zj.common.entity.dto.MasterCollect;
+import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.master.service.MasterMonitor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

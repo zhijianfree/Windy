@@ -14,4 +14,6 @@ public class BusinessStatus {
     private Integer value;
 
     private Integer sort;
+
+    private String statusColor;
 }

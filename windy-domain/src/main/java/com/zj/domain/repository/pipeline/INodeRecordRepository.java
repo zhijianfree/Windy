@@ -1,8 +1,8 @@
 package com.zj.domain.repository.pipeline;
 
 import com.zj.common.enums.ProcessStatus;
-import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
-import com.zj.domain.entity.po.pipeline.NodeRecord;
+import com.zj.domain.entity.bo.pipeline.NodeRecordBO;
+
 import java.util.List;
 
 /**
@@ -11,19 +11,21 @@ import java.util.List;
  */
 public interface INodeRecordRepository {
 
-  boolean saveNodeRecord(NodeRecordDto nodeRecord);
+  boolean saveNodeRecord(NodeRecordBO nodeRecord);
 
-  boolean updateNodeRecord(NodeRecordDto nodeRecord);
+  boolean updateNodeRecord(NodeRecordBO nodeRecord);
 
-  boolean updateNodeRecordStatus(String recordId, Integer status, String message);
+  boolean updateNodeRecordStatus(String recordId, Integer status, List<String> messageList);
 
   boolean batchUpdateStatus(List<String> recordIds, ProcessStatus processStatus);
 
-  List<NodeRecordDto> getRecordsByHistoryId(String historyId);
+  List<NodeRecordBO> getRecordsByHistoryId(String historyId);
 
-  NodeRecordDto getRecordById(String recordId);
+  NodeRecordBO getRecordById(String recordId);
 
-  NodeRecordDto getRecordByNodeAndHistory(String historyId, String nodeId);
+  NodeRecordBO getRecordByNodeAndHistory(String historyId, String nodeId);
 
   void updateRunningNodeStatus(String historyId, ProcessStatus stop);
+
+  boolean deleteRecordByHistoryId(String historyId);
 }

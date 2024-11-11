@@ -43,9 +43,9 @@ public class Bug {
     private String realResult;
 
     /**
-     * 提出团队
+     * 提出人名称
      * */
-    private String proposeTeam;
+    private String proposerName;
 
     /**
      * 提出人
@@ -53,9 +53,9 @@ public class Bug {
     private String proposer;
 
     /**
-     * 接受团队
+     * 接受人名称
      * */
-    private String acceptTeam;
+    private String acceptorName;
 
     /**
      *
@@ -81,6 +81,16 @@ public class Bug {
      * bug状态
      * */
     private Integer status;
+
+    /**
+     * 空间ID
+     */
+    private String spaceId;
+
+    /**
+     * 迭代ID
+     */
+    private String iterationId;
 
     /**
      * 创建时间

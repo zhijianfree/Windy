@@ -1,6 +1,6 @@
 package com.zj.domain.repository.feature;
 
-import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
+import com.zj.domain.entity.bo.feature.TestCaseConfigBO;
 import java.util.List;
 
 /**
@@ -9,11 +9,13 @@ import java.util.List;
  */
 public interface ITestCaseConfigRepository {
 
-  List<TestCaseConfigDto> getCaseConfigs(String caseId);
+  List<TestCaseConfigBO> getCaseConfigs(String caseId);
 
-  boolean saveConfig(TestCaseConfigDto caseConfig);
+  boolean saveConfig(TestCaseConfigBO caseConfig);
 
-  boolean updateCaseConfig(TestCaseConfigDto configDto);
+  boolean updateCaseConfig(TestCaseConfigBO configDto);
 
   boolean deleteCaseConfig(String configId);
+
+  boolean batchUpdateCaseConfig(List<TestCaseConfigBO> updateList);
 }

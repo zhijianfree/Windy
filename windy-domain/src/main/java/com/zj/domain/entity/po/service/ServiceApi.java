@@ -58,12 +58,12 @@ public class ServiceApi {
   /**
    * 请求参数
    * */
-  private String requestParams;
+  private String requestParameter;
 
   /**
    * 响应参数
    * */
-  private String responseParams;
+  private String responseParameter;
 
   private String bodyClass;
 

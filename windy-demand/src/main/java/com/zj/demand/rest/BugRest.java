@@ -1,11 +1,13 @@
 package com.zj.demand.rest;
 
+import com.zj.common.entity.dto.PageSize;
+import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.PageSize;
-import com.zj.common.model.ResponseMeta;
+import com.zj.demand.entity.BugDetailDto;
+import com.zj.demand.entity.BugDto;
 import com.zj.demand.service.BugService;
-import com.zj.domain.entity.dto.demand.BugDTO;
-import com.zj.domain.entity.dto.demand.BusinessStatusDTO;
+import com.zj.domain.entity.bo.demand.BugBO;
+import com.zj.domain.entity.bo.demand.BusinessStatusBO;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,30 +31,42 @@ public class BugRest {
     }
 
     @PostMapping("/bugs")
-    public ResponseMeta<BugDTO> createBug(@Validated @RequestBody BugDTO bugDTO) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.createBug(bugDTO));
+    public ResponseMeta<BugDto> createBug(@Validated @RequestBody BugDto bugDto) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.createBug(bugDto));
     }
 
     @PutMapping("/bug")
-    public ResponseMeta<Boolean> updateBug(@Validated @RequestBody BugDTO bugDTO) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.updateBug(bugDTO));
+    public ResponseMeta<Boolean> updateBug(@Validated @RequestBody BugDto bugDto) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.updateBug(bugDto));
     }
 
     @GetMapping("/bugs")
-    public ResponseMeta<PageSize<BugDTO>> getBugPage(@RequestParam(value = "page", defaultValue = "1") Integer page,
-                                                     @RequestParam(value = "size", defaultValue = "10") Integer size,
-                                                     @RequestParam(value = "name", required = false) String name,
-                                                     @RequestParam(value = "status", required = false) Integer status) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getBugPage(page, size, name, status));
+    public ResponseMeta<PageSize<BugBO>> getBugPage(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                    @RequestParam(value = "size", defaultValue = "10") Integer size,
+                                                    @RequestParam(value = "name", required = false) String name,
+                                                    @RequestParam(value = "spaceId", required = false) String spaceId,
+                                                    @RequestParam(value = "iterationId", required = false) String iterationId,
+                                                    @RequestParam(value = "status", required = false) Integer status) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getBugPage(page, size, name, status, spaceId, iterationId));
+    }
+
+    @GetMapping("/bug/tags")
+    public ResponseMeta<List<BusinessStatusBO>> getBugTags() {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getBugTags());
     }
 
     @GetMapping("/bugs/{bugId}")
-    public ResponseMeta<BugDTO> getBug(@PathVariable("bugId") String bugId) {
+    public ResponseMeta<BugDetailDto> getBug(@PathVariable("bugId") String bugId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getBug(bugId));
     }
 
+    @GetMapping("/iterations/{iterationId}/bugs")
+    public ResponseMeta<List<BugBO>> getIterationBugs(@PathVariable("iterationId") String iterationId) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getIterationBugs(iterationId));
+    }
+
     @GetMapping("/bug/statuses")
-    public ResponseMeta<List<BusinessStatusDTO>> getBugStatuses() {
+    public ResponseMeta<List<BusinessStatusBO>> getBugStatuses() {
         return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getBugStatuses());
     }
 
@@ -62,9 +76,9 @@ public class BugRest {
     }
 
     @GetMapping("/user/bugs")
-    public ResponseMeta<PageSize<BugDTO>> getRelatedBugs(@RequestParam(value = "page", defaultValue = "1") Integer page,
-                                                         @RequestParam(value = "size", defaultValue = "10") Integer size,
-                                                         @RequestParam(value = "status", required = false) Integer status) {
+    public ResponseMeta<PageSize<BugBO>> getRelatedBugs(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                        @RequestParam(value = "size", defaultValue = "10") Integer size,
+                                                        @RequestParam(value = "status", required = false) Integer status) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getRelatedBugs(page, size, status));
     }
 

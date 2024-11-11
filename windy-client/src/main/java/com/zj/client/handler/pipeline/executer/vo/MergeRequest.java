@@ -8,6 +8,10 @@ import java.util.Objects;
 @Data
 public class MergeRequest extends GitMeta{
 
+  private String tagName;
+
+  private String message;
+
   private String pipelineId;
 
   private List<String> branches;

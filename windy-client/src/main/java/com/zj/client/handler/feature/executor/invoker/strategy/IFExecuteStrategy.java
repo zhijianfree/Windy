@@ -1,32 +1,24 @@
 package com.zj.client.handler.feature.executor.invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.zj.client.handler.feature.executor.compare.ognl.DefaultMemberAccess;
-import com.zj.common.feature.ExecutePointDto;
-import com.zj.client.entity.enuns.ExecutePointType;
-import com.zj.client.entity.vo.ExecutePoint;
-import com.zj.client.entity.vo.FeatureResponse;
+import com.zj.client.entity.bo.ExecutePoint;
+import com.zj.common.entity.feature.FeatureResponse;
 import com.zj.client.handler.feature.executor.compare.CompareHandler;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
-import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
 import com.zj.client.handler.feature.executor.interceptor.InterceptorProxy;
-import com.zj.client.handler.feature.executor.vo.ExecuteContext;
-import com.zj.common.feature.ExecutorUnit;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
+import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
+import com.zj.common.enums.TemplateType;
+import com.zj.common.entity.feature.ExecutePointDto;
+import com.zj.common.entity.feature.ExecutorUnit;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import lombok.extern.slf4j.Slf4j;
-import ognl.DefaultClassResolver;
-import ognl.DefaultTypeConverter;
-import ognl.Ognl;
-import ognl.OgnlContext;
-import ognl.OgnlException;
+import org.apache.commons.lang.text.StrSubstitutor;
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author guyuelan
@@ -45,17 +37,19 @@ public class IFExecuteStrategy extends BaseExecuteStrategy {
   }
 
   @Override
-  public List<ExecutePointType> getType() {
-    return Collections.singletonList(ExecutePointType.IF);
+  public List<TemplateType> getType() {
+    return Collections.singletonList(TemplateType.IF);
   }
 
   @Override
-  public List<FeatureResponse> execute(ExecutePoint executePoint, ExecuteContext executeContext) {
-    log.info("start execute IFExecuteStrategy context={}", JSON.toJSONString(executeContext.toMap()));
-    ExecutorUnit executorUnit = JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit
-        .class);
-    String ongl = executorUnit.getMethod();
-    boolean result = ognlDataParser.parserExpression(executeContext.toMap(), ongl);
+  public List<FeatureResponse> execute(ExecutePoint executePoint, FeatureExecuteContext featureExecuteContext) {
+    log.info("start execute IFExecuteStrategy context={}", JSON.toJSONString(featureExecuteContext.toMap()));
+    ExecutorUnit executorUnit = executePoint.getExecutorUnit();
+    String ognl = executorUnit.getMethod();
+    StrSubstitutor strSubstitutor = new StrSubstitutor(featureExecuteContext.toMap());
+    String replaceOgnl = strSubstitutor.replace(ognl);
+    log.info("replace ognl ={}", replaceOgnl);
+    boolean result = ognlDataParser.judgeExpression(featureExecuteContext.toMap(), replaceOgnl);
     if (!result) {
       ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
       executeDetailVo.setStatus(true);
@@ -68,7 +62,7 @@ public class IFExecuteStrategy extends BaseExecuteStrategy {
     List<ExecutePointDto> executePoints = executorUnit.getExecutePoints();
     return executePoints.stream().map(executePointDto -> {
       ExecutePoint point = toExecutePoint(executePointDto);
-      return executeFeature(executeContext, point);
+      return executeFeature(featureExecuteContext, point);
     }).collect(Collectors.toList());
   }
 }

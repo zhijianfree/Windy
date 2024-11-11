@@ -13,6 +13,10 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class MergeMasterContext extends RequestContext{
 
+  private String tagName;
+
+  private String message;
+
   private List<String> branches;
 
   private String deleteBranch;

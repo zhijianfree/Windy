@@ -12,7 +12,8 @@ public enum TemplateType {
   IF(3),
   DEFAULT(4),
   PLUGIN(5),
-  SCRIPT(6);
+  SCRIPT(6),
+  THREAD(7);
   private final int type;
 
   TemplateType(int type) {
@@ -20,8 +21,9 @@ public enum TemplateType {
   }
 
   public static List<Integer> getToolTemplates(){
-    return Arrays.asList(TemplateType.FOR.getType(),
-            TemplateType.IF.getType(), TemplateType.DEFAULT.getType(), TemplateType.SCRIPT.getType());
+    return Arrays.asList(TemplateType.FOR.getType(),TemplateType.PLUGIN.getType(),
+            TemplateType.IF.getType(), TemplateType.DEFAULT.getType(), TemplateType.SCRIPT.getType(),
+            TemplateType.THREAD.getType());
   }
 
 }

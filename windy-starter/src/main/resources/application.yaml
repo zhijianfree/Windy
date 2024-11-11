@@ -1,5 +1,10 @@
 server:
   port: 9768
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
 spring:
   mvc:
@@ -54,7 +59,16 @@ eureka:
 logging:
   level:
     com.netflix: warn
+#    org:
+#      springframework:
+#        security: DEBUG
 
 mybatis-plus:
   global-config:
     banner: false
+
+
+windy:
+  token:
+    expire: 3600
+    secret: tuyqteutwuytsd72368qewtquy

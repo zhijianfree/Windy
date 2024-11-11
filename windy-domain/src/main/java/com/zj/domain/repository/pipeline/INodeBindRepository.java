@@ -1,8 +1,8 @@
 package com.zj.domain.repository.pipeline;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.zj.domain.entity.dto.pipeline.NodeBindDto;
-import com.zj.domain.entity.po.pipeline.NodeBind;
+import com.zj.domain.entity.bo.pipeline.NodeBindBO;
+
 import java.util.List;
 
 /**
@@ -11,15 +11,15 @@ import java.util.List;
  */
 public interface INodeBindRepository {
 
-  boolean saveNodeBind(NodeBindDto nodeBindDto);
+  boolean saveNodeBind(NodeBindBO nodeBindBO);
 
-  boolean updateNode(NodeBindDto nodeBindDto);
+  boolean updateNode(NodeBindBO nodeBindBO);
 
-  NodeBindDto getNode(String nodeId);
+  NodeBindBO getNode(String nodeId);
 
   Boolean deleteNode(String nodeId);
 
-  IPage<NodeBindDto> getPageNode(Integer page, Integer size, String name);
+  IPage<NodeBindBO> getPageNode(Integer page, Integer size, String name);
 
-  List<NodeBindDto> getAllNodes();
+  List<NodeBindBO> getAllNodes();
 }

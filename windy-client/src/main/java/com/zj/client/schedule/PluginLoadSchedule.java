@@ -1,23 +1,22 @@
 package com.zj.client.schedule;
 
-import com.alibaba.fastjson.JSON;
 import com.zj.client.handler.feature.executor.invoker.invoke.MethodInvoke;
 import com.zj.client.handler.feature.executor.invoker.loader.PluginManager;
-import com.zj.common.model.PluginInfo;
-import com.zj.common.monitor.InstanceMonitor;
-import com.zj.common.monitor.RequestProxy;
-import com.zj.common.monitor.trace.TidInterceptor;
+import com.zj.common.adapter.invoker.IMasterInvoker;
+import com.zj.common.adapter.monitor.InstanceMonitor;
+import com.zj.common.entity.dto.PluginInfo;
+import com.zj.common.utils.TraceUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.MDC;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
 /**
  * @author guyuelan
@@ -27,14 +26,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class PluginLoadSchedule {
 
-  private final RequestProxy requestProxy;
+  private final IMasterInvoker masterInvoker;
   private final PluginManager pluginManager;
   private final InstanceMonitor instanceMonitor;
   private final MethodInvoke methodInvoke;
 
-  public PluginLoadSchedule(RequestProxy requestProxy, PluginManager pluginManager,
+  public PluginLoadSchedule(IMasterInvoker masterInvoker, PluginManager pluginManager,
       InstanceMonitor instanceMonitor, MethodInvoke methodInvoke) {
-    this.requestProxy = requestProxy;
+    this.masterInvoker = masterInvoker;
     this.pluginManager = pluginManager;
     this.instanceMonitor = instanceMonitor;
     this.methodInvoke = methodInvoke;
@@ -43,12 +42,14 @@ public class PluginLoadSchedule {
   @Scheduled(cron = "0/5 * * * * ? ")
   public void loadSchedule() {
     if (instanceMonitor.isUnStable()) {
+      log.info("server is not unstable");
       return;
     }
 
-    initMDC();
-    List<PluginInfo> plugins = requestProxy.getAvailablePlugins();
+    initTraceId();
+    List<PluginInfo> plugins = masterInvoker.getAvailablePlugins();
     if (CollectionUtils.isEmpty(plugins)) {
+      log.info("get plugin list is empty");
       return;
     }
 
@@ -57,6 +58,7 @@ public class PluginLoadSchedule {
         .filter(plugin -> !localNames.contains(plugin.getPluginName()))
         .collect(Collectors.toList());
     if (CollectionUtils.isEmpty(needLoad)) {
+      log.info("not plugin is need load ");
       return;
     }
 
@@ -66,8 +68,8 @@ public class PluginLoadSchedule {
     methodInvoke.loadPluginFromDisk();
   }
 
-  private static void initMDC() {
-    MDC.put(TidInterceptor.MDC_TID_KEY, UUID.randomUUID().toString().replace("-",""));
+  private static void initTraceId() {
+    TraceUtils.putTrace(UUID.randomUUID().toString().replace("-",""));
   }
 
   private List<String> loadLocalJarFiles() {

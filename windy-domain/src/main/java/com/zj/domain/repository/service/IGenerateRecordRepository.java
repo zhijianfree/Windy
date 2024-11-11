@@ -1,15 +1,15 @@
 package com.zj.domain.repository.service;
 
-import com.zj.domain.entity.dto.service.GenerateRecordDto;
+import com.zj.common.entity.generate.GenerateRecordBO;
 import java.util.List;
 
 public interface IGenerateRecordRepository {
 
-  List<GenerateRecordDto> getServiceRecords(String serviceId);
+  List<GenerateRecordBO> getServiceRecords(String serviceId);
 
-  boolean create(GenerateRecordDto generateRecordDto);
+  boolean create(GenerateRecordBO generateRecordBO);
 
-  boolean update(GenerateRecordDto generateRecordDto);
+  boolean update(GenerateRecordBO generateRecordBO);
 
-  GenerateRecordDto getGenerateRecord(String serviceId, String version);
+  List<GenerateRecordBO> getGenerateRecord(String serviceId, String version);
 }

@@ -3,10 +3,12 @@ package com.zj.service.service.imports.strategy;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.zj.common.entity.service.ApiParamModel;
 import com.zj.common.enums.ApiType;
 import com.zj.common.enums.Position;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.domain.entity.dto.service.ServiceApiDto;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.utils.OrikaUtil;
+import com.zj.domain.entity.bo.service.ServiceApiBO;
 import com.zj.domain.repository.service.IServiceApiRepository;
 import com.zj.plugin.loader.ParamValueType;
 import com.zj.service.entity.ApiRequestVariable;
@@ -45,16 +47,16 @@ public class PostmanImportStrategy implements IApiImportStrategy {
     }
 
     @Override
-    public List<ServiceApiDto> importContent(String serviceId, String fileContent) {
+    public List<ServiceApiBO> importContent(String serviceId, String fileContent) {
         PostmanImport postmanImport = JSON.parseObject(fileContent, PostmanImport.class);
         if (Objects.isNull(postmanImport)) {
             return Collections.emptyList();
         }
 
-        ServiceApiDto dirApi = createApiDir(serviceId, postmanImport);
-        List<ServiceApiDto> serviceApiList = postmanImport.getItem().stream().map(postmanApi -> {
+        ServiceApiBO dirApi = createApiDir(serviceId, postmanImport);
+        List<ServiceApiBO> serviceApiList = postmanImport.getItem().stream().map(postmanApi -> {
             PostmanImport.PostmanApiRequest request = postmanApi.getRequest();
-            ServiceApiDto serviceApi = new ServiceApiDto();
+            ServiceApiBO serviceApi = new ServiceApiBO();
             serviceApi.setApiId(uniqueIdService.getUniqueId());
             serviceApi.setApiType(ApiType.API.getType());
             serviceApi.setApiName(postmanApi.getName());
@@ -71,8 +73,7 @@ public class PostmanImportStrategy implements IApiImportStrategy {
 
 
             List<ApiRequestVariable> variableList = getRequestParams(request);
-            serviceApi.setRequestParams(JSON.toJSONString(variableList));
-
+            serviceApi.setRequestParams(OrikaUtil.convertList(variableList, ApiParamModel.class));
             Optional.ofNullable(request.getHeader()).ifPresent(headers -> {
                 Map<String, String> headerMap =
                         headers.stream().collect(Collectors.toMap(PostmanImport.PostmanApiHeader::getKey,
@@ -86,15 +87,15 @@ public class PostmanImportStrategy implements IApiImportStrategy {
         return serviceApiList;
     }
 
-    private ServiceApiDto createApiDir(String serviceId, PostmanImport postmanImport) {
+    private ServiceApiBO createApiDir(String serviceId, PostmanImport postmanImport) {
         String name = postmanImport.getInfo().getName();
-        ServiceApiDto serviceApiDto = new ServiceApiDto();
-        serviceApiDto.setApiId(uniqueIdService.getUniqueId());
-        serviceApiDto.setApiName(name);
-        serviceApiDto.setApiType(ApiType.DIR.getType());
-        serviceApiDto.setServiceId(serviceId);
-        serviceApiRepository.saveApi(serviceApiDto);
-        return serviceApiDto;
+        ServiceApiBO serviceApiBO = new ServiceApiBO();
+        serviceApiBO.setApiId(uniqueIdService.getUniqueId());
+        serviceApiBO.setApiName(name);
+        serviceApiBO.setApiType(ApiType.DIR.getType());
+        serviceApiBO.setServiceId(serviceId);
+        serviceApiRepository.saveApi(serviceApiBO);
+        return serviceApiBO;
     }
 
     private List<ApiRequestVariable> getRequestParams(PostmanImport.PostmanApiRequest request) {

@@ -5,11 +5,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.common.enums.DemandStatus;
-import com.zj.common.model.PageSize;
+import com.zj.common.entity.dto.PageSize;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.demand.DemandDTO;
-import com.zj.domain.entity.dto.demand.DemandQuery;
+import com.zj.domain.entity.bo.demand.DemandBO;
+import com.zj.domain.entity.bo.demand.DemandQueryBO;
+import com.zj.domain.entity.enums.DemandStatus;
 import com.zj.domain.entity.po.demand.Demand;
 import com.zj.domain.mapper.demand.DemandMapper;
 import com.zj.domain.repository.demand.IDemandRepository;
@@ -18,42 +18,50 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> implements IDemandRepository {
     @Override
-    public boolean createDemand(DemandDTO demandDTO) {
-        Demand demand = OrikaUtil.convert(demandDTO, Demand.class);
-        demand.setStatus(DemandStatus.CREATE.getType());
+    public boolean createDemand(DemandBO demandBO) {
+        Demand demand = OrikaUtil.convert(demandBO, Demand.class);
+        demand.setStatus(DemandStatus.NOT_HANDLE.getType());
         demand.setCreateTime(System.currentTimeMillis());
         demand.setUpdateTime(System.currentTimeMillis());
         return save(demand);
     }
 
     @Override
-    public PageSize<DemandDTO> getDemandPage(DemandQuery query) {
+    public PageSize<DemandBO> getDemandPage(DemandQueryBO query) {
         IPage<Demand> pageObj = new Page<>(query.getPage(), query.getPageSize());
-        LambdaQueryWrapper<Demand> queryWrapper = Wrappers.lambdaQuery(Demand.class).eq(Demand::getCreator,
-                        query.getCreator()).orderByDesc(Demand::getCreateTime);
+        LambdaQueryWrapper<Demand> queryWrapper = Wrappers.lambdaQuery(Demand.class).eq(Demand::getAcceptor,
+                query.getCreator()).orderByDesc(Demand::getCreateTime);
         Optional.ofNullable(query.getStatus()).ifPresent(status -> queryWrapper.eq(Demand::getStatus, status));
-        if (StringUtils.isNotBlank(query.getName())){
+        if (StringUtils.isNotBlank(query.getSpaceId())) {
+            queryWrapper.eq(Demand::getSpaceId, query.getSpaceId());
+        }
+        if (StringUtils.isNotBlank(query.getIterationId())) {
+            queryWrapper.eq(Demand::getIterationId, query.getIterationId());
+        }
+        if (StringUtils.isNotBlank(query.getName())) {
             queryWrapper.like(Demand::getDemandName, query.getName());
         }
+        queryWrapper.orderByDesc(Demand::getCreateTime);
         IPage<Demand> recordPage = page(pageObj, queryWrapper);
         return convertPageSize(recordPage);
     }
 
     @Override
-    public boolean updateDemand(DemandDTO demandDTO) {
-        Demand demand = OrikaUtil.convert(demandDTO, Demand.class);
+    public boolean updateDemand(DemandBO demandBO) {
+        Demand demand = OrikaUtil.convert(demandBO, Demand.class);
         demand.setUpdateTime(System.currentTimeMillis());
         return update(demand, Wrappers.lambdaUpdate(Demand.class).eq(Demand::getDemandId, demand.getDemandId()));
     }
 
     @Override
-    public DemandDTO getDemand(String demandId) {
+    public DemandBO getDemand(String demandId) {
         Demand demand = getOne(Wrappers.lambdaUpdate(Demand.class).eq(Demand::getDemandId, demandId));
-        return Optional.ofNullable(demand).map(d -> OrikaUtil.convert(d, DemandDTO.class)).orElse(null);
+        return Optional.ofNullable(demand).map(d -> OrikaUtil.convert(d, DemandBO.class)).orElse(null);
     }
 
     @Override
@@ -62,7 +70,7 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
     }
 
     @Override
-    public PageSize<DemandDTO> getRelatedDemands(String proposer, Integer pageNo, Integer size) {
+    public PageSize<DemandBO> getRelatedDemands(String proposer, Integer pageNo, Integer size) {
         IPage<Demand> pageObj = new Page<>(pageNo, size);
         IPage<Demand> recordPage = page(pageObj, Wrappers.lambdaQuery(Demand.class).eq(Demand::getProposer, proposer)
                 .orderByDesc(Demand::getCreateTime));
@@ -70,9 +78,44 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
         return convertPageSize(recordPage);
     }
 
-    private PageSize<DemandDTO> convertPageSize(IPage<Demand> recordPage) {
-        List<DemandDTO> list = OrikaUtil.convertList(recordPage.getRecords(), DemandDTO.class);
-        PageSize<DemandDTO> pageSize = new PageSize<>();
+    @Override
+    public Integer countIteration(String iterationId) {
+        return count(Wrappers.lambdaUpdate(Demand.class).eq(Demand::getIterationId, iterationId));
+    }
+
+    @Override
+    public List<DemandBO> getIterationDemand(String iterationId) {
+        List<Demand> list =
+                list(Wrappers.lambdaUpdate(Demand.class).eq(Demand::getIterationId, iterationId)
+                        .orderByDesc(Demand::getCreateTime));
+        return OrikaUtil.convertList(list, DemandBO.class);
+    }
+
+    @Override
+    public List<DemandBO> getDemandsByName(String queryName) {
+        List<Demand> list = list(Wrappers.lambdaUpdate(Demand.class).like(Demand::getDemandName, queryName));
+        return OrikaUtil.convertList(list, DemandBO.class);
+    }
+
+    @Override
+    public List<DemandBO> getSpaceNotHandleDemands(String spaceId) {
+        List<Demand> list = list(Wrappers.lambdaUpdate(Demand.class).eq(Demand::getSpaceId, spaceId)
+                .in(Demand::getStatus, DemandStatus.getNotHandleDemands().stream().map(DemandStatus::getType)
+                        .collect(Collectors.toList())));
+        return OrikaUtil.convertList(list, DemandBO.class);
+    }
+
+    @Override
+    public List<DemandBO> getIterationNotHandleDemands(String iterationId) {
+        List<Demand> list = list(Wrappers.lambdaUpdate(Demand.class).eq(Demand::getIterationId, iterationId)
+                .in(Demand::getStatus, DemandStatus.getNotHandleDemands().stream().map(DemandStatus::getType)
+                        .collect(Collectors.toList())));
+        return OrikaUtil.convertList(list, DemandBO.class);
+    }
+
+    private PageSize<DemandBO> convertPageSize(IPage<Demand> recordPage) {
+        List<DemandBO> list = OrikaUtil.convertList(recordPage.getRecords(), DemandBO.class);
+        PageSize<DemandBO> pageSize = new PageSize<>();
         pageSize.setTotal(recordPage.getTotal());
         pageSize.setData(list);
         return pageSize;

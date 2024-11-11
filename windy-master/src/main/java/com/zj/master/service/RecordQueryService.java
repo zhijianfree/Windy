@@ -1,11 +1,11 @@
 package com.zj.master.service;
 
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.model.ResponseStatusModel;
-import com.zj.common.model.ResponseStatusModel.PercentStatics;
-import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
-import com.zj.domain.entity.dto.feature.TaskRecordDto;
-import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
+import com.zj.common.entity.dto.ResponseStatusModel;
+import com.zj.common.entity.dto.ResponseStatusModel.PercentStatics;
+import com.zj.domain.entity.bo.feature.FeatureHistoryBO;
+import com.zj.domain.entity.bo.feature.TaskRecordBO;
+import com.zj.domain.entity.bo.pipeline.NodeRecordBO;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
@@ -36,12 +36,12 @@ public class RecordQueryService {
   }
 
   public ResponseStatusModel getTaskStatus(String taskRecordId) {
-    TaskRecordDto taskRecord = taskRecordRepository.getTaskRecord(taskRecordId);
+    TaskRecordBO taskRecord = taskRecordRepository.getTaskRecord(taskRecordId);
     Integer status = taskRecord.getStatus();
     ResponseStatusModel responseStatusModel = new ResponseStatusModel();
     responseStatusModel.setStatus(status);
 
-    List<FeatureHistoryDto> histories = featureHistoryRepository.getHistoriesByTaskRecordId(
+    List<FeatureHistoryBO> histories = featureHistoryRepository.getHistoriesByTaskRecordId(
         taskRecord.getRecordId());
     long successCount = histories.stream().filter(
             history -> Objects.equals(history.getExecuteStatus(), ProcessStatus.SUCCESS.getType()))
@@ -56,7 +56,7 @@ public class RecordQueryService {
     return responseStatusModel;
   }
 
-  public NodeRecordDto getRecord(String recordId) {
+  public NodeRecordBO getRecord(String recordId) {
     return nodeRecordRepository.getRecordById(recordId);
   }
 }

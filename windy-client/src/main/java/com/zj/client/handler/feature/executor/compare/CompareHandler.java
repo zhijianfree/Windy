@@ -3,8 +3,11 @@ package com.zj.client.handler.feature.executor.compare;
 import com.alibaba.fastjson.JSON;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
 import com.zj.client.handler.feature.executor.compare.operator.CompareFactory;
+import com.zj.common.entity.WindyConstants;
+import com.zj.common.entity.feature.CompareDefine;
+import com.zj.common.entity.feature.CompareResult;
+import com.zj.common.enums.CompareType;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.feature.CompareDefine;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -18,11 +21,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class CompareHandler {
-
-    public static final String RESPONSE_CODE = "$code";
-    public static final String RESPONSE_BODY = "$body";
     public static final String TIP_FORMAT = "compare key[%s] expect value is[%s] but find [%s]";
-    private OgnlDataParser ognlDataParser = new OgnlDataParser();
+    private final OgnlDataParser ognlDataParser = new OgnlDataParser();
 
     private final CompareFactory compareFactory;
 
@@ -87,23 +87,30 @@ public class CompareHandler {
             return;
         }
 
-        compareDefines.stream().filter(
-                compare -> StringUtils.isNoneBlank(compare.getCompareKey()) && StringUtils.isNoneBlank(
-                        compare.getCompareKey())).forEach(compareDefine -> {
+        compareDefines.stream().filter(CompareHandler::isNeedWrapResponseData).forEach(compareDefine -> {
             String key = compareDefine.getCompareKey();
-            if (Objects.equals(key, RESPONSE_CODE)) {
+            if (Objects.equals(key, WindyConstants.RESPONSE_CODE)) {
                 compareDefine.setResponseValue(String.valueOf(executeDetailVo.responseStatus()));
                 return;
             }
 
-            if (Objects.equals(key, RESPONSE_BODY)) {
+            if (Objects.equals(key, WindyConstants.RESPONSE_BODY)) {
                 compareDefine.setResponseValue(executeDetailVo.responseBody());
                 return;
             }
 
-            Object result = ognlDataParser.parserExpression(executeDetailVo.responseBody(), key);
+            Object result = ognlDataParser.exchangeOgnlParamValue(executeDetailVo.responseBody(), key);
             compareDefine.setResponseValue(result);
         });
     }
 
+    private static boolean isNeedWrapResponseData(CompareDefine compare) {
+        //CompareType.NOT_EMPTY 操作符不需要expectValue
+        if (StringUtils.isNoneBlank(compare.getCompareKey()) && Objects.equals(CompareType.NOT_EMPTY.getOperator(),
+                compare.getOperator())) {
+            return true;
+        }
+        return StringUtils.isNoneBlank(compare.getCompareKey()) && StringUtils.isNoneBlank(
+                compare.getExpectValue());
+    }
 }

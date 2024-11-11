@@ -32,9 +32,19 @@ public class PipelineAction {
   private String description;
 
   /**
+   * 请求的header
+   */
+  private String headers;
+
+  /**
    * 执行请求url
    */
   private String actionUrl;
+
+  /**
+   * post请求方式
+   */
+  private String bodyType;
 
   /**
    * 执行请求参数
@@ -47,6 +57,11 @@ public class PipelineAction {
   private String queryUrl;
 
   /**
+   * 循环查询条件
+   */
+  private String queryExpression;
+
+  /**
    * 查询结果比对条件
    */
   private String result;
@@ -57,5 +72,6 @@ public class PipelineAction {
   private String executeType;
 
   private Long createTime;
+
   private Long updateTime;
 }

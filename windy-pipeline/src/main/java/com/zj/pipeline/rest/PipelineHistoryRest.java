@@ -1,9 +1,9 @@
 package com.zj.pipeline.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.ResponseMeta;
-import com.zj.domain.entity.dto.pipeline.PipelineExecuteInfo;
-import com.zj.domain.entity.dto.pipeline.PipelineHistoryDto;
+import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.domain.entity.bo.pipeline.PipelineExecuteInfo;
+import com.zj.domain.entity.bo.pipeline.PipelineHistoryBO;
 import com.zj.pipeline.service.PipelineHistoryService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,34 +34,34 @@ public class PipelineHistoryRest {
 
   @ResponseBody
   @GetMapping("/history/{historyId}")
-  public ResponseMeta<PipelineHistoryDto> queryPipelineHistory(
+  public ResponseMeta<PipelineHistoryBO> queryPipelineHistory(
       @NotNull @PathVariable("historyId") String historyId) {
-    return new ResponseMeta<PipelineHistoryDto>(ErrorCode.SUCCESS,
+    return new ResponseMeta<PipelineHistoryBO>(ErrorCode.SUCCESS,
         historyService.getPipelineHistory(historyId));
   }
 
   @ResponseBody
   @PostMapping("/history")
   public ResponseMeta<String> createPipelineHistory(
-      @NotNull @Validated @RequestBody PipelineHistoryDto pipelineHistoryDto) {
+      @NotNull @Validated @RequestBody PipelineHistoryBO pipelineHistoryBO) {
     return new ResponseMeta<String>(ErrorCode.SUCCESS,
-        historyService.createPipelineHistory(pipelineHistoryDto));
+        historyService.createPipelineHistory(pipelineHistoryBO));
   }
 
   @ResponseBody
   @GetMapping("/{pipelineId}/histories")
-  public ResponseMeta<List<PipelineHistoryDto>> listPipelineHistories(
+  public ResponseMeta<List<PipelineHistoryBO>> listPipelineHistories(
       @NotNull @PathVariable("pipelineId") String pipelineId) {
-    return new ResponseMeta<List<PipelineHistoryDto>>(ErrorCode.SUCCESS,
+    return new ResponseMeta<List<PipelineHistoryBO>>(ErrorCode.SUCCESS,
         historyService.listPipelineHistories(pipelineId));
   }
 
   @ResponseBody
   @GetMapping("/{service}/{pipelineId}/latest/history")
-  public ResponseMeta<PipelineHistoryDto> getLatestPipelineHistory(
+  public ResponseMeta<PipelineHistoryBO> getLatestPipelineHistory(
       @PathVariable("service") String service,
       @PathVariable("pipelineId") String pipelineId) {
-    return new ResponseMeta<PipelineHistoryDto>(ErrorCode.SUCCESS,
+    return new ResponseMeta<PipelineHistoryBO>(ErrorCode.SUCCESS,
         historyService.getLatestPipelineHistory(pipelineId));
   }
 

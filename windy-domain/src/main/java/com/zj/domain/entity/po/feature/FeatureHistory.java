@@ -6,7 +6,11 @@ import lombok.Data;
 public class FeatureHistory {
     private Long id;
 
+    /**
+     * 用户执行历史ID
+     */
     private String historyId;
+
     /**
      * 用例Id
      * */
@@ -32,5 +36,8 @@ public class FeatureHistory {
      * */
     private Long createTime;
 
+    /**
+     * 修改时间
+     */
     private Long updateTime;
 }

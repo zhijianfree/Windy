@@ -6,5 +6,5 @@ package com.zj.master.dispatch.listener;
  */
 public interface IStopEventListener {
 
-  void stopEvent(InnerEvent event);
+  void stopEvent(InternalEvent event);
 }

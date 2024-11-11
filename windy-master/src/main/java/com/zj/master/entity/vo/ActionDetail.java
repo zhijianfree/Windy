@@ -1,6 +1,7 @@
 package com.zj.master.entity.vo;
 
-import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
+import com.zj.common.entity.pipeline.ConfigDetail;
+import com.zj.domain.entity.bo.pipeline.PipelineActionBO;
 import lombok.Data;
 
 /**
@@ -12,9 +13,9 @@ public class ActionDetail {
 
   private ConfigDetail configDetail;
 
-  private PipelineActionDto action;
+  private PipelineActionBO action;
 
-  public ActionDetail(ConfigDetail configDetail, PipelineActionDto action) {
+  public ActionDetail(ConfigDetail configDetail, PipelineActionBO action) {
     this.configDetail = configDetail;
     this.action = action;
   }

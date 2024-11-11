@@ -1,6 +1,6 @@
 package com.zj.domain.repository.feature;
 
-import com.zj.domain.entity.dto.feature.ExecutePointDto;
+import com.zj.domain.entity.bo.feature.ExecutePointBO;
 
 import java.util.List;
 
@@ -10,26 +10,24 @@ import java.util.List;
  */
 public interface IExecutePointRepository {
 
-  ExecutePointDto getExecutePoint(String executePointId);
+  ExecutePointBO getExecutePoint(String executePointId);
 
-  List<ExecutePointDto> getExecutePointByFeatureId(String featureId);
+  List<ExecutePointBO> getExecutePointByFeatureId(String featureId);
 
-  List<ExecutePointDto> getExecutePointByFeatureIds(List<String> featureIds);
-
-  boolean updateExecutePoint(ExecutePointDto executePoint);
+  boolean updateExecutePoint(ExecutePointBO executePoint);
 
   boolean deleteExecutePoint(String pointId);
 
   boolean deleteByFeatureId(String featureId);
   boolean deleteByFeatureIds(List<String> featureIds);
 
-  List<ExecutePointDto> getPointsByFeatureIds(List<String> featureIds);
+  List<ExecutePointBO> getPointsByFeatureIds(List<String> featureIds);
 
-  boolean saveExecutePoint(ExecutePointDto executePoint);
+  boolean saveExecutePoint(ExecutePointBO executePoint);
 
-  boolean saveBatch(List<ExecutePointDto> newExecutePoints);
+  boolean saveBatch(List<ExecutePointBO> newExecutePoints);
 
-  boolean updateBatch(List<ExecutePointDto> newExecutePoints);
+  boolean updateBatch(List<ExecutePointBO> newExecutePoints);
 
-  List<ExecutePointDto> getTemplateExecutePoints(String templateId);
+  List<ExecutePointBO> getTemplateExecutePoints(String templateId);
 }

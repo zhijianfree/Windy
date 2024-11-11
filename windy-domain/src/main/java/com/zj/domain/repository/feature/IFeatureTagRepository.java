@@ -1,7 +1,7 @@
 package com.zj.domain.repository.feature;
 
-import com.zj.domain.entity.dto.feature.FeatureTagDto;
-import com.zj.domain.entity.po.feature.FeatureTag;
+import com.zj.domain.entity.bo.feature.FeatureTagBO;
+
 import java.util.List;
 
 /**
@@ -10,11 +10,11 @@ import java.util.List;
  */
 public interface IFeatureTagRepository {
 
-  void saveBatchTag(List<FeatureTagDto> tagList);
+  void saveBatchTag(List<FeatureTagBO> tagList);
 
   boolean deleteByFeatureId(String featureId);
 
-  List<FeatureTagDto> getFeatureTags(String featureId);
+  List<FeatureTagBO> getFeatureTags(String featureId);
 
-  List<FeatureTagDto> getFeaturesByTag(List<String> tags);
+  List<FeatureTagBO> getFeaturesByTag(List<String> tags);
 }

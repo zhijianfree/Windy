@@ -1,8 +1,8 @@
 package com.zj.client.handler.feature.executor.compare.operator;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.common.feature.CompareDefine;
-import com.zj.client.handler.feature.executor.compare.CompareResult;
+import com.zj.common.entity.feature.CompareDefine;
+import com.zj.common.entity.feature.CompareResult;
 import com.zj.common.enums.CompareType;
 import com.zj.client.utils.CompareJsonUtils;
 import com.zj.common.exception.ErrorCode;

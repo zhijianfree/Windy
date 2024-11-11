@@ -2,11 +2,11 @@ package com.zj.master.schedule;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.LogType;
-import com.zj.common.model.DispatchTaskModel;
-import com.zj.domain.entity.dto.pipeline.PipelineDto;
+import com.zj.common.entity.dto.DispatchTaskModel;
+import com.zj.domain.entity.bo.pipeline.PipelineBO;
 import com.zj.domain.repository.pipeline.IOptimisticLockRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
-import com.zj.master.entity.vo.PipelineConfig;
+import com.zj.common.entity.pipeline.PipelineConfig;
 import com.zj.master.entity.vo.ScheduleHolder;
 import com.zj.master.service.TaskLogService;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +54,7 @@ public class PipelineSchedule implements CommandLineRunner {
   /**
    * 30 分钟检查一次是否有新的定时任务需要执行或者修改
    * */
-  @Scheduled(cron = "0/5 * * * * ? ")
+  @Scheduled(cron = "0 0/30 * * * ?")
   public void scanTaskLog() {
     log.debug("start scan schedule pipeline");
     loadSchedulePipeline();
@@ -68,8 +68,8 @@ public class PipelineSchedule implements CommandLineRunner {
   }
 
   private void loadSchedulePipeline() {
-    List<PipelineDto> pipelines = pipelineRepository.getSchedulePipelines().stream()
-        .filter(pipeline -> StringUtils.isNotBlank(pipeline.getPipelineConfig()))
+    List<PipelineBO> pipelines = pipelineRepository.getSchedulePipelines().stream()
+        .filter(pipeline -> Objects.nonNull(pipeline.getPipelineConfig()))
         .filter(this::notExistLocalMap)
         .collect(Collectors.toList());
     if (CollectionUtils.isEmpty(pipelines)) {
@@ -78,8 +78,7 @@ public class PipelineSchedule implements CommandLineRunner {
 
     log.info("start run task");
     pipelines.forEach(pipeline -> {
-      PipelineConfig pipelineConfig = JSON.parseObject(pipeline.getPipelineConfig(),
-          PipelineConfig.class);
+      PipelineConfig pipelineConfig = pipeline.getPipelineConfig();
       Trigger trigger = new CronTrigger(pipelineConfig.getSchedule());
       ScheduledFuture<?> scheduledFuture = taskScheduler.schedule(() -> {
         if (!lockRepository.tryLock(PIPELINE_SCHEDULE)) {
@@ -101,14 +100,13 @@ public class PipelineSchedule implements CommandLineRunner {
     });
   }
 
-  private boolean notExistLocalMap(PipelineDto pipeline) {
+  private boolean notExistLocalMap(PipelineBO pipeline) {
     ScheduleHolder holder = scheduledMap.get(pipeline.getPipelineId());
     if (Objects.isNull(holder)) {
       return true;
     }
 
-    PipelineConfig pipelineConfig = JSON.parseObject(pipeline.getPipelineConfig(),
-        PipelineConfig.class);
+    PipelineConfig pipelineConfig = pipeline.getPipelineConfig();
     if (!Objects.equals(holder.getCron(), pipelineConfig.getSchedule())){
       //如果定时任务发生改变需要将之前的定时任务取消，后面会重新添加新的定时任务
       holder.getScheduledFuture().cancel(true);

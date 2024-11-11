@@ -1,7 +1,7 @@
 package com.zj.feature.service;
 
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.domain.entity.dto.feature.TestCaseConfigDto;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.domain.entity.bo.feature.TestCaseConfigBO;
 import com.zj.domain.repository.feature.ITestCaseConfigRepository;
 import java.util.List;
 import java.util.Objects;
@@ -25,16 +25,16 @@ public class TestCaseConfigService {
     this.testCaseConfigRepository = testCaseConfigRepository;
   }
 
-  public List<TestCaseConfigDto> getTestCaseConfigs(String caseId) {
+  public List<TestCaseConfigBO> getTestCaseConfigs(String caseId) {
     return testCaseConfigRepository.getCaseConfigs(caseId);
   }
 
-  public Integer addCaseConfigs(List<TestCaseConfigDto> configs) {
+  public Integer addCaseConfigs(List<TestCaseConfigBO> configs) {
     if (CollectionUtils.isEmpty(configs)) {
       return 0;
     }
 
-    List<TestCaseConfigDto> caseConfigs = configs.stream().map(testCaseConfig -> {
+    List<TestCaseConfigBO> caseConfigs = configs.stream().map(testCaseConfig -> {
       testCaseConfig.setConfigId(uniqueIdService.getUniqueId());
       testCaseConfig.setCreateTime(System.currentTimeMillis());
       testCaseConfig.setUpdateTime(System.currentTimeMillis());
@@ -44,7 +44,7 @@ public class TestCaseConfigService {
         .mapToInt(caseConfig -> testCaseConfigRepository.saveConfig(caseConfig) ? 1 : 0).sum();
   }
 
-  public boolean updateCaseConfigs(TestCaseConfigDto configDto) {
+  public boolean updateCaseConfigs(TestCaseConfigBO configDto) {
     if (Objects.isNull(configDto)) {
       return false;
     }

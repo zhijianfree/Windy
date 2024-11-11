@@ -30,12 +30,12 @@ public class NodeRecord {
   /**
    * 执行的结果
    * */
-  private String result;
+  private String recordResult;
 
   /**
    * 任务执行上下文,作用域整个流水线
    * */
-  private String pipelineContext;
+  private String context;
 
   /**
    * 记录状态

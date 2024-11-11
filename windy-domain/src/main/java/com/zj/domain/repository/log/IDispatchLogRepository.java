@@ -1,6 +1,6 @@
 package com.zj.domain.repository.log;
 
-import com.zj.domain.entity.dto.log.DispatchLogDto;
+import com.zj.domain.entity.bo.log.DispatchLogDto;
 import java.util.List;
 
 /**

@@ -1,9 +1,9 @@
 package com.zj.client.handler.feature.executor.invoker.strategy;
 
-import com.zj.client.entity.vo.ExecutePoint;
-import com.zj.client.entity.vo.FeatureResponse;
+import com.zj.client.entity.bo.ExecutePoint;
+import com.zj.common.entity.feature.FeatureResponse;
 import com.zj.client.handler.feature.executor.invoker.IExecuteStrategy;
-import com.zj.client.handler.feature.executor.vo.ExecuteContext;
+import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
 import com.zj.common.exception.ExecuteException;
 import org.springframework.stereotype.Service;
 
@@ -26,11 +26,11 @@ public class ExecuteStrategyFactory {
                 strategy)));
     }
 
-    public List<FeatureResponse> execute(ExecutePoint executePoint, ExecuteContext executeContext) {
+    public List<FeatureResponse> execute(ExecutePoint executePoint, FeatureExecuteContext featureExecuteContext) {
         IExecuteStrategy executeStrategy = executeStrategyMap.get(executePoint.getExecuteType());
         if (Objects.isNull(executeStrategy)) {
             throw new ExecuteException("can not find strategy, not execute");
         }
-        return executeStrategy.execute(executePoint, executeContext);
+        return executeStrategy.execute(executePoint, featureExecuteContext);
     }
 }

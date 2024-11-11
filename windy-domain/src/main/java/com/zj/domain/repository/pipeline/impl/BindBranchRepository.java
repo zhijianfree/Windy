@@ -3,7 +3,7 @@ package com.zj.domain.repository.pipeline.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.pipeline.BindBranchDto;
+import com.zj.domain.entity.bo.pipeline.BindBranchBO;
 import com.zj.domain.entity.po.pipeline.BindBranch;
 import com.zj.domain.mapper.pipeline.BindBranchMapper;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
@@ -19,33 +19,33 @@ public class BindBranchRepository extends ServiceImpl<BindBranchMapper, BindBran
     IBindBranchRepository {
 
   @Override
-  public boolean saveGitBranch(BindBranchDto bindBranchDto) {
-    BindBranch bindBranch = OrikaUtil.convert(bindBranchDto, BindBranch.class);
+  public boolean saveGitBranch(BindBranchBO bindBranchBO) {
+    BindBranch bindBranch = OrikaUtil.convert(bindBranchBO, BindBranch.class);
     bindBranch.setUpdateTime(System.currentTimeMillis());
     bindBranch.setCreateTime(System.currentTimeMillis());
     return save(bindBranch);
   }
 
   @Override
-  public List<BindBranchDto> getPipelineRelatedBranches(String pipelineId) {
+  public List<BindBranchBO> getPipelineRelatedBranches(String pipelineId) {
     List<BindBranch> bindBranches = list(
         Wrappers.lambdaQuery(BindBranch.class).eq(BindBranch::getPipelineId, pipelineId));
-    return OrikaUtil.convertList(bindBranches, BindBranchDto.class);
+    return OrikaUtil.convertList(bindBranches, BindBranchBO.class);
   }
 
   @Override
-  public BindBranchDto getGitBranch(String bindId) {
+  public BindBranchBO getGitBranch(String bindId) {
     BindBranch bindBranch = getOne(
         Wrappers.lambdaQuery(BindBranch.class).eq(BindBranch::getBindId, bindId));
-    return OrikaUtil.convert(bindBranch, BindBranchDto.class);
+    return OrikaUtil.convert(bindBranch, BindBranchBO.class);
   }
 
   @Override
-  public Boolean updateGitBranch(BindBranchDto bindBranchDto) {
-    BindBranch update = OrikaUtil.convert(bindBranchDto, BindBranch.class);
+  public Boolean updateGitBranch(BindBranchBO bindBranchBO) {
+    BindBranch update = OrikaUtil.convert(bindBranchBO, BindBranch.class);
     update.setUpdateTime(System.currentTimeMillis());
     return update(update, Wrappers.lambdaUpdate(BindBranch.class)
-        .eq(BindBranch::getBindId, bindBranchDto.getBindId()));
+        .eq(BindBranch::getBindId, bindBranchBO.getBindId()));
   }
 
   @Override
@@ -62,10 +62,10 @@ public class BindBranchRepository extends ServiceImpl<BindBranchMapper, BindBran
   }
 
   @Override
-  public BindBranchDto getPipelineBindBranch(String pipelineId) {
+  public BindBranchBO getPipelineBindBranch(String pipelineId) {
     BindBranch bindBranch = getOne(
         Wrappers.lambdaQuery(BindBranch.class).eq(BindBranch::getPipelineId, pipelineId)
             .eq(BindBranch::getIsChoose, true));
-    return OrikaUtil.convert(bindBranch, BindBranchDto.class);
+    return OrikaUtil.convert(bindBranch, BindBranchBO.class);
   }
 }

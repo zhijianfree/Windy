@@ -4,9 +4,10 @@ package com.zj.demand.rest;
 import com.zj.common.exception.ErrorCode;
 import java.util.List;
 
-import com.zj.common.model.ResponseMeta;
+import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.demand.entity.CommentDto;
 import com.zj.demand.service.CommentService;
-import com.zj.domain.entity.dto.demand.CommentDTO;
+import com.zj.domain.entity.bo.demand.CommentBO;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,19 +33,19 @@ public class CommentRest {
   }
 
   @GetMapping("/{relativeId}/comments")
-  public ResponseMeta<List<CommentDTO>>  getComments(@PathVariable("relativeId") String relativeId) {
+  public ResponseMeta<List<CommentBO>>  getComments(@PathVariable("relativeId") String relativeId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS,
         commentService.getRelativeComments(relativeId));
   }
 
   @PostMapping("/comments")
-  public ResponseMeta<Boolean> createComment(@Validated @RequestBody CommentDTO commentDTO) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, commentService.addComment(commentDTO));
+  public ResponseMeta<Boolean> createComment(@Validated @RequestBody CommentDto commentDto) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, commentService.addComment(commentDto));
   }
 
   @PutMapping("/comments")
-  public ResponseMeta<Boolean> updateComment(@Validated @RequestBody CommentDTO commentDTO) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, commentService.updateComment(commentDTO));
+  public ResponseMeta<Boolean> updateComment(@Validated @RequestBody CommentDto commentDto) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, commentService.updateComment(commentDto));
   }
 
   @DeleteMapping("/{commentId}/comment")

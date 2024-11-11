@@ -1,7 +1,7 @@
 package com.zj.domain.repository.feature;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.zj.domain.entity.dto.feature.TestCaseDto;
+import com.zj.domain.entity.bo.feature.TestCaseBO;
 
 import java.util.List;
 
@@ -11,19 +11,19 @@ import java.util.List;
  */
 public interface ITestCaseRepository {
 
-    TestCaseDto getTestCaseById(String caseId);
+    TestCaseBO getTestCaseById(String caseId);
 
-    boolean saveCase(TestCaseDto testCaseDto);
+    boolean saveCase(TestCaseBO testCaseBO);
 
-    Boolean updateCase(TestCaseDto testCaseDto);
+    Boolean updateCase(TestCaseBO testCaseBO);
 
     Boolean deleteTestCase(String caseId);
 
-    List<TestCaseDto> getServiceCases(String serviceId);
+    List<TestCaseBO> getServiceCases(String serviceId);
 
-    IPage<TestCaseDto> getCasePage(String serviceId, Integer page, Integer pageSize);
+    IPage<TestCaseBO> getCasePage(String serviceId, Integer page, Integer pageSize);
 
-    IPage<TestCaseDto> getE2ECasesPage(Integer page, Integer pageSize);
+    IPage<TestCaseBO> getE2ECasesPage(Integer page, Integer pageSize);
 
-    List<TestCaseDto> getE2ECases();
+    List<TestCaseBO> getE2ECases();
 }

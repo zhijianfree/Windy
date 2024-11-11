@@ -1,9 +1,11 @@
 package com.zj.feature.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.PageSize;
-import com.zj.common.model.ResponseMeta;
-import com.zj.feature.entity.dto.ExecutePointVo;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.feature.entity.CompareOperator;
+import com.zj.feature.entity.ExecutePointTemplate;
+import com.zj.feature.entity.ExecutePointVo;
 import com.zj.feature.service.ExecutePointService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,6 +54,11 @@ public class ExecutePointRest {
         return new ResponseMeta(ErrorCode.SUCCESS, executePointService.deleteByFeatureId(featureId));
     }
 
+    @GetMapping("/points/{executePointId}/template")
+    public ResponseMeta<ExecutePointTemplate> queryPointTemplate(@PathVariable("executePointId") String executePointId) {
+        return new ResponseMeta(ErrorCode.SUCCESS, executePointService.queryPointTemplate(executePointId));
+    }
+
     @GetMapping("/execute/point/{executePointId}")
     public ResponseMeta<ExecutePointVo> queryExecutePoint(@PathVariable("executePointId") String executePointId) {
         return new ResponseMeta(ErrorCode.SUCCESS, executePointService.getExecutePoint(executePointId));
@@ -63,7 +70,7 @@ public class ExecutePointRest {
     }
 
     @GetMapping("/execute/operators")
-    public ResponseMeta<List<String>> queryExecutePointOperators() {
-        return new ResponseMeta<List<String>>(ErrorCode.SUCCESS, executePointService.queryExecutePointOperators());
+    public ResponseMeta<List<CompareOperator>> queryExecutePointOperators() {
+        return new ResponseMeta<List<CompareOperator>>(ErrorCode.SUCCESS, executePointService.queryExecutePointOperators());
     }
 }

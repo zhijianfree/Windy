@@ -3,16 +3,16 @@ package com.zj.feature.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.common.model.DispatchTaskModel;
-import com.zj.common.model.PageSize;
-import com.zj.common.model.ResponseStatusModel;
-import com.zj.common.model.ResponseStatusModel.PercentStatics;
-import com.zj.common.monitor.RequestProxy;
+import com.zj.common.adapter.invoker.IMasterInvoker;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.entity.dto.DispatchTaskModel;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.common.entity.dto.ResponseStatusModel;
+import com.zj.common.entity.dto.ResponseStatusModel.PercentStatics;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
-import com.zj.domain.entity.dto.feature.TaskInfoDto;
-import com.zj.domain.entity.dto.feature.TaskRecordDto;
+import com.zj.domain.entity.bo.feature.FeatureHistoryBO;
+import com.zj.domain.entity.bo.feature.TaskInfoBO;
+import com.zj.domain.entity.bo.feature.TaskRecordBO;
 import com.zj.domain.entity.po.feature.TaskInfo;
 import com.zj.domain.repository.feature.ITaskRepository;
 import java.util.Collections;
@@ -35,70 +35,70 @@ public class TaskInfoService {
   private final FeatureHistoryService featureHistoryService;
   private final UniqueIdService uniqueIdService;
   private final ITaskRepository taskRepository;
-  private final RequestProxy requestProxy;
+  private final IMasterInvoker masterInvoker;
 
   public static final String FORMAT_TIPS = "任务执行状态: 总任务数:%s 成功数: %s 成功率百分比: %s %";
 
   public TaskInfoService(TaskRecordService taskRecordService,
-      FeatureHistoryService featureHistoryService, UniqueIdService uniqueIdService,
-      ITaskRepository taskRepository, RequestProxy requestProxy) {
+                         FeatureHistoryService featureHistoryService, UniqueIdService uniqueIdService,
+                         ITaskRepository taskRepository, IMasterInvoker masterInvoker) {
     this.taskRecordService = taskRecordService;
     this.featureHistoryService = featureHistoryService;
     this.uniqueIdService = uniqueIdService;
     this.taskRepository = taskRepository;
-    this.requestProxy = requestProxy;
+    this.masterInvoker = masterInvoker;
   }
 
-  public PageSize<TaskInfoDto> getTaskList(String name, Integer pageNum, Integer size) {
+  public PageSize<TaskInfoBO> getTaskList(String name, Integer pageNum, Integer size) {
     IPage<TaskInfo> taskInfoIPage = taskRepository.getTaskList(name, pageNum, size);
-    PageSize<TaskInfoDto> pageSize = new PageSize<>();
+    PageSize<TaskInfoBO> pageSize = new PageSize<>();
     pageSize.setTotal(taskInfoIPage.getTotal());
     if (CollectionUtils.isEmpty(taskInfoIPage.getRecords())) {
       pageSize.setData(Collections.emptyList());
       return pageSize;
     }
 
-    List<TaskInfoDto> dtoList = taskInfoIPage.getRecords().stream().map(task -> {
-      TaskInfoDto taskInfoDTO = OrikaUtil.convert(task, TaskInfoDto.class);
-      boolean isRunning = isTaskRunning(taskInfoDTO);
-      taskInfoDTO.setIsRunning(isRunning);
-      return taskInfoDTO;
+    List<TaskInfoBO> dtoList = taskInfoIPage.getRecords().stream().map(task -> {
+      TaskInfoBO taskInfoBO = OrikaUtil.convert(task, TaskInfoBO.class);
+      boolean isRunning = isTaskRunning(taskInfoBO);
+      taskInfoBO.setIsRunning(isRunning);
+      return taskInfoBO;
     }).collect(Collectors.toList());
     pageSize.setData(dtoList);
     return pageSize;
   }
 
-  private boolean isTaskRunning(TaskInfoDto taskInfoDTO) {
-    List<TaskRecordDto> taskRecords = taskRecordService.getTaskRecordsByTaskId(
-        taskInfoDTO.getTaskId());
+  private boolean isTaskRunning(TaskInfoBO taskInfoBO) {
+    List<TaskRecordBO> taskRecords = taskRecordService.getTaskRecordsByTaskId(
+        taskInfoBO.getTaskId());
     if (CollectionUtils.isEmpty(taskRecords)) {
       return false;
     }
 
     return taskRecords.stream()
-        .anyMatch(record -> Objects.equals(ProcessStatus.RUNNING.getType(), record.getStatus()));
+        .anyMatch(taskRecord -> Objects.equals(ProcessStatus.RUNNING.getType(), taskRecord.getStatus()));
   }
 
-  public Boolean createTask(TaskInfoDto taskInfoDTO) {
+  public Boolean createTask(TaskInfoBO taskInfoBO) {
     String taskId = uniqueIdService.getUniqueId();
-    taskInfoDTO.setTaskId(taskId);
-    return taskRepository.createTask(taskInfoDTO);
+    taskInfoBO.setTaskId(taskId);
+    return taskRepository.createTask(taskInfoBO);
   }
 
-  public Boolean updateTask(TaskInfoDto taskInfoDTO) {
-    return taskRepository.updateTask(taskInfoDTO);
+  public Boolean updateTask(TaskInfoBO taskInfoBO) {
+    return taskRepository.updateTask(taskInfoBO);
   }
 
   public Boolean deleteTask(String taskId) {
     return taskRepository.deleteTask(taskId);
   }
 
-  public TaskInfoDto getTaskDetail(String taskId) {
+  public TaskInfoBO getTaskDetail(String taskId) {
     return taskRepository.getTaskDetail(taskId);
   }
 
   public Boolean startTask(String taskId) {
-    TaskInfoDto taskDetail = getTaskDetail(taskId);
+    TaskInfoBO taskDetail = getTaskDetail(taskId);
     if (Objects.isNull(taskDetail)) {
       log.info("can not find task={}", taskId);
       return false;
@@ -108,17 +108,18 @@ public class TaskInfoService {
     dispatchTaskModel.setType(LogType.FEATURE_TASK.getType());
     dispatchTaskModel.setSourceId(taskId);
     dispatchTaskModel.setSourceName(taskDetail.getTaskName());
-    return requestProxy.runTask(dispatchTaskModel);
+    String recordId = masterInvoker.runFeatureTask(dispatchTaskModel);
+    return Objects.nonNull(recordId);
   }
 
   public ResponseStatusModel getTaskStatus(String taskId) {
-    List<TaskRecordDto> taskRecords = taskRecordService.getTaskRecordsByTaskId(taskId);
-    TaskRecordDto taskRecord = taskRecords.get(0);
+    List<TaskRecordBO> taskRecords = taskRecordService.getTaskRecordsByTaskId(taskId);
+    TaskRecordBO taskRecord = taskRecords.get(0);
     Integer status = taskRecord.getStatus();
     ResponseStatusModel responseStatusModel = new ResponseStatusModel();
     responseStatusModel.setStatus(status);
 
-    List<FeatureHistoryDto> histories = featureHistoryService.getHistories(
+    List<FeatureHistoryBO> histories = featureHistoryService.getHistories(
         taskRecord.getRecordId());
     long successCount = histories.stream().filter(
             history -> Objects.equals(history.getExecuteStatus(), ProcessStatus.SUCCESS.getType()))
@@ -134,7 +135,7 @@ public class TaskInfoService {
     return responseStatusModel;
   }
 
-  public List<TaskInfoDto> getAllTaskList(String serviceId) {
+  public List<TaskInfoBO> getAllTaskList(String serviceId) {
     return taskRepository.getAllTaskList(serviceId);
   }
 }

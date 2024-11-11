@@ -3,14 +3,16 @@ package com.zj.master.dispatch.pipeline.intercept;
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.DeployType;
 import com.zj.common.enums.ExecuteType;
-import com.zj.common.model.DeployParams;
-import com.zj.common.model.K8SAccessParams;
-import com.zj.common.model.K8SContainerParams;
-import com.zj.domain.entity.dto.log.DispatchLogDto;
-import com.zj.domain.entity.dto.log.SubDispatchLogDto;
-import com.zj.domain.entity.dto.pipeline.NodeRecordDto;
-import com.zj.domain.entity.dto.service.DeployEnvironmentDto;
-import com.zj.domain.entity.dto.service.MicroserviceDto;
+import com.zj.common.entity.pipeline.DeployParams;
+import com.zj.common.entity.pipeline.K8SAccessParams;
+import com.zj.common.entity.pipeline.SSHParams;
+import com.zj.common.entity.pipeline.ServiceConfig;
+import com.zj.domain.entity.bo.log.DispatchLogDto;
+import com.zj.domain.entity.bo.log.SubDispatchLogDto;
+import com.zj.domain.entity.bo.pipeline.NodeRecordBO;
+import com.zj.domain.entity.bo.service.DeployEnvironmentBO;
+import com.zj.domain.entity.bo.service.MicroserviceBO;
+import com.zj.domain.entity.enums.EnvType;
 import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
@@ -80,23 +82,29 @@ public class DeployNodeInterceptor implements INodeExecuteInterceptor {
             deployContext.setRequestSingle(true);
         }
 
-        DeployEnvironmentDto deployEnvironment = environmentRepository.getEnvironment(deployContext.getEnvId());
-        DeployParams deployParams = getDeployParams(taskNode.getServiceId(), deployEnvironment.getEnvParams(),
-                deployContext.getImageName());
+        DeployEnvironmentBO deployEnvironment = environmentRepository.getEnvironment(deployContext.getEnvId());
+        DeployParams deployParams = getDeployParams(taskNode.getServiceId(), deployEnvironment, deployContext.getImageName());
         deployContext.setParams(deployParams);
         deployContext.setDeployType(deployEnvironment.getEnvType());
         taskNode.setRequestContext(deployContext);
     }
 
-    public DeployParams getDeployParams(String serviceId, String k8sAccess, String imageName) {
-        K8SAccessParams k8SAccessParams = JSON.parseObject(k8sAccess, K8SAccessParams.class);
-        MicroserviceDto serviceDetail = microServiceRepository.queryServiceDetail(serviceId);
-        K8SContainerParams k8SContainerParams = JSON.parseObject(serviceDetail.getServiceConfig(),
-                K8SContainerParams.class);
-        k8SContainerParams.setImageName(imageName);
+    public DeployParams getDeployParams(String serviceId, DeployEnvironmentBO environment, String imageName) {
         DeployParams deployParams = new DeployParams();
-        deployParams.setK8SAccessParams(k8SAccessParams);
-        deployParams.setK8SContainerParams(k8SContainerParams);
+        if (Objects.equals(environment.getEnvType(), EnvType.K8S.getType())) {
+            K8SAccessParams k8SAccessParams = JSON.parseObject(environment.getEnvParams(), K8SAccessParams.class);
+            deployParams.setK8SAccessParams(k8SAccessParams);
+        }
+
+        if (Objects.equals(environment.getEnvType(), EnvType.SSH.getType())) {
+            SSHParams sshParams = JSON.parseObject(environment.getEnvParams(), SSHParams.class);
+            deployParams.setSshParams(sshParams);
+        }
+
+        MicroserviceBO serviceDetail = microServiceRepository.queryServiceDetail(serviceId);
+        ServiceConfig serviceConfig = serviceDetail.getServiceConfig();
+        serviceConfig.setImageName(imageName);
+        deployParams.setServiceConfig(serviceConfig);
         return deployParams;
     }
 
@@ -105,9 +113,9 @@ public class DeployNodeInterceptor implements INodeExecuteInterceptor {
                 subDispatchLogDto.getLogId());
         String nodeId = subDispatchLogDto.getExecuteId();
         String pipelineHistoryId = dispatchLog.getSourceRecordId();
-        NodeRecordDto nodeRecord = nodeRecordRepository.getRecordByNodeAndHistory(pipelineHistoryId,
+        NodeRecordBO nodeRecord = nodeRecordRepository.getRecordByNodeAndHistory(pipelineHistoryId,
                 nodeId);
-        Map<String, Object> context = JSON.parseObject(nodeRecord.getPipelineContext());
+        Map<String, Object> context = nodeRecord.getPipelineContext();
         if (Objects.nonNull(context)) {
             deployContext.setImageName(String.valueOf(context.get(IMAGE_NAME)));
         }

@@ -31,14 +31,23 @@ public class PublishBind {
    */
   private String pipelineId;
 
-  private String publishLine;
+  /**
+   * 发布分支变更内容
+   */
+  private String message;
 
   /**
    * 发布状态
    */
   private Integer status;
 
+  /**
+   * 创建时间
+   * */
   private Long createTime;
 
+  /**
+   * 创建时间
+   * */
   private Long updateTime;
 }

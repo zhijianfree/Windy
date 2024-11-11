@@ -1,8 +1,8 @@
 package com.zj.domain.repository.pipeline;
 
-import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
+import com.zj.common.adapter.git.GitAccessInfo;
+import com.zj.domain.entity.bo.pipeline.SystemConfigBO;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
-import com.zj.domain.entity.vo.GitAccessVo;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
 import com.zj.domain.entity.vo.MavenConfigVo;
 
@@ -14,18 +14,18 @@ import java.util.List;
  */
 public interface ISystemConfigRepository {
 
-  List<SystemConfigDto> getAllConfigs();
+  List<SystemConfigBO> getAllConfigs();
 
-  boolean saveConfig(SystemConfigDto systemConfigDto);
+  boolean saveConfig(SystemConfigBO systemConfigBO);
 
-  boolean updateConfig(SystemConfigDto systemConfigDto);
+  boolean updateConfig(SystemConfigBO systemConfigBO);
 
   boolean deleteConfig(String configId);
 
-  SystemConfigDto getSystemConfig(String configId);
+  SystemConfigBO getSystemConfig(String configId);
 
-  GitAccessVo getGitAccess();
-  boolean updateGitAccess(GitAccessVo gitAccess);
+  GitAccessInfo getGitAccess();
+  boolean updateGitAccess(GitAccessInfo gitAccess);
 
   ImageRepositoryVo getRepository();
 

@@ -39,7 +39,7 @@ public class TaskNode extends BaseDispatch{
   private String executeType;
 
   /**
-   * 出发节点执行的第三方接口信息
+   * 触发节点执行的第三方接口信息
    * */
   private RequestContext requestContext;
 

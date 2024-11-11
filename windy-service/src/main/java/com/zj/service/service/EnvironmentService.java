@@ -5,10 +5,10 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.common.model.K8SAccessParams;
-import com.zj.common.model.PageSize;
-import com.zj.domain.entity.dto.service.DeployEnvironmentDto;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.entity.pipeline.K8SAccessParams;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.domain.entity.bo.service.DeployEnvironmentBO;
 import com.zj.domain.entity.enums.EnvType;
 import com.zj.domain.repository.service.IEnvironmentRepository;
 import com.zj.service.entity.ResourceList;
@@ -55,24 +55,24 @@ public class EnvironmentService {
         checkFuncMap.put(EnvType.K8S.getType(), this::checkK8S);
     }
 
-    public PageSize<DeployEnvironmentDto> getEnvironments(Integer page, Integer size, String name) {
-        IPage<DeployEnvironmentDto> envPage = repository.getEnvPage(page, size, name);
+    public PageSize<DeployEnvironmentBO> getEnvironments(Integer page, Integer size, String name) {
+        IPage<DeployEnvironmentBO> envPage = repository.getEnvPage(page, size, name);
         if (CollectionUtils.isEmpty(envPage.getRecords())) {
             return new PageSize<>();
         }
 
-        PageSize<DeployEnvironmentDto> pageSize = new PageSize<>();
+        PageSize<DeployEnvironmentBO> pageSize = new PageSize<>();
         pageSize.setData(envPage.getRecords());
         pageSize.setTotal(envPage.getTotal());
         return pageSize;
     }
 
-    public Boolean createEnvironment(DeployEnvironmentDto deployEnvironment) {
+    public Boolean createEnvironment(DeployEnvironmentBO deployEnvironment) {
         deployEnvironment.setEnvId(uniqueIdService.getUniqueId());
         return repository.createEnvironment(deployEnvironment);
     }
 
-    public Boolean updateEnvironment(DeployEnvironmentDto deployEnvironment) {
+    public Boolean updateEnvironment(DeployEnvironmentBO deployEnvironment) {
         return repository.updateEnvironment(deployEnvironment);
     }
 
@@ -80,7 +80,7 @@ public class EnvironmentService {
         return repository.deleteEnvironment(envId);
     }
 
-    public DeployEnvironmentDto getEnvironment(String envId) {
+    public DeployEnvironmentBO getEnvironment(String envId) {
         return repository.getEnvironment(envId);
     }
 
@@ -126,13 +126,13 @@ public class EnvironmentService {
         return false;
     }
 
-    public List<DeployEnvironmentDto> getAvailableEnvs() {
+    public List<DeployEnvironmentBO> getAvailableEnvs() {
         return repository.getAvailableEnvs();
     }
 
     public List<NodeInfo> getNodeList(String envId) {
         try {
-            DeployEnvironmentDto environment = repository.getEnvironment(envId);
+            DeployEnvironmentBO environment = repository.getEnvironment(envId);
             K8SAccessParams k8SParams = JSON.parseObject(environment.getEnvParams(), K8SAccessParams.class);
             Headers headers = getHeaders(k8SParams);
             String url = k8SParams.getApiService() + NODE_LIST_URI;

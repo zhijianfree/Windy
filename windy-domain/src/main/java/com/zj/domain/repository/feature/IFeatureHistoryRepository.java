@@ -1,7 +1,7 @@
 package com.zj.domain.repository.feature;
 
 import com.zj.common.enums.ProcessStatus;
-import com.zj.domain.entity.dto.feature.FeatureHistoryDto;
+import com.zj.domain.entity.bo.feature.FeatureHistoryBO;
 import java.util.List;
 
 /**
@@ -10,21 +10,23 @@ import java.util.List;
  */
 public interface IFeatureHistoryRepository {
 
-  FeatureHistoryDto getFeatureHistory(String historyId);
+  FeatureHistoryBO getFeatureHistory(String historyId);
 
-  List<FeatureHistoryDto> featureHistories(String featureId);
+  List<FeatureHistoryBO> featureHistories(String featureId);
 
-  boolean saveHistory(FeatureHistoryDto featureHistory);
+  boolean saveHistory(FeatureHistoryBO featureHistory);
 
   boolean deleteHistory(String historyId);
 
-  List<FeatureHistoryDto> getHistoriesByTaskRecordId(String taskRecordId);
+  List<FeatureHistoryBO> getHistoriesByTaskRecordId(String taskRecordId);
 
   boolean deleteByRecordId(String taskRecordId);
 
   boolean updateStatus(String historyId, int status);
 
-  List<FeatureHistoryDto> getTaskRecordFeatures(String taskRecordId);
+  List<FeatureHistoryBO> getTaskRecordFeatures(String taskRecordId);
 
   void stopTaskFeatures(String taskRecordId, ProcessStatus stop);
+
+    List<FeatureHistoryBO> getOldFeatureHistory(long queryTime);
 }

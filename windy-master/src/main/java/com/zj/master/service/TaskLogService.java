@@ -3,14 +3,14 @@ package com.zj.master.service;
 import com.alibaba.fastjson.JSON;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.common.model.DispatchTaskModel;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.entity.dto.DispatchTaskModel;
 import com.zj.common.utils.IpUtils;
-import com.zj.domain.entity.dto.log.DispatchLogDto;
+import com.zj.domain.entity.bo.log.DispatchLogDto;
 import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.master.dispatch.Dispatcher;
-import com.zj.master.dispatch.listener.InnerEvent;
-import com.zj.master.dispatch.listener.TaskInnerEventFactory;
+import com.zj.master.dispatch.listener.InternalEvent;
+import com.zj.master.dispatch.listener.InternalEventFactory;
 import com.zj.master.entity.enums.EventType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -54,11 +54,11 @@ public class TaskLogService {
   }
 
   public Boolean pauseTask(DispatchTaskModel task) {
-    InnerEvent event = new InnerEvent();
+    InternalEvent event = new InternalEvent();
     event.setEventType(EventType.STOP);
     event.setLogType(LogType.exchange(task.getType()));
     event.setTargetId(task.getSourceId());
-    TaskInnerEventFactory.sendNotifyEvent(event);
+    InternalEventFactory.sendNotifyEvent(event);
     return true;
   }
 }

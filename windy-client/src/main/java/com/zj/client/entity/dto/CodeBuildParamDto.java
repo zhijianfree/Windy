@@ -52,4 +52,26 @@ public class CodeBuildParamDto extends GitMeta {
    * 推送仓库密码
    * */
   private String password;
+
+  /**
+   * 发布构建的版本号
+   */
+  private String version;
+
+  /**
+   * 服务应用名称
+   */
+  private String serviceName;
+
+  /**
+   * 服务部署方式
+   */
+  private Integer deployType;
+
+  /**
+   * 服务开发代码
+   */
+  private String code;
+
+  private String buildVersion;
 }

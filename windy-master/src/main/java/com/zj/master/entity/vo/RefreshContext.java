@@ -1,6 +1,6 @@
 package com.zj.master.entity.vo;
 
-import com.zj.domain.entity.dto.pipeline.CompareResult;
+import com.zj.common.entity.pipeline.CompareParameter;
 import lombok.Builder;
 import lombok.Data;
 
@@ -17,7 +17,9 @@ public class RefreshContext {
 
   private String url;
 
+  private CompareParameter loopExpression;
+
   private Map<String, String> headers;
 
-  private List<CompareResult> compareConfig;
+  private List<CompareParameter> compareConfig;
 }

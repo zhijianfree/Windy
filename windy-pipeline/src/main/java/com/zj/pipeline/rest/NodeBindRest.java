@@ -1,10 +1,10 @@
 package com.zj.pipeline.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.PageSize;
-import com.zj.common.model.ResponseMeta;
-import com.zj.domain.entity.dto.pipeline.NodeBindDto;
-import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.domain.entity.bo.pipeline.NodeBindBO;
+import com.zj.domain.entity.bo.pipeline.PipelineActionBO;
 import com.zj.pipeline.service.NodeBindService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,17 +33,17 @@ public class NodeBindRest {
   }
 
   @PostMapping("/nodes")
-  public ResponseMeta<Boolean> createNode(@RequestBody NodeBindDto nodeBindDto) {
-    return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, service.createNodes(nodeBindDto));
+  public ResponseMeta<Boolean> createNode(@RequestBody NodeBindBO nodeBindBO) {
+    return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, service.createNodes(nodeBindBO));
   }
 
   @PutMapping("/node")
-  public ResponseMeta<Boolean> updateNode(@RequestBody NodeBindDto nodeBindDto) {
-    return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, service.updateNode(nodeBindDto));
+  public ResponseMeta<Boolean> updateNode(@RequestBody NodeBindBO nodeBindBO) {
+    return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, service.updateNode(nodeBindBO));
   }
 
   @GetMapping("/node/{nodeId}")
-  public ResponseMeta<NodeBindDto> getNode(@PathVariable("nodeId") String nodeId) {
+  public ResponseMeta<NodeBindBO> getNode(@PathVariable("nodeId") String nodeId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, service.getNode(nodeId));
   }
 
@@ -53,20 +53,20 @@ public class NodeBindRest {
   }
 
   @GetMapping("/nodes")
-  public PageSize<NodeBindDto> getNodes(@RequestParam("page") Integer page,
-      @RequestParam("size") Integer size, @RequestParam("name") String name) {
+  public PageSize<NodeBindBO> getNodes(@RequestParam("page") Integer page,
+                                       @RequestParam("size") Integer size, @RequestParam("name") String name) {
     return service.getNodes(page, size, name);
   }
 
   @GetMapping("/nodes/all")
-  public ResponseMeta<List<NodeBindDto>> getAllNodes() {
-    return new ResponseMeta<List<NodeBindDto>>(ErrorCode.SUCCESS, service.getAllNodes());
+  public ResponseMeta<List<NodeBindBO>> getAllNodes() {
+    return new ResponseMeta<List<NodeBindBO>>(ErrorCode.SUCCESS, service.getAllNodes());
   }
 
   @GetMapping("/{nodeId}/executors")
-  public ResponseMeta<List<PipelineActionDto>> getNodeExecutors(
+  public ResponseMeta<List<PipelineActionBO>> getNodeExecutors(
       @PathVariable("nodeId") String nodeId) {
-    return new ResponseMeta<List<PipelineActionDto>>(ErrorCode.SUCCESS,
+    return new ResponseMeta<List<PipelineActionBO>>(ErrorCode.SUCCESS,
         service.getNodeExecutors(nodeId));
   }
 }

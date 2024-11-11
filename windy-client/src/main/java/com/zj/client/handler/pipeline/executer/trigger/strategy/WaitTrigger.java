@@ -38,6 +38,7 @@ public class WaitTrigger implements INodeTrigger {
 
   @Override
   public void triggerRun(TriggerContext triggerContext, TaskNode taskNode) throws IOException {
+    log.info("start run wait trigger context={}", JSON.toJSONString(triggerContext));
     WaitRequestContext waitRequestContext = JSON.parseObject(
         JSON.toJSONString(triggerContext.getData()), WaitRequestContext.class);
     CompletableFuture.runAsync(() -> {

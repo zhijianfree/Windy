@@ -1,8 +1,8 @@
 package com.zj.domain.repository.pipeline;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
-import com.zj.domain.entity.po.pipeline.PipelineAction;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.domain.entity.bo.pipeline.PipelineActionBO;
+
 import java.util.List;
 
 /**
@@ -11,19 +11,19 @@ import java.util.List;
  */
 public interface IPipelineActionRepository {
 
-  Boolean createAction(PipelineActionDto actionDto);
+  Boolean createAction(PipelineActionBO actionDto);
 
-  PipelineActionDto getAction(String actionId);
+  PipelineActionBO getAction(String actionId);
 
-  Boolean updateAction(PipelineActionDto actionDto);
+  Boolean updateAction(PipelineActionBO actionDto);
 
   Boolean actionsBindNode(String nodeId, List<String> actionIds);
 
   Boolean deleteAction(String actionId);
 
-  IPage<PipelineAction>  getActions(Integer page, Integer size, String name);
+  PageSize<PipelineActionBO> getActions(Integer page, Integer size, String name);
 
-  List<PipelineAction> getActionsByNodeId(String nodeId);
+  List<PipelineActionBO> getActionsByNodeId(String nodeId);
 
   boolean batchDelete(List<String> removeList);
 }

@@ -1,6 +1,6 @@
 package com.zj.common.exception;
 
-import com.zj.common.model.ResponseMeta;
+import com.zj.common.entity.dto.ResponseMeta;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -41,10 +41,8 @@ public class GlobalExceptionHandler {
     List<FieldError> errors = ((MethodArgumentNotValidException) e)
         .getBindingResult().getFieldErrors();
     StringBuilder stringBuilder = new StringBuilder();
-    errors.forEach(fieldError -> {
-      stringBuilder.append(LEFT_STRING).append(fieldError.getField()).append(RIGHT_STRING)
-          .append(fieldError.getDefaultMessage());
-    });
+    errors.forEach(fieldError -> stringBuilder.append(LEFT_STRING).append(fieldError.getField()).append(RIGHT_STRING)
+        .append(fieldError.getDefaultMessage()));
     return stringBuilder.toString();
   }
 
@@ -52,7 +50,7 @@ public class GlobalExceptionHandler {
   @ResponseBody
   public ResponseEntity<ResponseMeta> handleBusinessException(CommonException commonException) {
     log.warn("common error", commonException);
-    return new ResponseEntity<>(new ResponseMeta(commonException.getErrorCode()),
-        commonException.getErrorCode().getHttpStatus());
+    return new ResponseEntity<>(new ResponseMeta(commonException.getCode(), commonException.getMessage()),
+        commonException.getHttpStatus());
   }
 }

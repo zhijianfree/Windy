@@ -1,17 +1,11 @@
 package com.zj.pipeline.service;
 
-import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.zj.common.model.PageSize;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.pipeline.ActionParam;
-import com.zj.domain.entity.dto.pipeline.CompareResult;
-import com.zj.domain.entity.dto.pipeline.PipelineActionDto;
-import com.zj.domain.entity.po.pipeline.PipelineAction;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.domain.entity.bo.pipeline.PipelineActionBO;
 import com.zj.domain.repository.pipeline.IPipelineActionRepository;
 import java.util.List;
-import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 
 /**
@@ -30,16 +24,16 @@ public class PipelineActionService {
     this.pipelineActionRepository = pipelineActionRepository;
   }
 
-  public Boolean createAction(PipelineActionDto actionDto) {
+  public Boolean createAction(PipelineActionBO actionDto) {
     actionDto.setActionId(uniqueIdService.getUniqueId());
     return pipelineActionRepository.createAction(actionDto);
   }
 
-  public PipelineActionDto getAction(String actionId) {
+  public PipelineActionBO getAction(String actionId) {
     return pipelineActionRepository.getAction(actionId);
   }
 
-  public Boolean updateAction(PipelineActionDto actionDto) {
+  public Boolean updateAction(PipelineActionBO actionDto) {
     return pipelineActionRepository.updateAction(actionDto);
   }
 
@@ -51,25 +45,11 @@ public class PipelineActionService {
     return pipelineActionRepository.deleteAction(actionId);
   }
 
-  public PageSize<PipelineActionDto> getActions(Integer page, Integer size, String name) {
-    IPage<PipelineAction> actionPage = pipelineActionRepository.getActions(page, size, name);
-    List<PipelineActionDto> actionList = actionPage.getRecords().stream()
-        .map(PipelineActionService::toPipelineActionDto).collect(Collectors.toList());
-
-    PageSize<PipelineActionDto> pageSize = new PageSize<>();
-    pageSize.setTotal(actionPage.getTotal());
-    pageSize.setData(actionList);
-    return pageSize;
+  public PageSize<PipelineActionBO> getActions(Integer page, Integer size, String name) {
+    return pipelineActionRepository.getActions(page, size, name);
   }
 
-  public static PipelineActionDto toPipelineActionDto(PipelineAction action) {
-    PipelineActionDto pipelineAction = OrikaUtil.convert(action, PipelineActionDto.class);
-    pipelineAction.setParamList(JSON.parseArray(action.getParamDetail(), ActionParam.class));
-    pipelineAction.setCompareResults(JSON.parseArray(action.getResult(), CompareResult.class));
-    return pipelineAction;
-  }
-
-  public List<PipelineAction> getActionsByNodeId(String nodeId) {
+  public List<PipelineActionBO> getActionsByNodeId(String nodeId) {
     return pipelineActionRepository.getActionsByNodeId(nodeId);
   }
 

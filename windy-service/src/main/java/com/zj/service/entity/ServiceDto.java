@@ -1,6 +1,6 @@
 package com.zj.service.entity;
 
-import com.zj.common.model.K8SContainerParams;
+import com.zj.common.entity.pipeline.ServiceConfig;
 import lombok.Data;
 
 @Data
@@ -36,6 +36,6 @@ public class ServiceDto {
     /**
      * 服务部署容器配置
      */
-    private K8SContainerParams containerParams;
+    private ServiceConfig serviceConfig;
 
 }

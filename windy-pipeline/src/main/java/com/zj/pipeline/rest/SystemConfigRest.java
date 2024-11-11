@@ -1,10 +1,10 @@
 package com.zj.pipeline.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.ResponseMeta;
-import com.zj.domain.entity.dto.pipeline.SystemConfigDto;
+import com.zj.common.adapter.git.GitAccessInfo;
+import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.domain.entity.bo.pipeline.SystemConfigBO;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
-import com.zj.domain.entity.vo.GitAccessVo;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
 import com.zj.domain.entity.vo.MavenConfigVo;
 import com.zj.pipeline.service.SystemConfigService;
@@ -32,19 +32,19 @@ public class SystemConfigRest {
 
   @ResponseBody
   @GetMapping("/system/configs")
-  public ResponseMeta<List<SystemConfigDto>> listSystemConfigs() {
+  public ResponseMeta<List<SystemConfigBO>> listSystemConfigs() {
     return new ResponseMeta<>(ErrorCode.SUCCESS, systemConfigService.listSystemConfigs());
   }
 
   @ResponseBody
   @PostMapping("/system/configs")
-  public ResponseMeta<String> createSystemConfig(@RequestBody SystemConfigDto config) {
+  public ResponseMeta<String> createSystemConfig(@RequestBody SystemConfigBO config) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, systemConfigService.createSystemConfig(config));
   }
 
   @ResponseBody
   @PutMapping("/system/config")
-  public ResponseMeta<Boolean> updateSystemConfig(@RequestBody SystemConfigDto config) {
+  public ResponseMeta<Boolean> updateSystemConfig(@RequestBody SystemConfigBO config) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, systemConfigService.updateSystemConfig(config));
   }
 
@@ -56,19 +56,19 @@ public class SystemConfigRest {
 
   @ResponseBody
   @GetMapping("/system/config/{configId}")
-  public ResponseMeta<SystemConfigDto> getSystemConfig(@PathVariable("configId") String configId) {
+  public ResponseMeta<SystemConfigBO> getSystemConfig(@PathVariable("configId") String configId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, systemConfigService.getSystemConfig(configId));
   }
 
   @ResponseBody
   @GetMapping("/system/config/git")
-  public ResponseMeta<GitAccessVo> getGitConfig() {
+  public ResponseMeta<GitAccessInfo> getGitConfig() {
     return new ResponseMeta<>(ErrorCode.SUCCESS, systemConfigService.getGitConfig());
   }
 
   @ResponseBody
   @PutMapping("/system/config/git")
-  public ResponseMeta<Boolean> updateGit(@RequestBody GitAccessVo config) {
+  public ResponseMeta<Boolean> updateGit(@RequestBody GitAccessInfo config) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, systemConfigService.updateGitConfig(config));
   }
 

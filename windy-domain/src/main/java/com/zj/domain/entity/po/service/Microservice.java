@@ -34,7 +34,12 @@ public class Microservice {
     /**
      * 服务配置
      */
-    private String serviceConfig;
+    private String config;
+
+    /**
+     * 接口覆盖率
+     */
+    private Integer apiCoverage;
 
     /**
      * 创建时间

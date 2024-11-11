@@ -3,7 +3,7 @@ package com.zj.domain.repository.feature.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.feature.FeatureTagDto;
+import com.zj.domain.entity.bo.feature.FeatureTagBO;
 import com.zj.domain.entity.po.feature.FeatureTag;
 import com.zj.domain.mapper.feeature.FeatureTagMapper;
 import com.zj.domain.repository.feature.IFeatureTagRepository;
@@ -19,7 +19,7 @@ public class FeatureTagRepository extends ServiceImpl<FeatureTagMapper, FeatureT
     IFeatureTagRepository {
 
   @Override
-  public void saveBatchTag(List<FeatureTagDto> tagList) {
+  public void saveBatchTag(List<FeatureTagBO> tagList) {
     List<FeatureTag> featureTags = OrikaUtil.convertList(tagList, FeatureTag.class);
     saveBatch(featureTags);
   }
@@ -30,16 +30,16 @@ public class FeatureTagRepository extends ServiceImpl<FeatureTagMapper, FeatureT
   }
 
   @Override
-  public List<FeatureTagDto> getFeatureTags(String featureId) {
+  public List<FeatureTagBO> getFeatureTags(String featureId) {
     List<FeatureTag> featureTags = list(
         Wrappers.lambdaQuery(FeatureTag.class).eq(FeatureTag::getFeatureId, featureId));
-    return OrikaUtil.convertList(featureTags, FeatureTagDto.class);
+    return OrikaUtil.convertList(featureTags, FeatureTagBO.class);
   }
 
   @Override
-  public List<FeatureTagDto> getFeaturesByTag(List<String> tags) {
+  public List<FeatureTagBO> getFeaturesByTag(List<String> tags) {
     List<FeatureTag> featureTags = list(
         Wrappers.lambdaQuery(FeatureTag.class).in(FeatureTag::getTagValue, tags));
-    return OrikaUtil.convertList(featureTags, FeatureTagDto.class);
+    return OrikaUtil.convertList(featureTags, FeatureTagBO.class);
   }
 }

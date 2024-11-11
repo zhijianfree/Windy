@@ -1,12 +1,12 @@
 package com.zj.client.handler.feature.executor.invoker.strategy;
 
-import com.zj.client.entity.enuns.ExecutePointType;
-import com.zj.client.entity.vo.ExecutePoint;
-import com.zj.client.entity.vo.FeatureResponse;
+import com.zj.client.entity.bo.ExecutePoint;
+import com.zj.common.entity.feature.FeatureResponse;
 import com.zj.client.handler.feature.executor.compare.CompareHandler;
 import com.zj.client.handler.feature.executor.interceptor.InterceptorProxy;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
-import com.zj.client.handler.feature.executor.vo.ExecuteContext;
+import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
+import com.zj.common.enums.TemplateType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -29,14 +29,14 @@ public class INormalExecuteStrategy extends BaseExecuteStrategy {
     }
 
     @Override
-    public List<ExecutePointType> getType() {
-        return Arrays.asList(ExecutePointType.NORMAL, ExecutePointType.DEFAULT);
+    public List<TemplateType> getType() {
+        return Arrays.asList(TemplateType.NORMAL, TemplateType.DEFAULT, TemplateType.PLUGIN);
     }
 
     @Override
-    public List<FeatureResponse> execute(ExecutePoint executePoint, ExecuteContext executeContext) {
+    public List<FeatureResponse> execute(ExecutePoint executePoint, FeatureExecuteContext featureExecuteContext) {
         log.info("start execute INormalExecuteStrategy pointId={}", executePoint.getPointId());
-        FeatureResponse featureResponse = executeFeature(executeContext, executePoint);
+        FeatureResponse featureResponse = executeFeature(featureExecuteContext, executePoint);
         return Collections.singletonList(featureResponse);
     }
 }

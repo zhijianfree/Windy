@@ -1,16 +1,16 @@
 package com.zj.feature.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.model.PageSize;
-import com.zj.common.model.ResponseMeta;
-import com.zj.domain.entity.dto.feature.FeatureInfoDto;
-import com.zj.feature.entity.dto.BatchDeleteDto;
-import com.zj.feature.entity.dto.BatchUpdateFeatures;
-import com.zj.feature.entity.dto.CopyCaseFeatureDto;
-import com.zj.feature.entity.dto.FeatureInfoVo;
-import com.zj.feature.entity.dto.FeatureNodeDto;
-import com.zj.feature.entity.dto.PasteFeatureDto;
-import com.zj.feature.entity.dto.TagFilterDto;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.domain.entity.bo.feature.FeatureInfoBO;
+import com.zj.feature.entity.BatchDeleteDto;
+import com.zj.feature.entity.BatchUpdateFeatures;
+import com.zj.feature.entity.CopyCaseFeatureDto;
+import com.zj.feature.entity.FeatureInfoVo;
+import com.zj.feature.entity.FeatureNodeDto;
+import com.zj.feature.entity.PasteFeatureDto;
+import com.zj.feature.entity.TagFilterDto;
 import com.zj.feature.service.FeatureService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,7 +42,7 @@ public class FeatureInfoRest {
     }
 
     @GetMapping("/{caseId}/features")
-    public ResponseMeta<List<FeatureInfoDto>> getFeatureList(@PathVariable("caseId") String caseId) {
+    public ResponseMeta<List<FeatureInfoBO>> getFeatureList(@PathVariable("caseId") String caseId) {
         return new ResponseMeta(ErrorCode.SUCCESS, featureService.queryFeatureList(caseId));
     }
 
@@ -77,7 +77,7 @@ public class FeatureInfoRest {
     }
 
     @GetMapping("/case/{caseId}/features")
-    public ResponseMeta<PageSize<FeatureInfoDto>> queryFeatureTask(
+    public ResponseMeta<PageSize<FeatureInfoBO>> queryFeatureTask(
             @PathVariable("caseId") String caseId,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) {

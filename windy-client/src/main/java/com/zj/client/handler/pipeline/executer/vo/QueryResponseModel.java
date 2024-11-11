@@ -19,14 +19,11 @@ public class QueryResponseModel {
 
   private Map<String, Object> context;
 
-  private List<String> message;
+  private List<String> message = new ArrayList<>();
 
   private Object data;
 
   public void addMessage(String msg) {
-    if (CollectionUtils.isEmpty(message)) {
-      message = new ArrayList<>();
-    }
     message.add(msg);
   }
 

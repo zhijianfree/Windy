@@ -1,15 +1,15 @@
 package com.zj.client.handler.feature.executor.invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.client.entity.enuns.ExecutePointType;
-import com.zj.client.entity.vo.ExecutePoint;
-import com.zj.client.entity.vo.FeatureResponse;
+import com.zj.client.entity.bo.ExecutePoint;
+import com.zj.common.entity.feature.FeatureResponse;
 import com.zj.client.handler.feature.executor.compare.CompareHandler;
 import com.zj.client.handler.feature.executor.interceptor.InterceptorProxy;
 import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
-import com.zj.client.handler.feature.executor.vo.ExecuteContext;
+import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
+import com.zj.common.enums.TemplateType;
 import com.zj.common.exception.ExecuteException;
-import com.zj.common.feature.ExecutorUnit;
+import com.zj.common.entity.feature.ExecutorUnit;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -37,16 +37,15 @@ public class ScriptExecuteStrategy extends BaseExecuteStrategy {
     }
 
     @Override
-    public List<ExecutePointType> getType() {
-        return Collections.singletonList(ExecutePointType.SCRIPT);
+    public List<TemplateType> getType() {
+        return Collections.singletonList(TemplateType.SCRIPT);
     }
 
     @Override
-    public List<FeatureResponse> execute(ExecutePoint executePoint, ExecuteContext executeContext) {
-        log.info("start handle script context={}", JSON.toJSONString(executeContext.toMap()));
+    public List<FeatureResponse> execute(ExecutePoint executePoint, FeatureExecuteContext featureExecuteContext) {
+        log.info("start handle script context={}", JSON.toJSONString(featureExecuteContext.toMap()));
         FeatureResponse response;
-        String featureInfo = executePoint.getFeatureInfo();
-        ExecutorUnit executorUnit = JSON.parseObject(featureInfo, ExecutorUnit.class);
+        ExecutorUnit executorUnit = executePoint.getExecutorUnit();
         try {
             String script = executorUnit.getService();
             if (StringUtils.isBlank(script)) {
@@ -56,7 +55,7 @@ public class ScriptExecuteStrategy extends BaseExecuteStrategy {
 
             // 执行 JavaScript 代码
             Bindings bindings = new SimpleBindings();
-            Map<String, Object> context = executeContext.toMap();
+            Map<String, Object> context = featureExecuteContext.toMap();
             bindings.put("context", context);
             String execScript = "function execute(context) {" + script + "}execute(context);";
             Object result = engine.eval(execScript, bindings);
@@ -67,7 +66,7 @@ public class ScriptExecuteStrategy extends BaseExecuteStrategy {
             log.info("handle script result={}", JSON.toJSONString(result));
             Map<String, Object> resultMap = (Map<String, Object>) result;
             //脚本执行结果添加到当前用例的上下文中
-            executeContext.bindMap(resultMap);
+            featureExecuteContext.bindMap(resultMap);
 
             ExecuteDetailVo executeDetail = new ExecuteDetailVo();
             executeDetail.setResBody(JSON.parseObject(JSON.toJSONString(result)));

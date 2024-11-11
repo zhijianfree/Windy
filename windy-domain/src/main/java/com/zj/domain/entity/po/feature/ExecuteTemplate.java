@@ -63,6 +63,13 @@ public class ExecuteTemplate {
      */
     private String relatedId;
 
+    /**
+     * 创建时间
+     */
     private Long createTime;
+
+    /**
+     * 修改时间
+     */
     private Long updateTime;
 }

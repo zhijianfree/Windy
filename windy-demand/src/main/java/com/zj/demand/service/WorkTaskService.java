@@ -1,10 +1,13 @@
 package com.zj.demand.service;
 
-import com.zj.common.model.PageSize;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.domain.entity.dto.demand.BusinessStatusDTO;
-import com.zj.domain.entity.dto.demand.TaskQuery;
-import com.zj.domain.entity.dto.demand.WorkTaskDTO;
+import com.zj.common.adapter.auth.IAuthService;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.utils.OrikaUtil;
+import com.zj.demand.entity.WorkTaskDto;
+import com.zj.domain.entity.bo.demand.BusinessStatusBO;
+import com.zj.domain.entity.bo.demand.TaskQueryBO;
+import com.zj.domain.entity.bo.demand.WorkTaskBO;
 import com.zj.domain.repository.demand.IBusinessStatusRepository;
 import com.zj.domain.repository.demand.IWorkTaskRepository;
 import org.springframework.stereotype.Service;
@@ -26,28 +29,29 @@ public class WorkTaskService {
         this.authService = authService;
     }
 
-    public WorkTaskDTO createWorkTask(WorkTaskDTO workTask) {
-        workTask.setTaskId(uniqueIdService.getUniqueId());
-        workTask.setCreator(authService.getCurrentUserId());
-        boolean result = workTaskRepository.createTask(workTask);
-        return result ? workTask : null;
+    public WorkTaskBO createWorkTask(WorkTaskDto workTaskDto) {
+        WorkTaskBO workTaskBO = OrikaUtil.convert(workTaskDto, WorkTaskBO.class);
+        workTaskBO.setTaskId(uniqueIdService.getUniqueId());
+        workTaskBO.setCreator(authService.getCurrentUserId());
+        boolean result = workTaskRepository.createTask(workTaskBO);
+        return result ? workTaskBO : null;
     }
 
-    public Boolean updateWorkTask(WorkTaskDTO workTask) {
-        return workTaskRepository.updateWorkTask(workTask);
+    public Boolean updateWorkTask(WorkTaskDto workTaskDto) {
+        return workTaskRepository.updateWorkTask(OrikaUtil.convert(workTaskDto, WorkTaskBO.class));
     }
 
-    public PageSize<WorkTaskDTO> getWorkTaskPage(Integer page, Integer size, String name, Integer status) {
+    public PageSize<WorkTaskBO> getWorkTaskPage(Integer page, Integer size, String name, Integer status) {
         String userId = authService.getCurrentUserId();
-        TaskQuery taskQuery = TaskQuery.builder().page(page).size(size).name(name).userId(userId).status(status).build();
-        return workTaskRepository.getWorkTaskPage(taskQuery);
+        TaskQueryBO taskQueryBO = TaskQueryBO.builder().page(page).size(size).name(name).userId(userId).status(status).build();
+        return workTaskRepository.getWorkTaskPage(taskQueryBO);
     }
 
-    public WorkTaskDTO getWorkTask(String taskId) {
+    public WorkTaskBO getWorkTask(String taskId) {
         return workTaskRepository.getWorkTask(taskId);
     }
 
-    public List<BusinessStatusDTO> getWorkTaskStatuses() {
+    public List<BusinessStatusBO> getWorkTaskStatuses() {
         return businessStatusRepository.getWorkTaskStatuses();
     }
 

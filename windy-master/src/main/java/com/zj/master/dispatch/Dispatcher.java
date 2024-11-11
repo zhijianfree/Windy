@@ -1,7 +1,7 @@
 package com.zj.master.dispatch;
 
-import com.zj.common.model.DispatchTaskModel;
-import com.zj.domain.entity.dto.log.DispatchLogDto;
+import com.zj.common.entity.dto.DispatchTaskModel;
+import com.zj.domain.entity.bo.log.DispatchLogDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

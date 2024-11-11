@@ -3,7 +3,7 @@ package com.zj.domain.repository.pipeline.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.dto.pipeline.PublishBindDto;
+import com.zj.domain.entity.bo.pipeline.PublishBindBO;
 import com.zj.domain.entity.po.pipeline.PublishBind;
 import com.zj.domain.mapper.pipeline.PublishBindMapper;
 import com.zj.domain.repository.pipeline.IPublishBindRepository;
@@ -20,7 +20,7 @@ public class PublishBindRepository extends ServiceImpl<PublishBindMapper, Publis
     IPublishBindRepository {
 
   @Override
-  public boolean createPublish(PublishBindDto publishBind) {
+  public boolean createPublish(PublishBindBO publishBind) {
     PublishBind publish = OrikaUtil.convert(publishBind, PublishBind.class);
     long dateNow = System.currentTimeMillis();
     publish.setCreateTime(dateNow);
@@ -29,7 +29,7 @@ public class PublishBindRepository extends ServiceImpl<PublishBindMapper, Publis
   }
 
   @Override
-  public boolean updatePublish(PublishBindDto publishBind) {
+  public boolean updatePublish(PublishBindBO publishBind) {
     PublishBind publish = OrikaUtil.convert(publishBind, PublishBind.class);
     publish.setUpdateTime(System.currentTimeMillis());
     return update(publish, Wrappers.lambdaUpdate(PublishBind.class)
@@ -42,25 +42,31 @@ public class PublishBindRepository extends ServiceImpl<PublishBindMapper, Publis
   }
 
   @Override
-  public List<PublishBindDto> getServicePublishes(String serviceId) {
+  public List<PublishBindBO> getServicePublishes(String serviceId) {
     List<PublishBind> publishBinds = list(
         Wrappers.lambdaQuery(PublishBind.class).eq(PublishBind::getServiceId, serviceId));
-    return OrikaUtil.convertList(publishBinds, PublishBindDto.class);
+    return OrikaUtil.convertList(publishBinds, PublishBindBO.class);
   }
 
   @Override
-  public PublishBindDto getServiceBranch(String serviceId, String gitBranch) {
+  public PublishBindBO getServiceBranch(String serviceId, String gitBranch) {
     PublishBind publishBind = getOne(
         Wrappers.lambdaQuery(PublishBind.class).eq(PublishBind::getServiceId, serviceId)
             .eq(PublishBind::getBranch, gitBranch));
     if (Objects.isNull(publishBind)) {
       return null;
     }
-    return OrikaUtil.convert(publishBind, PublishBindDto.class);
+    return OrikaUtil.convert(publishBind, PublishBindBO.class);
   }
 
   @Override
-  public boolean deletePublishLine(String masterLineId) {
-    return remove( Wrappers.lambdaQuery(PublishBind.class).eq(PublishBind::getPublishLine, masterLineId));
+  public boolean deleteServicePublishes(String serviceId) {
+    return remove( Wrappers.lambdaQuery(PublishBind.class).eq(PublishBind::getServiceId, serviceId));
+  }
+
+  @Override
+  public PublishBindBO getPublishById(String publishId) {
+    PublishBind publishBind = getOne(Wrappers.lambdaQuery(PublishBind.class).eq(PublishBind::getPublishId, publishId));
+    return OrikaUtil.convert(publishBind, PublishBindBO.class);
   }
 }

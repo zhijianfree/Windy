@@ -22,7 +22,7 @@ public class GlobalEnvConfig {
   
   @Getter
   @Value("${windy.loop.query.timeout:7200000}")
-  private Integer loopQueryTimeout;
+  private Long loopQueryTimeout;
 
   @Setter
   @Getter

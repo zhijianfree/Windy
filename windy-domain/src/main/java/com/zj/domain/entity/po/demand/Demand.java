@@ -28,24 +28,19 @@ public class Demand {
     private String customerValue;
 
     /**
-     * 附件地址
-     * */
-    private String enclosurePath;
-
-    /**
-     * 提出团队
-     * */
-    private String proposeTeam;
+     * 提出人名称
+     */
+    private String proposerName;
 
     /**
      * 提出人
-     * */
+     */
     private String proposer;
 
     /**
-     * 接受团队
-     * */
-    private String acceptTeam;
+     * 接受人名称
+     */
+    private String acceptorName;
 
     /**
      * 接受人
@@ -88,9 +83,14 @@ public class Demand {
     private String tag;
 
     /**
-     * 需求创建人
+     * 空间ID
      */
-    private String creator;
+    private String spaceId;
+
+    /**
+     * 迭代ID
+     */
+    private String iterationId;
 
     /**
      * 创建时间

@@ -1,20 +1,23 @@
 package com.zj.service.service;
 
 import com.alibaba.fastjson.JSON;
+import com.zj.common.adapter.invoker.IMasterInvoker;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.entity.WindyConstants;
+import com.zj.common.entity.dto.DispatchTaskModel;
+import com.zj.common.entity.feature.ExecuteTemplateVo;
+import com.zj.common.entity.generate.GenerateRecordBO;
+import com.zj.common.entity.service.ApiParamModel;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.Position;
 import com.zj.common.enums.TemplateType;
 import com.zj.common.exception.ApiException;
+import com.zj.common.exception.CommonException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.feature.ExecuteTemplateVo;
-import com.zj.common.model.DispatchTaskModel;
-import com.zj.common.monitor.RequestProxy;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.common.uuid.UniqueIdService;
-import com.zj.domain.entity.dto.feature.ExecuteTemplateDto;
-import com.zj.domain.entity.dto.service.GenerateRecordDto;
-import com.zj.domain.entity.dto.service.ServiceApiDto;
-import com.zj.domain.entity.dto.service.ServiceGenerateDto;
+import com.zj.domain.entity.bo.feature.ExecuteTemplateBO;
+import com.zj.domain.entity.bo.service.ServiceApiBO;
+import com.zj.domain.entity.bo.service.ServiceGenerateBO;
 import com.zj.domain.entity.vo.MavenConfigVo;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
@@ -32,6 +35,7 @@ import com.zj.service.service.imports.ApiImportFactory;
 import com.zj.service.service.imports.IApiImportStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -57,20 +61,20 @@ public class ApiService {
     public static final String HOST_KEY = "host";
     private final UniqueIdService uniqueIdService;
     private final IServiceApiRepository apiRepository;
-    private final RequestProxy requestProxy;
+    private final IMasterInvoker masterInvoker;
     private final ISystemConfigRepository systemConfigRepository;
     private final IGenerateRepository generateRepository;
     private final IGenerateRecordRepository generateRecordRepository;
     private final ApiImportFactory apiImportFactory;
     private final IExecuteTemplateRepository executeTemplateRepository;
 
-    public ApiService(UniqueIdService uniqueIdService, IServiceApiRepository apiRepository, RequestProxy requestProxy
+    public ApiService(UniqueIdService uniqueIdService, IServiceApiRepository apiRepository, IMasterInvoker masterInvoker
             , ISystemConfigRepository systemConfigRepository, IGenerateRepository generateRepository,
                       IGenerateRecordRepository generateRecordRepository, ApiImportFactory apiImportFactory,
                       IExecuteTemplateRepository executeTemplateRepository) {
         this.uniqueIdService = uniqueIdService;
         this.apiRepository = apiRepository;
-        this.requestProxy = requestProxy;
+        this.masterInvoker = masterInvoker;
         this.systemConfigRepository = systemConfigRepository;
         this.generateRepository = generateRepository;
         this.generateRecordRepository = generateRecordRepository;
@@ -78,28 +82,34 @@ public class ApiService {
         this.executeTemplateRepository = executeTemplateRepository;
     }
 
-    public ServiceApiDto getServiceApi(String apiId) {
+    public ServiceApiBO getServiceApi(String apiId) {
         return apiRepository.getServiceApi(apiId);
     }
 
-    public List<ServiceApiDto> getServiceApis(String serviceId) {
+    public List<ServiceApiBO> getServiceApis(String serviceId) {
         return apiRepository.getApiByService(serviceId);
     }
 
     public boolean createServiceApi(ApiModel apiModel) {
-        ServiceApiDto serviceApi = OrikaUtil.convert(apiModel, ServiceApiDto.class);
-        String requestParams = Optional.ofNullable(apiModel.getRequestParams()).map(JSON::toJSONString).orElse(null);
+        ServiceApiBO serviceApi = OrikaUtil.convert(apiModel, ServiceApiBO.class);
+        List<ApiParamModel> requestParams =
+                Optional.ofNullable(apiModel.getRequestParams()).map(params -> OrikaUtil.convertList(params,
+                        ApiParamModel.class)).orElse(null);
         serviceApi.setRequestParams(requestParams);
-        String responseParams = Optional.ofNullable(apiModel.getResponseParams()).map(JSON::toJSONString).orElse(null);
+        List<ApiParamModel> responseParams =
+                Optional.ofNullable(apiModel.getResponseParams()).map(params -> OrikaUtil.convertList(params,
+                        ApiParamModel.class)).orElse(null);
         serviceApi.setResponseParams(responseParams);
         serviceApi.setApiId(uniqueIdService.getUniqueId());
         return apiRepository.saveApi(serviceApi);
     }
 
     public boolean updateServiceApi(ApiModel apiModel) {
-        ServiceApiDto serviceApi = OrikaUtil.convert(apiModel, ServiceApiDto.class);
-        serviceApi.setRequestParams(JSON.toJSONString(apiModel.getRequestParams()));
-        serviceApi.setResponseParams(JSON.toJSONString(apiModel.getResponseParams()));
+        ServiceApiBO serviceApi = OrikaUtil.convert(apiModel, ServiceApiBO.class);
+        serviceApi.setRequestParams(OrikaUtil.convertList(apiModel.getRequestParams(),
+                ApiParamModel.class));
+        serviceApi.setResponseParams(OrikaUtil.convertList(apiModel.getResponseParams(),
+                ApiParamModel.class));
         return apiRepository.updateApi(serviceApi);
     }
 
@@ -111,20 +121,70 @@ public class ApiService {
         return apiRepository.batchDeleteApi(apiIds);
     }
 
-    public Boolean generateServiceApi(ServiceGenerateDto generate) {
+    public Boolean generateServiceApi(ServiceGenerateBO generate) {
         checkMavenConfig();
         checkVersionExist(generate.getServiceId(), generate.getVersion());
         saveOrUpdateParams(generate);
-
+        checkGenerateClassName(generate);
         DispatchTaskModel dispatchTaskModel = new DispatchTaskModel();
         dispatchTaskModel.setSourceId(generate.getServiceId());
         dispatchTaskModel.setType(LogType.GENERATE.getType());
-        return requestProxy.runGenerate(dispatchTaskModel);
+        return masterInvoker.runGenerateTask(dispatchTaskModel);
+    }
+
+    private void checkGenerateClassName(ServiceGenerateBO generate) {
+        List<ServiceApiBO> serviceApiList = apiRepository.getApiByService(generate.getServiceId())
+                .stream().filter(ServiceApiBO::isApi).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(serviceApiList)) {
+            log.info("service do not have api = {}", generate.getServiceId());
+            throw new ApiException(ErrorCode.SERVICE_API_NOT_FIND);
+        }
+        serviceApiList.forEach(serviceApi -> {
+            if (StringUtils.isBlank(serviceApi.getClassName()) || StringUtils.isBlank(serviceApi.getClassMethod())) {
+                log.info("service not config class name or method name ={}", serviceApi.getApiId());
+                throw new CommonException(ErrorCode.SERVICE_GENERATE_NAME_EMPTY, serviceApi.getApiName());
+            }
+
+            if (StringUtils.isBlank(serviceApi.getResultClass())) {
+                log.info("api request body name is empty={}", serviceApi.getApiName());
+                throw new CommonException(ErrorCode.SERVICE_GENERATE_RESPONSE_NAME_EMPTY, serviceApi.getApiName());
+            }
+
+            Optional<ApiParamModel> optional =
+                    serviceApi.getRequestParams().stream().filter(param -> Objects.equals(param.getPosition(),
+                            Position.Body.name())).findFirst();
+            if (optional.isPresent() && StringUtils.isBlank(serviceApi.getBodyClass())) {
+                log.info("api request body name is empty={}", serviceApi.getApiName());
+                throw new CommonException(ErrorCode.SERVICE_GENERATE_BODY_NAME_EMPTY, serviceApi.getApiName());
+            }
+
+            Optional<ApiParamModel> requestOptional =
+                    serviceApi.getRequestParams().stream().filter(param -> Objects.equals(param.getPosition(),
+                            Position.Body.name()) && StringUtils.isBlank(param.getObjectName())).findFirst();
+            if (requestOptional.isPresent()) {
+                ApiParamModel requestParam = requestOptional.get();
+                log.info("api request body param name is empty api={} param key = {}", serviceApi.getApiName(),
+                        requestParam.getParamKey());
+                throw new CommonException(ErrorCode.SERVICE_GENERATE_BODY_PARAM_NAME_EMPTY, serviceApi.getApiName());
+            }
+
+            Optional<ApiParamModel> responseOptional =
+                    serviceApi.getResponseParams().stream().filter(param -> Objects.equals(param.getPosition(),
+                            Position.Body.name()) && StringUtils.isBlank(param.getObjectName())).findFirst();
+            if (responseOptional.isPresent()) {
+                ApiParamModel responseParam = responseOptional.get();
+                log.info("api response body param name is empty api={} param key = {}", serviceApi.getApiName(),
+                        responseParam.getParamKey());
+                throw new CommonException(ErrorCode.SERVICE_GENERATE_RESPONSE_PARAM_NAME_EMPTY,
+                        serviceApi.getApiName());
+            }
+
+        });
     }
 
     private void checkVersionExist(String serviceId, String version) {
-        GenerateRecordDto generateRecord = generateRecordRepository.getGenerateRecord(serviceId, version);
-        if (Objects.nonNull(generateRecord)) {
+        List<GenerateRecordBO> generateRecords = generateRecordRepository.getGenerateRecord(serviceId, version);
+        if (CollectionUtils.isNotEmpty(generateRecords)) {
             log.info("generate version exist, can not execute serviceId={} version={}", serviceId, version);
             throw new ApiException(ErrorCode.GENERATE_VERSION_EXIST);
         }
@@ -137,9 +197,9 @@ public class ApiService {
         }
     }
 
-    private void saveOrUpdateParams(ServiceGenerateDto generate) {
-        ServiceGenerateDto serviceGenerateDto = generateRepository.getByService(generate.getServiceId());
-        if (Objects.isNull(serviceGenerateDto)) {
+    private void saveOrUpdateParams(ServiceGenerateBO generate) {
+        ServiceGenerateBO serviceGenerateBO = generateRepository.getByService(generate.getServiceId());
+        if (Objects.isNull(serviceGenerateBO)) {
             generate.setGenerateId(uniqueIdService.getUniqueId());
             generateRepository.create(generate);
         } else {
@@ -147,16 +207,16 @@ public class ApiService {
         }
     }
 
-    public ServiceGenerateDto getGenerateParams(String serviceId) {
+    public ServiceGenerateBO getGenerateParams(String serviceId) {
         return generateRepository.getByService(serviceId);
     }
 
-    public List<GenerateRecordDto> getLatestGenerateLog(String serviceId) {
-        List<GenerateRecordDto> serviceRecords = generateRecordRepository.getServiceRecords(serviceId);
+    public List<GenerateRecordBO> getLatestGenerateLog(String serviceId) {
+        List<GenerateRecordBO> serviceRecords = generateRecordRepository.getServiceRecords(serviceId);
         if (CollectionUtils.isEmpty(serviceRecords)) {
             return Collections.emptyList();
         }
-        return serviceRecords.stream().sorted(Comparator.comparing(GenerateRecordDto::getUpdateTime).reversed()).collect(Collectors.toList());
+        return serviceRecords.stream().sorted(Comparator.comparing(GenerateRecordBO::getUpdateTime).reversed()).collect(Collectors.toList());
     }
 
     public ImportApiResult importApiFile(MultipartFile file, String importType, String serviceId) {
@@ -167,7 +227,7 @@ public class ApiService {
                 log.info("can not support import type={}", importType);
                 return null;
             }
-            List<ServiceApiDto> serviceApiList = importStrategy.importContent(serviceId, fileContent);
+            List<ServiceApiBO> serviceApiList = importStrategy.importContent(serviceId, fileContent);
             return new ImportApiResult(serviceApiList);
         } catch (IOException exception) {
             log.error("import api error importType={}", importType, exception);
@@ -176,34 +236,34 @@ public class ApiService {
     }
 
     public List<ExecuteTemplateVo> apiGenerateTemplate(GenerateTemplate generateTemplate) {
-        List<ServiceApiDto> serviceApis = apiRepository.getServiceApiList(generateTemplate.getApiIds());
+        List<ServiceApiBO> serviceApis = apiRepository.getServiceApiList(generateTemplate.getApiIds());
         if (CollectionUtils.isEmpty(serviceApis)) {
             return Collections.emptyList();
         }
 
-        List<String> templateIds = serviceApis.stream().map(ServiceApiDto::getApiId).collect(Collectors.toList());
+        List<String> templateIds = serviceApis.stream().map(ServiceApiBO::getApiId).collect(Collectors.toList());
         List<String> existTemplateIds =
-                executeTemplateRepository.getTemplateByIds(templateIds).stream().map(ExecuteTemplateDto::getTemplateId).collect(Collectors.toList());
+                executeTemplateRepository.getTemplateByIds(templateIds).stream().map(ExecuteTemplateBO::getTemplateId).collect(Collectors.toList());
 
         return serviceApis.stream().filter(serviceApi -> generateTemplate.getCover() || !existTemplateIds.contains(serviceApi.getApiId())).map(serviceApi -> convertApi2Template(serviceApi, generateTemplate.getInvokeType(), generateTemplate.getRelatedId())).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    private ExecuteTemplateVo convertApi2Template(ServiceApiDto serviceApi, Integer invokeType, String relatedId) {
+    private ExecuteTemplateVo convertApi2Template(ServiceApiBO serviceApi, Integer invokeType, String relatedId) {
         if (!serviceApi.isApi()) {
             return null;
         }
 
-        ExecuteTemplateDto templateDto = new ExecuteTemplateDto();
-        templateDto.setTemplateId(serviceApi.getApiId());
-        templateDto.setName(serviceApi.getApiName());
-        templateDto.setMethod(serviceApi.getMethod());
-        templateDto.setInvokeType(invokeType);
-        templateDto.setTemplateType(TemplateType.NORMAL.getType());
-        templateDto.setDescription(serviceApi.getDescription());
-        templateDto.setOwner(serviceApi.getServiceId());
-        templateDto.setRelatedId(relatedId);
+        ExecuteTemplateBO executeTemplateBO = new ExecuteTemplateBO();
+        executeTemplateBO.setTemplateId(serviceApi.getApiId());
+        executeTemplateBO.setName(serviceApi.getApiName());
+        executeTemplateBO.setMethod(serviceApi.getMethod());
+        executeTemplateBO.setInvokeType(invokeType);
+        executeTemplateBO.setTemplateType(TemplateType.NORMAL.getType());
+        executeTemplateBO.setDescription(serviceApi.getDescription());
+        executeTemplateBO.setOwner(serviceApi.getServiceId());
+        executeTemplateBO.setRelatedId(relatedId);
 
-        List<ApiRequestVariable> apiVariables = JSON.parseArray(serviceApi.getRequestParams(),
+        List<ApiRequestVariable> apiVariables = OrikaUtil.convertList(serviceApi.getRequestParams(),
                 ApiRequestVariable.class);
         Map<String, String> header = new HashMap<>();
         List<ParameterDefine> parameterDefines = apiVariables.stream().map(variable -> {
@@ -218,12 +278,12 @@ public class ApiService {
             return parameterDefine;
         }).filter(Objects::nonNull).collect(Collectors.toList());
         parameterDefines.add(createHostParam());
-        templateDto.setParam(JSON.toJSONString(parameterDefines));
-        templateDto.setHeader(JSON.toJSONString(header));
+        executeTemplateBO.setParameterDefines(parameterDefines);
+        executeTemplateBO.setHeader(JSON.toJSONString(header));
 
         String assembledUrl = assembledApiUrl(serviceApi.getResource(), apiVariables);
-        templateDto.setService(assembledUrl);
-        return toExecuteTemplateDTO(templateDto);
+        executeTemplateBO.setService(assembledUrl);
+        return toExecuteTemplateDTO(executeTemplateBO);
     }
 
     private ParameterDefine createHostParam() {
@@ -295,16 +355,16 @@ public class ApiService {
             }
             if (Objects.equals(variable.getPosition(), Position.Path.name())) {
                 uriBuilder = new StringBuilder(uriBuilder.toString().replace("{" + variable.getParamKey() + "}",
-                        "${" + variable.getParamKey() + "}"));
+                        WindyConstants.VARIABLE_CHAR + "{" + variable.getParamKey() + "}"));
             }
         }
         uri = uriBuilder.toString();
         return HOST_VARIABLE_LABEL + uri;
     }
 
-    public ExecuteTemplateVo toExecuteTemplateDTO(ExecuteTemplateDto executeTemplate) {
+    public ExecuteTemplateVo toExecuteTemplateDTO(ExecuteTemplateBO executeTemplate) {
         ExecuteTemplateVo templateVo = OrikaUtil.convert(executeTemplate, ExecuteTemplateVo.class);
-        templateVo.setParams(JSON.parseArray(executeTemplate.getParam(), ParameterDefine.class));
+        templateVo.setParams(executeTemplate.getParameterDefines());
         templateVo.setHeaders((Map<String, String>) JSON.parse(executeTemplate.getHeader()));
         return templateVo;
     }
