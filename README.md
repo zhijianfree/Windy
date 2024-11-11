@@ -21,7 +21,7 @@
 
 
 ### Global Design
-  <br/>
+
   Master节点设计内含了eureka，提供了注册中心能力。这样可以管理和维护子节点信息。其中master节点和client节点都是高可用设计，保证任务执行的连贯性。
   在整体设计上，分为三个部分:
   - Windy Console: console承载了所有任务数据维护的责任，可以认为是数据的创建者，比如：用例任务编写、流水线创建、以及API维护等
@@ -30,5 +30,7 @@
 
   在整体架构上，Console服务的任何数据都不会受到Master和CLient服务的影响，也就是说即使Master与CLient服务挂掉都不会影响用户数据存储保存。因为在设计上保证了独立性，所以在实际部署的时候可以根据实际使用情况动态扩容每个服务组件。
   <br/>
+  <br/>
+  
 ![design](https://github.com/user-attachments/assets/241296aa-0ead-469a-809d-b5e037aad315)
 
