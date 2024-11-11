@@ -8,10 +8,12 @@ import com.zj.common.adapter.invoker.IClientInvoker;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.common.entity.WindyConstants;
 import com.zj.common.entity.dto.PageSize;
+import com.zj.common.entity.feature.ExecutePointDto;
 import com.zj.common.entity.pipeline.ServiceConfig;
 import com.zj.common.entity.service.LanguageVersionDto;
 import com.zj.common.enums.ApiType;
 import com.zj.common.enums.InvokerType;
+import com.zj.common.enums.TemplateType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.utils.OrikaUtil;
@@ -210,6 +212,7 @@ public class MicroserviceService {
 
     public Map<Boolean, List<ServiceApiBO>> getServiceApiPartMap(String serviceId, List<ServiceApiBO> serviceApiList) {
         List<ExecuteTemplateBO> templates = getServiceAllExecuteTemplate(serviceId);
+
         List<String> templateApiList =
                 templates.stream().map(template -> template.getMethod().toUpperCase() + "_" + template.getService()).map(uri -> uri.replace(WindyConstants.VARIABLE_CHAR, "")).collect(Collectors.toList());
         return serviceApiList.stream().collect(Collectors.partitioningBy(serviceApi -> templateApiList.stream().anyMatch(templateApi -> {
@@ -224,8 +227,7 @@ public class MicroserviceService {
     }
 
     private List<ExecuteTemplateBO> getServiceAllExecuteTemplate(String serviceId) {
-        List<String> caseIds =
-                testCaseRepository.getServiceCases(serviceId).stream().map(TestCaseBO::getTestCaseId).collect(Collectors.toList());
+        List<String> caseIds = testCaseRepository.getServiceCases(serviceId).stream().map(TestCaseBO::getTestCaseId).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(caseIds)) {
             return Collections.emptyList();
         }
@@ -234,9 +236,26 @@ public class MicroserviceService {
         if (CollectionUtils.isEmpty(featureIds)) {
             return Collections.emptyList();
         }
-        List<String> templateIds =
-                executePointRepository.getPointsByFeatureIds(featureIds).stream().map(ExecutePointBO::getTemplateId).distinct().collect(Collectors.toList());
-        return executeTemplateRepository.getTemplateByIds(templateIds).stream().filter(executeTemplate -> Objects.equals(executeTemplate.getInvokeType(), InvokerType.HTTP.getType())).collect(Collectors.toList());
+
+        List<ExecutePointBO> executePointList = executePointRepository.getPointsByFeatureIds(featureIds);
+        List<String> templateIds = executePointList.stream().map(ExecutePointBO::getTemplateId).distinct().collect(Collectors.toList());
+        List<ExecuteTemplateBO> templateList = executeTemplateRepository.getTemplateByIds(templateIds).stream()
+                .filter(executeTemplate -> Objects.equals(executeTemplate.getInvokeType(), InvokerType.HTTP.getType()))
+                .collect(Collectors.toList());
+
+        //将if和for包含的模版也统计
+        List<ExecuteTemplateBO> specialTemplates =
+                executePointList.stream().filter(executePointBO -> Objects.equals(executePointBO.getExecuteType(),
+                        TemplateType.IF.getType()) || Objects.equals(executePointBO.getExecuteType(),
+                        TemplateType.FOR.getType())).map(pointBO -> pointBO.getExecutorUnit().getExecutePoints()).flatMap(List::stream)
+                .filter(Objects::nonNull).map(point -> {
+                    ExecuteTemplateBO executeTemplateBO = new ExecuteTemplateBO();
+                    executeTemplateBO.setService(point.getExecutorUnit().getService());
+                    executeTemplateBO.setMethod(point.getExecutorUnit().getMethod());
+                    return executeTemplateBO;
+                }).collect(Collectors.toList());
+        templateList.addAll(specialTemplates);
+        return templateList;
     }
 
 

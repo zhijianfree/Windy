@@ -41,7 +41,7 @@ public class ExecutorUnit {
     private List<ParameterDefine> params;
 
     /**
-     * 针对for循环的需要特殊处理
+     * 针对if、for循环的需要特殊处理
      * */
     private List<ExecutePointDto> executePoints;
 
