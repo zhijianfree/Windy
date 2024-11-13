@@ -4,19 +4,17 @@ import com.zj.client.handler.pipeline.executer.notify.NodeStatusQueryLooper;
 import com.zj.common.adapter.monitor.collector.InstanceCollector;
 import com.zj.common.adapter.monitor.collector.PhysicsCollect;
 import com.zj.common.entity.dto.ClientCollectDto;
-import com.zj.common.entity.service.LanguageVersionDto;
+import com.zj.common.entity.service.ToolLoadResult;
+import com.zj.common.entity.service.ToolVersionDto;
+import com.zj.common.enums.CodeType;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.ArrayUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.io.InputStreamReader;
+import java.util.Objects;
 
 /**
  * @author guyuelan
@@ -44,32 +42,44 @@ public class ClientCollector {
         return clientCollectDto;
     }
 
-    public LanguageVersionDto getLanguageVersions() {
-        String javaPath = buildVersionPath + File.separator + "java";
-        File javaDir = new File(javaPath);
-        List<String> javaList = getVersionsFromDir(javaDir);
-
-        String goPath = buildVersionPath + File.separator + "go";
-        File goDir = new File(goPath);
-        List<String> goList = getVersionsFromDir(goDir);
-        LanguageVersionDto languageVersionDto = new LanguageVersionDto();
-        languageVersionDto.setJavaVersions(javaList);
-        languageVersionDto.setGoVersions(goList);
-        return languageVersionDto;
+    public ToolLoadResult loadLocalToolVersion(ToolVersionDto toolVersionDto) {
+        File localFile = new File(toolVersionDto.getInstallPath());
+        ToolLoadResult toolLoadResult = new ToolLoadResult();
+        boolean showVersion = showVersion(toolVersionDto.getType(), toolVersionDto.getInstallPath());
+        toolLoadResult.setSuccess(localFile.exists() && localFile.isDirectory() && showVersion);
+        return toolLoadResult;
     }
 
-    private static List<String> getVersionsFromDir(File dir) {
-        if (!dir.exists()) {
-            boolean mkdirs = dir.mkdirs();
-            if (!mkdirs) {
-                return Collections.emptyList();
+    public boolean showVersion(String type, String installPath) {
+        try {
+            String command = exchangeCommand(type, installPath);
+            // 使用 ProcessBuilder 执行命令
+            ProcessBuilder processBuilder = new ProcessBuilder();
+            processBuilder.command("sh", command);
+            Process process = processBuilder.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                log.info("load shell info: " + line);
             }
+            return process.waitFor() == 0;
+        } catch (Exception e) {
+            log.info("get build tool ={} version error ", type, e);
         }
-        log.info("get list from url = {}", dir.getAbsolutePath());
-        File[] files = dir.listFiles();
-        if (ArrayUtils.isEmpty(files)) {
-            return Collections.emptyList();
+        return false;
+    }
+
+    private static String exchangeCommand(String type, String installPath) {
+        String command = installPath;
+        if (Objects.equals(CodeType.JAVA.getType(), type)) {
+            command += "/bin/java -version";
         }
-        return Arrays.stream(files).filter(File::isDirectory).map(File::getName).collect(Collectors.toList());
+        if (Objects.equals(CodeType.GO.getType(), type)) {
+            command += "/bin/go version";
+        }
+        if (Objects.equals(CodeType.MAVEN.getType(), type)) {
+            command += "/bin/mvn -v";
+        }
+        return command;
     }
 }

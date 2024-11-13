@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.entity.pipeline.ServiceConfig;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.bo.service.MicroserviceBO;
-import com.zj.domain.entity.bo.service.ResourceMemberDto;
+import com.zj.domain.entity.bo.service.ResourceMemberBO;
 import com.zj.domain.entity.po.service.Microservice;
 import com.zj.domain.entity.po.service.ResourceMember;
 import com.zj.domain.mapper.service.MicroServiceMapper;
@@ -51,10 +51,10 @@ public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Micr
     microservice.setUpdateTime(System.currentTimeMillis());
     boolean save = save(microservice);
     if (save) {
-      ResourceMemberDto resourceMemberDto = new ResourceMemberDto();
-      resourceMemberDto.setResourceId(microservice.getServiceId());
-      resourceMemberDto.setUserId(userId);
-      boolean result = memberRepository.addResourceMember(resourceMemberDto);
+      ResourceMemberBO resourceMemberBO = new ResourceMemberBO();
+      resourceMemberBO.setResourceId(microservice.getServiceId());
+      resourceMemberBO.setUserId(userId);
+      boolean result = memberRepository.addResourceMember(resourceMemberBO);
       log.info("add service member result = {}", result);
     }
     return save ? microservice.getServiceId() : null;

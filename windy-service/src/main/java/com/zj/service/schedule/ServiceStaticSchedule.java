@@ -33,8 +33,7 @@ public class ServiceStaticSchedule {
         this.microserviceService = microserviceService;
     }
 
-//    @Scheduled(cron = "0 0 0 * * ?")
-    @Scheduled(cron = "0/5 * * * * ?")
+    @Scheduled(cron = "0 0 0 * * ?")
     public void loadApi() {
         List<MicroserviceBO> services = microServiceRepository.getAllServices();
         services.forEach(this::calculateServiceStatics);
@@ -62,6 +61,4 @@ public class ServiceStaticSchedule {
             log.info("count service coverage error", e);
         }
     }
-
-
 }

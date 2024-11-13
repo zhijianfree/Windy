@@ -8,7 +8,7 @@ import com.zj.demand.service.IterationService;
 import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.demand.BusinessStatusBO;
 import com.zj.domain.entity.bo.demand.IterationBO;
-import com.zj.domain.entity.bo.service.ResourceMemberDto;
+import com.zj.domain.entity.bo.service.ResourceMemberBO;
 import com.zj.domain.entity.vo.Create;
 import com.zj.domain.entity.vo.Update;
 import org.springframework.validation.annotation.Validated;
@@ -69,7 +69,7 @@ public class IterationRest {
     }
 
     @PostMapping("/iterations/{iterationId}/members")
-    public ResponseMeta<Boolean> addIterationMember(@RequestBody ResourceMemberDto serviceMember) {
+    public ResponseMeta<Boolean> addIterationMember(@RequestBody ResourceMemberBO serviceMember) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.addIterationMember(serviceMember));
     }
 

@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.bo.auth.UserBO;
-import com.zj.domain.entity.bo.service.ResourceMemberDto;
+import com.zj.domain.entity.bo.service.ResourceMemberBO;
 import com.zj.domain.entity.po.service.ResourceMember;
 import com.zj.domain.mapper.service.ResourceMemberMapper;
 import com.zj.domain.repository.auth.IUserRepository;
@@ -36,8 +36,8 @@ public class MemberRepositoryImpl extends ServiceImpl<ResourceMemberMapper, Reso
     }
 
     @Override
-    public boolean addResourceMember(ResourceMemberDto resourceMemberDto) {
-        ResourceMember resourceMember = OrikaUtil.convert(resourceMemberDto, ResourceMember.class);
+    public boolean addResourceMember(ResourceMemberBO resourceMemberBO) {
+        ResourceMember resourceMember = OrikaUtil.convert(resourceMemberBO, ResourceMember.class);
         resourceMember.setCreateTime(System.currentTimeMillis());
         return save(resourceMember);
     }

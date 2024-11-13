@@ -12,7 +12,7 @@ import com.zj.domain.entity.bo.demand.BugBO;
 import com.zj.domain.entity.bo.demand.BusinessStatusBO;
 import com.zj.domain.entity.bo.demand.DemandBO;
 import com.zj.domain.entity.bo.demand.IterationBO;
-import com.zj.domain.entity.bo.service.ResourceMemberDto;
+import com.zj.domain.entity.bo.service.ResourceMemberBO;
 import com.zj.domain.entity.po.service.ResourceMember;
 import com.zj.domain.repository.demand.IBugRepository;
 import com.zj.domain.repository.demand.IBusinessStatusRepository;
@@ -114,8 +114,8 @@ public class IterationService {
         return memberRepository.queryResourceMembers(iterationId);
     }
 
-    public Boolean addIterationMember(ResourceMemberDto resourceMemberDto) {
-        return memberRepository.addResourceMember(resourceMemberDto);
+    public Boolean addIterationMember(ResourceMemberBO resourceMemberBO) {
+        return memberRepository.addResourceMember(resourceMemberBO);
     }
 
     public Boolean deleteIterationMember(String iterationId, String userId) {

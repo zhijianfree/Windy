@@ -65,18 +65,18 @@ public class BaseEurekaAdapter {
         }
     }
 
-    protected boolean postWithIp(String url, Object data) {
+    protected Response postWithIp(String url, Object data) {
         String traceId = TraceUtils.getTraceId();
         Request request = new Request.Builder().url(url).header(TidInterceptor.HTTP_HEADER_TRACE_ID, traceId)
                 .post(RequestBody.create(mediaType, JSON.toJSONString(data))).build();
         try {
             Response response = okHttpClient.newCall(request).execute();
             log.info("notify master ip status result code={} result={}", response.code(), response.body().string());
-            return response.isSuccessful();
+            return response;
         } catch (Exception e) {
             log.error("request post with ip error ={}", e.toString());
         }
-        return false;
+        return null;
     }
 
     protected Response getWithIp(String url) {

@@ -42,6 +42,7 @@ public enum ErrorCode {
   SERVICE_GENERATE_RESPONSE_PARAM_NAME_EMPTY(HttpStatus.BAD_REQUEST, "Service.000012", "[%s]接口响应参数类名为空"),
   SERVICE_GENERATE_RESPONSE_NAME_EMPTY(HttpStatus.BAD_REQUEST, "Service.000013", "[%s]接口转化的响应类名为空"),
   SERVICE_API_NOT_FIND(HttpStatus.BAD_REQUEST, "Service.000014", "未发现服务API列表"),
+  LOAD_CLIENT_BUILD_TOOL_ERROR(HttpStatus.OK, "Service.000015", "加载client节点构建工具失败,节点列表: %s"),
   /*==================用例服务==================*/
   COMPARE_ERROR(HttpStatus.FORBIDDEN, "Feature.000002", "feature compare error"),
   EXECUTE_POINT_NOT_FIND(HttpStatus.NOT_FOUND, "Feature.000003", "can not find execute point"),

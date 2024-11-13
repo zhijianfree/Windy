@@ -2,7 +2,8 @@ package com.zj.common.adapter.invoker;
 
 import com.zj.common.entity.dto.ClientCollectDto;
 import com.zj.common.entity.dto.StopDispatch;
-import com.zj.common.entity.service.LanguageVersionDto;
+import com.zj.common.entity.service.ToolLoadResult;
+import com.zj.common.entity.service.ToolVersionDto;
 
 import java.util.List;
 
@@ -17,5 +18,5 @@ public interface IClientInvoker {
 
     List<ClientCollectDto> requestClientMonitor();
 
-    LanguageVersionDto getSupportVersions();
+    List<ToolLoadResult> loadBuildTool(ToolVersionDto toolVersion);
 }

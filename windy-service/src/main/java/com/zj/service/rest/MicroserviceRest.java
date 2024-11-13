@@ -1,15 +1,18 @@
 package com.zj.service.rest;
 
-import com.zj.common.entity.service.LanguageVersionDto;
+import com.zj.common.entity.service.ToolVersionDto;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.entity.dto.PageSize;
 import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.domain.entity.bo.auth.UserBO;
+import com.zj.domain.entity.bo.service.BuildToolBO;
 import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.service.entity.ServiceDto;
-import com.zj.domain.entity.bo.service.ResourceMemberDto;
+import com.zj.domain.entity.bo.service.ResourceMemberBO;
 import com.zj.service.entity.ServiceStaticsDto;
+import com.zj.service.entity.SystemBuildDto;
 import com.zj.service.service.MicroserviceService;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -62,7 +65,7 @@ public class MicroserviceRest {
     }
 
     @PostMapping("/services/{serviceId}/members")
-    public ResponseMeta<Boolean> addServiceMember(@RequestBody ResourceMemberDto serviceMember) {
+    public ResponseMeta<Boolean> addServiceMember(@RequestBody ResourceMemberBO serviceMember) {
         return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, microservice.addServiceMember(serviceMember));
     }
 
@@ -79,7 +82,7 @@ public class MicroserviceRest {
     }
 
     @ResponseBody
-    @PutMapping("/services")
+    @PutMapping("/systems/builds")
     public ResponseMeta<String> updateService(@RequestBody ServiceDto update) {
         return new ResponseMeta<String>(ErrorCode.SUCCESS, microservice.updateService(update));
     }
@@ -90,8 +93,19 @@ public class MicroserviceRest {
         return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, microservice.deleteService(serviceId));
     }
 
-    @GetMapping(value = "/service/build/versions")
-    public ResponseMeta<LanguageVersionDto> getSupportVersions() {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, microservice.getSupportVersions());
+    @GetMapping(value = "/system/build/versions")
+    public ResponseMeta<List<BuildToolBO>> getToolVersions() {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, microservice.getToolVersions());
+    }
+    @ResponseBody
+    @PostMapping("/system/builds")
+    public ResponseMeta<Boolean> createBuildTool(@Validated @RequestBody SystemBuildDto systemBuildDto) {
+        return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, microservice.createBuildTool(systemBuildDto));
+    }
+
+    @ResponseBody
+    @DeleteMapping("/system/builds/{toolId}")
+    public ResponseMeta<Boolean> deleteBuildTool(@PathVariable("toolId") String toolId) {
+        return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, microservice.deleteBuildTool(toolId));
     }
 }

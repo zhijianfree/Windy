@@ -7,7 +7,9 @@ import com.zj.common.adapter.invoker.IClientInvoker;
 import com.zj.common.entity.dto.ClientCollectDto;
 import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.common.entity.dto.StopDispatch;
-import com.zj.common.entity.service.LanguageVersionDto;
+import com.zj.common.entity.service.ToolLoadResult;
+import com.zj.common.entity.service.ToolVersionDto;
+import com.zj.common.utils.OrikaUtil;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +26,7 @@ import java.util.stream.Collectors;
 public class EurekaClientInvokerAdapter extends BaseEurekaAdapter implements IClientInvoker {
 
     private static final String DISPATCH_GENERATE_TASK = "http://WindyClient/v1/client/dispatch/generate";
-    private static final String GET_LANGUAGE_VERSION = "http://WindyClient/v1/devops/client/languages/version";
+    private static final String LOAD_LANGUAGE_VERSION = "http://%s/v1/devops/client/load/build/version";
     private static final String DISPATCH_PIPELINE_TASK = "http://WindyClient/v1/client/dispatch/pipeline";
     private static final String DISPATCH_FEATURE_TASK = "http://WindyClient/v1/client/dispatch/feature";
     private static final String MASTER_NOTIFY_CLIENT_STOP = "http://%s/v1/client/task/stop";
@@ -58,7 +60,8 @@ public class EurekaClientInvokerAdapter extends BaseEurekaAdapter implements ICl
                 return false;
             }
             String url = DISPATCH_PIPELINE_TASK.replace(DiscoverService.WINDY_Client, optional.get().getHost());
-            return postWithIp(url, pipelineTask);
+            Response response = postWithIp(url, pipelineTask);
+            return Optional.ofNullable(response).map(Response::isSuccessful).orElse(false);
         }
         ResponseEntity<String> response = requestPost(DISPATCH_PIPELINE_TASK, pipelineTask);
         if (Objects.isNull(response)) {
@@ -92,12 +95,25 @@ public class EurekaClientInvokerAdapter extends BaseEurekaAdapter implements ICl
     }
 
     @Override
-    public LanguageVersionDto getSupportVersions() {
-        ResponseEntity<String> response = requestGet(GET_LANGUAGE_VERSION);
-        log.info("get support versions = {}", response.getBody());
-        ResponseMeta responseMeta = JSON.parseObject(response.getBody(), ResponseMeta.class);
-        return Optional.ofNullable(responseMeta).map(data -> JSON.parseObject(JSON.toJSONString(data.getData()),
-                LanguageVersionDto.class)).orElse(null);
+    public List<ToolLoadResult> loadBuildTool(ToolVersionDto toolVersion) {
+        List<ServiceInstance> serviceInstances = discoverService.getServiceInstances(DiscoverService.WINDY_Client);
+        return serviceInstances.stream().map(service -> {
+            ToolLoadResult toolLoadResult = new ToolLoadResult();
+            toolLoadResult.setNodeIP(service.getIp());
+            try {
+                String url = String.format(LOAD_LANGUAGE_VERSION, service.getHost());
+                Response response = postWithIp(url, toolVersion);
+                String resultString = response.body().string();
+                log.info("get support versions = {}", resultString);
+                ResponseMeta responseMeta = JSON.parseObject(resultString, ResponseMeta.class);
+                Boolean loadResult = Optional.ofNullable(responseMeta).map(data -> Boolean.parseBoolean(String.valueOf(data))).orElse(false);
+                toolLoadResult.setSuccess(loadResult);
+            }catch (Exception e){
+                log.info("request client load tool error", e);
+                toolLoadResult.setSuccess(false);
+            }
+            return toolLoadResult;
+        }).collect(Collectors.toList());
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.zj.service.service;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.common.adapter.auth.IAuthService;
 import com.zj.common.adapter.git.GitAccessInfo;
@@ -8,13 +9,14 @@ import com.zj.common.adapter.invoker.IClientInvoker;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.common.entity.WindyConstants;
 import com.zj.common.entity.dto.PageSize;
-import com.zj.common.entity.feature.ExecutePointDto;
 import com.zj.common.entity.pipeline.ServiceConfig;
-import com.zj.common.entity.service.LanguageVersionDto;
+import com.zj.common.entity.service.ToolLoadResult;
+import com.zj.common.entity.service.ToolVersionDto;
 import com.zj.common.enums.ApiType;
 import com.zj.common.enums.InvokerType;
 import com.zj.common.enums.TemplateType;
 import com.zj.common.exception.ApiException;
+import com.zj.common.exception.CommonException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.bo.auth.UserBO;
@@ -23,8 +25,9 @@ import com.zj.domain.entity.bo.feature.ExecuteTemplateBO;
 import com.zj.domain.entity.bo.feature.FeatureInfoBO;
 import com.zj.domain.entity.bo.feature.TestCaseBO;
 import com.zj.domain.entity.bo.pipeline.PipelineBO;
+import com.zj.domain.entity.bo.service.BuildToolBO;
 import com.zj.domain.entity.bo.service.MicroserviceBO;
-import com.zj.domain.entity.bo.service.ResourceMemberDto;
+import com.zj.domain.entity.bo.service.ResourceMemberBO;
 import com.zj.domain.entity.bo.service.ServiceApiBO;
 import com.zj.domain.entity.enums.FeatureType;
 import com.zj.domain.entity.po.service.ResourceMember;
@@ -35,10 +38,12 @@ import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.domain.repository.feature.ITestCaseRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
+import com.zj.domain.repository.service.IBuildToolRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.domain.repository.service.IServiceApiRepository;
 import com.zj.service.entity.ServiceDto;
 import com.zj.service.entity.ServiceStaticsDto;
+import com.zj.service.entity.SystemBuildDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -69,6 +74,7 @@ public class MicroserviceService {
     private final IFeatureRepository featureRepository;
     private final IExecutePointRepository executePointRepository;
     private final IExecuteTemplateRepository executeTemplateRepository;
+    private final IBuildToolRepository buildToolRepository;
 
     public MicroserviceService(IMicroServiceRepository microServiceRepository, UniqueIdService uniqueIdService,
                                IAuthService authService, List<IGitRepositoryHandler> gitRepositories,
@@ -76,7 +82,7 @@ public class MicroserviceService {
                                ITestCaseRepository testCaseRepository, IMemberRepository memberRepository,
                                IClientInvoker clientInvoker, IServiceApiRepository serviceApiRepository,
                                IFeatureRepository featureRepository, IExecutePointRepository executePointRepository,
-                               IExecuteTemplateRepository executeTemplateRepository) {
+                               IExecuteTemplateRepository executeTemplateRepository, IBuildToolRepository buildToolRepository) {
         this.microServiceRepository = microServiceRepository;
         this.uniqueIdService = uniqueIdService;
         this.authService = authService;
@@ -90,6 +96,7 @@ public class MicroserviceService {
         this.featureRepository = featureRepository;
         this.executePointRepository = executePointRepository;
         this.executeTemplateRepository = executeTemplateRepository;
+        this.buildToolRepository = buildToolRepository;
     }
 
     private IGitRepositoryHandler getRepositoryBranch(String type) {
@@ -184,16 +191,12 @@ public class MicroserviceService {
         return memberRepository.queryResourceMembers(serviceId);
     }
 
-    public Boolean addServiceMember(ResourceMemberDto member) {
+    public Boolean addServiceMember(ResourceMemberBO member) {
         return memberRepository.addResourceMember(member);
     }
 
     public Boolean deleteServiceMember(String serviceId, String userId) {
         return memberRepository.deleteResourceMember(serviceId, userId);
-    }
-
-    public LanguageVersionDto getSupportVersions() {
-        return clientInvoker.getSupportVersions();
     }
 
     public ServiceStaticsDto getServiceStatics(String serviceId) {
@@ -277,5 +280,27 @@ public class MicroserviceService {
 
         // 比较路径
         return templatePath.contains(apiPath);
+    }
+
+    public Boolean createBuildTool(SystemBuildDto systemBuildDto) {
+        ToolVersionDto toolVersionDto = OrikaUtil.convert(systemBuildDto, ToolVersionDto.class);
+        List<String> loadErrorClients = clientInvoker.loadBuildTool(toolVersionDto).stream()
+                .filter(result -> !result.getSuccess()).map(ToolLoadResult::getNodeIP).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(loadErrorClients)){
+            log.info("client load tool error list={}", loadErrorClients);
+            throw new CommonException(ErrorCode.LOAD_CLIENT_BUILD_TOOL_ERROR, String.join(",", loadErrorClients));
+        }
+
+        BuildToolBO buildToolBO = OrikaUtil.convert(systemBuildDto, BuildToolBO.class);
+        buildToolBO.setToolId(uniqueIdService.getUniqueId());
+        return buildToolRepository.saveBuildTool(buildToolBO);
+    }
+
+    public Boolean deleteBuildTool(String toolId) {
+        return buildToolRepository.deleteBuildTool(toolId);
+    }
+
+    public List<BuildToolBO> getToolVersions() {
+        return buildToolRepository.getBuildToolList();
     }
 }
