@@ -86,7 +86,8 @@ public class EurekaMasterInvokerAdapter extends BaseEurekaAdapter implements IMa
                     String url = NOTIFY_TASK_RESULT.replace(DiscoverService.WINDY_MASTER, serviceInstance.getHost());
                     log.info("start notify master ip={} result", serviceInstance.getHost());
                     // 如果触发任务执行的master节点存在那么优先访问触发任务的master节点
-                    return postWithIp(url, resultEvent);
+                    Response response = postWithIp(url, resultEvent);
+                    return response.isSuccessful();
                 }).orElse(false);
         if (notifySuccess) {
             return true;
