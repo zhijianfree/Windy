@@ -30,7 +30,7 @@ public class ClientCollectorRest {
     return new ResponseMeta<>(ErrorCode.SUCCESS, clientCollector.getInstanceInfo());
   }
 
-  @GetMapping("/languages/version")
+  @GetMapping("/load/build/version")
   public ResponseMeta<ToolLoadResult> loadToolVersion(@RequestBody ToolVersionDto toolVersionDto) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, clientCollector.loadLocalToolVersion(toolVersionDto));
   }
