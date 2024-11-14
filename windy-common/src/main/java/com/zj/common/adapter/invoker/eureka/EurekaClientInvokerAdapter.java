@@ -106,7 +106,8 @@ public class EurekaClientInvokerAdapter extends BaseEurekaAdapter implements ICl
                 String resultString = response.body().string();
                 log.info("get support versions = {}", resultString);
                 ResponseMeta responseMeta = JSON.parseObject(resultString, ResponseMeta.class);
-                Boolean loadResult = Optional.ofNullable(responseMeta).map(data -> Boolean.parseBoolean(String.valueOf(data))).orElse(false);
+                Boolean loadResult = Optional.ofNullable(responseMeta).map(res -> JSON.parseObject(JSON.toJSONString(res.getData()),
+                        ToolLoadResult.class)).map(ToolLoadResult::getSuccess).orElse(false);
                 toolLoadResult.setSuccess(loadResult);
             }catch (Exception e){
                 log.info("request client load tool error", e);
