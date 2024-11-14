@@ -24,7 +24,7 @@ public class BaseEurekaAdapter {
     private final RestTemplate restTemplate;
     private final HttpHeaders headers;
     private final okhttp3.MediaType mediaType = okhttp3.MediaType.get("application/json; charset=utf-8");
-    protected final OkHttpClient okHttpClient = new OkHttpClient.Builder().connectTimeout(10,
+    protected final OkHttpClient okHttpClient = new OkHttpClient.Builder().connectTimeout(60,
             TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS).build();
 
     public BaseEurekaAdapter(RestTemplate restTemplate) {
@@ -71,7 +71,7 @@ public class BaseEurekaAdapter {
                 .post(RequestBody.create(mediaType, JSON.toJSONString(data))).build();
         try {
             Response response = okHttpClient.newCall(request).execute();
-            log.info("notify master ip status result code={} result={}", response.code(), response.body().string());
+            log.info("notify master ip status result code={}", response.code());
             return response;
         } catch (Exception e) {
             log.error("request post with ip error ={}", e.toString());
