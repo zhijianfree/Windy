@@ -7,6 +7,7 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.entity.dto.ClientCollectDto;
 import com.zj.common.entity.dto.ResponseMeta;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,7 +31,7 @@ public class ClientCollectorRest {
     return new ResponseMeta<>(ErrorCode.SUCCESS, clientCollector.getInstanceInfo());
   }
 
-  @GetMapping("/load/build/version")
+  @PostMapping("/load/build/version")
   public ResponseMeta<ToolLoadResult> loadToolVersion(@RequestBody ToolVersionDto toolVersionDto) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, clientCollector.loadLocalToolVersion(toolVersionDto));
   }
