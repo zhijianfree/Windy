@@ -53,18 +53,29 @@ public class ClientCollector {
     public boolean showVersion(String type, String installPath) {
         try {
             String command = exchangeCommand(type, installPath);
-            // 使用 ProcessBuilder 执行命令
             ProcessBuilder processBuilder = new ProcessBuilder();
-            processBuilder.command("sh", command);
+            processBuilder.command("sh", "-c", command);
             Process process = processBuilder.start();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                log.info("load shell info: " + line);
+
+            // 读取标准输出
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    log.info("load shell info: " + line);
+                }
             }
+
+            // 读取错误输出
+            try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+                String errorLine;
+                while ((errorLine = errorReader.readLine()) != null) {
+                    log.error("load shell error: " + errorLine);
+                }
+            }
+
             return process.waitFor() == 0;
         } catch (Exception e) {
-            log.info("get build tool ={} version error ", type, e);
+            log.error("get build tool ={} version error ", type, e);
         }
         return false;
     }
