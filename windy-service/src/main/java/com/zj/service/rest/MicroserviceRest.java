@@ -82,7 +82,7 @@ public class MicroserviceRest {
     }
 
     @ResponseBody
-    @PutMapping("/systems/builds")
+    @PutMapping("/services")
     public ResponseMeta<String> updateService(@RequestBody ServiceDto update) {
         return new ResponseMeta<String>(ErrorCode.SUCCESS, microservice.updateService(update));
     }

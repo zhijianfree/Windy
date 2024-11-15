@@ -78,10 +78,10 @@ public class MavenOperator implements ICodeBuilder {
 
     String mavenDir = globalEnvConfig.getMavenPath();
     Preconditions.checkNotNull(mavenDir, "maven path can not find , consider to fix it");
-    Invoker ideaInvoker = new DefaultInvoker();
-    ideaInvoker.setMavenHome(new File(mavenDir));
-    ideaInvoker.setOutputHandler(outputHandler);
-    InvocationResult ideaResult = ideaInvoker.execute(ideaRequest);
+    Invoker mavenInvoker = new DefaultInvoker();
+    mavenInvoker.setMavenHome(new File(mavenDir));
+    mavenInvoker.setOutputHandler(outputHandler);
+    InvocationResult ideaResult = mavenInvoker.execute(ideaRequest);
     File pomFile = new File(pomPath);
     copyJar2DeployDir(pomFile);
     return ideaResult.getExitCode();
