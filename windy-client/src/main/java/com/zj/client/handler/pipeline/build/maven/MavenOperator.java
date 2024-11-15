@@ -16,6 +16,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.shared.invoker.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
@@ -62,27 +63,28 @@ public class MavenOperator implements ICodeBuilder {
   public Integer build(CodeBuildContext context, IBuildNotifyListener notifyListener) {
     try {
       log.info("start build java code = {}", JSON.toJSONString(context));
-      return build(context.getBuildFile(), context.getTargetDir(), notifyListener::notifyMessage);
+      return buildMaven(context, notifyListener::notifyMessage);
     } catch (Exception e) {
       log.info("execute maven error", e);
     }
     return -1;
   }
 
-  public Integer build(String pomPath, String servicePath, InvocationOutputHandler outputHandler)
+  public Integer buildMaven(CodeBuildContext context, InvocationOutputHandler outputHandler)
       throws IOException, MavenInvocationException {
     InvocationRequest ideaRequest = new DefaultInvocationRequest();
-    ideaRequest.setBaseDirectory(new File(servicePath));
+    ideaRequest.setBaseDirectory(new File(context.getTargetDir()));
     ideaRequest.setAlsoMakeDependents(true);
     ideaRequest.setGoals(Collections.singletonList("package"));
 
-    String mavenDir = globalEnvConfig.getMavenPath();
+    String mavenDir = Optional.ofNullable(context.getBuildVersion()).filter(StringUtils::isNoneBlank)
+            .orElseGet(globalEnvConfig::getMavenPath);
     Preconditions.checkNotNull(mavenDir, "maven path can not find , consider to fix it");
     Invoker mavenInvoker = new DefaultInvoker();
     mavenInvoker.setMavenHome(new File(mavenDir));
     mavenInvoker.setOutputHandler(outputHandler);
     InvocationResult ideaResult = mavenInvoker.execute(ideaRequest);
-    File pomFile = new File(pomPath);
+    File pomFile = new File(context.getBuildFile());
     copyJar2DeployDir(pomFile);
     return ideaResult.getExitCode();
   }
