@@ -13,6 +13,7 @@ import com.zj.domain.mapper.pipeline.PipelineMapper;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -97,6 +98,9 @@ public class PipelineRepository extends ServiceImpl<PipelineMapper, Pipeline> im
   }
 
   private static Pipeline convertPipeline(PipelineBO pipelineBO) {
+    if (Objects.isNull(pipelineBO)) {
+      return null;
+    }
     Pipeline pipeline = OrikaUtil.convert(pipelineBO, Pipeline.class);
     Optional.ofNullable(pipelineBO.getPipelineConfig()).ifPresent(config ->
             pipeline.setConfig(JSON.toJSONString(config)));
@@ -104,6 +108,9 @@ public class PipelineRepository extends ServiceImpl<PipelineMapper, Pipeline> im
   }
 
   private static PipelineBO convertPipelineBO(Pipeline pipeline) {
+    if (Objects.isNull(pipeline)) {
+      return null;
+    }
     PipelineBO pipelineBO = OrikaUtil.convert(pipeline, PipelineBO.class);
     pipelineBO.setPipelineConfig(JSON.parseObject(pipeline.getConfig(), PipelineConfig.class));
     return pipelineBO;

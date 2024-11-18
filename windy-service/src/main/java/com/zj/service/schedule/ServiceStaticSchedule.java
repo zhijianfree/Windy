@@ -47,7 +47,7 @@ public class ServiceStaticSchedule {
             if (CollectionUtils.isEmpty(serviceApiList)) {
                 service.setApiCoverage(0);
                 boolean updateResult = microServiceRepository.updateService(service);
-                log.info("update  service coverage result = {}", updateResult);
+                log.info("update service={} 0 coverage result = {}", service.getServiceName(), updateResult);
                 return;
             }
             Map<Boolean, List<ServiceApiBO>> serviceApiPartMap =
@@ -56,7 +56,8 @@ public class ServiceStaticSchedule {
             double result = Math.round((double) apiInFeatureList.size() / serviceApiList.size() * 100 * 100) / 100.0;
             service.setApiCoverage((int) result);
             boolean updateResult = microServiceRepository.updateService(service);
-            log.info("update  service coverage result = {} coverage={}", updateResult, result);
+            log.info("update  service={} coverage result = {} coverage={}", service.getServiceName(), updateResult,
+                    result);
         } catch (Exception e) {
             log.info("count service coverage error", e);
         }
