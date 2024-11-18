@@ -15,6 +15,7 @@ import com.zj.common.enums.TemplateType;
 import com.zj.common.entity.dto.ResultEvent;
 import com.zj.common.utils.IpUtils;
 import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.utils.TraceUtils;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +74,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
             Map<String, Object> globalContext = new HashMap<>();
             CountDownLatch countDownLatch = null;
             for (ExecutePoint executePoint : executePoints) {
+                TraceUtils.startNextSpan();
                 judgeWhetherWait(countDownLatch);
                 ExecuteRecord executeRecord = new ExecuteRecord();
                 String recordId = uniqueIdService.getUniqueId();
@@ -103,16 +105,20 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
                     FeatureResponse featureResponse = createFailResponse(executePoint, e);
                     executeRecord.setStatus(ProcessStatus.FAIL.getType());
                     executeRecord.setRecordResult(Collections.singletonList(featureResponse));
+                }finally {
+                    //3 保存执行点记录
+                    saveRecord(featureParam, executePoint, executeRecord);
+                    TraceUtils.removeTrace();
                 }
 
-                //3 保存执行点记录
-                saveRecord(featureParam, executePoint, executeRecord);
                 if (Objects.equals(executeRecord.getStatus(), ProcessStatus.FAIL.getType())) {
                     log.warn("execute feature error featureId= {}", executePoint.getFeatureId());
                     status.set(executeRecord.getStatus());
                     break;
                 }
             }
+
+            //todo 如果用例执行失败，尝试执行清除逻辑
 
             //4 更新整个用例执行结果
             featureHistory.setExecuteStatus(status.get());
