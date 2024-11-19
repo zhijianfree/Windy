@@ -18,7 +18,7 @@ public class NoneMatchCompare extends BaseCompare {
 
     @Override
     public CompareType getType() {
-        return CompareType.ARRAY_ITEM_MATCH;
+        return CompareType.NONE_ITEM_MATCH;
     }
 
     @Override
