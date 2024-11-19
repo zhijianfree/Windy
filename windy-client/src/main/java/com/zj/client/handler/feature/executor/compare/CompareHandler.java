@@ -91,7 +91,7 @@ public class CompareHandler {
                 compareDefine.setResponseValue(String.valueOf(executeDetailVo.responseStatus()));
                 return;
             }
-            exchangeOneCompareData(executeDetailVo, compareDefine);
+            exchangeOneCompareData(executeDetailVo.responseBody(), compareDefine);
         });
     }
 
