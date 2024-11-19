@@ -33,7 +33,7 @@ public class OgnlDataParser {
         try {
             ans = Ognl.getValue(Ognl.parseExpression(expression), context, context.getRoot());
         } catch (OgnlException e) {
-            e.printStackTrace();
+            log.info("ognl parse error",e);
         }
         return ans;
     }
