@@ -39,9 +39,8 @@ public class CompareHandler {
         }
 
         //过滤比较Key不能为空
-        compareDefines = compareDefines.stream().filter(Objects::nonNull).filter(
-                compare -> StringUtils.isNoneBlank(compare.getCompareKey())).collect(
-                Collectors.toList());
+        compareDefines =
+                compareDefines.stream().filter(Objects::nonNull).filter(compare -> StringUtils.isNoneBlank(compare.getCompareKey())).collect(Collectors.toList());
 
         preHandle(executeDetailVo, compareDefines);
         log.info("step 4 execute compare pre Handle");
@@ -49,9 +48,8 @@ public class CompareHandler {
         for (CompareDefine compareDefine : compareDefines) {
             compareResult = compareOne(compareDefine);
             if (!compareResult.isCompareSuccess()) {
-                compareResult.setDescription(
-                        String.format(TIP_FORMAT, compareDefine.getCompareKey(), compareDefine.getExpectValue(),
-                                compareDefine.getResponseValue()));
+                compareResult.setDescription(String.format(TIP_FORMAT, compareDefine.getCompareKey(),
+                        compareDefine.getExpectValue(), compareDefine.getResponseValue()));
                 compareResult.setErrorType(ErrorCode.COMPARE_ERROR);
                 return compareResult;
             }
@@ -87,21 +85,25 @@ public class CompareHandler {
             return;
         }
 
-        compareDefines.stream().filter(CompareHandler::isNeedWrapResponseData).forEach(compareDefine -> {
+        compareDefines.stream().filter(CompareHandler::isNeedWrapResponseData).forEach(compareDefine ->{
             String key = compareDefine.getCompareKey();
             if (Objects.equals(key, WindyConstants.RESPONSE_CODE)) {
                 compareDefine.setResponseValue(String.valueOf(executeDetailVo.responseStatus()));
                 return;
             }
-
-            if (Objects.equals(key, WindyConstants.RESPONSE_BODY)) {
-                compareDefine.setResponseValue(executeDetailVo.responseBody());
-                return;
-            }
-
-            Object result = ognlDataParser.exchangeOgnlParamValue(executeDetailVo.responseBody(), key);
-            compareDefine.setResponseValue(result);
+            exchangeOneCompareData(executeDetailVo, compareDefine);
         });
+    }
+
+    public void exchangeOneCompareData(Object responseData, CompareDefine compareDefine) {
+        String key = compareDefine.getCompareKey();
+        if (Objects.equals(key, WindyConstants.RESPONSE_BODY)) {
+            compareDefine.setResponseValue(responseData);
+            return;
+        }
+
+        Object result = ognlDataParser.exchangeOgnlParamValue(responseData, key);
+        compareDefine.setResponseValue(result);
     }
 
     private static boolean isNeedWrapResponseData(CompareDefine compare) {
@@ -110,7 +112,6 @@ public class CompareHandler {
                 compare.getOperator())) {
             return true;
         }
-        return StringUtils.isNoneBlank(compare.getCompareKey()) && StringUtils.isNoneBlank(
-                compare.getExpectValue());
+        return StringUtils.isNoneBlank(compare.getCompareKey()) && StringUtils.isNoneBlank(compare.getExpectValue());
     }
 }
