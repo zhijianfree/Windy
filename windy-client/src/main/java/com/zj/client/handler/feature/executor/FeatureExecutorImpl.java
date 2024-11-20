@@ -89,6 +89,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
                     if (Objects.equals(executePoint.getExecuteType(), TemplateType.THREAD.getType())) {
                         countDownLatch = new CountDownLatch(1);
                         featureExecuteContext.setCountDownLatch(countDownLatch);
+                        status.set(ProcessStatus.RUNNING.getType());
                     }
                     List<FeatureResponse> responses = executeStrategyFactory.execute(executePoint, featureExecuteContext);
                     executeRecord.setStatus(judgeRecordStatus(responses));
@@ -148,7 +149,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
     }
 
     public static Integer judgeRecordStatus(List<FeatureResponse> responses) {
-        boolean processing = responses.stream().allMatch(FeatureResponse::isProcessing);
+        boolean processing = responses.stream().anyMatch(FeatureResponse::isProcessing);
         if (processing) {
             return ProcessStatus.RUNNING.getType();
         }

@@ -3,6 +3,7 @@ package com.zj.client.handler.feature.executor.invoker.strategy;
 import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.bo.ExecutePoint;
 import com.zj.client.entity.bo.ExecuteRecord;
+import com.zj.client.handler.feature.executor.interceptor.IExecuteInterceptor;
 import com.zj.common.entity.feature.FeatureResponse;
 import com.zj.client.handler.feature.executor.FeatureExecutorImpl;
 import com.zj.client.handler.feature.executor.compare.CompareHandler;
@@ -38,7 +39,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class AsyncExecuteStrategy extends BaseExecuteStrategy {
+public class AsyncExecuteStrategy extends BaseExecuteStrategy implements IExecuteInterceptor {
 
     private final Executor executor;
     private final IResultEventNotify resultEventNotify;
@@ -65,13 +66,10 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy {
         String timeout = executorUnit.getMethod();
         List<ExecutePointDto> executePoints = executorUnit.getExecutePoints();
         FeatureExecuteContext newContext = OrikaUtil.convert(featureExecuteContext, FeatureExecuteContext.class);
+        newContext.setCountDownLatch(featureExecuteContext.getCountDownLatch());
         executor.execute(() ->{
             CountDownLatch countDownLatch = new CountDownLatch(1);
             CompletableFuture.runAsync(() -> {
-                if (Objects.nonNull(featureExecuteContext.getCountDownLatch())) {
-                    log.info("find count down release wait");
-                    featureExecuteContext.getCountDownLatch().countDown();
-                }
                 List<FeatureResponse> responses = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(executePoints)){
                     responses = executePoints.stream().map(executePointDto -> {
@@ -145,5 +143,13 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy {
                 .logId(featureExecuteContext.getLogId())
                 .params(executeRecord);
         resultEventNotify.notifyEvent(resultEvent);
+    }
+
+    @Override
+    public void beforeExecute(ExecutorUnit executorUnit, FeatureExecuteContext context) {
+        if (Objects.nonNull(context.getCountDownLatch())) {
+            log.info("find count down release wait");
+            context.getCountDownLatch().countDown();
+        }
     }
 }

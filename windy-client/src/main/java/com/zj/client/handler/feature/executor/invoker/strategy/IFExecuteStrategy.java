@@ -77,7 +77,7 @@ public class IFExecuteStrategy extends BaseExecuteStrategy {
             ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
             executeDetailVo.setStatus(true);
             executeDetailVo.setResBody("test condition failed ");
-            FeatureResponse featureResponse = FeatureResponse.builder().executeDetailVo(executeDetailVo).build();
+            FeatureResponse featureResponse = FeatureResponse.builder().name("execute if condition").executeDetailVo(executeDetailVo).build();
             return Collections.singletonList(featureResponse);
         }
 
@@ -94,10 +94,8 @@ public class IFExecuteStrategy extends BaseExecuteStrategy {
             return false;
         }
         //将比较参变量转换成实际值
-        log.info("before convert={}",JSON.toJSONString(compareDefine));
         Object object = ognlDataParser.exchangeOgnlValue(contextMap, compareDefine.getCompareKey());
         compareDefine.setResponseValue(object);
-        log.info("after convert={}",JSON.toJSONString(compareDefine));
 
         CompareOperator operator = compareFactory.getOperator(compareDefine.getOperator());
         if (Objects.isNull(operator)) {
