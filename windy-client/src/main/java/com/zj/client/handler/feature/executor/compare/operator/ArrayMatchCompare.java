@@ -9,6 +9,7 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.entity.feature.CompareDefine;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +34,12 @@ public class ArrayMatchCompare extends BaseCompare{
         CompareResult compareResult = createSuccessResult();
         try {
             List<Object> responseList = JSON.parseArray(JSON.toJSONString(compareDefine.getResponseValue()), Object.class);
+            if (CollectionUtils.isEmpty(responseList)) {
+                compareResult.setErrorType(ErrorCode.COMPARE_ERROR);
+                compareResult.setErrorMessage("compare array list is empty");
+                return compareResult;
+
+            }
             PattenEntry pattenEntry = convertEntry(compareDefine.getExpectValue());
             log.info("compare key = {} response value={}", pattenEntry.getPropertyKey(),
                     JSON.toJSONString(compareDefine.getResponseValue()));

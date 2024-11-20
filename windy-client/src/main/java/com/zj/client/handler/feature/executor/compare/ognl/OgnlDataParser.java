@@ -41,13 +41,13 @@ public class OgnlDataParser {
             log.info("source obj is null not exchange");
             return null;
         }
-
-        expression = expression.replace(WindyConstants.VARIABLE_CHAR, WindyConstants.RUNTIME_VARIABLE_CHAR);
+        expression = expression.replace(WindyConstants.VARIABLE_CHAR, "#context.");
         OgnlContext context = (OgnlContext) Ognl.createDefaultContext(this,
                 new DefaultMemberAccess(true),
                 new DefaultClassResolver(),
                 new DefaultTypeConverter());
         context.setRoot(object);
+        context.put("context", object);
         try {
             return Ognl.getValue(Ognl.parseExpression(expression), context, context.getRoot());
         } catch (OgnlException e) {
