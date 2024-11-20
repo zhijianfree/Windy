@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -41,14 +40,12 @@ import java.util.stream.Collectors;
 public class IFExecuteStrategy extends BaseExecuteStrategy {
 
     private final OgnlDataParser ognlDataParser = new OgnlDataParser();
-    private final CompareHandler compareHandler;
     private final CompareFactory compareFactory;
 
     public IFExecuteStrategy(InterceptorProxy interceptorProxy,
                              List<IExecuteInvoker> executeInvokers,
-                             CompareHandler compareHandler, CompareHandler compareHandler1, CompareFactory compareFactory) {
+                             CompareHandler compareHandler, CompareFactory compareFactory) {
         super(interceptorProxy, executeInvokers, compareHandler);
-        this.compareHandler = compareHandler1;
         this.compareFactory = compareFactory;
     }
 
@@ -64,7 +61,8 @@ public class IFExecuteStrategy extends BaseExecuteStrategy {
         ExecutorUnit executorUnit = executePoint.getExecutorUnit();
         boolean result;
         String ognl = executorUnit.getService();
-        if (StringUtils.isNotBlank(ognl)) {
+        boolean isNewVersion = StringUtils.isNotBlank(ognl);
+        if (isNewVersion) {
             result = runCompare(ognl, contextMap);
         } else {
             ognl = executorUnit.getMethod();
@@ -76,8 +74,7 @@ public class IFExecuteStrategy extends BaseExecuteStrategy {
         if (!result) {
             ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
             executeDetailVo.setStatus(true);
-            executeDetailVo.addRequestInfo("校验条件", executorUnit.getMethod());
-            executeDetailVo.setResBody("校验不通过");
+            executeDetailVo.setResBody("test condition failed ");
             FeatureResponse featureResponse = FeatureResponse.builder().executeDetailVo(executeDetailVo).build();
             return Collections.singletonList(featureResponse);
         }
@@ -96,7 +93,8 @@ public class IFExecuteStrategy extends BaseExecuteStrategy {
         }
         //将比较参变量转换成实际值
         log.info("before convert={}",JSON.toJSONString(compareDefine));
-        compareHandler.exchangeOneCompareData(contextMap, compareDefine);
+        Object object = ognlDataParser.exchangeOgnlValue(contextMap, compareDefine.getCompareKey());
+        compareDefine.setResponseValue(object);
         log.info("after convert={}",JSON.toJSONString(compareDefine));
 
         CompareOperator operator = compareFactory.getOperator(compareDefine.getOperator());

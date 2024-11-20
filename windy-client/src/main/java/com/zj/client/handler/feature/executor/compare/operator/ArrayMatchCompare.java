@@ -40,7 +40,7 @@ public class ArrayMatchCompare extends BaseCompare{
                 if (StringUtils.isBlank(pattenEntry.propertyKey)) {
                     return Objects.equals(pattenEntry.getExpectValue(), String.valueOf(obj));
                 }
-                Object value = ognlDataParser.exchangeOgnlParamValue(obj,
+                Object value = ognlDataParser.exchangeOgnlResponseValue(obj,
                         WindyConstants.RESPONSE_BODY +"." + pattenEntry.propertyKey);
                 return Objects.equals(pattenEntry.getExpectValue(), String.valueOf(value));
             });

@@ -15,7 +15,7 @@ import ognl.OgnlException;
 @Slf4j
 public class OgnlDataParser {
 
-    public Object exchangeOgnlParamValue(Object object, String expression) {
+    public Object exchangeOgnlResponseValue(Object object, String expression) {
         if (Objects.isNull(object)) {
             log.info("source obj is null not exchange");
             return null;
@@ -28,14 +28,32 @@ public class OgnlDataParser {
                 new DefaultTypeConverter());
         context.setRoot(object);
         context.put(WindyConstants.BODY, object);
-
-        Object ans = null;
         try {
-            ans = Ognl.getValue(Ognl.parseExpression(expression), context, context.getRoot());
+            return Ognl.getValue(Ognl.parseExpression(expression), context, context.getRoot());
         } catch (OgnlException e) {
             log.info("ognl parse error",e);
         }
-        return ans;
+        return null;
+    }
+
+    public Object exchangeOgnlValue(Object object, String expression) {
+        if (Objects.isNull(object)) {
+            log.info("source obj is null not exchange");
+            return null;
+        }
+
+        expression = expression.replace(WindyConstants.VARIABLE_CHAR, WindyConstants.RUNTIME_VARIABLE_CHAR);
+        OgnlContext context = (OgnlContext) Ognl.createDefaultContext(this,
+                new DefaultMemberAccess(true),
+                new DefaultClassResolver(),
+                new DefaultTypeConverter());
+        context.setRoot(object);
+        try {
+            return Ognl.getValue(Ognl.parseExpression(expression), context, context.getRoot());
+        } catch (OgnlException e) {
+            log.info("ognl parse error",e);
+        }
+        return null;
     }
 
     public boolean judgeExpression(Map<String, Object> map, String expression) {
@@ -44,7 +62,7 @@ public class OgnlDataParser {
             Object result = Ognl.getValue(Ognl.parseExpression(expression), map, new Object());
             return Optional.ofNullable(result).map(r -> Boolean.parseBoolean(String.valueOf(result))).orElse(false);
         } catch (OgnlException e) {
-            e.printStackTrace();
+            log.info("");
         }
         return false;
     }

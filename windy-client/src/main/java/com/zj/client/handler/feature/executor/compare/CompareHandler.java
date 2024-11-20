@@ -85,24 +85,23 @@ public class CompareHandler {
             return;
         }
 
-        compareDefines.stream().filter(CompareHandler::isNeedWrapResponseData).forEach(compareDefine ->{
-            String key = compareDefine.getCompareKey();
-            if (Objects.equals(key, WindyConstants.RESPONSE_CODE)) {
-                compareDefine.setResponseValue(String.valueOf(executeDetailVo.responseStatus()));
-                return;
-            }
-            exchangeOneCompareData(executeDetailVo.responseBody(), compareDefine);
-        });
+        compareDefines.stream().filter(CompareHandler::isNeedWrapResponseData).forEach(compareDefine ->
+                exchangeOneCompareData(executeDetailVo, compareDefine));
     }
 
-    public void exchangeOneCompareData(Object responseData, CompareDefine compareDefine) {
+    public void exchangeOneCompareData(ExecuteDetailVo executeDetailVo, CompareDefine compareDefine) {
         String key = compareDefine.getCompareKey();
-        if (Objects.equals(key, WindyConstants.RESPONSE_BODY)) {
-            compareDefine.setResponseValue(responseData);
+        if (Objects.equals(key, WindyConstants.RESPONSE_CODE)) {
+            compareDefine.setResponseValue(String.valueOf(executeDetailVo.responseStatus()));
             return;
         }
 
-        Object result = ognlDataParser.exchangeOgnlParamValue(responseData, key);
+        if (Objects.equals(key, WindyConstants.RESPONSE_BODY)) {
+            compareDefine.setResponseValue(executeDetailVo.responseBody());
+            return;
+        }
+
+        Object result = ognlDataParser.exchangeOgnlResponseValue(executeDetailVo.responseBody(), key);
         compareDefine.setResponseValue(result);
     }
 

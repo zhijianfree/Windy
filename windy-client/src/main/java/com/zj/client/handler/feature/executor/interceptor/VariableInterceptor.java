@@ -90,7 +90,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
                 return;
             }
 
-            Object result = ognlDataParser.exchangeOgnlParamValue(responseBody, expressionString);
+            Object result = ognlDataParser.exchangeOgnlResponseValue(responseBody, expressionString);
             context.set(variableDefine.getVariableKey(), result);
             log.info("set context key={} value= {}", variableDefine.getVariableKey(), result);
         });
