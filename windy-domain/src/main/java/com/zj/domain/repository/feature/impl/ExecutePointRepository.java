@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -109,6 +110,9 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
     return executePoints.stream().map(this::convertExecutePointBO).collect(Collectors.toList());
   }
   public ExecutePointBO convertExecutePointBO(ExecutePoint executePoint){
+    if (Objects.isNull(executePoint)) {
+      return null;
+    }
     ExecutePointBO executePointBO = OrikaUtil.convert(executePoint, ExecutePointBO.class);
     executePointBO.setCompareDefines(JSON.parseArray(executePoint.getCompareDefine(), CompareDefine.class));
     executePointBO.setExecutorUnit(JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit.class));
