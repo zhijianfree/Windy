@@ -50,7 +50,7 @@ public class ArrayMatchCompare extends BaseCompare {
                     return Objects.equals(pattenEntry.getExpectValue(), String.valueOf(obj));
                 }
                 Object value = ognlDataParser.exchangeOgnlResponseValue(obj,
-                        WindyConstants.RESPONSE_BODY + "." + pattenEntry.getExpectValue());
+                        WindyConstants.RESPONSE_BODY + pattenEntry.getPropertyKey());
                 log.info("array item propertyKey={} value={} expectValue = {}", pattenEntry.getPropertyKey(),
                         value, pattenEntry.getExpectValue());
                 return Objects.equals(pattenEntry.getExpectValue(), String.valueOf(value));
@@ -85,5 +85,15 @@ public class ArrayMatchCompare extends BaseCompare {
         private String propertyKey;
 
         private String expectValue;
+    }
+
+    public static void main(String[] args) {
+        CompareDefine compareDefine = new CompareDefine();
+        compareDefine.setResponseValue(JSON.parseArray("[{\"msg\":\"sssssssss;\",\"nickName\":\"云边协同应用\"}]"));
+        compareDefine.setOperator("");
+        compareDefine.setExpectValue("{msg}sssssssss;");
+        ArrayMatchCompare arrayMatchCompare = new ArrayMatchCompare();
+        CompareResult compareResult = arrayMatchCompare.compare(compareDefine);
+        log.info(JSON.toJSONString(compareResult));
     }
 }
