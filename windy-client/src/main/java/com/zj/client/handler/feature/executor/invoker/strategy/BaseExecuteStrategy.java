@@ -21,7 +21,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 /**
@@ -54,6 +56,8 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
     log.info("step 1 execute before interceptor service={} context={}", executorUnit.getService(),
             JSON.toJSONString(featureExecuteContext.toMap()));
 
+    countDownIfNeed(featureExecuteContext);
+
     //3 调用方法执行
     Integer invokeType = Optional.ofNullable(executorUnit.getRelatedTemplate())
             .map(executor -> InvokerType.RELATED_TEMPLATE.getType()).orElseGet(executorUnit::getInvokeType);
@@ -85,6 +89,14 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
             .executeDetailVo(executeDetailVo).compareResult(compareResult).build();
     response.setStatus(response.getExecuteStatus());
     return response;
+  }
+
+  private void countDownIfNeed(FeatureExecuteContext featureExecuteContext) {
+    CountDownLatch countDownLatch = featureExecuteContext.getCountDownLatch();
+    if (Objects.nonNull(countDownLatch) && countDownLatch.getCount() > 0){
+      log.info("find count down release wait");
+      countDownLatch.countDown();
+    }
   }
 
   public static ExecutePoint toExecutePoint(ExecutePointDto dto) {

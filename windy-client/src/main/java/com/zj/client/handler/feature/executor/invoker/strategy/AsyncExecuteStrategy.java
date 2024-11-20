@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class AsyncExecuteStrategy extends BaseExecuteStrategy implements IExecuteInterceptor {
+public class AsyncExecuteStrategy extends BaseExecuteStrategy{
 
     private final Executor executor;
     private final IResultEventNotify resultEventNotify;
@@ -102,6 +102,7 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy implements IExecut
                 boolean result = countDownLatch.await(Integer.parseInt(timeout), TimeUnit.SECONDS);
                 log.info("wait time out result= {}", result);
             } catch (InterruptedException e) {
+                log.info("async wait error", e);
                 notifyError(newContext, "执行任务超时", timeout);
             }
         });
@@ -143,13 +144,5 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy implements IExecut
                 .logId(featureExecuteContext.getLogId())
                 .params(executeRecord);
         resultEventNotify.notifyEvent(resultEvent);
-    }
-
-    @Override
-    public void beforeExecute(ExecutorUnit executorUnit, FeatureExecuteContext context) {
-        if (Objects.nonNull(context.getCountDownLatch())) {
-            log.info("find count down release wait");
-            context.getCountDownLatch().countDown();
-        }
     }
 }
