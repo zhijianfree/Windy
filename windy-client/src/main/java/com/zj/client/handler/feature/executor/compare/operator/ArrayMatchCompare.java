@@ -1,12 +1,12 @@
 package com.zj.client.handler.feature.executor.compare.operator;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.common.entity.WindyConstants;
-import com.zj.common.entity.feature.CompareResult;
 import com.zj.client.handler.feature.executor.compare.ognl.OgnlDataParser;
+import com.zj.common.entity.WindyConstants;
+import com.zj.common.entity.feature.CompareDefine;
+import com.zj.common.entity.feature.CompareResult;
 import com.zj.common.enums.CompareType;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.entity.feature.CompareDefine;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -20,10 +20,11 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Component
-public class ArrayMatchCompare extends BaseCompare{
+public class ArrayMatchCompare extends BaseCompare {
 
     private final Pattern pattern = Pattern.compile("\\{(.*?)\\}(.*)");
     private final OgnlDataParser ognlDataParser = new OgnlDataParser();
+
     @Override
     public CompareType getType() {
         return CompareType.ARRAY_ITEM_MATCH;
@@ -33,7 +34,8 @@ public class ArrayMatchCompare extends BaseCompare{
     public CompareResult compare(CompareDefine compareDefine) {
         CompareResult compareResult = createSuccessResult();
         try {
-            List<Object> responseList = JSON.parseArray(JSON.toJSONString(compareDefine.getResponseValue()), Object.class);
+            List<Object> responseList = JSON.parseArray(JSON.toJSONString(compareDefine.getResponseValue()),
+                    Object.class);
             if (CollectionUtils.isEmpty(responseList)) {
                 compareResult.setErrorType(ErrorCode.COMPARE_ERROR);
                 compareResult.setErrorMessage("compare array list is empty");
@@ -48,15 +50,17 @@ public class ArrayMatchCompare extends BaseCompare{
                     return Objects.equals(pattenEntry.getExpectValue(), String.valueOf(obj));
                 }
                 Object value = ognlDataParser.exchangeOgnlResponseValue(obj,
-                        WindyConstants.RESPONSE_BODY +"." + pattenEntry.propertyKey);
+                        WindyConstants.RESPONSE_BODY + "." + pattenEntry.getExpectValue());
+                log.info("array item propertyKey={} value={} expectValue = {}", pattenEntry.getPropertyKey(),
+                        value, pattenEntry.getExpectValue());
                 return Objects.equals(pattenEntry.getExpectValue(), String.valueOf(value));
             });
-            if (!anyMatch){
+            if (!anyMatch) {
                 compareResult.setErrorType(ErrorCode.COMPARE_ERROR);
                 String message = String.format("not find expect value=%s in array", pattenEntry.getExpectValue());
                 compareResult.setErrorMessage(message);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             log.info("run array_item_match error", e);
             compareResult.setErrorType(ErrorCode.COMPARE_ERROR);
             compareResult.setErrorMessage("array match run error");
@@ -76,7 +80,7 @@ public class ArrayMatchCompare extends BaseCompare{
     }
 
     @Data
-    public static class PattenEntry{
+    public static class PattenEntry {
 
         private String propertyKey;
 
