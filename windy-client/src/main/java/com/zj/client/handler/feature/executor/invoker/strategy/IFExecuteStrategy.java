@@ -98,8 +98,9 @@ public class IFExecuteStrategy extends BaseExecuteStrategy {
         compareDefine.setResponseValue(keyObject);
 
         //将比较值转换成实际值
-        Object expectObject = ognlDataParser.exchangeOgnlValue(contextMap, compareDefine.getExpectValue());
-        compareDefine.setExpectValue(String.valueOf(expectObject));
+        StrSubstitutor strSubstitutor = new StrSubstitutor(contextMap);
+        String replaceValue = strSubstitutor.replace(compareDefine.getExpectValue());
+        compareDefine.setExpectValue(replaceValue);
 
         CompareOperator operator = compareFactory.getOperator(compareDefine.getOperator());
         if (Objects.isNull(operator)) {
