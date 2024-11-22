@@ -91,6 +91,7 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy{
                 }
                 countDownLatch.countDown();
                 notifyAsyncRecordResult(newContext, responses);
+                log.info("async notify complete");
             }, executor).exceptionally(throwable -> {
                 log.info("AsyncExecuteStrategy feature execute error", throwable);
                 countDownLatch.countDown();
@@ -101,6 +102,7 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy{
             try {
                 boolean result = countDownLatch.await(Integer.parseInt(timeout), TimeUnit.SECONDS);
                 log.info("wait time out result= {}", result);
+                notifyError(newContext, "执行任务超时", timeout);
             } catch (InterruptedException e) {
                 log.info("async wait error", e);
                 notifyError(newContext, "执行任务超时", timeout);
