@@ -1,7 +1,7 @@
 package com.zj.pipeline.rest;
 
-import com.zj.common.exception.ErrorCode;
 import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.common.exception.ErrorCode;
 import com.zj.domain.entity.bo.pipeline.PipelineExecuteInfo;
 import com.zj.domain.entity.bo.pipeline.PipelineHistoryBO;
 import com.zj.pipeline.service.PipelineHistoryService;
@@ -26,50 +26,49 @@ import java.util.List;
 @RestController
 public class PipelineHistoryRest {
 
-  private final PipelineHistoryService historyService;
+    private final PipelineHistoryService historyService;
 
-  public PipelineHistoryRest(PipelineHistoryService historyService) {
-    this.historyService = historyService;
-  }
+    public PipelineHistoryRest(PipelineHistoryService historyService) {
+        this.historyService = historyService;
+    }
 
-  @ResponseBody
-  @GetMapping("/history/{historyId}")
-  public ResponseMeta<PipelineHistoryBO> queryPipelineHistory(
-      @NotNull @PathVariable("historyId") String historyId) {
-    return new ResponseMeta<PipelineHistoryBO>(ErrorCode.SUCCESS,
-        historyService.getPipelineHistory(historyId));
-  }
+    @ResponseBody
+    @GetMapping("/history/{historyId}")
+    public ResponseMeta<PipelineHistoryBO> queryPipelineHistory(
+            @NotNull @PathVariable("historyId") String historyId) {
+        return new ResponseMeta<PipelineHistoryBO>(ErrorCode.SUCCESS,
+                historyService.getPipelineHistory(historyId));
+    }
 
-  @ResponseBody
-  @PostMapping("/history")
-  public ResponseMeta<String> createPipelineHistory(
-      @NotNull @Validated @RequestBody PipelineHistoryBO pipelineHistoryBO) {
-    return new ResponseMeta<String>(ErrorCode.SUCCESS,
-        historyService.createPipelineHistory(pipelineHistoryBO));
-  }
+    @ResponseBody
+    @PostMapping("/history")
+    public ResponseMeta<String> createPipelineHistory(
+            @NotNull @Validated @RequestBody PipelineHistoryBO pipelineHistoryBO) {
+        return new ResponseMeta<String>(ErrorCode.SUCCESS,
+                historyService.createPipelineHistory(pipelineHistoryBO));
+    }
 
-  @ResponseBody
-  @GetMapping("/{pipelineId}/histories")
-  public ResponseMeta<List<PipelineHistoryBO>> listPipelineHistories(
-      @NotNull @PathVariable("pipelineId") String pipelineId) {
-    return new ResponseMeta<List<PipelineHistoryBO>>(ErrorCode.SUCCESS,
-        historyService.listPipelineHistories(pipelineId));
-  }
+    @ResponseBody
+    @GetMapping("/{pipelineId}/histories")
+    public ResponseMeta<List<PipelineHistoryBO>> listPipelineHistories(
+            @NotNull @PathVariable("pipelineId") String pipelineId) {
+        return new ResponseMeta<List<PipelineHistoryBO>>(ErrorCode.SUCCESS,
+                historyService.listPipelineHistories(pipelineId));
+    }
 
-  @ResponseBody
-  @GetMapping("/{service}/{pipelineId}/latest/history")
-  public ResponseMeta<PipelineHistoryBO> getLatestPipelineHistory(
-      @PathVariable("service") String service,
-      @PathVariable("pipelineId") String pipelineId) {
-    return new ResponseMeta<PipelineHistoryBO>(ErrorCode.SUCCESS,
-        historyService.getLatestPipelineHistory(pipelineId));
-  }
+    @ResponseBody
+    @GetMapping("/{service}/{pipelineId}/latest/history")
+    public ResponseMeta<PipelineHistoryBO> getLatestPipelineHistory(
+            @PathVariable("service") String service,
+            @PathVariable("pipelineId") String pipelineId) {
+        return new ResponseMeta<PipelineHistoryBO>(ErrorCode.SUCCESS,
+                historyService.getLatestPipelineHistory(pipelineId));
+    }
 
-  @ResponseBody
-  @GetMapping("/{historyId}/status")
-  public ResponseMeta<PipelineExecuteInfo> getPipeLineStatusDetail(
-      @NotNull @PathVariable("historyId") String historyId) {
-    return new ResponseMeta<PipelineExecuteInfo>(ErrorCode.SUCCESS,
-        historyService.getPipeLineStatusDetail(historyId));
-  }
+    @ResponseBody
+    @GetMapping("/{historyId}/status")
+    public ResponseMeta<PipelineExecuteInfo> getPipeLineStatusDetail(@NotNull @PathVariable("historyId") String historyId) {
+        return new ResponseMeta<PipelineExecuteInfo>(ErrorCode.SUCCESS,
+                historyService.getPipeLineStatusDetail(historyId));
+    }
 }
