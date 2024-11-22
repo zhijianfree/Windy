@@ -1,9 +1,13 @@
 package com.zj.client.handler.feature.executor.random.entity;
 
-import java.util.Random;
+import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Getter
 public enum RandomType {
     RANDOM_STRING("RandomString"),
     RANDOM_INTEGER("RandomInteger");
@@ -12,10 +16,6 @@ public enum RandomType {
 
     RandomType(String type) {
         this.type = type;
-    }
-
-    public String getType() {
-        return type;
     }
 
     public static RandomEntity exchangeRandomType(String randomString) {
@@ -28,12 +28,16 @@ public enum RandomType {
             // 根据函数名调用对应的随机生成方法
             switch (functionName) {
                 case "RandomString":
-                    return RandomEntity.builder().randomType(RandomType.RANDOM_STRING).randomRule(new StringRandomRule(Integer.parseInt(params))).build();
+                    Integer length = Optional.ofNullable(params).filter(StringUtils::isNoneBlank).map(Integer::parseInt).orElse(6);
+                    return RandomEntity.builder().randomType(RandomType.RANDOM_STRING).randomRule(new StringRandomRule(length)).build();
                 case "RandomInteger":
-                    String[] range = params.split(",");
-                    int min = Integer.parseInt(range[0]);
-                    int max = Integer.parseInt(range[1]);
+                    String range = Optional.ofNullable(params).filter(StringUtils::isNoneBlank).orElse("1,10");
+                    String[] rangeArray = range.split(",");
+                    int min = Integer.parseInt(rangeArray[0]);
+                    int max = Integer.parseInt(rangeArray[1]);
                     return RandomEntity.builder().randomType(RandomType.RANDOM_INTEGER).randomRule(new IntegerRandomRule(max, min)).build();
+                default:
+                    return null;
             }
         }
         return null;

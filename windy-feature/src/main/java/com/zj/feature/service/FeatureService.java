@@ -222,8 +222,8 @@ public class FeatureService {
             });
             return pointGroupMap.get(oldId);
         }).flatMap(Collection::stream).collect(Collectors.toList());
-        executePointService.saveBatch(newExecutePoints);
-        log.info("batch save points={}", JSON.toJSONString(newExecutePoints));
+        boolean saveBatch = executePointService.saveBatch(newExecutePoints);
+        log.info("batch save points result={}", saveBatch);
 
         //3 复制全局变量
         List<TestCaseConfigBO> caseConfigs = testCaseConfigService.getTestCaseConfigs(copyCaseFeature.getTestCaseId());
@@ -311,7 +311,8 @@ public class FeatureService {
                 point.setCreateTime(System.currentTimeMillis());
                 return point;
             }).collect(Collectors.toList());
-            executePointService.saveBatch(existPoints);
+            boolean saveBatch = executePointService.saveBatch(existPoints);
+            log.info("batch save execute point result ={}", saveBatch);
 
             feature.setId(null);
             feature.setFeatureName(feature.getFeatureName() + "  Copy");

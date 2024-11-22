@@ -94,8 +94,12 @@ public class IFExecuteStrategy extends BaseExecuteStrategy {
             return false;
         }
         //将比较参变量转换成实际值
-        Object object = ognlDataParser.exchangeOgnlValue(contextMap, compareDefine.getCompareKey());
-        compareDefine.setResponseValue(object);
+        Object keyObject = ognlDataParser.exchangeOgnlValue(contextMap, compareDefine.getCompareKey());
+        compareDefine.setResponseValue(keyObject);
+
+        //将比较值转换成实际值
+        Object expectObject = ognlDataParser.exchangeOgnlValue(contextMap, compareDefine.getExpectValue());
+        compareDefine.setExpectValue(String.valueOf(expectObject));
 
         CompareOperator operator = compareFactory.getOperator(compareDefine.getOperator());
         if (Objects.isNull(operator)) {

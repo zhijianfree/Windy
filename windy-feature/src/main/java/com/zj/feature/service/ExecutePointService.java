@@ -128,8 +128,8 @@ public class ExecutePointService {
         }).collect(Collectors.toList());
     }
 
-    public void saveBatch(List<ExecutePointBO> newExecutePoints) {
-        executePointRepository.saveBatch(newExecutePoints);
+    public boolean saveBatch(List<ExecutePointBO> newExecutePoints) {
+        return executePointRepository.batchSavePoints(newExecutePoints);
     }
 
     public ExecutePointVo getExecutePoint(String executePointId) {

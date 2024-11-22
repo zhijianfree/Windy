@@ -25,7 +25,7 @@ public interface IExecutePointRepository {
 
   boolean saveExecutePoint(ExecutePointBO executePoint);
 
-  boolean saveBatch(List<ExecutePointBO> newExecutePoints);
+  boolean batchSavePoints(List<ExecutePointBO> newExecutePoints);
 
   boolean updateBatch(List<ExecutePointBO> newExecutePoints);
 

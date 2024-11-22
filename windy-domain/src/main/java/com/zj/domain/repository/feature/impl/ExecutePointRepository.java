@@ -86,7 +86,8 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
   }
 
   @Override
-  public boolean saveBatch(List<ExecutePointBO> executePoints) {
+  @Transactional
+  public boolean batchSavePoints(List<ExecutePointBO> executePoints) {
     List<ExecutePoint> pointList = convertExecutePointList(executePoints);
     return saveBatch(pointList);
   }
