@@ -74,13 +74,7 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy{
                     responses = executePoints.stream().map(executePointDto -> {
                         try {
                             ExecutePoint point = toExecutePoint(executePointDto);
-                            return executeFeature(newContext, point, () -> {
-                                CountDownLatch asyncCount = featureExecuteContext.getCountDownLatch();
-                                if (Objects.nonNull(asyncCount) && asyncCount.getCount() > 0){
-                                    log.info("find count down release wait");
-                                    asyncCount.countDown();
-                                }
-                            });
+                            return executeFeature(newContext, point, () -> releaseWaitIfNeed(featureExecuteContext));
                         } catch (Exception e) {
                             log.info("thread execute error", e);
                             ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
@@ -94,8 +88,8 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy{
                         }
                     }).collect(Collectors.toList());
                 }
-                countDownLatch.countDown();
                 notifyAsyncRecordResult(newContext, responses);
+                countDownLatch.countDown();
                 log.info("async notify complete");
             }, executor).exceptionally(throwable -> {
                 log.info("AsyncExecuteStrategy feature execute error", throwable);
@@ -107,7 +101,6 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy{
             try {
                 boolean result = countDownLatch.await(Integer.parseInt(timeout), TimeUnit.SECONDS);
                 log.info("wait time out result= {}", result);
-                notifyError(newContext, "执行任务超时", timeout);
             } catch (InterruptedException e) {
                 log.info("async wait error", e);
                 notifyError(newContext, "执行任务超时", timeout);
@@ -125,6 +118,14 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy{
             featureResponse.setName(point.getExecutorUnit().getName());
             return featureResponse;
         }).collect(Collectors.toList());
+    }
+
+    private static void releaseWaitIfNeed(FeatureExecuteContext featureExecuteContext) {
+        CountDownLatch asyncCount = featureExecuteContext.getCountDownLatch();
+        if (Objects.nonNull(asyncCount) && asyncCount.getCount() > 0){
+            log.info("find count down release wait");
+            asyncCount.countDown();
+        }
     }
 
     private void notifyError(FeatureExecuteContext featureExecuteContext, String errorMessage, String timeout) {
