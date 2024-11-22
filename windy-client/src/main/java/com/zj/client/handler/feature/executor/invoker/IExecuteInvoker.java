@@ -6,6 +6,8 @@ import com.zj.common.enums.InvokerType;
 import com.zj.common.entity.feature.ExecutorUnit;
 import com.zj.plugin.loader.IAsyncNotifyListener;
 
+import java.util.Objects;
+
 public interface IExecuteInvoker {
 
   InvokerType type();
@@ -14,6 +16,9 @@ public interface IExecuteInvoker {
 
   default Object invoke(ExecutorUnit executorUnit, FeatureExecuteContext featureExecuteContext,
                 IAsyncNotifyListener notifyListener){
+    if (Objects.isNull(notifyListener)) {
+      return invoke(executorUnit, featureExecuteContext);
+    }
     return null;
   }
 }
