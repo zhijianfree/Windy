@@ -15,6 +15,7 @@ import com.zj.common.entity.feature.FeatureResponse;
 import com.zj.common.entity.feature.VariableDefine;
 import com.zj.common.enums.InvokerType;
 import com.zj.plugin.loader.ExecuteDetailVo;
+import com.zj.plugin.loader.IAsyncNotifyListener;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -48,6 +49,12 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
   }
 
   public FeatureResponse executeFeature(FeatureExecuteContext featureExecuteContext, ExecutePoint executePoint) {
+    return executeFeature(featureExecuteContext, executePoint, null);
+  }
+
+
+  public FeatureResponse executeFeature(FeatureExecuteContext featureExecuteContext, ExecutePoint executePoint,
+                                        IAsyncNotifyListener listener) {
     //1 执行用例，目前使用反射/http执行，后续考虑使用dubbo调用
     ExecutorUnit executorUnit = executePoint.getExecutorUnit();
 
@@ -56,13 +63,11 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
     log.info("step 1 execute before interceptor service={} context={}", executorUnit.getService(),
             JSON.toJSONString(featureExecuteContext.toMap()));
 
-    countDownIfNeed(featureExecuteContext);
-
     //3 调用方法执行
     Integer invokeType = Optional.ofNullable(executorUnit.getRelatedTemplate())
             .map(executor -> InvokerType.RELATED_TEMPLATE.getType()).orElseGet(executorUnit::getInvokeType);
     IExecuteInvoker executeInvoker = executeInvokerMap.get(invokeType);
-    ExecuteDetailVo executeDetailVo = (ExecuteDetailVo) executeInvoker.invoke(executorUnit, featureExecuteContext);
+    ExecuteDetailVo executeDetailVo = (ExecuteDetailVo) executeInvoker.invoke(executorUnit, featureExecuteContext, listener);
     log.info("step 2 execute invoker ={} invoke", executeInvoker.type().name());
 
     //4 将执行之后的响应结果添加到context中，方便后面用例使用
@@ -89,14 +94,6 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
             .executeDetailVo(executeDetailVo).compareResult(compareResult).build();
     response.setStatus(response.getExecuteStatus());
     return response;
-  }
-
-  private void countDownIfNeed(FeatureExecuteContext featureExecuteContext) {
-    CountDownLatch countDownLatch = featureExecuteContext.getCountDownLatch();
-    if (Objects.nonNull(countDownLatch) && countDownLatch.getCount() > 0){
-      log.info("find count down release wait");
-      countDownLatch.countDown();
-    }
   }
 
   public static ExecutePoint toExecutePoint(ExecutePointDto dto) {
