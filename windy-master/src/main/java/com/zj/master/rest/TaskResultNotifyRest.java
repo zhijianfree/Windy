@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/v1/devops/dispatch")
-public class ClientNotifyRest {
+public class TaskResultNotifyRest {
 
   private final ClientNotifyService clientNotifyService;
 
-  public ClientNotifyRest(ClientNotifyService clientNotifyService) {
+  public TaskResultNotifyRest(ClientNotifyService clientNotifyService) {
     this.clientNotifyService = clientNotifyService;
   }
 

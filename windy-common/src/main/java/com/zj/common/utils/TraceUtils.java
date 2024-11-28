@@ -10,7 +10,9 @@ public class TraceUtils {
     public static void putTrace(String traceId) {
         MDC.put(MDC_TID_KEY, traceId);
     }
-
+    public static void initTrace() {
+        MDC.put(MDC_TID_KEY, UUID.randomUUID().toString().replace("-",""));
+    }
     public static void removeTrace() {
         MDC.remove(MDC_TID_KEY);
     }

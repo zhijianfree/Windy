@@ -124,7 +124,7 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
             loadGitRepositories(accessInfo);
         }
         projectId = serviceIdMap.get(accessInfo.getGitServiceName().toLowerCase());
-        log.info("get service gitlab project id = {}", projectId);
+        log.info("get service={} gitlab project id = {}", accessInfo.getGitServiceName(), projectId);
         return projectId;
     }
 

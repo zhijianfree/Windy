@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/v1/devops/master")
-public class RecordQueryRest {
+public class RecordStatusQueryRest {
 
   private final RecordQueryService recordQueryService;
 
-  public RecordQueryRest(RecordQueryService recordQueryService) {
+  public RecordStatusQueryRest(RecordQueryService recordQueryService) {
     this.recordQueryService = recordQueryService;
   }
 

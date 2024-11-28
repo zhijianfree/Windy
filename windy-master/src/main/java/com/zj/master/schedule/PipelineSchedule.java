@@ -1,17 +1,16 @@
 package com.zj.master.schedule;
 
-import com.alibaba.fastjson.JSON;
-import com.zj.common.enums.LogType;
 import com.zj.common.entity.dto.DispatchTaskModel;
+import com.zj.common.entity.pipeline.PipelineConfig;
+import com.zj.common.enums.LogType;
+import com.zj.common.utils.TraceUtils;
 import com.zj.domain.entity.bo.pipeline.PipelineBO;
 import com.zj.domain.repository.pipeline.IOptimisticLockRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
-import com.zj.common.entity.pipeline.PipelineConfig;
 import com.zj.master.entity.vo.ScheduleHolder;
 import com.zj.master.service.TaskLogService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
@@ -68,36 +67,41 @@ public class PipelineSchedule implements CommandLineRunner {
   }
 
   private void loadSchedulePipeline() {
-    List<PipelineBO> pipelines = pipelineRepository.getSchedulePipelines().stream()
-        .filter(pipeline -> Objects.nonNull(pipeline.getPipelineConfig()))
-        .filter(this::notExistLocalMap)
-        .collect(Collectors.toList());
-    if (CollectionUtils.isEmpty(pipelines)) {
-      return;
+    try {
+      TraceUtils.initTrace();
+      List<PipelineBO> pipelines = pipelineRepository.getSchedulePipelines().stream()
+              .filter(pipeline -> Objects.nonNull(pipeline.getPipelineConfig()))
+              .filter(this::notExistLocalMap)
+              .collect(Collectors.toList());
+      if (CollectionUtils.isEmpty(pipelines)) {
+        return;
+      }
+
+      log.info("start run task");
+      pipelines.forEach(pipeline -> {
+        PipelineConfig pipelineConfig = pipeline.getPipelineConfig();
+        Trigger trigger = new CronTrigger(pipelineConfig.getSchedule());
+        ScheduledFuture<?> scheduledFuture = taskScheduler.schedule(() -> {
+          if (!lockRepository.tryLock(PIPELINE_SCHEDULE)) {
+            log.info("pipeline do not have lock pipelineId={}", pipeline.getPipelineId());
+            return;
+          }
+          log.info("start dispatch pipeline task pipelineId={}", pipeline.getPipelineId());
+          DispatchTaskModel task = new DispatchTaskModel();
+          task.setType(LogType.PIPELINE.getType());
+          task.setSourceName(pipeline.getPipelineName());
+          task.setSourceId(pipeline.getPipelineId());
+          taskLogService.createTask(task);
+        }, trigger);
+
+        ScheduleHolder scheduleHolder = new ScheduleHolder();
+        scheduleHolder.setScheduledFuture(scheduledFuture);
+        scheduleHolder.setCron(pipelineConfig.getSchedule());
+        scheduledMap.put(pipeline.getPipelineId(), scheduleHolder);
+      });
+    }finally {
+      TraceUtils.removeTrace();
     }
-
-    log.info("start run task");
-    pipelines.forEach(pipeline -> {
-      PipelineConfig pipelineConfig = pipeline.getPipelineConfig();
-      Trigger trigger = new CronTrigger(pipelineConfig.getSchedule());
-      ScheduledFuture<?> scheduledFuture = taskScheduler.schedule(() -> {
-        if (!lockRepository.tryLock(PIPELINE_SCHEDULE)) {
-          log.info("pipeline do not have lock pipelineId={}", pipeline.getPipelineId());
-          return;
-        }
-        log.info("start dispatch pipeline task pipelineId={}", pipeline.getPipelineId());
-        DispatchTaskModel task = new DispatchTaskModel();
-        task.setType(LogType.PIPELINE.getType());
-        task.setSourceName(pipeline.getPipelineName());
-        task.setSourceId(pipeline.getPipelineId());
-        taskLogService.createTask(task);
-      }, trigger);
-
-      ScheduleHolder scheduleHolder = new ScheduleHolder();
-      scheduleHolder.setScheduledFuture(scheduledFuture);
-      scheduleHolder.setCron(pipelineConfig.getSchedule());
-      scheduledMap.put(pipeline.getPipelineId(), scheduleHolder);
-    });
   }
 
   private boolean notExistLocalMap(PipelineBO pipeline) {
@@ -111,7 +115,8 @@ public class PipelineSchedule implements CommandLineRunner {
       //如果定时任务发生改变需要将之前的定时任务取消，后面会重新添加新的定时任务
       holder.getScheduledFuture().cancel(true);
       scheduledMap.remove(pipeline.getPipelineId());
-      log.info("remove pipeline old schedule = {} pipelineId={}", holder.getCron(), pipeline.getPipelineId());
+      log.info("remove pipeline old schedule = {} pipelineId={} new schedule={}", holder.getCron(),
+              pipeline.getPipelineId(), pipelineConfig.getSchedule());
       return true;
     }
     return false;
