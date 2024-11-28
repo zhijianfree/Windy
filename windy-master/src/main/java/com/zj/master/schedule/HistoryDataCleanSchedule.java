@@ -5,6 +5,7 @@ import com.zj.domain.entity.bo.pipeline.PipelineHistoryBO;
 import com.zj.domain.repository.feature.IExecuteRecordRepository;
 import com.zj.domain.repository.feature.IFeatureHistoryRepository;
 import com.zj.domain.repository.pipeline.INodeRecordRepository;
+import com.zj.domain.repository.pipeline.IOptimisticLockRepository;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -23,15 +24,21 @@ public class HistoryDataCleanSchedule {
 
     @Value("${windy.clean.pipeline}")
     private Integer cleanPipelineTime;
+
+    private final String PIPELINE_HISTORY_DATA_CLEAN = "pipeline_history_data_clean";
+    private final String FEATURE_HISTORY_DATA_CLEAN = "feature_history_data_clean";
+
+    private final IOptimisticLockRepository optimisticLockRepository;
     private final IPipelineHistoryRepository pipelineHistoryRepository;
     private final INodeRecordRepository nodeRecordRepository;
     private final IFeatureHistoryRepository featureHistoryRepository;
     private final IExecuteRecordRepository executeRecordRepository;
 
-    public HistoryDataCleanSchedule(IPipelineHistoryRepository pipelineHistoryRepository,
+    public HistoryDataCleanSchedule(IOptimisticLockRepository optimisticLockRepository, IPipelineHistoryRepository pipelineHistoryRepository,
                                     INodeRecordRepository nodeRecordRepository,
                                     IFeatureHistoryRepository featureHistoryRepository,
                                     IExecuteRecordRepository executeRecordRepository) {
+        this.optimisticLockRepository = optimisticLockRepository;
         this.pipelineHistoryRepository = pipelineHistoryRepository;
         this.nodeRecordRepository = nodeRecordRepository;
         this.featureHistoryRepository = featureHistoryRepository;
@@ -41,9 +48,28 @@ public class HistoryDataCleanSchedule {
     @Scheduled(cron = "0 0 23 * * ?")
     public void cleanPipelineHistory() {
         log.info("start scan clean pipeline history");
+        boolean tryLock = optimisticLockRepository.tryLock(PIPELINE_HISTORY_DATA_CLEAN);
+        if (!tryLock){
+            return;
+        }
+        log.info("start clean pipeline history");
         long oldTime = new DateTime().minusHours(cleanPipelineTime).getMillis();
         List<PipelineHistoryBO> pipelineHistories = pipelineHistoryRepository.getOldPipelineHistory(oldTime);
         pipelineHistories.forEach(this::deletePipelineHistory);
+    }
+
+    @Scheduled(cron = "0 0 1 * * ?")
+    public void cleanFeatureHistory() {
+        log.info("start scan clean feature history");
+        boolean tryLock = optimisticLockRepository.tryLock(FEATURE_HISTORY_DATA_CLEAN);
+        if (!tryLock){
+            return;
+        }
+
+        log.info("start clean feature history");
+        long featureOldTime = new DateTime().minusHours(cleanFeatureTime).getMillis();
+        List<FeatureHistoryBO> featureHistories = featureHistoryRepository.getOldFeatureHistory(featureOldTime);
+        featureHistories.forEach(this::deleteFeatureHistories);
     }
 
     private void deletePipelineHistory(PipelineHistoryBO pipelineHistory) {
@@ -54,14 +80,6 @@ public class HistoryDataCleanSchedule {
         } catch (Exception e) {
             log.info("delete pipeline history error", e);
         }
-    }
-
-    @Scheduled(cron = "0 0 1 * * ?")
-    public void cleanFeatureHistory() {
-        log.info("start scan clean feature history");
-        long featureOldTime = new DateTime().minusHours(cleanFeatureTime).getMillis();
-        List<FeatureHistoryBO> featureHistories = featureHistoryRepository.getOldFeatureHistory(featureOldTime);
-        featureHistories.forEach(this::deleteFeatureHistories);
     }
 
     private void deleteFeatureHistories(FeatureHistoryBO featureHistoryBO) {
