@@ -1,5 +1,6 @@
 package com.zj.master.schedule;
 
+import com.zj.common.adapter.discover.DiscoverService;
 import com.zj.common.adapter.monitor.InstanceMonitor;
 import com.zj.common.utils.IpUtils;
 import com.zj.common.utils.TraceUtils;
@@ -116,7 +117,7 @@ public class DispatchLogSchedule {
   }
 
   private List<String> getCurrentMasterIpList() {
-    List<ServiceInstance> instances = discoveryClient.getInstances(WINDY_MASTER_NAME);
+    List<ServiceInstance> instances = discoveryClient.getInstances(DiscoverService.WINDY_MASTER);
     if (CollectionUtils.isEmpty(instances)) {
       return Collections.emptyList();
     }
