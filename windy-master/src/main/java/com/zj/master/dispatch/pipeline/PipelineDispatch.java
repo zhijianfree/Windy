@@ -202,6 +202,11 @@ public class PipelineDispatch implements IDispatchExecutor {
       return false;
     }
 
+    BindBranchBO pipelineBindBranch = bindBranchRepository.getPipelineBindBranch(pipelineId);
+    if (Objects.isNull(pipelineBindBranch)) {
+      log.info("can not find pipeline bind branch pipelineId={}", pipelineId);
+      return false;
+    }
     PipelineTask pipelineTask = new PipelineTask();
     pipelineTask.setPipelineId(pipeline.getPipelineId());
     pipelineTask.setLogId(dispatchLog.getLogId());

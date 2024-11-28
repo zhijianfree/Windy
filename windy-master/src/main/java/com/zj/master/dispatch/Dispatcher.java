@@ -38,8 +38,13 @@ public class Dispatcher {
 
   public boolean resumeTask(DispatchLogDto taskLog) {
     log.info("start resume task type={}", taskLog.getLogType());
-    IDispatchExecutor dispatchExecutor = dispatchExecutorMap.get(taskLog.getLogType());
-    return dispatchExecutor.resume(taskLog);
+    try {
+      IDispatchExecutor dispatchExecutor = dispatchExecutorMap.get(taskLog.getLogType());
+      return dispatchExecutor.resume(taskLog);
+    }catch (Exception e){
+      log.info("resume task error", e);
+    }
+    return false;
   }
 
   public boolean isExitInJvm(DispatchLogDto taskLog){
