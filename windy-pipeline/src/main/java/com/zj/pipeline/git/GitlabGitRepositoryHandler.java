@@ -108,6 +108,7 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
         String result = gitRequestProxy.get(accessInfo.getGitDomain() + path, getTokenHeader(accessInfo));
         List<BranchInfo> branches = JSON.parseArray(result, BranchInfo.class);
         if (CollectionUtils.isEmpty(branches)) {
+            log.info("can not get project branches ={}", projectId);
             return Collections.emptyList();
         }
         return branches.stream().map(BranchInfo::getName)
@@ -122,7 +123,9 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
         if (Objects.isNull(projectId)) {
             loadGitRepositories(accessInfo);
         }
-        return serviceIdMap.get(accessInfo.getGitServiceName().toLowerCase());
+        projectId = serviceIdMap.get(accessInfo.getGitServiceName().toLowerCase());
+        log.info("get service gitlab project id = {}", projectId);
+        return projectId;
     }
 
     @Override
