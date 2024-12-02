@@ -80,6 +80,8 @@ public class DispatchLogSchedule {
       log.debug("start run no master task size={}", logs.size());
       // 4 筛选出来的任务开始切换到当前节点执行
       logs.forEach(dispatcher::resumeTask);
+    }catch (Exception e){
+      log.info("handle dispatch log error", e);
     }finally {
       TraceUtils.removeTrace();
     }
