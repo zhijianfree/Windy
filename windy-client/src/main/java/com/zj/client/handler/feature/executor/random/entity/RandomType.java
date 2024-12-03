@@ -9,8 +9,7 @@ import java.util.regex.Pattern;
 
 @Getter
 public enum RandomType {
-    RANDOM_STRING("RandomString"),
-    RANDOM_INTEGER("RandomInteger");
+    RANDOM_STRING("RandomString"), RANDOM_INTEGER("RandomInteger");
 
     private final String type;
 
@@ -28,8 +27,11 @@ public enum RandomType {
             // 根据函数名调用对应的随机生成方法
             switch (functionName) {
                 case "RandomString":
-                    Integer length = Optional.ofNullable(params).filter(StringUtils::isNoneBlank).map(Integer::parseInt).orElse(6);
-                    return RandomEntity.builder().randomType(RandomType.RANDOM_STRING).randomRule(new StringRandomRule(length)).build();
+                    String string = Optional.ofNullable(params).filter(StringUtils::isNoneBlank).orElse("6");
+                    String[] paramArray = string.split(",");
+                    int length = Integer.parseInt(paramArray[0]);
+                    Integer exchangeType = paramArray.length > 1 ? Integer.parseInt(paramArray[1]) : null;
+                    return RandomEntity.builder().randomType(RandomType.RANDOM_STRING).randomRule(new StringRandomRule(length, exchangeType)).build();
                 case "RandomInteger":
                     String range = Optional.ofNullable(params).filter(StringUtils::isNoneBlank).orElse("1,10");
                     String[] rangeArray = range.split(",");
