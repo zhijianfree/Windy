@@ -1,6 +1,5 @@
 package com.zj.service.service;
 
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.common.adapter.auth.IAuthService;
 import com.zj.common.adapter.git.GitAccessInfo;
@@ -243,7 +242,9 @@ public class MicroserviceService {
         List<ExecutePointBO> executePointList = executePointRepository.getPointsByFeatureIds(featureIds);
         List<String> templateIds = executePointList.stream().map(ExecutePointBO::getTemplateId).distinct().collect(Collectors.toList());
         List<ExecuteTemplateBO> templateList = executeTemplateRepository.getTemplateByIds(templateIds).stream()
-                .filter(executeTemplate -> Objects.equals(executeTemplate.getInvokeType(), InvokerType.HTTP.getType()))
+                .filter(executeTemplate -> Objects.equals(executeTemplate.getInvokeType(), InvokerType.HTTP.getType())
+                        || Objects.equals(executeTemplate.getInvokeType(),
+                        InvokerType.RELATED_TEMPLATE.getType()))
                 .collect(Collectors.toList());
 
         //将if和for包含的模版也统计
