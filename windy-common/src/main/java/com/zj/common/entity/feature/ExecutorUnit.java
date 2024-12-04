@@ -24,6 +24,8 @@ public class ExecutorUnit {
     @NotNull
     private Integer invokeType;
 
+    private String description;
+
     /**
      * 执行方法
      * */
