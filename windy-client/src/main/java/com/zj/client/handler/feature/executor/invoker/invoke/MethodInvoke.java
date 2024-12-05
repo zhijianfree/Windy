@@ -113,6 +113,17 @@ public class MethodInvoke implements IExecuteInvoker {
         }
     }
 
+    public static void main(String[] args) {
+        ParameterDefine parameterDefine = new ParameterDefine();
+        parameterDefine.setType("Array");
+        parameterDefine.setParamKey("appVersions");
+        parameterDefine.setPosition("Body");
+        parameterDefine.setDescription("dddd");
+        parameterDefine.setValue(JSON.parseArray("[{\"imageId\":\"${imageId}\"," +
+                "\"rangeList\":[{\"paramKey\":\"imageId\",\"initData\":{},\"position\":\"Body\",\"type\":\"String\",\"value\":\"${imageId}\"},{\"paramKey\":\"appName\",\"initData\":{},\"position\":\"Body\",\"type\":\"String\",\"value\":\"$RandomString(6)\"},{\"paramKey\":\"description\",\"initData\":{},\"position\":\"Body\",\"type\":\"String\",\"value\":\"111\"},{\"paramKey\":\"version\",\"initData\":{},\"position\":\"Body\",\"type\":\"String\",\"value\":\"1.0.0\"}],\"appName\":\"$RandomString(6)\",\"description\":\"111\",\"version\":\"1.0.0\"}]"));
+
+        System.out.println(MethodInvoke.convertDataToType(parameterDefine));
+    }
     public static Object convertDataToType(ParameterDefine paramDefine) {
         if (Objects.isNull(paramDefine.getValue())) {
             return null;
