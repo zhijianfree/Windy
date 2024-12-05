@@ -159,7 +159,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
                 return;
             }
 
-            Object randomValue = generateRandomRule(paramValue);
+            Object randomValue = generateRandomRule(param);
             if (Objects.nonNull(randomValue)) {
                 param.setValue(randomValue);
                 return;
@@ -192,7 +192,13 @@ public class VariableInterceptor implements IExecuteInterceptor {
         });
     }
 
-    private Object generateRandomRule(Object paramValue) {
+    private Object generateRandomRule(ParameterDefine param) {
+        Object paramValue = param.getValue();
+        if (Objects.equals(param.getType(), ParamValueType.Array.name()) || Objects.equals(param.getType(),
+                ParamValueType.Object.name())){
+            return paramValue;
+        }
+
         RandomEntity randomEntity = RandomType.exchangeRandomType(String.valueOf(paramValue));
         if (Objects.isNull(randomEntity)) {
             return null;
