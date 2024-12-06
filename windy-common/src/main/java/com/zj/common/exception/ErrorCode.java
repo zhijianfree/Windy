@@ -7,7 +7,8 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
   SUCCESS(HttpStatus.OK, "Common.000000", "请求成功"),
   ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Common.000001", "请求失败"),
-  PARAM_VALIDATE_ERROR(HttpStatus.BAD_REQUEST, "Common.000005", "参数校验失败"),
+  PARAM_VALIDATE_ERROR(HttpStatus.BAD_REQUEST, "Common.000002", "参数校验失败"),
+  STATUS_UNCHANGEABLE_ERROR(HttpStatus.BAD_REQUEST, "Common.00003", "状态不可变更"),
   /*===================流水线=================*/
   NOT_FOUND_PIPELINE(HttpStatus.NOT_FOUND, "Pipeline.000002", "流水线未找到"),
   NOT_FOUND_CODE_CHANGE(HttpStatus.NOT_FOUND, "Pipeline.000003", "服务变更未找到"),
@@ -63,7 +64,6 @@ public enum ErrorCode {
   SPACE_HAS_NOT_COMPLETE_BUG(HttpStatus.BAD_REQUEST, "Space.000008", "空间下有未完成的bug无法删除"),
   ITERATION_HAS_NOT_COMPLETE_DEMAND(HttpStatus.BAD_REQUEST, "Iteration.000009", "迭代下有未完成的需求"),
   ITERATION_HAS_NOT_COMPLETE_BUG(HttpStatus.BAD_REQUEST, "Iteration.000010", "迭代下有未完成的bug无法删除"),
-  UPDATE_ITERATION_STATUS_ERROR(HttpStatus.BAD_REQUEST, "Iteration.000011", "迭代状态更新失败"),
   /*==================Client端构建运行==================*/
   NOT_FIND_JAR(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000001", "构建时未发现JAR包"),
   UNKNOWN_EXECUTE_TYPE(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000002", "未找到节点执行类型"),

@@ -13,6 +13,8 @@ import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.demand.BugBO;
 import com.zj.domain.entity.bo.demand.BugQueryBO;
 import com.zj.domain.entity.bo.demand.BusinessStatusBO;
+import com.zj.domain.entity.bo.demand.DemandBO;
+import com.zj.domain.entity.enums.BusinessStatusType;
 import com.zj.domain.repository.auth.IUserRepository;
 import com.zj.domain.repository.demand.IBugRepository;
 import com.zj.domain.repository.demand.IBusinessStatusRepository;
@@ -52,6 +54,13 @@ public class BugService {
     }
 
     public Boolean updateBug(BugDto bugDto) {
+        BugBO bug = bugRepository.getBug(bugDto.getBugId());
+        boolean unchangeableStatus = businessStatusRepository.isUnchangeableStatus(bug.getStatus(),
+                BusinessStatusType.BUG.name());
+        if (Objects.nonNull(bugDto.getStatus()) && unchangeableStatus) {
+            log.info("demand status is unchangeable status= {}", bug.getStatus());
+            throw new ApiException(ErrorCode.STATUS_UNCHANGEABLE_ERROR);
+        }
         return bugRepository.updateBug(OrikaUtil.convert(bugDto, BugBO.class));
     }
 

@@ -13,6 +13,7 @@ import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.demand.BusinessStatusBO;
 import com.zj.domain.entity.bo.demand.DemandBO;
 import com.zj.domain.entity.bo.demand.DemandQueryBO;
+import com.zj.domain.entity.enums.BusinessStatusType;
 import com.zj.domain.repository.auth.IUserRepository;
 import com.zj.domain.repository.demand.IBusinessStatusRepository;
 import com.zj.domain.repository.demand.IDemandRepository;
@@ -77,6 +78,13 @@ public class DemandService {
     }
 
     public boolean updateDemand(DemandDto demandDto) {
+        DemandBO demand = demandRepository.getDemand(demandDto.getDemandId());
+        boolean unchangeableStatus = businessStatusRepository.isUnchangeableStatus(demand.getStatus(),
+                BusinessStatusType.DEMAND.name());
+        if (Objects.nonNull(demandDto.getStatus()) && unchangeableStatus) {
+            log.info("demand status is unchangeable status= {}", demand.getStatus());
+            throw new ApiException(ErrorCode.STATUS_UNCHANGEABLE_ERROR);
+        }
         return demandRepository.updateDemand(OrikaUtil.convert(demandDto, DemandBO.class));
     }
 

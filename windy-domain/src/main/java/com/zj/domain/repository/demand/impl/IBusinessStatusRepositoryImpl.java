@@ -13,9 +13,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class IBusinessStatusRepositoryImpl extends ServiceImpl<BusinessStatusMapper, BusinessStatus> implements IBusinessStatusRepository {
+
+    public static final int UNCHANGEABLE_TYPE = 2;
+
     @Override
     public List<BusinessStatusBO> getDemandStatuses() {
         return getStatusListByType(BusinessStatusType.DEMAND);
@@ -44,6 +48,13 @@ public class IBusinessStatusRepositoryImpl extends ServiceImpl<BusinessStatusMap
     @Override
     public List<BusinessStatusBO> getBugTags() {
         return getStatusListByType(BusinessStatusType.BUG_TAG);
+    }
+
+    @Override
+    public boolean isUnchangeableStatus(Integer status, String businessType) {
+        BusinessStatus businessStatus = getOne(Wrappers.lambdaQuery(BusinessStatus.class).eq(BusinessStatus::getType,
+                businessType).eq(BusinessStatus::getValue, status));
+        return Objects.nonNull(businessStatus) && Objects.equals(businessStatus.getOperateType(), UNCHANGEABLE_TYPE);
     }
 
     private List<BusinessStatusBO> getStatusListByType(BusinessStatusType bug) {

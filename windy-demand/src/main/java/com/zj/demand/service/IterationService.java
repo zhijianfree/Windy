@@ -1,9 +1,9 @@
 package com.zj.demand.service;
 
 import com.zj.common.adapter.auth.IAuthService;
+import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.demand.entity.IterationDto;
 import com.zj.demand.entity.IterationStatisticDto;
@@ -13,6 +13,7 @@ import com.zj.domain.entity.bo.demand.BusinessStatusBO;
 import com.zj.domain.entity.bo.demand.DemandBO;
 import com.zj.domain.entity.bo.demand.IterationBO;
 import com.zj.domain.entity.bo.service.ResourceMemberBO;
+import com.zj.domain.entity.enums.BusinessStatusType;
 import com.zj.domain.entity.po.service.ResourceMember;
 import com.zj.domain.repository.demand.IBugRepository;
 import com.zj.domain.repository.demand.IBusinessStatusRepository;
@@ -41,9 +42,11 @@ public class IterationService {
     private final IAuthService authService;
     private final IMemberRepository memberRepository;
     private final IBusinessStatusRepository businessStatusRepository;
+
     public IterationService(IDemandRepository demandRepository, IBugRepository bugRepository,
                             IWorkTaskRepository workTaskRepository, IterationRepository iterationRepository,
-                            UniqueIdService uniqueIdService, IAuthService authService, IMemberRepository memberRepository, IBusinessStatusRepository businessStatusRepository) {
+                            UniqueIdService uniqueIdService, IAuthService authService,
+                            IMemberRepository memberRepository, IBusinessStatusRepository businessStatusRepository) {
         this.demandRepository = demandRepository;
         this.bugRepository = bugRepository;
         this.workTaskRepository = workTaskRepository;
@@ -60,7 +63,8 @@ public class IterationService {
         if (CollectionUtils.isEmpty(resourceMembers)) {
             return Collections.emptyList();
         }
-        List<String> iterationIds = resourceMembers.stream().map(ResourceMember::getResourceId).collect(Collectors.toList());
+        List<String> iterationIds =
+                resourceMembers.stream().map(ResourceMember::getResourceId).collect(Collectors.toList());
         return iterationRepository.getIterationList(spaceId, iterationIds);
     }
 
@@ -78,9 +82,11 @@ public class IterationService {
             throw new ApiException(ErrorCode.ITERATION_NOT_EXIST);
         }
 
-        if(Objects.nonNull(iterationDto.getStatus()) && iterationDto.getStatus() < iteration.getStatus()){
-            log.info("iteration status update error status= {}", iterationDto.getStatus());
-            throw new ApiException(ErrorCode.UPDATE_ITERATION_STATUS_ERROR);
+        boolean unchangeableStatus = businessStatusRepository.isUnchangeableStatus(iteration.getStatus(),
+                BusinessStatusType.ITERATION.name());
+        if (Objects.nonNull(iterationDto.getStatus()) && unchangeableStatus) {
+            log.info("iteration status is unchangeable status= {}", iterationDto.getStatus());
+            throw new ApiException(ErrorCode.STATUS_UNCHANGEABLE_ERROR);
         }
         return iterationRepository.updateIteration(OrikaUtil.convert(iterationDto, IterationBO.class));
     }
