@@ -135,7 +135,7 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
                     apiRequestVariable.setDescription(pathParam.getDesc());
                     apiRequestVariable.setType(ParamValueType.String.name());
                     apiRequestVariable.setRequired(true);
-                    apiRequestVariable.setPosition("Path");
+                    apiRequestVariable.setPosition(Position.Path.name());
                     return apiRequestVariable;
                 }).collect(Collectors.toList());
             }
@@ -151,7 +151,7 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
                     apiRequestVariable.setDescription(queryParam.getDesc());
                     apiRequestVariable.setType(ParamValueType.String.name());
                     apiRequestVariable.setRequired(requirdList.contains(queryParam.getName()));
-                    apiRequestVariable.setPosition("Query");
+                    apiRequestVariable.setPosition(Position.Query.name());
                     return apiRequestVariable;
                 }).collect(Collectors.toList());
             }
