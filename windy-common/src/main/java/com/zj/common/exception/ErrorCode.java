@@ -5,10 +5,10 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public enum ErrorCode {
-  /*===================流水线=================*/
   SUCCESS(HttpStatus.OK, "Common.000000", "请求成功"),
   ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Common.000001", "请求失败"),
   PARAM_VALIDATE_ERROR(HttpStatus.BAD_REQUEST, "Common.000005", "参数校验失败"),
+  /*===================流水线=================*/
   NOT_FOUND_PIPELINE(HttpStatus.NOT_FOUND, "Pipeline.000002", "流水线未找到"),
   NOT_FOUND_CODE_CHANGE(HttpStatus.NOT_FOUND, "Pipeline.000003", "服务变更未找到"),
   NOT_FOUND_PIPELINE_GIT_BIND(HttpStatus.NOT_FOUND, "Pipeline.000004", "流水关联分支未找到"),
@@ -51,6 +51,7 @@ public enum ErrorCode {
   SUB_FEATURE_EXIST(HttpStatus.BAD_REQUEST, "Feature.000005", "存在子用例不能删除目录"),
   PARSE_PLUGIN_ERROR(HttpStatus.BAD_REQUEST, "Feature.000006", "解析插件错误"),
   TEMPLATE_NOT_FIND(HttpStatus.NOT_FOUND, "Feature.000007", "未找到模版"),
+  BATCH_UPDATE_FEATURE_POINTS_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Feature.000008", "批量更新用例执行点失败"),
   /*==================需求缺陷管理======================*/
   DEMAND_CREATE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Demand.000001", "创建需求失败"),
   SPACE_NOT_EXIST(HttpStatus.BAD_REQUEST, "Space.000002", "空间不存在"),

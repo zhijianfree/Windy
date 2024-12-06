@@ -5,13 +5,17 @@ import com.zj.domain.repository.feature.IFeatureTagRepository;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author guyuelan
  * @since 2023/1/28
  */
+@Slf4j
 @Service
 public class FeatureTagService{
 
@@ -21,7 +25,7 @@ public class FeatureTagService{
     this.featureTagRepository = featureTagRepository;
   }
 
-  public void batchAddTag(String featureId, List<String> tags) {
+  public boolean batchAddTag(String featureId, List<String> tags) {
     long currentTime = System.currentTimeMillis();
     List<FeatureTagBO> tagList = tags.stream().distinct().map(tag -> {
       FeatureTagBO featureTag = new FeatureTagBO();
@@ -31,14 +35,18 @@ public class FeatureTagService{
       return featureTag;
     }).collect(Collectors.toList());
 
-    featureTagRepository.saveBatchTag(tagList);
+    return featureTagRepository.saveBatchTag(tagList);
   }
 
-  public void batchUpdateTag(String featureId, List<String> tags) {
-    featureTagRepository.deleteByFeatureId(featureId);
-    if (!CollectionUtils.isEmpty(tags)) {
-      batchAddTag(featureId, tags);
+  @Transactional
+  public boolean batchUpdateTag(String featureId, List<String> tags) {
+    if (CollectionUtils.isEmpty(tags)) {
+      log.info("tag is empty, update fail");
+      return false;
     }
+    boolean deleteByFeatureId = featureTagRepository.deleteByFeatureId(featureId);
+    log.info("delete feature tag result={}", deleteByFeatureId);
+    return batchAddTag(featureId, tags);
   }
 
   public List<String> getFeatureTags(String featureId) {

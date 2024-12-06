@@ -121,7 +121,8 @@ public class FeatureService {
         boolean result = featureRepository.createFeature(featureInfo);
 
         if (CollectionUtils.isNotEmpty(featureInfoDTO.getTags())) {
-            featureTagService.batchAddTag(featureInfo.getFeatureId(), featureInfoDTO.getTags());
+            boolean batchAddTag = featureTagService.batchAddTag(featureInfo.getFeatureId(), featureInfoDTO.getTags());
+            log.info("batch save tag result={}", batchAddTag);
         }
 
         log.info("create feature detail result = {}", result);
@@ -136,20 +137,21 @@ public class FeatureService {
 
         FeatureInfoBO featureInfo = OrikaUtil.convert(featureInfoDTO, FeatureInfoBO.class);
         boolean result = featureRepository.updateFeatureInfo(featureInfo);
+        log.info("update test case feature result={}", result);
 
         List<ExecutePointVo> executePoints = featureInfoDTO.getTestFeatures();
         if (CollectionUtils.isNotEmpty(executePoints)) {
             int featureResult = updateExecutePoint(executePoints);
             if (featureResult < 1) {
-                throw new ApiException(ErrorCode.ERROR);
+                log.info("update feature points result count less than 1");
+                throw new ApiException(ErrorCode.BATCH_UPDATE_FEATURE_POINTS_ERROR);
             }
         }
 
         if (Objects.nonNull(featureInfoDTO.getTags())) {
-            featureTagService.batchUpdateTag(featureInfo.getFeatureId(), featureInfoDTO.getTags());
+            boolean batchUpdateTag = featureTagService.batchUpdateTag(featureInfo.getFeatureId(), featureInfoDTO.getTags());
+            log.info("batch update tag result={}", batchUpdateTag);
         }
-
-        log.info("update test case feature result={}", result);
         return featureInfo.getFeatureId();
     }
 

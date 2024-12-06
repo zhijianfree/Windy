@@ -10,7 +10,7 @@ import java.util.List;
  */
 public interface IFeatureTagRepository {
 
-  void saveBatchTag(List<FeatureTagBO> tagList);
+  boolean saveBatchTag(List<FeatureTagBO> tagList);
 
   boolean deleteByFeatureId(String featureId);
 

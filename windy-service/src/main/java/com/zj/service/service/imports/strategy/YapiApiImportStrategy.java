@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.common.entity.service.ApiParamModel;
 import com.zj.common.enums.ApiType;
+import com.zj.common.enums.Position;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.bo.service.ServiceApiBO;
 import com.zj.domain.repository.service.IServiceApiRepository;
@@ -45,12 +46,12 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
     public YapiApiImportStrategy(IServiceApiRepository serviceApiRepository, UniqueIdService uniqueIdService) {
         this.serviceApiRepository = serviceApiRepository;
         this.uniqueIdService = uniqueIdService;
-        variableMap.put("string", "String");
-        variableMap.put("integer", "Integer");
-        variableMap.put("number", "Long");
-        variableMap.put("boolean", "Boolean");
-        variableMap.put("object", "Object");
-        variableMap.put("array", "Array");
+        variableMap.put("string", ParamValueType.String.name());
+        variableMap.put("integer", ParamValueType.Integer.name());
+        variableMap.put("number", ParamValueType.Long.name());
+        variableMap.put("boolean", ParamValueType.Boolean.name());
+        variableMap.put("object", ParamValueType.Object.name());
+        variableMap.put("array", ParamValueType.Array.name());
     }
 
     @Override
@@ -132,7 +133,7 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
                     ApiRequestVariable apiRequestVariable = new ApiRequestVariable();
                     apiRequestVariable.setParamKey(pathParam.getName());
                     apiRequestVariable.setDescription(pathParam.getDesc());
-                    apiRequestVariable.setType("String");
+                    apiRequestVariable.setType(ParamValueType.String.name());
                     apiRequestVariable.setRequired(true);
                     apiRequestVariable.setPosition("Path");
                     return apiRequestVariable;
@@ -148,7 +149,7 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
                     ApiRequestVariable apiRequestVariable = new ApiRequestVariable();
                     apiRequestVariable.setParamKey(queryParam.getName());
                     apiRequestVariable.setDescription(queryParam.getDesc());
-                    apiRequestVariable.setType("String");
+                    apiRequestVariable.setType(ParamValueType.String.name());
                     apiRequestVariable.setRequired(requirdList.contains(queryParam.getName()));
                     apiRequestVariable.setPosition("Query");
                     return apiRequestVariable;
@@ -192,7 +193,7 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
             apiRequestVariable.setRequired(requirdList.contains(entry.getKey()));
             String type = convertVariableType(typeJSON.getString("type"));
             apiRequestVariable.setType(type);
-            apiRequestVariable.setPosition("Body");
+            apiRequestVariable.setPosition(Position.Body.name());
 
             if (Objects.equals(type, ParamValueType.Object.name())) {
                 JSONObject subProperties = typeJSON.getJSONObject(PROPERTIES_KEY);
@@ -206,12 +207,19 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
                 JSONObject item = typeJSON.getJSONObject("items");
                 String itemType = convertVariableType(item.getString("type"));
                 if (Objects.equals(itemType, ParamValueType.Object.name())) {
+                    ApiRequestVariable objectParam = new ApiRequestVariable();
+                    objectParam.setParamKey("");
+                    objectParam.setPosition(Position.Body.name());
+                    objectParam.setType(ParamValueType.Object.name());
+                    objectParam.setRequired(apiRequestVariable.isRequired());
+
                     List<String> subRequirdList =
                             Optional.of(item).map(json -> JSON.parseArray(JSON.toJSONString(json.getJSONArray(
                                     REQUIRED_KEY)), String.class)).orElseGet(Collections::emptyList);
                     JSONObject subProperties = item.getJSONObject(PROPERTIES_KEY);
                     List<ApiRequestVariable> apiRequestVariables = convertProperties(subProperties, subRequirdList);
-                    apiRequestVariable.setChildren(apiRequestVariables);
+                    objectParam.setChildren(apiRequestVariables);
+                    apiRequestVariable.setChildren(Collections.singletonList(objectParam));
                 }
             }
             return apiRequestVariable;

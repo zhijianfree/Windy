@@ -9,6 +9,7 @@ import com.zj.domain.mapper.feeature.FeatureTagMapper;
 import com.zj.domain.repository.feature.IFeatureTagRepository;
 import java.util.List;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author guyuelan
@@ -19,9 +20,10 @@ public class FeatureTagRepository extends ServiceImpl<FeatureTagMapper, FeatureT
     IFeatureTagRepository {
 
   @Override
-  public void saveBatchTag(List<FeatureTagBO> tagList) {
+  @Transactional
+  public boolean saveBatchTag(List<FeatureTagBO> tagList) {
     List<FeatureTag> featureTags = OrikaUtil.convertList(tagList, FeatureTag.class);
-    saveBatch(featureTags);
+    return saveBatch(featureTags);
   }
 
   @Override
