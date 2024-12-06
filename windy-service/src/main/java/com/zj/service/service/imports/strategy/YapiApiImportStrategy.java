@@ -59,8 +59,8 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
         return ImportType.Yapi.name();
     }
 
-    @Transactional
     @Override
+    @Transactional
     public List<ServiceApiBO> importContent(String serviceId, String fileContent) {
         List<YapiImportApi> yapiImportApis = JSON.parseArray(fileContent, YapiImportApi.class);
         Map<String, ServiceApiBO> serviceExistApi = getServiceExistApi(serviceId);
