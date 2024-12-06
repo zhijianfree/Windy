@@ -37,6 +37,11 @@ public class PluginInfo {
   private byte[] fileData;
 
   /**
+   * 文件hash计算值
+   */
+  private String hashValue;
+
+  /**
    * 创建时间
    */
   private Long createTime;

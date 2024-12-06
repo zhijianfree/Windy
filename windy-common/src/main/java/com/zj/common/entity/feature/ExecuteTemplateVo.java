@@ -61,6 +61,11 @@ public class ExecuteTemplateVo {
   private String owner;
 
   /**
+   * 模版来源，如果是插件模版就此字段代表关联的插件ID
+   */
+  private String source;
+
+  /**
    * 关联的模版Id，在实际执行模版的时候使用
    */
   private String relatedId;

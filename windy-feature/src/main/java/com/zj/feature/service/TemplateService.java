@@ -24,6 +24,7 @@ import com.zj.plugin.loader.Feature;
 import com.zj.plugin.loader.FeatureDefine;
 import com.zj.plugin.loader.ParameterDefine;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -168,6 +169,8 @@ public class TemplateService {
             pluginInfoBO.setStatus(SourceStatus.UNAVAILABLE.getType());
             pluginInfoBO.setPluginId(uniqueIdService.getUniqueId());
             pluginInfoBO.setFileData(file.getBytes());
+            String hashValue = DigestUtils.md5Hex(file.getBytes());
+            pluginInfoBO.setHashValue(hashValue);
             pluginRepository.addPlugin(pluginInfoBO);
 
             UploadResultDto uploadResult = new UploadResultDto();
