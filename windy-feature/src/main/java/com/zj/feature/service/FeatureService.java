@@ -35,9 +35,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -270,7 +272,32 @@ public class FeatureService {
             return Collections.emptyList();
         }
 
-        return featureList.stream().filter(feature -> featuresTags.contains(feature.getFeatureId())).collect(Collectors.toList());
+        // 过滤出符合标签的 feature
+        List<FeatureInfoBO> matchedFeatures = featureList.stream()
+                .filter(feature -> featuresTags.contains(feature.getFeatureId()))
+                .collect(Collectors.toList());
+
+        // 找到所有相关的父节点
+        Set<FeatureInfoBO> resultSet = new HashSet<>(matchedFeatures);
+        for (FeatureInfoBO feature : matchedFeatures) {
+            findParents(featureList, feature.getParentId(), resultSet);
+        }
+        return new ArrayList<>(resultSet);
+    }
+
+    /**
+     * 递归查找父节点
+     */
+    private void findParents(List<FeatureInfoBO> allFeatures, String parentId, Set<FeatureInfoBO> resultSet) {
+        if (Objects.isNull(parentId)) {
+            return;
+        }
+        for (FeatureInfoBO feature : allFeatures) {
+            if (parentId.equals(feature.getFeatureId()) && !resultSet.contains(feature)) {
+                resultSet.add(feature); // 添加父节点到结果集合
+                findParents(allFeatures, feature.getParentId(), resultSet); // 递归查找父节点
+            }
+        }
     }
 
     public Boolean executeFeature(String featureId) {
