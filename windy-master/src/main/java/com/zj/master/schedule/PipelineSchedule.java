@@ -51,9 +51,9 @@ public class PipelineSchedule implements CommandLineRunner {
     }
 
     /**
-     * 30 分钟检查一次是否有新的定时任务需要执行或者修改
+     * 5分钟检查一次是否有新的定时任务需要执行或者修改
      * */
-    @Scheduled(cron = "0 0/30 * * * ?")
+    @Scheduled(cron = "0 0/5 * * * ?")
     public void scanTaskLog() {
         log.debug("start scan schedule pipeline");
         loadSchedulePipeline();

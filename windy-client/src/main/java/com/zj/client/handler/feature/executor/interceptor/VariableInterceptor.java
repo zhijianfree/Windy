@@ -102,7 +102,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
     public void filterVariable(ExecutorUnit executorUnit, FeatureExecuteContext featureExecuteContext) {
         List<ParameterDefine> params = executorUnit.getParams();
         if (CollectionUtils.isNotEmpty(params)) {
-            filterParam(featureExecuteContext, params);
+            filterParameter(featureExecuteContext, params);
         }
 
         //如果是HTTP请求的方式，还需要给service(url)、header替换变量参数
@@ -150,10 +150,12 @@ public class VariableInterceptor implements IExecuteInterceptor {
         }
     }
 
-    private void filterParam(FeatureExecuteContext featureExecuteContext, List<ParameterDefine> params) {
+    private void filterParameter(FeatureExecuteContext featureExecuteContext, List<ParameterDefine> params) {
         //如果执行点的参数使用了环境变量则需要转换变量
         StrSubstitutor strSubstitutor = new StrSubstitutor(featureExecuteContext.toMap());
         params.forEach(param -> {
+            log.info("start filterParameter key={} type={} value={}", param.getParamKey(), param.getType(),
+                    param.getValue());
             Object paramValue = getParamValueWithDefaultValue(param);
             if (!String.valueOf(paramValue).contains(WindyConstants.VARIABLE_CHAR)){
                 return;
