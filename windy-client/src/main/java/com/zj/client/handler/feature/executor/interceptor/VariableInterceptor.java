@@ -154,8 +154,6 @@ public class VariableInterceptor implements IExecuteInterceptor {
         //如果执行点的参数使用了环境变量则需要转换变量
         StrSubstitutor strSubstitutor = new StrSubstitutor(featureExecuteContext.toMap());
         params.forEach(param -> {
-            log.info("start filterParameter key={} type={} value={}", param.getParamKey(), param.getType(),
-                    param.getValue());
             Object paramValue = getParamValueWithDefaultValue(param);
             if (!String.valueOf(paramValue).contains(WindyConstants.VARIABLE_CHAR)){
                 return;
@@ -163,6 +161,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
 
             Object randomValue = generateRandomRule(param);
             if (Objects.nonNull(randomValue)) {
+                log.info("handle random param key={}", param.getParamKey());
                 param.setValue(randomValue);
                 return;
             }
@@ -195,12 +194,11 @@ public class VariableInterceptor implements IExecuteInterceptor {
     }
 
     private Object generateRandomRule(ParameterDefine param) {
-        Object paramValue = param.getValue();
         if (Objects.equals(param.getType(), ParamValueType.Array.name()) || Objects.equals(param.getType(),
                 ParamValueType.Object.name())){
-            return paramValue;
+            return null;
         }
-
+        Object paramValue = param.getValue();
         RandomEntity randomEntity = RandomType.exchangeRandomType(String.valueOf(paramValue));
         if (Objects.isNull(randomEntity)) {
             return null;
