@@ -1,7 +1,6 @@
 package com.zj.pipeline.git;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.zj.common.adapter.git.CommitMessage;
 import com.zj.common.adapter.git.GitAccessInfo;
@@ -17,6 +16,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -84,7 +85,30 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
         String path = String.format("/api/v4/projects/%s/repository/commits?ref_name=%s&per_page=%d", projectId,
                 branch, 20);
         String result = gitRequestProxy.get(accessInfo.getGitDomain() + path, getTokenHeader(accessInfo));
-        return JSON.parseArray(result, CommitMessage.class);
+        List<JSONObject> commitsJson = JSON.parseArray(result, JSONObject.class);
+        return commitsJson.stream()
+                .map(commitJson -> {
+                    CommitMessage commit = new CommitMessage();
+                    commit.setCommitId(commitJson.getString("id"));
+                    commit.setShortId(commitJson.getString("short_id"));
+                    commit.setMessage(commitJson.getString("message"));
+                    commit.setCommitUser(commitJson.getString("author_name"));
+                    commit.setCommitTime(convertIso8601ToTimestamp(commitJson.getString("created_at")));
+                    return commit;
+                }).collect(Collectors.toList());
+    }
+
+    /**
+     * 将 ISO 8601 格式的日期字符串转换为时间戳（毫秒）
+     *
+     * @param iso8601Date ISO 8601 日期字符串，例如 "2024-12-10T11:01:54.000+08:00"
+     * @return 时间戳（毫秒）
+     */
+    public static long convertIso8601ToTimestamp(String iso8601Date) {
+        // 使用 OffsetDateTime 解析日期
+        OffsetDateTime dateTime = OffsetDateTime.parse(iso8601Date, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        // 转换为时间戳（毫秒）
+        return dateTime.toInstant().toEpochMilli();
     }
 
     @Override

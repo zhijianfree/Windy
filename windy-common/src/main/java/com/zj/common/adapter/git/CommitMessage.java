@@ -29,4 +29,9 @@ public class CommitMessage {
      */
     @JSONField(name = "author_name")
     private String commitUser;
+
+    /**
+     * 提交时间
+     */
+    private Long commitTime;
 }
