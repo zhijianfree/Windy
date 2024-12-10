@@ -1,5 +1,6 @@
 package com.zj.pipeline.rest;
 
+import com.zj.common.adapter.git.CommitMessage;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.domain.entity.bo.pipeline.BindBranchBO;
@@ -36,10 +37,15 @@ public class GitBindRest {
   }
 
   @ResponseBody
+  @GetMapping("/services/{serviceId}/{branchName}/commits")
+  public ResponseMeta<List<CommitMessage>> getBranchCommits(@PathVariable("branchName") String branchName,
+                                                            @PathVariable("serviceId") String serviceId) {
+    return new ResponseMeta<List<CommitMessage>>(ErrorCode.SUCCESS, gitBindService.getBranchCommits(serviceId, branchName));
+  }
+  @ResponseBody
   @PostMapping("/git/bind")
   public ResponseMeta<String> createGitBind(@Validated @RequestBody BindBranchBO bindBranchBO) {
-    return new ResponseMeta<String>(ErrorCode.SUCCESS,
-        gitBindService.createGitBind(bindBranchBO));
+    return new ResponseMeta<String>(ErrorCode.SUCCESS, gitBindService.createGitBind(bindBranchBO));
   }
 
   @ResponseBody

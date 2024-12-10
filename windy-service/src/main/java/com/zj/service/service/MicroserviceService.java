@@ -2,6 +2,7 @@ package com.zj.service.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.common.adapter.auth.IAuthService;
+import com.zj.common.adapter.git.CommitMessage;
 import com.zj.common.adapter.git.GitAccessInfo;
 import com.zj.common.adapter.git.IGitRepositoryHandler;
 import com.zj.common.adapter.invoker.IClientInvoker;

@@ -1,11 +1,14 @@
 package com.zj.pipeline.git;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.zj.common.adapter.git.CommitMessage;
+import com.zj.common.adapter.git.GitAccessInfo;
+import com.zj.common.adapter.git.IGitRepositoryHandler;
 import com.zj.common.enums.GitType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.adapter.git.GitAccessInfo;
-import com.zj.common.adapter.git.IGitRepositoryHandler;
 import com.zj.pipeline.entity.vo.BranchInfo;
 import com.zj.pipeline.entity.vo.GitlabRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +44,7 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
         this.gitRequestProxy = gitRequestProxy;
     }
 
-    private Map<String, String> getTokenHeader(GitAccessInfo gitAccessInfo) {
+    private static Map<String, String> getTokenHeader(GitAccessInfo gitAccessInfo) {
         Map<String, String> header = new HashMap<>();
         String accessToken = gitAccessInfo.getAccessToken();
         header.put("Private-Token", accessToken);
@@ -52,7 +55,8 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
         try {
             List<GitlabRepository> gitlabRepositories = getGitlabRepositories(accessInfo);
             serviceIdMap = gitlabRepositories.stream()
-                    .collect(Collectors.toMap(this::getRepositoryName, GitlabRepository::getId, (value1, value2) -> value2));
+                    .collect(Collectors.toMap(this::getRepositoryName, GitlabRepository::getId,
+                            (value1, value2) -> value2));
         } catch (Exception e) {
             log.info("load gitlab repositories error ={}", e.getMessage());
         }
@@ -72,6 +76,15 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
     @Override
     public String gitType() {
         return GitType.Gitlab.name();
+    }
+
+    @Override
+    public List<CommitMessage> getBranchCommits(String branch, GitAccessInfo accessInfo) {
+        Integer projectId = transformProjectId(accessInfo);
+        String path = String.format("/api/v4/projects/%s/repository/commits?ref_name=%s&per_page=%d", projectId,
+                branch, 20);
+        String result = gitRequestProxy.get(accessInfo.getGitDomain() + path, getTokenHeader(accessInfo));
+        return JSON.parseArray(result, CommitMessage.class);
     }
 
     @Override
@@ -195,7 +208,7 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
     private List<GitlabRepository> getGitlabRepository(GitAccessInfo accessInfo) {
         String result =
                 gitRequestProxy.get(accessInfo.getGitDomain() + "/api/v4/projects?search=" + accessInfo.getGitServiceName(),
-                getTokenHeader(accessInfo));
+                        getTokenHeader(accessInfo));
         return JSON.parseArray(result, GitlabRepository.class);
     }
 
