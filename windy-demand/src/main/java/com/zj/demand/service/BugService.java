@@ -63,16 +63,12 @@ public class BugService {
         return bugRepository.updateBug(OrikaUtil.convert(bugDto, BugBO.class));
     }
 
-    public PageSize<BugBO> getBugPage(Integer page, Integer size, String name, Integer status, String spaceId, String iterationId) {
+    public PageSize<BugBO> getBugPage(Integer page, Integer size, String name, Integer status, String spaceId,
+                                      String iterationId, String acceptor, Integer type) {
         String userId = authService.getCurrentUserId();
-        BugQueryBO bugQueryBO = BugQueryBO.builder()
-                .userId(userId)
-                .page(page)
-                .size(size)
-                .name(name)
-                .iterationId(iterationId)
-                .status(status)
-                .spaceId(spaceId).build();
+        BugQueryBO bugQueryBO = BugQueryBO.builder().page(page).size(size).name(name).proposer(userId)
+                .acceptor(acceptor).iterationId(iterationId).status(status).spaceId(spaceId).build();
+        bugQueryBO.handleQueryType(type, userId);
         return bugRepository.getUserBugs(bugQueryBO);
     }
 
@@ -96,7 +92,7 @@ public class BugService {
 
     public PageSize<BugBO> getRelatedBugs(Integer page, Integer size, Integer status) {
         String userId = authService.getCurrentUserId();
-        BugQueryBO bugQueryBO = BugQueryBO.builder().page(page).size(size).userId(userId).status(status).build();
+        BugQueryBO bugQueryBO = BugQueryBO.builder().page(page).size(size).proposer(userId).status(status).build();
         return bugRepository.getUserRelatedBugs(bugQueryBO);
     }
 

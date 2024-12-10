@@ -8,12 +8,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.entity.dto.PageSize;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.bo.demand.DemandBO;
 import com.zj.domain.entity.bo.demand.TaskQueryBO;
 import com.zj.domain.entity.bo.demand.WorkTaskBO;
-import com.zj.domain.entity.enums.DemandStatus;
 import com.zj.domain.entity.enums.WorkTaskStatus;
-import com.zj.domain.entity.po.demand.Demand;
 import com.zj.domain.entity.po.demand.WorkTask;
 import com.zj.domain.mapper.demand.WorkTaskMapper;
 import com.zj.domain.repository.demand.IWorkTaskRepository;
@@ -63,7 +60,10 @@ public class IWorkTaskRepositoryImpl extends ServiceImpl<WorkTaskMapper, WorkTas
     public PageSize<WorkTaskBO> getWorkTaskPage(TaskQueryBO taskQueryBO) {
         LambdaQueryWrapper<WorkTask> wrapper = Wrappers.lambdaQuery(WorkTask.class).eq(WorkTask::getCreator,
                 taskQueryBO.getUserId());
-        Optional.ofNullable(taskQueryBO.getStatus()).ifPresent(status -> wrapper.eq(WorkTask::getStatus, status));
+        Optional.ofNullable(taskQueryBO.getStatus()).map(status -> wrapper.eq(WorkTask::getStatus, status)).orElseGet(() ->{
+            wrapper.in(WorkTask::getStatus, WorkTaskStatus.getNotHandleWorks());
+            return null;
+        });
         IPage<WorkTask> pageQuery = new Page<>(taskQueryBO.getPage(), taskQueryBO.getSize());
         IPage<WorkTask> page = page(pageQuery, wrapper);
         PageSize<WorkTaskBO> pageSize = new PageSize<>(Collections.emptyList());

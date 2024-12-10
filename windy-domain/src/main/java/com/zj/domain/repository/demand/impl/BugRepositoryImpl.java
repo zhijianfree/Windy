@@ -12,7 +12,6 @@ import com.zj.domain.entity.bo.demand.BugBO;
 import com.zj.domain.entity.bo.demand.BugQueryBO;
 import com.zj.domain.entity.enums.BugStatus;
 import com.zj.domain.entity.po.demand.Bug;
-import com.zj.domain.entity.po.demand.Demand;
 import com.zj.domain.mapper.demand.BugMapper;
 import com.zj.domain.repository.demand.IBugRepository;
 import org.apache.commons.collections4.CollectionUtils;
@@ -29,7 +28,7 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
 
     @Override
     public PageSize<BugBO> getUserBugs(BugQueryBO bugQueryBO) {
-        LambdaQueryWrapper<Bug> wrapper = Wrappers.lambdaQuery(Bug.class).eq(Bug::getProposer, bugQueryBO.getUserId());
+        LambdaQueryWrapper<Bug> wrapper = Wrappers.lambdaQuery(Bug.class).eq(Bug::getProposer, bugQueryBO.getProposer());
         Optional.ofNullable(bugQueryBO.getStatus()).ifPresent(status -> wrapper.eq(Bug::getStatus, status));
         if (StringUtils.isNotBlank(bugQueryBO.getIterationId())){
             wrapper.eq(Bug::getIterationId, bugQueryBO.getIterationId());
@@ -40,6 +39,12 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
         if (StringUtils.isNotBlank(bugQueryBO.getName())){
             wrapper.eq(Bug::getBugName, bugQueryBO.getName());
         }
+        if (StringUtils.isNotBlank(bugQueryBO.getAcceptor())){
+            wrapper.eq(Bug::getAcceptor, bugQueryBO.getAcceptor());
+        }
+        if (Objects.isNull(bugQueryBO.getStatus())){
+            wrapper.in(Bug::getStatus, BugStatus.getNotHandleBugs());
+        }
         wrapper.orderByDesc(Bug::getCreateTime);
         IPage<Bug> pageQuery = new Page<>(bugQueryBO.getPage(), bugQueryBO.getSize());
         return exchangePageSize(pageQuery, wrapper);
@@ -47,7 +52,7 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
 
     @Override
     public PageSize<BugBO> getUserRelatedBugs(BugQueryBO bugQueryBO) {
-        LambdaQueryWrapper<Bug> wrapper = Wrappers.lambdaQuery(Bug.class).eq(Bug::getAcceptor, bugQueryBO.getUserId());
+        LambdaQueryWrapper<Bug> wrapper = Wrappers.lambdaQuery(Bug.class).eq(Bug::getAcceptor, bugQueryBO.getProposer());
         Optional.ofNullable(bugQueryBO.getStatus()).ifPresent(status -> wrapper.eq(Bug::getStatus, status));
         IPage<Bug> pageQuery = new Page<>(bugQueryBO.getPage(), bugQueryBO.getSize());
         return exchangePageSize(pageQuery, wrapper);

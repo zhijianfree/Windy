@@ -18,8 +18,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Repository;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -37,17 +37,29 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
     @Override
     public PageSize<DemandBO> getDemandPage(DemandQueryBO query) {
         IPage<Demand> pageObj = new Page<>(query.getPage(), query.getPageSize());
-        LambdaQueryWrapper<Demand> queryWrapper = Wrappers.lambdaQuery(Demand.class).eq(Demand::getAcceptor,
-                query.getCreator()).orderByDesc(Demand::getCreateTime);
+        LambdaQueryWrapper<Demand> queryWrapper = Wrappers.lambdaQuery(Demand.class);
         Optional.ofNullable(query.getStatus()).ifPresent(status -> queryWrapper.eq(Demand::getStatus, status));
         if (StringUtils.isNotBlank(query.getSpaceId())) {
             queryWrapper.eq(Demand::getSpaceId, query.getSpaceId());
         }
+        if (StringUtils.isNotBlank(query.getProposer())) {
+            queryWrapper.eq(Demand::getProposer, query.getProposer());
+        }
+
         if (StringUtils.isNotBlank(query.getIterationId())) {
             queryWrapper.eq(Demand::getIterationId, query.getIterationId());
         }
         if (StringUtils.isNotBlank(query.getName())) {
             queryWrapper.like(Demand::getDemandName, query.getName());
+        }
+
+        if (StringUtils.isNotBlank(query.getAcceptor())) {
+            queryWrapper.like(Demand::getAcceptor, query.getAcceptor());
+        }
+
+        if (Objects.isNull(query.getStatus())) {
+            queryWrapper.in(Demand::getStatus,
+                    DemandStatus.getNotHandleDemands().stream().map(DemandStatus::getType).collect(Collectors.toList()));
         }
         queryWrapper.orderByDesc(Demand::getCreateTime);
         IPage<Demand> recordPage = page(pageObj, queryWrapper);
@@ -121,7 +133,7 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
         List<Demand> list =
                 list(Wrappers.lambdaUpdate(Demand.class).in(Demand::getDemandId, demandIds).in(Demand::getStatus,
                         DemandStatus.getNotHandleDemands().stream().map(DemandStatus::getType)
-                        .collect(Collectors.toList())));
+                                .collect(Collectors.toList())));
         return OrikaUtil.convertList(list, DemandBO.class);
     }
 

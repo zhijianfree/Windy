@@ -49,8 +49,11 @@ public class DemandRest {
                                                           @RequestParam(value = "name", required = false) String name,
                                                           @RequestParam(value = "spaceId", required = false) String spaceId,
                                                           @RequestParam(value = "iterationId", required = false) String iterationId,
-                                                          @RequestParam(value = "status", required = false) Integer status) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getDemandPage(page, size, name, status, spaceId, iterationId));
+                                                          @RequestParam(value = "acceptor", required = false) String acceptor,
+                                                          @RequestParam(value = "status", required = false) Integer status,
+                                                          @RequestParam(value = "type", required = false) Integer type) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, demandService.getDemandPage(page, size, name, status, spaceId,
+                iterationId, acceptor, type));
     }
 
     @GetMapping("/iterations/{iterationId}/demands")

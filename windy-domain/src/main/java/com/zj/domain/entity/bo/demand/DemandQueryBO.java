@@ -1,11 +1,12 @@
 package com.zj.domain.entity.bo.demand;
 
+import com.zj.domain.entity.vo.BaseQuery;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
-public class DemandQueryBO {
+public class DemandQueryBO extends BaseQuery {
   /**
    * 需求状态
    */
@@ -27,9 +28,9 @@ public class DemandQueryBO {
   private String name;
 
   /**
-   * 创建人
+   * 用户ID
    */
-  private String creator;
+  private String proposer;
 
   /**
    * 迭代ID
@@ -40,4 +41,9 @@ public class DemandQueryBO {
    * 空间ID
    */
   private String spaceId;
+
+  /**
+   * 处理人Id
+   */
+  private String acceptor;
 }

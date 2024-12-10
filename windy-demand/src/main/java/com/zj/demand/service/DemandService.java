@@ -9,6 +9,7 @@ import com.zj.common.utils.OrikaUtil;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.demand.entity.DemandDetailDto;
 import com.zj.demand.entity.DemandDto;
+import com.zj.domain.entity.enums.QueryType;
 import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.demand.BusinessStatusBO;
 import com.zj.domain.entity.bo.demand.DemandBO;
@@ -57,23 +58,18 @@ public class DemandService {
         return demandBO;
     }
 
-    public PageSize<DemandBO> getDemandPage(Integer page, Integer size, String name, Integer status, String spaceId, String iterationId) {
+    public PageSize<DemandBO> getDemandPage(Integer page, Integer size, String name, Integer status, String spaceId, String iterationId, String acceptor, Integer type) {
         String currentUserId = authService.getCurrentUserId();
-        DemandQueryBO demandQueryBO = DemandQueryBO.builder()
-                .pageSize(size)
-                .page(page)
-                .name(name)
-                .status(status)
-                .spaceId(spaceId)
-                .iterationId(iterationId)
-                .creator(currentUserId).build();
+        DemandQueryBO demandQueryBO = DemandQueryBO.builder().pageSize(size).page(page).name(name).status(status)
+                .spaceId(spaceId).acceptor(acceptor).iterationId(iterationId).proposer(currentUserId).build();
+        demandQueryBO.handleQueryType(type, currentUserId);
         return demandRepository.getDemandPage(demandQueryBO);
     }
 
     public PageSize<DemandBO> getUserDemands(Integer page, Integer size, Integer status) {
         String currentUserId = authService.getCurrentUserId();
         DemandQueryBO demandQueryBO =
-                DemandQueryBO.builder().pageSize(size).page(page).status(status).creator(currentUserId).build();
+                DemandQueryBO.builder().pageSize(size).page(page).status(status).proposer(currentUserId).build();
         return demandRepository.getDemandPage(demandQueryBO);
     }
 

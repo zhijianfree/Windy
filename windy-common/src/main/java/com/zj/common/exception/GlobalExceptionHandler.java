@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ResponseMeta> handleException(Exception e) {
     String errorCode = ErrorCode.ERROR.getCode();
-    String message = e.getMessage();
+    String message = ErrorCode.ERROR.getMessage();
     if (e instanceof MethodArgumentNotValidException) {
       log.warn("param validate error", e);
       message = resetParamErrorMsg(e);
