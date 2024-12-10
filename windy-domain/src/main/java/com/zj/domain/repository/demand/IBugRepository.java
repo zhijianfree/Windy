@@ -27,4 +27,8 @@ public interface IBugRepository {
     List<BugBO> getSpaceNotHandleBugs(String spaceId);
 
     List<BugBO> getIterationNotHandleBugs(String iterationId);
+
+    List<BugBO> getNotCompleteBugs(List<String> bugIds);
+
+    boolean batchUpdateStatus(List<String> bugIds, int status);
 }

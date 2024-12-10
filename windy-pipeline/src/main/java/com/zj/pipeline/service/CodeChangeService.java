@@ -1,6 +1,5 @@
 package com.zj.pipeline.service;
 
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.zj.common.exception.ApiException;
@@ -21,7 +20,7 @@ import com.zj.domain.repository.demand.IWorkTaskRepository;
 import com.zj.domain.repository.pipeline.ICodeChangeRepository;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
-import com.zj.pipeline.entity.enums.RelationType;
+import com.zj.domain.entity.enums.RelationType;
 import com.zj.pipeline.git.RepositoryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

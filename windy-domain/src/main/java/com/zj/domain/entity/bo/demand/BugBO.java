@@ -99,6 +99,12 @@ public class BugBO {
    */
   private String iterationId;
 
+
+  /**
+   * 工作量
+   */
+  private Integer workload;
+
   /**
    * 创建时间
    * */

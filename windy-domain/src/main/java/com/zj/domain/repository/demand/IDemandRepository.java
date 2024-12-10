@@ -28,4 +28,8 @@ public interface IDemandRepository {
     List<DemandBO> getSpaceNotHandleDemands(String spaceId);
 
     List<DemandBO> getIterationNotHandleDemands(String iterationId);
+
+    List<DemandBO> getNotCompleteDemandByIds(List<String> demandIds);
+
+    boolean batchUpdateStatus(List<String> demandIds, int status);
 }

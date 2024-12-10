@@ -47,6 +47,12 @@ public class Bug {
      * */
     private String proposerName;
 
+
+    /**
+     * 工作量
+     */
+    private Integer workload;
+
     /**
      * 提出人
      * */

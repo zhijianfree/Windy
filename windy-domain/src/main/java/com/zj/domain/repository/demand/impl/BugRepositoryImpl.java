@@ -1,6 +1,7 @@
 package com.zj.domain.repository.demand.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -11,6 +12,7 @@ import com.zj.domain.entity.bo.demand.BugBO;
 import com.zj.domain.entity.bo.demand.BugQueryBO;
 import com.zj.domain.entity.enums.BugStatus;
 import com.zj.domain.entity.po.demand.Bug;
+import com.zj.domain.entity.po.demand.Demand;
 import com.zj.domain.mapper.demand.BugMapper;
 import com.zj.domain.repository.demand.IBugRepository;
 import org.apache.commons.collections4.CollectionUtils;
@@ -122,5 +124,23 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
                 .in(Bug::getStatus, BugStatus.getNotHandleBugs().stream().map(BugStatus::getType)
                         .collect(Collectors.toList())));
         return OrikaUtil.convertList(list, BugBO.class);
+    }
+
+    @Override
+    public List<BugBO> getNotCompleteBugs(List<String> bugIds) {
+        List<Bug> list = list(Wrappers.lambdaQuery(Bug.class).in(Bug::getBugId, bugIds)
+                .in(Bug::getStatus, BugStatus.getNotHandleBugs().stream().map(BugStatus::getType)
+                        .collect(Collectors.toList())));
+        return OrikaUtil.convertList(list, BugBO.class);
+    }
+
+    @Override
+    public boolean batchUpdateStatus(List<String> bugIds, int status) {
+        if (CollectionUtils.isEmpty(bugIds)) {
+            return false;
+        }
+        UpdateWrapper<Bug> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set("status", status).in("bug_id", bugIds);
+        return baseMapper.update(null, updateWrapper) > 0;
     }
 }

@@ -11,6 +11,5 @@ public interface IBusinessStatusRepository {
     List<BusinessStatusBO> getWorkTaskStatuses();
     List<BusinessStatusBO> getDemandTags();
     List<BusinessStatusBO> getBugTags();
-
     boolean isUnchangeableStatus(Integer status, String businessType);
 }

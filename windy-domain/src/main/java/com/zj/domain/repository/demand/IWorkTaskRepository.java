@@ -17,7 +17,9 @@ public interface IWorkTaskRepository {
 
     PageSize<WorkTaskBO> getWorkTaskPage(TaskQueryBO taskQueryBO);
 
-    Integer countIteration(String iterationId);
-
     List<WorkTaskBO> getWorkTaskByName(String queryName);
+
+    List<WorkTaskBO> getNotCompleteWorkTasks(List<String> taskIds);
+
+    boolean batchUpdateStatus(List<String> notCompleteTaskIds, int status);
 }

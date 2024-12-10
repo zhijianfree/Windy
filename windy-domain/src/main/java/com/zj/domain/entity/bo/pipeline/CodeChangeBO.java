@@ -51,7 +51,7 @@ public class CodeChangeBO {
     /**
      * 关联的业务类型
      */
-    private String relationType;
+    private Integer relationType;
 
     /**
      * 创建时间

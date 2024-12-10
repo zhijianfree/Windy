@@ -3,9 +3,11 @@ package com.zj.auth.service;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.zj.auth.entity.UserSession;
+import com.zj.domain.entity.bo.auth.UserBO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -16,7 +18,7 @@ public class DefaultMemoryCache implements ISessionCache{
 
     public DefaultMemoryCache(Integer tokenExpire) {
         memoryCache = CacheBuilder.newBuilder()
-                .expireAfterAccess(tokenExpire, TimeUnit.SECONDS)
+                .expireAfterWrite(tokenExpire, TimeUnit.SECONDS)
                 .build();
     }
 
@@ -39,5 +41,4 @@ public class DefaultMemoryCache implements ISessionCache{
             return null;
         }
     }
-
 }

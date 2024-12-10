@@ -19,7 +19,6 @@ import com.zj.domain.repository.demand.IBugRepository;
 import com.zj.domain.repository.demand.IBusinessStatusRepository;
 import com.zj.domain.repository.demand.IDemandRepository;
 import com.zj.domain.repository.demand.IMemberRepository;
-import com.zj.domain.repository.demand.IWorkTaskRepository;
 import com.zj.domain.repository.demand.IterationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -36,7 +35,6 @@ public class IterationService {
 
     private final IDemandRepository demandRepository;
     private final IBugRepository bugRepository;
-    private final IWorkTaskRepository workTaskRepository;
     private final IterationRepository iterationRepository;
     private final UniqueIdService uniqueIdService;
     private final IAuthService authService;
@@ -44,12 +42,11 @@ public class IterationService {
     private final IBusinessStatusRepository businessStatusRepository;
 
     public IterationService(IDemandRepository demandRepository, IBugRepository bugRepository,
-                            IWorkTaskRepository workTaskRepository, IterationRepository iterationRepository,
+                            IterationRepository iterationRepository,
                             UniqueIdService uniqueIdService, IAuthService authService,
                             IMemberRepository memberRepository, IBusinessStatusRepository businessStatusRepository) {
         this.demandRepository = demandRepository;
         this.bugRepository = bugRepository;
-        this.workTaskRepository = workTaskRepository;
         this.iterationRepository = iterationRepository;
         this.uniqueIdService = uniqueIdService;
         this.authService = authService;
@@ -110,10 +107,14 @@ public class IterationService {
     }
 
     public IterationStatisticDto getIterationStatistic(String iterationId) {
-        Integer demandCount = demandRepository.countIteration(iterationId);
-        Integer bugCount = bugRepository.countIteration(iterationId);
-        Integer workCount = workTaskRepository.countIteration(iterationId);
-        return new IterationStatisticDto(demandCount, bugCount, workCount, 0);
+        List<DemandBO> iterationDemand = demandRepository.getIterationDemand(iterationId);
+        double demandWorkload =
+                iterationDemand.stream().filter(Objects::nonNull).map(DemandBO::getWorkload).mapToInt(Integer::intValue).sum();
+        List<BugBO> iterationBugs = bugRepository.getIterationBugs(iterationId);
+        double bugWorkload =
+                iterationBugs.stream().filter(Objects::nonNull).map(BugBO::getWorkload).mapToDouble(Integer::intValue).sum();
+        return new IterationStatisticDto(iterationDemand.size(), iterationBugs.size(), 0,
+                (int) (demandWorkload + bugWorkload));
     }
 
     public List<UserBO> queryIterationMembers(String iterationId) {

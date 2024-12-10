@@ -1,6 +1,7 @@
 package com.zj.domain.repository.demand.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -13,9 +14,11 @@ import com.zj.domain.entity.enums.DemandStatus;
 import com.zj.domain.entity.po.demand.Demand;
 import com.zj.domain.mapper.demand.DemandMapper;
 import com.zj.domain.repository.demand.IDemandRepository;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -111,6 +114,25 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
                 .in(Demand::getStatus, DemandStatus.getNotHandleDemands().stream().map(DemandStatus::getType)
                         .collect(Collectors.toList())));
         return OrikaUtil.convertList(list, DemandBO.class);
+    }
+
+    @Override
+    public List<DemandBO> getNotCompleteDemandByIds(List<String> demandIds) {
+        List<Demand> list =
+                list(Wrappers.lambdaUpdate(Demand.class).in(Demand::getDemandId, demandIds).in(Demand::getStatus,
+                        DemandStatus.getNotHandleDemands().stream().map(DemandStatus::getType)
+                        .collect(Collectors.toList())));
+        return OrikaUtil.convertList(list, DemandBO.class);
+    }
+
+    @Override
+    public boolean batchUpdateStatus(List<String> demandIds, int status) {
+        if (CollectionUtils.isEmpty(demandIds)) {
+            return false;
+        }
+        UpdateWrapper<Demand> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set("status", status).in("demand_id", demandIds);
+        return baseMapper.update(null, updateWrapper) > 0;
     }
 
     private PageSize<DemandBO> convertPageSize(IPage<Demand> recordPage) {

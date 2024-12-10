@@ -1,4 +1,4 @@
-package com.zj.pipeline.entity.enums;
+package com.zj.domain.entity.enums;
 
 import lombok.Getter;
 
