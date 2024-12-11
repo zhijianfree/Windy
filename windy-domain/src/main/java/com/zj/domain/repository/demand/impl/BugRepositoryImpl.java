@@ -28,22 +28,26 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
 
     @Override
     public PageSize<BugBO> getUserBugs(BugQueryBO bugQueryBO) {
-        LambdaQueryWrapper<Bug> wrapper = Wrappers.lambdaQuery(Bug.class).eq(Bug::getProposer, bugQueryBO.getProposer());
+        LambdaQueryWrapper<Bug> wrapper = Wrappers.lambdaQuery(Bug.class);
         Optional.ofNullable(bugQueryBO.getStatus()).ifPresent(status -> wrapper.eq(Bug::getStatus, status));
-        if (StringUtils.isNotBlank(bugQueryBO.getIterationId())){
+        if (StringUtils.isNotBlank(bugQueryBO.getProposer())) {
+            wrapper.eq(Bug::getProposer, bugQueryBO.getProposer());
+        }
+        if (StringUtils.isNotBlank(bugQueryBO.getIterationId())) {
             wrapper.eq(Bug::getIterationId, bugQueryBO.getIterationId());
         }
-        if (StringUtils.isNotBlank(bugQueryBO.getSpaceId())){
+        if (StringUtils.isNotBlank(bugQueryBO.getSpaceId())) {
             wrapper.eq(Bug::getSpaceId, bugQueryBO.getSpaceId());
         }
-        if (StringUtils.isNotBlank(bugQueryBO.getName())){
+        if (StringUtils.isNotBlank(bugQueryBO.getName())) {
             wrapper.eq(Bug::getBugName, bugQueryBO.getName());
         }
-        if (StringUtils.isNotBlank(bugQueryBO.getAcceptor())){
+        if (StringUtils.isNotBlank(bugQueryBO.getAcceptor())) {
             wrapper.eq(Bug::getAcceptor, bugQueryBO.getAcceptor());
         }
-        if (Objects.isNull(bugQueryBO.getStatus())){
-            wrapper.in(Bug::getStatus, BugStatus.getNotHandleBugs());
+        if (Objects.isNull(bugQueryBO.getStatus())) {
+            wrapper.in(Bug::getStatus,
+                    BugStatus.getNotHandleBugs().stream().map(BugStatus::getType).collect(Collectors.toList()));
         }
         wrapper.orderByDesc(Bug::getCreateTime);
         IPage<Bug> pageQuery = new Page<>(bugQueryBO.getPage(), bugQueryBO.getSize());
@@ -52,7 +56,8 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
 
     @Override
     public PageSize<BugBO> getUserRelatedBugs(BugQueryBO bugQueryBO) {
-        LambdaQueryWrapper<Bug> wrapper = Wrappers.lambdaQuery(Bug.class).eq(Bug::getAcceptor, bugQueryBO.getProposer());
+        LambdaQueryWrapper<Bug> wrapper = Wrappers.lambdaQuery(Bug.class).eq(Bug::getAcceptor,
+                bugQueryBO.getProposer());
         Optional.ofNullable(bugQueryBO.getStatus()).ifPresent(status -> wrapper.eq(Bug::getStatus, status));
         IPage<Bug> pageQuery = new Page<>(bugQueryBO.getPage(), bugQueryBO.getSize());
         return exchangePageSize(pageQuery, wrapper);
@@ -117,25 +122,22 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
 
     @Override
     public List<BugBO> getSpaceNotHandleBugs(String spaceId) {
-        List<Bug> list = list(Wrappers.lambdaQuery(Bug.class).eq(Bug::getSpaceId, spaceId)
-                .in(Bug::getStatus, BugStatus.getNotHandleBugs().stream().map(BugStatus::getType)
-                        .collect(Collectors.toList())));
+        List<Bug> list = list(Wrappers.lambdaQuery(Bug.class).eq(Bug::getSpaceId, spaceId).in(Bug::getStatus,
+                BugStatus.getNotHandleBugs().stream().map(BugStatus::getType).collect(Collectors.toList())));
         return OrikaUtil.convertList(list, BugBO.class);
     }
 
     @Override
     public List<BugBO> getIterationNotHandleBugs(String iterationId) {
-        List<Bug> list = list(Wrappers.lambdaQuery(Bug.class).eq(Bug::getIterationId, iterationId)
-                .in(Bug::getStatus, BugStatus.getNotHandleBugs().stream().map(BugStatus::getType)
-                        .collect(Collectors.toList())));
+        List<Bug> list = list(Wrappers.lambdaQuery(Bug.class).eq(Bug::getIterationId, iterationId).in(Bug::getStatus,
+                BugStatus.getNotHandleBugs().stream().map(BugStatus::getType).collect(Collectors.toList())));
         return OrikaUtil.convertList(list, BugBO.class);
     }
 
     @Override
     public List<BugBO> getNotCompleteBugs(List<String> bugIds) {
-        List<Bug> list = list(Wrappers.lambdaQuery(Bug.class).in(Bug::getBugId, bugIds)
-                .in(Bug::getStatus, BugStatus.getNotHandleBugs().stream().map(BugStatus::getType)
-                        .collect(Collectors.toList())));
+        List<Bug> list = list(Wrappers.lambdaQuery(Bug.class).in(Bug::getBugId, bugIds).in(Bug::getStatus,
+                BugStatus.getNotHandleBugs().stream().map(BugStatus::getType).collect(Collectors.toList())));
         return OrikaUtil.convertList(list, BugBO.class);
     }
 

@@ -19,7 +19,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Repository
@@ -60,10 +60,12 @@ public class IWorkTaskRepositoryImpl extends ServiceImpl<WorkTaskMapper, WorkTas
     public PageSize<WorkTaskBO> getWorkTaskPage(TaskQueryBO taskQueryBO) {
         LambdaQueryWrapper<WorkTask> wrapper = Wrappers.lambdaQuery(WorkTask.class).eq(WorkTask::getCreator,
                 taskQueryBO.getUserId());
-        Optional.ofNullable(taskQueryBO.getStatus()).map(status -> wrapper.eq(WorkTask::getStatus, status)).orElseGet(() ->{
-            wrapper.in(WorkTask::getStatus, WorkTaskStatus.getNotHandleWorks());
-            return null;
-        });
+        if (Objects.nonNull(taskQueryBO.getStatus())) {
+            wrapper.eq(WorkTask::getStatus, taskQueryBO.getStatus());
+        } else {
+            wrapper.in(WorkTask::getStatus,
+                    WorkTaskStatus.getNotHandleWorks().stream().map(WorkTaskStatus::getType).collect(Collectors.toList()));
+        }
         IPage<WorkTask> pageQuery = new Page<>(taskQueryBO.getPage(), taskQueryBO.getSize());
         IPage<WorkTask> page = page(pageQuery, wrapper);
         PageSize<WorkTaskBO> pageSize = new PageSize<>(Collections.emptyList());
