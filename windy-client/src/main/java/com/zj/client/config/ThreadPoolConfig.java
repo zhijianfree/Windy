@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @author guyuelan
@@ -78,6 +79,19 @@ public class ThreadPoolConfig {
     windyThreadPool.setAllowCoreThreadTimeOut(false);
     windyThreadPool.setQueueSize(100);
     windyThreadPool.setThreadNamePrefix("feature-");
+    return windyThreadPool;
+  }
+
+  @Bean("cleanDirtyDataExecutePool")
+  public Executor getCleanDirtyDataExecutePool() {
+    WindyThreadPool windyThreadPool = new WindyThreadPool();
+    windyThreadPool.setCorePoolSize(10);
+    windyThreadPool.setMaxPoolSize(40);
+    windyThreadPool.setAllowCoreThreadTimeOut(false);
+    windyThreadPool.setQueueSize(100);
+    windyThreadPool.setThreadNamePrefix("clean-dirty-");
+    //清理脏数据处理任务，堆积就直接清除
+    windyThreadPool.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
     return windyThreadPool;
   }
 

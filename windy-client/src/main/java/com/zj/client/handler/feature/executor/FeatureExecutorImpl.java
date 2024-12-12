@@ -3,22 +3,23 @@ package com.zj.client.handler.feature.executor;
 import com.zj.client.entity.bo.ExecutePoint;
 import com.zj.client.entity.bo.ExecuteRecord;
 import com.zj.client.entity.bo.FeatureHistory;
-import com.zj.common.entity.feature.FeatureResponse;
 import com.zj.client.handler.feature.executor.invoker.strategy.ExecuteStrategyFactory;
 import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
 import com.zj.client.handler.feature.executor.vo.FeatureParam;
 import com.zj.client.handler.notify.IResultEventNotify;
 import com.zj.client.utils.ExceptionUtils;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.entity.dto.ResultEvent;
+import com.zj.common.entity.feature.FeatureResponse;
 import com.zj.common.enums.NotifyType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.enums.TemplateType;
-import com.zj.common.entity.dto.ResultEvent;
+import com.zj.common.enums.TestStageType;
 import com.zj.common.utils.IpUtils;
-import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.common.utils.TraceUtils;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -44,16 +45,18 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
 
     private final IResultEventNotify resultEventNotify;
 
-    @Autowired
-    @Qualifier("featureExecutePool")
-    private Executor executor;
+    private final Executor featureExecutorPool;
+    private final Executor cleanDirtyPool;
 
     public FeatureExecutorImpl(
             ExecuteStrategyFactory executeStrategyFactory, UniqueIdService uniqueIdService,
-            IResultEventNotify resultEventNotify) {
+            IResultEventNotify resultEventNotify, @Qualifier("featureExecutePool") Executor featureExecutorPool,
+            @Qualifier("cleanDirtyDataExecutePool") Executor cleanDirtyPool) {
         this.executeStrategyFactory = executeStrategyFactory;
         this.uniqueIdService = uniqueIdService;
         this.resultEventNotify = resultEventNotify;
+        this.featureExecutorPool = featureExecutorPool;
+        this.cleanDirtyPool = cleanDirtyPool;
     }
 
     @Override
@@ -91,7 +94,8 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
                         featureExecuteContext.setCountDownLatch(countDownLatch);
                         status.set(ProcessStatus.RUNNING.getType());
                     }
-                    List<FeatureResponse> responses = executeStrategyFactory.execute(executePoint, featureExecuteContext);
+                    List<FeatureResponse> responses = executeStrategyFactory.execute(executePoint,
+                            featureExecuteContext);
                     executeRecord.setStatus(judgeRecordStatus(responses));
                     executeRecord.setRecordResult(responses);
 
@@ -106,7 +110,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
                     FeatureResponse featureResponse = createFailResponse(executePoint, e);
                     executeRecord.setStatus(ProcessStatus.FAIL.getType());
                     executeRecord.setRecordResult(Collections.singletonList(featureResponse));
-                }finally {
+                } finally {
                     //3 保存执行点记录
                     saveRecord(featureParam, executePoint, executeRecord);
                     TraceUtils.removeTrace();
@@ -115,11 +119,15 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
                 if (Objects.equals(executeRecord.getStatus(), ProcessStatus.FAIL.getType())) {
                     log.warn("execute feature error featureId= {}", executePoint.getFeatureId());
                     status.set(executeRecord.getStatus());
+
+                    //只有非清理阶段的执行点执行失败才需要清理
+                    if(!Objects.equals(executePoint.getTestStage(), TestStageType.CLEAN.getType())){
+                        //如果用例执行异常，那么执行一下清理阶段的用例，减少测试环境的脏数据
+                        cleanFeatureDirtyDataAsync(executePoints, featureExecuteContext);
+                    }
                     break;
                 }
             }
-
-            //todo 如果用例执行失败，尝试执行清除逻辑
 
             //4 更新整个用例执行结果
             featureHistory.setExecuteStatus(status.get());
@@ -131,13 +139,36 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
                     .context(globalContext)
                     .params(featureHistory);
             resultEventNotify.notifyEvent(resultEvent);
-        }, executor);
+        }, featureExecutorPool);
+    }
+
+    /**
+     * 异步执行清理动作
+     */
+    private void cleanFeatureDirtyDataAsync(List<ExecutePoint> executePoints,
+                                            FeatureExecuteContext featureExecuteContext) {
+        List<ExecutePoint> cleanPoints =
+                executePoints.stream().filter(executePoint -> Objects.equals(executePoint.getTestStage(),
+                        TestStageType.CLEAN.getType())).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(cleanPoints)) {
+            log.info("clean stage points is empty, not clean");
+            return;
+        }
+        log.info("start run clean stage points");
+        CompletableFuture.runAsync(() -> cleanPoints.forEach(executePoint -> {
+            try {
+                log.info("start execute clean stage point={}", executePoint.getExecutorUnit().getName());
+                executeStrategyFactory.execute(executePoint, featureExecuteContext);
+            } catch (Exception e) {
+                log.debug("execute clean stage point error {}", e.getMessage());
+            }
+        }), cleanDirtyPool);
     }
 
     /**
      * 上个任务是异步任务的需要等上个任务执行之后再开始下一个避免
      */
-    private  void judgeWhetherWait(CountDownLatch countDownLatch) {
+    private void judgeWhetherWait(CountDownLatch countDownLatch) {
         if (Objects.isNull(countDownLatch) || countDownLatch.getCount() < 1) {
             return;
         }
