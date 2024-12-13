@@ -37,7 +37,7 @@ public class GoCodeBuilder implements ICodeBuilder {
         String buildFilePath = context.getTargetDir() + File.separator + "go_build.sh";
         notifyListener.notifyMessage("执行构建文件目录:" + buildFilePath);
         copyBuildFile(buildFilePath);
-        String goPath = context.getBuildVersion();
+        String goPath = context.getBuildPath();
         ProcessBuilder processBuilder = new ProcessBuilder(buildFilePath, context.getServiceName(), "1.0.0",
                 targetFile.getParentFile().getAbsolutePath(), goPath, context.getTargetDir());
         processBuilder.redirectErrorStream(true); // 合并标准错误流和标准输出流

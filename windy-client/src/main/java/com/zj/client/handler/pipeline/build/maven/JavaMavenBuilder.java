@@ -74,7 +74,13 @@ public class JavaMavenBuilder implements ICodeBuilder {
     ideaRequest.setAlsoMakeDependents(true);
     ideaRequest.setGoals(Collections.singletonList("package"));
 
-    String mavenDir = Optional.ofNullable(context.getBuildVersion()).filter(StringUtils::isNoneBlank)
+    // 动态版本号传递，如果没有传递，则使用pom中的版本
+    Properties properties = new Properties();
+      Optional.ofNullable(context.getVersion())
+              .filter(StringUtils::isNoneBlank).ifPresent(dynamicVersion -> properties.setProperty("revision", dynamicVersion));
+    ideaRequest.setProperties(properties);
+
+      String mavenDir = Optional.ofNullable(context.getBuildPath()).filter(StringUtils::isNoneBlank)
             .orElseGet(globalEnvConfig::getMavenPath);
     Preconditions.checkNotNull(mavenDir, "maven path can not find , consider to fix it");
     Invoker mavenInvoker = new DefaultInvoker();

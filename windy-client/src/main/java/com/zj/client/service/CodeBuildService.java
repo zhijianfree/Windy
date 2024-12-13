@@ -93,7 +93,8 @@ public class CodeBuildService {
                 context.setBuildFile(pomPath);
                 context.setTargetDir(pipelineWorkspace);
                 context.setServiceName(serviceName);
-                context.setBuildVersion(codeBuildParam.getBuildVersion());
+                context.setVersion(codeBuildParam.getVersion());
+                context.setBuildPath(codeBuildParam.getBuildVersion());
                 Integer exitCode = codeBuilder.build(context, message -> {
                     if (StringUtils.isNotBlank(message)){
                         notifyMessage(taskNode, message);
