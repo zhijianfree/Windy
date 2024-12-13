@@ -78,7 +78,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
             CountDownLatch countDownLatch = null;
             for (ExecutePoint executePoint : executePoints) {
                 TraceUtils.startNextSpan();
-                judgeWhetherWait(countDownLatch);
+                waitIFExistAsyncPoint(countDownLatch);
                 ExecuteRecord executeRecord = new ExecuteRecord();
                 String recordId = uniqueIdService.getUniqueId();
                 executeRecord.setExecuteRecordId(recordId);
@@ -166,9 +166,9 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
     }
 
     /**
-     * 上个任务是异步任务的需要等上个任务执行之后再开始下一个避免
+     * 上个任务是异步任务的需要等上个任务执行之后再开始下一个避免异步任务错误后续任务的处理的结果
      */
-    private void judgeWhetherWait(CountDownLatch countDownLatch) {
+    private void waitIFExistAsyncPoint(CountDownLatch countDownLatch) {
         if (Objects.isNull(countDownLatch) || countDownLatch.getCount() < 1) {
             return;
         }
