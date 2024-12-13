@@ -110,7 +110,7 @@ public class PublishEndListener implements IPipelineEndListener {
         }
 
         List<String> taskIds = relationMap.get(RelationType.WORK.getType());
-        if (CollectionUtils.isNotEmpty(bugIds)) {
+        if (CollectionUtils.isNotEmpty(taskIds)) {
             List<String> notCompleteTaskIds =
                     workTaskRepository.getNotCompleteWorkTasks(taskIds).stream().map(WorkTaskBO::getTaskId).collect(Collectors.toList());
             boolean workTaskUpdate = workTaskRepository.batchUpdateStatus(notCompleteTaskIds, WorkTaskStatus.COMPLETE.getType());
