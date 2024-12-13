@@ -23,8 +23,13 @@ import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.springframework.stereotype.Component;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.File;
 import java.io.IOException;
+import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -45,11 +50,33 @@ public class GitOperator implements IGitProcessor {
     // 判断本地目录是否存在
     createIfNotExist(workspace);
 
+    disableSSLValidation();
     // clone 仓库到指定目录
     return Git.cloneRepository().setURI(gitMeta.getGitUrl()).setDirectory(new File(workspace))
         .setCredentialsProvider(
             new UsernamePasswordCredentialsProvider(gitMeta.getTokenName(), gitMeta.getToken()))
         .setRemote(ORIGIN).setBranch(branch).setProgressMonitor(new TextProgressMonitor(new PrintWriter(System.out))).call();
+  }
+
+  private void disableSSLValidation() throws Exception {
+    TrustManager[] trustAllCerts = new TrustManager[]{
+            new X509TrustManager() {
+              public X509Certificate[] getAcceptedIssuers() {
+                return null;
+              }
+
+              public void checkClientTrusted(X509Certificate[] certs, String authType) {
+              }
+
+              public void checkServerTrusted(X509Certificate[] certs, String authType) {
+              }
+            }
+    };
+
+    SSLContext sc = SSLContext.getInstance("TLS");
+    sc.init(null, trustAllCerts, new java.security.SecureRandom());
+    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+    HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
   }
 
   private void createIfNotExist(String serviceDir) {
