@@ -41,7 +41,6 @@ public class RelateTemplateInvoker implements IExecuteInvoker {
         String body = Optional.of(bodyMap).filter(map -> !map.isEmpty()).map(JSON::toJSONString).orElse("");
 
         ExecutorUnit relatedTemplateUnit = executorUnit.getRelatedTemplate();
-        log.info("get related template={}", JSON.toJSONString(relatedTemplateUnit));
         relatedTemplateUnit.getParams().forEach(param ->{
             if (Objects.equals(param.getParamKey(), "url")) {
                 log.info("get request url = {}", executorUnit.getService());
@@ -57,9 +56,7 @@ public class RelateTemplateInvoker implements IExecuteInvoker {
                 param.setValue(executorUnit.getMethod());
             }
         });
-        log.info("execute param={}", JSON.toJSONString(relatedTemplateUnit));
         variableInterceptor.filterVariable(relatedTemplateUnit, featureExecuteContext);
-        log.info("filter execute param={}", JSON.toJSONString(relatedTemplateUnit));
         return methodInvoke.invoke(relatedTemplateUnit, featureExecuteContext);
     }
 }

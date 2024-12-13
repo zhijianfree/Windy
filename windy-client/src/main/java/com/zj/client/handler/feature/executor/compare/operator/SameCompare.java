@@ -1,15 +1,18 @@
 package com.zj.client.handler.feature.executor.compare.operator;
 
+import com.zj.common.entity.feature.CompareDefine;
 import com.zj.common.entity.feature.CompareResult;
 import com.zj.common.enums.CompareType;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.entity.feature.CompareDefine;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
 @Component
 public class SameCompare extends BaseCompare {
+
+    public static final String COMPARE_ERROR_ERROR_FORMAT = "response data=%s not same as expect value=%s";
+
     @Override
     public CompareType getType() {
         return CompareType.SAME;
@@ -20,7 +23,8 @@ public class SameCompare extends BaseCompare {
         CompareResult compareResult = createSuccessResult();
         if (!Objects.equals(String.valueOf(compareDefine.getResponseValue()), compareDefine.getExpectValue())) {
             compareResult.setErrorType(ErrorCode.COMPARE_ERROR);
-            compareResult.setErrorMessage("response data not same as expect value");
+            compareResult.setErrorMessage(String.format(COMPARE_ERROR_ERROR_FORMAT, compareDefine.getResponseValue(),
+                    compareDefine.getExpectValue()));
         }
         return compareResult;
     }

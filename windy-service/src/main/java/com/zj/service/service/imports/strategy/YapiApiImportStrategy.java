@@ -193,6 +193,7 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
             apiRequestVariable.setRequired(requirdList.contains(entry.getKey()));
             String type = convertVariableType(typeJSON.getString("type"));
             apiRequestVariable.setType(type);
+            apiRequestVariable.setDescription(typeJSON.getString("description"));
             apiRequestVariable.setPosition(Position.Body.name());
 
             if (Objects.equals(type, ParamValueType.Object.name())) {
