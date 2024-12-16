@@ -36,7 +36,7 @@ public enum ErrorCode {
   GIT_NO_PERMISSION(HttpStatus.BAD_REQUEST, "Service.000005", "配置的用户token无权限访问"),
   USER_NO_PERMISSION(HttpStatus.BAD_REQUEST, "Service.000006", "用户未被授权访问当前git地址"),
   MAVEN_NOT_CONFIG(HttpStatus.BAD_REQUEST, "Service.000007", "系统未配置maven仓库地址，请先配置再尝试生成"),
-  GENERATE_VERSION_EXIST(HttpStatus.BAD_REQUEST, "Service.000008", "构建Maven而方包失败，版本号已存在"),
+  GENERATE_VERSION_EXIST(HttpStatus.BAD_REQUEST, "Service.000008", "构建Maven二方包失败，版本号已存在"),
   SERVICE_GENERATE_NAME_EMPTY(HttpStatus.BAD_REQUEST, "Service.000009", "[%s]接口转化的类名、方法名为空"),
   SERVICE_GENERATE_BODY_NAME_EMPTY(HttpStatus.BAD_REQUEST, "Service.000010", "[%s]接口转化的请求体类名为空"),
   SERVICE_GENERATE_BODY_PARAM_NAME_EMPTY(HttpStatus.BAD_REQUEST, "Service.000011", "[%s]接口请求参数类名为空"),
