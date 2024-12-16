@@ -207,9 +207,7 @@ public class CodeBuildService {
 
     public String buildDocker(String imageName, String version, File dockerfile,
                               CodeBuildParamDto param) throws InterruptedException {
-        DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
-                .withDockerHost("unix:///var/run/docker.sock")
-                .build();
+        DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
         DockerClient dockerClient = DockerClientBuilder.getInstance(config).build();
         BuildImageResultCallback callback = new BuildImageResultCallback() {
             @Override
