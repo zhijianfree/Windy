@@ -1,12 +1,10 @@
 package com.zj.pipeline.service;
 
 import com.baomidou.mybatisplus.core.toolkit.Assert;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.adapter.git.GitAccessInfo;
 import com.zj.common.adapter.git.IGitRepositoryHandler;
-import com.zj.common.entity.pipeline.ServiceConfig;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.domain.entity.bo.demand.BugBO;
 import com.zj.domain.entity.bo.demand.DemandBO;
@@ -18,7 +16,6 @@ import com.zj.domain.repository.demand.IBugRepository;
 import com.zj.domain.repository.demand.IDemandRepository;
 import com.zj.domain.repository.demand.IWorkTaskRepository;
 import com.zj.domain.repository.pipeline.ICodeChangeRepository;
-import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.domain.entity.enums.RelationType;
 import com.zj.pipeline.git.RepositoryFactory;
@@ -28,7 +25,6 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 

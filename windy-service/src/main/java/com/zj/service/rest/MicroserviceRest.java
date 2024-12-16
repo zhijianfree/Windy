@@ -6,8 +6,8 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.service.BuildToolBO;
 import com.zj.domain.entity.bo.service.MicroserviceBO;
-import com.zj.domain.entity.bo.service.ResourceMemberBO;
 import com.zj.service.entity.ServiceDto;
+import com.zj.service.entity.ServiceMemberDto;
 import com.zj.service.entity.ServiceStaticsDto;
 import com.zj.service.entity.SystemBuildDto;
 import com.zj.service.service.MicroserviceService;
@@ -64,8 +64,8 @@ public class MicroserviceRest {
     }
 
     @PostMapping("/services/{serviceId}/members")
-    public ResponseMeta<Boolean> addServiceMember(@RequestBody ResourceMemberBO serviceMember) {
-        return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, microservice.addServiceMember(serviceMember));
+    public ResponseMeta<Boolean> addServiceMember(@RequestBody ServiceMemberDto serviceMemberDto) {
+        return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, microservice.addServiceMember(serviceMemberDto));
     }
 
     @DeleteMapping("/services/{serviceId}/members/{userId}")

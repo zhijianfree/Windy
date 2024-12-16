@@ -2,7 +2,6 @@ package com.zj.service.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.common.adapter.auth.IAuthService;
-import com.zj.common.adapter.git.CommitMessage;
 import com.zj.common.adapter.git.GitAccessInfo;
 import com.zj.common.adapter.git.IGitRepositoryHandler;
 import com.zj.common.adapter.invoker.IClientInvoker;
@@ -30,7 +29,7 @@ import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.domain.entity.bo.service.ResourceMemberBO;
 import com.zj.domain.entity.bo.service.ServiceApiBO;
 import com.zj.domain.entity.enums.FeatureType;
-import com.zj.domain.entity.po.service.ResourceMember;
+import com.zj.domain.entity.enums.MemberType;
 import com.zj.domain.repository.demand.IMemberRepository;
 import com.zj.domain.repository.feature.IExecutePointRepository;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
@@ -42,6 +41,7 @@ import com.zj.domain.repository.service.IBuildToolRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.domain.repository.service.IServiceApiRepository;
 import com.zj.service.entity.ServiceDto;
+import com.zj.service.entity.ServiceMemberDto;
 import com.zj.service.entity.ServiceStaticsDto;
 import com.zj.service.entity.SystemBuildDto;
 import lombok.extern.slf4j.Slf4j;
@@ -105,13 +105,13 @@ public class MicroserviceService {
 
     public PageSize<ServiceDto> getServices(Integer pageNo, Integer size, String name) {
         String currentUserId = authService.getCurrentUserId();
-        List<ResourceMember> resourceMembers = memberRepository.getResourceMembersByUser(currentUserId);
+        List<ResourceMemberBO> resourceMembers = memberRepository.getByRelationMember(currentUserId, MemberType.SERVICE_MEMBER.getType());
         if (CollectionUtils.isEmpty(resourceMembers)) {
             return new PageSize<>();
         }
 
         List<String> serviceIds =
-                resourceMembers.stream().map(ResourceMember::getResourceId).collect(Collectors.toList());
+                resourceMembers.stream().map(ResourceMemberBO::getResourceId).collect(Collectors.toList());
         IPage<MicroserviceBO> page = microServiceRepository.getServices(pageNo, size, name, serviceIds);
         PageSize<ServiceDto> pageSize = new PageSize<>();
         if (CollectionUtils.isEmpty(page.getRecords())) {
@@ -145,7 +145,8 @@ public class MicroserviceService {
         MicroserviceBO microserviceBO = OrikaUtil.convert(serviceDto, MicroserviceBO.class);
         microserviceBO.setServiceConfig(serviceDto.getServiceConfig());
         microserviceBO.setServiceId(uniqueIdService.getUniqueId());
-        return microServiceRepository.createService(authService.getCurrentUserId(), microserviceBO);
+        String currentUserId = authService.getCurrentUserId();
+        return microServiceRepository.createService(currentUserId, microserviceBO);
     }
 
     private String chooseGitType(ServiceDto serviceDto) {
@@ -188,11 +189,15 @@ public class MicroserviceService {
     }
 
     public List<UserBO> queryServiceMembers(String serviceId) {
-        return memberRepository.queryResourceMembers(serviceId);
+        return memberRepository.getResourceUserMembers(serviceId, MemberType.SERVICE_MEMBER.getType());
     }
 
-    public Boolean addServiceMember(ResourceMemberBO member) {
-        return memberRepository.addResourceMember(member);
+    public Boolean addServiceMember(ServiceMemberDto serviceMemberDto) {
+        ResourceMemberBO resourceMemberBO = new ResourceMemberBO();
+        resourceMemberBO.setMemberType(MemberType.SERVICE_MEMBER.getType());
+        resourceMemberBO.setResourceId(serviceMemberDto.getServiceId());
+        resourceMemberBO.setRelationId(serviceMemberDto.getUserId());
+        return memberRepository.addResourceMember(resourceMemberBO);
     }
 
     public Boolean deleteServiceMember(String serviceId, String userId) {

@@ -14,11 +14,15 @@ import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.domain.entity.bo.feature.ExecutePointBO;
 import com.zj.domain.entity.bo.feature.ExecuteTemplateBO;
 import com.zj.domain.entity.bo.feature.PluginInfoBO;
+import com.zj.domain.entity.bo.service.ResourceMemberBO;
+import com.zj.domain.entity.enums.MemberType;
 import com.zj.domain.entity.enums.SourceStatus;
+import com.zj.domain.repository.demand.IMemberRepository;
 import com.zj.domain.repository.feature.IExecutePointRepository;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import com.zj.domain.repository.feature.IPluginRepository;
 import com.zj.feature.entity.BatchTemplates;
+import com.zj.feature.entity.RelatedTemplateDto;
 import com.zj.feature.entity.UploadResultDto;
 import com.zj.plugin.loader.Feature;
 import com.zj.plugin.loader.FeatureDefine;
@@ -57,14 +61,16 @@ public class TemplateService {
     private final IExecuteTemplateRepository templateRepository;
     private final IExecutePointRepository executePointRepository;
     private final IPluginRepository pluginRepository;
+    private final IMemberRepository memberRepository;
 
     public TemplateService(UniqueIdService uniqueIdService,
                            IExecuteTemplateRepository templateRepository,
-                           IExecutePointRepository executePointRepository, IPluginRepository pluginRepository) {
+                           IExecutePointRepository executePointRepository, IPluginRepository pluginRepository, IMemberRepository memberRepository) {
         this.uniqueIdService = uniqueIdService;
         this.templateRepository = templateRepository;
         this.executePointRepository = executePointRepository;
         this.pluginRepository = pluginRepository;
+        this.memberRepository = memberRepository;
     }
 
     public PageSize<ExecuteTemplateVo> getTemplatePage(String serviceId, Integer pageNo, Integer size, String name) {
@@ -302,9 +308,26 @@ public class TemplateService {
         return templateVo;
     }
 
-    public List<ExecuteTemplateVo> getAllTemplates() {
-        List<ExecuteTemplateBO> executeTemplates = templateRepository.getAllTemplates();
-        return executeTemplates.stream().map(this::toExecuteTemplateDTO)
-                .collect(Collectors.toList());
+    public List<ExecuteTemplateVo> serviceRelatedTemplates(String serviceId) {
+        List<ResourceMemberBO> relationMembers = memberRepository.getResourceRelations(serviceId,
+                MemberType.FEATURE_MEMBER.getType());
+        List<String> serviceIds =
+                relationMembers.stream().map(ResourceMemberBO::getRelationId).collect(Collectors.toList());
+        serviceIds.add(serviceId);
+        List<ExecuteTemplateBO> executeTemplates = templateRepository.getTemplatesByServiceIds(serviceIds);
+        return executeTemplates.stream().map(this::toExecuteTemplateDTO).collect(Collectors.toList());
     }
+
+    public Boolean addRelatedTemplate(RelatedTemplateDto relatedTemplateDto) {
+        List<ResourceMemberBO> resourceMembers =
+                relatedTemplateDto.getRelatedServiceIds().stream().map(relatedServiceId -> {
+            ResourceMemberBO resourceMemberBO = new ResourceMemberBO();
+            resourceMemberBO.setResourceId(relatedTemplateDto.getServiceId());
+            resourceMemberBO.setRelationId(relatedServiceId);
+            resourceMemberBO.setMemberType(MemberType.FEATURE_MEMBER.getType());
+            return resourceMemberBO;
+        }).collect(Collectors.toList());
+        return memberRepository.batchUpdateMembers(resourceMembers, MemberType.FEATURE_MEMBER.getType());
+    }
+
 }

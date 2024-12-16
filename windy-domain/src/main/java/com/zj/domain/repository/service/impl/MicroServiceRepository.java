@@ -10,8 +10,8 @@ import com.zj.common.entity.pipeline.ServiceConfig;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.domain.entity.bo.service.ResourceMemberBO;
+import com.zj.domain.entity.enums.MemberType;
 import com.zj.domain.entity.po.service.Microservice;
-import com.zj.domain.entity.po.service.ResourceMember;
 import com.zj.domain.mapper.service.MicroServiceMapper;
 import com.zj.domain.repository.demand.IMemberRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
@@ -53,7 +53,8 @@ public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Micr
     if (save) {
       ResourceMemberBO resourceMemberBO = new ResourceMemberBO();
       resourceMemberBO.setResourceId(microservice.getServiceId());
-      resourceMemberBO.setUserId(userId);
+      resourceMemberBO.setRelationId(userId);
+      resourceMemberBO.setMemberType(MemberType.SERVICE_MEMBER.getType());
       boolean result = memberRepository.addResourceMember(resourceMemberBO);
       log.info("add service member result = {}", result);
     }
@@ -83,11 +84,12 @@ public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Micr
 
   @Override
   public List<MicroserviceBO> getUserRelatedServices(String currentUserId) {
-    List<ResourceMember> resourceMembers = memberRepository.getResourceMembersByUser(currentUserId);
+    List<ResourceMemberBO> resourceMembers = memberRepository.getByRelationMember(currentUserId,
+            MemberType.SERVICE_MEMBER.getType());
     if (CollectionUtils.isEmpty(resourceMembers)) {
       return Collections.emptyList();
     }
-    List<String> serviceIds = resourceMembers.stream().map(ResourceMember::getResourceId).collect(Collectors.toList());
+    List<String> serviceIds = resourceMembers.stream().map(ResourceMemberBO::getResourceId).collect(Collectors.toList());
     return list(Wrappers.lambdaQuery(Microservice.class).in(Microservice::getServiceId, serviceIds)).stream()
         .map(MicroServiceRepository::convertServiceBO)
         .collect(Collectors.toList());

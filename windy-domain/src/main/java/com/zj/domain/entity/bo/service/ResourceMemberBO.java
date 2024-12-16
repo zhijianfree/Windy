@@ -5,7 +5,18 @@ import lombok.Data;
 @Data
 public class ResourceMemberBO {
 
+    /**
+     * 资源ID
+     */
     private String resourceId;
 
-    private String userId;
+    /**
+     * 关联ID
+     */
+    private String relationId;
+
+    /**
+     * 关联成员类型
+     */
+    private String memberType;
 }

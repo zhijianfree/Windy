@@ -6,6 +6,7 @@ import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.demand.entity.IterationDto;
+import com.zj.demand.entity.IterationMemberDto;
 import com.zj.demand.entity.IterationStatisticDto;
 import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.demand.BugBO;
@@ -14,7 +15,7 @@ import com.zj.domain.entity.bo.demand.DemandBO;
 import com.zj.domain.entity.bo.demand.IterationBO;
 import com.zj.domain.entity.bo.service.ResourceMemberBO;
 import com.zj.domain.entity.enums.BusinessStatusType;
-import com.zj.domain.entity.po.service.ResourceMember;
+import com.zj.domain.entity.enums.MemberType;
 import com.zj.domain.repository.demand.IBugRepository;
 import com.zj.domain.repository.demand.IBusinessStatusRepository;
 import com.zj.domain.repository.demand.IDemandRepository;
@@ -56,20 +57,31 @@ public class IterationService {
 
     public List<IterationBO> getSpaceIterationList(String spaceId) {
         String currentUserId = authService.getCurrentUserId();
-        List<ResourceMember> resourceMembers = memberRepository.getResourceMembersByUser(currentUserId);
+        List<ResourceMemberBO> resourceMembers = memberRepository.getByRelationMember(currentUserId,
+                MemberType.ITERATION_MEMBER.getType());
         if (CollectionUtils.isEmpty(resourceMembers)) {
             return Collections.emptyList();
         }
         List<String> iterationIds =
-                resourceMembers.stream().map(ResourceMember::getResourceId).collect(Collectors.toList());
+                resourceMembers.stream().map(ResourceMemberBO::getResourceId).collect(Collectors.toList());
         return iterationRepository.getIterationList(spaceId, iterationIds);
     }
 
     public IterationBO createIteration(IterationDto iterationDto) {
         IterationBO iterationBO = OrikaUtil.convert(iterationDto, IterationBO.class);
         iterationBO.setIterationId(uniqueIdService.getUniqueId());
-        iterationBO.setUserId(authService.getCurrentUserId());
-        return iterationRepository.createIteration(iterationBO);
+        String currentUserId = authService.getCurrentUserId();
+        iterationBO.setUserId(currentUserId);
+        IterationBO iteration = iterationRepository.createIteration(iterationBO);
+        if (Objects.nonNull(iteration)) {
+            ResourceMemberBO resourceMemberBO = new ResourceMemberBO();
+            resourceMemberBO.setMemberType(MemberType.ITERATION_MEMBER.getType());
+            resourceMemberBO.setRelationId(currentUserId);
+            resourceMemberBO.setResourceId(iteration.getIterationId());
+            boolean addResourceMember = memberRepository.addResourceMember(resourceMemberBO);
+            log.info("add default iteration member result={}", addResourceMember);
+        }
+        return iteration;
     }
 
     public Boolean updateIteration(String iterationId, IterationDto iterationDto) {
@@ -118,10 +130,14 @@ public class IterationService {
     }
 
     public List<UserBO> queryIterationMembers(String iterationId) {
-        return memberRepository.queryResourceMembers(iterationId);
+        return memberRepository.getResourceUserMembers(iterationId, MemberType.ITERATION_MEMBER.getType());
     }
 
-    public Boolean addIterationMember(ResourceMemberBO resourceMemberBO) {
+    public Boolean addIterationMember(IterationMemberDto memberDto) {
+        ResourceMemberBO resourceMemberBO = new ResourceMemberBO();
+        resourceMemberBO.setMemberType(MemberType.ITERATION_MEMBER.getType());
+        resourceMemberBO.setResourceId(memberDto.getIterationId());
+        resourceMemberBO.setRelationId(memberDto.getUserId());
         return memberRepository.addResourceMember(resourceMemberBO);
     }
 

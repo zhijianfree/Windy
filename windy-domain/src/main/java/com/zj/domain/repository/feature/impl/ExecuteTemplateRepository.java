@@ -74,7 +74,15 @@ public class ExecuteTemplateRepository extends
 
   @Override
   public List<ExecuteTemplateBO> getServiceTemplates(String serviceId) {
-    List<ExecuteTemplate> executeTemplates = list(Wrappers.lambdaQuery(ExecuteTemplate.class).eq(ExecuteTemplate::getOwner, serviceId));
+    List<ExecuteTemplate> executeTemplates = list(Wrappers.lambdaQuery(ExecuteTemplate.class)
+            .eq(ExecuteTemplate::getOwner, serviceId));
+    return convertExecuteTemplateBOList(executeTemplates);
+  }
+
+  @Override
+  public List<ExecuteTemplateBO> getTemplatesByServiceIds(List<String> serviceIds) {
+    List<ExecuteTemplate> executeTemplates = list(Wrappers.lambdaQuery(ExecuteTemplate.class)
+            .in(ExecuteTemplate::getOwner, serviceIds));
     return convertExecuteTemplateBOList(executeTemplates);
   }
 

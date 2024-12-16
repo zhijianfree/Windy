@@ -32,4 +32,6 @@ public interface IExecuteTemplateRepository {
   List<ExecuteTemplateBO> getToolTemplates();
 
   List<ExecuteTemplateBO> getTemplateByIds(List<String> templateIds);
+
+  List<ExecuteTemplateBO> getTemplatesByServiceIds(List<String> serviceIds);
 }

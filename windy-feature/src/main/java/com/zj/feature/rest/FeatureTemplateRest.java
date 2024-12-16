@@ -5,6 +5,7 @@ import com.zj.common.entity.dto.PageSize;
 import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.feature.entity.BatchTemplates;
 import com.zj.common.entity.feature.ExecuteTemplateVo;
+import com.zj.feature.entity.RelatedTemplateDto;
 import com.zj.feature.entity.UploadResultDto;
 import com.zj.feature.service.TemplateService;
 import org.springframework.validation.annotation.Validated;
@@ -72,9 +73,14 @@ public class FeatureTemplateRest {
     }
 
     @ResponseBody
-    @GetMapping("/templates")
-    public ResponseMeta<List<ExecuteTemplateVo>> getAllTemplates() {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, templateService.getAllTemplates());
+    @PostMapping("/related/templates")
+    public ResponseMeta<Boolean> addRelatedTemplate(@Validated @RequestBody RelatedTemplateDto relatedTemplateDto) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, templateService.addRelatedTemplate(relatedTemplateDto));
+    }
+    @ResponseBody
+    @GetMapping("/{serviceId}/related/templates")
+    public ResponseMeta<List<ExecuteTemplateVo>> serviceRelatedTemplates(@PathVariable("serviceId") String serviceId) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, templateService.serviceRelatedTemplates(serviceId));
     }
 
     @ResponseBody

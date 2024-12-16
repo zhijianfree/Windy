@@ -50,7 +50,7 @@ public class IterationRepositoryImpl extends ServiceImpl<IterationMapper, Iterat
         boolean result = save(iteration);
         if (result) {
             ResourceMemberBO resourceMemberBO = new ResourceMemberBO();
-            resourceMemberBO.setUserId(iterationBO.getUserId());
+            resourceMemberBO.setRelationId(iterationBO.getUserId());
             resourceMemberBO.setResourceId(iterationBO.getIterationId());
             memberRepository.addResourceMember(resourceMemberBO);
         }
