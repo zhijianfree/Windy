@@ -16,6 +16,7 @@ import com.zj.common.enums.ProcessStatus;
 import com.zj.common.enums.TemplateType;
 import com.zj.common.enums.TestStageType;
 import com.zj.common.utils.IpUtils;
+import com.zj.common.utils.OrikaUtil;
 import com.zj.common.utils.TraceUtils;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import lombok.extern.slf4j.Slf4j;
@@ -154,11 +155,12 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
             log.info("clean stage points is empty, not clean");
             return;
         }
+        FeatureExecuteContext newContext = OrikaUtil.convert(featureExecuteContext, FeatureExecuteContext.class);
         log.info("start run clean stage points");
         CompletableFuture.runAsync(() -> cleanPoints.forEach(executePoint -> {
             try {
                 log.info("start execute clean stage point={}", executePoint.getExecutorUnit().getName());
-                executeStrategyFactory.execute(executePoint, featureExecuteContext);
+                executeStrategyFactory.execute(executePoint, newContext);
             } catch (Exception e) {
                 log.debug("execute clean stage point error {}", e.getMessage());
             }

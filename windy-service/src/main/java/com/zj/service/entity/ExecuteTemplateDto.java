@@ -1,13 +1,15 @@
-package com.zj.common.entity.feature;
+package com.zj.service.entity;
 
+import com.zj.domain.entity.vo.Create;
 import com.zj.plugin.loader.ParameterDefine;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.Map;
 
 @Data
-public class ExecuteTemplateVo {
+public class ExecuteTemplateDto {
   /**
    * 模版Id
    */
@@ -16,6 +18,7 @@ public class ExecuteTemplateVo {
   /**
    * 模版名称
    */
+  @NotBlank(message = "模版名称不能为空", groups = Create.class)
   private String name;
 
   /**

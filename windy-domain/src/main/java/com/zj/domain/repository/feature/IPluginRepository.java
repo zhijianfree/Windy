@@ -17,5 +17,7 @@ public interface IPluginRepository {
 
   boolean deletePlugin(String pluginId);
 
-  void updatePluginStatus(String pluginId);
+  boolean enablePluginStatus(String pluginId);
+
+    boolean update(PluginInfoBO pluginInfoBO);
 }

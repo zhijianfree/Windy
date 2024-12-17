@@ -13,7 +13,6 @@ import java.util.concurrent.CountDownLatch;
  */
 @Data
 public class FeatureExecuteContext {
-
   private final Map<String, Object> contextMap = new ConcurrentHashMap<>();
   private String recordId;
   private String historyId;

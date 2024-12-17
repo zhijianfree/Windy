@@ -36,13 +36,18 @@ public class PluginRepository extends ServiceImpl<PluginInfoMapper, PluginInfo> 
   }
 
   @Override
-  public void updatePluginStatus(String pluginId) {
+  public boolean enablePluginStatus(String pluginId) {
     PluginInfo pluginInfo = new PluginInfo();
     pluginInfo.setPluginId(pluginId);
     pluginInfo.setUpdateTime(System.currentTimeMillis());
     pluginInfo.setStatus(SourceStatus.AVAILABLE.getType());
-    update(pluginInfo,
+    return update(pluginInfo,
         Wrappers.lambdaQuery(PluginInfo.class).eq(PluginInfo::getPluginId, pluginId));
+  }
+
+  @Override
+  public boolean update(PluginInfoBO pluginInfoBO) {
+    return false;
   }
 
   @Override

@@ -60,7 +60,7 @@ public class ExecuteTemplateRepository extends
   @Override
   public List<ExecuteTemplateBO> getTemplatesByType(List<Integer> templateTypes) {
     List<ExecuteTemplate> executeTemplates = list(Wrappers.lambdaQuery(ExecuteTemplate.class)
-            .in(ExecuteTemplate::getTemplateType, templateTypes));
+            .in(ExecuteTemplate::getTemplateType, templateTypes).orderByDesc(ExecuteTemplate::getCreateTime));
     return convertExecuteTemplateBOList(executeTemplates);
   }
 

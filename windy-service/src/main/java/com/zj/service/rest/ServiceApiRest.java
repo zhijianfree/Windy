@@ -1,12 +1,12 @@
 package com.zj.service.rest;
 
-import com.zj.common.exception.ErrorCode;
-import com.zj.common.entity.feature.ExecuteTemplateVo;
 import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.common.entity.generate.GenerateRecordBO;
+import com.zj.common.exception.ErrorCode;
 import com.zj.domain.entity.bo.service.ServiceApiBO;
 import com.zj.domain.entity.bo.service.ServiceGenerateBO;
 import com.zj.service.entity.ApiModel;
+import com.zj.service.entity.ExecuteTemplateDto;
 import com.zj.service.entity.GenerateTemplate;
 import com.zj.service.entity.ImportApiResult;
 import com.zj.service.service.ApiService;
@@ -55,7 +55,7 @@ public class ServiceApiRest {
   }
 
   @PostMapping("/service/resource/templates")
-  public ResponseMeta<List<ExecuteTemplateVo>> apiGenerateTemplate(@RequestBody GenerateTemplate generateTemplate) {
+  public ResponseMeta<List<ExecuteTemplateDto>> apiGenerateTemplate(@RequestBody GenerateTemplate generateTemplate) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.apiGenerateTemplate(generateTemplate));
   }
 

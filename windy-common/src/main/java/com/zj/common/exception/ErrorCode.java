@@ -53,6 +53,7 @@ public enum ErrorCode {
   PARSE_PLUGIN_ERROR(HttpStatus.BAD_REQUEST, "Feature.000006", "解析插件错误"),
   TEMPLATE_NOT_FIND(HttpStatus.NOT_FOUND, "Feature.000007", "未找到模版"),
   BATCH_UPDATE_FEATURE_POINTS_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Feature.000008", "批量更新用例执行点失败"),
+  NO_TEMPLATE_IN_PLUGIN(HttpStatus.BAD_REQUEST, "Feature.000009", "在插件中未找到模版信息，导入失败"),
   /*==================需求缺陷管理======================*/
   DEMAND_CREATE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Demand.000001", "创建需求失败"),
   SPACE_NOT_EXIST(HttpStatus.BAD_REQUEST, "Space.000002", "空间不存在"),
