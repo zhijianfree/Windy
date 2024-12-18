@@ -67,3 +67,30 @@ Client时windy的所有任务的实际执行者，其中处理任务所需要的
 - 用例任务执行：执行在测试集中编写的单个用例
 - 任务执行： 执行负载任务管理中绑定的任务列表
 - API二方包生成： 根据服务的API列表生成二方包，业务根据二方包来开发业务，当需要变更API时就需要重新生成二方包，进而可以长期维护API信息与代码的一致性。并且在后面的迭代中添加审核机制，可以更好的管理API的质量。
+
+## 快速开始
+### 1 导数据库sql
+下载sql文件: 
+[windy.sql] (https://github.com/zhijianfree/Windy/blob/1.0.0_alpha/windy-starter/src/main/resources/sql/windy.
+sql)
+### 2 启动docker服务
+> 启动Master
+```shell
+docker run --env=DB_HOST='{mysql数据库IP:端口}' --env=DB_USERNAME={数据库用户} --env=DB_PASSWORD={数据库密码} 
+--env=eureka_zone='http://{服务IP}:9888/eureka' --name windy-master -p 9888:9888 -d  guyuelan/windy-master:1.0-alpha
+```
+> 启动console
+```shell
+docker run --env=DB_HOST='{mysql数据库IP:端口}' --env=DB_USERNAME={数据库用户} --env=DB_PASSWORD={数据库密码} 
+--env=eureka_zone='http://{服务IP}:9888/eureka' --name windy-console -p 9768:9768 -d  guyuelan/windy-console:1.0-alpha
+```
+> 启动client
+```shell
+docker run --env=eureka_zone='http://{服务IP}:9888/eureka' --name windy-client -p 9768:9768 -d guyuelan/windy-console:1.
+0-alpha
+```
+### 3 用浏览器打开console
+```
+http://{服务IP}:9768
+```
+在浏览器中输入地址即可访问Windy。
