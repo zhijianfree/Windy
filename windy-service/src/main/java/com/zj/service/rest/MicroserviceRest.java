@@ -10,6 +10,7 @@ import com.zj.service.entity.ServiceDto;
 import com.zj.service.entity.ServiceMemberDto;
 import com.zj.service.entity.ServiceStaticsDto;
 import com.zj.service.entity.SystemBuildDto;
+import com.zj.service.entity.SystemVersion;
 import com.zj.service.service.MicroserviceService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,6 +36,11 @@ public class MicroserviceRest {
         this.microservice = microservice;
     }
 
+    @ResponseBody
+    @GetMapping("/system/version")
+    public ResponseMeta<SystemVersion> getSystemVersion() {
+        return new ResponseMeta<SystemVersion>(ErrorCode.SUCCESS, microservice.getSystemVersion());
+    }
     @ResponseBody
     @GetMapping("/services")
     public ResponseMeta<List<MicroserviceBO>> queryServices() {

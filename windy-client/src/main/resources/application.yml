@@ -37,3 +37,7 @@ eureka:
     registry-fetch-interval-seconds: 30
     service-url:
       defaultZone: ${eureka_zone}
+
+windy:
+  client:
+    version: @project.version@

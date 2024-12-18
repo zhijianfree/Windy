@@ -10,7 +10,18 @@ import lombok.Data;
 @Data
 public class MasterCollect {
 
+  /**
+   * Client当前版本
+   */
+  private String version;
+
+  /**
+   * 采集的物理监控信息
+   */
   private PhysicsCollect physics;
 
+  /**
+   * 分配任务正在处理的个数
+   */
   private Integer taskCount;
 }

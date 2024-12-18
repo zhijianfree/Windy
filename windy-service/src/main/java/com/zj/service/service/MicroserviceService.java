@@ -44,9 +44,11 @@ import com.zj.service.entity.ServiceDto;
 import com.zj.service.entity.ServiceMemberDto;
 import com.zj.service.entity.ServiceStaticsDto;
 import com.zj.service.entity.SystemBuildDto;
+import com.zj.service.entity.SystemVersion;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -61,6 +63,8 @@ import java.util.stream.Collectors;
 @Service
 public class MicroserviceService {
 
+    @Value("${windy.console.version}")
+    private String consoleVersion;
     private final IMicroServiceRepository microServiceRepository;
     private final UniqueIdService uniqueIdService;
     private final IPipelineRepository pipelineRepository;
@@ -177,10 +181,6 @@ public class MicroserviceService {
 
     public MicroserviceBO queryServiceDetail(String serviceId) {
         return microServiceRepository.queryServiceDetail(serviceId);
-    }
-
-    public MicroserviceBO queryServiceByName(String serviceName) {
-        return microServiceRepository.queryServiceByName(serviceName);
     }
 
     public List<MicroserviceBO> getServices() {
@@ -309,5 +309,9 @@ public class MicroserviceService {
 
     public List<BuildToolBO> getToolVersions() {
         return buildToolRepository.getBuildToolList();
+    }
+
+    public SystemVersion getSystemVersion() {
+        return new SystemVersion(consoleVersion);
     }
 }

@@ -24,9 +24,8 @@ import java.util.Objects;
 @Service
 public class ClientCollector {
 
-    @Value("${windy.build.path:/opt/windy/build}")
-    private String buildVersionPath;
-
+    @Value("${windy.client.version}")
+    private String clientVersion;
     private final NodeStatusQueryLooper nodeStatusQueryLooper;
 
     public ClientCollector(NodeStatusQueryLooper nodeStatusQueryLooper) {
@@ -39,6 +38,7 @@ public class ClientCollector {
         clientCollectDto.setPhysics(physics);
         Integer waitQuerySize = nodeStatusQueryLooper.getWaitQuerySize();
         clientCollectDto.setWaitQuerySize(waitQuerySize);
+        clientCollectDto.setVersion(clientVersion);
         return clientCollectDto;
     }
 

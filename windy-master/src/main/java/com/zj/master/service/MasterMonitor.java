@@ -4,6 +4,7 @@ import com.zj.common.entity.dto.MasterCollect;
 import com.zj.common.adapter.monitor.collector.InstanceCollector;
 import com.zj.common.adapter.monitor.collector.PhysicsCollect;
 import com.zj.master.dispatch.IDispatchExecutor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,6 +15,9 @@ import java.util.List;
  */
 @Service
 public class MasterMonitor {
+
+  @Value("${windy.master.version}")
+  private String masterVersion;
   private final List<IDispatchExecutor> dispatchExecutors;
 
   public MasterMonitor(List<IDispatchExecutor> dispatchExecutors) {
@@ -26,6 +30,7 @@ public class MasterMonitor {
     masterCollect.setPhysics(physics);
     int count = dispatchExecutors.stream().mapToInt(IDispatchExecutor::getExecuteCount).sum();
     masterCollect.setTaskCount(count);
+    masterCollect.setVersion(masterVersion);
     return masterCollect;
   }
 }

@@ -40,6 +40,8 @@ mybatis-plus:
     banner: false
 
 windy:
+  master:
+    version: @project.version@
   clean:
     #用例执行历史记录删除时间默认7天，单位小时
     feature: 168

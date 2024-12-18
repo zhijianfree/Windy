@@ -69,6 +69,8 @@ mybatis-plus:
 
 
 windy:
+  console:
+    version: @project.version@
   token:
     expire: 3600
     secret: tuyqteutwuytsd72368qewtquy
