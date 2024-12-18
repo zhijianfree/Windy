@@ -77,7 +77,7 @@ docker pull mysql:5.7
 docker run --env=MYSQL_ROOT_PASSWORD=123456 -p 3306:3306 -d mysql:5.7
 ```
 数据库准备好后，先创建数据:**windy**, 然后下载并导入sql文件: 
-[windy.sql] (https://github.com/zhijianfree/Windy/blob/1.0.0_alpha/windy-starter/src/main/resources/sql/windy.sql)
+[windy.sql](https://github.com/zhijianfree/Windy/blob/1.0.0_alpha/windy-starter/src/main/resources/sql/windy.sql)
 ### 2 启动docker服务
 > 启动Master
 ```shell
