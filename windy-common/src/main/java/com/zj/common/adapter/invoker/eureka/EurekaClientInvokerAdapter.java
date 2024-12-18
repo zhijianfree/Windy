@@ -61,6 +61,9 @@ public class EurekaClientInvokerAdapter extends BaseEurekaAdapter implements ICl
             }
             String url = DISPATCH_PIPELINE_TASK.replace(DiscoverService.WINDY_Client, optional.get().getHost());
             Response response = postWithIp(url, pipelineTask);
+            if (Objects.nonNull(response)) {
+                response.close();
+            }
             return Optional.ofNullable(response).map(Response::isSuccessful).orElse(false);
         }
         ResponseEntity<String> response = requestPost(DISPATCH_PIPELINE_TASK, pipelineTask);
@@ -89,7 +92,10 @@ public class EurekaClientInvokerAdapter extends BaseEurekaAdapter implements ICl
                 String url = String.format(MASTER_NOTIFY_CLIENT_STOP, serviceInstance.getHost());
                 log.info("start stop loop query task status targetId={} targetType={}", stopDispatch.getTargetId(),
                         stopDispatch.getLogType());
-                postWithIp(url, stopDispatch);
+                Response response = postWithIp(url, stopDispatch);
+                if (Objects.nonNull(response)) {
+                    response.close();
+                }
             });
         });
     }
@@ -103,12 +109,17 @@ public class EurekaClientInvokerAdapter extends BaseEurekaAdapter implements ICl
             try {
                 String url = String.format(LOAD_LANGUAGE_VERSION, service.getHost());
                 Response response = postWithIp(url, toolVersion);
+                if (Objects.isNull(response)) {
+                    toolLoadResult.setSuccess(false);
+                    return toolLoadResult;
+                }
                 String resultString = response.body().string();
                 log.info("get support versions = {}", resultString);
                 ResponseMeta responseMeta = JSON.parseObject(resultString, ResponseMeta.class);
                 Boolean loadResult = Optional.ofNullable(responseMeta).map(res -> JSON.parseObject(JSON.toJSONString(res.getData()),
                         ToolLoadResult.class)).map(ToolLoadResult::getSuccess).orElse(false);
                 toolLoadResult.setSuccess(loadResult);
+                response.close();
             }catch (Exception e){
                 log.info("request client load tool error", e);
                 toolLoadResult.setSuccess(false);

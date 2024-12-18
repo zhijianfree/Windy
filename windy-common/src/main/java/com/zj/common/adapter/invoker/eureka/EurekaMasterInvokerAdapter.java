@@ -87,7 +87,11 @@ public class EurekaMasterInvokerAdapter extends BaseEurekaAdapter implements IMa
                     log.info("start notify master ip={} result", serviceInstance.getHost());
                     // 如果触发任务执行的master节点存在那么优先访问触发任务的master节点
                     Response response = postWithIp(url, resultEvent);
-                    return response.isSuccessful();
+                    if (Objects.nonNull(response)){
+                        response.close();
+                        return response.isSuccessful();
+                    }
+                    return false;
                 }).orElse(false);
         if (notifySuccess) {
             return true;

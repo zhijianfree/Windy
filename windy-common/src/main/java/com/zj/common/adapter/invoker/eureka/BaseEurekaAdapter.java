@@ -83,8 +83,9 @@ public class BaseEurekaAdapter {
         String traceId = TraceUtils.getTraceId();
         Request request =
                 new Request.Builder().url(url).get().header(TidInterceptor.HTTP_HEADER_TRACE_ID, traceId).build();
-        try {
-            return okHttpClient.newCall(request).execute();
+        try (Response response = okHttpClient.newCall(request).execute()){
+            log.info(" get response code={}", response.code());
+            return response;
         } catch (Exception e) {
             log.error("request get with ip error ={}", e.toString());
         }
