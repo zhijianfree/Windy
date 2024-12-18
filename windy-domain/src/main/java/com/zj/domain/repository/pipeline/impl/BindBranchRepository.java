@@ -54,6 +54,11 @@ public class BindBranchRepository extends ServiceImpl<BindBranchMapper, BindBran
   }
 
   @Override
+  public boolean deleteByPipelineId(String pipelineId) {
+    return remove(Wrappers.lambdaQuery(BindBranch.class).eq(BindBranch::getPipelineId, pipelineId));
+  }
+
+  @Override
   public void batchUnbindBranches(List<String> unbindBranches) {
     BindBranch update = new BindBranch();
     update.setIsChoose(false);
