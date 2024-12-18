@@ -37,7 +37,6 @@
     <fastjson-version>2.0.34</fastjson-version>
     <ognl-version>3.2.21</ognl-version>
     <mybatis-plus.version>3.4.0</mybatis-plus.version>
-    <mariadb.version>2.6.2</mariadb.version>
     <hibernate.version>6.1.0.Final</hibernate.version>
     <commons-collections4.version>4.3</commons-collections4.version>
     <commons-codec.version>1.15</commons-codec.version>
@@ -190,9 +189,9 @@
         <version>${mybatis-plus.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.mariadb.jdbc</groupId>
-        <artifactId>mariadb-java-client</artifactId>
-        <version>${mariadb.version}</version>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <scope>runtime</scope>
       </dependency>
       <dependency>
         <groupId>org.hibernate</groupId>
