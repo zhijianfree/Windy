@@ -85,6 +85,7 @@ public class NodeStatusQueryLooper implements Runnable {
         if (stopPipelineHistoryMap.containsKey(node.getHistoryId())) {
           log.info("record result ignore , because pipeline is stop historyId={} recordId={}",
               node.getHistoryId(), node.getRecordId());
+          stopPipelineHistoryMap.remove(node.getHistoryId());
           return;
         }
 
@@ -229,9 +230,5 @@ public class NodeStatusQueryLooper implements Runnable {
   private void putAndCheckRecord(String historyId) {
     Long dateNow = System.currentTimeMillis();
     stopPipelineHistoryMap.put(historyId, dateNow);
-    stopPipelineHistoryMap.entrySet().removeIf(entity -> {
-      long mills = entity.getValue() - dateNow;
-      return mills > globalEnvConfig.getLoopQueryTimeout();
-    });
   }
 }
