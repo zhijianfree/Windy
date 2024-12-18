@@ -15,6 +15,10 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 
+CREATE DATABASE IF NOT EXISTS `windy` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
+
+USE `windy`;
+
 # Dump of table bind_branch
 # ------------------------------------------------------------
 

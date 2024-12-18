@@ -83,15 +83,21 @@ public class TemplateService {
         }
 
         List<ExecuteTemplateDto> templateDTOS = templateIPage.getRecords().stream()
-                .map(this::toExecuteTemplateDTO).collect(Collectors.toList());
+                .map(this::toExecuteTemplateDto).collect(Collectors.toList());
         pageSize.setData(templateDTOS);
         pageSize.setTotal(templateIPage.getTotal());
         return pageSize;
     }
 
+    public List<ExecuteTemplateDto> getAllTemplates() {
+        List<ExecuteTemplateBO> executeTemplates = templateRepository.getAllTemplates();
+        return executeTemplates.stream().map(this::toExecuteTemplateDto)
+                .collect(Collectors.toList());
+    }
+
     public ExecuteTemplateDto getExecuteTemplate(String templateId) {
         ExecuteTemplateBO executeTemplate = templateRepository.getExecuteTemplate(templateId);
-        return toExecuteTemplateDTO(executeTemplate);
+        return toExecuteTemplateDto(executeTemplate);
     }
 
     public String createTemplate(ExecuteTemplateDto executeTemplateDto) {
@@ -118,7 +124,7 @@ public class TemplateService {
         List<ExecuteTemplateBO> defaultTemplates = templateRepository.getToolTemplates();
         List<ExecuteTemplateBO> executeTemplates = templateRepository.getServiceTemplates(serviceId);
         executeTemplates.addAll(defaultTemplates);
-        return executeTemplates.stream().map(this::toExecuteTemplateDTO)
+        return executeTemplates.stream().map(this::toExecuteTemplateDto)
                 .collect(Collectors.toList());
     }
 
@@ -333,10 +339,10 @@ public class TemplateService {
     public List<ExecuteTemplateDto> getTemplatesByInvokeType(Integer invokeType) {
         List<ExecuteTemplateBO> templateList =
                 templateRepository.getTemplatesByType(Collections.singletonList(invokeType));
-        return templateList.stream().map(this::toExecuteTemplateDTO).collect(Collectors.toList());
+        return templateList.stream().map(this::toExecuteTemplateDto).collect(Collectors.toList());
     }
 
-    public ExecuteTemplateDto toExecuteTemplateDTO(ExecuteTemplateBO executeTemplate) {
+    public ExecuteTemplateDto toExecuteTemplateDto(ExecuteTemplateBO executeTemplate) {
         ExecuteTemplateDto templateVo = OrikaUtil.convert(executeTemplate, ExecuteTemplateDto.class);
         templateVo.setParams(executeTemplate.getParameterDefines());
         templateVo.setHeaders((Map<String, String>) JSON.parse(executeTemplate.getHeader()));
@@ -350,7 +356,7 @@ public class TemplateService {
                 relationMembers.stream().map(ResourceMemberBO::getRelationId).collect(Collectors.toList());
         serviceIds.add(serviceId);
         List<ExecuteTemplateBO> executeTemplates = templateRepository.getTemplatesByServiceIds(serviceIds);
-        return executeTemplates.stream().map(this::toExecuteTemplateDTO).collect(Collectors.toList());
+        return executeTemplates.stream().map(this::toExecuteTemplateDto).collect(Collectors.toList());
     }
 
     public Boolean addRelatedTemplate(RelatedTemplateDto relatedTemplateDto) {

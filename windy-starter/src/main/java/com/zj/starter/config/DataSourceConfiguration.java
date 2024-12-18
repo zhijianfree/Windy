@@ -11,7 +11,7 @@ import javax.sql.DataSource;
 public class DataSourceConfiguration {
     public static final String MARIADB_JDBC_DRIVER = "org.mariadb.jdbc.Driver";
     public static final String JDBC_FORMAT_URL = "jdbc:mariadb://%s/%s?serverTimezone=UTC&allowPublicKeyRetrieval" +
-            "=true&useSSL=false";
+            "=true&useSSL=false&passwordCharacterEncoding=utf8mb4";
     public static final String WINDY = "windy";
     @Value("${DB_HOST}")
     private String dbHost;
