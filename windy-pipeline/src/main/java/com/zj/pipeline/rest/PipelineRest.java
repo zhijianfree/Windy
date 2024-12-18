@@ -49,14 +49,13 @@ public class PipelineRest {
     public ResponseMeta<Boolean> updatePipeline(@PathVariable("service") String service,
                                                 @PathVariable("pipelineId") String pipelineId,
                                                 @RequestBody PipelineDto pipelineDto) {
-        return new ResponseMeta<Boolean>(ErrorCode.SUCCESS,
-                pipelineService.updatePipeline(service, pipelineId, pipelineDto));
+        return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, pipelineService.updatePipeline(service, pipelineId,
+                pipelineDto));
     }
 
     @ResponseBody
     @GetMapping("/{serviceId}/list")
-    public ResponseMeta<List<PipelineBO>> listPipelines(
-            @PathVariable("serviceId") String serviceId) {
+    public ResponseMeta<List<PipelineBO>> listPipelines(@PathVariable("serviceId") String serviceId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, pipelineService.listPipelines(serviceId));
     }
 
@@ -64,8 +63,7 @@ public class PipelineRest {
     @DeleteMapping("/{service}/{pipelineId}")
     public ResponseMeta<Boolean> deletePipeline(@PathVariable("service") String service,
                                                 @PathVariable("pipelineId") String pipelineId) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS,
-                pipelineService.deletePipeline(service, pipelineId));
+        return new ResponseMeta<>(ErrorCode.SUCCESS, pipelineService.deletePipeline(service, pipelineId));
     }
 
     @ResponseBody

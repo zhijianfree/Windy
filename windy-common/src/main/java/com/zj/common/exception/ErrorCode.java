@@ -79,6 +79,7 @@ public enum ErrorCode {
   USER_NOT_HAVE_PERMISSION(HttpStatus.BAD_REQUEST,"Auth.000005","用户没有权限"),
   RESOURCE_IS_BIND(HttpStatus.BAD_REQUEST,"Auth.000006","资源被绑定无法删除"),
   ROLE_IS_BIND(HttpStatus.BAD_REQUEST,"Auth.000007","角色被绑定无法删除"),
+  GROUP_EXIST_USER(HttpStatus.INTERNAL_SERVER_ERROR,"Auth.000008","组织下存在用户无法删除"),
   ;
 
   ErrorCode(HttpStatus httpStatus, String code, String message) {

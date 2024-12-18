@@ -25,4 +25,6 @@ public interface IBindBranchRepository {
   Boolean deleteGitBranch(String bindId);
 
   void batchUnbindBranches(List<String> unbindBranches);
+
+  boolean deleteByPipelineId(String pipelineId);
 }

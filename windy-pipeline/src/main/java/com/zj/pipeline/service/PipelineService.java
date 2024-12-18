@@ -153,10 +153,10 @@ public class PipelineService {
     public Boolean deletePipeline(String serviceId, String pipelineId) {
         try {
             checkPipelineAndService(serviceId, pipelineId);
-
+            boolean deleteBind = bindBranchRepository.deleteByPipelineId(pipelineId);
             boolean deleteStage = pipelineStageService.deleteStagesByPipelineId(pipelineId);
-            boolean deletePipelineNode = pipelineNodeService.deleteByPipeline(pipelineId);
-            log.info("delete stage and node result stage = {} node={}", deleteStage, deletePipelineNode);
+            boolean deleteNode = pipelineNodeService.deleteByPipeline(pipelineId);
+            log.info("delete stage and node result stage = {} node={} bind={}", deleteStage, deleteNode, deleteBind);
             return pipelineRepository.deletePipeline(pipelineId);
         } catch (Exception e) {
             throw new ApiException(ErrorCode.DELETE_PIPELINE_ERROR);

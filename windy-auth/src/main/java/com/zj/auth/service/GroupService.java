@@ -2,6 +2,8 @@ package com.zj.auth.service;
 
 import com.zj.auth.entity.GroupTree;
 import com.zj.auth.entity.GroupUserTree;
+import com.zj.common.exception.ApiException;
+import com.zj.common.exception.ErrorCode;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.domain.entity.bo.auth.GroupBO;
@@ -66,6 +68,11 @@ public class GroupService {
     }
 
     public boolean deleteGroup(String groupId) {
+        List<UserBO> groupUserList = userRepository.getGroupUserList(groupId);
+        if (CollectionUtils.isNotEmpty(groupUserList)) {
+            log.info("user group have user , can not delete groupId={}", groupId);
+            throw new ApiException(ErrorCode.GROUP_EXIST_USER);
+        }
         return groupRepository.deleteGroup(groupId);
     }
 
