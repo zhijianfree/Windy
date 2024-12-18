@@ -225,6 +225,7 @@ public class NodeStatusQueryLooper implements Runnable {
 
   public void stopPipeline(String historyId) {
     putAndCheckRecord(historyId);
+    queue.removeIf(taskNode -> Objects.equals(historyId, taskNode.getHistoryId()));
     log.info("add stop query historyId={}", historyId);
   }
 

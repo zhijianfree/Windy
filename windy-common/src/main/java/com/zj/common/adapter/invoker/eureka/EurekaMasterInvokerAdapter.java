@@ -144,6 +144,7 @@ public class EurekaMasterInvokerAdapter extends BaseEurekaAdapter implements IMa
             try {
                 String resultString = response.body().string();
                 log.info("request master monitor result={}", resultString);
+                response.close();
                 ResponseMeta result = JSON.parseObject(resultString, ResponseMeta.class);
                 return JSON.parseObject(JSON.toJSONString(result.getData()), MasterCollect.class);
             } catch (IOException e) {

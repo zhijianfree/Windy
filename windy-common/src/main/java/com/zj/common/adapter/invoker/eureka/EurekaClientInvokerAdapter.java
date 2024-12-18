@@ -142,6 +142,7 @@ public class EurekaClientInvokerAdapter extends BaseEurekaAdapter implements ICl
                 String resultString = response.body().string();
                 log.info("request client monitor result={}", resultString);
                 ResponseMeta result = JSON.parseObject(resultString, ResponseMeta.class);
+                response.close();
                 return JSON.parseObject(JSON.toJSONString(result.getData()), ClientCollectDto.class);
             } catch (IOException e) {
                 log.info("handle client monitor result error");
