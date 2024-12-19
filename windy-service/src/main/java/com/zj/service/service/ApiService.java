@@ -17,7 +17,7 @@ import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.bo.feature.ExecuteTemplateBO;
 import com.zj.domain.entity.bo.service.ServiceApiBO;
 import com.zj.domain.entity.bo.service.ServiceGenerateBO;
-import com.zj.domain.entity.vo.MavenConfigVo;
+import com.zj.domain.entity.vo.GenerateMavenConfigDto;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IGenerateRecordRepository;
@@ -191,7 +191,7 @@ public class ApiService {
     }
 
     private void checkMavenConfig() {
-        MavenConfigVo mavenConfig = systemConfigRepository.getMavenConfig();
+        GenerateMavenConfigDto mavenConfig = systemConfigRepository.getMavenConfig();
         if (Objects.isNull(mavenConfig) || !mavenConfig.checkConfig()) {
             throw new ApiException(ErrorCode.MAVEN_NOT_CONFIG);
         }

@@ -6,6 +6,8 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.service.BuildToolBO;
 import com.zj.domain.entity.bo.service.MicroserviceBO;
+import com.zj.domain.entity.vo.Create;
+import com.zj.domain.entity.vo.Update;
 import com.zj.service.entity.ServiceDto;
 import com.zj.service.entity.ServiceMemberDto;
 import com.zj.service.entity.ServiceStaticsDto;
@@ -104,8 +106,14 @@ public class MicroserviceRest {
     }
     @ResponseBody
     @PostMapping("/system/builds")
-    public ResponseMeta<Boolean> createBuildTool(@Validated @RequestBody SystemBuildDto systemBuildDto) {
+    public ResponseMeta<Boolean> createBuildTool(@Validated(Create.class) @RequestBody SystemBuildDto systemBuildDto) {
         return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, microservice.createBuildTool(systemBuildDto));
+    }
+
+    @ResponseBody
+    @PutMapping("/system/build")
+    public ResponseMeta<Boolean> updateBuildTool(@Validated(Update.class) @RequestBody SystemBuildDto systemBuildDto) {
+        return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, microservice.updateBuildTool(systemBuildDto));
     }
 
     @ResponseBody

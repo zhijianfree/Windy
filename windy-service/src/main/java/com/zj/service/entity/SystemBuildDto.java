@@ -1,5 +1,7 @@
 package com.zj.service.entity;
 
+import com.zj.domain.entity.vo.Create;
+import com.zj.domain.entity.vo.Update;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
@@ -9,16 +11,22 @@ import javax.validation.constraints.NotBlank;
 public class SystemBuildDto {
 
     /**
+     * 工具ID
+     */
+    @NotBlank(groups = Update.class, message = "构建工具ID不能为空")
+    private String toolId;
+
+    /**
      * 工具版本名称
      */
-    @NotBlank
     @Length(max = 50)
+    @NotBlank(groups = Create.class)
     private String name;
 
     /**
      * 构建工具类型
      */
-    @NotBlank
+    @NotBlank(groups = Create.class)
     private String type;
 
     /**
@@ -33,4 +41,9 @@ public class SystemBuildDto {
      */
     @Length(max = 256)
     private String description;
+
+    /**
+     * 构建配置
+     */
+    private String buildConfig;
 }

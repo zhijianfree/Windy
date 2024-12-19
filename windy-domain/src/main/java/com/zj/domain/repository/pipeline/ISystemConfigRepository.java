@@ -4,7 +4,7 @@ import com.zj.common.adapter.git.GitAccessInfo;
 import com.zj.domain.entity.bo.pipeline.SystemConfigBO;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
-import com.zj.domain.entity.vo.MavenConfigVo;
+import com.zj.domain.entity.vo.GenerateMavenConfigDto;
 
 import java.util.List;
 
@@ -33,7 +33,7 @@ public interface ISystemConfigRepository {
 
   DefaultPipelineVo getDefaultPipeline();
 
-  Boolean updateMavenConfig(MavenConfigVo mavenConfig);
+  Boolean updateMavenConfig(GenerateMavenConfigDto mavenConfig);
 
-  MavenConfigVo getMavenConfig();
+  GenerateMavenConfigDto getMavenConfig();
 }

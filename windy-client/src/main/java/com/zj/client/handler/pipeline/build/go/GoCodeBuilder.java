@@ -5,7 +5,7 @@ import com.zj.client.handler.pipeline.build.CodeBuildContext;
 import com.zj.client.handler.pipeline.build.IBuildNotifyListener;
 import com.zj.client.handler.pipeline.build.ICodeBuilder;
 import com.zj.client.utils.ExceptionUtils;
-import com.zj.common.enums.CodeType;
+import com.zj.common.enums.ToolType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +27,7 @@ public class GoCodeBuilder implements ICodeBuilder {
 
     @Override
     public String codeType() {
-        return CodeType.GO.getType();
+        return ToolType.GO.getType();
     }
 
     @Override

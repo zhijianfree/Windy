@@ -31,4 +31,11 @@ public class BuildToolRepository extends ServiceImpl<IBuildToolMapper, BuildTool
         List<BuildTool> buildTools = list();
         return OrikaUtil.convertList(buildTools, BuildToolBO.class);
     }
+
+    @Override
+    public boolean updateBuildTool(BuildToolBO buildToolBO) {
+        BuildTool buildTool = OrikaUtil.convert(buildToolBO, BuildTool.class);
+        buildTool.setUpdateTime(System.currentTimeMillis());
+        return update(buildTool, Wrappers.lambdaUpdate(BuildTool.class).eq(BuildTool::getToolId, buildTool.getToolId()));
+    }
 }

@@ -9,7 +9,7 @@ import com.zj.common.entity.dto.MasterCollect;
 import com.zj.domain.entity.bo.pipeline.SystemConfigBO;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
-import com.zj.domain.entity.vo.MavenConfigVo;
+import com.zj.domain.entity.vo.GenerateMavenConfigDto;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.pipeline.entity.dto.SystemMonitorDto;
 import java.util.List;
@@ -83,11 +83,11 @@ public class SystemConfigService {
     return systemConfigRepository.getDefaultPipeline();
   }
 
-  public Boolean updateMavenConfig(MavenConfigVo mavenConfig) {
+  public Boolean updateMavenConfig(GenerateMavenConfigDto mavenConfig) {
     return systemConfigRepository.updateMavenConfig(mavenConfig);
   }
 
-  public MavenConfigVo getMavenConfig() {
+  public GenerateMavenConfigDto getMavenConfig() {
     return systemConfigRepository.getMavenConfig();
   }
 }

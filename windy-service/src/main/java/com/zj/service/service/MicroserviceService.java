@@ -290,6 +290,14 @@ public class MicroserviceService {
     }
 
     public Boolean createBuildTool(SystemBuildDto systemBuildDto) {
+        checkBuildTool(systemBuildDto);
+
+        BuildToolBO buildToolBO = OrikaUtil.convert(systemBuildDto, BuildToolBO.class);
+        buildToolBO.setToolId(uniqueIdService.getUniqueId());
+        return buildToolRepository.saveBuildTool(buildToolBO);
+    }
+
+    private void checkBuildTool(SystemBuildDto systemBuildDto) {
         ToolVersionDto toolVersionDto = OrikaUtil.convert(systemBuildDto, ToolVersionDto.class);
         List<String> loadErrorClients = clientInvoker.loadBuildTool(toolVersionDto).stream()
                 .filter(result -> !result.getSuccess()).map(ToolLoadResult::getNodeIP).collect(Collectors.toList());
@@ -297,10 +305,12 @@ public class MicroserviceService {
             log.info("client load tool error list={}", loadErrorClients);
             throw new CommonException(ErrorCode.LOAD_CLIENT_BUILD_TOOL_ERROR, String.join(",", loadErrorClients));
         }
+    }
 
+    public Boolean updateBuildTool(SystemBuildDto systemBuildDto) {
+        checkBuildTool(systemBuildDto);
         BuildToolBO buildToolBO = OrikaUtil.convert(systemBuildDto, BuildToolBO.class);
-        buildToolBO.setToolId(uniqueIdService.getUniqueId());
-        return buildToolRepository.saveBuildTool(buildToolBO);
+        return buildToolRepository.updateBuildTool(buildToolBO);
     }
 
     public Boolean deleteBuildTool(String toolId) {

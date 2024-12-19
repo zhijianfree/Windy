@@ -4,7 +4,7 @@ import lombok.Data;
 import org.apache.commons.lang.StringUtils;
 
 @Data
-public class MavenConfigVo {
+public class GenerateMavenConfigDto {
     /**
      * 推送的Maven仓库地址
      * */

@@ -33,6 +33,11 @@ public class BuildTool {
     private String description;
 
     /**
+     * 工具构建配置
+     */
+    private String buildConfig;
+
+    /**
      * 创建时间
      */
     private Long createTime;

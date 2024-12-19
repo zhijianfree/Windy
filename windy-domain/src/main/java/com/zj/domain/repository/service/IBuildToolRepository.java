@@ -11,4 +11,6 @@ public interface IBuildToolRepository {
     boolean deleteBuildTool(String buildToolId);
 
     List<BuildToolBO> getBuildToolList();
+
+    boolean updateBuildTool(BuildToolBO buildToolBO);
 }

@@ -19,4 +19,9 @@ public class ToolVersionDto {
      * 安装路径
      */
     private String installPath;
+
+    /**
+     * 构建配置
+     */
+    private String buildConfig;
 }

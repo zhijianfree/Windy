@@ -1,12 +1,14 @@
 package com.zj.client.service;
 
+import com.alibaba.fastjson.JSON;
+import com.zj.client.entity.dto.MavenConfigDto;
 import com.zj.client.handler.pipeline.executer.notify.NodeStatusQueryLooper;
 import com.zj.common.adapter.monitor.collector.InstanceCollector;
 import com.zj.common.adapter.monitor.collector.PhysicsCollect;
 import com.zj.common.entity.dto.ClientCollectDto;
 import com.zj.common.entity.service.ToolLoadResult;
 import com.zj.common.entity.service.ToolVersionDto;
-import com.zj.common.enums.CodeType;
+import com.zj.common.enums.ToolType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -43,14 +45,21 @@ public class ClientCollector {
     }
 
     public ToolLoadResult loadLocalToolVersion(ToolVersionDto toolVersionDto) {
+        boolean toolExist = checkToolExist(toolVersionDto.getType(), toolVersionDto.getInstallPath());
+        boolean configSetting = true;
+        if (toolExist && Objects.equals(toolVersionDto.getType(), ToolType.MAVEN.getType())) {
+            MavenConfigDto mavenConfig = JSON.parseObject(toolVersionDto.getBuildConfig(), MavenConfigDto.class);
+            mavenConfig.setMavenPath(toolVersionDto.getInstallPath());
+            configSetting = MavenSettingHelper.configSetting(mavenConfig);
+        }
+
         File localFile = new File(toolVersionDto.getInstallPath());
         ToolLoadResult toolLoadResult = new ToolLoadResult();
-        boolean showVersion = showVersion(toolVersionDto.getType(), toolVersionDto.getInstallPath());
-        toolLoadResult.setSuccess(localFile.exists() && localFile.isDirectory() && showVersion);
+        toolLoadResult.setSuccess(localFile.exists() && localFile.isDirectory() && toolExist && configSetting);
         return toolLoadResult;
     }
 
-    public boolean showVersion(String type, String installPath) {
+    public boolean checkToolExist(String type, String installPath) {
         try {
             String command = exchangeCommand(type, installPath);
             ProcessBuilder processBuilder = new ProcessBuilder();
@@ -82,13 +91,13 @@ public class ClientCollector {
 
     private static String exchangeCommand(String type, String installPath) {
         String command = installPath;
-        if (Objects.equals(CodeType.JAVA.getType(), type)) {
+        if (Objects.equals(ToolType.JAVA.getType(), type)) {
             command += "/bin/java -version";
         }
-        if (Objects.equals(CodeType.GO.getType(), type)) {
+        if (Objects.equals(ToolType.GO.getType(), type)) {
             command += "/bin/go version";
         }
-        if (Objects.equals(CodeType.MAVEN.getType(), type)) {
+        if (Objects.equals(ToolType.MAVEN.getType(), type)) {
             command += "/bin/mvn -v";
         }
         return command;

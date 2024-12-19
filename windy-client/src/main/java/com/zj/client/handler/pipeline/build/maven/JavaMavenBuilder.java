@@ -6,7 +6,7 @@ import com.zj.client.config.GlobalEnvConfig;
 import com.zj.client.handler.pipeline.build.CodeBuildContext;
 import com.zj.client.handler.pipeline.build.IBuildNotifyListener;
 import com.zj.client.handler.pipeline.build.ICodeBuilder;
-import com.zj.common.enums.CodeType;
+import com.zj.common.enums.ToolType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +53,7 @@ public class JavaMavenBuilder implements ICodeBuilder {
 
   @Override
   public String codeType() {
-    return CodeType.JAVA.getType();
+    return ToolType.JAVA.getType();
   }
 
   @Override
