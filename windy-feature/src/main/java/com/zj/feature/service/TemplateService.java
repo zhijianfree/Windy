@@ -91,8 +91,7 @@ public class TemplateService {
 
     public List<ExecuteTemplateDto> getAllTemplates() {
         List<ExecuteTemplateBO> executeTemplates = templateRepository.getAllTemplates();
-        return executeTemplates.stream().map(this::toExecuteTemplateDto)
-                .collect(Collectors.toList());
+        return executeTemplates.stream().map(this::toExecuteTemplateDto).collect(Collectors.toList());
     }
 
     public ExecuteTemplateDto getExecuteTemplate(String templateId) {
@@ -124,13 +123,11 @@ public class TemplateService {
         List<ExecuteTemplateBO> defaultTemplates = templateRepository.getToolTemplates();
         List<ExecuteTemplateBO> executeTemplates = templateRepository.getServiceTemplates(serviceId);
         executeTemplates.addAll(defaultTemplates);
-        return executeTemplates.stream().map(this::toExecuteTemplateDto)
-                .collect(Collectors.toList());
+        return executeTemplates.stream().map(this::toExecuteTemplateDto).collect(Collectors.toList());
     }
 
     public Boolean refreshTemplate(String templateId) {
-        List<ExecutePointBO> executePoints = executePointRepository.getTemplateExecutePoints(
-                templateId);
+        List<ExecutePointBO> executePoints = executePointRepository.getTemplateExecutePoints(templateId);
         if (CollectionUtils.isEmpty(executePoints)) {
             return true;
         }

@@ -43,6 +43,13 @@ public class MicroserviceRest {
     public ResponseMeta<SystemVersion> getSystemVersion() {
         return new ResponseMeta<SystemVersion>(ErrorCode.SUCCESS, microservice.getSystemVersion());
     }
+
+    @ResponseBody
+    @GetMapping("/services/list")
+    public ResponseMeta<List<MicroserviceBO>> getServicesByIds(@RequestParam("serviceIds") String serviceIds) {
+        return new ResponseMeta<List<MicroserviceBO>>(ErrorCode.SUCCESS, microservice.getServicesByIds(serviceIds));
+    }
+
     @ResponseBody
     @GetMapping("/services")
     public ResponseMeta<List<MicroserviceBO>> queryServices() {

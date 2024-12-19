@@ -26,4 +26,6 @@ public interface IMicroServiceRepository {
   MicroserviceBO queryServiceByName(String serviceName);
 
     List<MicroserviceBO> getAllServices();
+
+    List<MicroserviceBO> getServiceByIds(List<String> serviceIdList);
 }

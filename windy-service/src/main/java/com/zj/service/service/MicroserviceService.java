@@ -51,6 +51,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -323,5 +324,10 @@ public class MicroserviceService {
 
     public SystemVersion getSystemVersion() {
         return new SystemVersion(consoleVersion);
+    }
+
+    public List<MicroserviceBO> getServicesByIds(String serviceIds) {
+        List<String> serviceIdList = Arrays.asList(serviceIds.split(","));
+        return microServiceRepository.getServiceByIds(serviceIdList);
     }
 }

@@ -83,6 +83,13 @@ public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Micr
   }
 
   @Override
+  public List<MicroserviceBO> getServiceByIds(List<String> serviceIdList) {
+    List<Microservice> microservices = list(Wrappers.lambdaQuery(Microservice.class).in(Microservice::getServiceId,
+            serviceIdList));
+    return convertServiceBOList(microservices);
+  }
+
+  @Override
   public List<MicroserviceBO> getUserRelatedServices(String currentUserId) {
     List<ResourceMemberBO> resourceMembers = memberRepository.getByRelationMember(currentUserId,
             MemberType.SERVICE_MEMBER.getType());
