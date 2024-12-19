@@ -26,4 +26,6 @@ public interface ITaskRecordRepository {
     TaskRecordBO getTaskRecordByTrigger(String triggerId);
 
     PageSize<TaskRecordBO> getTriggerTaskRecords(String triggerId, Integer pageNum, Integer size);
+
+    List<TaskRecordBO> getOldTaskRecord(long oldTime);
 }
