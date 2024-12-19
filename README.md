@@ -82,10 +82,10 @@ docker run --env=MYSQL_ROOT_PASSWORD=123456 -p 3306:3306 -d mysql:5.7
 > 启动Master
 ```shell
 docker run \
-  --env=DB_HOST='{本机IP:数据库端口}' \
+  --env=DB_HOST='{宿主机IP:数据库端口}' \
   --env=DB_USERNAME={数据库用户} \
   --env=DB_PASSWORD={数据库密码} \
-  --env=eureka_zone='http://{本机IP}:9888/eureka' \
+  --env=eureka_zone='http://{宿主机IP}:9888/eureka' \
   --name windy-master \
   -p 9888:9888 \
   -d \
@@ -94,10 +94,10 @@ docker run \
 > 启动console
 ```shell
 docker run \
-  --env=DB_HOST='{本机IP:端口}' \
+  --env=DB_HOST='{宿主机IP:数据库端口}' \
   --env=DB_USERNAME={数据库用户} \
   --env=DB_PASSWORD={数据库密码} \
-  --env=eureka_zone='http://{本机IP}:9888/eureka' \
+  --env=eureka_zone='http://{宿主机IP}:9888/eureka' \
   --name windy-console \
   -p 9768:9768 \
   -d \
@@ -106,7 +106,7 @@ docker run \
 > 启动client
 ```shell
 docker run \
-  --env=eureka_zone='http://{本机IP}:9888/eureka' \
+  --env=eureka_zone='http://{宿主机IP}:9888/eureka' \
   --name windy-client \
   -p 8070:8070 \
   -d \
@@ -114,6 +114,6 @@ docker run \
 ```
 ### 3 用浏览器打开console
 ```
-http://{本机IP}:9768
+http://{宿主机IP}:9768
 ```
 在浏览器中输入地址即可访问Windy，默认用户名/密码: windy/admin
