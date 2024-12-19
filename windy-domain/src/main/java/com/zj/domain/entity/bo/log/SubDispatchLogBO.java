@@ -7,7 +7,7 @@ import lombok.Data;
  * @since 2023/5/12
  */
 @Data
-public class SubDispatchLogDto {
+public class SubDispatchLogBO {
 
   private Long id;
 

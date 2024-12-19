@@ -39,8 +39,9 @@ public class CompareHandler {
         }
 
         //过滤比较Key不能为空
-        compareDefines =
-                compareDefines.stream().filter(Objects::nonNull).filter(compare -> StringUtils.isNoneBlank(compare.getCompareKey())).collect(Collectors.toList());
+        compareDefines = compareDefines.stream().filter(Objects::nonNull)
+                .filter(compare -> StringUtils.isNoneBlank(compare.getCompareKey()))
+                .collect(Collectors.toList());
 
         preHandle(executeDetailVo, compareDefines);
         log.info("step 4 execute compare pre Handle");

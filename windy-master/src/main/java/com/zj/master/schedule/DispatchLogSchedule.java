@@ -4,7 +4,7 @@ import com.zj.common.adapter.discover.DiscoverService;
 import com.zj.common.adapter.monitor.InstanceMonitor;
 import com.zj.common.utils.IpUtils;
 import com.zj.common.utils.TraceUtils;
-import com.zj.domain.entity.bo.log.DispatchLogDto;
+import com.zj.domain.entity.bo.log.DispatchLogBO;
 import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.domain.repository.log.ISubDispatchLogRepository;
 import com.zj.domain.repository.pipeline.IOptimisticLockRepository;
@@ -65,18 +65,18 @@ public class DispatchLogSchedule {
 
       log.info("start scan log......");
       // 1 扫描任务日志，只获取正在执行中的日志
-      List<DispatchLogDto> runningTaskLog = taskLogRepository.getRunningDispatchLog();
+      List<DispatchLogBO> runningTaskLog = taskLogRepository.getRunningDispatchLog();
       if (CollectionUtils.isEmpty(runningTaskLog)) {
         return;
       }
 
       // 2 判断扫描到的任务执行的master节点是否还存在，不存在准备进入重选节点流程
-      List<DispatchLogDto> needRunList = resolveNoMasterTaskLog(runningTaskLog);
+      List<DispatchLogBO> needRunList = resolveNoMasterTaskLog(runningTaskLog);
 
       // 3 如果当前节点重启后由于IP未变化，但是重启节点没有执行任务
-      List<DispatchLogDto> localIpNoRun = resolveLocalIpTaskLog(runningTaskLog);
+      List<DispatchLogBO> localIpNoRun = resolveLocalIpTaskLog(runningTaskLog);
       needRunList.addAll(localIpNoRun);
-      List<DispatchLogDto> logs = needRunList.stream().distinct().collect(Collectors.toList());
+      List<DispatchLogBO> logs = needRunList.stream().distinct().collect(Collectors.toList());
       log.debug("start run no master task size={}", logs.size());
       // 4 筛选出来的任务开始切换到当前节点执行
       logs.forEach(dispatcher::resumeTask);
@@ -87,7 +87,7 @@ public class DispatchLogSchedule {
     }
   }
 
-  private List<DispatchLogDto> resolveLocalIpTaskLog(List<DispatchLogDto> runningTaskLog) {
+  private List<DispatchLogBO> resolveLocalIpTaskLog(List<DispatchLogBO> runningTaskLog) {
     String localIP = IpUtils.getLocalIP();
     return runningTaskLog.stream().filter(log -> Objects.equals(localIP, log.getNodeIp()))
         .filter(log -> (System.currentTimeMillis() - log.getUpdateTime()) > MAX_REDO_TIMEOUT)
@@ -108,7 +108,7 @@ public class DispatchLogSchedule {
   /**
    * 任务的NodeIP在现有Master的list中不存在时，证明当前任务未执行
    * */
-  private List<DispatchLogDto> resolveNoMasterTaskLog(List<DispatchLogDto> runningTaskLog) {
+  private List<DispatchLogBO> resolveNoMasterTaskLog(List<DispatchLogBO> runningTaskLog) {
     String localIP = IpUtils.getLocalIP();
     List<String> masterIps = getCurrentMasterIpList();
     return runningTaskLog.stream().filter(log -> !Objects.equals(localIP, log.getNodeIp()))

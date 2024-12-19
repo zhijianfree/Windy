@@ -6,7 +6,7 @@ import com.zj.common.enums.ProcessStatus;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.common.entity.dto.DispatchTaskModel;
 import com.zj.common.utils.IpUtils;
-import com.zj.domain.entity.bo.log.DispatchLogDto;
+import com.zj.domain.entity.bo.log.DispatchLogBO;
 import com.zj.domain.repository.log.IDispatchLogRepository;
 import com.zj.master.dispatch.Dispatcher;
 import com.zj.master.dispatch.listener.InternalEvent;
@@ -36,12 +36,12 @@ public class TaskLogService {
 
   public Object createTask(DispatchTaskModel task) {
     log.info("receive task detail ={}", JSON.toJSONString(task));
-    DispatchLogDto taskLog = saveLog(task);
+    DispatchLogBO taskLog = saveLog(task);
     return dispatcher.dispatch(task, taskLog.getLogId());
   }
 
-  private DispatchLogDto saveLog(DispatchTaskModel task) {
-    DispatchLogDto taskLog = new DispatchLogDto();
+  private DispatchLogBO saveLog(DispatchTaskModel task) {
+    DispatchLogBO taskLog = new DispatchLogBO();
     taskLog.setLogId(uniqueIdService.getUniqueId());
     taskLog.setSourceId(task.getSourceId());
     taskLog.setSourceName(task.getSourceName());

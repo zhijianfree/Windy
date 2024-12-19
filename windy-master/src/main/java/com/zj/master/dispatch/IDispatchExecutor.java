@@ -2,7 +2,7 @@ package com.zj.master.dispatch;
 
 import com.zj.common.enums.LogType;
 import com.zj.common.entity.dto.DispatchTaskModel;
-import com.zj.domain.entity.bo.log.DispatchLogDto;
+import com.zj.domain.entity.bo.log.DispatchLogBO;
 
 /**
  * @author guyuelan
@@ -15,7 +15,7 @@ public interface IDispatchExecutor {
   /**
    * 传入的任务是否在当前实例中
    * */
-  boolean isExistInJvm(DispatchLogDto taskLog);
+  boolean isExistInJvm(DispatchLogBO taskLog);
 
   /**
    * 分配任务给子节点
@@ -27,7 +27,7 @@ public interface IDispatchExecutor {
   /**
    * 恢复执行任务
    * */
-  boolean resume(DispatchLogDto taskLog);
+  boolean resume(DispatchLogBO taskLog);
 
   /**
    * 当前待执行个数，监控统计使用

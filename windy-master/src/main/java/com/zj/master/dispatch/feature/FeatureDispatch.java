@@ -7,7 +7,7 @@ import com.zj.common.entity.dto.DispatchTaskModel;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.domain.entity.bo.feature.FeatureInfoBO;
 import com.zj.domain.entity.bo.feature.TestCaseConfigBO;
-import com.zj.domain.entity.bo.log.DispatchLogDto;
+import com.zj.domain.entity.bo.log.DispatchLogBO;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.domain.repository.feature.ITestCaseConfigRepository;
 import com.zj.domain.repository.log.IDispatchLogRepository;
@@ -55,7 +55,7 @@ public class FeatureDispatch implements IDispatchExecutor {
     }
 
     @Override
-    public boolean isExistInJvm(DispatchLogDto taskLog) {
+    public boolean isExistInJvm(DispatchLogBO taskLog) {
         return featureExecuteProxy.isExitTask(taskLog.getSourceRecordId());
     }
 
@@ -82,7 +82,7 @@ public class FeatureDispatch implements IDispatchExecutor {
     }
 
     @Override
-    public boolean resume(DispatchLogDto taskLog) {
+    public boolean resume(DispatchLogBO taskLog) {
         log.info("not support resume temporary feature log={}", taskLog.getLogId());
         dispatchLogRepository.updateLogStatus(taskLog.getLogId(), ProcessStatus.FAIL.getType());
         return false;

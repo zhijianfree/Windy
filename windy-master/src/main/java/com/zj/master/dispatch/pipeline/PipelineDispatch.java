@@ -6,8 +6,8 @@ import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.common.entity.dto.DispatchTaskModel;
-import com.zj.domain.entity.bo.log.DispatchLogDto;
-import com.zj.domain.entity.bo.log.SubDispatchLogDto;
+import com.zj.domain.entity.bo.log.DispatchLogBO;
+import com.zj.domain.entity.bo.log.SubDispatchLogBO;
 import com.zj.domain.entity.bo.pipeline.BindBranchBO;
 import com.zj.domain.entity.bo.pipeline.PipelineActionBO;
 import com.zj.domain.entity.bo.pipeline.PipelineBO;
@@ -76,7 +76,7 @@ public class PipelineDispatch implements IDispatchExecutor {
   }
 
   @Override
-  public boolean isExistInJvm(DispatchLogDto taskLog) {
+  public boolean isExistInJvm(DispatchLogBO taskLog) {
     return pipelineExecuteProxy.isExitTask(taskLog.getSourceRecordId());
   }
 
@@ -125,8 +125,8 @@ public class PipelineDispatch implements IDispatchExecutor {
 
   private void createSubTaskLog(List<PipelineNodeBO> pipelineNodes, String logId,
                                 Map<String, String> executeTypeMap) {
-    List<SubDispatchLogDto> logList = pipelineNodes.stream().map(pipelineNode -> {
-      SubDispatchLogDto subTaskLog = new SubDispatchLogDto();
+    List<SubDispatchLogBO> logList = pipelineNodes.stream().map(pipelineNode -> {
+      SubDispatchLogBO subTaskLog = new SubDispatchLogBO();
       subTaskLog.setSubTaskId(uniqueIdService.getUniqueId());
       subTaskLog.setSubTaskName(pipelineNode.getNodeName());
       subTaskLog.setLogId(logId);
@@ -185,7 +185,7 @@ public class PipelineDispatch implements IDispatchExecutor {
   }
 
   @Override
-  public boolean resume(DispatchLogDto dispatchLog) {
+  public boolean resume(DispatchLogBO dispatchLog) {
     String pipelineId = dispatchLog.getSourceId();
     PipelineBO pipeline = pipelineRepository.getPipeline(pipelineId);
     if (Objects.isNull(pipeline)) {
@@ -217,11 +217,11 @@ public class PipelineDispatch implements IDispatchExecutor {
     }
 
     //过滤掉已经执行完成的任务
-    List<SubDispatchLogDto> subLogs = subDispatchLogRepository.getSubLogByLogId(
+    List<SubDispatchLogBO> subLogs = subDispatchLogRepository.getSubLogByLogId(
         dispatchLog.getLogId());
     List<String> subTasks = subLogs.stream()
         .filter(subTask -> !ProcessStatus.isCompleteStatus(subTask.getStatus()))
-        .map(SubDispatchLogDto::getExecuteId).collect(Collectors.toList());
+        .map(SubDispatchLogBO::getExecuteId).collect(Collectors.toList());
     List<TaskNode> taskNodeList = pipelineNodes.stream()
         .filter(node -> subTasks.contains(node.getNodeId()))
         .map(node -> buildTaskNode(node, dispatchLog.getSourceRecordId(), pipeline.getServiceId()))

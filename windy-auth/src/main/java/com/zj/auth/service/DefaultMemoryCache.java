@@ -18,7 +18,7 @@ public class DefaultMemoryCache implements ISessionCache{
 
     public DefaultMemoryCache(Integer tokenExpire) {
         memoryCache = CacheBuilder.newBuilder()
-                .expireAfterWrite(tokenExpire, TimeUnit.SECONDS)
+                .expireAfterAccess(tokenExpire, TimeUnit.SECONDS)
                 .build();
     }
 

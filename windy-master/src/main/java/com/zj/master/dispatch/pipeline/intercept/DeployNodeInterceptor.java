@@ -7,8 +7,8 @@ import com.zj.common.entity.pipeline.DeployParams;
 import com.zj.common.entity.pipeline.K8SAccessParams;
 import com.zj.common.entity.pipeline.SSHParams;
 import com.zj.common.entity.pipeline.ServiceConfig;
-import com.zj.domain.entity.bo.log.DispatchLogDto;
-import com.zj.domain.entity.bo.log.SubDispatchLogDto;
+import com.zj.domain.entity.bo.log.DispatchLogBO;
+import com.zj.domain.entity.bo.log.SubDispatchLogBO;
 import com.zj.domain.entity.bo.pipeline.NodeRecordBO;
 import com.zj.domain.entity.bo.service.DeployEnvironmentBO;
 import com.zj.domain.entity.bo.service.MicroserviceBO;
@@ -66,19 +66,19 @@ public class DeployNodeInterceptor implements INodeExecuteInterceptor {
         if (!Objects.equals(taskNode.getExecuteType(), ExecuteType.DEPLOY.name())) {
             return;
         }
-        List<SubDispatchLogDto> subLogs = subDispatchLogRepository.getSubLogByLogId(
+        List<SubDispatchLogBO> subLogs = subDispatchLogRepository.getSubLogByLogId(
                 taskNode.getLogId());
-        Optional<SubDispatchLogDto> optional = subLogs.stream()
+        Optional<SubDispatchLogBO> optional = subLogs.stream()
                 .filter(subLog -> Objects.equals(subLog.getExecuteType(), ExecuteType.BUILD.name()))
                 .findFirst();
         DeployContext deployContext = (DeployContext) taskNode.getRequestContext();
         if (optional.isPresent()) {
-            SubDispatchLogDto subDispatchLogDto = optional.get();
+            SubDispatchLogBO subDispatchLogBO = optional.get();
             if (!Objects.equals(deployContext.getDeployType(), DeployType.SSH.getType())) {
-                findDockerImageName(subDispatchLogDto, deployContext);
+                findDockerImageName(subDispatchLogBO, deployContext);
             }
 
-            deployContext.setSingleClientIp(subDispatchLogDto.getClientIp());
+            deployContext.setSingleClientIp(subDispatchLogBO.getClientIp());
             deployContext.setRequestSingle(true);
         }
 
@@ -108,10 +108,10 @@ public class DeployNodeInterceptor implements INodeExecuteInterceptor {
         return deployParams;
     }
 
-    private void findDockerImageName(SubDispatchLogDto subDispatchLogDto, DeployContext deployContext) {
-        DispatchLogDto dispatchLog = dispatchLogRepository.getDispatchLog(
-                subDispatchLogDto.getLogId());
-        String nodeId = subDispatchLogDto.getExecuteId();
+    private void findDockerImageName(SubDispatchLogBO subDispatchLogBO, DeployContext deployContext) {
+        DispatchLogBO dispatchLog = dispatchLogRepository.getDispatchLog(
+                subDispatchLogBO.getLogId());
+        String nodeId = subDispatchLogBO.getExecuteId();
         String pipelineHistoryId = dispatchLog.getSourceRecordId();
         NodeRecordBO nodeRecord = nodeRecordRepository.getRecordByNodeAndHistory(pipelineHistoryId,
                 nodeId);

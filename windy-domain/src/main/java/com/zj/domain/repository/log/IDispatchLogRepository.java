@@ -1,6 +1,6 @@
 package com.zj.domain.repository.log;
 
-import com.zj.domain.entity.bo.log.DispatchLogDto;
+import com.zj.domain.entity.bo.log.DispatchLogBO;
 import java.util.List;
 
 /**
@@ -9,16 +9,16 @@ import java.util.List;
  */
 public interface IDispatchLogRepository {
 
-  List<DispatchLogDto> getRunningDispatchLog();
+  List<DispatchLogBO> getRunningDispatchLog();
 
   List<String> delete7DayLog();
 
-  void saveLog(DispatchLogDto taskLog);
+  void saveLog(DispatchLogBO taskLog);
 
   void updateLogStatus(String logId, int type);
 
   boolean updateLogMasterIp(String logId, String localIP, Integer lockVersion);
 
   void updateLogSourceRecord(String logId, String recordId);
-  DispatchLogDto getDispatchLog(String logId);
+  DispatchLogBO getDispatchLog(String logId);
 }
