@@ -3,7 +3,7 @@ package com.zj.common.adapter.invoker.eureka;
 import com.alibaba.fastjson.JSON;
 import com.zj.common.adapter.invoker.IMasterInvoker;
 import com.zj.common.entity.dto.DispatchTaskModel;
-import com.zj.common.entity.dto.MasterCollect;
+import com.zj.common.entity.dto.MasterCollectDto;
 import com.zj.common.entity.dto.PluginInfo;
 import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.common.entity.dto.ResponseStatusModel;
@@ -133,7 +133,7 @@ public class EurekaMasterInvokerAdapter extends BaseEurekaAdapter implements IMa
     }
 
     @Override
-    public List<MasterCollect> requestMasterMonitor() {
+    public List<MasterCollectDto> requestMasterMonitor() {
         List<ServiceInstance> serviceInstances = discoverService.getServiceInstances(DiscoverService.WINDY_MASTER);
         return serviceInstances.stream().map(service -> {
             String url = String.format(MASTER_MONITOR_URL, service.getHost());
@@ -146,7 +146,7 @@ public class EurekaMasterInvokerAdapter extends BaseEurekaAdapter implements IMa
                 log.info("request master monitor result={}", resultString);
                 response.close();
                 ResponseMeta result = JSON.parseObject(resultString, ResponseMeta.class);
-                return JSON.parseObject(JSON.toJSONString(result.getData()), MasterCollect.class);
+                return JSON.parseObject(JSON.toJSONString(result.getData()), MasterCollectDto.class);
             } catch (IOException e) {
                 log.info("handle master monitor error", e);
             }

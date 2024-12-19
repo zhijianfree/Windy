@@ -5,7 +5,7 @@ import com.zj.common.adapter.invoker.IClientInvoker;
 import com.zj.common.adapter.invoker.IMasterInvoker;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.common.entity.dto.ClientCollectDto;
-import com.zj.common.entity.dto.MasterCollect;
+import com.zj.common.entity.dto.MasterCollectDto;
 import com.zj.domain.entity.bo.pipeline.SystemConfigBO;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
@@ -58,7 +58,7 @@ public class SystemConfigService {
     SystemMonitorDto systemMonitorDto = new SystemMonitorDto();
     List<ClientCollectDto> clientMonitor = clientInvoker.requestClientMonitor();
     systemMonitorDto.setClients(clientMonitor);
-    List<MasterCollect> masterMonitor = masterInvoker.requestMasterMonitor();
+    List<MasterCollectDto> masterMonitor = masterInvoker.requestMasterMonitor();
     systemMonitorDto.setMasters(masterMonitor);
     return systemMonitorDto;
   }

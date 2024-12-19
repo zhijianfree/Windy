@@ -1,7 +1,7 @@
 package com.zj.common.adapter.invoker;
 
 import com.zj.common.entity.dto.DispatchTaskModel;
-import com.zj.common.entity.dto.MasterCollect;
+import com.zj.common.entity.dto.MasterCollectDto;
 import com.zj.common.entity.dto.PluginInfo;
 import com.zj.common.entity.dto.ResponseStatusModel;
 import com.zj.common.entity.dto.ResultEvent;
@@ -38,5 +38,5 @@ public interface IMasterInvoker {
 
     boolean stopDispatchTask(DispatchTaskModel dispatchTaskModel);
 
-    List<MasterCollect> requestMasterMonitor();
+    List<MasterCollectDto> requestMasterMonitor();
 }

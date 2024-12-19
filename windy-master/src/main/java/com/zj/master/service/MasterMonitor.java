@@ -1,6 +1,6 @@
 package com.zj.master.service;
 
-import com.zj.common.entity.dto.MasterCollect;
+import com.zj.common.entity.dto.MasterCollectDto;
 import com.zj.common.adapter.monitor.collector.InstanceCollector;
 import com.zj.common.adapter.monitor.collector.PhysicsCollect;
 import com.zj.master.dispatch.IDispatchExecutor;
@@ -24,13 +24,13 @@ public class MasterMonitor {
     this.dispatchExecutors = dispatchExecutors;
   }
 
-  public MasterCollect getInstanceInfo() {
-    MasterCollect masterCollect = new MasterCollect();
+  public MasterCollectDto getInstanceInfo() {
+    MasterCollectDto masterCollectDto = new MasterCollectDto();
     PhysicsCollect physics = InstanceCollector.collectPhysics();
-    masterCollect.setPhysics(physics);
+    masterCollectDto.setPhysics(physics);
     int count = dispatchExecutors.stream().mapToInt(IDispatchExecutor::getExecuteCount).sum();
-    masterCollect.setTaskCount(count);
-    masterCollect.setVersion(masterVersion);
-    return masterCollect;
+    masterCollectDto.setTaskCount(count);
+    masterCollectDto.setVersion(masterVersion);
+    return masterCollectDto;
   }
 }
