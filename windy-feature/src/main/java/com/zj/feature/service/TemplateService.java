@@ -119,12 +119,6 @@ public class TemplateService {
         return templateRepository.deleteTemplate(templateId);
     }
 
-    public List<ExecuteTemplateDto> getFeatureList(String serviceId) {
-        List<ExecuteTemplateBO> defaultTemplates = templateRepository.getToolTemplates();
-        List<ExecuteTemplateBO> executeTemplates = templateRepository.getServiceTemplates(serviceId);
-        executeTemplates.addAll(defaultTemplates);
-        return executeTemplates.stream().map(this::toExecuteTemplateDto).collect(Collectors.toList());
-    }
 
     public Boolean refreshTemplate(String templateId) {
         List<ExecutePointBO> executePoints = executePointRepository.getTemplateExecutePoints(templateId);
@@ -347,12 +341,14 @@ public class TemplateService {
     }
 
     public List<ExecuteTemplateDto> serviceRelatedTemplates(String serviceId) {
+        List<ExecuteTemplateBO> defaultTemplates = templateRepository.getToolTemplates();
         List<ResourceMemberBO> relationMembers = memberRepository.getResourceRelations(serviceId,
                 MemberType.FEATURE_MEMBER.getType());
         List<String> serviceIds =
                 relationMembers.stream().map(ResourceMemberBO::getRelationId).collect(Collectors.toList());
         serviceIds.add(serviceId);
         List<ExecuteTemplateBO> executeTemplates = templateRepository.getTemplatesByServiceIds(serviceIds);
+        executeTemplates.addAll(defaultTemplates);
         return executeTemplates.stream().map(this::toExecuteTemplateDto).collect(Collectors.toList());
     }
 

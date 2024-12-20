@@ -59,13 +59,6 @@ public class FeatureTemplateRest {
     }
 
     @ResponseBody
-    @GetMapping("/{serviceId}/templates")
-    public ResponseMeta<List<ExecuteTemplateDto>> getFeatureTemplates(@PathVariable("serviceId") String serviceId) {
-        List<ExecuteTemplateDto> featureConfigs = templateService.getFeatureList(serviceId);
-        return new ResponseMeta<>(ErrorCode.SUCCESS, featureConfigs);
-    }
-
-    @ResponseBody
     @PostMapping("/template")
     public ResponseMeta<String> createFeatureTemplate(@RequestBody ExecuteTemplateDto executeTemplate) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, templateService.createTemplate(executeTemplate));
