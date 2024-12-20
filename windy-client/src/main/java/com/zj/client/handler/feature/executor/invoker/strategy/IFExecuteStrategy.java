@@ -14,6 +14,7 @@ import com.zj.common.entity.feature.CompareResult;
 import com.zj.common.entity.feature.ExecutePointDto;
 import com.zj.common.entity.feature.ExecutorUnit;
 import com.zj.common.entity.feature.FeatureResponse;
+import com.zj.common.enums.CompareType;
 import com.zj.common.enums.TemplateType;
 import com.zj.plugin.loader.ExecuteDetailVo;
 import lombok.extern.slf4j.Slf4j;
@@ -126,7 +127,12 @@ public class IFExecuteStrategy extends BaseExecuteStrategy {
         compareDefine.setCompareKey(strings.get(0));
         compareDefine.setOperator(strings.get(1));
         compareDefine.setResponseValue(contextMap);
-        compareDefine.setExpectValue("{" +strings.get(2)+ "}" + strings.get(3));
+        String expectValue = strings.get(3);
+        if (Objects.equals(compareDefine.getOperator(), CompareType.ARRAY_ITEM_MATCH.getOperator()) ||
+                Objects.equals(compareDefine.getOperator(), CompareType.NONE_ITEM_MATCH.getOperator())){
+            expectValue = "{" + strings.get(2) + "}" + expectValue;
+        }
+        compareDefine.setExpectValue(expectValue);
         return compareDefine;
     }
 
