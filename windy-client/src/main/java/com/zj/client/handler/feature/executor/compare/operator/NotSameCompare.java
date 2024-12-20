@@ -16,7 +16,7 @@ public class NotSameCompare extends BaseCompare {
 
     @Override
     public CompareType getType() {
-        return CompareType.SAME;
+        return CompareType.NOT_SAME;
     }
 
     @Override
