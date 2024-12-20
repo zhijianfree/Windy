@@ -6,6 +6,7 @@ import lombok.Getter;
 public enum CompareType {
     /** 字符串对比*/
     SAME("equal", "等值比对"),
+    NOT_SAME("not_equal", "值不相同"),
     /** 字符串内容不能为空*/
     NOT_EMPTY("not_null", "值不为空"),
     /** 对象数组内容匹配*/
