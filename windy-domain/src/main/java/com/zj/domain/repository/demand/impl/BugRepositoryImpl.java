@@ -57,7 +57,7 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
     @Override
     public PageSize<BugBO> getUserRelatedBugs(BugQueryBO bugQueryBO) {
         LambdaQueryWrapper<Bug> wrapper = Wrappers.lambdaQuery(Bug.class).eq(Bug::getAcceptor,
-                bugQueryBO.getProposer());
+                bugQueryBO.getAcceptor());
         Optional.ofNullable(bugQueryBO.getStatus()).ifPresent(status -> wrapper.eq(Bug::getStatus, status));
         if (Objects.isNull(bugQueryBO.getStatus())) {
             wrapper.in(Bug::getStatus,

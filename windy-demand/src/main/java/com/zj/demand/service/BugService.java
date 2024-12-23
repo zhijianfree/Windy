@@ -109,9 +109,9 @@ public class BugService {
         return bugRepository.deleteBug(bugId);
     }
 
-    public PageSize<BugBO> getRelatedBugs(Integer page, Integer size, Integer status) {
+    public PageSize<BugBO> getUserRelatedBugs(Integer page, Integer size, Integer status) {
         String userId = authService.getCurrentUserId();
-        BugQueryBO bugQueryBO = BugQueryBO.builder().page(page).size(size).proposer(userId).status(status).build();
+        BugQueryBO bugQueryBO = BugQueryBO.builder().page(page).size(size).acceptor(userId).status(status).build();
         return bugRepository.getUserRelatedBugs(bugQueryBO);
     }
 

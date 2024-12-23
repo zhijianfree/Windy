@@ -74,7 +74,7 @@ public class DemandService {
     public PageSize<DemandBO> getUserDemands(Integer page, Integer size, Integer status) {
         String currentUserId = authService.getCurrentUserId();
         DemandQueryBO demandQueryBO =
-                DemandQueryBO.builder().pageSize(size).page(page).status(status).proposer(currentUserId).build();
+                DemandQueryBO.builder().pageSize(size).page(page).status(status).acceptor(currentUserId).build();
         return demandRepository.getDemandPage(demandQueryBO);
     }
 
