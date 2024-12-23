@@ -19,25 +19,6 @@ import java.util.Objects;
 public class MavenSettingHelper {
 
     public static final String WINDY_AUTO_CONFIG_ID = "windy-auto-config";
-
-    public static void main(String[] args) {
-        MavenConfigDto mavenConfigDto = new MavenConfigDto();
-        mavenConfigDto.setMavenPath("/Users/falcon/docker/client/maven");
-        MavenConfigDto.RemoteRepository repository = new MavenConfigDto.RemoteRepository();
-        repository.setRepositoryId("xxxxx");
-        repository.setRepositoryUrl("http://xxxxx1");
-        List<MavenConfigDto.RemoteRepository> remoteRepositories = new ArrayList<>();
-        remoteRepositories.add(repository);
-
-        MavenConfigDto.RemoteRepository repository1 = new MavenConfigDto.RemoteRepository();
-        repository1.setRepositoryId("yyyyyyy");
-        repository1.setRepositoryUrl("http://yyyyyy");
-        repository1.setUserName("admin");
-        repository1.setPassword("admin");
-        remoteRepositories.add(repository1);
-        mavenConfigDto.setRemoteRepositories(remoteRepositories);
-        MavenSettingHelper.configSetting(mavenConfigDto);
-    }
     public static boolean configSetting(MavenConfigDto mavenConfigDto) {
         try {
             String settingPath = mavenConfigDto.getMavenPath() + "/conf/settings.xml";

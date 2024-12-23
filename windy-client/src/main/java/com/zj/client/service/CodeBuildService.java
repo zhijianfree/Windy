@@ -4,6 +4,8 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback.Adapter;
 import com.github.dockerjava.api.command.BuildImageResultCallback;
 import com.github.dockerjava.api.model.AuthConfig;
+import com.github.dockerjava.api.model.AuthConfigurations;
+import com.github.dockerjava.api.model.AuthResponse;
 import com.github.dockerjava.api.model.PushResponseItem;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
@@ -233,8 +235,14 @@ public class CodeBuildService {
         // 设置登陆远程仓库的用户信息
         AuthConfig authConfig = new AuthConfig().withRegistryAddress(repository)
                 .withUsername(param.getUser()).withPassword(param.getPassword());
-        dockerClient.authCmd().withAuthConfig(authConfig).exec();
+        AuthResponse authResponse = dockerClient.authCmd().withAuthConfig(authConfig).exec();
+        String status = authResponse.getStatus();
+        log.info("docker login status={}", status);
+
+        AuthConfigurations authConfigs = new AuthConfigurations();
+        authConfigs.addConfig(authConfig);
         dockerClient.buildImageCmd().withDockerfile(dockerfile)
+                .withBuildAuthConfigs(authConfigs)
                 .withTags(Collections.singleton(imageRepository)).exec(callback).awaitImageId();
 
         // 将镜像推送到远程镜像仓库
