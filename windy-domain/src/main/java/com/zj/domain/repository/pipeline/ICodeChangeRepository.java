@@ -20,4 +20,6 @@ public interface ICodeChangeRepository {
   boolean deleteCodeChange(String codeChangeId);
 
   boolean batchDeleteCodeChange(List<String> codeChangeIds);
+
+  List<CodeChangeBO> getCodeChangeByRelationId(String relationId, Integer relationType);
 }

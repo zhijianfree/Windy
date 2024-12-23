@@ -54,6 +54,14 @@ public class CodeChangeRepository extends ServiceImpl<CodeChangeMapper, CodeChan
   }
 
   @Override
+  public List<CodeChangeBO> getCodeChangeByRelationId(String relationId, Integer relationType) {
+    List<CodeChange> codeChanges = list(
+            Wrappers.lambdaQuery(CodeChange.class).eq(CodeChange::getRelationId, relationId)
+                    .eq(CodeChange::getRelationType, relationType));
+    return OrikaUtil.convertList(codeChanges, CodeChangeBO.class);
+  }
+
+  @Override
   public boolean deleteCodeChange(String codeChangeId) {
     return remove(Wrappers.lambdaQuery(CodeChange.class).eq(CodeChange::getChangeId, codeChangeId));
   }

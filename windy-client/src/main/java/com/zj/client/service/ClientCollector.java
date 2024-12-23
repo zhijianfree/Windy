@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -48,8 +49,11 @@ public class ClientCollector {
         boolean toolExist = checkToolExist(toolVersionDto.getType(), toolVersionDto.getInstallPath());
         boolean configSetting = true;
         if (toolExist && Objects.equals(toolVersionDto.getType(), ToolType.MAVEN.getType())) {
-            MavenConfigDto mavenConfig = JSON.parseObject(toolVersionDto.getBuildConfig(), MavenConfigDto.class);
+            MavenConfigDto mavenConfig = new MavenConfigDto();
             mavenConfig.setMavenPath(toolVersionDto.getInstallPath());
+            List<MavenConfigDto.RemoteRepository> repositories = JSON.parseArray(toolVersionDto.getBuildConfig(),
+                    MavenConfigDto.RemoteRepository.class);
+            mavenConfig.setRemoteRepositories(repositories);
             configSetting = MavenSettingHelper.configSetting(mavenConfig);
         }
 

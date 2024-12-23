@@ -13,11 +13,15 @@ import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.demand.BugBO;
 import com.zj.domain.entity.bo.demand.BugQueryBO;
 import com.zj.domain.entity.bo.demand.BusinessStatusBO;
+import com.zj.domain.entity.bo.pipeline.CodeChangeBO;
 import com.zj.domain.entity.enums.BusinessStatusType;
+import com.zj.domain.entity.enums.RelationType;
 import com.zj.domain.repository.auth.IUserRepository;
 import com.zj.domain.repository.demand.IBugRepository;
 import com.zj.domain.repository.demand.IBusinessStatusRepository;
+import com.zj.domain.repository.pipeline.ICodeChangeRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,14 +36,16 @@ public class BugService {
     private final UniqueIdService uniqueIdService;
     private final IAuthService authService;
     private final IUserRepository userRepository;
+    private final ICodeChangeRepository codeChangeRepository;
     private final IBusinessStatusRepository businessStatusRepository;
 
     public BugService(IBugRepository bugRepository, UniqueIdService uniqueIdService, IAuthService authService,
-                      IUserRepository userRepository, IBusinessStatusRepository businessStatusRepository) {
+                      IUserRepository userRepository, ICodeChangeRepository codeChangeRepository, IBusinessStatusRepository businessStatusRepository) {
         this.bugRepository = bugRepository;
         this.uniqueIdService = uniqueIdService;
         this.authService = authService;
         this.userRepository = userRepository;
+        this.codeChangeRepository = codeChangeRepository;
         this.businessStatusRepository = businessStatusRepository;
     }
 
@@ -87,6 +93,19 @@ public class BugService {
     }
 
     public Boolean deleteBug(String bugId) {
+        BugBO bug = bugRepository.getBug(bugId);
+        if (Objects.isNull(bug)) {
+            log.info("bug not find bugId={}", bugId);
+            throw new ApiException(ErrorCode.BUG_NOT_EXIST);
+        }
+
+        boolean completeStatus = businessStatusRepository.isUnchangeableStatus(bug.getStatus(), BusinessStatusType.BUG.name());
+        List<CodeChangeBO> codeChanges = codeChangeRepository.getCodeChangeByRelationId(bugId,
+                RelationType.BUG.getType());
+        if (CollectionUtils.isNotEmpty(codeChanges) && !completeStatus) {
+            log.info("bug has bind branch bugId={}", bugId);
+            throw new ApiException(ErrorCode.BUG_HAS_BIND_BRANCH);
+        }
         return bugRepository.deleteBug(bugId);
     }
 

@@ -3,15 +3,20 @@ package com.zj.client.service;
 import com.zj.client.entity.dto.MavenConfigDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.*;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -19,6 +24,7 @@ import java.util.Objects;
 public class MavenSettingHelper {
 
     public static final String WINDY_AUTO_CONFIG_ID = "windy-auto-config";
+
     public static boolean configSetting(MavenConfigDto mavenConfigDto) {
         try {
             String settingPath = mavenConfigDto.getMavenPath() + "/conf/settings.xml";
@@ -47,7 +53,7 @@ public class MavenSettingHelper {
             log.info("update maven config success");
             return true;
         } catch (Exception e) {
-           log.info("config maven config error", e);
+            log.info("config maven config error", e);
         }
         return false;
     }
@@ -110,16 +116,23 @@ public class MavenSettingHelper {
             targetProfile = createProfileNode(document);
         }
 
+        NodeList repositoriesNode = targetProfile.getElementsByTagName("repositories");
+        if (repositoriesNode.getLength() == 0) {
+            Element repositoriesElement = document.createElement("repositories");
+            targetProfile.appendChild(repositoriesElement);
+        }
+
+
         // 更新或新增 remoteRepository 节点
+        Element repositiesElement = (Element) repositoriesNode.item(0);
         for (MavenConfigDto.RemoteRepository repo : repositories) {
-            updateOrAddRemoteRepository(document, targetProfile, repo);
+            updateOrAddRemoteRepository(document, repositiesElement, repo);
         }
     }
 
     // 创建新的 profile 节点
     private static Element createProfileNode(Document document) {
-        Element profiles = getOrCreateProfilesNode(document);
-
+        Element profiles = getOrCreateNode(document);
         Element profile = document.createElement("profile");
         Element idElement = document.createElement("id");
         idElement.setTextContent(WINDY_AUTO_CONFIG_ID);
@@ -130,7 +143,7 @@ public class MavenSettingHelper {
     }
 
     // 确保 profiles 节点存在
-    private static Element getOrCreateProfilesNode(Document document) {
+    private static Element getOrCreateNode(Document document) {
         NodeList profilesList = document.getElementsByTagName("profiles");
         if (profilesList.getLength() > 0) {
             return (Element) profilesList.item(0);
@@ -142,9 +155,9 @@ public class MavenSettingHelper {
     }
 
     // 更新或新增单个 remoteRepository 节点
-    private static void updateOrAddRemoteRepository(Document document, Element profile,
+    private static void updateOrAddRemoteRepository(Document document, Element repositoriesElement,
                                                     MavenConfigDto.RemoteRepository repo) {
-        NodeList repositoryList = profile.getElementsByTagName("repository");
+        NodeList repositoryList = repositoriesElement.getElementsByTagName("repository");
         Element targetRemoteRepository = null;
 
         // 查找匹配的 remoteRepository 节点
@@ -160,7 +173,7 @@ public class MavenSettingHelper {
         // 如果未找到 remoteRepository，则创建一个新的
         if (targetRemoteRepository == null) {
             targetRemoteRepository = createRemoteRepositoryNode(document, repo);
-            profile.appendChild(targetRemoteRepository);
+            repositoriesElement.appendChild(targetRemoteRepository);
         } else {
             // 更新已有 remoteRepository
             updateRemoteRepositoryNode(targetRemoteRepository, repo);
@@ -192,7 +205,8 @@ public class MavenSettingHelper {
         }
     }
 
-    private static void updateOrAddServers(Document document, List<MavenConfigDto.RemoteRepository> remoteRepositories) {
+    private static void updateOrAddServers(Document document,
+                                           List<MavenConfigDto.RemoteRepository> remoteRepositories) {
         if (CollectionUtils.isEmpty(remoteRepositories)) {
             return;
         }

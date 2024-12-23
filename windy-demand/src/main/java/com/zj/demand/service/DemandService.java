@@ -9,16 +9,19 @@ import com.zj.common.utils.OrikaUtil;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.demand.entity.DemandDetailDto;
 import com.zj.demand.entity.DemandDto;
-import com.zj.domain.entity.enums.QueryType;
 import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.demand.BusinessStatusBO;
 import com.zj.domain.entity.bo.demand.DemandBO;
 import com.zj.domain.entity.bo.demand.DemandQueryBO;
+import com.zj.domain.entity.bo.pipeline.CodeChangeBO;
 import com.zj.domain.entity.enums.BusinessStatusType;
+import com.zj.domain.entity.enums.RelationType;
 import com.zj.domain.repository.auth.IUserRepository;
 import com.zj.domain.repository.demand.IBusinessStatusRepository;
 import com.zj.domain.repository.demand.IDemandRepository;
+import com.zj.domain.repository.pipeline.ICodeChangeRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,14 +37,16 @@ public class DemandService {
     private final UniqueIdService uniqueIdService;
     private final IUserRepository userRepository;
     private final IBusinessStatusRepository businessStatusRepository;
+    private final ICodeChangeRepository codeChangeRepository;
 
     public DemandService(IAuthService authService, IDemandRepository demandRepository,
-                         UniqueIdService uniqueIdService, IUserRepository userRepository, IBusinessStatusRepository businessStatusRepository) {
+                         UniqueIdService uniqueIdService, IUserRepository userRepository, IBusinessStatusRepository businessStatusRepository, ICodeChangeRepository codeChangeRepository) {
         this.authService = authService;
         this.demandRepository = demandRepository;
         this.uniqueIdService = uniqueIdService;
         this.userRepository = userRepository;
         this.businessStatusRepository = businessStatusRepository;
+        this.codeChangeRepository = codeChangeRepository;
     }
 
     public DemandBO createDemand(DemandDto demandDto) {
@@ -99,6 +104,19 @@ public class DemandService {
     }
 
     public Boolean deleteDemand(String demandId) {
+        DemandBO demand = demandRepository.getDemand(demandId);
+        if (Objects.isNull(demand)) {
+            log.info("demand not find demandId={}", demandId);
+            throw new ApiException(ErrorCode.DEMAND_NOT_EXIST);
+        }
+
+        boolean completeStatus = businessStatusRepository.isUnchangeableStatus(demand.getStatus(),
+                BusinessStatusType.DEMAND.name());
+        List<CodeChangeBO> codeChanges = codeChangeRepository.getCodeChangeByRelationId(demandId, RelationType.DEMAND.getType());
+        if (CollectionUtils.isNotEmpty(codeChanges) && !completeStatus) {
+            log.info("demand has bind branch demandId={}", demandId);
+            throw new ApiException(ErrorCode.DEMAND_HAS_BIND_BRANCH);
+        }
         return demandRepository.deleteDemand(demandId);
     }
 
