@@ -23,6 +23,7 @@ import com.zj.pipeline.entity.dto.PipelineDto;
 import com.zj.pipeline.entity.enums.PipelineStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -268,14 +269,20 @@ public class PipelineService {
     public String execute(String pipelineId) {
         PipelineBO pipeline = getPipeline(pipelineId);
         if (Objects.isNull(pipeline)) {
-            return null;
+            log.info("can not find pipeline pipelineId={}", pipelineId);
+            throw new ApiException(ErrorCode.NOT_FIND_PIPELINE);
         }
 
         DispatchTaskModel dispatchTaskModel = new DispatchTaskModel();
         dispatchTaskModel.setSourceId(pipelineId);
         dispatchTaskModel.setSourceName(pipeline.getPipelineName());
         dispatchTaskModel.setType(LogType.PIPELINE.getType());
-        return masterInvoker.startPipelineTask(dispatchTaskModel);
+        String taskId = masterInvoker.startPipelineTask(dispatchTaskModel);
+        if (StringUtils.isBlank(taskId)) {
+            log.info("execute pipeline error pipelineId={}", pipelineId);
+            throw new ApiException(ErrorCode.RUN_PIPELINE_ERROR);
+        }
+        return taskId;
     }
 
     public PipelineBO getPipelineDetail(String pipelineId) {

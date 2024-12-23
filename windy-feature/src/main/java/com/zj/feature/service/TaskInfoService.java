@@ -9,6 +9,8 @@ import com.zj.common.entity.dto.DispatchTaskModel;
 import com.zj.common.entity.dto.PageSize;
 import com.zj.common.entity.dto.ResponseStatusModel;
 import com.zj.common.entity.dto.ResponseStatusModel.PercentStatics;
+import com.zj.common.exception.ApiException;
+import com.zj.common.exception.ErrorCode;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.bo.feature.FeatureHistoryBO;
 import com.zj.domain.entity.bo.feature.TaskInfoBO;
@@ -20,6 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -101,7 +104,7 @@ public class TaskInfoService {
     TaskInfoBO taskDetail = getTaskDetail(taskId);
     if (Objects.isNull(taskDetail)) {
       log.info("can not find task={}", taskId);
-      return false;
+      throw new ApiException(ErrorCode.TASK_NOT_FIND);
     }
 
     DispatchTaskModel dispatchTaskModel = new DispatchTaskModel();
@@ -109,7 +112,11 @@ public class TaskInfoService {
     dispatchTaskModel.setSourceId(taskId);
     dispatchTaskModel.setSourceName(taskDetail.getTaskName());
     String recordId = masterInvoker.runFeatureTask(dispatchTaskModel);
-    return Objects.nonNull(recordId);
+    if (StringUtils.isBlank(recordId)) {
+      log.info("run task failed taskId={}", taskId);
+      throw new ApiException(ErrorCode.TASK_RUN_FAILED);
+    }
+    return true;
   }
 
   public ResponseStatusModel getTaskStatus(String taskId) {

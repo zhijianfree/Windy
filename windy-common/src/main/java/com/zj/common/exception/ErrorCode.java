@@ -27,7 +27,7 @@ public enum ErrorCode {
   CREATE_BRANCH_ERROR(HttpStatus.BAD_REQUEST, "Pipeline.000016", "创建分支失败"),
   PIPELINE_RUNNING_NOT_DELETE_PUBLISH(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000017", "流水线正在运行，无法删除发布分支"),
   PIPELINE_NOT_BIND_SERVICE(HttpStatus.BAD_REQUEST, "Pipeline.000018", "流水线不属于当前服务"),
-
+  RUN_PIPELINE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000019", "流水线任务调度失败,请稍后重试"),
   /*==================Service服务==================*/
   NOT_FIND_REPO_CONFIG(HttpStatus.BAD_REQUEST, "Service.000001", "git访问失败，请检查系统配置"),
   REPO_NOT_EXIST(HttpStatus.BAD_REQUEST, "Service.000002", "未发现用户可访问的仓库列表"),
@@ -54,6 +54,9 @@ public enum ErrorCode {
   TEMPLATE_NOT_FIND(HttpStatus.NOT_FOUND, "Feature.000007", "未找到模版"),
   BATCH_UPDATE_FEATURE_POINTS_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Feature.000008", "批量更新用例执行点失败"),
   NO_TEMPLATE_IN_PLUGIN(HttpStatus.BAD_REQUEST, "Feature.000009", "在插件中未找到模版信息，导入失败"),
+  TASK_NOT_FIND(HttpStatus.BAD_REQUEST, "Feature.000010", "任务不存在"),
+  TASK_RUN_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Feature.000011", "用例任务调度失败，请稍后重试"),
+  FEATURE_RUN_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Feature.000012", "用例执行调度失败，请稍后重试"),
   /*==================需求缺陷管理======================*/
   BUG_NOT_EXIST(HttpStatus.BAD_REQUEST, "Bug.000001", "缺陷不存在"),
   BUG_HAS_BIND_BRANCH(HttpStatus.BAD_REQUEST, "Bug.000002", "缺陷已经关联了分支无法删除"),

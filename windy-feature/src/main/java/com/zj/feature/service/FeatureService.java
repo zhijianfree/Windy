@@ -26,7 +26,7 @@ import com.zj.feature.entity.PasteFeatureDto;
 import com.zj.feature.entity.TagFilterDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -304,7 +304,7 @@ public class FeatureService {
         FeatureInfoVo feature = getFeatureById(featureId);
         if (Objects.isNull(feature)) {
             log.info("can not find feature={}", featureId);
-            return false;
+            throw new ApiException(ErrorCode.FEATURE_NOT_FIND);
         }
 
         DispatchTaskModel dispatchTaskModel = new DispatchTaskModel();
@@ -312,7 +312,11 @@ public class FeatureService {
         dispatchTaskModel.setSourceId(JSON.toJSONString(Collections.singletonList(featureId)));
         dispatchTaskModel.setSourceName(feature.getFeatureName());
         String recordId = masterInvoker.runFeatureTask(dispatchTaskModel);
-        return Objects.nonNull(recordId);
+        if (StringUtils.isBlank(recordId)) {
+            log.info("run feature failed featureId={}", featureId);
+            throw new ApiException(ErrorCode.FEATURE_RUN_FAILED);
+        }
+        return true;
     }
 
     public Boolean pasteFeatures(PasteFeatureDto copyFeature) {
