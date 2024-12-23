@@ -59,6 +59,10 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
         LambdaQueryWrapper<Bug> wrapper = Wrappers.lambdaQuery(Bug.class).eq(Bug::getAcceptor,
                 bugQueryBO.getProposer());
         Optional.ofNullable(bugQueryBO.getStatus()).ifPresent(status -> wrapper.eq(Bug::getStatus, status));
+        if (Objects.isNull(bugQueryBO.getStatus())) {
+            wrapper.in(Bug::getStatus,
+                    BugStatus.getNotHandleBugs().stream().map(BugStatus::getType).collect(Collectors.toList()));
+        }
         IPage<Bug> pageQuery = new Page<>(bugQueryBO.getPage(), bugQueryBO.getSize());
         return exchangePageSize(pageQuery, wrapper);
     }
