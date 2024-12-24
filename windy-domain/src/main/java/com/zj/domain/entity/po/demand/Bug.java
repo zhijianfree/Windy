@@ -94,6 +94,11 @@ public class Bug {
     private String spaceId;
 
     /**
+     * 关联ID(目前是需求ID、未来可能是任务或者是线上事故ID等)
+     */
+    private String relationId;
+
+    /**
      * 迭代ID
      */
     private String iterationId;

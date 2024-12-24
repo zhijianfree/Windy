@@ -51,10 +51,10 @@ public class BugService {
 
     public BugDto createBug(BugDto bugDto) {
         bugDto.setBugId(uniqueIdService.getUniqueId());
-        UserDetail userDetail = authService.getUserDetail();
-        bugDto.setProposer(userDetail.getUserId());
-        bugDto.setProposerName(Optional.ofNullable(userDetail.getNickName()).orElse(userDetail.getUserName()));
         BugBO bugBO = OrikaUtil.convert(bugDto, BugBO.class);
+        UserDetail userDetail = authService.getUserDetail();
+        bugBO.setProposer(userDetail.getUserId());
+        bugBO.setProposerName(Optional.ofNullable(userDetail.getNickName()).orElse(userDetail.getUserName()));
         return bugRepository.createBug(bugBO) ? bugDto : null;
     }
 
