@@ -11,10 +11,11 @@ import com.zj.domain.entity.po.feature.FeatureInfo;
 import com.zj.domain.mapper.feeature.FeatureMapper;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -131,6 +132,9 @@ public class FeatureRepository extends ServiceImpl<FeatureMapper, FeatureInfo> i
 
     @Override
     public List<FeatureInfoBO> getFeatureByCases(List<String> testCaseIds) {
+        if (CollectionUtils.isEmpty(testCaseIds)){
+            return Collections.emptyList();
+        }
         List<FeatureInfo> featureInfoList = list(Wrappers.lambdaQuery(FeatureInfo.class)
                 .in(FeatureInfo::getTestCaseId, testCaseIds));
         return OrikaUtil.convertList(featureInfoList, FeatureInfoBO.class);

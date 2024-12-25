@@ -187,10 +187,8 @@ public class CodeBuildService {
         notifyMessage(taskNode, "======= " + message);
     }
 
-    private void saveStatus(String recordId, ProcessStatus status, String message,
-                            Map<String, Object> context) {
-        QueryResponseModel model = Optional.ofNullable(statusMap.get(recordId))
-                .orElse(new QueryResponseModel());
+    private void saveStatus(String recordId, ProcessStatus status, String message, Map<String, Object> context) {
+        QueryResponseModel model = Optional.ofNullable(statusMap.get(recordId)).orElse(new QueryResponseModel());
         model.setStatus(status.getType());
         model.setContext(context);
         model.addMessage(message);
@@ -235,10 +233,6 @@ public class CodeBuildService {
         // 设置登陆远程仓库的用户信息
         AuthConfig authConfig = new AuthConfig().withRegistryAddress(repository)
                 .withUsername(param.getUser()).withPassword(param.getPassword());
-        AuthResponse authResponse = dockerClient.authCmd().withAuthConfig(authConfig).exec();
-        String status = authResponse.getStatus();
-        log.info("docker login status={}", status);
-
         AuthConfigurations authConfigs = new AuthConfigurations();
         authConfigs.addConfig(authConfig);
         dockerClient.buildImageCmd().withDockerfile(dockerfile)

@@ -87,7 +87,8 @@ public class MicroserviceService {
                                ITestCaseRepository testCaseRepository, IMemberRepository memberRepository,
                                IClientInvoker clientInvoker, IServiceApiRepository serviceApiRepository,
                                IFeatureRepository featureRepository, IExecutePointRepository executePointRepository,
-                               IExecuteTemplateRepository executeTemplateRepository, IBuildToolRepository buildToolRepository) {
+                               IExecuteTemplateRepository executeTemplateRepository,
+                               IBuildToolRepository buildToolRepository) {
         this.microServiceRepository = microServiceRepository;
         this.uniqueIdService = uniqueIdService;
         this.authService = authService;
@@ -110,7 +111,8 @@ public class MicroserviceService {
 
     public PageSize<ServiceDto> getServices(Integer pageNo, Integer size, String name) {
         String currentUserId = authService.getCurrentUserId();
-        List<ResourceMemberBO> resourceMembers = memberRepository.getByRelationMember(currentUserId, MemberType.SERVICE_MEMBER.getType());
+        List<ResourceMemberBO> resourceMembers = memberRepository.getByRelationMember(currentUserId,
+                MemberType.SERVICE_MEMBER.getType());
         if (CollectionUtils.isEmpty(resourceMembers)) {
             return new PageSize<>();
         }
@@ -211,12 +213,18 @@ public class MicroserviceService {
             log.info("can not find service = {}", serviceId);
             throw new ApiException(ErrorCode.NOT_FOUND_SERVICE);
         }
+        List<String> caseIds = testCaseRepository.getServiceCases(serviceId).stream().map(TestCaseBO::getTestCaseId)
+                .collect(Collectors.toList());
+        long featureCount = featureRepository.getFeatureByCases(caseIds).stream().filter(featureInfoBO ->
+                        Objects.equals(featureInfoBO.getFeatureType(), FeatureType.ITEM.getType()))
+                .count();
         List<ServiceApiBO> serviceApiList =
                 serviceApiRepository.getApiByService(serviceId).stream().filter(api -> Objects.equals(ApiType.API.getType(), api.getApiType())).collect(Collectors.toList());
 
         Map<Boolean, List<ServiceApiBO>> serviceApiPartMap = getServiceApiPartMap(serviceId, serviceApiList);
         Integer serviceApiCount = serviceApiList.size();
-        return new ServiceStaticsDto(serviceApiCount, microserviceBO.getApiCoverage(), serviceApiPartMap.get(false));
+        return new ServiceStaticsDto(serviceApiCount, (int) featureCount, microserviceBO.getApiCoverage(),
+                serviceApiPartMap.get(false));
     }
 
     public Map<Boolean, List<ServiceApiBO>> getServiceApiPartMap(String serviceId, List<ServiceApiBO> serviceApiList) {
@@ -236,7 +244,8 @@ public class MicroserviceService {
     }
 
     private List<ExecuteTemplateBO> getServiceAllExecuteTemplate(String serviceId) {
-        List<String> caseIds = testCaseRepository.getServiceCases(serviceId).stream().map(TestCaseBO::getTestCaseId).collect(Collectors.toList());
+        List<String> caseIds =
+                testCaseRepository.getServiceCases(serviceId).stream().map(TestCaseBO::getTestCaseId).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(caseIds)) {
             return Collections.emptyList();
         }
@@ -247,7 +256,8 @@ public class MicroserviceService {
         }
 
         List<ExecutePointBO> executePointList = executePointRepository.getPointsByFeatureIds(featureIds);
-        List<String> templateIds = executePointList.stream().map(ExecutePointBO::getTemplateId).distinct().collect(Collectors.toList());
+        List<String> templateIds =
+                executePointList.stream().map(ExecutePointBO::getTemplateId).distinct().collect(Collectors.toList());
         List<ExecuteTemplateBO> templateList = executeTemplateRepository.getTemplateByIds(templateIds).stream()
                 .filter(executeTemplate -> Objects.equals(executeTemplate.getInvokeType(), InvokerType.HTTP.getType())
                         || Objects.equals(executeTemplate.getInvokeType(),
@@ -257,14 +267,14 @@ public class MicroserviceService {
         //将if和for包含的模版也统计
         List<ExecuteTemplateBO> specialTemplates =
                 executePointList.stream().filter(executePointBO -> Objects.equals(executePointBO.getExecuteType(),
-                        TemplateType.IF.getType()) || Objects.equals(executePointBO.getExecuteType(),
-                        TemplateType.FOR.getType())).map(pointBO -> pointBO.getExecutorUnit().getExecutePoints()).flatMap(List::stream)
-                .filter(Objects::nonNull).map(point -> {
-                    ExecuteTemplateBO executeTemplateBO = new ExecuteTemplateBO();
-                    executeTemplateBO.setService(point.getExecutorUnit().getService());
-                    executeTemplateBO.setMethod(point.getExecutorUnit().getMethod());
-                    return executeTemplateBO;
-                }).collect(Collectors.toList());
+                                TemplateType.IF.getType()) || Objects.equals(executePointBO.getExecuteType(),
+                                TemplateType.FOR.getType())).map(pointBO -> pointBO.getExecutorUnit().getExecutePoints()).flatMap(List::stream)
+                        .filter(Objects::nonNull).map(point -> {
+                            ExecuteTemplateBO executeTemplateBO = new ExecuteTemplateBO();
+                            executeTemplateBO.setService(point.getExecutorUnit().getService());
+                            executeTemplateBO.setMethod(point.getExecutorUnit().getMethod());
+                            return executeTemplateBO;
+                        }).collect(Collectors.toList());
         templateList.addAll(specialTemplates);
         return templateList;
     }
@@ -302,7 +312,7 @@ public class MicroserviceService {
         ToolVersionDto toolVersionDto = OrikaUtil.convert(systemBuildDto, ToolVersionDto.class);
         List<String> loadErrorClients = clientInvoker.loadBuildTool(toolVersionDto).stream()
                 .filter(result -> !result.getSuccess()).map(ToolLoadResult::getNodeIP).collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(loadErrorClients)){
+        if (CollectionUtils.isNotEmpty(loadErrorClients)) {
             log.info("client load tool error list={}", loadErrorClients);
             throw new CommonException(ErrorCode.LOAD_CLIENT_BUILD_TOOL_ERROR, String.join(",", loadErrorClients));
         }
