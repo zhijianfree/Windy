@@ -4,18 +4,18 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zj.common.enums.ProcessStatus;
 import com.zj.common.entity.dto.PageSize;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.bo.feature.TaskRecordBO;
-import com.zj.domain.entity.po.feature.FeatureHistory;
 import com.zj.domain.entity.po.feature.TaskRecord;
 import com.zj.domain.mapper.feeature.TaskRecordMapper;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author guyuelan
@@ -66,7 +66,7 @@ public class TaskRecordRepository extends ServiceImpl<TaskRecordMapper, TaskReco
   }
 
   @Override
-  public List<TaskRecordBO> getTaskRecordsOrderByTime(String taskId) {
+  public List<TaskRecordBO> getTaskRecords(String taskId) {
     List<TaskRecord> taskRecords = list(
         Wrappers.lambdaQuery(TaskRecord.class).eq(TaskRecord::getTaskId, taskId)
             .orderByDesc(TaskRecord::getCreateTime));

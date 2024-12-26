@@ -18,8 +18,8 @@ public class PipelineStageService{
     this.pipelineStageRepository = pipelineStageRepository;
   }
 
-  public void deletePipelineStages(List<String> notExistStages) {
-    pipelineStageRepository.deletePipelineStages(notExistStages);
+  public boolean deletePipelineStages(List<String> notExistStages) {
+    return pipelineStageRepository.deletePipelineStages(notExistStages);
   }
 
   public PipelineStageBO getPipelineStage(String stageId) {

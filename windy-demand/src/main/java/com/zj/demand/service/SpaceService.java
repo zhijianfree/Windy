@@ -6,6 +6,7 @@ import com.zj.common.exception.ErrorCode;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.demand.entity.SpaceDto;
+import com.zj.domain.entity.bo.demand.BugBO;
 import com.zj.domain.entity.bo.demand.DemandBO;
 import com.zj.domain.entity.bo.demand.IterationBO;
 import com.zj.domain.entity.bo.demand.SpaceBO;
@@ -77,8 +78,8 @@ public class SpaceService {
             throw new ApiException(ErrorCode.SPACE_HAS_NOT_COMPLETE_DEMAND);
         }
 
-        bugRepository.getSpaceNotHandleBugs(spaceId);
-        if (CollectionUtils.isNotEmpty(notHandleDemands)) {
+        List<BugBO> notHandleBugs = bugRepository.getSpaceNotHandleBugs(spaceId);
+        if (CollectionUtils.isNotEmpty(notHandleBugs)) {
             log.info("space has bugs can not delete spaceId={}", spaceId);
             throw new ApiException(ErrorCode.SPACE_HAS_NOT_COMPLETE_BUG);
         }

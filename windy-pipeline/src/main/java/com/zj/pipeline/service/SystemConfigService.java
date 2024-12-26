@@ -72,11 +72,11 @@ public class SystemConfigService {
   }
 
   public ImageRepositoryVo getImageRepository() {
-    return systemConfigRepository.getRepository();
+    return systemConfigRepository.getImageRepository();
   }
 
   public boolean updateRepository(ImageRepositoryVo repository) {
-    return systemConfigRepository.updateRepository(repository);
+    return systemConfigRepository.updateImageRepository(repository);
   }
 
   public DefaultPipelineVo getDefaultPipeline() {

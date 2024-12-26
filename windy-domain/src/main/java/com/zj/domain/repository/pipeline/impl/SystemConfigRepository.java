@@ -81,13 +81,13 @@ public class SystemConfigRepository extends ServiceImpl<SystemConfigMapper, Syst
     }
 
     @Override
-    public ImageRepositoryVo getRepository() {
+    public ImageRepositoryVo getImageRepository() {
         ImageRepositoryVo imageRepositoryVo = getGlobalConfig(IMAGE_REPOSITORY, ImageRepositoryVo.class);
         return Optional.ofNullable(imageRepositoryVo).orElse(new ImageRepositoryVo());
     }
 
     @Override
-    public boolean updateRepository(ImageRepositoryVo imageRepositoryVo) {
+    public boolean updateImageRepository(ImageRepositoryVo imageRepositoryVo) {
         return updateGlobalConfig(JSON.toJSONString(imageRepositoryVo), IMAGE_REPOSITORY);
     }
 
@@ -98,7 +98,7 @@ public class SystemConfigRepository extends ServiceImpl<SystemConfigMapper, Syst
     }
 
     @Override
-    public Boolean updateMavenConfig(GenerateMavenConfigDto mavenConfig) {
+    public boolean updateMavenConfig(GenerateMavenConfigDto mavenConfig) {
         return updateGlobalConfig(JSON.toJSONString(mavenConfig), MAVEN_REPOSITORY);
     }
 

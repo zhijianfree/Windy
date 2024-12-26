@@ -18,6 +18,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -108,18 +109,13 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
     }
 
     @Override
-    public Integer countIteration(String iterationId) {
-        return count(Wrappers.lambdaQuery(Bug.class).eq(Bug::getIterationId, iterationId));
-    }
-
-    @Override
     public List<BugBO> getIterationBugs(String iterationId) {
         List<Bug> list = list(Wrappers.lambdaQuery(Bug.class).eq(Bug::getIterationId, iterationId));
         return OrikaUtil.convertList(list, BugBO.class);
     }
 
     @Override
-    public List<BugBO> getBugsByName(String queryName) {
+    public List<BugBO> getBugsFuzzyByName(String queryName) {
         List<Bug> list = list(Wrappers.lambdaQuery(Bug.class).like(Bug::getBugName, queryName));
         return OrikaUtil.convertList(list, BugBO.class);
     }
@@ -140,6 +136,9 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
 
     @Override
     public List<BugBO> getNotCompleteBugs(List<String> bugIds) {
+        if (CollectionUtils.isEmpty(bugIds)) {
+            return Collections.emptyList();
+        }
         List<Bug> list = list(Wrappers.lambdaQuery(Bug.class).in(Bug::getBugId, bugIds).in(Bug::getStatus,
                 BugStatus.getNotHandleBugs().stream().map(BugStatus::getType).collect(Collectors.toList())));
         return OrikaUtil.convertList(list, BugBO.class);

@@ -244,10 +244,10 @@ public class FeatureExecuteProxy implements IStopEventListener {
             featureTaskMap.remove(taskRecordId);
         }
 
-        log.info("stop pipeline task taskId={} taskRecordId={}", featureTask.getTaskId(),
-                featureTask.getTaskRecordId());
-        taskRecordRepository.updateRecordStatus(taskRecordId, ProcessStatus.STOP.getType());
-        featureHistoryRepository.stopTaskFeatures(taskRecordId, ProcessStatus.STOP);
+        boolean updateStatus = taskRecordRepository.updateRecordStatus(taskRecordId, ProcessStatus.STOP.getType());
+        boolean stopResult = featureHistoryRepository.stopTaskFeatures(taskRecordId, ProcessStatus.STOP);
+        log.info("stop pipeline task taskId={} taskRecordId={} updateStatus={} stopResult={}", featureTask.getTaskId(),
+                featureTask.getTaskRecordId(), updateStatus, stopResult);
     }
 
     public Integer getTaskSize() {

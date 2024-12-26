@@ -53,7 +53,7 @@ public class TaskInfoService {
   }
 
   public PageSize<TaskInfoBO> getTaskList(String name, Integer pageNum, Integer size) {
-    IPage<TaskInfo> taskInfoIPage = taskRepository.getTaskList(name, pageNum, size);
+    IPage<TaskInfo> taskInfoIPage = taskRepository.getFuzzTaskList(name, pageNum, size);
     PageSize<TaskInfoBO> pageSize = new PageSize<>();
     pageSize.setTotal(taskInfoIPage.getTotal());
     if (CollectionUtils.isEmpty(taskInfoIPage.getRecords())) {

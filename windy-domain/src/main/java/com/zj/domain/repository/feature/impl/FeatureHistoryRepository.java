@@ -88,16 +88,14 @@ public class FeatureHistoryRepository extends
   @Override
   @Transactional
   public boolean deleteByRecordId(String taskRecordId) {
-    List<FeatureHistory> histories = list(
-        Wrappers.lambdaQuery(FeatureHistory.class).eq(FeatureHistory::getRecordId, taskRecordId));
+    List<FeatureHistory> histories = list(Wrappers.lambdaQuery(FeatureHistory.class)
+            .eq(FeatureHistory::getRecordId, taskRecordId));
+    if (CollectionUtils.isEmpty(histories)) {
+      return false;
+    }
     List<String> historyIds = histories.stream().map(FeatureHistory::getHistoryId)
         .collect(Collectors.toList());
     boolean deleteRecode = executeRecordRepository.batchDeleteByHistoryId(historyIds);
-
-    if (CollectionUtils.isEmpty(historyIds)) {
-      return deleteRecode;
-    }
-
     boolean result = remove(
         Wrappers.lambdaQuery(FeatureHistory.class).in(FeatureHistory::getHistoryId, historyIds));
     log.info("delete testCase history  testcaseId={} history={} recode={} delete ", taskRecordId,
@@ -116,18 +114,11 @@ public class FeatureHistoryRepository extends
   }
 
   @Override
-  public List<FeatureHistoryBO> getTaskRecordFeatures(String taskRecordId) {
-    List<FeatureHistory> histories = list(
-        Wrappers.lambdaQuery(FeatureHistory.class).eq(FeatureHistory::getRecordId, taskRecordId));
-    return OrikaUtil.convertList(histories, FeatureHistoryBO.class);
-  }
-
-  @Override
-  public void stopTaskFeatures(String taskRecordId, ProcessStatus processStatus) {
+  public boolean stopTaskFeatures(String taskRecordId, ProcessStatus processStatus) {
     FeatureHistory featureHistory = new FeatureHistory();
     featureHistory.setExecuteStatus(processStatus.getType());
     featureHistory.setUpdateTime(System.currentTimeMillis());
-    update(featureHistory,
+    return update(featureHistory,
         Wrappers.lambdaUpdate(FeatureHistory.class).eq(FeatureHistory::getRecordId, taskRecordId)
             .eq(FeatureHistory::getExecuteStatus, ProcessStatus.RUNNING.getType()));
   }

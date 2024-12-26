@@ -120,11 +120,6 @@ public class DemandService {
         return demandRepository.deleteDemand(demandId);
     }
 
-    public PageSize<DemandBO> getRelatedDemands(Integer page, Integer size) {
-        String currentUserId = authService.getCurrentUserId();
-        return demandRepository.getRelatedDemands(currentUserId, page, size);
-    }
-
     public List<BusinessStatusBO> getDemandStatuses() {
         return businessStatusRepository.getDemandStatuses();
     }

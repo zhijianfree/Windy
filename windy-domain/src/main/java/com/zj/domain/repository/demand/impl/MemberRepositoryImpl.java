@@ -64,14 +64,17 @@ public class MemberRepositoryImpl extends ServiceImpl<ResourceMemberMapper, Reso
     }
 
     @Override
-    public boolean deleteResourceMember(String resourceId, String userId) {
+    public boolean deleteResourceMember(String resourceId, String relationId) {
         return remove(Wrappers.lambdaQuery(ResourceMember.class).eq(ResourceMember::getResourceId,
-                resourceId).eq(ResourceMember::getRelationId, userId));
+                resourceId).eq(ResourceMember::getRelationId, relationId));
     }
 
     @Override
     @Transactional
     public Boolean batchUpdateMembers(List<ResourceMemberBO> resourceMembers, String memberType) {
+        if (CollectionUtils.isEmpty(resourceMembers)) {
+            return false;
+        }
         ResourceMemberBO resourceMemberBO = resourceMembers.get(0);
         boolean removeResult = remove(Wrappers.lambdaQuery(ResourceMember.class).eq(ResourceMember::getResourceId,
                 resourceMemberBO.getResourceId()).eq(ResourceMember::getMemberType, memberType));

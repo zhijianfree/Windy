@@ -18,6 +18,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -85,20 +86,6 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
     }
 
     @Override
-    public PageSize<DemandBO> getRelatedDemands(String proposer, Integer pageNo, Integer size) {
-        IPage<Demand> pageObj = new Page<>(pageNo, size);
-        IPage<Demand> recordPage = page(pageObj, Wrappers.lambdaQuery(Demand.class).eq(Demand::getProposer, proposer)
-                .orderByDesc(Demand::getCreateTime));
-
-        return convertPageSize(recordPage);
-    }
-
-    @Override
-    public Integer countIteration(String iterationId) {
-        return count(Wrappers.lambdaUpdate(Demand.class).eq(Demand::getIterationId, iterationId));
-    }
-
-    @Override
     public List<DemandBO> getIterationDemand(String iterationId) {
         List<Demand> list =
                 list(Wrappers.lambdaUpdate(Demand.class).eq(Demand::getIterationId, iterationId)
@@ -107,7 +94,7 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
     }
 
     @Override
-    public List<DemandBO> getDemandsByName(String queryName) {
+    public List<DemandBO> getDemandsByFuzzName(String queryName) {
         List<Demand> list = list(Wrappers.lambdaUpdate(Demand.class).like(Demand::getDemandName, queryName));
         return OrikaUtil.convertList(list, DemandBO.class);
     }
@@ -130,10 +117,12 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
 
     @Override
     public List<DemandBO> getNotCompleteDemandByIds(List<String> demandIds) {
-        List<Demand> list =
-                list(Wrappers.lambdaUpdate(Demand.class).in(Demand::getDemandId, demandIds).in(Demand::getStatus,
-                        DemandStatus.getNotHandleDemands().stream().map(DemandStatus::getType)
-                                .collect(Collectors.toList())));
+        if (CollectionUtils.isEmpty(demandIds)) {
+            return Collections.emptyList();
+        }
+        List<Demand> list = list(Wrappers.lambdaUpdate(Demand.class).in(Demand::getDemandId, demandIds)
+                .in(Demand::getStatus, DemandStatus.getNotHandleDemands().stream().map(DemandStatus::getType)
+                        .collect(Collectors.toList())));
         return OrikaUtil.convertList(list, DemandBO.class);
     }
 

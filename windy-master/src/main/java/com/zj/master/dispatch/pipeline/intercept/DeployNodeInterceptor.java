@@ -113,7 +113,7 @@ public class DeployNodeInterceptor implements INodeExecuteInterceptor {
                 subDispatchLogBO.getLogId());
         String nodeId = subDispatchLogBO.getExecuteId();
         String pipelineHistoryId = dispatchLog.getSourceRecordId();
-        NodeRecordBO nodeRecord = nodeRecordRepository.getRecordByNodeAndHistory(pipelineHistoryId,
+        NodeRecordBO nodeRecord = nodeRecordRepository.getRecordsByNodeIdAndHistory(pipelineHistoryId,
                 nodeId);
         Map<String, Object> context = nodeRecord.getPipelineContext();
         if (Objects.nonNull(context)) {

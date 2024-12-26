@@ -14,26 +14,82 @@ import java.util.List;
  */
 public interface ISystemConfigRepository {
 
+  /**
+   * 获取所有配置
+   * @return 配置列表
+   */
   List<SystemConfigBO> getAllConfigs();
 
+  /**
+   * 保存配置
+   * @param systemConfigBO 配置信息
+   * @return 是否成功
+   */
   boolean saveConfig(SystemConfigBO systemConfigBO);
 
+  /**
+   * 更新配置
+   * @param systemConfigBO 配置信息
+   * @return 是否成功
+   */
   boolean updateConfig(SystemConfigBO systemConfigBO);
 
+  /**
+   * 删除配置
+   * @param configId 配置ID
+   * @return 是否成功
+   */
   boolean deleteConfig(String configId);
 
+  /**
+   * 获取配置
+   * @param configId 配置ID
+   * @return 配置信息
+   */
   SystemConfigBO getSystemConfig(String configId);
 
+  /**
+   * 获取Git访问配置
+   * @return 系统Git配置信息
+   */
   GitAccessInfo getGitAccess();
+
+  /**
+   * 更新Git访问配置
+   * @param gitAccess Git配置信息
+   * @return 是否成功
+   */
   boolean updateGitAccess(GitAccessInfo gitAccess);
 
-  ImageRepositoryVo getRepository();
+  /**
+   * 获取镜像仓库配置
+   * @return 镜像仓库配置信息
+   */
+  ImageRepositoryVo getImageRepository();
 
-  boolean updateRepository(ImageRepositoryVo imageRepositoryVo);
+  /**
+   * 更新镜像仓库配置
+   * @param imageRepositoryVo 镜像仓库配置信息
+   * @return 是否成功
+   */
+  boolean updateImageRepository(ImageRepositoryVo imageRepositoryVo);
 
+  /**
+   * 获取默认流水线配置
+   * @return 默认流水线配置信息
+   */
   DefaultPipelineVo getDefaultPipeline();
 
-  Boolean updateMavenConfig(GenerateMavenConfigDto mavenConfig);
+  /**
+   * 更新二方包maven配置
+   * @param mavenConfig maven配置信息
+   * @return 是否成功
+   */
+  boolean updateMavenConfig(GenerateMavenConfigDto mavenConfig);
 
+  /**
+   * 获取二方包maven配置
+   * @return maven配置信息
+   */
   GenerateMavenConfigDto getMavenConfig();
 }

@@ -97,9 +97,9 @@ public class CodeChangeService {
 
     public List<RelationDemandBug> queryRelationIds(String queryName) {
         CompletableFuture<List<BugBO>> bugFuture =
-                CompletableFuture.supplyAsync(() -> bugRepository.getBugsByName(queryName));
+                CompletableFuture.supplyAsync(() -> bugRepository.getBugsFuzzyByName(queryName));
         CompletableFuture<List<DemandBO>> demandFuture =
-                CompletableFuture.supplyAsync(() -> demandRepository.getDemandsByName(queryName));
+                CompletableFuture.supplyAsync(() -> demandRepository.getDemandsByFuzzName(queryName));
         CompletableFuture<List<WorkTaskBO>> workFuture =
                 CompletableFuture.supplyAsync(() -> workTaskRepository.getWorkTaskByName(queryName));
         CompletableFuture.allOf(bugFuture, demandFuture, workFuture).join();
@@ -122,13 +122,11 @@ public class CodeChangeService {
         return Collections.emptyList();
     }
 
-    private MicroserviceBO checkServiceExist(String serviceId) {
+    private void checkServiceExist(String serviceId) {
         MicroserviceBO serviceDetail = serviceRepository.queryServiceDetail(serviceId);
         if (Objects.isNull(serviceDetail)) {
             log.warn("can not find serviceId ={}", serviceId);
             throw new ApiException(ErrorCode.NOT_FOUND_SERVICE);
         }
-
-        return serviceDetail;
     }
 }

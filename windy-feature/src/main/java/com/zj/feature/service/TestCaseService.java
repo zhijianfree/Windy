@@ -82,8 +82,8 @@ public class TestCaseService {
     public String createTestCase(TestCaseBO testCaseBO) {
         String testCaseId = uniqueIdService.getUniqueId();
         testCaseBO.setTestCaseId(testCaseId);
-        testCaseRepository.saveCase(testCaseBO);
-        return testCaseId;
+        boolean saveCase = testCaseRepository.saveCase(testCaseBO);
+        return saveCase ? testCaseId : "";
     }
 
     public Boolean updateTestCase(TestCaseBO testCaseBO) {

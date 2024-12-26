@@ -106,7 +106,7 @@ public class TaskRecordService {
     }
 
     public List<TaskRecordBO> getTaskRecordsByTaskId(String taskId) {
-        return taskRecordRepository.getTaskRecordsOrderByTime(taskId);
+        return taskRecordRepository.getTaskRecords(taskId);
     }
 
     public Boolean stopTaskRecord(String recordId) {

@@ -1,9 +1,9 @@
 package com.zj.pipeline.service;
 
+import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.domain.entity.bo.pipeline.BindBranchBO;
 import com.zj.domain.entity.bo.pipeline.PipelineHistoryBO;
 import com.zj.domain.entity.bo.pipeline.PublishBindBO;
@@ -38,15 +38,17 @@ public class PublishService {
     }
 
     public Boolean createPublish(PublishBindBO publishBindBO) {
-        BindBranchBO bindBranch = bindBranchRepository.getPipelineBindBranch(
-                publishBindBO.getPipelineId());
+        BindBranchBO bindBranch = bindBranchRepository.getPipelineBindBranch(publishBindBO.getPipelineId());
         if (Objects.isNull(bindBranch)) {
+            log.info("pipeline not bind branch, pipelineId={}", publishBindBO.getPipelineId());
             throw new ApiException(ErrorCode.PIPELINE_NOT_BIND);
         }
 
-        PublishBindBO serviceBranch = publishBindRepository.getServiceBranch(
-                publishBindBO.getServiceId(), bindBranch.getGitBranch());
+        PublishBindBO serviceBranch = publishBindRepository.getServiceBranch(publishBindBO.getServiceId(),
+                bindBranch.getGitBranch());
         if (Objects.nonNull(serviceBranch)) {
+            log.info("service branch publish info exist, serviceId={}, branch={}", publishBindBO.getServiceId(),
+                    bindBranch.getGitBranch());
             throw new ApiException(ErrorCode.SERVICE_BRANCH_PUBLISH_EXIST);
         }
 

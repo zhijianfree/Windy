@@ -41,7 +41,7 @@ public class BindBranchRepository extends ServiceImpl<BindBranchMapper, BindBran
   }
 
   @Override
-  public Boolean updateGitBranch(BindBranchBO bindBranchBO) {
+  public boolean updateGitBranch(BindBranchBO bindBranchBO) {
     BindBranch update = OrikaUtil.convert(bindBranchBO, BindBranch.class);
     update.setUpdateTime(System.currentTimeMillis());
     return update(update, Wrappers.lambdaUpdate(BindBranch.class)
@@ -49,7 +49,7 @@ public class BindBranchRepository extends ServiceImpl<BindBranchMapper, BindBran
   }
 
   @Override
-  public Boolean deleteGitBranch(String bindId) {
+  public boolean deleteGitBranch(String bindId) {
     return remove(Wrappers.lambdaQuery(BindBranch.class).eq(BindBranch::getBindId, bindId));
   }
 

@@ -104,7 +104,8 @@ public class PipelineService {
 
         //如果node节点未变更则直接退出
         if (CollectionUtils.isNotEmpty(notExistNodes)) {
-            pipelineNodeService.deleteNodeIds(notExistNodes);
+            boolean deleteNodeIds = pipelineNodeService.deleteNodeIds(notExistNodes);
+            log.info("delete node result={}", deleteNodeIds);
         }
 
         List<String> newStageIds = stageList.stream().map(PipelineStageBO::getStageId)
@@ -113,7 +114,8 @@ public class PipelineService {
                 .map(PipelineStageBO::getStageId).filter(stageId -> !newStageIds.contains(stageId))
                 .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(notExistStages)) {
-            pipelineStageService.deletePipelineStages(notExistStages);
+            boolean deletePipelineStages = pipelineStageService.deletePipelineStages(notExistStages);
+            log.info("delete stage result={}", deletePipelineStages);
         }
     }
 
@@ -132,7 +134,8 @@ public class PipelineService {
 
             //修改stage节点
             stageDto.setSortOrder(sortOrder.incrementAndGet());
-            pipelineStageService.updateStage(stageDto);
+            boolean updateStage = pipelineStageService.updateStage(stageDto);
+            log.info("update stage result={}", updateStage);
 
             //修改node节点
             List<PipelineNodeBO> stageDtoNodes = stageDto.getNodes();
@@ -147,7 +150,7 @@ public class PipelineService {
 
 
     public List<PipelineBO> listPipelines(String serviceId) {
-        return pipelineRepository.listPipelines(serviceId);
+        return pipelineRepository.getServicePipelines(serviceId);
     }
 
     @Transactional

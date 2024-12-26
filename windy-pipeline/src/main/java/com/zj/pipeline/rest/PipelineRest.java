@@ -3,6 +3,8 @@ package com.zj.pipeline.rest;
 import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.common.exception.ErrorCode;
 import com.zj.domain.entity.bo.pipeline.PipelineBO;
+import com.zj.domain.entity.vo.Create;
+import com.zj.domain.entity.vo.Update;
 import com.zj.pipeline.entity.dto.PipelineDto;
 import com.zj.pipeline.service.PipelineService;
 import org.springframework.validation.annotation.Validated;
@@ -40,7 +42,7 @@ public class PipelineRest {
 
     @ResponseBody
     @PostMapping("")
-    public ResponseMeta<String> createPipeline(@Validated @RequestBody PipelineDto pipelineDto) {
+    public ResponseMeta<String> createPipeline(@Validated(Create.class) @RequestBody PipelineDto pipelineDto) {
         return new ResponseMeta<String>(ErrorCode.SUCCESS, pipelineService.createPipeline(pipelineDto));
     }
 
@@ -48,7 +50,7 @@ public class PipelineRest {
     @PutMapping("/{service}/{pipelineId}")
     public ResponseMeta<Boolean> updatePipeline(@PathVariable("service") String service,
                                                 @PathVariable("pipelineId") String pipelineId,
-                                                @RequestBody PipelineDto pipelineDto) {
+                                                @Validated(Update.class) @RequestBody PipelineDto pipelineDto) {
         return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, pipelineService.updatePipeline(service, pipelineId,
                 pipelineDto));
     }

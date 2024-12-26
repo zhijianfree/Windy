@@ -10,9 +10,11 @@ import com.zj.domain.entity.po.demand.Iteration;
 import com.zj.domain.mapper.demand.IterationMapper;
 import com.zj.domain.repository.demand.IMemberRepository;
 import com.zj.domain.repository.demand.IterationRepository;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +29,9 @@ public class IterationRepositoryImpl extends ServiceImpl<IterationMapper, Iterat
 
     @Override
     public List<IterationBO> getIterationList(String spaceId, List<String> iterationIds) {
+        if (CollectionUtils.isEmpty(iterationIds)) {
+            return Collections.emptyList();
+        }
         List<Iteration> iterations = list(Wrappers.lambdaQuery(Iteration.class).in(Iteration::getIterationId,
                         iterationIds)
                 .eq(Iteration::getSpaceId, spaceId).orderByDesc(Iteration::getCreateTime));

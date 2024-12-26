@@ -44,16 +44,4 @@ public class PluginRepository extends ServiceImpl<PluginInfoMapper, PluginInfo> 
     return update(pluginInfo,
         Wrappers.lambdaQuery(PluginInfo.class).eq(PluginInfo::getPluginId, pluginId));
   }
-
-  @Override
-  public boolean update(PluginInfoBO pluginInfoBO) {
-    return false;
-  }
-
-  @Override
-  public PluginInfoBO getPlugin(String pluginId) {
-    PluginInfo pluginInfo = getOne(
-        Wrappers.lambdaQuery(PluginInfo.class).eq(PluginInfo::getPluginId, pluginId));
-    return OrikaUtil.convert(pluginInfo, PluginInfoBO.class);
-  }
 }

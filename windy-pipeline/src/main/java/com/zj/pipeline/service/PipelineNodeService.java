@@ -18,8 +18,8 @@ public class PipelineNodeService {
   }
 
 
-  public void deleteNodeIds(List<String> nodeIds) {
-    pipelineNodeRepository.deleteNodeIds(nodeIds);
+  public boolean deleteNodeIds(List<String> nodeIds) {
+    return pipelineNodeRepository.deleteNodeIds(nodeIds);
   }
 
   public void updateNode(PipelineNodeBO dto) {

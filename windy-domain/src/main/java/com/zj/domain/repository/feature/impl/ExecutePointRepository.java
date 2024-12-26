@@ -12,9 +12,11 @@ import com.zj.domain.entity.po.feature.ExecutePoint;
 import com.zj.domain.mapper.feeature.ExecutePointMapper;
 import com.zj.domain.repository.feature.IExecutePointRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -70,6 +72,9 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
 
   @Override
   public List<ExecutePointBO> getPointsByFeatureIds(List<String> featureIds) {
+    if (CollectionUtils.isEmpty(featureIds)) {
+      return Collections.emptyList();
+    }
     List<ExecutePoint> pointList = list(
         Wrappers.lambdaQuery(ExecutePoint.class).in(ExecutePoint::getFeatureId, featureIds)
             .orderByDesc(ExecutePoint::getCreateTime));
@@ -88,6 +93,9 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
   @Override
   @Transactional
   public boolean batchSavePoints(List<ExecutePointBO> executePoints) {
+    if (CollectionUtils.isEmpty(executePoints)) {
+      return false;
+    }
     List<ExecutePoint> pointList = convertExecutePointList(executePoints);
     return saveBatch(pointList);
   }
@@ -95,8 +103,11 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
 
   @Override
   @Transactional
-  public boolean updateBatch(List<ExecutePointBO> executePointBOList) {
-    List<ExecutePoint> pointList = convertExecutePointList(executePointBOList);
+  public boolean updateBatch(List<ExecutePointBO> executePointList) {
+    if (CollectionUtils.isEmpty(executePointList)) {
+      return false;
+    }
+    List<ExecutePoint> pointList = convertExecutePointList(executePointList);
     return updateBatchById(pointList);
   }
 

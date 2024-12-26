@@ -78,6 +78,9 @@ public class IWorkTaskRepositoryImpl extends ServiceImpl<WorkTaskMapper, WorkTas
 
     @Override
     public List<WorkTaskBO> getNotCompleteWorkTasks(List<String> taskIds) {
+        if (CollectionUtils.isEmpty(taskIds)) {
+            return Collections.emptyList();
+        }
         List<WorkTask> list =
                 list(Wrappers.lambdaUpdate(WorkTask.class).in(WorkTask::getTaskId, taskIds).in(WorkTask::getStatus,
                         WorkTaskStatus.getNotHandleWorks().stream().map(WorkTaskStatus::getType)

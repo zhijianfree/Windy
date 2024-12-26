@@ -181,6 +181,10 @@ public class FeatureService {
         testCase.setTestCaseName(testCase.getTestCaseName() + COPY_STRING);
         String newCaseId = testCaseService.createTestCase(testCase);
         log.info("new caseId={} old case Id={}", newCaseId, copyCaseFeature.getTestCaseId());
+        if (StringUtils.isBlank(newCaseId)) {
+            log.info("create new case failed old case Id={}", copyCaseFeature.getTestCaseId());
+            throw new ApiException(ErrorCode.COPY_CASE_FAILED);
+        }
 
         List<FeatureInfoBO> featureList = featureRepository.queryFeatureList(copyCaseFeature.getFeatureIds());
         log.info("get feature list ={}", JSON.toJSONString(featureList));
