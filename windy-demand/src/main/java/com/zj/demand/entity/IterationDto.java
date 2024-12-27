@@ -17,7 +17,7 @@ public class IterationDto {
     @NotBlank(groups = Update.class)
     private String iterationId;
 
-    @Length(min = 10, max = 50)
+    @Length(min = 4, max = 50)
     @NotBlank(groups = Create.class)
     private String name;
 

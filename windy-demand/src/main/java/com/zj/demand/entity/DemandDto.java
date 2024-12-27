@@ -20,7 +20,7 @@ public class DemandDto {
     /**
      * 需求名称
      */
-    @Length(min = 10, max = 50)
+    @Length(min = 4, max = 50)
     @NotBlank(groups = Create.class)
     private String demandName;
 
