@@ -54,7 +54,7 @@ eureka:
     # client每隔30秒，向server请求可用服务清单。对于API网关类应用，可以适当降低时间间隔
     registry-fetch-interval-seconds: 90
     service-url:
-      defaultZone: ${eureka_zone}
+      defaultZone: ${EUREKA_ZONE}
 
 logging:
   level:
