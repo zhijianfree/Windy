@@ -179,6 +179,9 @@ public class MicroserviceService {
         if (CollectionUtils.isNotEmpty(serviceCases)) {
             throw new ApiException(ErrorCode.SERVICE_EXIST_FEATURE);
         }
+
+        boolean resourceMember = memberRepository.deleteResourceMemberByType(serviceId, MemberType.SERVICE_MEMBER);
+        log.info("delete service member result={}", resourceMember);
         return microServiceRepository.deleteService(serviceId);
     }
 

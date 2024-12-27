@@ -111,6 +111,9 @@ public class IterationService {
             log.info("iteration has demands can not delete iteration={}", iterationId);
             throw new ApiException(ErrorCode.ITERATION_HAS_NOT_COMPLETE_DEMAND);
         }
+        boolean deleteIterationUsers = memberRepository.deleteResourceMemberByType(iterationId,
+                MemberType.ITERATION_MEMBER);
+        log.info("delete iteration users result={}", deleteIterationUsers);
         return iterationRepository.deleteIteration(iterationId);
     }
 

@@ -69,4 +69,11 @@ public interface INodeRecordRepository {
    * @return 是否成功
    */
   boolean deleteRecordByHistoryId(String historyId);
+
+  /**
+   * 删除流水线节点执行记录
+   * @param nodeIds 节点ID列表
+   * @return 是否成功
+   */
+  boolean deleteRecordByNodeId(List<String> nodeIds);
 }

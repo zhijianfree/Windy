@@ -1,8 +1,13 @@
 # ************************************************************
+# Sequel Pro SQL dump
+# Version 4541
+#
+# http://www.sequelpro.com/
+# https://github.com/sequelpro/sequelpro
 #
 # Host: 127.0.0.1 (MySQL 5.7.44)
 # Database: windy
-# Generation Time: 2024-12-18 03:07:18 +0000
+# Generation Time: 2024-12-27 06:04:41 +0000
 # ************************************************************
 
 
@@ -35,7 +40,7 @@ CREATE TABLE `bind_branch` (
                                `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
                                PRIMARY KEY (`id`),
                                KEY `idx_pipeline_id` (`pipeline_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1869198625512976386 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -61,7 +66,7 @@ CREATE TABLE `bug` (
                        `tags` varchar(100) DEFAULT NULL COMMENT '标签',
                        `level` int(11) NOT NULL COMMENT 'bug严重级别',
                        `status` int(2) NOT NULL DEFAULT '1' COMMENT 'bug状态',
-                       `demand_id` varchar(64) DEFAULT NULL COMMENT '需求ID',
+                       `relation_id` varchar(64) DEFAULT NULL COMMENT '关联ID(需求ID)',
                        `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
                        `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
                        `iteration_id` varchar(64) DEFAULT NULL COMMENT '迭代ID',
@@ -87,16 +92,17 @@ CREATE TABLE `build_tool` (
                               `description` varchar(256) DEFAULT NULL,
                               `create_time` bigint(20) NOT NULL,
                               `update_time` bigint(20) DEFAULT NULL,
+                              `build_config` varchar(2000) DEFAULT NULL,
                               PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1857297275905867778 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 LOCK TABLES `build_tool` WRITE;
 /*!40000 ALTER TABLE `build_tool` DISABLE KEYS */;
 
-INSERT INTO `build_tool` (`id`, `tool_id`, `name`, `type`, `install_path`, `description`, `create_time`, `update_time`)
+INSERT INTO `build_tool` (`id`, `tool_id`, `name`, `type`, `install_path`, `description`, `create_time`, `update_time`, `build_config`)
 VALUES
-    (1,'44dd1c32dba94680823838d8475edf49','openjdk-11','Java','/usr/local/openjdk-11',NULL,1731552526809,1731552526809),
-    (2,'dbce81f924584ea7a609d739fdd90419','mvn-3.8.8','Maven','/opt/windy-client/maven',NULL,1731649152143,1731649152143);
+    (1,'44dd1c32dba94680823838d8475edf49','openjdk-11','Java','/usr/local/openjdk-11',NULL,1731552526809,1731552526809,NULL),
+    (2,'dbce81f924584ea7a609d739fdd90419','mvn-3.8.8','Maven','/opt/windy-client/maven',NULL,1731649152143,1734933608239,'[{\"userName\":\"public_nexus\",\"password\":\"tuya@8888\",\"repositoryUrl\":\"https://maven.tuya-inc.top/nexus/content/groups/public/\",\"repositoryId\":\"tuya-public\"},{\"repositoryId\":\"tuya-third\",\"repositoryUrl\":\"https://maven.tuya-inc.top/nexus/content/repositories/thirdparty/\",\"userName\":\"public_nexus\",\"password\":\"tuya@8888\"}]');
 
 /*!40000 ALTER TABLE `build_tool` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -116,7 +122,7 @@ CREATE TABLE `business_status` (
                                    `status_color` varchar(20) DEFAULT NULL COMMENT '状态颜色',
                                    `operate_type` int(2) DEFAULT '1' COMMENT '状态类型： 1 可变更状态 2 状态不可变更',
                                    PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 LOCK TABLES `business_status` WRITE;
 /*!40000 ALTER TABLE `business_status` DISABLE KEYS */;
@@ -221,7 +227,7 @@ CREATE TABLE `demand` (
                           `space_id` varchar(64) DEFAULT NULL COMMENT '空间ID',
                           PRIMARY KEY (`id`),
                           UNIQUE KEY `uniq_demand_id` (`demand_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1869004638177030147 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -245,7 +251,7 @@ CREATE TABLE `dispatch_log` (
                                 PRIMARY KEY (`id`),
                                 KEY `idx_log_id` (`log_id`),
                                 KEY `idx_source_id` (`source_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1869213816622940162 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -340,7 +346,7 @@ CREATE TABLE `execute_template` (
                                     `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
                                     `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
                                     PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1819277511253372931 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 LOCK TABLES `execute_template` WRITE;
 /*!40000 ALTER TABLE `execute_template` DISABLE KEYS */;
@@ -485,7 +491,7 @@ CREATE TABLE `microservice` (
                                 `api_coverage` int(4) DEFAULT NULL,
                                 PRIMARY KEY (`id`),
                                 UNIQUE KEY `uniq_service_name` (`service_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=1869198200420265987 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -503,7 +509,7 @@ CREATE TABLE `node_bind` (
                              `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
                              `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
                              PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 LOCK TABLES `node_bind` WRITE;
 /*!40000 ALTER TABLE `node_bind` DISABLE KEYS */;
@@ -559,7 +565,7 @@ CREATE TABLE `node_record` (
                                PRIMARY KEY (`id`),
                                KEY `idx_record_id` (`record_id`),
                                KEY `idx_history_id` (`history_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1869213901654065155 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -578,7 +584,7 @@ CREATE TABLE `optimistic_lock` (
                                    `version` bigint(20) DEFAULT NULL COMMENT '乐观锁版本',
                                    PRIMARY KEY (`id`),
                                    UNIQUE KEY `unique_biz_code` (`biz_code`)
-) ENGINE=InnoDB AUTO_INCREMENT=1869065015648059395 DEFAULT CHARSET=utf8mb4 COMMENT='分布式乐观锁';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='分布式乐观锁';
 
 
 
@@ -601,7 +607,7 @@ CREATE TABLE `pipeline` (
                             PRIMARY KEY (`id`),
                             UNIQUE KEY `unique_pipeline_id` (`pipeline_id`),
                             KEY `idx_service_id` (`service_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1869198351838834691 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -629,7 +635,7 @@ CREATE TABLE `pipeline_action` (
                                    PRIMARY KEY (`id`),
                                    KEY `idx_action_id` (`action_id`),
                                    KEY `idx_node_id` (`node_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 LOCK TABLES `pipeline_action` WRITE;
 /*!40000 ALTER TABLE `pipeline_action` DISABLE KEYS */;
@@ -666,7 +672,7 @@ CREATE TABLE `pipeline_history` (
                                     PRIMARY KEY (`id`),
                                     UNIQUE KEY `idx_history_id` (`history_id`),
                                     KEY `idx_pipeline_id` (`pipeline_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1869213816794906626 DEFAULT CHARSET=utf8mb4 COMMENT='流水线执行历史';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='流水线执行历史';
 
 
 
@@ -687,7 +693,7 @@ CREATE TABLE `pipeline_node` (
                                  `update_time` bigint(20) NOT NULL COMMENT '修改时间',
                                  `sort_order` int(3) DEFAULT NULL COMMENT '排序',
                                  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1869213807328980994 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -707,7 +713,7 @@ CREATE TABLE `pipeline_stage` (
                                   `update_time` bigint(20) NOT NULL COMMENT '修改时间',
                                   `sort_order` int(3) DEFAULT NULL COMMENT '排序',
                                   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1869213807320592386 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -772,7 +778,7 @@ CREATE TABLE `resource` (
                             `operate` varchar(10) DEFAULT NULL COMMENT '资源操作类型',
                             `resource_type` int(2) NOT NULL DEFAULT '1' COMMENT '资源类型(1 权限菜单 2 接口资源)',
                             PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1849319304048017410 DEFAULT CHARSET=utf8mb4 COMMENT='资源表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='资源表';
 
 LOCK TABLES `resource` WRITE;
 /*!40000 ALTER TABLE `resource` DISABLE KEYS */;
@@ -818,7 +824,7 @@ CREATE TABLE `resource_member` (
                                    `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
                                    `member_type` varchar(20) DEFAULT NULL COMMENT '关联成员类型',
                                    PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1869214475930398723 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -837,7 +843,7 @@ CREATE TABLE `role` (
                         `create_time` bigint(20) NOT NULL COMMENT '创建时间',
                         `update_time` bigint(20) NOT NULL COMMENT '更新时间',
                         PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1849320774294175747 DEFAULT CHARSET=utf8mb4 COMMENT='角色表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='角色表';
 
 LOCK TABLES `role` WRITE;
 /*!40000 ALTER TABLE `role` DISABLE KEYS */;
@@ -963,7 +969,7 @@ CREATE TABLE `space` (
                          `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
                          `update_time` bigint(11) DEFAULT NULL COMMENT '修改时间',
                          PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1869004746528485378 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 LOCK TABLES `space` WRITE;
 /*!40000 ALTER TABLE `space` DISABLE KEYS */;
@@ -994,7 +1000,7 @@ CREATE TABLE `sub_dispatch_log` (
                                     `update_time` bigint(20) NOT NULL COMMENT '修改时间',
                                     `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
                                     PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1869213816916541442 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -1014,7 +1020,7 @@ CREATE TABLE `system_config` (
                                  `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
                                  `update_time` bigint(20) DEFAULT NULL COMMENT '修改时间',
                                  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 LOCK TABLES `system_config` WRITE;
 /*!40000 ALTER TABLE `system_config` DISABLE KEYS */;
@@ -1136,7 +1142,7 @@ CREATE TABLE `user` (
                         `update_time` bigint(20) NOT NULL COMMENT '修改时间',
                         `group_id` varchar(64) DEFAULT NULL COMMENT '群组ID',
                         PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1869214279213346818 DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
@@ -1192,7 +1198,7 @@ CREATE TABLE `windy_group` (
                                `update_time` bigint(20) NOT NULL COMMENT '修改时间',
                                `parent_id` varchar(64) DEFAULT NULL COMMENT '父组织id',
                                PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1830510201426452482 DEFAULT CHARSET=utf8mb4 COMMENT='组织表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='组织表';
 
 LOCK TABLES `windy_group` WRITE;
 /*!40000 ALTER TABLE `windy_group` DISABLE KEYS */;

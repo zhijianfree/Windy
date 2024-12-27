@@ -6,6 +6,7 @@ import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.bo.demand.IterationBO;
 import com.zj.domain.entity.bo.service.ResourceMemberBO;
 import com.zj.domain.entity.enums.IterationStatus;
+import com.zj.domain.entity.enums.MemberType;
 import com.zj.domain.entity.po.demand.Iteration;
 import com.zj.domain.mapper.demand.IterationMapper;
 import com.zj.domain.repository.demand.IMemberRepository;
@@ -56,6 +57,7 @@ public class IterationRepositoryImpl extends ServiceImpl<IterationMapper, Iterat
         if (result) {
             ResourceMemberBO resourceMemberBO = new ResourceMemberBO();
             resourceMemberBO.setRelationId(iterationBO.getUserId());
+            resourceMemberBO.setMemberType(MemberType.ITERATION_MEMBER.getType());
             resourceMemberBO.setResourceId(iterationBO.getIterationId());
             memberRepository.addResourceMember(resourceMemberBO);
         }

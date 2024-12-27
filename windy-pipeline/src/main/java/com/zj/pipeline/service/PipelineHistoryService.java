@@ -63,4 +63,8 @@ public class PipelineHistoryService {
     return PipelineExecuteInfo.builder().pipelineStatus(pipelineHistory.getPipelineStatus())
         .nodeStatusList(statusList).build();
   }
+
+  public boolean deleteByPipelineId(String pipelineId) {
+    return pipelineHistoryRepository.deleteByPipelineId(pipelineId);
+  }
 }

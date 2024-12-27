@@ -59,4 +59,6 @@ public interface IPipelineHistoryRepository {
    * @return 是否成功
    */
   boolean deleteByHistoryId(String historyId);
+
+  boolean deleteByPipelineId(String pipelineId);
 }

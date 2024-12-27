@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -90,6 +91,14 @@ public class NodeRecordRepository extends ServiceImpl<NodeRecordMapper, NodeReco
   @Override
   public boolean deleteRecordByHistoryId(String historyId) {
     return remove(Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getHistoryId, historyId));
+  }
+
+  @Override
+  public boolean deleteRecordByNodeId(List<String> nodeIds) {
+    if (CollectionUtils.isEmpty(nodeIds)) {
+      return false;
+    }
+    return remove(Wrappers.lambdaQuery(NodeRecord.class).in(NodeRecord::getNodeId, nodeIds));
   }
 
   private static NodeRecord convertNodeRecord(NodeRecordBO nodeRecordBO) {

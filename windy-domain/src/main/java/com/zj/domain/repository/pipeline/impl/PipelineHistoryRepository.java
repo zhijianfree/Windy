@@ -121,4 +121,9 @@ public class PipelineHistoryRepository extends
   public boolean deleteByHistoryId(String historyId) {
     return remove(Wrappers.lambdaQuery(PipelineHistory.class).eq(PipelineHistory::getHistoryId, historyId));
   }
+
+  @Override
+  public boolean deleteByPipelineId(String pipelineId) {
+    return remove(Wrappers.lambdaQuery(PipelineHistory.class).eq(PipelineHistory::getPipelineId, pipelineId));
+  }
 }

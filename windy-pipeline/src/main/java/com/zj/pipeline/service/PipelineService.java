@@ -17,6 +17,7 @@ import com.zj.domain.entity.bo.pipeline.PipelineStageBO;
 import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.domain.entity.enums.PipelineType;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
+import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.domain.repository.service.impl.MicroServiceRepository;
 import com.zj.pipeline.entity.dto.PipelineDto;
@@ -49,13 +50,14 @@ public class PipelineService {
     private final IPipelineRepository pipelineRepository;
     private final IBindBranchRepository bindBranchRepository;
     private final MicroServiceRepository microServiceRepository;
+    private final INodeRecordRepository nodeRecordRepository;
     private final IMasterInvoker masterInvoker;
 
     public PipelineService(PipelineNodeService pipelineNodeService,
                            PipelineStageService pipelineStageService, PipelineHistoryService pipelineHistoryService,
                            UniqueIdService uniqueIdService, IPipelineRepository pipelineRepository,
                            IBindBranchRepository bindBranchRepository, MicroServiceRepository microServiceRepository,
-                           IMasterInvoker masterInvoker) {
+                           INodeRecordRepository nodeRecordRepository, IMasterInvoker masterInvoker) {
         this.pipelineNodeService = pipelineNodeService;
         this.pipelineStageService = pipelineStageService;
         this.pipelineHistoryService = pipelineHistoryService;
@@ -63,6 +65,7 @@ public class PipelineService {
         this.pipelineRepository = pipelineRepository;
         this.bindBranchRepository = bindBranchRepository;
         this.microServiceRepository = microServiceRepository;
+        this.nodeRecordRepository = nodeRecordRepository;
         this.masterInvoker = masterInvoker;
     }
 
@@ -157,12 +160,17 @@ public class PipelineService {
     public Boolean deletePipeline(String serviceId, String pipelineId) {
         try {
             checkPipelineAndService(serviceId, pipelineId);
+            boolean deleteHistory = pipelineHistoryService.deleteByPipelineId(pipelineId);
+            List<String> nodeIds = pipelineNodeService.getPipelineNodes(pipelineId).stream().map(PipelineNodeBO::getNodeId).collect(Collectors.toList());
+            boolean deleteRecord = nodeRecordRepository.deleteRecordByNodeId(nodeIds);
             boolean deleteBind = bindBranchRepository.deleteByPipelineId(pipelineId);
             boolean deleteStage = pipelineStageService.deleteStagesByPipelineId(pipelineId);
             boolean deleteNode = pipelineNodeService.deleteByPipeline(pipelineId);
-            log.info("delete stage and node result stage = {} node={} bind={}", deleteStage, deleteNode, deleteBind);
+            log.info("delete stage and node result stage = {} node={} bind={} deleteHistory={} deleteRecord={}",
+                    deleteStage, deleteNode, deleteBind, deleteHistory, deleteRecord);
             return pipelineRepository.deletePipeline(pipelineId);
         } catch (Exception e) {
+            log.info("delete pipeline error serviceId={} pipelineId={}", serviceId, pipelineId, e);
             throw new ApiException(ErrorCode.DELETE_PIPELINE_ERROR);
         }
     }

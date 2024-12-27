@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.service.ResourceMemberBO;
+import com.zj.domain.entity.enums.MemberType;
 import com.zj.domain.entity.po.service.ResourceMember;
 import com.zj.domain.mapper.service.ResourceMemberMapper;
 import com.zj.domain.repository.auth.IUserRepository;
@@ -81,5 +82,11 @@ public class MemberRepositoryImpl extends ServiceImpl<ResourceMemberMapper, Reso
         log.info("remove resource members result={}", removeResult);
         List<ResourceMember> resourceMemberList = OrikaUtil.convertList(resourceMembers, ResourceMember.class);
         return saveBatch(resourceMemberList);
+    }
+
+    @Override
+    public boolean deleteResourceMemberByType(String resourceId, MemberType memberType) {
+        return remove(Wrappers.lambdaQuery(ResourceMember.class).eq(ResourceMember::getResourceId,
+                resourceId).eq(ResourceMember::getMemberType, memberType.getType()));
     }
 }
