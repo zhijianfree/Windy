@@ -117,7 +117,7 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
         String path = String.format("/api/v4/projects/%s/repository/branches?branch=%s&ref=master",
                 projectId, branchName);
         String result = gitRequestProxy.post(accessInfo.getGitDomain() + path, "", getTokenHeader(accessInfo));
-        log.info("gitea create branch result = {}", result);
+        log.info("gitlab create branch result = {}", result);
         BranchInfo branchInfo = JSON.parseObject(result, BranchInfo.class);
         if (Objects.isNull(branchInfo) || !Objects.equals(branchInfo.getName(), branchName)) {
             throw new ApiException(ErrorCode.CREATE_BRANCH_ERROR);
@@ -130,7 +130,7 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
         String path = String.format("/api/v4/projects/%s/repository/branches/%s", projectId,
                 branchName);
         String result = gitRequestProxy.delete(accessInfo.getGitDomain() + path, getTokenHeader(accessInfo));
-        log.info("gitea delete branch result = {}", result);
+        log.info("gitlab delete branch result = {}", result);
     }
 
     @Override

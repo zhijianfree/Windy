@@ -37,7 +37,6 @@ public class BaseEurekaAdapter {
     public ResponseEntity<String> requestPost(String url , Object data) {
         wrapTraceHeader();
         HttpEntity<Object> http = new HttpEntity<>(data, headers);
-        log.info("request body={}", JSON.toJSONString(data));
         try {
             return restTemplate.postForEntity(url, http, String.class);
         } catch (Exception e) {
