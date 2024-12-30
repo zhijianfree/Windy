@@ -5,8 +5,10 @@ import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.domain.entity.bo.pipeline.BindBranchBO;
+import com.zj.domain.entity.bo.pipeline.PipelineBO;
 import com.zj.domain.entity.bo.pipeline.PipelineHistoryBO;
 import com.zj.domain.entity.bo.pipeline.PublishBindBO;
+import com.zj.domain.entity.enums.PipelineType;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
 import com.zj.domain.repository.pipeline.IPublishBindRepository;
@@ -28,13 +30,15 @@ public class PublishService {
     private final IBindBranchRepository bindBranchRepository;
     private final IPipelineHistoryRepository pipelineHistoryRepository;
     private final UniqueIdService uniqueIdService;
+    private final PipelineService pipelineService;
 
     public PublishService(IPublishBindRepository publishBindRepository, IBindBranchRepository bindBranchRepository,
-                          IPipelineHistoryRepository pipelineHistoryRepository, UniqueIdService uniqueIdService) {
+                          IPipelineHistoryRepository pipelineHistoryRepository, UniqueIdService uniqueIdService, PipelineService pipelineService) {
         this.publishBindRepository = publishBindRepository;
         this.bindBranchRepository = bindBranchRepository;
         this.pipelineHistoryRepository = pipelineHistoryRepository;
         this.uniqueIdService = uniqueIdService;
+        this.pipelineService = pipelineService;
     }
 
     public Boolean createPublish(PublishBindBO publishBindBO) {
@@ -43,6 +47,14 @@ public class PublishService {
             log.info("pipeline not bind branch, pipelineId={}", publishBindBO.getPipelineId());
             throw new ApiException(ErrorCode.PIPELINE_NOT_BIND);
         }
+
+        boolean nonePublish = pipelineService.listPipelines(publishBindBO.getServiceId()).stream().noneMatch(pipelineBO -> Objects.equals(
+                pipelineBO.getPipelineType(), PipelineType.PUBLISH.getType()));
+        if (nonePublish) {
+            log.info("service not bind publish pipeline, serviceId={}", publishBindBO.getServiceId());
+            throw new ApiException(ErrorCode.SERVICE_CREATE_PUBLISH_PIPELINE);
+        }
+
 
         PublishBindBO serviceBranch = publishBindRepository.getServiceBranch(publishBindBO.getServiceId(),
                 bindBranch.getGitBranch());

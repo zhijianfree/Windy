@@ -33,7 +33,9 @@ public class GitRequestProxy {
         .build();
     try {
       Response execute = okHttpClient.newCall(request).execute();
-      return execute.body().string();
+      String response = execute.body().string();
+      checkResponseCode(execute, response);
+      return response;
     } catch (IOException e) {
       throw new ApiException(ErrorCode.REQUEST_GIT_SERVER_FAILED);
     }
@@ -55,7 +57,9 @@ public class GitRequestProxy {
         .post(requestBody).build();
     try {
       Response execute = okHttpClient.newCall(request).execute();
-      return execute.body().string();
+      String string = execute.body().string();
+      checkResponseCode(execute, string);
+      return string;
     } catch (IOException e) {
       throw new ApiException(ErrorCode.REQUEST_GIT_SERVER_FAILED);
     }
@@ -66,7 +70,9 @@ public class GitRequestProxy {
     Request request = new Request.Builder().url(path).put(requestBody).build();
     try {
       Response execute = okHttpClient.newCall(request).execute();
-      return execute.body().string();
+      String string = execute.body().string();
+      checkResponseCode(execute, string);
+      return string;
     } catch (IOException e) {
       throw new ApiException(ErrorCode.REQUEST_GIT_SERVER_FAILED);
     }
@@ -77,9 +83,18 @@ public class GitRequestProxy {
         .delete().build();
     try {
       Response execute = okHttpClient.newCall(request).execute();
-      return execute.body().string();
+      String string = execute.body().string();
+      checkResponseCode(execute, string);
+      return string;
     } catch (IOException e) {
       log.error("request git serve error", e);
+      throw new ApiException(ErrorCode.REQUEST_GIT_SERVER_FAILED);
+    }
+  }
+
+  private static void checkResponseCode(Response execute, String response) {
+    if (!execute.isSuccessful()){
+      log.info("request git response code is fail result={}", response);
       throw new ApiException(ErrorCode.REQUEST_GIT_SERVER_FAILED);
     }
   }

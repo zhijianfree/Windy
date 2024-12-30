@@ -28,6 +28,7 @@ public enum ErrorCode {
   PIPELINE_RUNNING_NOT_DELETE_PUBLISH(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000017", "流水线正在运行，无法删除发布分支"),
   PIPELINE_NOT_BIND_SERVICE(HttpStatus.BAD_REQUEST, "Pipeline.000018", "流水线不属于当前服务"),
   RUN_PIPELINE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000019", "流水线任务调度失败,请稍后重试"),
+  SERVICE_CREATE_PUBLISH_PIPELINE(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000020", "当前服务未创建发布流水线，无法推送发布"),
   /*==================Service服务==================*/
   NOT_FIND_REPO_CONFIG(HttpStatus.BAD_REQUEST, "Service.000001", "git访问失败，请检查系统配置"),
   REPO_NOT_EXIST(HttpStatus.BAD_REQUEST, "Service.000002", "未发现用户可访问的仓库列表"),
