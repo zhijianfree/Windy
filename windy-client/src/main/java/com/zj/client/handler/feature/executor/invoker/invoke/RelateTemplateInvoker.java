@@ -33,15 +33,15 @@ public class RelateTemplateInvoker implements IExecuteInvoker {
 
     @Override
     public Object invoke(ExecutorUnit executorUnit, FeatureExecuteContext featureExecuteContext) {
+        log.info("origin executorUnit = {}", JSON.toJSONString(executorUnit));
         Map<String, Object> bodyMap = new HashMap<>();
         executorUnit.getParams().stream().filter(parameterDefine -> Objects.equals(parameterDefine.getPosition(),
                 Position.Body.name())).forEach(param -> bodyMap.put(param.getParamKey(),
                 MethodInvoke.convertDataToType(param)));
         String body = Optional.of(bodyMap).filter(map -> !map.isEmpty()).map(JSON::toJSONString).orElse("");
 
-        ExecutorUnit relatedTemplate = executorUnit.getRelatedTemplate();
-        log.info("get related template={}", JSON.toJSONString(relatedTemplate));
-        relatedTemplate.getParams().forEach(param ->{
+        ExecutorUnit relatedTemplateUnit = executorUnit.getRelatedTemplate();
+        relatedTemplateUnit.getParams().forEach(param ->{
             if (Objects.equals(param.getParamKey(), "url")) {
                 log.info("get request url = {}", executorUnit.getService());
                 param.setValue(executorUnit.getService());
@@ -56,9 +56,7 @@ public class RelateTemplateInvoker implements IExecuteInvoker {
                 param.setValue(executorUnit.getMethod());
             }
         });
-        log.info("execute param={}", JSON.toJSONString(relatedTemplate));
-        variableInterceptor.filterVariable(relatedTemplate, featureExecuteContext);
-        log.info("filter execute param={}", JSON.toJSONString(relatedTemplate));
-        return methodInvoke.invoke(relatedTemplate, featureExecuteContext);
+        variableInterceptor.filterVariable(relatedTemplateUnit, featureExecuteContext);
+        return methodInvoke.invoke(relatedTemplateUnit, featureExecuteContext);
     }
 }

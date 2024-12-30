@@ -67,7 +67,7 @@ public class BuildCodeInterceptor implements INodeExecuteInterceptor {
             return;
         }
 
-        ImageRepositoryVo repository = configRepository.getRepository();
+        ImageRepositoryVo repository = configRepository.getImageRepository();
         PipelineNodeBO pipelineNode = pipelineNodeRepository.getPipelineNode(taskNode.getNodeId());
         PipelineBO pipeline = pipelineRepository.getPipeline(pipelineNode.getPipelineId());
         MicroserviceBO serviceDetail = microServiceRepository.queryServiceDetail(pipeline.getServiceId());

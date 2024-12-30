@@ -4,6 +4,8 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback.Adapter;
 import com.github.dockerjava.api.command.BuildImageResultCallback;
 import com.github.dockerjava.api.model.AuthConfig;
+import com.github.dockerjava.api.model.AuthConfigurations;
+import com.github.dockerjava.api.model.AuthResponse;
 import com.github.dockerjava.api.model.PushResponseItem;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
@@ -93,7 +95,8 @@ public class CodeBuildService {
                 context.setBuildFile(pomPath);
                 context.setTargetDir(pipelineWorkspace);
                 context.setServiceName(serviceName);
-                context.setBuildVersion(codeBuildParam.getBuildVersion());
+                context.setVersion(codeBuildParam.getVersion());
+                context.setBuildPath(codeBuildParam.getBuildVersion());
                 Integer exitCode = codeBuilder.build(context, message -> {
                     if (StringUtils.isNotBlank(message)){
                         notifyMessage(taskNode, message);
@@ -184,10 +187,8 @@ public class CodeBuildService {
         notifyMessage(taskNode, "======= " + message);
     }
 
-    private void saveStatus(String recordId, ProcessStatus status, String message,
-                            Map<String, Object> context) {
-        QueryResponseModel model = Optional.ofNullable(statusMap.get(recordId))
-                .orElse(new QueryResponseModel());
+    private void saveStatus(String recordId, ProcessStatus status, String message, Map<String, Object> context) {
+        QueryResponseModel model = Optional.ofNullable(statusMap.get(recordId)).orElse(new QueryResponseModel());
         model.setStatus(status.getType());
         model.setContext(context);
         model.addMessage(message);
@@ -206,9 +207,7 @@ public class CodeBuildService {
 
     public String buildDocker(String imageName, String version, File dockerfile,
                               CodeBuildParamDto param) throws InterruptedException {
-        DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
-                .withDockerHost("unix:///var/run/docker.sock")
-                .build();
+        DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
         DockerClient dockerClient = DockerClientBuilder.getInstance(config).build();
         BuildImageResultCallback callback = new BuildImageResultCallback() {
             @Override
@@ -234,8 +233,10 @@ public class CodeBuildService {
         // 设置登陆远程仓库的用户信息
         AuthConfig authConfig = new AuthConfig().withRegistryAddress(repository)
                 .withUsername(param.getUser()).withPassword(param.getPassword());
-        dockerClient.authCmd().withAuthConfig(authConfig).exec();
+        AuthConfigurations authConfigs = new AuthConfigurations();
+        authConfigs.addConfig(authConfig);
         dockerClient.buildImageCmd().withDockerfile(dockerfile)
+                .withBuildAuthConfigs(authConfigs)
                 .withTags(Collections.singleton(imageRepository)).exec(callback).awaitImageId();
 
         // 将镜像推送到远程镜像仓库

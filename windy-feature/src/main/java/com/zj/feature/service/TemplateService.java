@@ -2,31 +2,36 @@ package com.zj.feature.service;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.entity.dto.PageSize;
+import com.zj.feature.entity.ExecuteTemplateDto;
+import com.zj.common.entity.feature.ExecutorUnit;
 import com.zj.common.enums.InvokerType;
 import com.zj.common.enums.TemplateType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.entity.feature.ExecuteTemplateVo;
-import com.zj.common.entity.feature.ExecutorUnit;
-import com.zj.common.entity.dto.PageSize;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.domain.entity.bo.feature.ExecutePointBO;
 import com.zj.domain.entity.bo.feature.ExecuteTemplateBO;
 import com.zj.domain.entity.bo.feature.PluginInfoBO;
+import com.zj.domain.entity.bo.service.ResourceMemberBO;
+import com.zj.domain.entity.enums.MemberType;
 import com.zj.domain.entity.enums.SourceStatus;
+import com.zj.domain.repository.demand.IMemberRepository;
 import com.zj.domain.repository.feature.IExecutePointRepository;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import com.zj.domain.repository.feature.IPluginRepository;
 import com.zj.feature.entity.BatchTemplates;
+import com.zj.feature.entity.RelatedTemplateDto;
 import com.zj.feature.entity.UploadResultDto;
 import com.zj.plugin.loader.Feature;
 import com.zj.plugin.loader.FeatureDefine;
 import com.zj.plugin.loader.ParameterDefine;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
@@ -56,49 +61,56 @@ public class TemplateService {
     private final IExecuteTemplateRepository templateRepository;
     private final IExecutePointRepository executePointRepository;
     private final IPluginRepository pluginRepository;
+    private final IMemberRepository memberRepository;
 
     public TemplateService(UniqueIdService uniqueIdService,
                            IExecuteTemplateRepository templateRepository,
-                           IExecutePointRepository executePointRepository, IPluginRepository pluginRepository) {
+                           IExecutePointRepository executePointRepository, IPluginRepository pluginRepository,
+                           IMemberRepository memberRepository) {
         this.uniqueIdService = uniqueIdService;
         this.templateRepository = templateRepository;
         this.executePointRepository = executePointRepository;
         this.pluginRepository = pluginRepository;
+        this.memberRepository = memberRepository;
     }
 
-    public PageSize<ExecuteTemplateVo> getTemplatePage(String serviceId, Integer pageNo, Integer size, String name) {
+    public PageSize<ExecuteTemplateDto> getTemplatePage(String serviceId, Integer pageNo, Integer size, String name) {
         IPage<ExecuteTemplateBO> templateIPage = templateRepository.getPage(serviceId, pageNo, size, name);
-        PageSize<ExecuteTemplateVo> pageSize = new PageSize<>();
+        PageSize<ExecuteTemplateDto> pageSize = new PageSize<>();
         if (CollectionUtils.isEmpty(templateIPage.getRecords())) {
             pageSize.setTotal(0);
             return pageSize;
         }
 
-        List<ExecuteTemplateVo> templateDTOS = templateIPage.getRecords().stream()
-                .map(this::toExecuteTemplateDTO).collect(Collectors.toList());
+        List<ExecuteTemplateDto> templateDTOS = templateIPage.getRecords().stream()
+                .map(this::toExecuteTemplateDto).collect(Collectors.toList());
         pageSize.setData(templateDTOS);
         pageSize.setTotal(templateIPage.getTotal());
         return pageSize;
     }
 
-    public ExecuteTemplateVo getExecuteTemplate(String templateId) {
-        ExecuteTemplateBO executeTemplate = templateRepository.getExecuteTemplate(templateId);
-        return toExecuteTemplateDTO(executeTemplate);
+    public List<ExecuteTemplateDto> getAllTemplates() {
+        List<ExecuteTemplateBO> executeTemplates = templateRepository.getAllTemplates();
+        return executeTemplates.stream().map(this::toExecuteTemplateDto).collect(Collectors.toList());
     }
 
-    public String createTemplate(ExecuteTemplateVo executeTemplateVo) {
-        ExecuteTemplateBO executeTemplate = buildExecuteTemplateDto(
-                executeTemplateVo);
+    public ExecuteTemplateDto getExecuteTemplate(String templateId) {
+        ExecuteTemplateBO executeTemplate = templateRepository.getExecuteTemplate(templateId);
+        return toExecuteTemplateDto(executeTemplate);
+    }
+
+    public String createTemplate(ExecuteTemplateDto executeTemplateDto) {
+        ExecuteTemplateBO executeTemplate = buildExecuteTemplateDto(executeTemplateDto);
         boolean result = templateRepository.save(executeTemplate);
         return result ? executeTemplate.getTemplateId() : "";
     }
 
-    public String updateTemplate(ExecuteTemplateVo executeTemplateVo) {
-        ExecuteTemplateBO executeTemplate = OrikaUtil.convert(executeTemplateVo,
+    public String updateTemplate(ExecuteTemplateDto executeTemplateDto) {
+        ExecuteTemplateBO executeTemplate = OrikaUtil.convert(executeTemplateDto,
                 ExecuteTemplateBO.class);
         executeTemplate.setUpdateTime(System.currentTimeMillis());
-        executeTemplate.setParameterDefines(executeTemplateVo.getParams());
-        executeTemplate.setHeader(JSON.toJSONString(executeTemplateVo.getHeaders()));
+        executeTemplate.setParameterDefines(executeTemplateDto.getParams());
+        executeTemplate.setHeader(JSON.toJSONString(executeTemplateDto.getHeaders()));
         return templateRepository.updateTemplate(executeTemplate)
                 ? executeTemplate.getTemplateId() : "";
     }
@@ -107,17 +119,9 @@ public class TemplateService {
         return templateRepository.deleteTemplate(templateId);
     }
 
-    public List<ExecuteTemplateVo> getFeatureList(String serviceId) {
-        List<ExecuteTemplateBO> defaultTemplates = templateRepository.getToolTemplates();
-        List<ExecuteTemplateBO> executeTemplates = templateRepository.getServiceTemplates(serviceId);
-        executeTemplates.addAll(defaultTemplates);
-        return executeTemplates.stream().map(this::toExecuteTemplateDTO)
-                .collect(Collectors.toList());
-    }
 
     public Boolean refreshTemplate(String templateId) {
-        List<ExecutePointBO> executePoints = executePointRepository.getTemplateExecutePoints(
-                templateId);
+        List<ExecutePointBO> executePoints = executePointRepository.getTemplateExecutePoints(templateId);
         if (CollectionUtils.isEmpty(executePoints)) {
             return true;
         }
@@ -159,21 +163,31 @@ public class TemplateService {
         try {
             List<FeatureDefine> featureDefines = parseJarFile(file);
             if (CollectionUtils.isEmpty(featureDefines)) {
-                return null;
+                log.info("there is no templates in plugin serviceId={}", serviceId);
+                throw new ApiException(ErrorCode.NO_TEMPLATE_IN_PLUGIN);
             }
 
             //将文件存储到数据库
-            PluginInfoBO pluginInfoBO = new PluginInfoBO();
-            pluginInfoBO.setPluginName(file.getOriginalFilename());
-            pluginInfoBO.setStatus(SourceStatus.UNAVAILABLE.getType());
-            pluginInfoBO.setPluginId(uniqueIdService.getUniqueId());
-            pluginInfoBO.setFileData(file.getBytes());
-            pluginRepository.addPlugin(pluginInfoBO);
+            PluginInfoBO pluginInfoBO= convertPluginInfo(file, uniqueIdService.getUniqueId());
+            boolean addPlugin = pluginRepository.addPlugin(pluginInfoBO);
+            log.info("add plugin result={}", addPlugin);
 
             UploadResultDto uploadResult = new UploadResultDto();
             uploadResult.setPluginId(pluginInfoBO.getPluginId());
-            List<ExecuteTemplateVo> templates = featureDefines.stream()
-                    .map(featureDefine -> buildExecuteTemplateVo(featureDefine, serviceId)).collect(Collectors.toList());
+
+            List<ExecuteTemplateBO> pluginTemplates =
+                    templateRepository.getTemplatesByType(Collections.singletonList(TemplateType.PLUGIN.getType()));
+            //这个地方是根据上传插件解析后的模版service(全路径:包名+类名)比较关联到已存在的插件
+            List<ExecuteTemplateBO> existTemplate = featureDefines.stream().map(featureDefine -> pluginTemplates.stream().filter(pluginTemplate ->
+                            Objects.equals(pluginTemplate.getService(), featureDefine.getSource()))
+                    .findFirst().orElse(null)).collect(Collectors.toList());
+            List<String> existPlugin =   existTemplate.stream().filter(Objects::nonNull).map(ExecuteTemplateBO::getSource)
+                    .filter(StringUtils::isNoneBlank).distinct().collect(Collectors.toList());
+            uploadResult.setExistPlugins(existPlugin);
+
+            List<ExecuteTemplateDto> templates = featureDefines.stream()
+                    .map(featureDefine -> buildExecuteTemplateVo(featureDefine, serviceId, pluginTemplates,
+                            pluginInfoBO.getPluginId())).collect(Collectors.toList());
             uploadResult.setTemplateDefines(templates);
             return uploadResult;
         } catch (Exception e) {
@@ -182,17 +196,37 @@ public class TemplateService {
         }
     }
 
-    private ExecuteTemplateVo buildExecuteTemplateVo(FeatureDefine define, String serviceId) {
-        ExecuteTemplateVo executeTemplateVo = new ExecuteTemplateVo();
-        executeTemplateVo.setTemplateType(TemplateType.PLUGIN.getType());
-        executeTemplateVo.setInvokeType(InvokerType.METHOD.getType());
-        executeTemplateVo.setName(define.getName());
-        executeTemplateVo.setMethod(define.getMethod());
-        executeTemplateVo.setService(define.getSource());
-        executeTemplateVo.setDescription(define.getDescription());
-        executeTemplateVo.setParams(define.getParams());
-        executeTemplateVo.setOwner(serviceId);
-        return executeTemplateVo;
+    private static PluginInfoBO convertPluginInfo(MultipartFile file, String pluginId) throws IOException {
+        PluginInfoBO pluginInfoBO = new PluginInfoBO();
+        pluginInfoBO.setPluginName(file.getOriginalFilename());
+        pluginInfoBO.setStatus(SourceStatus.UNAVAILABLE.getType());
+        pluginInfoBO.setPluginId(pluginId);
+        pluginInfoBO.setFileData(file.getBytes());
+        String hashValue = DigestUtils.md5Hex(file.getBytes());
+        pluginInfoBO.setHashValue(hashValue);
+        return pluginInfoBO;
+    }
+
+    private ExecuteTemplateDto buildExecuteTemplateVo(FeatureDefine define, String serviceId,
+                                                      List<ExecuteTemplateBO> pluginTemplates, String pluginId) {
+        ExecuteTemplateDto executeTemplateDto = new ExecuteTemplateDto();
+        executeTemplateDto.setTemplateType(TemplateType.PLUGIN.getType());
+        executeTemplateDto.setInvokeType(InvokerType.METHOD.getType());
+        executeTemplateDto.setName(define.getName());
+        executeTemplateDto.setMethod(define.getMethod());
+        executeTemplateDto.setService(define.getSource());
+        executeTemplateDto.setDescription(define.getDescription());
+        executeTemplateDto.setParams(define.getParams());
+        executeTemplateDto.setOwner(serviceId);
+        executeTemplateDto.setSource(pluginId);
+        pluginTemplates.stream().filter(pluginTemplate -> isSameTemplate(define, pluginTemplate)).findFirst()
+                .ifPresent(pluginTemplate -> executeTemplateDto.setTemplateId(pluginTemplate.getTemplateId()));
+        return executeTemplateDto;
+    }
+
+    private boolean isSameTemplate(FeatureDefine define, ExecuteTemplateBO pluginTemplate) {
+        return Objects.equals(define.getSource(), pluginTemplate.getService()) && Objects.equals(define.getMethod(),
+                pluginTemplate.getMethod());
     }
 
     private List<FeatureDefine> parseJarFile(MultipartFile file) throws IOException {
@@ -245,14 +279,15 @@ public class TemplateService {
     public Boolean batchCreateTemplates(BatchTemplates batchTemplates) {
         if (StringUtils.isNotBlank(batchTemplates.getPluginId())) {
             String pluginId = batchTemplates.getPluginId();
-            pluginRepository.updatePluginStatus(pluginId);
+            boolean enablePluginStatus = pluginRepository.enablePluginStatus(pluginId);
+            log.info("enable plugin status result={}", enablePluginStatus);
         }
 
         //获取已存在的模版
-        List<String> templateIds =
-                batchTemplates.getTemplates().stream().map(ExecuteTemplateVo::getTemplateId).collect(Collectors.toList());
-        List<String> existTemplates =
-                templateRepository.getTemplateByIds(templateIds).stream().map(ExecuteTemplateBO::getTemplateId).collect(Collectors.toList());
+        List<String> templateIds = batchTemplates.getTemplates().stream().map(ExecuteTemplateDto::getTemplateId)
+                .collect(Collectors.toList());
+        List<String> existTemplates = templateRepository.getTemplateByIds(templateIds).stream()
+                .map(ExecuteTemplateBO::getTemplateId).collect(Collectors.toList());
 
         //更新已存在的模版
         List<ExecuteTemplateBO> templates = batchTemplates.getTemplates().stream().map(this::buildExecuteTemplateDto)
@@ -261,24 +296,30 @@ public class TemplateService {
                 .forEach(templateRepository::updateTemplate);
 
         //添加新的模版
-        List<ExecuteTemplateBO> createList =
-                templates.stream().filter(template -> !existTemplates.contains(template.getTemplateId())).collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(createList)) {
-            return true;
+        boolean handleResult = true;
+        List<ExecuteTemplateBO> createList = templates.stream()
+                .filter(template -> !existTemplates.contains(template.getTemplateId())).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(createList)) {
+            handleResult = templateRepository.batchAddTemplates(createList);
         }
-        return templateRepository.batchAddTemplates(createList);
+
+        if (CollectionUtils.isNotEmpty(batchTemplates.getExistPlugins())){
+            boolean deletePlugin = pluginRepository.deletePlugin(batchTemplates.getExistPlugins().get(0));
+            log.info("delete old plugin result={}", deletePlugin);
+        }
+        return handleResult;
     }
 
-    private ExecuteTemplateBO buildExecuteTemplateDto(ExecuteTemplateVo executeTemplateVo) {
-        ExecuteTemplateBO executeTemplate = OrikaUtil.convert(executeTemplateVo,
+    private ExecuteTemplateBO buildExecuteTemplateDto(ExecuteTemplateDto executeTemplateDto) {
+        ExecuteTemplateBO executeTemplate = OrikaUtil.convert(executeTemplateDto,
                 ExecuteTemplateBO.class);
         String templateId =
-                Optional.ofNullable(executeTemplateVo.getTemplateId()).orElseGet(uniqueIdService::getUniqueId);
+                Optional.ofNullable(executeTemplateDto.getTemplateId()).orElseGet(uniqueIdService::getUniqueId);
         executeTemplate.setTemplateId(templateId);
         executeTemplate.setCreateTime(System.currentTimeMillis());
         executeTemplate.setUpdateTime(System.currentTimeMillis());
-        executeTemplate.setHeader(JSON.toJSONString(executeTemplateVo.getHeaders()));
-        executeTemplate.setParameterDefines(executeTemplateVo.getParams());
+        executeTemplate.setHeader(JSON.toJSONString(executeTemplateDto.getHeaders()));
+        executeTemplate.setParameterDefines(executeTemplateDto.getParams());
         return executeTemplate;
     }
 
@@ -286,22 +327,42 @@ public class TemplateService {
         return pluginRepository.deletePlugin(pluginId);
     }
 
-    public List<ExecuteTemplateVo> getTemplatesByInvokeType(Integer invokeType) {
+    public List<ExecuteTemplateDto> getTemplatesByInvokeType(Integer invokeType) {
         List<ExecuteTemplateBO> templateList =
                 templateRepository.getTemplatesByType(Collections.singletonList(invokeType));
-        return templateList.stream().map(this::toExecuteTemplateDTO).collect(Collectors.toList());
+        return templateList.stream().map(this::toExecuteTemplateDto).collect(Collectors.toList());
     }
 
-    public ExecuteTemplateVo toExecuteTemplateDTO(ExecuteTemplateBO executeTemplate) {
-        ExecuteTemplateVo templateVo = OrikaUtil.convert(executeTemplate, ExecuteTemplateVo.class);
+    public ExecuteTemplateDto toExecuteTemplateDto(ExecuteTemplateBO executeTemplate) {
+        ExecuteTemplateDto templateVo = OrikaUtil.convert(executeTemplate, ExecuteTemplateDto.class);
         templateVo.setParams(executeTemplate.getParameterDefines());
         templateVo.setHeaders((Map<String, String>) JSON.parse(executeTemplate.getHeader()));
         return templateVo;
     }
 
-    public List<ExecuteTemplateVo> getAllTemplates() {
-        List<ExecuteTemplateBO> executeTemplates = templateRepository.getAllTemplates();
-        return executeTemplates.stream().map(this::toExecuteTemplateDTO)
-                .collect(Collectors.toList());
+    public List<ExecuteTemplateDto> serviceRelatedTemplates(String serviceId) {
+        List<ExecuteTemplateBO> defaultTemplates = templateRepository.getToolTemplates();
+        List<ResourceMemberBO> relationMembers = memberRepository.getResourceRelations(serviceId,
+                MemberType.FEATURE_MEMBER.getType());
+        List<String> serviceIds =
+                relationMembers.stream().map(ResourceMemberBO::getRelationId).collect(Collectors.toList());
+        serviceIds.add(serviceId);
+        List<ExecuteTemplateBO> executeTemplates = templateRepository.getTemplatesByServiceIds(serviceIds);
+        executeTemplates.addAll(defaultTemplates);
+        return executeTemplates.stream().map(this::toExecuteTemplateDto).collect(Collectors.toList());
     }
+
+    public Boolean addRelatedTemplate(RelatedTemplateDto relatedTemplateDto) {
+        List<ResourceMemberBO> resourceMembers =
+                relatedTemplateDto.getRelatedServiceIds().stream().map(relatedServiceId -> {
+                    ResourceMemberBO resourceMemberBO = new ResourceMemberBO();
+                    resourceMemberBO.setResourceId(relatedTemplateDto.getServiceId());
+                    resourceMemberBO.setRelationId(relatedServiceId);
+                    resourceMemberBO.setMemberType(MemberType.FEATURE_MEMBER.getType());
+                    return resourceMemberBO;
+                }).collect(Collectors.toList());
+        return memberRepository.batchUpdateMembers(resourceMembers, MemberType.FEATURE_MEMBER.getType());
+    }
+
+
 }

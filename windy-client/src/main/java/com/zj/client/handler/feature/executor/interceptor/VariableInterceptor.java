@@ -90,7 +90,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
                 return;
             }
 
-            Object result = ognlDataParser.exchangeOgnlParamValue(responseBody, expressionString);
+            Object result = ognlDataParser.exchangeOgnlResponseValue(responseBody, expressionString);
             context.set(variableDefine.getVariableKey(), result);
             log.info("set context key={} value= {}", variableDefine.getVariableKey(), result);
         });
@@ -102,7 +102,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
     public void filterVariable(ExecutorUnit executorUnit, FeatureExecuteContext featureExecuteContext) {
         List<ParameterDefine> params = executorUnit.getParams();
         if (CollectionUtils.isNotEmpty(params)) {
-            filterParam(featureExecuteContext, params);
+            filterParameter(featureExecuteContext, params);
         }
 
         //如果是HTTP请求的方式，还需要给service(url)、header替换变量参数
@@ -150,7 +150,7 @@ public class VariableInterceptor implements IExecuteInterceptor {
         }
     }
 
-    private void filterParam(FeatureExecuteContext featureExecuteContext, List<ParameterDefine> params) {
+    private void filterParameter(FeatureExecuteContext featureExecuteContext, List<ParameterDefine> params) {
         //如果执行点的参数使用了环境变量则需要转换变量
         StrSubstitutor strSubstitutor = new StrSubstitutor(featureExecuteContext.toMap());
         params.forEach(param -> {
@@ -159,8 +159,9 @@ public class VariableInterceptor implements IExecuteInterceptor {
                 return;
             }
 
-            Object randomValue = generateRandomRule(paramValue);
+            Object randomValue = generateRandomRule(param);
             if (Objects.nonNull(randomValue)) {
+                log.info("handle random param key={}", param.getParamKey());
                 param.setValue(randomValue);
                 return;
             }
@@ -192,7 +193,12 @@ public class VariableInterceptor implements IExecuteInterceptor {
         });
     }
 
-    private Object generateRandomRule(Object paramValue) {
+    private Object generateRandomRule(ParameterDefine param) {
+        if (Objects.equals(param.getType(), ParamValueType.Array.name()) || Objects.equals(param.getType(),
+                ParamValueType.Object.name())){
+            return null;
+        }
+        Object paramValue = param.getValue();
         RandomEntity randomEntity = RandomType.exchangeRandomType(String.valueOf(paramValue));
         if (Objects.isNull(randomEntity)) {
             return null;

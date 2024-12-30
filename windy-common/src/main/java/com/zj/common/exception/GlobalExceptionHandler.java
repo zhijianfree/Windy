@@ -22,11 +22,11 @@ public class GlobalExceptionHandler {
   public static final String LEFT_STRING = "【";
   public static final String RIGHT_STRING = "】 ";
 
-  @ExceptionHandler(Exception.class)
   @ResponseBody
+  @ExceptionHandler(Exception.class)
   public ResponseEntity<ResponseMeta> handleException(Exception e) {
     String errorCode = ErrorCode.ERROR.getCode();
-    String message = e.getMessage();
+    String message = ErrorCode.ERROR.getMessage();
     if (e instanceof MethodArgumentNotValidException) {
       log.warn("param validate error", e);
       message = resetParamErrorMsg(e);
@@ -46,8 +46,8 @@ public class GlobalExceptionHandler {
     return stringBuilder.toString();
   }
 
-  @ExceptionHandler(CommonException.class)
   @ResponseBody
+  @ExceptionHandler(CommonException.class)
   public ResponseEntity<ResponseMeta> handleBusinessException(CommonException commonException) {
     log.warn("common error", commonException);
     return new ResponseEntity<>(new ResponseMeta(commonException.getCode(), commonException.getMessage()),

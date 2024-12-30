@@ -1,6 +1,7 @@
 package com.zj.domain.repository.demand.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -9,6 +10,7 @@ import com.zj.common.entity.dto.PageSize;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.bo.demand.TaskQueryBO;
 import com.zj.domain.entity.bo.demand.WorkTaskBO;
+import com.zj.domain.entity.enums.WorkTaskStatus;
 import com.zj.domain.entity.po.demand.WorkTask;
 import com.zj.domain.mapper.demand.WorkTaskMapper;
 import com.zj.domain.repository.demand.IWorkTaskRepository;
@@ -17,7 +19,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Repository
 public class IWorkTaskRepositoryImpl extends ServiceImpl<WorkTaskMapper, WorkTask> implements IWorkTaskRepository {
@@ -57,7 +60,12 @@ public class IWorkTaskRepositoryImpl extends ServiceImpl<WorkTaskMapper, WorkTas
     public PageSize<WorkTaskBO> getWorkTaskPage(TaskQueryBO taskQueryBO) {
         LambdaQueryWrapper<WorkTask> wrapper = Wrappers.lambdaQuery(WorkTask.class).eq(WorkTask::getCreator,
                 taskQueryBO.getUserId());
-        Optional.ofNullable(taskQueryBO.getStatus()).ifPresent(status -> wrapper.eq(WorkTask::getStatus, status));
+        if (Objects.nonNull(taskQueryBO.getStatus())) {
+            wrapper.eq(WorkTask::getStatus, taskQueryBO.getStatus());
+        } else {
+            wrapper.in(WorkTask::getStatus,
+                    WorkTaskStatus.getNotHandleWorks().stream().map(WorkTaskStatus::getType).collect(Collectors.toList()));
+        }
         IPage<WorkTask> pageQuery = new Page<>(taskQueryBO.getPage(), taskQueryBO.getSize());
         IPage<WorkTask> page = page(pageQuery, wrapper);
         PageSize<WorkTaskBO> pageSize = new PageSize<>(Collections.emptyList());
@@ -69,7 +77,24 @@ public class IWorkTaskRepositoryImpl extends ServiceImpl<WorkTaskMapper, WorkTas
     }
 
     @Override
-    public Integer countIteration(String iterationId) {
-        return 0;
+    public List<WorkTaskBO> getNotCompleteWorkTasks(List<String> taskIds) {
+        if (CollectionUtils.isEmpty(taskIds)) {
+            return Collections.emptyList();
+        }
+        List<WorkTask> list =
+                list(Wrappers.lambdaUpdate(WorkTask.class).in(WorkTask::getTaskId, taskIds).in(WorkTask::getStatus,
+                        WorkTaskStatus.getNotHandleWorks().stream().map(WorkTaskStatus::getType)
+                                .collect(Collectors.toList())));
+        return OrikaUtil.convertList(list, WorkTaskBO.class);
+    }
+
+    @Override
+    public boolean batchUpdateStatus(List<String> taskIds, int status) {
+        if (CollectionUtils.isEmpty(taskIds)) {
+            return false;
+        }
+        UpdateWrapper<WorkTask> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set("status", status).in("task_id", taskIds);
+        return baseMapper.update(null, updateWrapper) > 0;
     }
 }

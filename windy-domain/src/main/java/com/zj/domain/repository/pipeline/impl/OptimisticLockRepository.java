@@ -34,9 +34,9 @@ import java.util.stream.Collectors;
 public class OptimisticLockRepository extends ServiceImpl<OptimisticLockMapper, OptimisticLock> implements IOptimisticLockRepository,
         DisposableBean {
 
-    private Integer PERIOD_TIME = 1;
-    private Integer BEFORE_PERIOD = 10 * 1000;
-    private Map<String, OptimisticLock> lockMap = new HashMap<>();
+    private final Integer PERIOD_TIME = 1;
+    private final Integer BEFORE_PERIOD = 10 * 1000;
+    private final Map<String, OptimisticLock> lockMap = new HashMap<>();
 
     @Override
     public boolean hasLock(String bizCode) {
@@ -71,6 +71,9 @@ public class OptimisticLockRepository extends ServiceImpl<OptimisticLockMapper, 
 
             boolean result = recoverNewLock(bizCode, lock, dateNow);
             log.info("lock bizCode={} result={}", bizCode, result);
+            if (result) {
+                lockMap.put(bizCode, lock);
+            }
             return result;
         } catch (Exception e) {
             log.error("lock Optimistic Lock error", e);

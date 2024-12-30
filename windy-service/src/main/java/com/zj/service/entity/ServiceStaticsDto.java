@@ -18,6 +18,11 @@ public class ServiceStaticsDto {
     private Integer apiCount;
 
     /**
+     * 用例总数
+     */
+    private Integer featureCount;
+
+    /**
      * 服务的API覆盖率
      */
     private Integer apiCoverage;

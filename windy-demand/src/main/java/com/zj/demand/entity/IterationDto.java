@@ -1,6 +1,7 @@
 package com.zj.demand.entity;
 
 import com.zj.domain.entity.vo.Create;
+import com.zj.domain.entity.vo.Update;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
@@ -10,7 +11,13 @@ import javax.validation.constraints.NotNull;
 @Data
 public class IterationDto {
 
-    @Length(min = 10, max = 50)
+    /**
+     * 迭代ID
+     */
+    @NotBlank(groups = Update.class)
+    private String iterationId;
+
+    @Length(min = 4, max = 50)
     @NotBlank(groups = Create.class)
     private String name;
 

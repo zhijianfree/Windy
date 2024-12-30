@@ -49,7 +49,7 @@ public class PluginLoadSchedule {
     initTraceId();
     List<PluginInfo> plugins = masterInvoker.getAvailablePlugins();
     if (CollectionUtils.isEmpty(plugins)) {
-      log.info("get plugin list is empty");
+      log.debug("get plugin list is empty");
       return;
     }
 
@@ -58,7 +58,7 @@ public class PluginLoadSchedule {
         .filter(plugin -> !localNames.contains(plugin.getPluginName()))
         .collect(Collectors.toList());
     if (CollectionUtils.isEmpty(needLoad)) {
-      log.info("not plugin is need load ");
+      log.debug("not plugin is need load ");
       return;
     }
 

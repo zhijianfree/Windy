@@ -63,7 +63,7 @@ public class TaskEndProcessor {
         }
 
         //2 找到任务关联所有用例的执行记录
-        List<FeatureHistoryBO> taskRecordFeatures = featureHistoryRepository.getTaskRecordFeatures(taskRecordId);
+        List<FeatureHistoryBO> taskRecordFeatures = featureHistoryRepository.getHistoriesByTaskRecordId(taskRecordId);
         List<String> recordFeatureIds =
                 taskRecordFeatures.stream().map(FeatureHistoryBO::getFeatureId).collect(Collectors.toList());
         //3 如果所有用例都有执行记录，那么任务执行完成

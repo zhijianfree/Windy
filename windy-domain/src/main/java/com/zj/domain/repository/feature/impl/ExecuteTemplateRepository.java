@@ -13,9 +13,11 @@ import com.zj.domain.entity.po.feature.ExecuteTemplate;
 import com.zj.domain.mapper.feeature.ExecuteTemplateMapper;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import com.zj.plugin.loader.ParameterDefine;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -59,8 +61,11 @@ public class ExecuteTemplateRepository extends
 
   @Override
   public List<ExecuteTemplateBO> getTemplatesByType(List<Integer> templateTypes) {
+    if (CollectionUtils.isEmpty(templateTypes)) {
+      return Collections.emptyList();
+    }
     List<ExecuteTemplate> executeTemplates = list(Wrappers.lambdaQuery(ExecuteTemplate.class)
-            .in(ExecuteTemplate::getTemplateType, templateTypes));
+            .in(ExecuteTemplate::getTemplateType, templateTypes).orderByDesc(ExecuteTemplate::getCreateTime));
     return convertExecuteTemplateBOList(executeTemplates);
   }
 
@@ -74,7 +79,18 @@ public class ExecuteTemplateRepository extends
 
   @Override
   public List<ExecuteTemplateBO> getServiceTemplates(String serviceId) {
-    List<ExecuteTemplate> executeTemplates = list(Wrappers.lambdaQuery(ExecuteTemplate.class).eq(ExecuteTemplate::getOwner, serviceId));
+    List<ExecuteTemplate> executeTemplates = list(Wrappers.lambdaQuery(ExecuteTemplate.class)
+            .eq(ExecuteTemplate::getOwner, serviceId));
+    return convertExecuteTemplateBOList(executeTemplates);
+  }
+
+  @Override
+  public List<ExecuteTemplateBO> getTemplatesByServiceIds(List<String> serviceIds) {
+    if (CollectionUtils.isEmpty(serviceIds)) {
+      return Collections.emptyList();
+    }
+    List<ExecuteTemplate> executeTemplates = list(Wrappers.lambdaQuery(ExecuteTemplate.class)
+            .in(ExecuteTemplate::getOwner, serviceIds));
     return convertExecuteTemplateBOList(executeTemplates);
   }
 
@@ -103,6 +119,9 @@ public class ExecuteTemplateRepository extends
 
   @Override
   public Boolean batchAddTemplates(List<ExecuteTemplateBO> templates) {
+    if (CollectionUtils.isEmpty(templates)) {
+      return false;
+    }
     List<ExecuteTemplate> templateList = templates.stream().map(executeTemplateBO -> {
       ExecuteTemplate executeTemplate = convertExecuteTemplate(executeTemplateBO);
       executeTemplate.setCreateTime(System.currentTimeMillis());
@@ -115,6 +134,9 @@ public class ExecuteTemplateRepository extends
 
   @Override
   public List<ExecuteTemplateBO> getTemplateByIds(List<String> templateIds) {
+    if (CollectionUtils.isEmpty(templateIds)) {
+      return Collections.emptyList();
+    }
     List<ExecuteTemplate> executeTemplates =
             list(Wrappers.lambdaQuery(ExecuteTemplate.class).in(ExecuteTemplate::getTemplateId, templateIds));
     return convertExecuteTemplateBOList(executeTemplates);

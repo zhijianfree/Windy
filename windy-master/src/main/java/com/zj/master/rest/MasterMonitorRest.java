@@ -1,7 +1,7 @@
 package com.zj.master.rest;
 
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.entity.dto.MasterCollect;
+import com.zj.common.entity.dto.MasterCollectDto;
 import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.master.service.MasterMonitor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +23,7 @@ public class MasterMonitorRest {
   }
 
   @GetMapping("/instance")
-  public ResponseMeta<MasterCollect> getInstance() {
+  public ResponseMeta<MasterCollectDto> getInstance() {
     return new ResponseMeta<>(ErrorCode.SUCCESS, masterMonitor.getInstanceInfo());
   }
 }

@@ -1,6 +1,4 @@
-FROM registry-shdocker-registry.cn-shanghai.cr.aliyuncs.com/shenzhen_ka/docker:dind
-
-FROM registry-shdocker-registry.cn-shanghai.cr.aliyuncs.com/shenzhen_ka/openjdk:11
+FROM registry-shdocker-registry.cn-shanghai.cr.aliyuncs.com/shenzhen_ka/windy-dind:1.1
 
 RUN mkdir -p /opt/windy-client
 

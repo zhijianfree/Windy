@@ -1,7 +1,7 @@
 package com.zj.master.dispatch;
 
 import com.zj.common.entity.dto.DispatchTaskModel;
-import com.zj.domain.entity.bo.log.DispatchLogDto;
+import com.zj.domain.entity.bo.log.DispatchLogBO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -36,13 +36,18 @@ public class Dispatcher {
     return dispatchExecutor.dispatch(task, logId);
   }
 
-  public boolean resumeTask(DispatchLogDto taskLog) {
+  public boolean resumeTask(DispatchLogBO taskLog) {
     log.info("start resume task type={}", taskLog.getLogType());
-    IDispatchExecutor dispatchExecutor = dispatchExecutorMap.get(taskLog.getLogType());
-    return dispatchExecutor.resume(taskLog);
+    try {
+      IDispatchExecutor dispatchExecutor = dispatchExecutorMap.get(taskLog.getLogType());
+      return dispatchExecutor.resume(taskLog);
+    }catch (Exception e){
+      log.info("resume task error", e);
+    }
+    return false;
   }
 
-  public boolean isExitInJvm(DispatchLogDto taskLog){
+  public boolean isExitInJvm(DispatchLogBO taskLog){
     IDispatchExecutor dispatchExecutor = dispatchExecutorMap.get(taskLog.getLogType());
     return dispatchExecutor.isExistInJvm(taskLog);
   }

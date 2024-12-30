@@ -75,7 +75,7 @@ public class Demand {
     /**
      * 工作量
      * */
-    private Double workload;
+    private Integer workload;
 
     /**
      * 需求标签

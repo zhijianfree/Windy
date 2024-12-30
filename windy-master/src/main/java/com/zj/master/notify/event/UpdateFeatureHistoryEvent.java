@@ -46,7 +46,7 @@ public class UpdateFeatureHistoryEvent implements INotifyEvent {
     FeatureHistoryBO featureHistory = featureHistoryRepository.getFeatureHistory(history.getHistoryId());
     boolean updateStatus = true;
     if (!ProcessStatus.isCompleteStatus(featureHistory.getExecuteStatus())) {
-      log.info("feature history status completed,not update historyId={}", history.getHistoryId());
+      log.info("feature history status completed, update historyId={}", history.getHistoryId());
       updateStatus = featureHistoryRepository.updateStatus(history.getHistoryId(), resultEvent.getStatus().getType());
     }
 

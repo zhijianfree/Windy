@@ -1,5 +1,6 @@
 package com.zj.common.adapter.git;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -9,6 +10,10 @@ import java.util.List;
 public interface IGitRepositoryHandler {
 
   String gitType();
+
+  default List<CommitMessage> getBranchCommits(String branch, GitAccessInfo accessInfo){
+    return Collections.emptyList();
+  }
 
   /**
    * 创建分支

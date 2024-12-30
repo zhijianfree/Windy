@@ -9,7 +9,7 @@ import com.zj.domain.entity.bo.pipeline.SystemConfigBO;
 import com.zj.domain.entity.po.pipeline.SystemConfig;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
-import com.zj.domain.entity.vo.MavenConfigVo;
+import com.zj.domain.entity.vo.GenerateMavenConfigDto;
 import com.zj.domain.mapper.pipeline.SystemConfigMapper;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 
@@ -81,13 +81,13 @@ public class SystemConfigRepository extends ServiceImpl<SystemConfigMapper, Syst
     }
 
     @Override
-    public ImageRepositoryVo getRepository() {
+    public ImageRepositoryVo getImageRepository() {
         ImageRepositoryVo imageRepositoryVo = getGlobalConfig(IMAGE_REPOSITORY, ImageRepositoryVo.class);
         return Optional.ofNullable(imageRepositoryVo).orElse(new ImageRepositoryVo());
     }
 
     @Override
-    public boolean updateRepository(ImageRepositoryVo imageRepositoryVo) {
+    public boolean updateImageRepository(ImageRepositoryVo imageRepositoryVo) {
         return updateGlobalConfig(JSON.toJSONString(imageRepositoryVo), IMAGE_REPOSITORY);
     }
 
@@ -98,14 +98,14 @@ public class SystemConfigRepository extends ServiceImpl<SystemConfigMapper, Syst
     }
 
     @Override
-    public Boolean updateMavenConfig(MavenConfigVo mavenConfig) {
+    public boolean updateMavenConfig(GenerateMavenConfigDto mavenConfig) {
         return updateGlobalConfig(JSON.toJSONString(mavenConfig), MAVEN_REPOSITORY);
     }
 
     @Override
-    public MavenConfigVo getMavenConfig() {
-        MavenConfigVo mavenConfig = getGlobalConfig(MAVEN_REPOSITORY, MavenConfigVo.class);
-        return Optional.ofNullable(mavenConfig).orElse(new MavenConfigVo());
+    public GenerateMavenConfigDto getMavenConfig() {
+        GenerateMavenConfigDto mavenConfig = getGlobalConfig(MAVEN_REPOSITORY, GenerateMavenConfigDto.class);
+        return Optional.ofNullable(mavenConfig).orElse(new GenerateMavenConfigDto());
     }
 
     private <T> T getGlobalConfig(String type, Class<T> cls) {

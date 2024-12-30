@@ -1,6 +1,6 @@
 package com.zj.common.entity.pipeline;
 
-import com.zj.common.enums.CodeType;
+import com.zj.common.enums.ToolType;
 import com.zj.common.enums.DeployType;
 import lombok.Data;
 
@@ -13,7 +13,7 @@ public class ServiceContext {
     private Integer deployType;
 
     /**
-     * 代码开发语言:{@link CodeType}
+     * 代码开发语言:{@link ToolType}
      */
     private String code;
 

@@ -6,7 +6,7 @@ import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.domain.entity.bo.pipeline.SystemConfigBO;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
-import com.zj.domain.entity.vo.MavenConfigVo;
+import com.zj.domain.entity.vo.GenerateMavenConfigDto;
 import com.zj.pipeline.service.SystemConfigService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -74,13 +74,13 @@ public class SystemConfigRest {
 
   @ResponseBody
   @PutMapping("/system/config/maven")
-  public ResponseMeta<Boolean> updateMaven(@RequestBody MavenConfigVo mavenConfig) {
+  public ResponseMeta<Boolean> updateMaven(@RequestBody GenerateMavenConfigDto mavenConfig) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, systemConfigService.updateMavenConfig(mavenConfig));
   }
 
   @ResponseBody
   @GetMapping("/system/config/maven")
-  public ResponseMeta<MavenConfigVo> getMavenConfig() {
+  public ResponseMeta<GenerateMavenConfigDto> getMavenConfig() {
     return new ResponseMeta<>(ErrorCode.SUCCESS, systemConfigService.getMavenConfig());
   }
 

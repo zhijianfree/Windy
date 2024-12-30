@@ -1,11 +1,13 @@
 package com.zj.pipeline.git;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.zj.common.adapter.git.CommitMessage;
+import com.zj.common.adapter.git.GitAccessInfo;
+import com.zj.common.adapter.git.IGitRepositoryHandler;
 import com.zj.common.enums.GitType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.adapter.git.GitAccessInfo;
-import com.zj.common.adapter.git.IGitRepositoryHandler;
 import com.zj.pipeline.entity.vo.BranchInfo;
 import com.zj.pipeline.entity.vo.GitlabRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +16,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,7 +45,7 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
         this.gitRequestProxy = gitRequestProxy;
     }
 
-    private Map<String, String> getTokenHeader(GitAccessInfo gitAccessInfo) {
+    private static Map<String, String> getTokenHeader(GitAccessInfo gitAccessInfo) {
         Map<String, String> header = new HashMap<>();
         String accessToken = gitAccessInfo.getAccessToken();
         header.put("Private-Token", accessToken);
@@ -52,7 +56,8 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
         try {
             List<GitlabRepository> gitlabRepositories = getGitlabRepositories(accessInfo);
             serviceIdMap = gitlabRepositories.stream()
-                    .collect(Collectors.toMap(this::getRepositoryName, GitlabRepository::getId, (value1, value2) -> value2));
+                    .collect(Collectors.toMap(this::getRepositoryName, GitlabRepository::getId,
+                            (value1, value2) -> value2));
         } catch (Exception e) {
             log.info("load gitlab repositories error ={}", e.getMessage());
         }
@@ -72,6 +77,38 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
     @Override
     public String gitType() {
         return GitType.Gitlab.name();
+    }
+
+    @Override
+    public List<CommitMessage> getBranchCommits(String branch, GitAccessInfo accessInfo) {
+        Integer projectId = transformProjectId(accessInfo);
+        String path = String.format("/api/v4/projects/%s/repository/commits?ref_name=%s&per_page=%d", projectId,
+                branch, 20);
+        String result = gitRequestProxy.get(accessInfo.getGitDomain() + path, getTokenHeader(accessInfo));
+        List<JSONObject> commitsJson = JSON.parseArray(result, JSONObject.class);
+        return commitsJson.stream()
+                .map(commitJson -> {
+                    CommitMessage commit = new CommitMessage();
+                    commit.setCommitId(commitJson.getString("id"));
+                    commit.setShortId(commitJson.getString("short_id"));
+                    commit.setMessage(commitJson.getString("message"));
+                    commit.setCommitUser(commitJson.getString("author_name"));
+                    commit.setCommitTime(convertIso8601ToTimestamp(commitJson.getString("created_at")));
+                    return commit;
+                }).collect(Collectors.toList());
+    }
+
+    /**
+     * 将 ISO 8601 格式的日期字符串转换为时间戳（毫秒）
+     *
+     * @param iso8601Date ISO 8601 日期字符串，例如 "2024-12-10T11:01:54.000+08:00"
+     * @return 时间戳（毫秒）
+     */
+    public static long convertIso8601ToTimestamp(String iso8601Date) {
+        // 使用 OffsetDateTime 解析日期
+        OffsetDateTime dateTime = OffsetDateTime.parse(iso8601Date, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        // 转换为时间戳（毫秒）
+        return dateTime.toInstant().toEpochMilli();
     }
 
     @Override
@@ -108,6 +145,7 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
         String result = gitRequestProxy.get(accessInfo.getGitDomain() + path, getTokenHeader(accessInfo));
         List<BranchInfo> branches = JSON.parseArray(result, BranchInfo.class);
         if (CollectionUtils.isEmpty(branches)) {
+            log.info("can not get project branches ={}", projectId);
             return Collections.emptyList();
         }
         return branches.stream().map(BranchInfo::getName)
@@ -122,7 +160,9 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
         if (Objects.isNull(projectId)) {
             loadGitRepositories(accessInfo);
         }
-        return serviceIdMap.get(accessInfo.getGitServiceName().toLowerCase());
+        projectId = serviceIdMap.get(accessInfo.getGitServiceName().toLowerCase());
+        log.info("get service={} gitlab project id = {}", accessInfo.getGitServiceName(), projectId);
+        return projectId;
     }
 
     @Override
@@ -192,7 +232,7 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
     private List<GitlabRepository> getGitlabRepository(GitAccessInfo accessInfo) {
         String result =
                 gitRequestProxy.get(accessInfo.getGitDomain() + "/api/v4/projects?search=" + accessInfo.getGitServiceName(),
-                getTokenHeader(accessInfo));
+                        getTokenHeader(accessInfo));
         return JSON.parseArray(result, GitlabRepository.class);
     }
 

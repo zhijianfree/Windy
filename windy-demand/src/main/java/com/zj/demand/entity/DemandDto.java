@@ -20,7 +20,7 @@ public class DemandDto {
     /**
      * 需求名称
      */
-    @Length(min = 10, max = 50)
+    @Length(min = 4, max = 50)
     @NotBlank(groups = Create.class)
     private String demandName;
 
@@ -37,17 +37,6 @@ public class DemandDto {
     private String customerValue;
 
     /**
-     * 提出人名称
-     */
-    @Length(max = 64)
-    private String proposerName;
-
-    /**
-     * 提出人
-     */
-    private String proposer;
-
-    /**
      * 接受人名称
      */
     @Length(max = 64)
@@ -56,6 +45,8 @@ public class DemandDto {
     /**
      * 接受人
      */
+    @Length(max = 64)
+    @NotBlank(message = "需求接受人不能为空", groups = Create.class)
     private String acceptor;
 
     /**
@@ -77,7 +68,7 @@ public class DemandDto {
     /**
      * 期待完成时间
      */
-    @NotNull(groups = Create.class)
+    @NotNull(groups = Create.class, message = "需求期望完成时间不能为空")
     private Long expectTime;
 
     /**
@@ -88,7 +79,7 @@ public class DemandDto {
     /**
      * 工作量
      */
-    @NotNull(groups = Create.class)
+    @NotNull(groups = Create.class, message = "需求工作量不能为空")
     private Double workload;
 
     /**

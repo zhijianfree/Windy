@@ -82,12 +82,14 @@ public class TokenHolder {
     public UserSession getUserSessionByToken(HttpServletRequest request) {
         String authTokenValue = request.getHeader(Constants.AUTHORIZATION_KEY);
         if (StringUtils.isBlank(authTokenValue) || !authTokenValue.startsWith(Constants.TOKEN_PREFIX)){
+            log.info("token value is invalid, not start with: {}", Constants.TOKEN_PREFIX);
             return null;
         }
 
         authTokenValue =  authTokenValue.replace(Constants.TOKEN_PREFIX,"");
         boolean verifyResult = verifyToken(authTokenValue, tokenSecret);
         if (!verifyResult) {
+            log.info("verify token fail");
             return null;
         }
 

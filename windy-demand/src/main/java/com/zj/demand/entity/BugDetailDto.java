@@ -87,7 +87,7 @@ public class BugDetailDto {
      * 需求ID
      */
     @NotBlank(message = "缺陷关联的需求ID不能为空",groups = Create.class)
-    private String demandId;
+    private String relationId;
 
     /**
      * 空间ID

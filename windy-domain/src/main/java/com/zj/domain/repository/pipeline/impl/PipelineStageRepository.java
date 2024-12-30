@@ -19,9 +19,8 @@ public class PipelineStageRepository extends
     ServiceImpl<PipelineStageMapper, PipelineStage> implements IPipelineStageRepository {
 
   @Override
-  public void deletePipelineStages(List<String> stageIds) {
-    remove(
-        Wrappers.lambdaQuery(PipelineStage.class).in(PipelineStage::getStageId, stageIds));
+  public boolean deletePipelineStages(List<String> stageIds) {
+    return remove(Wrappers.lambdaQuery(PipelineStage.class).in(PipelineStage::getStageId, stageIds));
   }
 
   @Override

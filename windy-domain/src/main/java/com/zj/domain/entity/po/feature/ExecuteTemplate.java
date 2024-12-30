@@ -59,6 +59,11 @@ public class ExecuteTemplate {
     private String owner;
 
     /**
+     * 模版来源，如果是插件模版就此字段代表关联的插件ID
+     */
+    private String source;
+
+    /**
      * 关联的模版Id
      */
     private String relatedId;

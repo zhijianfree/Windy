@@ -37,7 +37,7 @@ public class NodeRecordService {
       log.warn("can not parse status type ={}", approvalInfo.getType());
       throw new ApiException(ErrorCode.PARAM_VALIDATE_ERROR);
     }
-    NodeRecordBO nodeRecord = nodeRecordRepository.getRecordByNodeAndHistory(approvalInfo.getHistoryId(),
+    NodeRecordBO nodeRecord = nodeRecordRepository.getRecordsByNodeIdAndHistory(approvalInfo.getHistoryId(),
             approvalInfo.getNodeId());
     if (Objects.isNull(nodeRecord)) {
       log.info("can not find node record historyId={} nodeId={}",approvalInfo.getHistoryId(), approvalInfo.getNodeId());

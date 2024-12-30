@@ -1,11 +1,12 @@
 package com.zj.domain.entity.bo.demand;
 
+import com.zj.domain.entity.vo.BaseQuery;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
-public class BugQueryBO {
+public class BugQueryBO extends BaseQuery {
 
     /**
      * 分页号
@@ -28,11 +29,6 @@ public class BugQueryBO {
     private Integer status;
 
     /**
-     * 用户ID
-     */
-    private String userId;
-
-    /**
      * 空间ID
      */
     private String spaceId;
@@ -41,4 +37,14 @@ public class BugQueryBO {
      * 迭代ID
      */
     private String iterationId;
+
+    /**
+     * 处理人
+     */
+    private String acceptor;
+
+    /**
+     * 用户ID
+     */
+    private String proposer;
 }

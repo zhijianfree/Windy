@@ -5,7 +5,7 @@ import com.zj.client.handler.pipeline.build.CodeBuildContext;
 import com.zj.client.handler.pipeline.build.IBuildNotifyListener;
 import com.zj.client.handler.pipeline.build.ICodeBuilder;
 import com.zj.client.utils.ExceptionUtils;
-import com.zj.common.enums.CodeType;
+import com.zj.common.enums.ToolType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +27,7 @@ public class GoCodeBuilder implements ICodeBuilder {
 
     @Override
     public String codeType() {
-        return CodeType.GO.getType();
+        return ToolType.GO.getType();
     }
 
     @Override
@@ -37,7 +37,7 @@ public class GoCodeBuilder implements ICodeBuilder {
         String buildFilePath = context.getTargetDir() + File.separator + "go_build.sh";
         notifyListener.notifyMessage("执行构建文件目录:" + buildFilePath);
         copyBuildFile(buildFilePath);
-        String goPath = buildVersionPath + File.separator + "go" + File.separator + context.getBuildVersion();
+        String goPath = context.getBuildPath();
         ProcessBuilder processBuilder = new ProcessBuilder(buildFilePath, context.getServiceName(), "1.0.0",
                 targetFile.getParentFile().getAbsolutePath(), goPath, context.getTargetDir());
         processBuilder.redirectErrorStream(true); // 合并标准错误流和标准输出流

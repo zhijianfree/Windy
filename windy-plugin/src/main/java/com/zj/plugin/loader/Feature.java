@@ -4,4 +4,7 @@ import java.util.List;
 
 public interface Feature {
     List<FeatureDefine> scanFeatureDefines();
+
+    default void bindListener(IAsyncNotifyListener listener) {
+    }
 }

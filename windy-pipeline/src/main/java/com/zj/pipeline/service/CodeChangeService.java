@@ -1,13 +1,10 @@
 package com.zj.pipeline.service;
 
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.adapter.git.GitAccessInfo;
 import com.zj.common.adapter.git.IGitRepositoryHandler;
-import com.zj.common.entity.pipeline.ServiceConfig;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.domain.entity.bo.demand.BugBO;
 import com.zj.domain.entity.bo.demand.DemandBO;
@@ -19,9 +16,8 @@ import com.zj.domain.repository.demand.IBugRepository;
 import com.zj.domain.repository.demand.IDemandRepository;
 import com.zj.domain.repository.demand.IWorkTaskRepository;
 import com.zj.domain.repository.pipeline.ICodeChangeRepository;
-import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
-import com.zj.pipeline.entity.enums.RelationType;
+import com.zj.domain.entity.enums.RelationType;
 import com.zj.pipeline.git.RepositoryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,7 +25,6 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -46,20 +41,18 @@ public class CodeChangeService {
     private final UniqueIdService uniqueIdService;
     private final ICodeChangeRepository codeChangeRepository;
     private final IBugRepository bugRepository;
-    private final ISystemConfigRepository systemConfigRepository;
     private final IDemandRepository demandRepository;
     private final IWorkTaskRepository workTaskRepository;
 
     public CodeChangeService(RepositoryFactory repositoryFactory, IMicroServiceRepository serviceRepository,
                              UniqueIdService uniqueIdService, ICodeChangeRepository codeChangeRepository,
-                             IBugRepository bugRepository, ISystemConfigRepository systemConfigRepository, IDemandRepository demandRepository,
+                             IBugRepository bugRepository, IDemandRepository demandRepository,
                              IWorkTaskRepository workTaskRepository) {
         this.repositoryFactory = repositoryFactory;
         this.serviceRepository = serviceRepository;
         this.uniqueIdService = uniqueIdService;
         this.codeChangeRepository = codeChangeRepository;
         this.bugRepository = bugRepository;
-        this.systemConfigRepository = systemConfigRepository;
         this.demandRepository = demandRepository;
         this.workTaskRepository = workTaskRepository;
     }
@@ -70,11 +63,7 @@ public class CodeChangeService {
     }
 
     public String createCodeChange(CodeChangeBO codeChange) {
-        MicroserviceBO service = checkServiceExist(codeChange.getServiceId());
-        GitAccessInfo gitAccessInfo = Optional.ofNullable(service.getServiceConfig())
-                .map(ServiceConfig::getGitAccessInfo).filter(access -> StringUtils.isNotBlank(access.getAccessToken()))
-                .orElseGet(systemConfigRepository::getGitAccess);
-        gitAccessInfo.setGitUrl(service.getGitUrl());
+        GitAccessInfo gitAccessInfo = repositoryFactory.getServiceRepositoryAccessInfo(codeChange.getServiceId());
         IGitRepositoryHandler repository = repositoryFactory.getRepository(gitAccessInfo.getGitType());
         repository.createBranch(codeChange.getChangeBranch(), gitAccessInfo);
 
@@ -99,22 +88,18 @@ public class CodeChangeService {
     }
 
     public Boolean deleteCodeChange(String serviceId, String codeChangeId) {
-        MicroserviceBO service = checkServiceExist(serviceId);
         CodeChangeBO codeChange = getCodeChange(serviceId, codeChangeId);
-        GitAccessInfo gitAccessInfo = Optional.ofNullable(service.getServiceConfig())
-                .map(ServiceConfig::getGitAccessInfo).filter(access -> StringUtils.isNotBlank(access.getAccessToken()))
-                .orElseGet(systemConfigRepository::getGitAccess);
+        GitAccessInfo gitAccessInfo = repositoryFactory.getServiceRepositoryAccessInfo(serviceId);
         IGitRepositoryHandler repository = repositoryFactory.getRepository(gitAccessInfo.getGitType());
-        gitAccessInfo.setGitUrl(service.getGitUrl());
         repository.deleteBranch(codeChange.getChangeBranch(), gitAccessInfo);
         return codeChangeRepository.deleteCodeChange(codeChangeId);
     }
 
     public List<RelationDemandBug> queryRelationIds(String queryName) {
         CompletableFuture<List<BugBO>> bugFuture =
-                CompletableFuture.supplyAsync(() -> bugRepository.getBugsByName(queryName));
+                CompletableFuture.supplyAsync(() -> bugRepository.getBugsFuzzyByName(queryName));
         CompletableFuture<List<DemandBO>> demandFuture =
-                CompletableFuture.supplyAsync(() -> demandRepository.getDemandsByName(queryName));
+                CompletableFuture.supplyAsync(() -> demandRepository.getDemandsByFuzzName(queryName));
         CompletableFuture<List<WorkTaskBO>> workFuture =
                 CompletableFuture.supplyAsync(() -> workTaskRepository.getWorkTaskByName(queryName));
         CompletableFuture.allOf(bugFuture, demandFuture, workFuture).join();
@@ -137,13 +122,11 @@ public class CodeChangeService {
         return Collections.emptyList();
     }
 
-    private MicroserviceBO checkServiceExist(String serviceId) {
+    private void checkServiceExist(String serviceId) {
         MicroserviceBO serviceDetail = serviceRepository.queryServiceDetail(serviceId);
         if (Objects.isNull(serviceDetail)) {
             log.warn("can not find serviceId ={}", serviceId);
             throw new ApiException(ErrorCode.NOT_FOUND_SERVICE);
         }
-
-        return serviceDetail;
     }
 }

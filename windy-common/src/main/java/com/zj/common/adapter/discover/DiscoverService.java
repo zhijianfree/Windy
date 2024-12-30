@@ -17,7 +17,7 @@ public class DiscoverService {
   public static final String WINDY_MASTER = "WindyMaster";
   public static final String WINDY_Client = "WindyClient";
 
-  private DiscoveryClient discoveryClient;
+  private final DiscoveryClient discoveryClient;
 
   public DiscoverService(DiscoveryClient discoveryClient) {
     this.discoveryClient = discoveryClient;

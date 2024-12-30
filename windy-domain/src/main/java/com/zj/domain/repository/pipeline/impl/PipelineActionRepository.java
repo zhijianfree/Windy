@@ -15,6 +15,7 @@ import com.zj.domain.entity.bo.pipeline.PipelineActionBO;
 import com.zj.domain.entity.po.pipeline.PipelineAction;
 import com.zj.domain.mapper.pipeline.PipelineActionMapper;
 import com.zj.domain.repository.pipeline.IPipelineActionRepository;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
@@ -95,9 +96,11 @@ public class PipelineActionRepository extends
     }
 
     @Override
-    public boolean batchDelete(List<String> removeList) {
-        return remove(
-                Wrappers.lambdaQuery(PipelineAction.class).in(PipelineAction::getActionId, removeList));
+    public boolean batchDelete(List<String> actionIds) {
+        if (CollectionUtils.isEmpty(actionIds)) {
+            return false;
+        }
+        return remove(Wrappers.lambdaQuery(PipelineAction.class).in(PipelineAction::getActionId, actionIds));
     }
 
     private PipelineActionBO convertActionBO(PipelineAction action) {

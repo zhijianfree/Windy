@@ -5,7 +5,6 @@ import com.zj.common.adapter.invoker.IMasterInvoker;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.common.entity.WindyConstants;
 import com.zj.common.entity.dto.DispatchTaskModel;
-import com.zj.common.entity.feature.ExecuteTemplateVo;
 import com.zj.common.entity.generate.GenerateRecordBO;
 import com.zj.common.entity.service.ApiParamModel;
 import com.zj.common.enums.LogType;
@@ -18,7 +17,7 @@ import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.bo.feature.ExecuteTemplateBO;
 import com.zj.domain.entity.bo.service.ServiceApiBO;
 import com.zj.domain.entity.bo.service.ServiceGenerateBO;
-import com.zj.domain.entity.vo.MavenConfigVo;
+import com.zj.domain.entity.vo.GenerateMavenConfigDto;
 import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IGenerateRecordRepository;
@@ -29,6 +28,7 @@ import com.zj.plugin.loader.ParamValueType;
 import com.zj.plugin.loader.ParameterDefine;
 import com.zj.service.entity.ApiModel;
 import com.zj.service.entity.ApiRequestVariable;
+import com.zj.service.entity.ExecuteTemplateDto;
 import com.zj.service.entity.GenerateTemplate;
 import com.zj.service.entity.ImportApiResult;
 import com.zj.service.service.imports.ApiImportFactory;
@@ -191,7 +191,7 @@ public class ApiService {
     }
 
     private void checkMavenConfig() {
-        MavenConfigVo mavenConfig = systemConfigRepository.getMavenConfig();
+        GenerateMavenConfigDto mavenConfig = systemConfigRepository.getMavenConfig();
         if (Objects.isNull(mavenConfig) || !mavenConfig.checkConfig()) {
             throw new ApiException(ErrorCode.MAVEN_NOT_CONFIG);
         }
@@ -235,7 +235,7 @@ public class ApiService {
         return null;
     }
 
-    public List<ExecuteTemplateVo> apiGenerateTemplate(GenerateTemplate generateTemplate) {
+    public List<ExecuteTemplateDto> apiGenerateTemplate(GenerateTemplate generateTemplate) {
         List<ServiceApiBO> serviceApis = apiRepository.getServiceApiList(generateTemplate.getApiIds());
         if (CollectionUtils.isEmpty(serviceApis)) {
             return Collections.emptyList();
@@ -248,7 +248,7 @@ public class ApiService {
         return serviceApis.stream().filter(serviceApi -> generateTemplate.getCover() || !existTemplateIds.contains(serviceApi.getApiId())).map(serviceApi -> convertApi2Template(serviceApi, generateTemplate.getInvokeType(), generateTemplate.getRelatedId())).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    private ExecuteTemplateVo convertApi2Template(ServiceApiBO serviceApi, Integer invokeType, String relatedId) {
+    private ExecuteTemplateDto convertApi2Template(ServiceApiBO serviceApi, Integer invokeType, String relatedId) {
         if (!serviceApi.isApi()) {
             return null;
         }
@@ -362,8 +362,8 @@ public class ApiService {
         return HOST_VARIABLE_LABEL + uri;
     }
 
-    public ExecuteTemplateVo toExecuteTemplateDTO(ExecuteTemplateBO executeTemplate) {
-        ExecuteTemplateVo templateVo = OrikaUtil.convert(executeTemplate, ExecuteTemplateVo.class);
+    public ExecuteTemplateDto toExecuteTemplateDTO(ExecuteTemplateBO executeTemplate) {
+        ExecuteTemplateDto templateVo = OrikaUtil.convert(executeTemplate, ExecuteTemplateDto.class);
         templateVo.setParams(executeTemplate.getParameterDefines());
         templateVo.setHeaders((Map<String, String>) JSON.parse(executeTemplate.getHeader()));
         return templateVo;

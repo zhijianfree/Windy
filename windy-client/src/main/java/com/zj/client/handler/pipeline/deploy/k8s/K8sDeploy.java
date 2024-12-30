@@ -1,5 +1,6 @@
 package com.zj.client.handler.pipeline.deploy.k8s;
 
+import com.alibaba.fastjson.JSON;
 import com.zj.client.handler.pipeline.deploy.AbstractDeployMode;
 import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.utils.ExceptionUtils;
@@ -34,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -66,21 +68,33 @@ public class K8sDeploy extends AbstractDeployMode<K8sDeployContext> {
         Config config = new ConfigBuilder().withMasterUrl(k8SAccess.getApiService())
                 .withNamespace(k8SAccess.getNamespace())
                 .withTrustCerts(true).withOauthToken(k8SAccess.getToken()).build();
-        KubernetesClient client = null;
-        try {
-            client = new DefaultKubernetesClient(config);
+        try (KubernetesClient client = new DefaultKubernetesClient(config)){
             String appName = Optional.ofNullable(deployContext.getServiceConfig().getAppName())
                     .orElse(deployContext.getServiceName()).toLowerCase();
+            List<String> messages = convertDeployInfo(deployContext, appName);
+            updateDeployStatus(deployContext.getRecordId(), ProcessStatus.RUNNING, messages);
             deployK8s(deployContext, client, appName);
             loopQueryDeployStatus(deployContext, client, appName);
             updateDeployStatus(deployContext.getRecordId(), ProcessStatus.SUCCESS);
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             log.error("deploy k8s instance error", e);
             List<String> errorMsg = ExceptionUtils.getErrorMsg(e);
             updateDeployStatus(deployContext.getRecordId(), ProcessStatus.FAIL, errorMsg);
-        } finally {
-            Optional.ofNullable(client).ifPresent(Client::close);
         }
+    }
+
+    private List<String> convertDeployInfo(K8sDeployContext deployContext, String appName) {
+        List<String> messages = new ArrayList<>();
+        messages.add("start deploy deployment:");
+        messages.add("app name: " + appName);
+        messages.add("NameSpace: " + deployContext.getK8SAccessParams().getNamespace());
+        ServiceConfig serviceConfig = deployContext.getServiceConfig();
+        messages.add("replicas: " + serviceConfig.getReplicas());
+        messages.add("image address: " + serviceConfig.getImageName());
+        messages.add("service port: " + JSON.toJSONString(serviceConfig.getPorts()));
+        messages.add("app environment: " + JSON.toJSONString(serviceConfig.getEnvParams()));
+        messages.add("volumes: " + JSON.toJSONString(serviceConfig.getVolumes()));
+        return messages;
     }
 
     private void deployK8s(K8sDeployContext deployContext, KubernetesClient client, String appName) {

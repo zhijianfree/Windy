@@ -46,8 +46,11 @@ public class BugRest {
                                                     @RequestParam(value = "name", required = false) String name,
                                                     @RequestParam(value = "spaceId", required = false) String spaceId,
                                                     @RequestParam(value = "iterationId", required = false) String iterationId,
+                                                    @RequestParam(value = "acceptor", required = false) String acceptor,
+                                                    @RequestParam(value = "type", required = false) Integer type,
                                                     @RequestParam(value = "status", required = false) Integer status) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getBugPage(page, size, name, status, spaceId, iterationId));
+        return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getBugPage(page, size, name, status, spaceId,
+                iterationId, acceptor, type));
     }
 
     @GetMapping("/bug/tags")
@@ -76,10 +79,10 @@ public class BugRest {
     }
 
     @GetMapping("/user/bugs")
-    public ResponseMeta<PageSize<BugBO>> getRelatedBugs(@RequestParam(value = "page", defaultValue = "1") Integer page,
-                                                        @RequestParam(value = "size", defaultValue = "10") Integer size,
-                                                        @RequestParam(value = "status", required = false) Integer status) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getRelatedBugs(page, size, status));
+    public ResponseMeta<PageSize<BugBO>> getUserRelatedBugs(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                            @RequestParam(value = "size", defaultValue = "10") Integer size,
+                                                            @RequestParam(value = "status", required = false) Integer status) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, bugService.getUserRelatedBugs(page, size, status));
     }
 
 }

@@ -4,15 +4,18 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.bo.demand.IterationBO;
-import com.zj.domain.entity.bo.service.ResourceMemberDto;
+import com.zj.domain.entity.bo.service.ResourceMemberBO;
 import com.zj.domain.entity.enums.IterationStatus;
+import com.zj.domain.entity.enums.MemberType;
 import com.zj.domain.entity.po.demand.Iteration;
 import com.zj.domain.mapper.demand.IterationMapper;
 import com.zj.domain.repository.demand.IMemberRepository;
 import com.zj.domain.repository.demand.IterationRepository;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +30,9 @@ public class IterationRepositoryImpl extends ServiceImpl<IterationMapper, Iterat
 
     @Override
     public List<IterationBO> getIterationList(String spaceId, List<String> iterationIds) {
+        if (CollectionUtils.isEmpty(iterationIds)) {
+            return Collections.emptyList();
+        }
         List<Iteration> iterations = list(Wrappers.lambdaQuery(Iteration.class).in(Iteration::getIterationId,
                         iterationIds)
                 .eq(Iteration::getSpaceId, spaceId).orderByDesc(Iteration::getCreateTime));
@@ -49,10 +55,11 @@ public class IterationRepositoryImpl extends ServiceImpl<IterationMapper, Iterat
         Iteration iteration = OrikaUtil.convert(iterationBO, Iteration.class);
         boolean result = save(iteration);
         if (result) {
-            ResourceMemberDto resourceMemberDto = new ResourceMemberDto();
-            resourceMemberDto.setUserId(iterationBO.getUserId());
-            resourceMemberDto.setResourceId(iterationBO.getIterationId());
-            memberRepository.addResourceMember(resourceMemberDto);
+            ResourceMemberBO resourceMemberBO = new ResourceMemberBO();
+            resourceMemberBO.setRelationId(iterationBO.getUserId());
+            resourceMemberBO.setMemberType(MemberType.ITERATION_MEMBER.getType());
+            resourceMemberBO.setResourceId(iterationBO.getIterationId());
+            memberRepository.addResourceMember(resourceMemberBO);
         }
         return result ? iterationBO : null;
     }

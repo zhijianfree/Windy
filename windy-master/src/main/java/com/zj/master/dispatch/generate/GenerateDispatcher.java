@@ -6,11 +6,11 @@ import com.zj.common.entity.service.ApiParamModel;
 import com.zj.common.enums.DispatchType;
 import com.zj.common.enums.LogType;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.bo.log.DispatchLogDto;
+import com.zj.domain.entity.bo.log.DispatchLogBO;
 import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.domain.entity.bo.service.ServiceApiBO;
 import com.zj.domain.entity.bo.service.ServiceGenerateBO;
-import com.zj.domain.entity.vo.MavenConfigVo;
+import com.zj.domain.entity.vo.GenerateMavenConfigDto;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IGenerateRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
@@ -48,7 +48,7 @@ public class GenerateDispatcher implements IDispatchExecutor {
   }
 
   @Override
-  public boolean isExistInJvm(DispatchLogDto taskLog) {
+  public boolean isExistInJvm(DispatchLogBO taskLog) {
     return false;
   }
 
@@ -62,7 +62,7 @@ public class GenerateDispatcher implements IDispatchExecutor {
 
     GenerateParam generateParam = OrikaUtil.convert(serviceGenerate, GenerateParam.class);
     generateParam.setDispatchType(DispatchType.GENERATE.name());
-    MavenConfigVo mavenConfig = systemConfigRepository.getMavenConfig();
+    GenerateMavenConfigDto mavenConfig = systemConfigRepository.getMavenConfig();
     generateParam.setMavenUser(mavenConfig.getUserName());
     generateParam.setMavenPwd(mavenConfig.getPassword());
     generateParam.setMavenRepository(mavenConfig.getMavenUrl());
@@ -85,7 +85,7 @@ public class GenerateDispatcher implements IDispatchExecutor {
   }
 
   @Override
-  public boolean resume(DispatchLogDto taskLog) {
+  public boolean resume(DispatchLogBO taskLog) {
     return false;
   }
 

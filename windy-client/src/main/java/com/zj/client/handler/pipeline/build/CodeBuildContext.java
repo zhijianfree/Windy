@@ -20,7 +20,12 @@ public class CodeBuildContext {
     private String targetDir;
 
     /**
-     * 构建的版本目录
+     * 构建工具的安装目录
      */
-    private String buildVersion;
+    private String buildPath;
+
+    /**
+     * 构建的版本
+     */
+    private String version;
 }

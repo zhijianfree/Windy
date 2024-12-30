@@ -2,7 +2,6 @@ package com.zj.client.handler.pipeline.executer.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +24,10 @@ public class QueryResponseModel {
 
   public void addMessage(String msg) {
     message.add(msg);
+  }
+
+  public void addAllMessage(List<String> msgList) {
+    message.addAll(msgList);
   }
 
   @Data

@@ -65,6 +65,11 @@ public class ExecuteTemplateBO {
     private String relatedId;
 
     /**
+     * 模版来源，如果是插件模版就此字段代表关联的插件ID
+     */
+    private String source;
+
+    /**
      * 创建时间
      */
     private Long createTime;

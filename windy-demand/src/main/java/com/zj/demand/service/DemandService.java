@@ -2,21 +2,27 @@ package com.zj.demand.service;
 
 import com.zj.common.adapter.auth.IAuthService;
 import com.zj.common.adapter.auth.UserDetail;
+import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.entity.dto.PageSize;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.common.entity.dto.PageSize;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.demand.entity.DemandDetailDto;
 import com.zj.demand.entity.DemandDto;
 import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.demand.BusinessStatusBO;
 import com.zj.domain.entity.bo.demand.DemandBO;
 import com.zj.domain.entity.bo.demand.DemandQueryBO;
+import com.zj.domain.entity.bo.pipeline.CodeChangeBO;
+import com.zj.domain.entity.enums.BusinessStatusType;
+import com.zj.domain.entity.enums.RelationType;
 import com.zj.domain.repository.auth.IUserRepository;
 import com.zj.domain.repository.demand.IBusinessStatusRepository;
 import com.zj.domain.repository.demand.IDemandRepository;
+import com.zj.domain.repository.demand.IMemberRepository;
+import com.zj.domain.repository.pipeline.ICodeChangeRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,14 +38,16 @@ public class DemandService {
     private final UniqueIdService uniqueIdService;
     private final IUserRepository userRepository;
     private final IBusinessStatusRepository businessStatusRepository;
+    private final ICodeChangeRepository codeChangeRepository;
 
     public DemandService(IAuthService authService, IDemandRepository demandRepository,
-                         UniqueIdService uniqueIdService, IUserRepository userRepository, IBusinessStatusRepository businessStatusRepository) {
+                         UniqueIdService uniqueIdService, IUserRepository userRepository, IBusinessStatusRepository businessStatusRepository, ICodeChangeRepository codeChangeRepository) {
         this.authService = authService;
         this.demandRepository = demandRepository;
         this.uniqueIdService = uniqueIdService;
         this.userRepository = userRepository;
         this.businessStatusRepository = businessStatusRepository;
+        this.codeChangeRepository = codeChangeRepository;
     }
 
     public DemandBO createDemand(DemandDto demandDto) {
@@ -56,27 +64,29 @@ public class DemandService {
         return demandBO;
     }
 
-    public PageSize<DemandBO> getDemandPage(Integer page, Integer size, String name, Integer status, String spaceId, String iterationId) {
+    public PageSize<DemandBO> getDemandPage(Integer page, Integer size, String name, Integer status, String spaceId, String iterationId, String acceptor, Integer type) {
         String currentUserId = authService.getCurrentUserId();
-        DemandQueryBO demandQueryBO = DemandQueryBO.builder()
-                .pageSize(size)
-                .page(page)
-                .name(name)
-                .status(status)
-                .spaceId(spaceId)
-                .iterationId(iterationId)
-                .creator(currentUserId).build();
+        DemandQueryBO demandQueryBO = DemandQueryBO.builder().pageSize(size).page(page).name(name).status(status)
+                .spaceId(spaceId).acceptor(acceptor).iterationId(iterationId).proposer(currentUserId).build();
+        demandQueryBO.handleQueryType(type, currentUserId);
         return demandRepository.getDemandPage(demandQueryBO);
     }
 
     public PageSize<DemandBO> getUserDemands(Integer page, Integer size, Integer status) {
         String currentUserId = authService.getCurrentUserId();
         DemandQueryBO demandQueryBO =
-                DemandQueryBO.builder().pageSize(size).page(page).status(status).creator(currentUserId).build();
+                DemandQueryBO.builder().pageSize(size).page(page).status(status).acceptor(currentUserId).build();
         return demandRepository.getDemandPage(demandQueryBO);
     }
 
     public boolean updateDemand(DemandDto demandDto) {
+        DemandBO demand = demandRepository.getDemand(demandDto.getDemandId());
+        boolean unchangeableStatus = businessStatusRepository.isUnchangeableStatus(demand.getStatus(),
+                BusinessStatusType.DEMAND.name());
+        if (Objects.nonNull(demandDto.getStatus()) && unchangeableStatus) {
+            log.info("demand status is unchangeable status= {}", demand.getStatus());
+            throw new ApiException(ErrorCode.STATUS_UNCHANGEABLE_ERROR);
+        }
         return demandRepository.updateDemand(OrikaUtil.convert(demandDto, DemandBO.class));
     }
 
@@ -95,12 +105,20 @@ public class DemandService {
     }
 
     public Boolean deleteDemand(String demandId) {
-        return demandRepository.deleteDemand(demandId);
-    }
+        DemandBO demand = demandRepository.getDemand(demandId);
+        if (Objects.isNull(demand)) {
+            log.info("demand not find demandId={}", demandId);
+            throw new ApiException(ErrorCode.DEMAND_NOT_EXIST);
+        }
 
-    public PageSize<DemandBO> getRelatedDemands(Integer page, Integer size) {
-        String currentUserId = authService.getCurrentUserId();
-        return demandRepository.getRelatedDemands(currentUserId, page, size);
+        boolean completeStatus = businessStatusRepository.isUnchangeableStatus(demand.getStatus(),
+                BusinessStatusType.DEMAND.name());
+        List<CodeChangeBO> codeChanges = codeChangeRepository.getCodeChangeByRelationId(demandId, RelationType.DEMAND.getType());
+        if (CollectionUtils.isNotEmpty(codeChanges) && !completeStatus) {
+            log.info("demand has bind branch demandId={}", demandId);
+            throw new ApiException(ErrorCode.DEMAND_HAS_BIND_BRANCH);
+        }
+        return demandRepository.deleteDemand(demandId);
     }
 
     public List<BusinessStatusBO> getDemandStatuses() {

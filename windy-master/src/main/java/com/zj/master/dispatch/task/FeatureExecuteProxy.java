@@ -181,24 +181,24 @@ public class FeatureExecuteProxy implements IStopEventListener {
     }
 
     public void featureStatusChange(String taskRecordId, FeatureHistoryBO history, Map<String, Object> context) {
-        //每个用例执行完成之后都需要判断下是整个任务是否执行完成
+        //优先替换全局上下文变量
         FeatureTask featureTask = featureTaskMap.get(taskRecordId);
-        if (Objects.isNull(featureTask)) {
-            log.info("can not find task record");
-            return;
-        }
-
-        boolean isTaskEnd = taskEndProcessor.process(taskRecordId, featureTask.getLogId());
-        if (isTaskEnd) {
-            featureTaskMap.remove(taskRecordId);
-            return;
-        }
-
         if (MapUtils.isNotEmpty(context)) {
-            featureTask.getExecuteContext().toMap().putAll(context);
+            Optional.ofNullable(featureTask).ifPresent(task -> task.getExecuteContext().toMap().putAll(context));
             //异步将上下文替换
             InternalEventFactory.sendNotifyEvent(new InternalEvent(EventType.RECOVER_CONTEXT, history.getFeatureId(),
                     context));
+        }
+
+        if (Objects.isNull(featureTask)) {
+            log.info("can not find task record, not cycle run");
+            return;
+        }
+        boolean isTaskEnd = taskEndProcessor.process(taskRecordId, featureTask.getLogId());
+        if (isTaskEnd) {
+            log.info("task is end, not run again taskRecordId={}", taskRecordId);
+            featureTaskMap.remove(taskRecordId);
+            return;
         }
 
         log.info("feature task start cycle run");
@@ -244,10 +244,10 @@ public class FeatureExecuteProxy implements IStopEventListener {
             featureTaskMap.remove(taskRecordId);
         }
 
-        log.info("stop pipeline task taskId={} taskRecordId={}", featureTask.getTaskId(),
-                featureTask.getTaskRecordId());
-        taskRecordRepository.updateRecordStatus(taskRecordId, ProcessStatus.STOP.getType());
-        featureHistoryRepository.stopTaskFeatures(taskRecordId, ProcessStatus.STOP);
+        boolean updateStatus = taskRecordRepository.updateRecordStatus(taskRecordId, ProcessStatus.STOP.getType());
+        boolean stopResult = featureHistoryRepository.stopTaskFeatures(taskRecordId, ProcessStatus.STOP);
+        log.info("stop pipeline task taskId={} taskRecordId={} updateStatus={} stopResult={}", featureTask.getTaskId(),
+                featureTask.getTaskRecordId(), updateStatus, stopResult);
     }
 
     public Integer getTaskSize() {

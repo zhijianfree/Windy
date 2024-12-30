@@ -8,12 +8,14 @@ import com.zj.client.handler.pipeline.executer.ExecuteProxy;
 import com.zj.client.handler.pipeline.executer.notify.NodeStatusQueryLooper;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.common.entity.dto.StopDispatch;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
  * @author guyuelan
  * @since 2023/5/15
  */
+@Slf4j
 @Service
 public class TaskDispatchService {
   private final IFeatureExecutor featureExecutor;
@@ -46,6 +48,7 @@ public class TaskDispatchService {
   }
 
   public Boolean stopDispatch(StopDispatch stopDispatch) {
+    log.info("receive stop message={}", stopDispatch.getTargetId());
     nodeStatusQueryLooper.stopPipeline(stopDispatch.getTargetId());
     return true;
   }

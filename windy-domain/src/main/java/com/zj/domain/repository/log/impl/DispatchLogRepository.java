@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.OrikaUtil;
-import com.zj.domain.entity.bo.log.DispatchLogDto;
+import com.zj.domain.entity.bo.log.DispatchLogBO;
 import com.zj.domain.entity.po.log.DispatchLog;
 import com.zj.domain.mapper.log.DispatchLogMapper;
 import com.zj.domain.repository.log.IDispatchLogRepository;
@@ -26,10 +26,10 @@ public class DispatchLogRepository extends ServiceImpl<DispatchLogMapper, Dispat
   public static final int PLUS_VERSION = 1;
 
   @Override
-  public List<DispatchLogDto> getRunningDispatchLog() {
+  public List<DispatchLogBO> getRunningDispatchLog() {
     List<DispatchLog> dispatchLogs = list(Wrappers.lambdaQuery(DispatchLog.class)
         .eq(DispatchLog::getLogStatus, ProcessStatus.RUNNING.getType()));
-    return OrikaUtil.convertList(dispatchLogs, DispatchLogDto.class);
+    return OrikaUtil.convertList(dispatchLogs, DispatchLogBO.class);
   }
 
   @Override
@@ -48,8 +48,8 @@ public class DispatchLogRepository extends ServiceImpl<DispatchLogMapper, Dispat
   }
 
   @Override
-  public void saveLog(DispatchLogDto dispatchLogDto) {
-    DispatchLog dispatchLog = OrikaUtil.convert(dispatchLogDto, DispatchLog.class);
+  public void saveLog(DispatchLogBO dispatchLogBO) {
+    DispatchLog dispatchLog = OrikaUtil.convert(dispatchLogBO, DispatchLog.class);
     Long dateNow = System.currentTimeMillis();
     dispatchLog.setCreateTime(dateNow);
     dispatchLog.setUpdateTime(dateNow);
@@ -87,9 +87,9 @@ public class DispatchLogRepository extends ServiceImpl<DispatchLogMapper, Dispat
   }
 
   @Override
-  public DispatchLogDto getDispatchLog(String logId) {
+  public DispatchLogBO getDispatchLog(String logId) {
     DispatchLog dispatchLog = getOne(
         Wrappers.lambdaQuery(DispatchLog.class).eq(DispatchLog::getLogId, logId));
-    return OrikaUtil.convert(dispatchLog, DispatchLogDto.class);
+    return OrikaUtil.convert(dispatchLog, DispatchLogBO.class);
   }
 }

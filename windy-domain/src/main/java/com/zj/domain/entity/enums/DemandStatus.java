@@ -21,6 +21,6 @@ public enum DemandStatus {
     }
 
     public static List<DemandStatus> getNotHandleDemands() {
-        return Arrays.asList(DemandStatus.NOT_HANDLE, DemandStatus.WORKING, ACCEPTED, WAIT_TEST);
+        return Arrays.asList(NOT_HANDLE, WORKING, ACCEPTED, WAIT_TEST);
     }
 }

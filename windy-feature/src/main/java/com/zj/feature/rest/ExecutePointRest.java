@@ -5,7 +5,7 @@ import com.zj.common.entity.dto.PageSize;
 import com.zj.common.entity.dto.ResponseMeta;
 import com.zj.feature.entity.CompareOperator;
 import com.zj.feature.entity.ExecutePointTemplate;
-import com.zj.feature.entity.ExecutePointVo;
+import com.zj.feature.entity.ExecutePointDto;
 import com.zj.feature.service.ExecutePointService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,18 +29,18 @@ public class ExecutePointRest {
     }
 
     @PostMapping("/batch/execute/point")
-    public ResponseMeta<Void> batchAddExecutePoint(@Valid @RequestBody List<ExecutePointVo> executePointDtos){
+    public ResponseMeta<Void> batchAddExecutePoint(@Valid @RequestBody List<ExecutePointDto> executePointDtos){
         executePointService.batchAddTestFeature(executePointDtos);
         return new ResponseMeta<>(ErrorCode.SUCCESS);
     }
 
     @PostMapping("/execute/point")
-    public ResponseMeta<String> createExecutePoint(@Valid @RequestBody ExecutePointVo executePointDTO) {
+    public ResponseMeta<String> createExecutePoint(@Valid @RequestBody ExecutePointDto executePointDTO) {
         return new ResponseMeta(ErrorCode.SUCCESS, executePointService.createExecutePoint(executePointDTO));
     }
 
     @PutMapping("/execute/point")
-    public ResponseMeta<String> updateExecutePoint(@Valid @RequestBody ExecutePointVo executePointDTO) {
+    public ResponseMeta<String> updateExecutePoint(@Valid @RequestBody ExecutePointDto executePointDTO) {
         return new ResponseMeta(ErrorCode.SUCCESS, executePointService.updateExecutePoint(executePointDTO));
     }
 
@@ -60,12 +60,12 @@ public class ExecutePointRest {
     }
 
     @GetMapping("/execute/point/{executePointId}")
-    public ResponseMeta<ExecutePointVo> queryExecutePoint(@PathVariable("executePointId") String executePointId) {
+    public ResponseMeta<ExecutePointDto> queryExecutePoint(@PathVariable("executePointId") String executePointId) {
         return new ResponseMeta(ErrorCode.SUCCESS, executePointService.getExecutePoint(executePointId));
     }
 
     @GetMapping("/{featureId}/execute/points")
-    public ResponseMeta<PageSize<ExecutePointVo>> queryFeaturePoints(@PathVariable("featureId") String featureId) {
+    public ResponseMeta<PageSize<ExecutePointDto>> queryFeaturePoints(@PathVariable("featureId") String featureId) {
         return new ResponseMeta(ErrorCode.SUCCESS, executePointService.getExecutePointsByFeatureId(featureId));
     }
 

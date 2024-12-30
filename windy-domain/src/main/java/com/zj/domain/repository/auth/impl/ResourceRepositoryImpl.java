@@ -95,7 +95,7 @@ public class ResourceRepositoryImpl extends ServiceImpl<ResourceMapper, Resource
     }
 
     @Override
-    public Boolean createResource(ResourceBO resourceBO) {
+    public boolean createResource(ResourceBO resourceBO) {
         Resource resource = OrikaUtil.convert(resourceBO, Resource.class);
         resource.setCreateTime(System.currentTimeMillis());
         resource.setUpdateTime(System.currentTimeMillis());
@@ -103,7 +103,7 @@ public class ResourceRepositoryImpl extends ServiceImpl<ResourceMapper, Resource
     }
 
     @Override
-    public Boolean updateResource(ResourceBO resourceBO) {
+    public boolean updateResource(ResourceBO resourceBO) {
         Resource resource = OrikaUtil.convert(resourceBO, Resource.class);
         resource.setUpdateTime(System.currentTimeMillis());
         return update(resource, Wrappers.lambdaUpdate(Resource.class).eq(Resource::getResourceId,
@@ -111,7 +111,7 @@ public class ResourceRepositoryImpl extends ServiceImpl<ResourceMapper, Resource
     }
 
     @Override
-    public Boolean deleteResource(String resourceId) {
+    public boolean deleteResource(String resourceId) {
         return remove(Wrappers.lambdaUpdate(Resource.class).eq(Resource::getResourceId, resourceId));
     }
 

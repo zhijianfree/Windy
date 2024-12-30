@@ -1,9 +1,10 @@
 package com.zj.master.service;
 
-import com.zj.common.entity.dto.MasterCollect;
+import com.zj.common.entity.dto.MasterCollectDto;
 import com.zj.common.adapter.monitor.collector.InstanceCollector;
 import com.zj.common.adapter.monitor.collector.PhysicsCollect;
 import com.zj.master.dispatch.IDispatchExecutor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,18 +15,22 @@ import java.util.List;
  */
 @Service
 public class MasterMonitor {
+
+  @Value("${windy.master.version}")
+  private String masterVersion;
   private final List<IDispatchExecutor> dispatchExecutors;
 
   public MasterMonitor(List<IDispatchExecutor> dispatchExecutors) {
     this.dispatchExecutors = dispatchExecutors;
   }
 
-  public MasterCollect getInstanceInfo() {
-    MasterCollect masterCollect = new MasterCollect();
+  public MasterCollectDto getInstanceInfo() {
+    MasterCollectDto masterCollectDto = new MasterCollectDto();
     PhysicsCollect physics = InstanceCollector.collectPhysics();
-    masterCollect.setPhysics(physics);
+    masterCollectDto.setPhysics(physics);
     int count = dispatchExecutors.stream().mapToInt(IDispatchExecutor::getExecuteCount).sum();
-    masterCollect.setTaskCount(count);
-    return masterCollect;
+    masterCollectDto.setTaskCount(count);
+    masterCollectDto.setVersion(masterVersion);
+    return masterCollectDto;
   }
 }

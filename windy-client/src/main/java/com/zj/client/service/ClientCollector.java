@@ -1,22 +1,23 @@
 package com.zj.client.service;
 
+import com.alibaba.fastjson.JSON;
+import com.zj.client.entity.dto.MavenConfigDto;
 import com.zj.client.handler.pipeline.executer.notify.NodeStatusQueryLooper;
 import com.zj.common.adapter.monitor.collector.InstanceCollector;
 import com.zj.common.adapter.monitor.collector.PhysicsCollect;
 import com.zj.common.entity.dto.ClientCollectDto;
-import com.zj.common.entity.service.LanguageVersionDto;
+import com.zj.common.entity.service.ToolLoadResult;
+import com.zj.common.entity.service.ToolVersionDto;
+import com.zj.common.enums.ToolType;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.ArrayUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.io.InputStreamReader;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 /**
  * @author guyuelan
@@ -26,9 +27,8 @@ import java.util.stream.Collectors;
 @Service
 public class ClientCollector {
 
-    @Value("${windy.build.path:/opt/windy/build}")
-    private String buildVersionPath;
-
+    @Value("${windy.client.version}")
+    private String clientVersion;
     private final NodeStatusQueryLooper nodeStatusQueryLooper;
 
     public ClientCollector(NodeStatusQueryLooper nodeStatusQueryLooper) {
@@ -41,35 +41,69 @@ public class ClientCollector {
         clientCollectDto.setPhysics(physics);
         Integer waitQuerySize = nodeStatusQueryLooper.getWaitQuerySize();
         clientCollectDto.setWaitQuerySize(waitQuerySize);
+        clientCollectDto.setVersion(clientVersion);
         return clientCollectDto;
     }
 
-    public LanguageVersionDto getLanguageVersions() {
-        String javaPath = buildVersionPath + File.separator + "java";
-        File javaDir = new File(javaPath);
-        List<String> javaList = getVersionsFromDir(javaDir);
+    public ToolLoadResult loadLocalToolVersion(ToolVersionDto toolVersionDto) {
+        boolean toolExist = checkToolExist(toolVersionDto.getType(), toolVersionDto.getInstallPath());
+        boolean configSetting = true;
+        if (toolExist && Objects.equals(toolVersionDto.getType(), ToolType.MAVEN.getType())) {
+            MavenConfigDto mavenConfig = new MavenConfigDto();
+            mavenConfig.setMavenPath(toolVersionDto.getInstallPath());
+            List<MavenConfigDto.RemoteRepository> repositories = JSON.parseArray(toolVersionDto.getBuildConfig(),
+                    MavenConfigDto.RemoteRepository.class);
+            mavenConfig.setRemoteRepositories(repositories);
+            configSetting = MavenSettingHelper.configSetting(mavenConfig);
+        }
 
-        String goPath = buildVersionPath + File.separator + "go";
-        File goDir = new File(goPath);
-        List<String> goList = getVersionsFromDir(goDir);
-        LanguageVersionDto languageVersionDto = new LanguageVersionDto();
-        languageVersionDto.setJavaVersions(javaList);
-        languageVersionDto.setGoVersions(goList);
-        return languageVersionDto;
+        File localFile = new File(toolVersionDto.getInstallPath());
+        ToolLoadResult toolLoadResult = new ToolLoadResult();
+        toolLoadResult.setSuccess(localFile.exists() && localFile.isDirectory() && toolExist && configSetting);
+        return toolLoadResult;
     }
 
-    private static List<String> getVersionsFromDir(File dir) {
-        if (!dir.exists()) {
-            boolean mkdirs = dir.mkdirs();
-            if (!mkdirs) {
-                return Collections.emptyList();
+    public boolean checkToolExist(String type, String installPath) {
+        try {
+            String command = exchangeCommand(type, installPath);
+            ProcessBuilder processBuilder = new ProcessBuilder();
+            processBuilder.command("sh", "-c", command);
+            Process process = processBuilder.start();
+
+            // 读取标准输出
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    log.info("load shell info: " + line);
+                }
             }
+
+            // 读取错误输出
+            try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+                String errorLine;
+                while ((errorLine = errorReader.readLine()) != null) {
+                    log.error("load shell error: " + errorLine);
+                }
+            }
+
+            return process.waitFor() == 0;
+        } catch (Exception e) {
+            log.error("get build tool ={} version error ", type, e);
         }
-        log.info("get list from url = {}", dir.getAbsolutePath());
-        File[] files = dir.listFiles();
-        if (ArrayUtils.isEmpty(files)) {
-            return Collections.emptyList();
+        return false;
+    }
+
+    private static String exchangeCommand(String type, String installPath) {
+        String command = installPath;
+        if (Objects.equals(ToolType.JAVA.getType(), type)) {
+            command += "/bin/java -version";
         }
-        return Arrays.stream(files).filter(File::isDirectory).map(File::getName).collect(Collectors.toList());
+        if (Objects.equals(ToolType.GO.getType(), type)) {
+            command += "/bin/go version";
+        }
+        if (Objects.equals(ToolType.MAVEN.getType(), type)) {
+            command += "/bin/mvn -v";
+        }
+        return command;
     }
 }

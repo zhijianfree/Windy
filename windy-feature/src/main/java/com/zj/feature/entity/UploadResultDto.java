@@ -2,7 +2,6 @@ package com.zj.feature.entity;
 
 import java.util.List;
 
-import com.zj.common.entity.feature.ExecuteTemplateVo;
 import lombok.Data;
 
 /**
@@ -14,5 +13,7 @@ public class UploadResultDto {
 
   private String pluginId;
 
-  private List<ExecuteTemplateVo> templateDefines;
+  private List<ExecuteTemplateDto> templateDefines;
+
+  private List<String> existPlugins;
 }

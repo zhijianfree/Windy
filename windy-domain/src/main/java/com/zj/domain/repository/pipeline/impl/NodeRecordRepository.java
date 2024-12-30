@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -55,35 +56,23 @@ public class NodeRecordRepository extends ServiceImpl<NodeRecordMapper, NodeReco
   }
 
   @Override
-  public boolean batchUpdateStatus(List<String> recordIds, ProcessStatus processStatus) {
-    NodeRecord nodeRecord = new NodeRecord();
-    nodeRecord.setStatus(processStatus.getType());
-    nodeRecord.setRecordResult(JSON.toJSONString(Collections.singleton(processStatus.getDesc())));
-    nodeRecord.setUpdateTime(System.currentTimeMillis());
-    boolean batchUpdate = update(nodeRecord,
-        Wrappers.lambdaUpdate(NodeRecord.class).in(NodeRecord::getRecordId, recordIds));
-    log.info("batch update record status={}", batchUpdate);
-    return batchUpdate;
-  }
-
-  @Override
-  public List<NodeRecordBO> getRecordsByHistoryId(String historyId) {
+  public List<NodeRecordBO> getRecordsByHistoryId(String pipelineHistoryId) {
     List<NodeRecord> nodeRecords = list(
-        Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getHistoryId, historyId));
+        Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getHistoryId, pipelineHistoryId));
     return nodeRecords.stream().map(NodeRecordRepository::convertNodeRecordBO).collect(Collectors.toList());
   }
 
   @Override
-  public NodeRecordBO getRecordById(String recordId) {
+  public NodeRecordBO getRecordById(String nodeRecordId) {
     NodeRecord nodeRecord = getOne(
-        Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getRecordId, recordId));
+        Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getRecordId, nodeRecordId));
     return convertNodeRecordBO(nodeRecord);
   }
 
   @Override
-  public NodeRecordBO getRecordByNodeAndHistory(String historyId, String nodeId) {
+  public NodeRecordBO getRecordsByNodeIdAndHistory(String pipelineHistoryId, String nodeId) {
     NodeRecord nodeRecord = getOne(
-        Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getHistoryId, historyId)
+        Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getHistoryId, pipelineHistoryId)
             .eq(NodeRecord::getNodeId, nodeId));
     return convertNodeRecordBO(nodeRecord);
   }
@@ -102,6 +91,14 @@ public class NodeRecordRepository extends ServiceImpl<NodeRecordMapper, NodeReco
   @Override
   public boolean deleteRecordByHistoryId(String historyId) {
     return remove(Wrappers.lambdaQuery(NodeRecord.class).eq(NodeRecord::getHistoryId, historyId));
+  }
+
+  @Override
+  public boolean deleteRecordByNodeId(List<String> nodeIds) {
+    if (CollectionUtils.isEmpty(nodeIds)) {
+      return false;
+    }
+    return remove(Wrappers.lambdaQuery(NodeRecord.class).in(NodeRecord::getNodeId, nodeIds));
   }
 
   private static NodeRecord convertNodeRecord(NodeRecordBO nodeRecordBO) {

@@ -5,10 +5,11 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public enum ErrorCode {
-  /*===================流水线=================*/
   SUCCESS(HttpStatus.OK, "Common.000000", "请求成功"),
   ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Common.000001", "请求失败"),
-  PARAM_VALIDATE_ERROR(HttpStatus.BAD_REQUEST, "Common.000005", "参数校验失败"),
+  PARAM_VALIDATE_ERROR(HttpStatus.BAD_REQUEST, "Common.000002", "参数校验失败"),
+  STATUS_UNCHANGEABLE_ERROR(HttpStatus.BAD_REQUEST, "Common.00003", "状态不可变更"),
+  /*===================流水线=================*/
   NOT_FOUND_PIPELINE(HttpStatus.NOT_FOUND, "Pipeline.000002", "流水线未找到"),
   NOT_FOUND_CODE_CHANGE(HttpStatus.NOT_FOUND, "Pipeline.000003", "服务变更未找到"),
   NOT_FOUND_PIPELINE_GIT_BIND(HttpStatus.NOT_FOUND, "Pipeline.000004", "流水关联分支未找到"),
@@ -26,7 +27,7 @@ public enum ErrorCode {
   CREATE_BRANCH_ERROR(HttpStatus.BAD_REQUEST, "Pipeline.000016", "创建分支失败"),
   PIPELINE_RUNNING_NOT_DELETE_PUBLISH(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000017", "流水线正在运行，无法删除发布分支"),
   PIPELINE_NOT_BIND_SERVICE(HttpStatus.BAD_REQUEST, "Pipeline.000018", "流水线不属于当前服务"),
-
+  RUN_PIPELINE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Pipeline.000019", "流水线任务调度失败,请稍后重试"),
   /*==================Service服务==================*/
   NOT_FIND_REPO_CONFIG(HttpStatus.BAD_REQUEST, "Service.000001", "git访问失败，请检查系统配置"),
   REPO_NOT_EXIST(HttpStatus.BAD_REQUEST, "Service.000002", "未发现用户可访问的仓库列表"),
@@ -35,13 +36,14 @@ public enum ErrorCode {
   GIT_NO_PERMISSION(HttpStatus.BAD_REQUEST, "Service.000005", "配置的用户token无权限访问"),
   USER_NO_PERMISSION(HttpStatus.BAD_REQUEST, "Service.000006", "用户未被授权访问当前git地址"),
   MAVEN_NOT_CONFIG(HttpStatus.BAD_REQUEST, "Service.000007", "系统未配置maven仓库地址，请先配置再尝试生成"),
-  GENERATE_VERSION_EXIST(HttpStatus.BAD_REQUEST, "Service.000008", "构建Maven而方包失败，版本号已存在"),
+  GENERATE_VERSION_EXIST(HttpStatus.BAD_REQUEST, "Service.000008", "构建Maven二方包失败，版本号已存在"),
   SERVICE_GENERATE_NAME_EMPTY(HttpStatus.BAD_REQUEST, "Service.000009", "[%s]接口转化的类名、方法名为空"),
   SERVICE_GENERATE_BODY_NAME_EMPTY(HttpStatus.BAD_REQUEST, "Service.000010", "[%s]接口转化的请求体类名为空"),
   SERVICE_GENERATE_BODY_PARAM_NAME_EMPTY(HttpStatus.BAD_REQUEST, "Service.000011", "[%s]接口请求参数类名为空"),
   SERVICE_GENERATE_RESPONSE_PARAM_NAME_EMPTY(HttpStatus.BAD_REQUEST, "Service.000012", "[%s]接口响应参数类名为空"),
   SERVICE_GENERATE_RESPONSE_NAME_EMPTY(HttpStatus.BAD_REQUEST, "Service.000013", "[%s]接口转化的响应类名为空"),
   SERVICE_API_NOT_FIND(HttpStatus.BAD_REQUEST, "Service.000014", "未发现服务API列表"),
+  LOAD_CLIENT_BUILD_TOOL_ERROR(HttpStatus.OK, "Service.000015", "加载client节点构建工具失败,节点列表: %s"),
   /*==================用例服务==================*/
   COMPARE_ERROR(HttpStatus.FORBIDDEN, "Feature.000002", "feature compare error"),
   EXECUTE_POINT_NOT_FIND(HttpStatus.NOT_FOUND, "Feature.000003", "can not find execute point"),
@@ -50,18 +52,25 @@ public enum ErrorCode {
   SUB_FEATURE_EXIST(HttpStatus.BAD_REQUEST, "Feature.000005", "存在子用例不能删除目录"),
   PARSE_PLUGIN_ERROR(HttpStatus.BAD_REQUEST, "Feature.000006", "解析插件错误"),
   TEMPLATE_NOT_FIND(HttpStatus.NOT_FOUND, "Feature.000007", "未找到模版"),
+  BATCH_UPDATE_FEATURE_POINTS_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Feature.000008", "批量更新用例执行点失败"),
+  NO_TEMPLATE_IN_PLUGIN(HttpStatus.BAD_REQUEST, "Feature.000009", "在插件中未找到模版信息，导入失败"),
+  TASK_NOT_FIND(HttpStatus.BAD_REQUEST, "Feature.000010", "任务不存在"),
+  TASK_RUN_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Feature.000011", "用例任务调度失败，请稍后重试"),
+  FEATURE_RUN_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Feature.000012", "用例执行调度失败，请稍后重试"),
+  COPY_CASE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Feature.000013", "复制用例失败"),
   /*==================需求缺陷管理======================*/
-  DEMAND_CREATE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Demand.000001", "创建需求失败"),
-  SPACE_NOT_EXIST(HttpStatus.BAD_REQUEST, "Space.000002", "空间不存在"),
+  BUG_NOT_EXIST(HttpStatus.BAD_REQUEST, "Bug.000001", "缺陷不存在"),
+  BUG_HAS_BIND_BRANCH(HttpStatus.BAD_REQUEST, "Bug.000002", "缺陷已经关联了分支无法删除"),
+  DEMAND_HAS_BIND_BRANCH(HttpStatus.BAD_REQUEST, "Demand.000001", "需求已经关联了分支无法删除"),
+  DEMAND_CREATE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Demand.000002", "创建需求失败"),
   DEMAND_NOT_EXIST(HttpStatus.BAD_REQUEST, "Demand.000004", "需求不存在"),
-  ITERATION_NOT_EXIST(HttpStatus.BAD_REQUEST, "Iteration.000003", "迭代不存在"),
-  BUG_NOT_EXIST(HttpStatus.BAD_REQUEST, "Bug.000005", "缺陷不存在"),
-  SPACE_HAS_NOT_COMPLETE_ITERATION(HttpStatus.BAD_REQUEST, "Space.000006", "空间下有未完成的迭代无法删除"),
-  SPACE_HAS_NOT_COMPLETE_DEMAND(HttpStatus.BAD_REQUEST, "Space.000007", "空间下有未完成的需求"),
-  SPACE_HAS_NOT_COMPLETE_BUG(HttpStatus.BAD_REQUEST, "Space.000008", "空间下有未完成的bug无法删除"),
-  ITERATION_HAS_NOT_COMPLETE_DEMAND(HttpStatus.BAD_REQUEST, "Iteration.000009", "迭代下有未完成的需求"),
-  ITERATION_HAS_NOT_COMPLETE_BUG(HttpStatus.BAD_REQUEST, "Iteration.000010", "迭代下有未完成的bug无法删除"),
-  UPDATE_ITERATION_STATUS_ERROR(HttpStatus.BAD_REQUEST, "Iteration.000011", "迭代状态更新失败"),
+  SPACE_NOT_EXIST(HttpStatus.BAD_REQUEST, "Space.000001", "空间不存在"),
+  SPACE_HAS_NOT_COMPLETE_ITERATION(HttpStatus.BAD_REQUEST, "Space.000002", "空间下有未完成的迭代无法删除"),
+  SPACE_HAS_NOT_COMPLETE_DEMAND(HttpStatus.BAD_REQUEST, "Space.000003", "空间下有未完成的需求"),
+  SPACE_HAS_NOT_COMPLETE_BUG(HttpStatus.BAD_REQUEST, "Space.000004", "空间下有未完成的bug无法删除"),
+  ITERATION_NOT_EXIST(HttpStatus.BAD_REQUEST, "Iteration.000001", "迭代不存在"),
+  ITERATION_HAS_NOT_COMPLETE_DEMAND(HttpStatus.BAD_REQUEST, "Iteration.000002", "迭代下有未完成的需求"),
+  ITERATION_HAS_NOT_COMPLETE_BUG(HttpStatus.BAD_REQUEST, "Iteration.00003", "迭代下有未完成的bug无法删除"),
   /*==================Client端构建运行==================*/
   NOT_FIND_JAR(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000001", "构建时未发现JAR包"),
   UNKNOWN_EXECUTE_TYPE(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000002", "未找到节点执行类型"),
@@ -76,6 +85,7 @@ public enum ErrorCode {
   USER_NOT_HAVE_PERMISSION(HttpStatus.BAD_REQUEST,"Auth.000005","用户没有权限"),
   RESOURCE_IS_BIND(HttpStatus.BAD_REQUEST,"Auth.000006","资源被绑定无法删除"),
   ROLE_IS_BIND(HttpStatus.BAD_REQUEST,"Auth.000007","角色被绑定无法删除"),
+  GROUP_EXIST_USER(HttpStatus.INTERNAL_SERVER_ERROR,"Auth.000008","组织下存在用户无法删除"),
   ;
 
   ErrorCode(HttpStatus httpStatus, String code, String message) {

@@ -1,16 +1,16 @@
 package com.zj.pipeline.service;
 
-import com.zj.common.enums.ProcessStatus;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.domain.entity.bo.pipeline.NodeRecordBO;
 import com.zj.domain.entity.bo.pipeline.NodeStatus;
 import com.zj.domain.entity.bo.pipeline.PipelineExecuteInfo;
 import com.zj.domain.entity.bo.pipeline.PipelineHistoryBO;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author guyuelan
@@ -48,10 +48,6 @@ public class PipelineHistoryService {
     return pipelineHistoryRepository.getLatestPipelineHistory(pipelineId);
   }
 
-  public void updateStatus(String historyId, ProcessStatus processStatus) {
-    pipelineHistoryRepository.updateStatus(historyId, processStatus);
-  }
-
   public PipelineExecuteInfo getPipeLineStatusDetail(String historyId) {
     PipelineHistoryBO pipelineHistory = getPipelineHistory(historyId);
     List<NodeRecordBO> nodeRecords = recordService.getNodeRecordsByHistory(historyId);
@@ -66,5 +62,9 @@ public class PipelineHistoryService {
 
     return PipelineExecuteInfo.builder().pipelineStatus(pipelineHistory.getPipelineStatus())
         .nodeStatusList(statusList).build();
+  }
+
+  public boolean deleteByPipelineId(String pipelineId) {
+    return pipelineHistoryRepository.deleteByPipelineId(pipelineId);
   }
 }

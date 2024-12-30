@@ -1,9 +1,6 @@
 package com.zj.domain.entity.bo.demand;
 
-import com.zj.domain.entity.vo.Create;
 import lombok.Data;
-
-import javax.validation.constraints.NotNull;
 
 @Data
 public class BugBO {
@@ -76,7 +73,6 @@ public class BugBO {
   /**
    * bug级别
    * */
-  @NotNull(groups = Create.class)
   private Integer level;
 
   /**
@@ -87,7 +83,7 @@ public class BugBO {
   /**
    * 需求ID
    */
-  private String demandId;
+  private String relationId;
 
   /**
    * 空间ID
@@ -98,6 +94,12 @@ public class BugBO {
    * 迭代ID
    */
   private String iterationId;
+
+
+  /**
+   * 工作量
+   */
+  private Integer workload;
 
   /**
    * 创建时间

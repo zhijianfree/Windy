@@ -1,14 +1,14 @@
 package com.zj.demand.rest;
 
-import com.zj.common.exception.ErrorCode;
 import com.zj.common.entity.dto.ResponseMeta;
+import com.zj.common.exception.ErrorCode;
 import com.zj.demand.entity.IterationDto;
+import com.zj.demand.entity.IterationMemberDto;
 import com.zj.demand.entity.IterationStatisticDto;
 import com.zj.demand.service.IterationService;
 import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.demand.BusinessStatusBO;
 import com.zj.domain.entity.bo.demand.IterationBO;
-import com.zj.domain.entity.bo.service.ResourceMemberDto;
 import com.zj.domain.entity.vo.Create;
 import com.zj.domain.entity.vo.Update;
 import org.springframework.validation.annotation.Validated;
@@ -69,8 +69,8 @@ public class IterationRest {
     }
 
     @PostMapping("/iterations/{iterationId}/members")
-    public ResponseMeta<Boolean> addIterationMember(@RequestBody ResourceMemberDto serviceMember) {
-        return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.addIterationMember(serviceMember));
+    public ResponseMeta<Boolean> addIterationMember(@RequestBody IterationMemberDto iterationMemberDto) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, iterationService.addIterationMember(iterationMemberDto));
     }
 
     @DeleteMapping("/iterations/{iterationId}/members/{userId}")

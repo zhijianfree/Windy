@@ -29,7 +29,7 @@ eureka:
     register-with-eureka: true #false表示不向注册中心注册自己。
     fetch-registry: true #false表示自己端就是注册中心，我的职责就是维护服务实例，并不需要去检索服务
     service-url:
-      defaultZone: ${eureka_zone}
+      defaultZone: ${EUREKA_ZONE}
 
 logging:
   level:
@@ -40,8 +40,12 @@ mybatis-plus:
     banner: false
 
 windy:
+  master:
+    version: @project.version@
   clean:
     #用例执行历史记录删除时间默认7天，单位小时
     feature: 168
     #流水线执行历史记录删除时间默认7天，单位小时
     pipeline: 168
+    #执行任务历史记录删除时间默认7天，单位小时
+    task: 168

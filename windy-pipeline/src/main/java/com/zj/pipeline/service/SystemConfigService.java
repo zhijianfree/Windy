@@ -5,11 +5,11 @@ import com.zj.common.adapter.invoker.IClientInvoker;
 import com.zj.common.adapter.invoker.IMasterInvoker;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.common.entity.dto.ClientCollectDto;
-import com.zj.common.entity.dto.MasterCollect;
+import com.zj.common.entity.dto.MasterCollectDto;
 import com.zj.domain.entity.bo.pipeline.SystemConfigBO;
 import com.zj.domain.entity.vo.DefaultPipelineVo;
 import com.zj.domain.entity.vo.ImageRepositoryVo;
-import com.zj.domain.entity.vo.MavenConfigVo;
+import com.zj.domain.entity.vo.GenerateMavenConfigDto;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.pipeline.entity.dto.SystemMonitorDto;
 import java.util.List;
@@ -58,7 +58,7 @@ public class SystemConfigService {
     SystemMonitorDto systemMonitorDto = new SystemMonitorDto();
     List<ClientCollectDto> clientMonitor = clientInvoker.requestClientMonitor();
     systemMonitorDto.setClients(clientMonitor);
-    List<MasterCollect> masterMonitor = masterInvoker.requestMasterMonitor();
+    List<MasterCollectDto> masterMonitor = masterInvoker.requestMasterMonitor();
     systemMonitorDto.setMasters(masterMonitor);
     return systemMonitorDto;
   }
@@ -72,22 +72,22 @@ public class SystemConfigService {
   }
 
   public ImageRepositoryVo getImageRepository() {
-    return systemConfigRepository.getRepository();
+    return systemConfigRepository.getImageRepository();
   }
 
   public boolean updateRepository(ImageRepositoryVo repository) {
-    return systemConfigRepository.updateRepository(repository);
+    return systemConfigRepository.updateImageRepository(repository);
   }
 
   public DefaultPipelineVo getDefaultPipeline() {
     return systemConfigRepository.getDefaultPipeline();
   }
 
-  public Boolean updateMavenConfig(MavenConfigVo mavenConfig) {
+  public Boolean updateMavenConfig(GenerateMavenConfigDto mavenConfig) {
     return systemConfigRepository.updateMavenConfig(mavenConfig);
   }
 
-  public MavenConfigVo getMavenConfig() {
+  public GenerateMavenConfigDto getMavenConfig() {
     return systemConfigRepository.getMavenConfig();
   }
 }

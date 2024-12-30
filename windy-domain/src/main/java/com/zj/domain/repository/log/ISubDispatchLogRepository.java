@@ -1,6 +1,6 @@
 package com.zj.domain.repository.log;
 
-import com.zj.domain.entity.bo.log.SubDispatchLogDto;
+import com.zj.domain.entity.bo.log.SubDispatchLogBO;
 import java.util.List;
 
 /**
@@ -9,15 +9,46 @@ import java.util.List;
  */
 public interface ISubDispatchLogRepository {
 
-  void batchSaveLogs(List<SubDispatchLogDto> subTaskLogs);
+  /**
+   * 批量保存日志
+   * @param subTaskLogs 日志列表
+   */
+  void batchSaveLogs(List<SubDispatchLogBO> subTaskLogs);
 
+  /**
+   * 更新日志状态
+   * @param logId 日志ID
+   * @param executeId 执行ID
+   * @param status 状态
+   */
   void updateLogStatus(String logId, String executeId, Integer status);
 
-  List<SubDispatchLogDto> getSubLogByLogId(String logId);
+  /**
+   * 获取日志
+   * @param logId 日志ID
+   * @return 日志信息
+   */
+  List<SubDispatchLogBO> getSubLogByLogId(String logId);
 
+  /**
+   * 批量删除日志
+   * @param logIds 日志ID列表
+   */
   void batchDeleteByLogIds(List<String> logIds);
 
-  SubDispatchLogDto getSubDispatchLog(String logId, String executeId);
+  /**
+   * 获取子任务记录日志
+   * @param logId 日志ID
+   * @param executeId 执行ID
+   * @return 日志信息
+   */
+  SubDispatchLogBO getSubDispatchLog(String logId, String executeId);
 
+  /**
+   * 更新子任务日志客户端IP
+   * @param logId 日志ID
+   * @param nodeId 节点ID
+   * @param clientIp 客户端IP
+   */
   void updateSubLogClientIp(String logId, String nodeId, String clientIp);
 }

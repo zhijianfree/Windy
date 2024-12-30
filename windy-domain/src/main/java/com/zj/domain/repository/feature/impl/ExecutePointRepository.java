@@ -12,10 +12,13 @@ import com.zj.domain.entity.po.feature.ExecutePoint;
 import com.zj.domain.mapper.feeature.ExecutePointMapper;
 import com.zj.domain.repository.feature.IExecutePointRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -69,6 +72,9 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
 
   @Override
   public List<ExecutePointBO> getPointsByFeatureIds(List<String> featureIds) {
+    if (CollectionUtils.isEmpty(featureIds)) {
+      return Collections.emptyList();
+    }
     List<ExecutePoint> pointList = list(
         Wrappers.lambdaQuery(ExecutePoint.class).in(ExecutePoint::getFeatureId, featureIds)
             .orderByDesc(ExecutePoint::getCreateTime));
@@ -85,8 +91,12 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
   }
 
   @Override
-  public boolean saveBatch(List<ExecutePointBO> executePoints) {
-    List<ExecutePoint> pointList = convertExecutePointList(executePoints);
+  @Transactional
+  public boolean batchSavePoints(List<ExecutePointBO> executePointBOList) {
+    if (CollectionUtils.isEmpty(executePointBOList)) {
+      return false;
+    }
+    List<ExecutePoint> pointList = convertExecutePointList(executePointBOList);
     return saveBatch(pointList);
   }
 
@@ -94,6 +104,9 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
   @Override
   @Transactional
   public boolean updateBatch(List<ExecutePointBO> executePointBOList) {
+    if (CollectionUtils.isEmpty(executePointBOList)) {
+      return false;
+    }
     List<ExecutePoint> pointList = convertExecutePointList(executePointBOList);
     return updateBatchById(pointList);
   }
@@ -109,6 +122,9 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
     return executePoints.stream().map(this::convertExecutePointBO).collect(Collectors.toList());
   }
   public ExecutePointBO convertExecutePointBO(ExecutePoint executePoint){
+    if (Objects.isNull(executePoint)) {
+      return null;
+    }
     ExecutePointBO executePointBO = OrikaUtil.convert(executePoint, ExecutePointBO.class);
     executePointBO.setCompareDefines(JSON.parseArray(executePoint.getCompareDefine(), CompareDefine.class));
     executePointBO.setExecutorUnit(JSON.parseObject(executePoint.getFeatureInfo(), ExecutorUnit.class));
@@ -126,5 +142,11 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
 
   private List<ExecutePoint> convertExecutePointList(List<ExecutePointBO> executePoints) {
     return executePoints.stream().map(this::convertExecutePoint).collect(Collectors.toList());
+  }
+
+  @Override
+  public List<ExecutePointBO> getAllExecutePoint() {
+    List<ExecutePoint> list = list();
+    return convertExecutePointBOList(list);
   }
 }

@@ -3,7 +3,6 @@ package com.zj.client.handler.feature.executor.invoker.strategy;
 import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.bo.ExecutePoint;
 import com.zj.client.entity.bo.ExecuteRecord;
-import com.zj.common.entity.feature.FeatureResponse;
 import com.zj.client.handler.feature.executor.FeatureExecutorImpl;
 import com.zj.client.handler.feature.executor.compare.CompareHandler;
 import com.zj.client.handler.feature.executor.interceptor.InterceptorProxy;
@@ -11,15 +10,17 @@ import com.zj.client.handler.feature.executor.invoker.IExecuteInvoker;
 import com.zj.client.handler.feature.executor.vo.FeatureExecuteContext;
 import com.zj.client.handler.notify.IResultEventNotify;
 import com.zj.client.utils.ExceptionUtils;
+import com.zj.common.entity.dto.ResultEvent;
+import com.zj.common.entity.feature.ExecutePointDto;
+import com.zj.common.entity.feature.ExecutorUnit;
+import com.zj.common.entity.feature.FeatureResponse;
 import com.zj.common.enums.NotifyType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.enums.TemplateType;
-import com.zj.common.entity.feature.ExecutePointDto;
-import com.zj.common.entity.feature.ExecutorUnit;
-import com.zj.common.entity.dto.ResultEvent;
 import com.zj.common.utils.IpUtils;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.plugin.loader.ExecuteDetailVo;
+import com.zj.plugin.loader.IAsyncNotifyListener;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,7 +39,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class AsyncExecuteStrategy extends BaseExecuteStrategy {
+public class AsyncExecuteStrategy extends BaseExecuteStrategy{
 
     private final Executor executor;
     private final IResultEventNotify resultEventNotify;
@@ -68,16 +69,12 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy {
         executor.execute(() ->{
             CountDownLatch countDownLatch = new CountDownLatch(1);
             CompletableFuture.runAsync(() -> {
-                if (Objects.nonNull(featureExecuteContext.getCountDownLatch())) {
-                    log.info("find count down release wait");
-                    featureExecuteContext.getCountDownLatch().countDown();
-                }
                 List<FeatureResponse> responses = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(executePoints)){
                     responses = executePoints.stream().map(executePointDto -> {
                         try {
                             ExecutePoint point = toExecutePoint(executePointDto);
-                            return executeFeature(newContext, point);
+                            return executeFeature(newContext, point, () -> releaseWaitIfNeed(featureExecuteContext));
                         } catch (Exception e) {
                             log.info("thread execute error", e);
                             ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
@@ -91,8 +88,9 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy {
                         }
                     }).collect(Collectors.toList());
                 }
-                countDownLatch.countDown();
                 notifyAsyncRecordResult(newContext, responses);
+                countDownLatch.countDown();
+                log.info("async notify complete");
             }, executor).exceptionally(throwable -> {
                 log.info("AsyncExecuteStrategy feature execute error", throwable);
                 countDownLatch.countDown();
@@ -104,6 +102,7 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy {
                 boolean result = countDownLatch.await(Integer.parseInt(timeout), TimeUnit.SECONDS);
                 log.info("wait time out result= {}", result);
             } catch (InterruptedException e) {
+                log.info("async wait error", e);
                 notifyError(newContext, "执行任务超时", timeout);
             }
         });
@@ -119,6 +118,14 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy {
             featureResponse.setName(point.getExecutorUnit().getName());
             return featureResponse;
         }).collect(Collectors.toList());
+    }
+
+    private static void releaseWaitIfNeed(FeatureExecuteContext featureExecuteContext) {
+        CountDownLatch asyncCount = featureExecuteContext.getCountDownLatch();
+        if (Objects.nonNull(asyncCount) && asyncCount.getCount() > 0){
+            log.info("find count down release wait");
+            asyncCount.countDown();
+        }
     }
 
     private void notifyError(FeatureExecuteContext featureExecuteContext, String errorMessage, String timeout) {

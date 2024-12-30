@@ -11,10 +11,11 @@ import com.zj.domain.entity.po.feature.FeatureInfo;
 import com.zj.domain.mapper.feeature.FeatureMapper;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -63,8 +64,11 @@ public class FeatureRepository extends ServiceImpl<FeatureMapper, FeatureInfo> i
     }
 
     @Override
-    public boolean saveBatch(List<FeatureInfoBO> infoList) {
-        List<FeatureInfo> list = OrikaUtil.convertList(infoList, FeatureInfo.class);
+    public boolean saveBatch(List<FeatureInfoBO> featureInfoList) {
+        if (CollectionUtils.isEmpty(featureInfoList)) {
+            return false;
+        }
+        List<FeatureInfo> list = OrikaUtil.convertList(featureInfoList, FeatureInfo.class);
         return saveBatch(list);
     }
 
@@ -95,6 +99,9 @@ public class FeatureRepository extends ServiceImpl<FeatureMapper, FeatureInfo> i
     @Override
     @Transactional
     public Boolean batchUpdate(List<FeatureInfoBO> features) {
+        if (CollectionUtils.isEmpty(features)) {
+            return false;
+        }
         List<FeatureInfo> featureList = OrikaUtil.convertList(features, FeatureInfo.class);
         return updateBatchById(featureList);
 
@@ -107,6 +114,9 @@ public class FeatureRepository extends ServiceImpl<FeatureMapper, FeatureInfo> i
 
     @Override
     public List<FeatureInfoBO> queryFeatureList(List<String> featureIds) {
+        if (CollectionUtils.isEmpty(featureIds)) {
+            return Collections.emptyList();
+        }
         List<FeatureInfo> featureInfoList = list(Wrappers.lambdaQuery(FeatureInfo.class)
                 .in(FeatureInfo::getFeatureId, featureIds));
 
@@ -114,23 +124,18 @@ public class FeatureRepository extends ServiceImpl<FeatureMapper, FeatureInfo> i
     }
 
     @Override
-    public Boolean batchDeleteByFeatureId(List<String> featureIds) {
+    public boolean batchDeleteByFeatureId(List<String> featureIds) {
         if (CollectionUtils.isEmpty(featureIds)) {
             return false;
         }
-
         return remove(Wrappers.lambdaQuery(FeatureInfo.class).in(FeatureInfo::getFeatureId, featureIds));
     }
 
     @Override
-    public List<FeatureInfoBO> getCaseFeatures(String testCaseId) {
-        List<FeatureInfo> featureInfoList = list(Wrappers.lambdaQuery(FeatureInfo.class)
-                .eq(FeatureInfo::getTestCaseId, testCaseId));
-        return OrikaUtil.convertList(featureInfoList, FeatureInfoBO.class);
-    }
-
-    @Override
     public List<FeatureInfoBO> getFeatureByCases(List<String> testCaseIds) {
+        if (CollectionUtils.isEmpty(testCaseIds)){
+            return Collections.emptyList();
+        }
         List<FeatureInfo> featureInfoList = list(Wrappers.lambdaQuery(FeatureInfo.class)
                 .in(FeatureInfo::getTestCaseId, testCaseIds));
         return OrikaUtil.convertList(featureInfoList, FeatureInfoBO.class);

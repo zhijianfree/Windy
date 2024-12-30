@@ -17,12 +17,14 @@ import com.zj.domain.entity.bo.pipeline.PipelineStageBO;
 import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.domain.entity.enums.PipelineType;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
+import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.domain.repository.service.impl.MicroServiceRepository;
 import com.zj.pipeline.entity.dto.PipelineDto;
 import com.zj.pipeline.entity.enums.PipelineStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,13 +50,14 @@ public class PipelineService {
     private final IPipelineRepository pipelineRepository;
     private final IBindBranchRepository bindBranchRepository;
     private final MicroServiceRepository microServiceRepository;
+    private final INodeRecordRepository nodeRecordRepository;
     private final IMasterInvoker masterInvoker;
 
     public PipelineService(PipelineNodeService pipelineNodeService,
                            PipelineStageService pipelineStageService, PipelineHistoryService pipelineHistoryService,
                            UniqueIdService uniqueIdService, IPipelineRepository pipelineRepository,
                            IBindBranchRepository bindBranchRepository, MicroServiceRepository microServiceRepository,
-                           IMasterInvoker masterInvoker) {
+                           INodeRecordRepository nodeRecordRepository, IMasterInvoker masterInvoker) {
         this.pipelineNodeService = pipelineNodeService;
         this.pipelineStageService = pipelineStageService;
         this.pipelineHistoryService = pipelineHistoryService;
@@ -62,6 +65,7 @@ public class PipelineService {
         this.pipelineRepository = pipelineRepository;
         this.bindBranchRepository = bindBranchRepository;
         this.microServiceRepository = microServiceRepository;
+        this.nodeRecordRepository = nodeRecordRepository;
         this.masterInvoker = masterInvoker;
     }
 
@@ -103,7 +107,8 @@ public class PipelineService {
 
         //如果node节点未变更则直接退出
         if (CollectionUtils.isNotEmpty(notExistNodes)) {
-            pipelineNodeService.deleteNodeIds(notExistNodes);
+            boolean deleteNodeIds = pipelineNodeService.deleteNodeIds(notExistNodes);
+            log.info("delete node result={}", deleteNodeIds);
         }
 
         List<String> newStageIds = stageList.stream().map(PipelineStageBO::getStageId)
@@ -112,7 +117,8 @@ public class PipelineService {
                 .map(PipelineStageBO::getStageId).filter(stageId -> !newStageIds.contains(stageId))
                 .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(notExistStages)) {
-            pipelineStageService.deletePipelineStages(notExistStages);
+            boolean deletePipelineStages = pipelineStageService.deletePipelineStages(notExistStages);
+            log.info("delete stage result={}", deletePipelineStages);
         }
     }
 
@@ -131,7 +137,8 @@ public class PipelineService {
 
             //修改stage节点
             stageDto.setSortOrder(sortOrder.incrementAndGet());
-            pipelineStageService.updateStage(stageDto);
+            boolean updateStage = pipelineStageService.updateStage(stageDto);
+            log.info("update stage result={}", updateStage);
 
             //修改node节点
             List<PipelineNodeBO> stageDtoNodes = stageDto.getNodes();
@@ -146,19 +153,24 @@ public class PipelineService {
 
 
     public List<PipelineBO> listPipelines(String serviceId) {
-        return pipelineRepository.listPipelines(serviceId);
+        return pipelineRepository.getServicePipelines(serviceId);
     }
 
     @Transactional
     public Boolean deletePipeline(String serviceId, String pipelineId) {
         try {
             checkPipelineAndService(serviceId, pipelineId);
-
+            boolean deleteHistory = pipelineHistoryService.deleteByPipelineId(pipelineId);
+            List<String> nodeIds = pipelineNodeService.getPipelineNodes(pipelineId).stream().map(PipelineNodeBO::getNodeId).collect(Collectors.toList());
+            boolean deleteRecord = nodeRecordRepository.deleteRecordByNodeId(nodeIds);
+            boolean deleteBind = bindBranchRepository.deleteByPipelineId(pipelineId);
             boolean deleteStage = pipelineStageService.deleteStagesByPipelineId(pipelineId);
-            boolean deletePipelineNode = pipelineNodeService.deleteByPipeline(pipelineId);
-            log.info("delete stage and node result stage = {} node={}", deleteStage, deletePipelineNode);
+            boolean deleteNode = pipelineNodeService.deleteByPipeline(pipelineId);
+            log.info("delete stage and node result stage = {} node={} bind={} deleteHistory={} deleteRecord={}",
+                    deleteStage, deleteNode, deleteBind, deleteHistory, deleteRecord);
             return pipelineRepository.deletePipeline(pipelineId);
         } catch (Exception e) {
+            log.info("delete pipeline error serviceId={} pipelineId={}", serviceId, pipelineId, e);
             throw new ApiException(ErrorCode.DELETE_PIPELINE_ERROR);
         }
     }
@@ -268,14 +280,20 @@ public class PipelineService {
     public String execute(String pipelineId) {
         PipelineBO pipeline = getPipeline(pipelineId);
         if (Objects.isNull(pipeline)) {
-            return null;
+            log.info("can not find pipeline pipelineId={}", pipelineId);
+            throw new ApiException(ErrorCode.NOT_FIND_PIPELINE);
         }
 
         DispatchTaskModel dispatchTaskModel = new DispatchTaskModel();
         dispatchTaskModel.setSourceId(pipelineId);
         dispatchTaskModel.setSourceName(pipeline.getPipelineName());
         dispatchTaskModel.setType(LogType.PIPELINE.getType());
-        return masterInvoker.startPipelineTask(dispatchTaskModel);
+        String taskId = masterInvoker.startPipelineTask(dispatchTaskModel);
+        if (StringUtils.isBlank(taskId)) {
+            log.info("execute pipeline error pipelineId={}", pipelineId);
+            throw new ApiException(ErrorCode.RUN_PIPELINE_ERROR);
+        }
+        return taskId;
     }
 
     public PipelineBO getPipelineDetail(String pipelineId) {

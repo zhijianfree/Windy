@@ -8,8 +8,8 @@ import com.zj.common.entity.feature.ExecutorUnit;
 
 public interface IExecuteInterceptor {
 
-  void beforeExecute(ExecutorUnit executorUnit, FeatureExecuteContext context);
+  default void beforeExecute(ExecutorUnit executorUnit, FeatureExecuteContext context){}
 
-  void afterExecute(ExecutePoint executePoint, ExecuteDetailVo executeDetailVo, FeatureExecuteContext context);
+  default void afterExecute(ExecutePoint executePoint, ExecuteDetailVo executeDetailVo, FeatureExecuteContext context){}
 
 }

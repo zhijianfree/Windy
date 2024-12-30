@@ -38,13 +38,6 @@ public class PipelineNodeRepository extends ServiceImpl<PipelineNodeMapper, Pipe
     }
 
     @Override
-    public List<PipelineNodeBO> getPipelineNodeByIds(List<String> nodeIds) {
-        List<PipelineNode> pipelineNodes = list(
-                Wrappers.lambdaQuery(PipelineNode.class).in(PipelineNode::getNodeId, nodeIds));
-        return pipelineNodes.stream().map(PipelineNodeRepository::convertPipelineNode).collect(Collectors.toList());
-    }
-
-    @Override
     public boolean deleteNodeIds(List<String> nodeIds) {
         return remove(Wrappers.lambdaQuery(PipelineNode.class).in(PipelineNode::getNodeId, nodeIds));
     }
