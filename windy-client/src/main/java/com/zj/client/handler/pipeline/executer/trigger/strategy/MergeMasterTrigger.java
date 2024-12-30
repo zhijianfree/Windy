@@ -144,12 +144,16 @@ public class MergeMasterTrigger implements INodeTrigger {
     private void push2Repository(MergeRequest mergeRequest, Git git)
             throws GitAPIException {
         // 推送合并后的代码到远程仓库的目标分支
-        Iterable<PushResult> results = git.push().setRemote(ORIGIN).setRefSpecs(new RefSpec(MASTER))
+        Iterable<PushResult> results = git.push().setRemote(ORIGIN).setRefSpecs(new RefSpec(MASTER + ":" + MASTER))
                 .setCredentialsProvider(
                         getCredentialsProvider(mergeRequest.getTokenName(), mergeRequest.getToken())).call();
         boolean pushStatus = StreamSupport.stream(results.spliterator(), false).anyMatch(
                 pushResult -> pushResult.getRemoteUpdates().stream()
-                        .anyMatch(remoteRefUpdate -> Objects.equals(remoteRefUpdate.getStatus(), Status.OK)));
+                        .anyMatch(remoteRefUpdate -> {
+                            log.info("Update status: {}, ref: {}, message: {}", remoteRefUpdate.getStatus(),
+                                    remoteRefUpdate.getRemoteName(), remoteRefUpdate.getMessage());
+                            return Objects.equals(remoteRefUpdate.getStatus(), Status.OK);
+                        }));
         if (!pushStatus) {
             log.info("push remote result={}", JSON.toJSONString(results));
             throw new ExecuteException(ErrorCode.MERGE_CODE_ERROR);
