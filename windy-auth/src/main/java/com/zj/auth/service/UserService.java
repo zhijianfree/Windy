@@ -14,6 +14,7 @@ import com.zj.domain.repository.auth.IUserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ import java.util.Objects;
 @Service
 public class UserService {
 
-    public static final String DEFAULT_PASSWORD = "123456";
+    public static final String DEFAULT_PASSWORD = "windy123";
     private final TokenHolder tokenHolder;
     private final AuthenticationManager authenticationManager;
     private final IAuthService authService;
@@ -48,6 +49,11 @@ public class UserService {
         } catch (Exception e) {
             if (e instanceof BadCredentialsException) {
                 log.info("user or password error user={}", loginUser.getUserName());
+                throw new ApiException(ErrorCode.USER_PASSWORD_ERROR);
+            }
+
+            if (e instanceof InternalAuthenticationServiceException) {
+                log.info("user not find error user={}", loginUser.getUserName());
                 throw new ApiException(ErrorCode.USER_PASSWORD_ERROR);
             }
 
