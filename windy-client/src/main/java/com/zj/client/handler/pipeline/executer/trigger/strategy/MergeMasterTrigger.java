@@ -11,6 +11,7 @@ import com.zj.client.handler.pipeline.executer.vo.RefreshContext;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.client.handler.pipeline.executer.vo.TriggerContext;
 import com.zj.client.handler.pipeline.git.IGitProcessor;
+import com.zj.common.exception.ApiException;
 import com.zj.common.utils.GitUtils;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.enums.ProcessStatus;
@@ -26,17 +27,20 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RefSpec;
+import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.RemoteRefUpdate.Status;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -115,7 +119,7 @@ public class MergeMasterTrigger implements INodeTrigger {
         log.info("start create tag ={}", mergeRequest.getTagName());
         try {
             String date = dateFormat.format(new Date());
-            git.tag().setName( mergeRequest.getTagName() + date).setMessage(mergeRequest.getMessage()).call();
+            git.tag().setName(mergeRequest.getTagName() + date).setMessage(mergeRequest.getMessage()).call();
             git.push().setCredentialsProvider(getCredentialsProvider(mergeRequest.getTokenName(),
                     mergeRequest.getToken())).setPushTags().call();
         } catch (Exception e) {
@@ -141,22 +145,24 @@ public class MergeMasterTrigger implements INodeTrigger {
         log.info("delete branches remoteRefNames={} result={}", remoteRefNames, strings);
     }
 
-    private void push2Repository(MergeRequest mergeRequest, Git git)
-            throws GitAPIException {
+    private void push2Repository(MergeRequest mergeRequest, Git git) throws GitAPIException {
         // 推送合并后的代码到远程仓库的目标分支
         Iterable<PushResult> results = git.push().setRemote(ORIGIN).setRefSpecs(new RefSpec(MASTER + ":" + MASTER))
                 .setCredentialsProvider(
                         getCredentialsProvider(mergeRequest.getTokenName(), mergeRequest.getToken())).call();
-        boolean pushStatus = StreamSupport.stream(results.spliterator(), false).anyMatch(
-                pushResult -> pushResult.getRemoteUpdates().stream()
-                        .anyMatch(remoteRefUpdate -> {
-                            log.info("Update status: {}, ref: {}, message: {}", remoteRefUpdate.getStatus(),
-                                    remoteRefUpdate.getRemoteName(), remoteRefUpdate.getMessage());
-                            return Objects.equals(remoteRefUpdate.getStatus(), Status.OK);
-                        }));
-        if (!pushStatus) {
-            log.info("push remote result={}", JSON.toJSONString(results));
-            throw new ExecuteException(ErrorCode.MERGE_CODE_ERROR);
+        Optional<RemoteRefUpdate> optional =
+                StreamSupport.stream(results.spliterator(), false).map(PushResult::getRemoteUpdates)
+                .flatMap(Collection::stream).filter(remoteRefUpdate -> {
+                    log.info("Update status: {}, ref: {}, message: {}", remoteRefUpdate.getStatus(),
+                            remoteRefUpdate.getRemoteName(), remoteRefUpdate.getMessage());
+                    return !Objects.equals(remoteRefUpdate.getStatus(), Status.OK);
+                }).findFirst();
+        if (optional.isPresent()) {
+            RemoteRefUpdate remoteRefUpdate =  optional.get();
+            log.info("Update status: {}, ref: {}, message: {}", remoteRefUpdate.getStatus(),
+                    remoteRefUpdate.getRemoteName(), remoteRefUpdate.getMessage());
+            String errorMsg = ErrorCode.MERGE_CODE_ERROR.getMessage() + ":" + remoteRefUpdate.getStatus();
+            throw new ExecuteException(errorMsg);
         }
     }
 
