@@ -68,17 +68,17 @@ public interface IExecutePointRepository {
 
   /**
    * 批量保存执行点
-   * @param newExecutePoints 执行点列表
+   * @param executePointBOList 执行点列表
    * @return 是否成功
    */
-  boolean batchSavePoints(List<ExecutePointBO> newExecutePoints);
+  boolean batchSavePoints(List<ExecutePointBO> executePointBOList);
 
   /**
    * 批量更新执行点
-   * @param newExecutePoints 执行点列表
+   * @param executePointBOList 执行点列表
    * @return 是否成功
    */
-  boolean updateBatch(List<ExecutePointBO> newExecutePoints);
+  boolean updateBatch(List<ExecutePointBO> executePointBOList);
 
   /**
    * 获取模板下的执行点
@@ -86,4 +86,6 @@ public interface IExecutePointRepository {
    * @return 执行点列表
    */
   List<ExecutePointBO> getTemplateExecutePoints(String templateId);
+
+    List<ExecutePointBO> getAllExecutePoint();
 }

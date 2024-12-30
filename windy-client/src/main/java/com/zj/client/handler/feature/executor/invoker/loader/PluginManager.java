@@ -38,7 +38,6 @@ public class PluginManager {
     List<Feature> features = new ArrayList<>();
     try {
       URL[] urls = getFileUrls();
-
       URLClassLoader urlClassLoader = new URLClassLoader(urls,
           Thread.currentThread().getContextClassLoader());
       ServiceLoader<Feature> serviceLoader = ServiceLoader.load(Feature.class, urlClassLoader);

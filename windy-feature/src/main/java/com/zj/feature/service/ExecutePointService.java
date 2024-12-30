@@ -12,7 +12,7 @@ import com.zj.domain.repository.feature.IExecuteTemplateRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.feature.entity.CompareOperator;
 import com.zj.feature.entity.ExecutePointTemplate;
-import com.zj.feature.entity.ExecutePointVo;
+import com.zj.feature.entity.ExecutePointDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -59,8 +59,8 @@ public class ExecutePointService {
         return executePointRepository.getPointsByFeatureIds(featureIds);
     }
 
-    public String createExecutePoint(ExecutePointVo executePointVo) {
-        ExecutePointBO executePoint = toExecutePoint(executePointVo);
+    public String createExecutePoint(ExecutePointDto executePointDto) {
+        ExecutePointBO executePoint = toExecutePoint(executePointDto);
         executePoint.setPointId(uniqueIdService.getUniqueId());
         boolean result = executePointRepository.saveExecutePoint(executePoint);
 
@@ -68,7 +68,7 @@ public class ExecutePointService {
         return executePoint.getPointId();
     }
 
-    public ExecutePointBO toExecutePoint(ExecutePointVo dto) {
+    public ExecutePointBO toExecutePoint(ExecutePointDto dto) {
         ExecutePointBO point = new ExecutePointBO();
         point.setFeatureId(dto.getFeatureId());
         point.setPointId(dto.getPointId());
@@ -83,19 +83,19 @@ public class ExecutePointService {
         return point;
     }
 
-    public String updateExecutePoint(ExecutePointVo executePointVo) {
-        ExecutePointBO executePoint = getExecutePointById(executePointVo.getPointId());
+    public String updateExecutePoint(ExecutePointDto executePointDto) {
+        ExecutePointBO executePoint = getExecutePointById(executePointDto.getPointId());
         if (Objects.isNull(executePoint)) {
             return null;
         }
 
-        executePoint.setTestStage(executePointVo.getTestStage());
-        executePoint.setDescription(executePointVo.getDescription());
-        executePoint.setSortOrder(executePointVo.getSortOrder());
-        executePoint.setExecuteType(executePointVo.getExecuteType());
-        executePoint.setExecutorUnit(executePointVo.getExecutorUnit());
-        executePoint.setCompareDefines(executePointVo.getCompareDefine());
-        executePoint.setVariableDefines(executePointVo.getVariableDefine());
+        executePoint.setTestStage(executePointDto.getTestStage());
+        executePoint.setDescription(executePointDto.getDescription());
+        executePoint.setSortOrder(executePointDto.getSortOrder());
+        executePoint.setExecuteType(executePointDto.getExecuteType());
+        executePoint.setExecutorUnit(executePointDto.getExecutorUnit());
+        executePoint.setCompareDefines(executePointDto.getCompareDefine());
+        executePoint.setVariableDefines(executePointDto.getVariableDefine());
         executePoint.setUpdateTime(System.currentTimeMillis());
         boolean result = updateByPointId(executePoint);
 
@@ -103,7 +103,7 @@ public class ExecutePointService {
         return executePoint.getPointId();
     }
 
-    public void batchAddTestFeature(List<ExecutePointVo> executePoints) {
+    public void batchAddTestFeature(List<ExecutePointDto> executePoints) {
         if (CollectionUtils.isEmpty(executePoints)) {
             log.warn("batch add test feature is empty list");
             return;
@@ -132,15 +132,15 @@ public class ExecutePointService {
         return executePointRepository.batchSavePoints(newExecutePoints);
     }
 
-    public ExecutePointVo getExecutePoint(String executePointId) {
+    public ExecutePointDto getExecutePoint(String executePointId) {
         ExecutePointBO executePoint = getExecutePointById(executePointId);
-        return ExecutePointVo.toExecutePointDTO(executePoint);
+        return ExecutePointDto.toExecutePointDTO(executePoint);
     }
 
-    public List<ExecutePointVo> getExecutePointsByFeatureId(String featureId) {
+    public List<ExecutePointDto> getExecutePointsByFeatureId(String featureId) {
         List<ExecutePointBO> executePoints = executePointRepository.getExecutePointByFeatureId(featureId);
-        return executePoints.stream().map(ExecutePointVo::toExecutePointDTO)
-                .sorted(Comparator.comparing(ExecutePointVo::getSortOrder)).collect(Collectors.toList());
+        return executePoints.stream().map(ExecutePointDto::toExecutePointDTO)
+                .sorted(Comparator.comparing(ExecutePointDto::getSortOrder)).collect(Collectors.toList());
     }
 
     public ExecutePointTemplate queryPointTemplate(String executePointId) {

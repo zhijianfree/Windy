@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class ExecutePointVo {
+public class ExecutePointDto {
 
   /**
    * 执行点Id
@@ -64,19 +64,19 @@ public class ExecutePointVo {
    */
   private Integer sortOrder;
 
-  public static ExecutePointVo toExecutePointDTO(ExecutePointBO executePoint) {
-    ExecutePointVo executePointVo = new ExecutePointVo();
-    executePointVo.setDescription(executePoint.getDescription());
-    executePointVo.setPointId(executePoint.getPointId());
-    executePointVo.setExecuteType(executePoint.getExecuteType());
-    executePointVo.setFeatureId(executePoint.getFeatureId());
-    executePointVo.setTestStage(executePoint.getTestStage());
-    executePointVo.setSortOrder(executePoint.getSortOrder());
-    executePointVo.setTemplateId(executePoint.getTemplateId());
-    executePointVo.setExecutorUnit(executePoint.getExecutorUnit());
-    executePointVo.setCompareDefine(executePoint.getCompareDefines());
-    executePointVo.setVariableDefine(executePoint.getVariableDefines());
-    return executePointVo;
+  public static ExecutePointDto toExecutePointDTO(ExecutePointBO executePoint) {
+    ExecutePointDto executePointDto = new ExecutePointDto();
+    executePointDto.setDescription(executePoint.getDescription());
+    executePointDto.setPointId(executePoint.getPointId());
+    executePointDto.setExecuteType(executePoint.getExecuteType());
+    executePointDto.setFeatureId(executePoint.getFeatureId());
+    executePointDto.setTestStage(executePoint.getTestStage());
+    executePointDto.setSortOrder(executePoint.getSortOrder());
+    executePointDto.setTemplateId(executePoint.getTemplateId());
+    executePointDto.setExecutorUnit(executePoint.getExecutorUnit());
+    executePointDto.setCompareDefine(executePoint.getCompareDefines());
+    executePointDto.setVariableDefine(executePoint.getVariableDefines());
+    return executePointDto;
   }
 
 }

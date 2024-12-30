@@ -92,22 +92,22 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
 
   @Override
   @Transactional
-  public boolean batchSavePoints(List<ExecutePointBO> executePoints) {
-    if (CollectionUtils.isEmpty(executePoints)) {
+  public boolean batchSavePoints(List<ExecutePointBO> executePointBOList) {
+    if (CollectionUtils.isEmpty(executePointBOList)) {
       return false;
     }
-    List<ExecutePoint> pointList = convertExecutePointList(executePoints);
+    List<ExecutePoint> pointList = convertExecutePointList(executePointBOList);
     return saveBatch(pointList);
   }
 
 
   @Override
   @Transactional
-  public boolean updateBatch(List<ExecutePointBO> executePointList) {
-    if (CollectionUtils.isEmpty(executePointList)) {
+  public boolean updateBatch(List<ExecutePointBO> executePointBOList) {
+    if (CollectionUtils.isEmpty(executePointBOList)) {
       return false;
     }
-    List<ExecutePoint> pointList = convertExecutePointList(executePointList);
+    List<ExecutePoint> pointList = convertExecutePointList(executePointBOList);
     return updateBatchById(pointList);
   }
 
@@ -142,5 +142,11 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
 
   private List<ExecutePoint> convertExecutePointList(List<ExecutePointBO> executePoints) {
     return executePoints.stream().map(this::convertExecutePoint).collect(Collectors.toList());
+  }
+
+  @Override
+  public List<ExecutePointBO> getAllExecutePoint() {
+    List<ExecutePoint> list = list();
+    return convertExecutePointBOList(list);
   }
 }

@@ -2,7 +2,12 @@ package com.zj.feature.service;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.zj.common.entity.feature.CompareDefine;
+import com.zj.common.enums.CompareType;
+import com.zj.common.enums.ExecuteType;
+import com.zj.common.enums.InvokerType;
 import com.zj.common.enums.LogType;
+import com.zj.common.enums.TemplateType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.entity.dto.DispatchTaskModel;
@@ -14,12 +19,13 @@ import com.zj.domain.entity.bo.feature.ExecutePointBO;
 import com.zj.domain.entity.bo.feature.FeatureInfoBO;
 import com.zj.domain.entity.bo.feature.TestCaseConfigBO;
 import com.zj.domain.entity.bo.feature.TestCaseBO;
+import com.zj.domain.repository.feature.IExecutePointRepository;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.feature.entity.BatchDeleteDto;
 import com.zj.feature.entity.BatchUpdateFeatures;
 import com.zj.feature.entity.CopyCaseFeatureDto;
-import com.zj.feature.entity.ExecutePointVo;
-import com.zj.feature.entity.FeatureInfoVo;
+import com.zj.feature.entity.ExecutePointDto;
+import com.zj.feature.entity.FeatureInfoDto;
 import com.zj.feature.entity.FeatureNodeDto;
 import com.zj.feature.entity.FeatureOrder;
 import com.zj.feature.entity.PasteFeatureDto;
@@ -27,6 +33,7 @@ import com.zj.feature.entity.TagFilterDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +47,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -93,12 +102,12 @@ public class FeatureService {
         return parent;
     }
 
-    public FeatureInfoVo getFeatureById(String featureId) {
+    public FeatureInfoDto getFeatureById(String featureId) {
         FeatureInfoBO featureInfo = featureRepository.getFeatureById(featureId);
         if (Objects.isNull(featureInfo)) {
             throw new ApiException(ErrorCode.FEATURE_NOT_FIND);
         }
-        FeatureInfoVo featureInfoDTO = OrikaUtil.convert(featureInfo, FeatureInfoVo.class);
+        FeatureInfoDto featureInfoDTO = OrikaUtil.convert(featureInfo, FeatureInfoDto.class);
         List<String> featureTags = featureTagService.getFeatureTags(featureId);
         featureInfoDTO.setTags(featureTags);
         return featureInfoDTO;
@@ -117,13 +126,13 @@ public class FeatureService {
     }
 
     @Transactional
-    public String createFeature(FeatureInfoVo featureInfoDTO) {
-        FeatureInfoBO featureInfo = OrikaUtil.convert(featureInfoDTO, FeatureInfoBO.class);
+    public String createFeature(FeatureInfoDto featureInfoDto) {
+        FeatureInfoBO featureInfo = OrikaUtil.convert(featureInfoDto, FeatureInfoBO.class);
         featureInfo.setFeatureId(uniqueIdService.getUniqueId());
         boolean result = featureRepository.createFeature(featureInfo);
 
-        if (CollectionUtils.isNotEmpty(featureInfoDTO.getTags())) {
-            boolean batchAddTag = featureTagService.batchAddTag(featureInfo.getFeatureId(), featureInfoDTO.getTags());
+        if (CollectionUtils.isNotEmpty(featureInfoDto.getTags())) {
+            boolean batchAddTag = featureTagService.batchAddTag(featureInfo.getFeatureId(), featureInfoDto.getTags());
             log.info("batch save tag result={}", batchAddTag);
         }
 
@@ -132,16 +141,16 @@ public class FeatureService {
     }
 
     @Transactional
-    public String updateFeatureInfo(FeatureInfoVo featureInfoDTO) {
-        if (Objects.isNull(getFeatureById(featureInfoDTO.getFeatureId()))) {
+    public String updateFeatureInfo(FeatureInfoDto featureInfoDto) {
+        if (Objects.isNull(getFeatureById(featureInfoDto.getFeatureId()))) {
             throw new ApiException(ErrorCode.FEATURE_NOT_FIND);
         }
 
-        FeatureInfoBO featureInfo = OrikaUtil.convert(featureInfoDTO, FeatureInfoBO.class);
+        FeatureInfoBO featureInfo = OrikaUtil.convert(featureInfoDto, FeatureInfoBO.class);
         boolean result = featureRepository.updateFeatureInfo(featureInfo);
         log.info("update test case feature result={}", result);
 
-        List<ExecutePointVo> executePoints = featureInfoDTO.getTestFeatures();
+        List<ExecutePointDto> executePoints = featureInfoDto.getTestFeatures();
         if (CollectionUtils.isNotEmpty(executePoints)) {
             int featureResult = updateExecutePoint(executePoints);
             if (featureResult < 1) {
@@ -150,20 +159,20 @@ public class FeatureService {
             }
         }
 
-        if (Objects.nonNull(featureInfoDTO.getTags())) {
-            boolean batchUpdateTag = featureTagService.batchUpdateTag(featureInfo.getFeatureId(), featureInfoDTO.getTags());
+        if (Objects.nonNull(featureInfoDto.getTags())) {
+            boolean batchUpdateTag = featureTagService.batchUpdateTag(featureInfo.getFeatureId(), featureInfoDto.getTags());
             log.info("batch update tag result={}", batchUpdateTag);
         }
         return featureInfo.getFeatureId();
     }
 
-    private int updateExecutePoint(List<ExecutePointVo> executePointVos) {
+    private int updateExecutePoint(List<ExecutePointDto> executePointDtoList) {
         int result = 0;
-        if (CollectionUtils.isEmpty(executePointVos)) {
+        if (CollectionUtils.isEmpty(executePointDtoList)) {
             return result;
         }
 
-        return executePointVos.stream().mapToInt(executePointVo -> {
+        return executePointDtoList.stream().mapToInt(executePointVo -> {
             if (Objects.isNull(executePointVo.getPointId())) {
                 executePointVo.setPointId(uniqueIdService.getUniqueId());
                 String pointId = executePointService.createExecutePoint(executePointVo);
@@ -207,8 +216,8 @@ public class FeatureService {
             String newParentId = idRecordMap.get(oldParentId);
             feature.setParentId(newParentId);
         });
-        featureRepository.saveBatch(newList);
-        log.info("batch save features ={} idMap={}", JSON.toJSONString(newList), idRecordMap);
+        boolean savedFeatureBatch = featureRepository.saveBatch(newList);
+        log.info("batch save batch features ={} idMap={}", savedFeatureBatch, idRecordMap);
 
         //2 复制执行点
         List<String> featureIds = new ArrayList<>(idRecordMap.keySet());
@@ -230,8 +239,8 @@ public class FeatureService {
             });
             return pointGroupMap.get(oldId);
         }).flatMap(Collection::stream).collect(Collectors.toList());
-        boolean saveBatch = executePointService.saveBatch(newExecutePoints);
-        log.info("batch save points result={}", saveBatch);
+        boolean saveBatchPoint = executePointService.saveBatch(newExecutePoints);
+        log.info("batch save points result={}", saveBatchPoint);
 
         //3 复制全局变量
         List<TestCaseConfigBO> caseConfigs = testCaseConfigService.getTestCaseConfigs(copyCaseFeature.getTestCaseId());
@@ -239,9 +248,9 @@ public class FeatureService {
             config.setUnionId(newCaseId);
             config.setId(null);
         });
-        testCaseConfigService.addCaseConfigs(caseConfigs);
-        log.info("copy global configs={}", JSON.toJSONString(caseConfigs));
-        return true;
+        Integer addConfigCount = testCaseConfigService.addCaseConfigs(caseConfigs);
+        log.info("copy global count={} configs={}",addConfigCount, JSON.toJSONString(caseConfigs));
+        return addConfigCount > 0;
     }
 
     @Transactional
@@ -305,7 +314,7 @@ public class FeatureService {
     }
 
     public Boolean executeFeature(String featureId) {
-        FeatureInfoVo feature = getFeatureById(featureId);
+        FeatureInfoDto feature = getFeatureById(featureId);
         if (Objects.isNull(feature)) {
             log.info("can not find feature={}", featureId);
             throw new ApiException(ErrorCode.FEATURE_NOT_FIND);

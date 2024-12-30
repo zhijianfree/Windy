@@ -7,7 +7,7 @@ import com.zj.domain.entity.bo.feature.FeatureInfoBO;
 import com.zj.feature.entity.BatchDeleteDto;
 import com.zj.feature.entity.BatchUpdateFeatures;
 import com.zj.feature.entity.CopyCaseFeatureDto;
-import com.zj.feature.entity.FeatureInfoVo;
+import com.zj.feature.entity.FeatureInfoDto;
 import com.zj.feature.entity.FeatureNodeDto;
 import com.zj.feature.entity.PasteFeatureDto;
 import com.zj.feature.entity.TagFilterDto;
@@ -36,8 +36,7 @@ public class FeatureInfoRest {
     }
 
     @GetMapping("/{caseId}/tree/features")
-    public ResponseMeta<List<FeatureNodeDto>> getFeatureTreeList(
-            @PathVariable("caseId") String caseId) {
+    public ResponseMeta<List<FeatureNodeDto>> getFeatureTreeList(@PathVariable("caseId") String caseId) {
         return new ResponseMeta(ErrorCode.SUCCESS, featureService.getFeatureTreeList(caseId));
     }
 
@@ -47,13 +46,13 @@ public class FeatureInfoRest {
     }
 
     @PostMapping("/feature")
-    public ResponseMeta<String> createFeature(@Valid @RequestBody FeatureInfoVo featureInfoDTO) {
+    public ResponseMeta<String> createFeature(@Valid @RequestBody FeatureInfoDto featureInfoDTO) {
         return new ResponseMeta(ErrorCode.SUCCESS, featureService.createFeature(featureInfoDTO));
     }
 
     @PutMapping("/feature")
-    public ResponseMeta<String> updateFeature(@RequestBody FeatureInfoVo featureInfoVo) {
-        return new ResponseMeta(ErrorCode.SUCCESS, featureService.updateFeatureInfo(featureInfoVo));
+    public ResponseMeta<String> updateFeature(@RequestBody FeatureInfoDto featureInfoDto) {
+        return new ResponseMeta(ErrorCode.SUCCESS, featureService.updateFeatureInfo(featureInfoDto));
     }
 
     @DeleteMapping("/feature/{featureId}")
@@ -72,8 +71,8 @@ public class FeatureInfoRest {
     }
 
     @GetMapping("/feature/{featureId}")
-    public ResponseMeta<FeatureInfoVo> queryFeature(@PathVariable("featureId") String featureId) {
-        return new ResponseMeta<FeatureInfoVo>(ErrorCode.SUCCESS, featureService.getFeatureById(featureId));
+    public ResponseMeta<FeatureInfoDto> queryFeature(@PathVariable("featureId") String featureId) {
+        return new ResponseMeta<FeatureInfoDto>(ErrorCode.SUCCESS, featureService.getFeatureById(featureId));
     }
 
     @GetMapping("/case/{caseId}/features")

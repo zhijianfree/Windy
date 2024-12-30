@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
-public class FeatureInfoVo {
+public class FeatureInfoDto {
 
     /**
      * 用例Id
@@ -52,7 +52,7 @@ public class FeatureInfoVo {
     /**
      * 执行点列表
      */
-    private List<@Valid ExecutePointVo> testFeatures;
+    private List<@Valid ExecutePointDto> testFeatures;
 
     /**
      * 排序

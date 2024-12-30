@@ -1,6 +1,6 @@
 package com.zj.client.handler.feature.executor.invoker.strategy;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import com.zj.client.entity.bo.ExecutePoint;
 import com.zj.client.handler.feature.executor.compare.CompareHandler;
 import com.zj.client.handler.feature.executor.compare.CompareOperator;
@@ -115,36 +115,16 @@ public class IFExecuteStrategy extends BaseExecuteStrategy {
     }
 
     /**
-     * 此处将[compareKey][operator][propertyKey][expectValue]
      * 转换成CompareDefine
      */
     private static CompareDefine convertCompareDefine(String replaceOgnl, Map<String, Object> contextMap) {
-        List<String> strings = exchangeList(replaceOgnl);
-        if (CollectionUtils.isEmpty(strings) || strings.size() != 4){
+        if (StringUtils.isBlank(replaceOgnl)) {
             return null;
         }
-        CompareDefine compareDefine = new CompareDefine();
-        compareDefine.setCompareKey(strings.get(0));
-        compareDefine.setOperator(strings.get(1));
+        CompareDefine compareDefine = JSON.parseObject(replaceOgnl, CompareDefine.class);
         compareDefine.setResponseValue(contextMap);
-        String expectValue = strings.get(3);
-        if (Objects.equals(compareDefine.getOperator(), CompareType.ARRAY_ITEM_MATCH.getOperator()) ||
-                Objects.equals(compareDefine.getOperator(), CompareType.NONE_ITEM_MATCH.getOperator())){
-            expectValue = "{" + strings.get(2) + "}" + expectValue;
-        }
-        compareDefine.setExpectValue(expectValue);
         return compareDefine;
     }
 
-    private static List<String> exchangeList(String input) {
-        String regex = "\\[(.*?)]";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(input);
-        List<String> results = new ArrayList<>();
-        while (matcher.find()) {
-            String groupValue = matcher.group(1);
-            results.add(StringUtils.isBlank(groupValue)? "" : groupValue);
-        }
-        return results;
-    }
+
 }
