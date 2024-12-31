@@ -25,7 +25,7 @@ public class TaskRepository extends ServiceImpl<TaskInfoMapper, TaskInfo> implem
 
   @Override
   public IPage<TaskInfo> getFuzzTaskList(String name, Integer pageNum, Integer size) {
-    LambdaQueryWrapper<TaskInfo> wrapper = Wrappers.lambdaQuery(TaskInfo.class);
+    LambdaQueryWrapper<TaskInfo> wrapper = Wrappers.lambdaQuery(TaskInfo.class).orderByDesc(TaskInfo::getCreateTime);
     if (StringUtils.isNotBlank(name)) {
       wrapper = wrapper.like(TaskInfo::getTaskName, name);
     }
