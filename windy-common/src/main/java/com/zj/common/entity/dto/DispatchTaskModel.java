@@ -31,6 +31,11 @@ public class DispatchTaskModel {
    */
   private String triggerId;
 
+  /**
+   * 任务触发人
+   */
+  private String user;
+
   public DispatchTaskModel() {
   }
 

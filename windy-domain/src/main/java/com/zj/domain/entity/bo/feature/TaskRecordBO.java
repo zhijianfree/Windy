@@ -51,6 +51,11 @@ public class TaskRecordBO {
   private Integer type;
 
   /**
+   * 任务执行人
+   */
+  private String executeUser;
+
+  /**
    * 执行机器
    * */
   private String machines;

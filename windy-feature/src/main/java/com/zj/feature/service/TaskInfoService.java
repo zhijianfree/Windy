@@ -1,6 +1,8 @@
 package com.zj.feature.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.zj.common.adapter.auth.IAuthService;
+import com.zj.common.adapter.auth.UserDetail;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.adapter.invoker.IMasterInvoker;
@@ -20,6 +22,7 @@ import com.zj.domain.repository.feature.ITaskRepository;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -39,17 +42,18 @@ public class TaskInfoService {
   private final UniqueIdService uniqueIdService;
   private final ITaskRepository taskRepository;
   private final IMasterInvoker masterInvoker;
-
+  private final IAuthService authService;
   public static final String FORMAT_TIPS = "任务执行状态: 总任务数:%s 成功数: %s 成功率百分比: %s %";
 
   public TaskInfoService(TaskRecordService taskRecordService,
                          FeatureHistoryService featureHistoryService, UniqueIdService uniqueIdService,
-                         ITaskRepository taskRepository, IMasterInvoker masterInvoker) {
+                         ITaskRepository taskRepository, IMasterInvoker masterInvoker, IAuthService authService) {
     this.taskRecordService = taskRecordService;
     this.featureHistoryService = featureHistoryService;
     this.uniqueIdService = uniqueIdService;
     this.taskRepository = taskRepository;
     this.masterInvoker = masterInvoker;
+    this.authService = authService;
   }
 
   public PageSize<TaskInfoBO> getTaskList(String name, Integer pageNum, Integer size) {
@@ -109,6 +113,9 @@ public class TaskInfoService {
 
     DispatchTaskModel dispatchTaskModel = new DispatchTaskModel();
     dispatchTaskModel.setType(LogType.FEATURE_TASK.getType());
+    UserDetail userDetail = authService.getUserDetail();
+    String user = Optional.ofNullable(userDetail.getNickName()).orElseGet(userDetail::getUserName);
+    dispatchTaskModel.setUser(user);
     dispatchTaskModel.setSourceId(taskId);
     dispatchTaskModel.setSourceName(taskDetail.getTaskName());
     String recordId = masterInvoker.runFeatureTask(dispatchTaskModel);
