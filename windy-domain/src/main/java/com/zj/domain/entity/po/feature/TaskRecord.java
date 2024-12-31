@@ -23,6 +23,11 @@ public class TaskRecord {
   private Integer status;
 
   /**
+   * 任务执行成功率
+   * */
+  private Integer percent;
+
+  /**
    * 任务名称
    * */
   private String taskName;

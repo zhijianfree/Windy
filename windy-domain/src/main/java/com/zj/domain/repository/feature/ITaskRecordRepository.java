@@ -20,11 +20,22 @@ public interface ITaskRecordRepository {
 
     /**
      * 更新任务记录状态
+     *
      * @param recordId 记录ID
-     * @param status 状态
+     * @param status   状态
      * @return 是否成功
      */
     boolean updateRecordStatus(String recordId, int status);
+
+    /**
+     * 更新任务记录状态和百分比
+     *
+     * @param recordId 记录ID
+     * @param status   状态
+     * @param percent  百分比
+     * @return 是否成功
+     */
+    boolean updateRecordStatusAndPercent(String recordId, Integer status, int percent);
 
     /**
      * 分页获取任务记录列表

@@ -63,17 +63,23 @@ public class TaskEndProcessor {
         }
 
         //2 找到任务关联所有用例的执行记录
-        List<FeatureHistoryBO> taskRecordFeatures = featureHistoryRepository.getHistoriesByTaskRecordId(taskRecordId);
-        List<String> recordFeatureIds =
-                taskRecordFeatures.stream().map(FeatureHistoryBO::getFeatureId).collect(Collectors.toList());
+        List<FeatureHistoryBO> featureHistories = featureHistoryRepository.getHistoriesByTaskRecordId(taskRecordId);
+        long successCount = featureHistories.stream().filter(featureHistoryBO ->
+                Objects.equals(featureHistoryBO.getExecuteStatus(), ProcessStatus.SUCCESS.getType())).count();
+        long percent = successCount * 100 / featureIds.size();
         //3 如果所有用例都有执行记录，那么任务执行完成
-        if (Objects.equals(recordFeatureIds.size(), featureIds.size())) {
+        if (Objects.equals(featureHistories.size(), featureIds.size())) {
             ProcessStatus processStatus =
-                    taskRecordFeatures.stream().filter(history -> ProcessStatus.exchange(history.getExecuteStatus())
+                    featureHistories.stream().filter(history -> ProcessStatus.exchange(history.getExecuteStatus())
                     .isFailStatus()).findAny().map(f -> ProcessStatus.FAIL).orElse(ProcessStatus.SUCCESS);
-            taskRecordRepository.updateRecordStatus(taskRecordId, processStatus.getType());
-            taskLogRepository.updateLogStatus(logId, processStatus.getType());
+            boolean updateStatus = taskRecordRepository.updateRecordStatusAndPercent(taskRecordId, processStatus.getType(), (int) percent);
+            boolean updateLogStatus = taskLogRepository.updateLogStatus(logId, processStatus.getType());
+            log.info("task end update recordId={} status={} percent={} logId={} updateStatus={} updateLogStatus={}",
+                    taskRecordId, processStatus.getType(), percent, logId, updateStatus, updateLogStatus);
             return true;
+        }else{
+            boolean updateStatus = taskRecordRepository.updateRecordStatusAndPercent(taskRecordId,null, (int) percent);
+            log.info("task percent update recordId={} percent={} updateStatus={}", taskRecordId, percent, updateStatus);
         }
         return false;
     }

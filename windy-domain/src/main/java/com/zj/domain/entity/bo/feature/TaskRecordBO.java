@@ -41,6 +41,11 @@ public class TaskRecordBO {
   private String taskConfig;
 
   /**
+   * 任务执行成功率
+   * */
+  private Integer percent;
+
+  /**
    * 执行机器
    * */
   private String machines;

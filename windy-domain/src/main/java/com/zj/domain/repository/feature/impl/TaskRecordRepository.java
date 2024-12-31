@@ -41,8 +41,17 @@ public class TaskRecordRepository extends ServiceImpl<TaskRecordMapper, TaskReco
     taskRecord.setRecordId(recordId);
     taskRecord.setStatus(status);
     taskRecord.setUpdateTime(System.currentTimeMillis());
-    return saveOrUpdate(taskRecord,
-        Wrappers.lambdaUpdate(TaskRecord.class).eq(TaskRecord::getRecordId, recordId));
+    return saveOrUpdate(taskRecord, Wrappers.lambdaUpdate(TaskRecord.class).eq(TaskRecord::getRecordId, recordId));
+  }
+
+  @Override
+  public boolean updateRecordStatusAndPercent(String recordId, Integer status, int percent) {
+    TaskRecord taskRecord = new TaskRecord();
+    taskRecord.setRecordId(recordId);
+    taskRecord.setStatus(status);
+    taskRecord.setPercent(percent);
+    taskRecord.setUpdateTime(System.currentTimeMillis());
+    return saveOrUpdate(taskRecord, Wrappers.lambdaUpdate(TaskRecord.class).eq(TaskRecord::getRecordId, recordId));
   }
 
   @Override

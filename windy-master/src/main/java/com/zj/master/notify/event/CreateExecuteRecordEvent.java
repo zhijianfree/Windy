@@ -32,8 +32,7 @@ public class CreateExecuteRecordEvent implements INotifyEvent {
   public boolean handle(ResultEvent resultEvent) {
     log.info("receive execute record create event id = {} event={}", resultEvent.getExecuteId(),
         JSON.toJSONString(resultEvent.getParams()));
-    ExecuteRecordBO executeRecordBO = JSON.parseObject(JSON.toJSONString(resultEvent.getParams()),
-        ExecuteRecordBO.class);
-    return executeRecordRepository.saveRecord(executeRecordBO);
+    ExecuteRecordBO executeRecord = JSON.parseObject(JSON.toJSONString(resultEvent.getParams()), ExecuteRecordBO.class);
+    return executeRecordRepository.saveRecord(executeRecord);
   }
 }

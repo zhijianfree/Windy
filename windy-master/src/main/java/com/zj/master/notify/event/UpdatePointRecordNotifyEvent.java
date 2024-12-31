@@ -41,8 +41,7 @@ public class UpdatePointRecordNotifyEvent implements INotifyEvent {
     public boolean handle(ResultEvent resultEvent) {
         log.info("receive execute record update event id = {} event={}", resultEvent.getExecuteId(),
                 JSON.toJSONString(resultEvent.getParams()));
-        ExecuteRecordBO executeRecordBO = JSON.parseObject(JSON.toJSONString(resultEvent.getParams()),
-                ExecuteRecordBO.class);
+        ExecuteRecordBO executeRecordBO = JSON.parseObject(JSON.toJSONString(resultEvent.getParams()), ExecuteRecordBO.class);
         updateFeatureHistory(executeRecordBO);
         return executeRecordRepository.updateStatusAndResult(executeRecordBO);
     }

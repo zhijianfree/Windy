@@ -32,7 +32,7 @@ public interface IDispatchLogRepository {
    * @param logId 日志ID
    * @param type 状态
    */
-  void updateLogStatus(String logId, int type);
+  boolean updateLogStatus(String logId, int type);
 
   /**
    * 更新日志主节点IP
