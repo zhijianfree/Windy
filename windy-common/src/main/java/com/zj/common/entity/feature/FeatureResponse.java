@@ -33,7 +33,15 @@ public class FeatureResponse {
      */
     private String pointId;
 
+    /**
+     * 执行状态
+     */
     private Integer status;
+
+    /**
+     * 用例执行花费时间
+     */
+    private Long spendTime;
 
     public boolean isSuccess() {
         boolean invokeStatus = true;
@@ -83,6 +91,10 @@ public class FeatureResponse {
 
     public FeatureResponse pointId(String  pointId){
         this.pointId = pointId;
+        return this;
+    }
+    public FeatureResponse spendTime(Long  spendTime){
+        this.spendTime = spendTime;
         return this;
     }
 

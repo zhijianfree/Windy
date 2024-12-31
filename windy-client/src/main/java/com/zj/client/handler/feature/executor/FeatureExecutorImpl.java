@@ -95,8 +95,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
                         featureExecuteContext.setCountDownLatch(countDownLatch);
                         status.set(ProcessStatus.RUNNING.getType());
                     }
-                    List<FeatureResponse> responses = executeStrategyFactory.execute(executePoint,
-                            featureExecuteContext);
+                    List<FeatureResponse> responses = executeStrategyFactory.execute(executePoint, featureExecuteContext);
                     executeRecord.setStatus(judgeRecordStatus(responses));
                     executeRecord.setRecordResult(responses);
 

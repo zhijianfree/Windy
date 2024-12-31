@@ -67,8 +67,10 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
     Integer invokeType = Optional.ofNullable(executorUnit.getRelatedTemplate())
             .map(executor -> InvokerType.RELATED_TEMPLATE.getType()).orElseGet(executorUnit::getInvokeType);
     IExecuteInvoker executeInvoker = executeInvokerMap.get(invokeType);
+    long currentTime = System.currentTimeMillis();
     ExecuteDetailVo executeDetailVo = (ExecuteDetailVo) executeInvoker.invoke(executorUnit, featureExecuteContext, listener);
-    log.info("step 2 execute invoker ={} invoke", executeInvoker.type().name());
+    long spendTime = System.currentTimeMillis() - currentTime;
+    log.info("step 2 execute invoker ={} invoke time={}", executeInvoker.type().name(), spendTime);
 
     //4 将执行之后的响应结果添加到context中，方便后面用例使用
     interceptorProxy.afterExecute(executePoint, executeDetailVo, featureExecuteContext);
@@ -90,8 +92,10 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
     }
 
     //6 返回执行状态
-    FeatureResponse response = FeatureResponse.builder().context(globalContext).name(executorUnit.getName()).pointId(executePoint.getPointId())
-            .executeDetailVo(executeDetailVo).compareResult(compareResult).build();
+    FeatureResponse response = FeatureResponse.builder().context(globalContext).name(executorUnit.getName())
+            .pointId(executePoint.getPointId()).executeDetailVo(executeDetailVo).compareResult(compareResult)
+            .spendTime(spendTime)
+            .build();
     response.setStatus(response.getExecuteStatus());
     return response;
   }

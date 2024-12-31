@@ -66,7 +66,6 @@ public class CodeChangeService {
         GitAccessInfo gitAccessInfo = repositoryFactory.getServiceRepositoryAccessInfo(codeChange.getServiceId());
         IGitRepositoryHandler repository = repositoryFactory.getRepository(gitAccessInfo.getGitType());
         repository.createBranch(codeChange.getChangeBranch(), gitAccessInfo);
-
         codeChange.setChangeId(uniqueIdService.getUniqueId());
         return codeChangeRepository.saveCodeChange(codeChange) ? codeChange.getChangeId() : "";
     }

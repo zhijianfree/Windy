@@ -37,49 +37,41 @@ public class CodeChangeRest {
 
   @ResponseBody
   @GetMapping("/{serviceId}/change/{codeChangeId}")
-  public ResponseMeta<CodeChangeBO> queryCodeChange(
-      @NotNull @PathVariable("codeChangeId") String codeChangeId,
-      @NotNull @PathVariable("serviceId") String serviceId) {
+  public ResponseMeta<CodeChangeBO> queryCodeChange(@NotNull @PathVariable("codeChangeId") String codeChangeId,
+                                                    @NotNull @PathVariable("serviceId") String serviceId) {
     return new ResponseMeta<CodeChangeBO>(ErrorCode.SUCCESS, codeChangeService.getCodeChange(serviceId, codeChangeId));
   }
 
   @ResponseBody
   @GetMapping("/relations")
-  public ResponseMeta<List<RelationDemandBug>> queryRelationIds(
-      @RequestParam("name") String queryName) {
+  public ResponseMeta<List<RelationDemandBug>> queryRelationIds(@RequestParam("name") String queryName) {
     return new ResponseMeta<List<RelationDemandBug>>(ErrorCode.SUCCESS, codeChangeService.queryRelationIds(queryName));
   }
 
   @ResponseBody
   @PostMapping("/change")
-  public ResponseMeta<String> createCodeChange(
-      @NotNull @Validated @RequestBody CodeChangeBO codeChangeBO) {
+  public ResponseMeta<String> createCodeChange(@NotNull @Validated @RequestBody CodeChangeBO codeChangeBO) {
     return new ResponseMeta<String>(ErrorCode.SUCCESS, codeChangeService.createCodeChange(codeChangeBO));
   }
 
   @ResponseBody
   @PutMapping("/{serviceId}/change/{codeChangeId}")
-  public ResponseMeta<Boolean> updateCodeChange(
-      @NotNull @PathVariable("serviceId") String serviceId,
-      @NotNull @PathVariable("codeChangeId") String codeChangeId,
-      @NotNull @RequestBody CodeChangeBO codeChangeBO) {
+  public ResponseMeta<Boolean> updateCodeChange(@NotNull @PathVariable("serviceId") String serviceId,
+                                                @NotNull @PathVariable("codeChangeId") String codeChangeId,
+                                                @NotNull @RequestBody CodeChangeBO codeChangeBO) {
     return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, codeChangeService.updateCodeChange(serviceId, codeChangeId, codeChangeBO));
   }
 
   @ResponseBody
   @GetMapping("/{serviceId}/changes")
-  public ResponseMeta<List<CodeChangeBO>> listCodeChanges(
-      @NotNull @PathVariable("serviceId") String serviceId) {
-    return new ResponseMeta<List<CodeChangeBO>>(ErrorCode.SUCCESS,
-        codeChangeService.listCodeChanges(serviceId));
+  public ResponseMeta<List<CodeChangeBO>> listCodeChanges(@NotNull @PathVariable("serviceId") String serviceId) {
+    return new ResponseMeta<List<CodeChangeBO>>(ErrorCode.SUCCESS, codeChangeService.listCodeChanges(serviceId));
   }
 
   @ResponseBody
   @DeleteMapping("/{serviceId}/change/{codeChangeId}")
-  public ResponseMeta<Boolean> deleteCodeChange(
-      @NotNull @PathVariable("serviceId") String serviceId,
-      @NotNull @PathVariable("codeChangeId") String codeChangeId) {
-    return new ResponseMeta<Boolean>(ErrorCode.SUCCESS,
-        codeChangeService.deleteCodeChange(serviceId, codeChangeId));
+  public ResponseMeta<Boolean> deleteCodeChange(@NotNull @PathVariable("serviceId") String serviceId,
+                                                @NotNull @PathVariable("codeChangeId") String codeChangeId) {
+    return new ResponseMeta<Boolean>(ErrorCode.SUCCESS, codeChangeService.deleteCodeChange(serviceId, codeChangeId));
   }
 }

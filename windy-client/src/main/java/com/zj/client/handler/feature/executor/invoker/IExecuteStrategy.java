@@ -15,6 +15,5 @@ public interface IExecuteStrategy {
 
   List<TemplateType> getType();
 
-  List<FeatureResponse> execute(ExecutePoint executePoint,
-      FeatureExecuteContext featureExecuteContext);
+  List<FeatureResponse> execute(ExecutePoint executePoint, FeatureExecuteContext featureExecuteContext);
 }
