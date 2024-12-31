@@ -84,4 +84,6 @@ public interface IDemandRepository {
      * @return 是否成功
      */
     boolean batchUpdateStatus(List<String> demandIds, int status);
+
+    boolean batchUpdateProcessing(List<String> demandIds);
 }

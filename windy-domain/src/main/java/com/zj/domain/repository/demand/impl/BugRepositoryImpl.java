@@ -27,6 +27,9 @@ import java.util.stream.Collectors;
 @Repository
 public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IBugRepository {
 
+    public static final String BUG_STATUS_COLUM_NAME = "status";
+    public static final String BUG_ID_COLUMN_NAME = "bug_id";
+
     @Override
     public PageSize<BugBO> getUserBugs(BugQueryBO bugQueryBO) {
         LambdaQueryWrapper<Bug> wrapper = Wrappers.lambdaQuery(Bug.class);
@@ -150,7 +153,18 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
             return false;
         }
         UpdateWrapper<Bug> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.set("status", status).in("bug_id", bugIds);
+        updateWrapper.set(BUG_STATUS_COLUM_NAME, status).in(BUG_ID_COLUMN_NAME, bugIds);
+        return baseMapper.update(null, updateWrapper) > 0;
+    }
+
+    @Override
+    public boolean batchUpdateProcessing(List<String> notCompleteBugIds) {
+        if (CollectionUtils.isEmpty(notCompleteBugIds)) {
+            return false;
+        }
+        UpdateWrapper<Bug> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set(BUG_STATUS_COLUM_NAME, BugStatus.WORKING.getType()).in(BUG_ID_COLUMN_NAME, notCompleteBugIds)
+                .eq(BUG_STATUS_COLUM_NAME, BugStatus.NOT_HANDLE.getType());
         return baseMapper.update(null, updateWrapper) > 0;
     }
 }

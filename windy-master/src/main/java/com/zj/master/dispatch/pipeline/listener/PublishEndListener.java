@@ -64,17 +64,25 @@ public class PublishEndListener implements IPipelineEndListener {
         }
 
         log.info("pipeline info = {}", JSON.toJSONString(pipeline));
-        if (Objects.equals(pipeline.getPipelineType(), PipelineType.PUBLISH.getType()) && statusChange.getProcessStatus().isSuccess()) {
+        if (Objects.equals(pipeline.getPipelineType(), PipelineType.PUBLISH.getType()) &&
+                statusChange.getProcessStatus().isSuccess()) {
+            //获取流水线所有的发布分支
             List<PublishBindBO> pipelinePublishes = publishBindRepository.getServicePublishes(pipeline.getServiceId());
             List<String> branches =
                     pipelinePublishes.stream().map(PublishBindBO::getBranch).collect(Collectors.toList());
             log.info("get publish branches ={}", branches);
+
+            //根据发布分支查询的变更列表，然后更新需求或缺陷状态
             List<CodeChangeBO> serviceChangeList = codeChangeRepository.getServiceChanges(pipeline.getServiceId());
-            finishCodeRelatedResource(serviceChangeList);
+            finishCodeRelatedResource(serviceChangeList, branches);
+
+            //删除已发布的变更列表
             List<String> serviceChanges =
                     serviceChangeList.stream().filter(codeChange -> branches.contains(codeChange.getChangeBranch())).map(CodeChangeBO::getChangeId).collect(Collectors.toList());
             log.info("code changes id ={}", serviceChanges);
             boolean batchDeleteCodeChange = codeChangeRepository.batchDeleteCodeChange(serviceChanges);
+
+            //删除发布绑定的分支
             boolean deletePublishLine = publishBindRepository.deleteServicePublishes(pipeline.getServiceId());
             log.info("delete code change result = {} delete publish result={}", batchDeleteCodeChange,
                     deletePublishLine);
@@ -82,31 +90,27 @@ public class PublishEndListener implements IPipelineEndListener {
     }
 
     /**
-     * 分支发布完成则会自动完成关联的需求、缺陷、工作项
+     * 分支发布完成则会自动修改关联的需求、缺陷、工作项状态
      */
-    private void finishCodeRelatedResource(List<CodeChangeBO> serviceChangeList) {
+    private void finishCodeRelatedResource(List<CodeChangeBO> serviceChangeList, List<String> publishBranches) {
         if (CollectionUtils.isEmpty(serviceChangeList)) {
             log.info("service code change is empty not finish relation source");
             return;
         }
 
-        Map<Integer, List<String>> relationMap =
-                serviceChangeList.stream().collect(Collectors.groupingBy(CodeChangeBO::getRelationType,
-                        Collectors.mapping(CodeChangeBO::getRelationId, Collectors.toList())));
+        //获取已发布的分支关联的变更
+        Map<Integer, List<String>> relationMap = serviceChangeList.stream().filter(codeChangeBO ->
+                        publishBranches.contains(codeChangeBO.getChangeBranch()))
+                        .collect(Collectors.groupingBy(CodeChangeBO::getRelationType,
+                                Collectors.mapping(CodeChangeBO::getRelationId, Collectors.toList())));
         List<String> demandIds = relationMap.get(RelationType.DEMAND.getType());
         if (CollectionUtils.isNotEmpty(demandIds)) {
-            List<String> notCompleteDemandIds = demandRepository.getNotCompleteDemandByIds(demandIds).stream()
-                    .map(DemandBO::getDemandId).collect(Collectors.toList());
-            boolean demandUpdate = demandRepository.batchUpdateStatus(notCompleteDemandIds, DemandStatus.PUBLISHED.getType());
-            log.info("batch update demand result ={} id={}", demandUpdate, notCompleteDemandIds);
+            batchUpdateDemands(demandIds, publishBranches);
         }
 
         List<String> bugIds = relationMap.get(RelationType.BUG.getType());
         if (CollectionUtils.isNotEmpty(bugIds)) {
-            List<String> notCompleteBugIds = bugRepository.getNotCompleteBugs(bugIds).stream()
-                    .map(BugBO::getBugId).collect(Collectors.toList());
-            boolean bugUpdate = bugRepository.batchUpdateStatus(notCompleteBugIds, BugStatus.PUBLISHED.getType());
-            log.info("batch update bug result ={}", bugUpdate);
+            batchUpdateBugs(bugIds, publishBranches);
         }
 
         List<String> taskIds = relationMap.get(RelationType.WORK.getType());
@@ -116,5 +120,46 @@ public class PublishEndListener implements IPipelineEndListener {
             boolean workTaskUpdate = workTaskRepository.batchUpdateStatus(notCompleteTaskIds, WorkTaskStatus.COMPLETE.getType());
             log.info("batch update work task result ={}", workTaskUpdate);
         }
+    }
+
+    private void batchUpdateBugs(List<String> bugIds, List<String> publishBranches) {
+        //将缺陷列表转化成变更分支是否全部发布的map
+        Map<Boolean, List<String>> partitionMap = bugIds.stream().collect(Collectors.partitioningBy(bugId ->
+                isDemandAllBranchPublish(bugId, RelationType.BUG, publishBranches)));
+
+        //将需求变更为发布状态
+        List<String> completeBugIds = partitionMap.get(true);
+        List<String> notPublishBugIds = bugRepository.getNotCompleteBugs(completeBugIds).stream()
+                .map(BugBO::getBugId).collect(Collectors.toList());
+        boolean bugUpdate = bugRepository.batchUpdateStatus(notPublishBugIds, BugStatus.PUBLISHED.getType());
+        log.info("batch update complete bug result ={} id={}", bugUpdate, notPublishBugIds);
+
+        //将未开始的需求变更未研发中状态
+        List<String> notCompleteBugIds = partitionMap.get(false);
+        boolean updateStatus = bugRepository.batchUpdateProcessing(notCompleteBugIds);
+        log.info("update bug processing result ={} id={}", updateStatus, notCompleteBugIds);
+    }
+
+    private void batchUpdateDemands(List<String> demandIds, List<String> branches) {
+        //将需求列表转化成变更分支是否全部发布的map
+        Map<Boolean, List<String>> partitionMap = demandIds.stream().collect(Collectors.partitioningBy(demandId ->
+                isDemandAllBranchPublish(demandId, RelationType.DEMAND, branches)));
+
+        //将需求变更为发布状态
+        List<String> completeDemandIds = partitionMap.get(true);
+        List<String> notPublishDemandIds = demandRepository.getNotCompleteDemandByIds(completeDemandIds).stream()
+                .map(DemandBO::getDemandId).collect(Collectors.toList());
+        boolean demandUpdate = demandRepository.batchUpdateStatus(notPublishDemandIds, DemandStatus.PUBLISHED.getType());
+        log.info("batch update complete demand result ={} id={}", demandUpdate, notPublishDemandIds);
+
+        //将未开始的需求变更未研发中状态
+        List<String> notCompleteDemandIds = partitionMap.get(false);
+        boolean updateStatus = demandRepository.batchUpdateProcessing(notCompleteDemandIds);
+        log.info("update demand processing result ={} id={}", updateStatus, notCompleteDemandIds);
+    }
+
+    private boolean isDemandAllBranchPublish(String relationId, RelationType relationType, List<String> branches) {
+        List<CodeChangeBO> codeChanges = codeChangeRepository.getCodeChangeByRelationId(relationId, relationType.getType());
+        return codeChanges.stream().allMatch(codeChangeBO -> branches.contains(codeChangeBO.getChangeBranch()));
     }
 }

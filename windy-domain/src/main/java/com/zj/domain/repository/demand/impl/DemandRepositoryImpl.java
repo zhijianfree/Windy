@@ -14,6 +14,7 @@ import com.zj.domain.entity.enums.DemandStatus;
 import com.zj.domain.entity.po.demand.Demand;
 import com.zj.domain.mapper.demand.DemandMapper;
 import com.zj.domain.repository.demand.IDemandRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Repository;
@@ -24,8 +25,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Repository
 public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> implements IDemandRepository {
+
+    public static final String DEMAND_STATUS_COLUMN_NAME = "status";
+    public static final String DEMAND_ID_COLUMN_NAME = "demand_id";
+
     @Override
     public boolean createDemand(DemandBO demandBO) {
         Demand demand = OrikaUtil.convert(demandBO, Demand.class);
@@ -129,10 +135,23 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
     @Override
     public boolean batchUpdateStatus(List<String> demandIds, int status) {
         if (CollectionUtils.isEmpty(demandIds)) {
+            log.info("batch update demand status demandIds is empty");
             return false;
         }
         UpdateWrapper<Demand> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.set("status", status).in("demand_id", demandIds);
+        updateWrapper.set(DEMAND_STATUS_COLUMN_NAME, status).in(DEMAND_ID_COLUMN_NAME, demandIds);
+        return baseMapper.update(null, updateWrapper) > 0;
+    }
+
+    @Override
+    public boolean batchUpdateProcessing(List<String> demandIds) {
+        if (CollectionUtils.isEmpty(demandIds)) {
+            log.info("batch update demand processing demandIds is empty");
+            return false;
+        }
+        UpdateWrapper<Demand> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set(DEMAND_STATUS_COLUMN_NAME, DemandStatus.WORKING.getType()).in(DEMAND_ID_COLUMN_NAME, demandIds)
+                .eq(DEMAND_STATUS_COLUMN_NAME, DemandStatus.NOT_HANDLE.getType());
         return baseMapper.update(null, updateWrapper) > 0;
     }
 

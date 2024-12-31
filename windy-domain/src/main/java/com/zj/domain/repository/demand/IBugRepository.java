@@ -91,4 +91,6 @@ public interface IBugRepository {
      * @return 是否成功
      */
     boolean batchUpdateStatus(List<String> bugIds, int status);
+
+    boolean batchUpdateProcessing(List<String> notCompleteBugIds);
 }
