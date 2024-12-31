@@ -53,6 +53,11 @@ public class TaskRecord {
   private String triggerId;
 
   /**
+   * 任务记录类型: 1 用例任务记录 2 临时批量任务
+   * */
+  private Integer type;
+
+  /**
    * 创建时间
    */
   private Long createTime;

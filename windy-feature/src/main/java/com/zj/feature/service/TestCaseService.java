@@ -13,6 +13,7 @@ import com.zj.domain.entity.bo.feature.ExecutePointBO;
 import com.zj.domain.entity.bo.feature.FeatureInfoBO;
 import com.zj.domain.entity.bo.feature.TaskRecordBO;
 import com.zj.domain.entity.bo.feature.TestCaseBO;
+import com.zj.domain.entity.enums.TaskRecordType;
 import com.zj.domain.repository.feature.IExecutePointRepository;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
@@ -141,6 +142,7 @@ public class TestCaseService {
         TaskRecordBO taskRecord = new TaskRecordBO();
         taskRecord.setRecordId(uniqueIdService.getUniqueId());
         taskRecord.setTriggerId(caseId);
+        taskRecord.setType(TaskRecordType.TEMP_TASK.getType());
         taskRecord.setTaskConfig(JSON.toJSONString(batchExecute));
         taskRecord.setTestCaseId(caseId);
         taskRecord.setStatus(ProcessStatus.RUNNING.getType());

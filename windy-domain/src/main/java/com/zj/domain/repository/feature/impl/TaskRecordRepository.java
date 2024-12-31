@@ -8,6 +8,7 @@ import com.zj.common.entity.dto.PageSize;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.OrikaUtil;
 import com.zj.domain.entity.bo.feature.TaskRecordBO;
+import com.zj.domain.entity.enums.TaskRecordType;
 import com.zj.domain.entity.po.feature.TaskRecord;
 import com.zj.domain.mapper.feeature.TaskRecordMapper;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
@@ -57,8 +58,8 @@ public class TaskRecordRepository extends ServiceImpl<TaskRecordMapper, TaskReco
   @Override
   public PageSize<TaskRecordBO> getTaskRecordPage(Integer pageNum, Integer size) {
     IPage<TaskRecord> page = new Page<>(pageNum, size);
-    IPage<TaskRecord> recordIPage = page(page,
-        Wrappers.lambdaQuery(TaskRecord.class).orderByDesc(TaskRecord::getUpdateTime));
+    IPage<TaskRecord> recordIPage = page(page, Wrappers.lambdaQuery(TaskRecord.class)
+            .eq(TaskRecord::getType, TaskRecordType.FEATURE_TASK.getType()).orderByDesc(TaskRecord::getUpdateTime));
     return convertRecordPage(recordIPage);
   }
 
