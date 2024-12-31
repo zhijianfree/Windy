@@ -70,8 +70,8 @@ public class GithubGitRepositoryHandler implements IGitRepositoryHandler {
         HashMap<String, String> hashMap = exchangeHeaders(accessInfo);
         String result = gitRequestProxy.get(accessInfo.getGitDomain() + uri, hashMap);
         List<GithubBranch> githubBranches = JSON.parseArray(result, GithubBranch.class);
-        return Optional.ofNullable(githubBranches).map(branch -> branch.stream()
-                        .map(GithubBranch::getName).collect(Collectors.toList()))
+        return Optional.ofNullable(githubBranches).map(branch ->
+                        branch.stream().map(GithubBranch::getName).collect(Collectors.toList()))
                 .orElseGet(ArrayList::new);
     }
 

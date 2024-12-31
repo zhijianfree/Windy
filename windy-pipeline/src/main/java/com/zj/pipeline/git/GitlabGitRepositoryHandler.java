@@ -34,9 +34,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
-
-    public static final String MASTER = "master";
-    public static final String TEMP_PREFIX = "temp_";
     private final GitRequestProxy gitRequestProxy;
 
     private Map<String, Integer> serviceIdMap = new HashMap<>();
@@ -148,11 +145,7 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
             log.info("can not get project branches ={}", projectId);
             return Collections.emptyList();
         }
-        return branches.stream().map(BranchInfo::getName)
-                //不显示master分支以及构建的临时分支
-                .filter(branch -> Objects.nonNull(branch) && !Objects.equals(branch, MASTER)
-                        && !branch.startsWith(TEMP_PREFIX))
-                .collect(Collectors.toList());
+        return branches.stream().map(BranchInfo::getName).collect(Collectors.toList());
     }
 
     private Integer transformProjectId(GitAccessInfo accessInfo) {
