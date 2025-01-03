@@ -7,7 +7,7 @@
 #
 # Host: 127.0.0.1 (MySQL 5.7.44)
 # Database: windy
-# Generation Time: 2024-12-27 06:04:41 +0000
+# Generation Time: 2025-01-03 06:46:58 +0000
 # ************************************************************
 
 
@@ -18,7 +18,6 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
 
 CREATE DATABASE IF NOT EXISTS `windy` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
 
@@ -66,7 +65,7 @@ CREATE TABLE `bug` (
                        `tags` varchar(100) DEFAULT NULL COMMENT '标签',
                        `level` int(11) NOT NULL COMMENT 'bug严重级别',
                        `status` int(2) NOT NULL DEFAULT '1' COMMENT 'bug状态',
-                       `relation_id` varchar(64) DEFAULT NULL COMMENT '关联ID(需求ID)',
+                       `relation_id` varchar(64) DEFAULT NULL COMMENT '需求ID',
                        `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
                        `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
                        `iteration_id` varchar(64) DEFAULT NULL COMMENT '迭代ID',
@@ -102,7 +101,7 @@ LOCK TABLES `build_tool` WRITE;
 INSERT INTO `build_tool` (`id`, `tool_id`, `name`, `type`, `install_path`, `description`, `create_time`, `update_time`, `build_config`)
 VALUES
     (1,'44dd1c32dba94680823838d8475edf49','openjdk-11','Java','/usr/local/openjdk-11',NULL,1731552526809,1731552526809,NULL),
-    (2,'dbce81f924584ea7a609d739fdd90419','mvn-3.8.8','Maven','/opt/windy-client/maven',NULL,1731649152143,1734933608239,'[{\"userName\":\"public_nexus\",\"password\":\"tuya@8888\",\"repositoryUrl\":\"https://maven.tuya-inc.top/nexus/content/groups/public/\",\"repositoryId\":\"tuya-public\"},{\"repositoryId\":\"tuya-third\",\"repositoryUrl\":\"https://maven.tuya-inc.top/nexus/content/repositories/thirdparty/\",\"userName\":\"public_nexus\",\"password\":\"tuya@8888\"}]');
+    (2,'dbce81f924584ea7a609d739fdd90419','mvn-3.8.8','Maven','/opt/windy-client/maven',NULL,1731649152143,1734933608239,'');
 
 /*!40000 ALTER TABLE `build_tool` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -295,6 +294,7 @@ CREATE TABLE `execute_point` (
                                  `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
                                  `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
                                  PRIMARY KEY (`id`),
+                                 UNIQUE KEY `uniq_point_id` (`point_id`),
                                  KEY `idx_feature_id` (`feature_id`),
                                  KEY `idx_template_id` (`template_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -642,7 +642,7 @@ LOCK TABLES `pipeline_action` WRITE;
 
 INSERT INTO `pipeline_action` (`id`, `action_id`, `action_name`, `node_id`, `action_url`, `param_detail`, `query_url`, `result`, `description`, `execute_type`, `create_time`, `update_time`, `headers`, `query_expression`, `body_type`)
 VALUES
-    (1,'62a0f23ab666417e9a7116d4e78a70a4','代码构建','07db7de5f7df4b7fa570ef9b14af24e9',NULL,'[{\"description\":\"构建pom相对路径\",\"name\":\"pomPath\",\"value\":\"pom.xml\"}]',NULL,'[{\"compareKey\":\"status\",\"description\":\"构建状态\",\"operator\":\"=\",\"showCompare\":false,\"value\":\"1\",\"valueType\":\"Integer\"}]','代码构建','BUILD',1692539956836,1692539956836,NULL,NULL,NULL),
+    (1,'62a0f23ab666417e9a7116d4e78a70a4','代码构建','07db7de5f7df4b7fa570ef9b14af24e9',NULL,'[{\"description\":\"构建文件相对路径\",\"name\":\"pomPath\",\"value\":\"pom.xml\"}]',NULL,'[{\"compareKey\":\"status\",\"description\":\"构建状态\",\"operator\":\"=\",\"showCompare\":false,\"value\":\"1\",\"valueType\":\"Integer\"}]','代码构建','BUILD',1692539956836,1692539956836,NULL,NULL,NULL),
     (2,'304d5182969945dda37bf974bc322c83','等待执行','a13bf21127284a348ae151e78bbecc0c',NULL,'[{\"description\":\"节点等待时长\",\"name\":\"waitTime\",\"value\":\"300\"}]',NULL,'[]','这个节点可以用于两个任务之间不期望立即执行的场景，比如部署与测试功能一般可在服务部署之后等待5min然后再开始功能测试。','WAIT',1692540079424,1692540079424,NULL,NULL,NULL),
     (3,'24a60706af63443e9721b8653b67fb3a','环境部署','3dcd3dc023234abc8892001426d1d3ec',NULL,'[{\"description\":\"环境Id\",\"name\":\"envId\",\"type\":\"select\",\"value\":\"\"}]',NULL,'[]','当前节点支持将构建好的代码部署到指定的环境，这里说的环境是在系统的环境管理中添加，流水线部署的环境可在流水线中自定义配置。','DEPLOY',1692540178899,1692540178899,NULL,NULL,NULL),
     (4,'08fd64be475c49c89daf872a540fe99e','功能测试','ce78243933964da78c09c9122c043053',NULL,'[{\"description\":\"选择任务\",\"name\":\"taskId\",\"type\":\"select\",\"value\":\"\"}]',NULL,'[{\"compareKey\":\"percent\",\"description\":\"执行成功率\",\"operator\":\">=\",\"showCompare\":true,\"value\":\"90\",\"valueType\":\"Integer\"}]','当前节点用于服务功能测试，具体的功能用例在Windy系统的“用例管理”功能中实现。测试任务在流水线中配置选择，成功率是指测试任务的成功百分比只有在测试任务达到设置值之后当前节点运行才算成功。','TEST',1692540382487,1692540382487,NULL,NULL,NULL),
@@ -826,6 +826,15 @@ CREATE TABLE `resource_member` (
                                    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+LOCK TABLES `resource_member` WRITE;
+/*!40000 ALTER TABLE `resource_member` DISABLE KEYS */;
+
+INSERT INTO `resource_member` (`id`, `resource_id`, `relation_id`, `create_time`, `member_type`)
+VALUES
+    (1873556333190492161,'c803c94b2f8f45e8a09b56168d2d14b0','d595a3d55b4e47978dd25cb8acb3e753',1735525613483,'service');
+
+/*!40000 ALTER TABLE `resource_member` ENABLE KEYS */;
+UNLOCK TABLES;
 
 
 # Dump of table role
@@ -1074,6 +1083,9 @@ CREATE TABLE `task_record` (
                                `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
                                `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
                                `trigger_id` varchar(64) DEFAULT NULL COMMENT '任务触发源ID',
+                               `percent` int(3) DEFAULT NULL COMMENT '任务执行百分比',
+                               `type` int(1) DEFAULT '1' COMMENT '记录类型: 1 用例任务  2 临时任务',
+                               `execute_user` varchar(64) DEFAULT '' COMMENT '任务执行人',
                                PRIMARY KEY (`id`),
                                UNIQUE KEY `unique_record_id` (`record_id`),
                                KEY `idx_task_id` (`task_id`)

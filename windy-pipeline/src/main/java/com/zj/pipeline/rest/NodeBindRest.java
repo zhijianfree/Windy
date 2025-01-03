@@ -66,7 +66,6 @@ public class NodeBindRest {
   @GetMapping("/{nodeId}/executors")
   public ResponseMeta<List<PipelineActionBO>> getNodeExecutors(
       @PathVariable("nodeId") String nodeId) {
-    return new ResponseMeta<List<PipelineActionBO>>(ErrorCode.SUCCESS,
-        service.getNodeExecutors(nodeId));
+    return new ResponseMeta<List<PipelineActionBO>>(ErrorCode.SUCCESS, service.getNodeExecutors(nodeId));
   }
 }
