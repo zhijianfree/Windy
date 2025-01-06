@@ -44,13 +44,17 @@ public abstract class AbstractWebhook implements IGitWebhook {
   @Override
   public boolean webhook(Object data) {
     GitParseResult parseResult = parseData(data);
-    if (StringUtils.isEmpty(parseResult.getBranch()) || StringUtils.isEmpty(parseResult.getRepository())) {
-      log.info("can not get service name or branch not trigger pipeline ={}",
-          JSON.toJSONString(data));
+    if (Objects.isNull(parseResult) ||StringUtils.isEmpty(parseResult.getBranch())
+            || StringUtils.isEmpty(parseResult.getRepository())) {
+      log.info("can not get service name or branch not trigger pipeline ={}", JSON.toJSONString(data));
       return false;
     }
 
     MicroserviceBO microservice = serviceRepository.getServiceByGitUrl(parseResult.getRepository());
+    if (Objects.isNull(microservice)) {
+      log.info("can not find service by git url={}", parseResult.getRepository());
+      return false;
+    }
     List<PipelineBO> pipelines = pipelineService.getServicePipelines(microservice.getServiceId());
     if (CollectionUtils.isEmpty(pipelines)) {
       log.info("can not find pipelines service={}", parseResult.getRepository());
