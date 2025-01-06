@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -50,25 +51,12 @@ public abstract class AbstractWebhook implements IGitWebhook {
       return false;
     }
 
-    MicroserviceBO microservice = serviceRepository.getServiceByGitUrl(parseResult.getRepository());
-    if (Objects.isNull(microservice)) {
-      log.info("can not find service by git url={}", parseResult.getRepository());
-      return false;
-    }
-    List<PipelineBO> pipelines = pipelineService.getServicePipelines(microservice.getServiceId());
-    if (CollectionUtils.isEmpty(pipelines)) {
-      log.info("can not find pipelines service={}", parseResult.getRepository());
+    List<PipelineBO> pushPipelines = getServicePipelineByType(parseResult, PipelineExecuteType.PUSH);
+    if (CollectionUtils.isEmpty(pushPipelines)){
       return false;
     }
 
-    List<PipelineBO> pushPipelines = pipelines.stream().filter(
-            pipeline -> Objects.equals(PipelineExecuteType.PUSH.getType(), pipeline.getExecuteType()))
-        .collect(Collectors.toList());
-    if (CollectionUtils.isEmpty(pushPipelines)) {
-      log.info("not find pushed pipelines service={} serviceId={}", microservice.getServiceName(),
-          microservice.getServiceId());
-      return false;
-    }
+    //根据当前推送的分支查找关联的流水线，然后执行
     pushPipelines.forEach(pipeline -> executorService.execute(() -> {
       List<BindBranchBO> gitBinds = listGitBinds(pipeline.getPipelineId());
       Optional<BindBranchBO> optional = gitBinds.stream().filter(BindBranchBO::getIsChoose)
@@ -80,6 +68,29 @@ public abstract class AbstractWebhook implements IGitWebhook {
       }
     }));
     return true;
+  }
+
+  private List<PipelineBO> getServicePipelineByType(GitParseResult parseResult, PipelineExecuteType executeType) {
+    MicroserviceBO microservice = serviceRepository.getServiceByGitUrl(parseResult.getRepository());
+    if (Objects.isNull(microservice)) {
+      log.info("can not find service by git url={}", parseResult.getRepository());
+      return Collections.emptyList();
+    }
+    List<PipelineBO> pipelines = pipelineService.getServicePipelines(microservice.getServiceId());
+    if (CollectionUtils.isEmpty(pipelines)) {
+      log.info("can not find pipelines service={}", parseResult.getRepository());
+      return Collections.emptyList();
+    }
+
+    List<PipelineBO> pushPipelines = pipelines.stream().filter(
+            pipeline -> Objects.equals(executeType.getType(), pipeline.getExecuteType()))
+        .collect(Collectors.toList());
+    if (CollectionUtils.isEmpty(pushPipelines)) {
+      log.info("not find pushed pipelines service={} serviceId={}", microservice.getServiceName(),
+          microservice.getServiceId());
+      return Collections.emptyList();
+    }
+    return pushPipelines;
   }
 
   public abstract GitParseResult parseData(Object data);

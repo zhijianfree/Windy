@@ -19,6 +19,7 @@ public class GitlabBaseEvent {
 
     @Data
     public static class GitProject{
+
         /**
          * 项目名称
          */
