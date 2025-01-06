@@ -74,6 +74,9 @@ docker run \
 docker run \
   --env=EUREKA_ZONE='http://{宿主机IP}:9888/eureka' \
   --name windy-client \
+  --privileged \
+  --env=TZ=Asia/Shanghai \
+  -v /var/run/docker.sock:/var/run/docker.sock \ 
   -p 8070:8070 \
   -d \
   guyuelan/windy-client:1.0-alpha
