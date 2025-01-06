@@ -103,9 +103,9 @@ public class GitBindService {
         }
     }
 
-    public void notifyHook(Object data, String platform) {
+    public boolean notifyHook(Object data, String platform) {
         IGitWebhook gitWebhook = webhookMap.get(platform);
-        gitWebhook.webhook(data);
+        return gitWebhook.webhook(data);
     }
 
 

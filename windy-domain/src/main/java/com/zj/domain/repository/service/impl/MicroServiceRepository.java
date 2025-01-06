@@ -122,9 +122,9 @@ public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Micr
   }
 
   @Override
-  public MicroserviceBO queryServiceByName(String serviceName) {
+  public MicroserviceBO getServiceByGitUrl(String gitUrl) {
     Microservice microservice = getOne(
-        Wrappers.lambdaQuery(Microservice.class).eq(Microservice::getServiceName, serviceName));
+        Wrappers.lambdaQuery(Microservice.class).eq(Microservice::getServiceName, gitUrl));
     return convertServiceBO(microservice);
   }
 

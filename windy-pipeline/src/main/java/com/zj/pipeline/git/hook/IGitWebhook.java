@@ -8,5 +8,5 @@ public interface IGitWebhook {
 
   String platform();
 
-  void webhook(Object data);
+  boolean webhook(Object data);
 }

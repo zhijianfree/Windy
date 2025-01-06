@@ -74,7 +74,7 @@ public class GitBindRest {
   }
 
   @PostMapping("/web/hook")
-  public void codeWebHook(@RequestBody Object data, @RequestParam("platform") String platform) {
-    gitBindService.notifyHook(data, platform);
+  public ResponseMeta<Boolean> codeWebHook(@RequestBody Object data, @RequestParam("platform") String platform) {
+    return new ResponseMeta(ErrorCode.SUCCESS, gitBindService.notifyHook(data, platform));
   }
 }

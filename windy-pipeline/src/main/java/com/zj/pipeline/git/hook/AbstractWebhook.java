@@ -42,21 +42,19 @@ public abstract class AbstractWebhook implements IGitWebhook {
   }
 
   @Override
-  public void webhook(Object data) {
+  public boolean webhook(Object data) {
     GitParseResult parseResult = parseData(data);
-    if (StringUtils.isEmpty(parseResult.getBranch()) || StringUtils.isEmpty(
-        parseResult.getRepository())) {
+    if (StringUtils.isEmpty(parseResult.getBranch()) || StringUtils.isEmpty(parseResult.getRepository())) {
       log.info("can not get service name or branch not trigger pipeline ={}",
           JSON.toJSONString(data));
-      return;
+      return false;
     }
 
-    MicroserviceBO microservice = serviceRepository.queryServiceByName(
-        parseResult.getRepository());
+    MicroserviceBO microservice = serviceRepository.getServiceByGitUrl(parseResult.getRepository());
     List<PipelineBO> pipelines = pipelineService.getServicePipelines(microservice.getServiceId());
     if (CollectionUtils.isEmpty(pipelines)) {
       log.info("can not find pipelines service={}", parseResult.getRepository());
-      return;
+      return false;
     }
 
     List<PipelineBO> pushPipelines = pipelines.stream().filter(
@@ -65,7 +63,7 @@ public abstract class AbstractWebhook implements IGitWebhook {
     if (CollectionUtils.isEmpty(pushPipelines)) {
       log.info("not find pushed pipelines service={} serviceId={}", microservice.getServiceName(),
           microservice.getServiceId());
-      return;
+      return false;
     }
     pushPipelines.forEach(pipeline -> executorService.execute(() -> {
       List<BindBranchBO> gitBinds = listGitBinds(pipeline.getPipelineId());
@@ -77,6 +75,7 @@ public abstract class AbstractWebhook implements IGitWebhook {
         log.info("web hook trigger pipeline execute pipeline={}", pipeline.getPipelineId());
       }
     }));
+    return true;
   }
 
   public abstract GitParseResult parseData(Object data);

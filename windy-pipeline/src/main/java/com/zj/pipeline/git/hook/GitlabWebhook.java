@@ -34,7 +34,7 @@ public class GitlabWebhook extends AbstractWebhook {
     String name = giteaHookVo.getProject();
     String branch = getBranchFromHookData(giteaHookVo.getRef());
     log.info("get repository name={} branch name={}", name, branch);
-    return GitParseResult.builder().repository(name).branch(branch).build();
+    return GitParseResult.builder().repository(name).eventType(giteaHookVo.getEventType()).branch(branch).build();
   }
 
   @Override
