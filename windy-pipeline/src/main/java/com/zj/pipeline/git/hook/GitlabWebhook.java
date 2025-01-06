@@ -36,7 +36,7 @@ public class GitlabWebhook extends AbstractWebhook {
     String gitString = JSON.toJSONString(data);
     log.info("get notify hook param={}", gitString);
     GitlabBaseEvent gitEvent = JSON.parseObject(gitString, GitlabBaseEvent.class);
-    GitlabBaseEvent.GitProject gitProject = gitEvent.getGitProject();
+    GitlabBaseEvent.GitProject gitProject = gitEvent.getProject();
     if (Objects.equals(gitEvent.getEventType(), PUSH_EVENT_NAME)){
       GitlabCommitVo gitlabCommitVo = JSON.parseObject(gitString, GitlabCommitVo.class);
       String branch = getBranchFromHookData(gitlabCommitVo.getRef());

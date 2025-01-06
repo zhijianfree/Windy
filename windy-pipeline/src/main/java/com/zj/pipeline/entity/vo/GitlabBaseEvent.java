@@ -15,7 +15,7 @@ public class GitlabBaseEvent {
     /**
      * 服务git信息
      */
-    private GitProject gitProject;
+    private GitProject project;
 
     @Data
     public static class GitProject{
