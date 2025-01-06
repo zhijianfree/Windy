@@ -9,7 +9,12 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class GitParseResult {
+public class GitPushResult {
+
+  /**
+   * 代码关联的服务ID
+   */
+  private String relatedServiceId;
 
   /**
    * git类型

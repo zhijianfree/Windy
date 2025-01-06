@@ -9,7 +9,7 @@ import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.pipeline.entity.enums.PipelineExecuteType;
-import com.zj.pipeline.entity.vo.GitParseResult;
+import com.zj.pipeline.entity.vo.GitPushResult;
 import com.zj.pipeline.service.PipelineService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -43,39 +43,43 @@ public abstract class AbstractWebhook implements IGitWebhook {
   }
 
   @Override
-  public boolean webhook(Object data) {
-    GitParseResult parseResult = parseData(data);
-    if (Objects.isNull(parseResult) ||StringUtils.isEmpty(parseResult.getBranch())
-            || StringUtils.isEmpty(parseResult.getRepository())) {
+  public GitPushResult webhook(Object data) {
+    GitPushResult gitPushResult = parseData(data);
+    if (Objects.isNull(gitPushResult) ||StringUtils.isEmpty(gitPushResult.getBranch())
+            || StringUtils.isEmpty(gitPushResult.getRepository())) {
       log.info("can not get service name or branch not trigger pipeline ={}", JSON.toJSONString(data));
-      return false;
+      return null;
     }
 
-    List<PipelineBO> pushPipelines = getServicePipelineByType(parseResult, PipelineExecuteType.PUSH);
+    MicroserviceBO microservice = serviceRepository.getServiceByGitUrl(gitPushResult.getRepository());
+    if (Objects.isNull(microservice)) {
+      log.info("can not find service by git url={}", gitPushResult.getRepository());
+      return null;
+    }
+
+    List<PipelineBO> pushPipelines = getServicePipelineByType(microservice, gitPushResult, PipelineExecuteType.PUSH);
     if (CollectionUtils.isEmpty(pushPipelines)){
-      return false;
+      return null;
     }
 
     //根据当前推送的分支查找关联的流水线，然后执行
     pushPipelines.forEach(pipeline -> executorService.execute(() -> {
       List<BindBranchBO> gitBinds = listGitBinds(pipeline.getPipelineId());
       Optional<BindBranchBO> optional = gitBinds.stream().filter(BindBranchBO::getIsChoose)
-          .filter(gitBind -> Objects.equals(gitBind.getGitBranch(), parseResult.getBranch()))
+          .filter(gitBind -> Objects.equals(gitBind.getGitBranch(), gitPushResult.getBranch()))
           .findAny();
       if (optional.isPresent()) {
         pipelineService.execute(pipeline.getPipelineId());
         log.info("web hook trigger pipeline execute pipeline={}", pipeline.getPipelineId());
       }
     }));
-    return true;
+
+    gitPushResult.setRelatedServiceId(microservice.getServiceId());
+    return gitPushResult;
   }
 
-  private List<PipelineBO> getServicePipelineByType(GitParseResult parseResult, PipelineExecuteType executeType) {
-    MicroserviceBO microservice = serviceRepository.getServiceByGitUrl(parseResult.getRepository());
-    if (Objects.isNull(microservice)) {
-      log.info("can not find service by git url={}", parseResult.getRepository());
-      return Collections.emptyList();
-    }
+  private List<PipelineBO> getServicePipelineByType(MicroserviceBO microservice, GitPushResult parseResult,
+                                                    PipelineExecuteType executeType) {
     List<PipelineBO> pipelines = pipelineService.getServicePipelines(microservice.getServiceId());
     if (CollectionUtils.isEmpty(pipelines)) {
       log.info("can not find pipelines service={}", parseResult.getRepository());
@@ -93,7 +97,7 @@ public abstract class AbstractWebhook implements IGitWebhook {
     return pushPipelines;
   }
 
-  public abstract GitParseResult parseData(Object data);
+  public abstract GitPushResult parseData(Object data);
 
   public List<BindBranchBO> listGitBinds(String pipelineId) {
     checkPipelineExist(pipelineId);

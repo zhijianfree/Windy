@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.pipeline.entity.enums.PlatformEnum;
-import com.zj.pipeline.entity.vo.GitParseResult;
+import com.zj.pipeline.entity.vo.GitPushResult;
 import com.zj.pipeline.entity.vo.GiteaHookVo;
 import com.zj.pipeline.service.PipelineService;
 import lombok.extern.slf4j.Slf4j;
@@ -33,12 +33,12 @@ public class GiteaWebhook extends AbstractWebhook {
   }
 
   @Override
-  public GitParseResult parseData(Object data) {
+  public GitPushResult parseData(Object data) {
     log.info("get notify hook param={}", JSON.toJSONString(data));
     GiteaHookVo giteaHookVo = JSON.parseObject(JSON.toJSONString(data), GiteaHookVo.class);
     String name = giteaHookVo.getRepository().getName();
     String branch = getBranchFromHookData(giteaHookVo.getRef());
     log.info("get repository name={} branch name={}", name, branch);
-    return GitParseResult.builder().repository(name).branch(branch).build();
+    return GitPushResult.builder().repository(name).branch(branch).build();
   }
 }

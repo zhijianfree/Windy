@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.pipeline.entity.enums.PlatformEnum;
-import com.zj.pipeline.entity.vo.GitParseResult;
+import com.zj.pipeline.entity.vo.GitPushResult;
 import com.zj.pipeline.entity.vo.GitlabBaseEvent;
 import com.zj.pipeline.entity.vo.GitlabCommitVo;
 import com.zj.pipeline.service.PipelineService;
@@ -32,7 +32,7 @@ public class GitlabWebhook extends AbstractWebhook {
   }
 
   @Override
-  public GitParseResult parseData(Object data) {
+  public GitPushResult parseData(Object data) {
     String gitString = JSON.toJSONString(data);
     log.info("gitlab notify hook param={}", gitString);
     GitlabBaseEvent gitEvent = JSON.parseObject(gitString, GitlabBaseEvent.class);
@@ -41,7 +41,7 @@ public class GitlabWebhook extends AbstractWebhook {
       GitlabCommitVo gitlabCommitVo = JSON.parseObject(gitString, GitlabCommitVo.class);
       String branch = getBranchFromHookData(gitlabCommitVo.getRef());
       log.info("get repository name={} url={} branch name={}", gitProject.getName(), gitProject.getGitUrl(), branch);
-      return GitParseResult.builder().repository(gitProject.getGitUrl()).eventType(gitEvent.getEventType()).branch(branch).build();
+      return GitPushResult.builder().repository(gitProject.getGitUrl()).eventType(gitEvent.getEventType()).branch(branch).build();
     }
 
     return null;
