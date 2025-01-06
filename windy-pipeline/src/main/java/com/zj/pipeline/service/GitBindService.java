@@ -20,6 +20,7 @@ import com.zj.pipeline.git.RepositoryFactory;
 import com.zj.pipeline.git.hook.IGitWebhook;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 /**
@@ -45,10 +47,13 @@ public class GitBindService {
     private final Map<String, IGitWebhook> webhookMap;
     private final IDemandRepository demandRepository;
     private final IBugRepository bugRepository;
+    private final Executor executorService;
 
     public GitBindService(PipelineService pipelineService, RepositoryFactory repositoryFactory,
                           UniqueIdService uniqueIdService, IBindBranchRepository gitBindRepository,
-                          ICodeChangeRepository codeChangeRepository, List<IGitWebhook> webhooks, IDemandRepository demandRepository, IBugRepository bugRepository) {
+                          ICodeChangeRepository codeChangeRepository, List<IGitWebhook> webhooks,
+                          IDemandRepository demandRepository, IBugRepository bugRepository,
+                          @Qualifier("webHookExecutorPool") Executor executorService) {
         this.pipelineService = pipelineService;
         this.repositoryFactory = repositoryFactory;
         this.uniqueIdService = uniqueIdService;
@@ -57,6 +62,7 @@ public class GitBindService {
         webhookMap = webhooks.stream().collect(Collectors.toMap(IGitWebhook::platform, webhook -> webhook));
         this.demandRepository = demandRepository;
         this.bugRepository = bugRepository;
+        this.executorService = executorService;
     }
 
     public String createGitBind(BindBranchBO bindBranchBO) {
@@ -119,23 +125,28 @@ public class GitBindService {
     public boolean notifyHook(Object data, String platform) {
         IGitWebhook gitWebhook = webhookMap.get(platform);
         GitPushResult gitPushResult = gitWebhook.webhook(data);
-        updateProcessStatusIfNeed(gitPushResult);
+        executorService.execute(() -> updateProcessStatusIfNeed(gitPushResult));
+
         return true;
     }
 
     private void updateProcessStatusIfNeed(GitPushResult gitPushResult) {
-        if (Objects.nonNull(gitPushResult) && Objects.equals(gitPushResult.getEventType(), GitEventType.COMMIT.getType())) {
-            List<CodeChangeBO> codeChanges = codeChangeRepository.getServiceChanges(gitPushResult.getRelatedServiceId());
-            List<String> demandCodeChanges = codeChanges.stream().filter(codeChange ->
-                    Objects.equals(RelationType.DEMAND.getType(), codeChange.getRelationType()))
-                    .map(CodeChangeBO::getRelationId).collect(Collectors.toList());
-            boolean demandProcessing = demandRepository.batchUpdateProcessing(demandCodeChanges);
-            log.info("update demand processing result={}", demandProcessing);
-            List<String> bugCodeChanges = codeChanges.stream().filter(codeChange ->
-                            Objects.equals(RelationType.BUG.getType(), codeChange.getRelationType()))
-                    .map(CodeChangeBO::getRelationId).collect(Collectors.toList());
-            boolean updateBugProcessing = bugRepository.batchUpdateProcessing(bugCodeChanges);
-            log.info("update bug processing result={}", updateBugProcessing);
+        try {
+            if (Objects.nonNull(gitPushResult) && Objects.equals(gitPushResult.getEventType(), GitEventType.COMMIT.getType())) {
+                List<CodeChangeBO> codeChanges = codeChangeRepository.getServiceChanges(gitPushResult.getRelatedServiceId());
+                List<String> demandCodeChanges = codeChanges.stream().filter(codeChange ->
+                                Objects.equals(RelationType.DEMAND.getType(), codeChange.getRelationType()))
+                        .map(CodeChangeBO::getRelationId).collect(Collectors.toList());
+                boolean demandProcessing = demandRepository.batchUpdateProcessing(demandCodeChanges);
+                log.info("update demand processing result={}", demandProcessing);
+                List<String> bugCodeChanges = codeChanges.stream().filter(codeChange ->
+                                Objects.equals(RelationType.BUG.getType(), codeChange.getRelationType()))
+                        .map(CodeChangeBO::getRelationId).collect(Collectors.toList());
+                boolean updateBugProcessing = bugRepository.batchUpdateProcessing(bugCodeChanges);
+                log.info("update bug processing result={}", updateBugProcessing);
+            }
+        }catch (Exception e){
+            log.info("update status error, after code push", e);
         }
     }
 

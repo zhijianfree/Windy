@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @author guyuelan
@@ -18,6 +19,7 @@ public class ThreadPoolConfig {
   @Bean("webHookExecutorPool")
   public Executor getWebHookExecutor() {
     WindyThreadPool windyThreadPool = new WindyThreadPool();
+    windyThreadPool.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
     windyThreadPool.setCorePoolSize(5);
     windyThreadPool.setMaxPoolSize(20);
     windyThreadPool.setTimeout(600L);
