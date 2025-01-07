@@ -1,4 +1,4 @@
-FROM registry-shdocker-registry.cn-shanghai.cr.aliyuncs.com/shenzhen_ka/openjdk:11
+FROM openjdk:11
 
 RUN mkdir -p /opt/windy-master
 

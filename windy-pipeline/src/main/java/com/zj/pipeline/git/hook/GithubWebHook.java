@@ -65,25 +65,23 @@ public class GithubWebHook extends AbstractWebhook {
         return Objects.equals(computedSignature, gitHubSignature);
     }
 
-    // 使用 HMAC-SHA1 算法计算签名
+    /**
+     * 使用 HMAC-SHA1 算法计算签名
+     * */
     private String computeHMACSHA1(String data, String secret) {
         try {
             Mac hmacSHA1 = Mac.getInstance("HmacSHA1");
             SecretKeySpec secretKey = new SecretKeySpec(secret.getBytes(), "HmacSHA1");
             hmacSHA1.init(secretKey);
-
             byte[] hash = hmacSHA1.doFinal(data.getBytes());
-
-            // 将结果转换为十六进制字符串
             StringBuilder hexString = new StringBuilder();
-            for (int i = 0; i < hash.length; i++) {
-                String hex = Integer.toHexString(0xff & hash[i]);
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
                 if (hex.length() == 1) {
                     hexString.append('0');
                 }
                 hexString.append(hex);
             }
-
             return hexString.toString();
         } catch (Exception e) {
             log.info("calculate signature error", e);

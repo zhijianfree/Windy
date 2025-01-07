@@ -1,4 +1,4 @@
-FROM registry-shdocker-registry.cn-shanghai.cr.aliyuncs.com/shenzhen_ka/windy-dind:1.1
+FROM windy-dind:1.1
 
 RUN mkdir -p /opt/windy-client
 
