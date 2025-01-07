@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Objects;
@@ -42,7 +44,7 @@ public class GitlabWebhook extends AbstractWebhook {
   public GitPushResult parseData(Object data, HttpServletRequest request) {
     String gitString = JSON.toJSONString(data);
     log.info("gitlab notify hook param={}", gitString);
-    if (checkSecret(gitString, request)){
+    if (!checkSecret(gitString, request)){
       log.info("gitlab signature check error");
       return null;
     }
@@ -67,7 +69,24 @@ public class GitlabWebhook extends AbstractWebhook {
       return false;
     }
     String gitLabToken = request.getHeader("X-Gitlab-Token");
+    String bodyString = getBodyString(request);
+    log.info("signature = {} gitlab={}, bodyString={}", signature, gitLabToken, bodyString);
     return Objects.equals(signature, gitLabToken);
+  }
+
+  private String getBodyString(HttpServletRequest request){
+    // 读取请求体内容
+    StringBuilder payload = new StringBuilder();
+    try (BufferedReader reader = request.getReader()) {
+      String line;
+      while ((line = reader.readLine()) != null) {
+        payload.append(line);
+      }
+      return payload.toString();
+    }catch (Exception e){
+      log.info("get request body error", e);
+    }
+    return null;
   }
 
   /**
