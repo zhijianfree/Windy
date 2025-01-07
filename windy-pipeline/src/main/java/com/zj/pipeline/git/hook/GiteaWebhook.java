@@ -2,6 +2,7 @@ package com.zj.pipeline.git.hook;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
+import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.pipeline.entity.enums.PlatformEnum;
 import com.zj.pipeline.entity.vo.GitPushResult;
@@ -23,8 +24,8 @@ import java.util.concurrent.Executor;
 public class GiteaWebhook extends AbstractWebhook {
 
   public GiteaWebhook(IMicroServiceRepository serviceRepository, PipelineService pipelineService,
-      @Qualifier("webHookExecutorPool") Executor executorService,
-      IBindBranchRepository gitBindRepository) {
+                      @Qualifier("webHookExecutorPool") Executor executorService,
+                      IBindBranchRepository gitBindRepository, ISystemConfigRepository systemConfigRepository) {
     super(serviceRepository, pipelineService, executorService, gitBindRepository, systemConfigRepository);
   }
 
