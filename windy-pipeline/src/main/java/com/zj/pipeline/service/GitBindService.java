@@ -126,7 +126,6 @@ public class GitBindService {
         IGitWebhook gitWebhook = webhookMap.get(platform);
         GitPushResult gitPushResult = gitWebhook.webhook(data);
         executorService.execute(() -> updateProcessStatusIfNeed(gitPushResult));
-
         return true;
     }
 

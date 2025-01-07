@@ -38,4 +38,9 @@ public class ServiceDto {
      */
     private ServiceConfig serviceConfig;
 
+    /**
+     * 创建时间
+     */
+    private Long createTime;
+
 }
