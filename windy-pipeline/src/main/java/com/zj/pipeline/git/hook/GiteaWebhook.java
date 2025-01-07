@@ -35,9 +35,9 @@ public class GiteaWebhook extends AbstractWebhook {
   }
 
   @Override
-  public GitPushResult parseData(Object data, HttpServletRequest request) {
-    log.info("get notify hook param={}", JSON.toJSONString(data));
-    GiteaHookVo giteaHookVo = JSON.parseObject(JSON.toJSONString(data), GiteaHookVo.class);
+  public GitPushResult parseData(String data, HttpServletRequest request) {
+    log.info("get notify hook param={}", data);
+    GiteaHookVo giteaHookVo = JSON.parseObject(data, GiteaHookVo.class);
     String name = giteaHookVo.getRepository().getName();
     String branch = getBranchFromHookData(giteaHookVo.getRef());
     log.info("get repository name={} branch name={}", name, branch);

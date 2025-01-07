@@ -48,7 +48,7 @@ public abstract class AbstractWebhook implements IGitWebhook {
   }
 
   @Override
-  public GitPushResult webhook(Object data, HttpServletRequest request) {
+  public GitPushResult webhook(String data, HttpServletRequest request) {
     GitPushResult gitPushResult = parseData(data, request);
     if (Objects.isNull(gitPushResult) ||StringUtils.isEmpty(gitPushResult.getBranch())
             || StringUtils.isEmpty(gitPushResult.getRepository())) {
@@ -102,7 +102,7 @@ public abstract class AbstractWebhook implements IGitWebhook {
     return pushPipelines;
   }
 
-  public abstract GitPushResult parseData(Object data, HttpServletRequest request);
+  public abstract GitPushResult parseData(String data, HttpServletRequest request);
 
   public GitAccessInfo getGitAccessInfo(){
     return systemConfigRepository.getGitAccess();

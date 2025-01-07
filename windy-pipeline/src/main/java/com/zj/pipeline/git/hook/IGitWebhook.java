@@ -12,5 +12,5 @@ public interface IGitWebhook {
 
   String platform();
 
-  GitPushResult webhook(Object data, HttpServletRequest request);
+  GitPushResult webhook(String data, HttpServletRequest request);
 }

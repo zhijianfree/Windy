@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -123,11 +124,26 @@ public class GitBindService {
         }
     }
 
-    public boolean notifyHook(Object data, String platform, HttpServletRequest request) {
+    public boolean notifyHook(String platform, HttpServletRequest request) {
         IGitWebhook gitWebhook = webhookMap.get(platform);
-        GitPushResult gitPushResult = gitWebhook.webhook(data, request);
+        String bodyString = getBodyString(request);
+        GitPushResult gitPushResult = gitWebhook.webhook(bodyString, request);
         executorService.execute(() -> updateProcessStatusIfNeed(gitPushResult));
         return true;
+    }
+    private String getBodyString(HttpServletRequest request){
+        // 读取请求体内容
+        StringBuilder payload = new StringBuilder();
+        try (BufferedReader reader = request.getReader()) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                payload.append(line);
+            }
+            return payload.toString();
+        }catch (Exception e){
+            log.info("get request body error", e);
+        }
+        return null;
     }
 
     private void updateProcessStatusIfNeed(GitPushResult gitPushResult) {

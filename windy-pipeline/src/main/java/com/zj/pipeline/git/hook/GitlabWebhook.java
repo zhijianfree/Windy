@@ -41,20 +41,19 @@ public class GitlabWebhook extends AbstractWebhook {
   }
 
   @Override
-  public GitPushResult parseData(Object data, HttpServletRequest request) {
-    String gitString = JSON.toJSONString(data);
-    log.info("gitlab notify hook param={}", gitString);
-    if (!checkSecret(gitString, request)){
+  public GitPushResult parseData(String data, HttpServletRequest request) {
+    log.info("gitlab notify hook param={}", data);
+    if (!checkSecret(data, request)){
       log.info("gitlab signature check error");
       return null;
     }
 
-    GitlabBaseEvent gitEvent = JSON.parseObject(gitString, GitlabBaseEvent.class);
+    GitlabBaseEvent gitEvent = JSON.parseObject(data, GitlabBaseEvent.class);
     GitlabBaseEvent.GitProject gitProject = gitEvent.getProject();
     if (!Objects.equals(gitEvent.getEventType(), PUSH_EVENT_NAME)){
       return null;
     }
-    GitlabCommitVo gitlabCommitVo = JSON.parseObject(gitString, GitlabCommitVo.class);
+    GitlabCommitVo gitlabCommitVo = JSON.parseObject(data, GitlabCommitVo.class);
     String branch = getBranchFromHookData(gitlabCommitVo.getRef());
     log.info("get repository name={} url={} branch name={}", gitProject.getName(), gitProject.getGitUrl(), branch);
     return GitPushResult.builder().repository(gitProject.getGitUrl()).eventType(gitEvent.getEventType()).branch(branch).build();
@@ -69,25 +68,11 @@ public class GitlabWebhook extends AbstractWebhook {
       return false;
     }
     String gitLabToken = request.getHeader("X-Gitlab-Token");
-    String bodyString = getBodyString(request);
-    log.info("signature = {} gitlab={}, bodyString={}", signature, gitLabToken, bodyString);
+    log.info("signature = {} gitlab={}", signature, gitLabToken);
     return Objects.equals(signature, gitLabToken);
   }
 
-  private String getBodyString(HttpServletRequest request){
-    // 读取请求体内容
-    StringBuilder payload = new StringBuilder();
-    try (BufferedReader reader = request.getReader()) {
-      String line;
-      while ((line = reader.readLine()) != null) {
-        payload.append(line);
-      }
-      return payload.toString();
-    }catch (Exception e){
-      log.info("get request body error", e);
-    }
-    return null;
-  }
+
 
   /**
    * 计算 HMAC-SHA256 签名
