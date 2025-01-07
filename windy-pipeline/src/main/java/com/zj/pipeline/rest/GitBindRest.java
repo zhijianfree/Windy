@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -74,7 +75,8 @@ public class GitBindRest {
   }
 
   @PostMapping("/web/hook")
-  public ResponseMeta<Boolean> codeWebHook(@RequestBody Object data, @RequestParam("platform") String platform) {
-    return new ResponseMeta(ErrorCode.SUCCESS, gitBindService.notifyHook(data, platform));
+  public ResponseMeta<Boolean> codeWebHook(@RequestBody Object data, @RequestParam("platform") String platform,
+                                           HttpServletRequest request) {
+    return new ResponseMeta(ErrorCode.SUCCESS, gitBindService.notifyHook(data, platform, request));
   }
 }

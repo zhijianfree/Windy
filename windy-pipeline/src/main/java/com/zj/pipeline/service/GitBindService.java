@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -122,9 +123,9 @@ public class GitBindService {
         }
     }
 
-    public boolean notifyHook(Object data, String platform) {
+    public boolean notifyHook(Object data, String platform, HttpServletRequest request) {
         IGitWebhook gitWebhook = webhookMap.get(platform);
-        GitPushResult gitPushResult = gitWebhook.webhook(data);
+        GitPushResult gitPushResult = gitWebhook.webhook(data, request);
         executorService.execute(() -> updateProcessStatusIfNeed(gitPushResult));
         return true;
     }

@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.concurrent.Executor;
 
 /**
@@ -24,7 +25,7 @@ public class GiteaWebhook extends AbstractWebhook {
   public GiteaWebhook(IMicroServiceRepository serviceRepository, PipelineService pipelineService,
       @Qualifier("webHookExecutorPool") Executor executorService,
       IBindBranchRepository gitBindRepository) {
-    super(serviceRepository, pipelineService, executorService, gitBindRepository);
+    super(serviceRepository, pipelineService, executorService, gitBindRepository, systemConfigRepository);
   }
 
   @Override
@@ -33,7 +34,7 @@ public class GiteaWebhook extends AbstractWebhook {
   }
 
   @Override
-  public GitPushResult parseData(Object data) {
+  public GitPushResult parseData(Object data, HttpServletRequest request) {
     log.info("get notify hook param={}", JSON.toJSONString(data));
     GiteaHookVo giteaHookVo = JSON.parseObject(JSON.toJSONString(data), GiteaHookVo.class);
     String name = giteaHookVo.getRepository().getName();

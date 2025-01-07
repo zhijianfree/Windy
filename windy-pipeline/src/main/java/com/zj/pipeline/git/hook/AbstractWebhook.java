@@ -1,12 +1,14 @@
 package com.zj.pipeline.git.hook;
 
 import com.alibaba.fastjson.JSON;
+import com.zj.common.adapter.git.GitAccessInfo;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.domain.entity.bo.pipeline.BindBranchBO;
 import com.zj.domain.entity.bo.pipeline.PipelineBO;
 import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
+import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.pipeline.entity.enums.PipelineExecuteType;
 import com.zj.pipeline.entity.vo.GitPushResult;
@@ -15,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -33,18 +36,20 @@ public abstract class AbstractWebhook implements IGitWebhook {
   private final PipelineService pipelineService;
   private final IBindBranchRepository gitBindRepository;
   private final Executor executorService;
+  private final ISystemConfigRepository systemConfigRepository;
 
   protected AbstractWebhook(IMicroServiceRepository serviceRepository, PipelineService pipelineService,
-      Executor executorService, IBindBranchRepository gitBindRepository) {
+                            Executor executorService, IBindBranchRepository gitBindRepository, ISystemConfigRepository systemConfigRepository) {
     this.serviceRepository = serviceRepository;
     this.pipelineService = pipelineService;
     this.gitBindRepository = gitBindRepository;
     this.executorService = executorService;
+    this.systemConfigRepository = systemConfigRepository;
   }
 
   @Override
-  public GitPushResult webhook(Object data) {
-    GitPushResult gitPushResult = parseData(data);
+  public GitPushResult webhook(Object data, HttpServletRequest request) {
+    GitPushResult gitPushResult = parseData(data, request);
     if (Objects.isNull(gitPushResult) ||StringUtils.isEmpty(gitPushResult.getBranch())
             || StringUtils.isEmpty(gitPushResult.getRepository())) {
       log.info("can not get service name or branch not trigger pipeline ={}", JSON.toJSONString(data));
@@ -97,8 +102,11 @@ public abstract class AbstractWebhook implements IGitWebhook {
     return pushPipelines;
   }
 
-  public abstract GitPushResult parseData(Object data);
+  public abstract GitPushResult parseData(Object data, HttpServletRequest request);
 
+  public GitAccessInfo getGitAccessInfo(){
+    return systemConfigRepository.getGitAccess();
+  }
   public List<BindBranchBO> listGitBinds(String pipelineId) {
     checkPipelineExist(pipelineId);
     return gitBindRepository.getPipelineRelatedBranches(pipelineId);
