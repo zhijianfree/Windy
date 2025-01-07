@@ -1,6 +1,6 @@
 package com.zj.pipeline.git.hook;
 
-import com.zj.pipeline.entity.vo.GitPushResult;
+import com.zj.pipeline.entity.vo.GitPushResultVo;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -12,5 +12,5 @@ public interface IGitWebhook {
 
   String platform();
 
-  GitPushResult webhook(String data, HttpServletRequest request);
+  GitPushResultVo webhook(String data, HttpServletRequest request);
 }

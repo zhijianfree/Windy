@@ -9,7 +9,7 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class GitPushResult {
+public class GitPushResultVo {
 
   /**
    * 代码关联的服务ID

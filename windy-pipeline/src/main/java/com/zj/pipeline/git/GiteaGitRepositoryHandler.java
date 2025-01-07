@@ -8,7 +8,7 @@ import com.zj.common.adapter.git.GitAccessInfo;
 import com.zj.common.adapter.git.IGitRepositoryHandler;
 import com.zj.pipeline.entity.vo.BranchInfo;
 import com.zj.pipeline.entity.vo.CreateBranchVo;
-import com.zj.pipeline.entity.vo.GiteaRepository;
+import com.zj.pipeline.entity.vo.GiteaRepositoryVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -74,12 +74,12 @@ public class GiteaGitRepositoryHandler implements IGitRepositoryHandler {
   public void checkRepository(GitAccessInfo accessInfo) {
     String result = gitRequestProxy.get("/api/v1/user/repos", getTokenHeader(accessInfo));
     log.info("query repository result ={}", result);
-    List<GiteaRepository> repositories = JSON.parseArray(result, GiteaRepository.class);
+    List<GiteaRepositoryVo> repositories = JSON.parseArray(result, GiteaRepositoryVo.class);
     if (CollectionUtils.isEmpty(repositories)) {
       throw new ApiException(ErrorCode.REPO_NOT_EXIST);
     }
 
-    Optional<GiteaRepository> optional = repositories.stream()
+    Optional<GiteaRepositoryVo> optional = repositories.stream()
         .filter(repo -> Objects.equals(repo.getName(), accessInfo.getGitServiceName())).findAny();
     if (!optional.isPresent()) {
       throw new ApiException(ErrorCode.USER_NO_PERMISSION);

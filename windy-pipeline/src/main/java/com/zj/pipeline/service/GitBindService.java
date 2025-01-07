@@ -15,7 +15,7 @@ import com.zj.domain.repository.demand.IDemandRepository;
 import com.zj.domain.repository.pipeline.IBindBranchRepository;
 import com.zj.domain.repository.pipeline.ICodeChangeRepository;
 import com.zj.pipeline.entity.enums.GitEventType;
-import com.zj.pipeline.entity.vo.GitPushResult;
+import com.zj.pipeline.entity.vo.GitPushResultVo;
 import com.zj.pipeline.git.RepositoryFactory;
 import com.zj.pipeline.git.hook.IGitWebhook;
 import lombok.extern.slf4j.Slf4j;
@@ -133,8 +133,8 @@ public class GitBindService {
         }
         IGitWebhook gitWebhook = webhookMap.get(platform);
         String bodyString = getBodyString(request);
-        GitPushResult gitPushResult = gitWebhook.webhook(bodyString, request);
-        executorService.execute(() -> updateProcessStatusIfNeed(gitPushResult));
+        GitPushResultVo gitPushResultVo = gitWebhook.webhook(bodyString, request);
+        executorService.execute(() -> updateProcessStatusIfNeed(gitPushResultVo));
         return true;
     }
     private String getBodyString(HttpServletRequest request){
@@ -152,10 +152,10 @@ public class GitBindService {
         return null;
     }
 
-    private void updateProcessStatusIfNeed(GitPushResult gitPushResult) {
+    private void updateProcessStatusIfNeed(GitPushResultVo gitPushResultVo) {
         try {
-            if (Objects.nonNull(gitPushResult) && Objects.equals(gitPushResult.getEventType(), GitEventType.COMMIT.getType())) {
-                List<CodeChangeBO> codeChanges = codeChangeRepository.getServiceChanges(gitPushResult.getRelatedServiceId());
+            if (Objects.nonNull(gitPushResultVo) && Objects.equals(gitPushResultVo.getEventType(), GitEventType.COMMIT.getType())) {
+                List<CodeChangeBO> codeChanges = codeChangeRepository.getServiceChanges(gitPushResultVo.getRelatedServiceId());
                 List<String> demandCodeChanges = codeChanges.stream().filter(codeChange ->
                                 Objects.equals(RelationType.DEMAND.getType(), codeChange.getRelationType()))
                         .map(CodeChangeBO::getRelationId).collect(Collectors.toList());

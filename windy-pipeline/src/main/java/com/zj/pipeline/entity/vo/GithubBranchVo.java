@@ -4,7 +4,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 
 @Data
-public class GithubBranch {
+public class GithubBranchVo {
 
     private String name;
 

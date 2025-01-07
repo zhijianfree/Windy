@@ -4,7 +4,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 
 @Data
-public class GitlabBaseEvent {
+public class GitlabBaseEventVo {
 
     /**
      * 事件类型

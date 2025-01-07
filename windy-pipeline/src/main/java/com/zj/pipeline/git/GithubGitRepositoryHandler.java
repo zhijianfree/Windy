@@ -8,8 +8,8 @@ import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.adapter.git.GitAccessInfo;
 import com.zj.common.adapter.git.IGitRepositoryHandler;
-import com.zj.pipeline.entity.vo.GithubBranch;
-import com.zj.pipeline.entity.vo.GithubRepository;
+import com.zj.pipeline.entity.vo.GithubBranchVo;
+import com.zj.pipeline.entity.vo.GithubRepositoryVo;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
 import okhttp3.MediaType;
@@ -69,9 +69,9 @@ public class GithubGitRepositoryHandler implements IGitRepositoryHandler {
         String uri = String.format("/repos/%s/%s/branches", accessInfo.getOwner(), accessInfo.getGitServiceName());
         HashMap<String, String> hashMap = exchangeHeaders(accessInfo);
         String result = gitRequestProxy.get(accessInfo.getGitDomain() + uri, hashMap);
-        List<GithubBranch> githubBranches = JSON.parseArray(result, GithubBranch.class);
-        return Optional.ofNullable(githubBranches).map(branch ->
-                        branch.stream().map(GithubBranch::getName).collect(Collectors.toList()))
+        List<GithubBranchVo> githubBranchVos = JSON.parseArray(result, GithubBranchVo.class);
+        return Optional.ofNullable(githubBranchVos).map(branch ->
+                        branch.stream().map(GithubBranchVo::getName).collect(Collectors.toList()))
                 .orElseGet(ArrayList::new);
     }
 
@@ -88,8 +88,8 @@ public class GithubGitRepositoryHandler implements IGitRepositoryHandler {
         String uri = String.format("/repos/%s/%s", accessInfo.getOwner(), accessInfo.getGitServiceName());
         HashMap<String, String> hashMap = exchangeHeaders(accessInfo);
         String result = gitRequestProxy.get(accessInfo.getGitDomain() + uri, hashMap);
-        GithubRepository githubRepository = JSON.parseObject(result, GithubRepository.class);
-        if (Objects.isNull(githubRepository)) {
+        GithubRepositoryVo githubRepositoryVo = JSON.parseObject(result, GithubRepositoryVo.class);
+        if (Objects.isNull(githubRepositoryVo)) {
             throw new ApiException(ErrorCode.REPO_NOT_EXIST);
         }
         log.info("get github repository result= {}", result);

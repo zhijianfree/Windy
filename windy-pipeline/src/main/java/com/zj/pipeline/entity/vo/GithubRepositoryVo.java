@@ -4,7 +4,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 
 @Data
-public class GithubRepository {
+public class GithubRepositoryVo {
 
     /**
      * 仓库ID
@@ -27,5 +27,8 @@ public class GithubRepository {
      */
     @JSONField(name = "default_branch")
     private String defaultBranch;
+
+    @JSONField(name = "git_url")
+    private String repository;
 
 }

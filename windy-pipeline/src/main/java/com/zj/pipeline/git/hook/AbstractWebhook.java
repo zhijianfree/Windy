@@ -10,7 +10,7 @@ import com.zj.domain.repository.pipeline.IBindBranchRepository;
 import com.zj.domain.repository.pipeline.ISystemConfigRepository;
 import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.pipeline.entity.enums.PipelineExecuteType;
-import com.zj.pipeline.entity.vo.GitPushResult;
+import com.zj.pipeline.entity.vo.GitPushResultVo;
 import com.zj.pipeline.service.PipelineService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -47,21 +47,21 @@ public abstract class AbstractWebhook implements IGitWebhook {
   }
 
   @Override
-  public GitPushResult webhook(String data, HttpServletRequest request) {
-    GitPushResult gitPushResult = analzeData(data, request);
-    if (Objects.isNull(gitPushResult) ||StringUtils.isEmpty(gitPushResult.getBranch())
-            || StringUtils.isEmpty(gitPushResult.getRepository())) {
+  public GitPushResultVo webhook(String data, HttpServletRequest request) {
+    GitPushResultVo gitPushResultVo = analyzeData(data, request);
+    if (Objects.isNull(gitPushResultVo) ||StringUtils.isEmpty(gitPushResultVo.getBranch())
+            || StringUtils.isEmpty(gitPushResultVo.getRepository())) {
       log.info("receive git push event but analyze data error");
       return null;
     }
 
-    MicroserviceBO microservice = serviceRepository.getServiceByGitUrl(gitPushResult.getRepository());
+    MicroserviceBO microservice = serviceRepository.getServiceByGitUrl(gitPushResultVo.getRepository());
     if (Objects.isNull(microservice)) {
-      log.info("can not find service by git url={}", gitPushResult.getRepository());
+      log.info("can not find service by git url={}", gitPushResultVo.getRepository());
       return null;
     }
 
-    List<PipelineBO> pushPipelines = getServicePipelineByType(microservice, gitPushResult, PipelineExecuteType.PUSH);
+    List<PipelineBO> pushPipelines = getServicePipelineByType(microservice, gitPushResultVo, PipelineExecuteType.PUSH);
     if (CollectionUtils.isEmpty(pushPipelines)){
       return null;
     }
@@ -70,7 +70,7 @@ public abstract class AbstractWebhook implements IGitWebhook {
     pushPipelines.forEach(pipeline -> executorService.execute(() -> {
       List<BindBranchBO> gitBinds = listGitBinds(pipeline.getPipelineId());
       Optional<BindBranchBO> optional = gitBinds.stream().filter(BindBranchBO::getIsChoose)
-          .filter(gitBind -> Objects.equals(gitBind.getGitBranch(), gitPushResult.getBranch()))
+          .filter(gitBind -> Objects.equals(gitBind.getGitBranch(), gitPushResultVo.getBranch()))
           .findAny();
       if (optional.isPresent()) {
         pipelineService.execute(pipeline.getPipelineId());
@@ -78,11 +78,11 @@ public abstract class AbstractWebhook implements IGitWebhook {
       }
     }));
 
-    gitPushResult.setRelatedServiceId(microservice.getServiceId());
-    return gitPushResult;
+    gitPushResultVo.setRelatedServiceId(microservice.getServiceId());
+    return gitPushResultVo;
   }
 
-  private List<PipelineBO> getServicePipelineByType(MicroserviceBO microservice, GitPushResult parseResult,
+  private List<PipelineBO> getServicePipelineByType(MicroserviceBO microservice, GitPushResultVo parseResult,
                                                     PipelineExecuteType executeType) {
     List<PipelineBO> pipelines = pipelineService.getServicePipelines(microservice.getServiceId());
     if (CollectionUtils.isEmpty(pipelines)) {
@@ -101,7 +101,7 @@ public abstract class AbstractWebhook implements IGitWebhook {
     return pushPipelines;
   }
 
-  public abstract GitPushResult analzeData(String data, HttpServletRequest request);
+  public abstract GitPushResultVo analyzeData(String data, HttpServletRequest request);
 
   public GitAccessInfo getGitAccessInfo(){
     return systemConfigRepository.getGitAccess();

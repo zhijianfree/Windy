@@ -9,7 +9,7 @@ import lombok.Data;
  * @since 2023/7/18
  */
 @Data
-public class GiteaRepository {
+public class GiteaRepositoryVo {
 
   private String name;
   private Permissions permissions;

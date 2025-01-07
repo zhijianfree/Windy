@@ -11,7 +11,7 @@ import lombok.Data;
  * @since 2023/7/18
  */
 @Data
-public class GitlabRepository {
+public class GitlabRepositoryVo {
 
   private Integer id;
   private String name;
