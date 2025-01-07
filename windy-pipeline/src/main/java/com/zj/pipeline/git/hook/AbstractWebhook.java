@@ -1,6 +1,5 @@
 package com.zj.pipeline.git.hook;
 
-import com.alibaba.fastjson.JSON;
 import com.zj.common.adapter.git.GitAccessInfo;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
@@ -49,10 +48,10 @@ public abstract class AbstractWebhook implements IGitWebhook {
 
   @Override
   public GitPushResult webhook(String data, HttpServletRequest request) {
-    GitPushResult gitPushResult = parseData(data, request);
+    GitPushResult gitPushResult = analzeData(data, request);
     if (Objects.isNull(gitPushResult) ||StringUtils.isEmpty(gitPushResult.getBranch())
             || StringUtils.isEmpty(gitPushResult.getRepository())) {
-      log.info("can not get service name or branch not trigger pipeline ={}", JSON.toJSONString(data));
+      log.info("receive git push event but analyze data error");
       return null;
     }
 
@@ -102,7 +101,7 @@ public abstract class AbstractWebhook implements IGitWebhook {
     return pushPipelines;
   }
 
-  public abstract GitPushResult parseData(String data, HttpServletRequest request);
+  public abstract GitPushResult analzeData(String data, HttpServletRequest request);
 
   public GitAccessInfo getGitAccessInfo(){
     return systemConfigRepository.getGitAccess();

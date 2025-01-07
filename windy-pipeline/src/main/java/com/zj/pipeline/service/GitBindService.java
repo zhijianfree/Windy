@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -125,6 +126,11 @@ public class GitBindService {
     }
 
     public boolean notifyHook(String platform, HttpServletRequest request) {
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String name = headerNames.nextElement();
+            log.info("get request header name={} value={}",name, request.getHeader(name));
+        }
         IGitWebhook gitWebhook = webhookMap.get(platform);
         String bodyString = getBodyString(request);
         GitPushResult gitPushResult = gitWebhook.webhook(bodyString, request);

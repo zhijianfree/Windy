@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -41,7 +43,7 @@ public class GitlabWebhook extends AbstractWebhook {
   }
 
   @Override
-  public GitPushResult parseData(String data, HttpServletRequest request) {
+  public GitPushResult analzeData(String data, HttpServletRequest request) {
     log.info("gitlab notify hook param={}", data);
     if (!checkSecret(data, request)){
       log.info("gitlab signature check error");
@@ -72,16 +74,26 @@ public class GitlabWebhook extends AbstractWebhook {
     return Objects.equals(signature, gitLabToken);
   }
 
-
-
   /**
    * 计算 HMAC-SHA256 签名
    */
-  private String computeHMAC(String payload, String secret) {
+  private static String computeHMAC(String payload, String secret) {
     try {
-      MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      byte[] hash = digest.digest((payload + secret).getBytes(StandardCharsets.UTF_8));
-      return DigestUtils.md5DigestAsHex(hash);
+      // 使用 HMAC-SHA256 算法
+      Mac mac = Mac.getInstance("HmacSHA256");
+      SecretKeySpec secretKeySpec = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+      mac.init(secretKeySpec);
+
+      // 计算哈希
+      byte[] hashBytes = mac.doFinal(payload.getBytes(StandardCharsets.UTF_8));
+
+      // 转换为十六进制字符串
+      StringBuilder hexString = new StringBuilder();
+      for (byte b : hashBytes) {
+        hexString.append(String.format("%02x", b)); // 确保是两位十六进制格式
+      }
+
+      return hexString.toString();
     } catch (Exception e) {
       log.info("calculate sha256 secret error", e);
     }
