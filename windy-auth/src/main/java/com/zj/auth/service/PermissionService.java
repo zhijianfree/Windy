@@ -45,6 +45,7 @@ public class PermissionService {
         whiteList.add("/");
         whiteList.add("/logo.svg");
         whiteList.add("/login");
+        whiteList.add("/v1/devops/system/version");
         whiteList.add("/v1/devops/pipeline/web/hook");
         whiteList.add("/css/**");
         whiteList.add("/js/**");
