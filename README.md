@@ -90,5 +90,5 @@ http://{宿主机IP}:9768
 在浏览器中输入地址即可访问Windy，默认用户名/密码: windy/admin
 ![登录页](./doc/images/login.png)
 
-## Windy使用文档
-请参考： [Windy使用文档](https://github.com/zhijianfree/Windy/wiki/Windy-%E4%BD%BF%E7%94%A8%E6%96%87%E6%A1%A3)
+## 系统初始化
+请参考使用文档完成系统初始化,主要完成系统配置即可, 详细内容请参考： [Windy使用文档](https://github.com/zhijianfree/Windy/wiki/Windy-%E4%BD%BF%E7%94%A8%E6%96%87%E6%A1%A3)

@@ -95,6 +95,13 @@ public class ExecuteTemplateRepository extends
   }
 
   @Override
+  public List<ExecuteTemplateBO> getPluginTemplates(String pluginId) {
+    List<ExecuteTemplate> executeTemplates = list(Wrappers.lambdaQuery(ExecuteTemplate.class)
+            .eq(ExecuteTemplate::getSource, pluginId));
+    return convertExecuteTemplateBOList(executeTemplates);
+  }
+
+  @Override
   public List<ExecuteTemplateBO> getAllTemplates() {
     List<ExecuteTemplate> executeTemplates = list();
     return convertExecuteTemplateBOList(executeTemplates);

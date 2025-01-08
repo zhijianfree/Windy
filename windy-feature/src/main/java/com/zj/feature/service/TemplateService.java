@@ -116,6 +116,23 @@ public class TemplateService {
     }
 
     public Boolean deleteExecuteTemplate(String templateId) {
+        ExecuteTemplateDto executeTemplate = getExecuteTemplate(templateId);
+        if (Objects.isNull(executeTemplate)) {
+            log.info("can not find template={}", templateId);
+            throw new ApiException(ErrorCode.TEMPLATE_NOT_FIND);
+        }
+
+        String pluginId = executeTemplate.getSource();
+        if (StringUtils.isNotBlank(pluginId)) {
+            // 如果插件关联的所有模版都被删除，那么默认删除插件
+            List<ExecuteTemplateBO> pluginTemplates = templateRepository.getPluginTemplates(pluginId);
+            boolean existOtherTemplates = pluginTemplates.stream().anyMatch(template -> !Objects.equals(templateId,
+                    template.getTemplateId()));
+            if (!existOtherTemplates) {
+                boolean deletePlugin = pluginRepository.deletePlugin(pluginId);
+                log.info("there is not plugin's template , delete plugin={} result={}", pluginId, deletePlugin);
+            }
+        }
         return templateRepository.deleteTemplate(templateId);
     }
 
@@ -349,7 +366,10 @@ public class TemplateService {
         serviceIds.add(serviceId);
         List<ExecuteTemplateBO> executeTemplates = templateRepository.getTemplatesByServiceIds(serviceIds);
         executeTemplates.addAll(defaultTemplates);
-        return executeTemplates.stream().map(this::toExecuteTemplateDto).collect(Collectors.toList());
+        return new ArrayList<>(executeTemplates.stream().map(this::toExecuteTemplateDto)
+                //根据相同的templateId去重
+                .collect(Collectors.toMap(ExecuteTemplateDto::getTemplateId, p -> p, (existing, replacement) -> existing))
+                .values());
     }
 
     public Boolean addRelatedTemplate(RelatedTemplateDto relatedTemplateDto) {

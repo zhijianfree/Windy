@@ -97,7 +97,7 @@ public class FeatureTemplateRest {
 
     @ResponseBody
     @DeleteMapping("/template/{templateId}")
-    public ResponseMeta<Boolean> updateExecuteTemplate(@PathVariable("templateId") String templateId) {
+    public ResponseMeta<Boolean> deleteExecuteTemplate(@PathVariable("templateId") String templateId) {
         Boolean result = templateService.deleteExecuteTemplate(templateId);
         return new ResponseMeta<>(ErrorCode.SUCCESS, result);
     }
