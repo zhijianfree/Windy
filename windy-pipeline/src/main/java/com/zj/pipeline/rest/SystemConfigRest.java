@@ -67,6 +67,12 @@ public class SystemConfigRest {
   }
 
   @ResponseBody
+  @PostMapping("/system/git/push/secret")
+  public ResponseMeta<String> createPushSecret() {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, systemConfigService.createPushSecret());
+  }
+
+  @ResponseBody
   @PutMapping("/system/config/git")
   public ResponseMeta<Boolean> updateGit(@RequestBody GitAccessInfo config) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, systemConfigService.updateGitConfig(config));

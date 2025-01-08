@@ -9,7 +9,7 @@ import com.zj.common.enums.GitType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.pipeline.entity.vo.BranchInfo;
-import com.zj.pipeline.entity.vo.GitlabRepository;
+import com.zj.pipeline.entity.vo.GitlabRepositoryVo;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
 import org.apache.commons.collections4.CollectionUtils;
@@ -51,9 +51,9 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
 
     private void loadGitRepositories(GitAccessInfo accessInfo) {
         try {
-            List<GitlabRepository> gitlabRepositories = getGitlabRepositories(accessInfo);
+            List<GitlabRepositoryVo> gitlabRepositories = getGitlabRepositories(accessInfo);
             serviceIdMap = gitlabRepositories.stream()
-                    .collect(Collectors.toMap(this::getRepositoryName, GitlabRepository::getId,
+                    .collect(Collectors.toMap(this::getRepositoryName, GitlabRepositoryVo::getId,
                             (value1, value2) -> value2));
         } catch (Exception e) {
             log.info("load gitlab repositories error ={}", e.getMessage());
@@ -63,7 +63,7 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
     /**
      * 如果仓库名称与git地址上名称不一致，则使用git地址上的名称
      */
-    private String getRepositoryName(GitlabRepository repo) {
+    private String getRepositoryName(GitlabRepositoryVo repo) {
         String repositoryName = repo.getName().toLowerCase();
         if (!Objects.equals(repo.getName().toLowerCase(), repo.getPath().toLowerCase())) {
             repositoryName = repo.getPath().toLowerCase();
@@ -160,13 +160,13 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
 
     @Override
     public void checkRepository(GitAccessInfo accessInfo) {
-        List<GitlabRepository> repositories = getGitlabRepository(accessInfo);
+        List<GitlabRepositoryVo> repositories = getGitlabRepository(accessInfo);
         if (CollectionUtils.isEmpty(repositories)) {
             log.info("gitlab repository not exist={}", accessInfo.getGitServiceName());
             throw new ApiException(ErrorCode.REPO_NOT_EXIST);
         }
 
-        Optional<GitlabRepository> optional = repositories.stream().filter(repo -> isMatchRepo(accessInfo, repo))
+        Optional<GitlabRepositoryVo> optional = repositories.stream().filter(repo -> isMatchRepo(accessInfo, repo))
                 .findAny();
         if (!optional.isPresent()) {
             log.info("user can not access gitlab repository permission={}", accessInfo.getGitServiceName());
@@ -180,17 +180,17 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
         }
     }
 
-    private boolean isMatchRepo(GitAccessInfo accessInfo, GitlabRepository repo) {
+    private boolean isMatchRepo(GitAccessInfo accessInfo, GitlabRepositoryVo repo) {
         return Objects.equals(repo.getName().toLowerCase(), accessInfo.getGitServiceName().toLowerCase()) ||
                 Objects.equals(repo.getPath().toLowerCase(), accessInfo.getGitServiceName().toLowerCase());
     }
 
-    private List<GitlabRepository> getGitlabRepositories(GitAccessInfo accessInfo) {
+    private List<GitlabRepositoryVo> getGitlabRepositories(GitAccessInfo accessInfo) {
         Response response = gitRequestProxy.getWithResponse(accessInfo.getGitDomain() + "/api/v4/projects?per_page" +
                 "=100&page=1", getTokenHeader(accessInfo));
         try {
             String result = response.body().string();
-            List<GitlabRepository> allRepositories = JSON.parseArray(result, GitlabRepository.class);
+            List<GitlabRepositoryVo> allRepositories = JSON.parseArray(result, GitlabRepositoryVo.class);
             String pageNum = response.header("x-total-pages");
             allRepositories.addAll(requestAllRepositories(pageNum, accessInfo));
             return allRepositories;
@@ -200,21 +200,21 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
         }
     }
 
-    private List<GitlabRepository> requestAllRepositories(String numString, GitAccessInfo accessInfo) {
+    private List<GitlabRepositoryVo> requestAllRepositories(String numString, GitAccessInfo accessInfo) {
         if (StringUtils.isBlank(numString)) {
             log.info("gitlab response header not find x-total-pages");
             return Collections.emptyList();
         }
 
         int num = Integer.parseInt(numString);
-        List<GitlabRepository> list = new ArrayList<>();
+        List<GitlabRepositoryVo> list = new ArrayList<>();
         for (int i = 2; i <= num; i++) {
             Response response = gitRequestProxy.getWithResponse(accessInfo.getGitDomain() + "/api/v4/projects" +
                             "?per_page=100&page=" + i,
                     getTokenHeader(accessInfo));
             try {
                 String result = response.body().string();
-                list.addAll(JSON.parseArray(result, GitlabRepository.class));
+                list.addAll(JSON.parseArray(result, GitlabRepositoryVo.class));
             } catch (Exception e) {
                 log.info("get gitlab repositories error", e);
             }
@@ -222,11 +222,11 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
         return list;
     }
 
-    private List<GitlabRepository> getGitlabRepository(GitAccessInfo accessInfo) {
+    private List<GitlabRepositoryVo> getGitlabRepository(GitAccessInfo accessInfo) {
         String result =
                 gitRequestProxy.get(accessInfo.getGitDomain() + "/api/v4/projects?search=" + accessInfo.getGitServiceName(),
                         getTokenHeader(accessInfo));
-        return JSON.parseArray(result, GitlabRepository.class);
+        return JSON.parseArray(result, GitlabRepositoryVo.class);
     }
 
 }

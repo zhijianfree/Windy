@@ -16,6 +16,9 @@ public enum ProcessStatus {
   STOP(6, "停止运行"),
   ;
 
+  private final int type;
+  private final String desc;
+
   ProcessStatus(int type, String desc) {
     this.type = type;
     this.desc = desc;
@@ -39,8 +42,5 @@ public enum ProcessStatus {
     return Arrays.stream(ProcessStatus.values())
         .filter(status -> Objects.equals(status.getType(), type)).findFirst().orElse(null);
   }
-
-  private final int type;
-  private final String desc;
 
 }

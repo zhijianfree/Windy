@@ -31,6 +31,8 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
 
     public static final String DEMAND_STATUS_COLUMN_NAME = "status";
     public static final String DEMAND_ID_COLUMN_NAME = "demand_id";
+    public static final String ACCEPT_TIME_COLUMN_NAME = "accept_time";
+    public static final String UPDATE_TIME_COLUM_NAME = "update_time";
 
     @Override
     public boolean createDemand(DemandBO demandBO) {
@@ -149,8 +151,12 @@ public class DemandRepositoryImpl extends ServiceImpl<DemandMapper, Demand> impl
             log.info("batch update demand processing demandIds is empty");
             return false;
         }
+        long currentTimeMillis = System.currentTimeMillis();
         UpdateWrapper<Demand> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.set(DEMAND_STATUS_COLUMN_NAME, DemandStatus.WORKING.getType()).in(DEMAND_ID_COLUMN_NAME, demandIds)
+        updateWrapper.set(DEMAND_STATUS_COLUMN_NAME, DemandStatus.WORKING.getType())
+                .set(ACCEPT_TIME_COLUMN_NAME, currentTimeMillis)
+                .set(UPDATE_TIME_COLUM_NAME, currentTimeMillis)
+                .in(DEMAND_ID_COLUMN_NAME, demandIds)
                 .eq(DEMAND_STATUS_COLUMN_NAME, DemandStatus.NOT_HANDLE.getType());
         return baseMapper.update(null, updateWrapper) > 0;
     }

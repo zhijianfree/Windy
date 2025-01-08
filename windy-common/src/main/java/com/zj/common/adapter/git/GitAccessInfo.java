@@ -31,6 +31,11 @@ public class GitAccessInfo {
      */
     private String gitUrl;
 
+    /**
+     * 三方git推送事件secret
+     */
+    private String pushSecret;
+
     public String getGitServiceName() {
         return GitUtils.getServiceFromUrl(getGitUrl());
     }

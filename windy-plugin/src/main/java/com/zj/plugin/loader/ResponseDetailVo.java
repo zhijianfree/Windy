@@ -2,12 +2,14 @@ package com.zj.plugin.loader;
 
 public class ResponseDetailVo {
     /**
-     * 响应状态
+     * 业务处理最终结果状态
+     * true: 处理成功
+     * false: 处理失败
      * */
     private Boolean responseStatus;
 
     /**
-     * 处理状态
+     * 业务处理状态: {@link ExecuteStatus}
      */
     private Integer processStatus;
 

@@ -90,4 +90,8 @@ public class SystemConfigService {
   public GenerateMavenConfigDto getMavenConfig() {
     return systemConfigRepository.getMavenConfig();
   }
+
+  public String createPushSecret() {
+    return uniqueIdService.getUniqueId();
+  }
 }

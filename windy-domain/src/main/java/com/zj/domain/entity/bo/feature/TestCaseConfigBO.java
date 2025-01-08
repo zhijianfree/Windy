@@ -44,6 +44,11 @@ public class TestCaseConfigBO {
   private String value;
 
   /**
+   * 参数描述
+   */
+  private String description;
+
+  /**
    * 排序
    * */
   private int sortOrder;

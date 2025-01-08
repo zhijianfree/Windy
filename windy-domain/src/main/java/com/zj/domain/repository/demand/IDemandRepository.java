@@ -85,5 +85,10 @@ public interface IDemandRepository {
      */
     boolean batchUpdateStatus(List<String> demandIds, int status);
 
+    /**
+     * 批量处理更新需求进入处理中
+     * @param demandIds 需求列表
+     * @return 是否成功
+     */
     boolean batchUpdateProcessing(List<String> demandIds);
 }

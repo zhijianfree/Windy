@@ -34,6 +34,8 @@ Windy是一款轻量级Devops平台工具,支持服务代码变更管理，代�
     - 通过AI分析研发体系数据，提供优化研发效率手段、梳理研发流程阻塞点等
     - AI自动添加测试用例
 
+## 架构设计
+![整体设计](./doc/images/design.png)
 ## 快速开始
 ### 1 导数据库sql
 如果没有数据库可先通过docker下载并安装:
@@ -74,6 +76,9 @@ docker run \
 docker run \
   --env=EUREKA_ZONE='http://{宿主机IP}:9888/eureka' \
   --name windy-client \
+  --privileged \
+  --env=TZ=Asia/Shanghai \
+  -v /var/run/docker.sock:/var/run/docker.sock \ 
   -p 8070:8070 \
   -d \
   guyuelan/windy-client:1.0-alpha
@@ -85,5 +90,5 @@ http://{宿主机IP}:9768
 在浏览器中输入地址即可访问Windy，默认用户名/密码: windy/admin
 ![登录页](./doc/images/login.png)
 
-## Windy使用文档
-请参考： [Windy使用文档](https://github.com/zhijianfree/Windy/wiki/Windy-%E4%BD%BF%E7%94%A8%E6%96%87%E6%A1%A3)
+## 系统初始化
+请参考使用文档完成系统初始化,主要完成系统配置即可, 详细内容请参考： [Windy使用文档](https://github.com/zhijianfree/Windy/wiki/Windy-%E4%BD%BF%E7%94%A8%E6%96%87%E6%A1%A3)

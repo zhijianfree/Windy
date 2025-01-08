@@ -18,6 +18,7 @@ import com.zj.domain.repository.service.IMicroServiceRepository;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
@@ -122,9 +123,8 @@ public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Micr
   }
 
   @Override
-  public MicroserviceBO queryServiceByName(String serviceName) {
-    Microservice microservice = getOne(
-        Wrappers.lambdaQuery(Microservice.class).eq(Microservice::getServiceName, serviceName));
+  public MicroserviceBO getServiceByGitUrl(String gitUrl) {
+    Microservice microservice = getOne(Wrappers.lambdaQuery(Microservice.class).eq(Microservice::getGitUrl, gitUrl));
     return convertServiceBO(microservice);
   }
 
@@ -141,6 +141,9 @@ public class MicroServiceRepository extends ServiceImpl<MicroServiceMapper, Micr
   }
 
   private static MicroserviceBO convertServiceBO(Microservice microservice) {
+    if (Objects.isNull(microservice)) {
+      return null;
+    }
     MicroserviceBO microserviceBO = OrikaUtil.convert(microservice, MicroserviceBO.class);
     microserviceBO.setServiceConfig(JSON.parseObject(microservice.getConfig(), ServiceConfig.class));
     return microserviceBO;

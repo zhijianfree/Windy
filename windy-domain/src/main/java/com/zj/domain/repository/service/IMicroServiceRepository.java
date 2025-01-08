@@ -59,10 +59,10 @@ public interface IMicroServiceRepository {
 
   /**
    * 根据服务名获取服务
-   * @param serviceName 服务名
+   * @param gitUrl git地址
    * @return 服务信息
    */
-  MicroserviceBO queryServiceByName(String serviceName);
+  MicroserviceBO getServiceByGitUrl(String gitUrl);
 
   /**
    * 获取所有服务

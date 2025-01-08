@@ -95,4 +95,11 @@ public interface IExecuteTemplateRepository {
    * @return 模板列表
    */
   List<ExecuteTemplateBO> getTemplatesByServiceIds(List<String> serviceIds);
+
+  /**
+   * 查询插件关联的模版列表
+   * @param pluginId 插件ID
+   * @return 模版列表
+   */
+  List<ExecuteTemplateBO> getPluginTemplates(String pluginId);
 }

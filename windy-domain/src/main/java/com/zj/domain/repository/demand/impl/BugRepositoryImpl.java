@@ -29,6 +29,8 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
 
     public static final String BUG_STATUS_COLUM_NAME = "status";
     public static final String BUG_ID_COLUMN_NAME = "bug_id";
+    public static final String START_TIME_COLUMN_NAME = "start_time";
+    public static final String UPDATE_TIME_COLUMN_NAME = "update_time";
 
     @Override
     public PageSize<BugBO> getUserBugs(BugQueryBO bugQueryBO) {
@@ -162,8 +164,12 @@ public class BugRepositoryImpl extends ServiceImpl<BugMapper, Bug> implements IB
         if (CollectionUtils.isEmpty(notCompleteBugIds)) {
             return false;
         }
+        long currentTimeMillis = System.currentTimeMillis();
         UpdateWrapper<Bug> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.set(BUG_STATUS_COLUM_NAME, BugStatus.WORKING.getType()).in(BUG_ID_COLUMN_NAME, notCompleteBugIds)
+        updateWrapper.set(BUG_STATUS_COLUM_NAME, BugStatus.WORKING.getType())
+                .set(START_TIME_COLUMN_NAME, currentTimeMillis)
+                .set(UPDATE_TIME_COLUMN_NAME, currentTimeMillis)
+                .in(BUG_ID_COLUMN_NAME, notCompleteBugIds)
                 .eq(BUG_STATUS_COLUM_NAME, BugStatus.NOT_HANDLE.getType());
         return baseMapper.update(null, updateWrapper) > 0;
     }

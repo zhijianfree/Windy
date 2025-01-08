@@ -1,8 +1,19 @@
 package com.zj.plugin.loader;
 
 public class InitData {
+    /**
+     * 默认值
+     */
     private String data;
+
+    /**
+     * 默认值范围
+     */
     private Object range;
+
+    /**
+     * 范围值的类型，如果默认值为Array时使用
+     */
     private String rangeType;
     public InitData() {
     }
