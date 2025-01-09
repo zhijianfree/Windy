@@ -26,7 +26,7 @@
     <module>windy-domain</module>
     <module>windy-plugin</module>
     <module>windy-demand</module>
-      <module>windy-auth</module>
+    <module>windy-auth</module>
   </modules>
 
 
