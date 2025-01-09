@@ -87,7 +87,7 @@
         <version>${revision}</version>
       </dependency>
       <dependency>
-        <groupId>com.zj</groupId>
+        <groupId>io.github.languyue</groupId>
         <artifactId>windy-plugin</artifactId>
         <version>${windy-plugin.revision}</version>
       </dependency>
