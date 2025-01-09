@@ -25,8 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
  * @author guyuelan
  * @since 2022/12/12
  */
-@RequestMapping("/v1/devops/feature")
 @RestController
+@RequestMapping("/v1/devops/feature")
 public class TestCaseRest {
 
   private final TestCaseService testCaseService;
@@ -44,7 +44,7 @@ public class TestCaseRest {
     return new ResponseMeta<>(ErrorCode.SUCCESS, testCaseDTOS);
   }
 
-  @RequestMapping("/e2e/page")
+  @GetMapping("/e2e/page")
   public ResponseMeta<PageSize<TestCaseBO>> getE2ECases(@RequestParam("page") Integer page,
                                                         @RequestParam("pageSize") Integer pageSize) {
     PageSize<TestCaseBO> testCaseDTOS = testCaseService.getE2ECases(page, pageSize);

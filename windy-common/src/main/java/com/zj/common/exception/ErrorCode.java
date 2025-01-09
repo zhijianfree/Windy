@@ -59,6 +59,7 @@ public enum ErrorCode {
   TASK_RUN_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Feature.000011", "用例任务调度失败，请稍后重试"),
   FEATURE_RUN_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Feature.000012", "用例执行调度失败，请稍后重试"),
   COPY_CASE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Feature.000013", "复制用例失败"),
+  CASE_EXIST_FEATURE(HttpStatus.INTERNAL_SERVER_ERROR, "Feature.000014", "测试集下存在用例不允许删除"),
   /*==================需求缺陷管理======================*/
   BUG_NOT_EXIST(HttpStatus.BAD_REQUEST, "Bug.000001", "缺陷不存在"),
   BUG_HAS_BIND_BRANCH(HttpStatus.BAD_REQUEST, "Bug.000002", "缺陷已经关联了分支无法删除"),
