@@ -5,6 +5,7 @@ import com.zj.common.enums.ApiType;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -91,7 +92,7 @@ public class ServiceApiBO {
     /**
      * http 请求的Header
      */
-    private String header;
+    private Map<String, String> header;
 
     private Long createTime;
 

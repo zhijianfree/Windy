@@ -2,6 +2,7 @@ package com.zj.service.service.imports.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.common.entity.service.ApiParamModel;
 import com.zj.common.enums.ApiType;
@@ -125,7 +126,10 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
             serviceApi.setDescription(apiModel.getTitle());
             serviceApi.setType(HTTP_API_TYPE);
             serviceApi.setResource(apiModel.getPath());
-            serviceApi.setHeader(JSON.toJSONString(apiModel.getHeaders()));
+
+            Map<String, String> headerMap = apiModel.getHeaders().stream().collect(Collectors.toMap(YapiImportApi.HeaderParam::getName,
+                    YapiImportApi.HeaderParam::getValue));
+            serviceApi.setHeader(headerMap);
 
             List<ApiRequestVariable> apiRequestVariables = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(apiModel.getPathParams())) {

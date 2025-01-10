@@ -92,13 +92,11 @@ public class ApiService {
 
     public boolean createServiceApi(ApiModel apiModel) {
         ServiceApiBO serviceApi = OrikaUtil.convert(apiModel, ServiceApiBO.class);
-        List<ApiParamModel> requestParams =
-                Optional.ofNullable(apiModel.getRequestParams()).map(params -> OrikaUtil.convertList(params,
-                        ApiParamModel.class)).orElse(null);
+        List<ApiParamModel> requestParams = Optional.ofNullable(apiModel.getRequestParams()).map(params ->
+                OrikaUtil.convertList(params, ApiParamModel.class)).orElse(null);
         serviceApi.setRequestParams(requestParams);
-        List<ApiParamModel> responseParams =
-                Optional.ofNullable(apiModel.getResponseParams()).map(params -> OrikaUtil.convertList(params,
-                        ApiParamModel.class)).orElse(null);
+        List<ApiParamModel> responseParams = Optional.ofNullable(apiModel.getResponseParams())
+                .map(params -> OrikaUtil.convertList(params, ApiParamModel.class)).orElse(null);
         serviceApi.setResponseParams(responseParams);
         serviceApi.setApiId(uniqueIdService.getUniqueId());
         return apiRepository.saveApi(serviceApi);
@@ -106,10 +104,8 @@ public class ApiService {
 
     public boolean updateServiceApi(ApiModel apiModel) {
         ServiceApiBO serviceApi = OrikaUtil.convert(apiModel, ServiceApiBO.class);
-        serviceApi.setRequestParams(OrikaUtil.convertList(apiModel.getRequestParams(),
-                ApiParamModel.class));
-        serviceApi.setResponseParams(OrikaUtil.convertList(apiModel.getResponseParams(),
-                ApiParamModel.class));
+        serviceApi.setRequestParams(OrikaUtil.convertList(apiModel.getRequestParams(), ApiParamModel.class));
+        serviceApi.setResponseParams(OrikaUtil.convertList(apiModel.getResponseParams(), ApiParamModel.class));
         return apiRepository.updateApi(serviceApi);
     }
 
