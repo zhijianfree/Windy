@@ -2,6 +2,7 @@ package com.zj.client.handler.pipeline.executer.notify;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.client.config.GlobalEnvConfig;
+import com.zj.client.entity.bo.DelayQuery;
 import com.zj.common.entity.feature.CompareDefine;
 import com.zj.client.handler.feature.executor.compare.CompareOperator;
 import com.zj.common.entity.feature.CompareResult;
@@ -12,6 +13,7 @@ import com.zj.client.handler.pipeline.executer.vo.PipelineStatusEvent;
 import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.plugin.loader.ExecuteStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -25,8 +27,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -43,9 +47,10 @@ public class NodeStatusQueryLooper implements Runnable {
   public static final String RESULT_VALUE_FORMAT = "返回值:【%s】";
   public static final String OPERATOR_FORMAT = "操作符:【%s】";
   public static final String QUERY_ERROR_TIPS = "loop query status error";
+  public static final int QUERY_INTERVAL_SECONDS = 5;
   private final Map<String, INodeTrigger> remoteInvokerMap;
   private final Map<String, Long> stopPipelineHistoryMap = new ConcurrentHashMap<>();
-  private final LinkedBlockingQueue<TaskNode> queue = new LinkedBlockingQueue<>();
+  private final DelayQueue<DelayQuery> delayQueue = new DelayQueue<>();
   private final Executor executorService;
   private final CompareFactory compareFactory;
   private final GlobalEnvConfig globalEnvConfig;
@@ -59,16 +64,15 @@ public class NodeStatusQueryLooper implements Runnable {
     this.executorService = executorService;
     this.compareFactory = compareFactory;
     this.globalEnvConfig = globalEnvConfig;
-
-    new Thread(this).start();
+    new Thread(this, "Loop-Query-Thread").start();
   }
 
   public void addQueryTask(TaskNode node) {
-    queue.add(node);
+    delayQueue.offer(new DelayQuery(node, QUERY_INTERVAL_SECONDS));
   }
 
   public Integer getWaitQuerySize() {
-    return queue.size();
+    return delayQueue.size();
   }
 
   private void runNode(TaskNode node) {
@@ -190,7 +194,7 @@ public class NodeStatusQueryLooper implements Runnable {
       putAndCheckRecord(node.getRecordId());
       return;
     }
-    queue.add(node);
+    addQueryTask(node);
   }
 
   /**
@@ -205,27 +209,22 @@ public class NodeStatusQueryLooper implements Runnable {
 
   public void run() {
     while (true) {
-      TaskNode taskNode = null;
+      DelayQuery delayQuery = null;
       try {
-        taskNode = queue.poll(10, TimeUnit.SECONDS);
+        delayQuery = delayQueue.poll(100, TimeUnit.MILLISECONDS);
       } catch (InterruptedException e) {
         log.info("get task from queue error", e);
       }
 
-      try {
-        Thread.sleep(5000);
-      } catch (InterruptedException ignore) {
-      }
-
-      if (Objects.nonNull(taskNode)) {
-        runNode(taskNode);
+      if (Objects.nonNull(delayQuery)) {
+        runNode(delayQuery.getTaskNode());
       }
     }
   }
 
   public void stopPipeline(String historyId) {
     putAndCheckRecord(historyId);
-    queue.removeIf(taskNode -> Objects.equals(historyId, taskNode.getHistoryId()));
+    delayQueue.removeIf(delayQuery -> Objects.equals(historyId, delayQuery.getTaskNode().getHistoryId()));
     log.info("add stop query historyId={}", historyId);
   }
 
