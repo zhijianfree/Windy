@@ -57,7 +57,8 @@ public class TaskInfoService {
   }
 
   public PageSize<TaskInfoBO> getTaskList(String name, Integer pageNum, Integer size) {
-    IPage<TaskInfo> taskInfoIPage = taskRepository.getFuzzTaskList(name, pageNum, size);
+    String currentUserId = authService.getCurrentUserId();
+    IPage<TaskInfo> taskInfoIPage = taskRepository.getFuzzTaskList(name, pageNum, size, currentUserId);
     PageSize<TaskInfoBO> pageSize = new PageSize<>();
     pageSize.setTotal(taskInfoIPage.getTotal());
     if (CollectionUtils.isEmpty(taskInfoIPage.getRecords())) {
@@ -89,6 +90,7 @@ public class TaskInfoService {
   public Boolean createTask(TaskInfoBO taskInfoBO) {
     String taskId = uniqueIdService.getUniqueId();
     taskInfoBO.setTaskId(taskId);
+    taskInfoBO.setUserId(authService.getCurrentUserId());
     return taskRepository.createTask(taskInfoBO);
   }
 
