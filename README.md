@@ -94,4 +94,4 @@ http://{宿主机IP}:9768
 请参考使用文档完成系统初始化,主要完成系统配置即可, 详细内容请参考： [Windy使用文档](https://github.com/zhijianfree/Windy/wiki/Windy-%E4%BD%BF%E7%94%A8%E6%96%87%E6%A1%A3)
 
 ## 系统介绍视频
-请查看B站地址: https://b23.tv/VfmGbSO
+系统使用介绍视频列表: [前往B站查看视频](https://b23.tv/VfmGbSO)

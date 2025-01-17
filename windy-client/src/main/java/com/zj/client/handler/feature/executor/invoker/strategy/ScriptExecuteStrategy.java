@@ -50,13 +50,8 @@ public class ScriptExecuteStrategy extends BaseExecuteStrategy {
         FeatureResponse response;
         ExecutorUnit executorUnit = executePoint.getExecutorUnit();
         try {
-            String script = executorUnit.getService();
-            if (StringUtils.isBlank(script)) {
-                log.info("execute script is empty, not execute");
-                throw new ExecuteException("execute script is empty, not execute");
-            }
-
             // 执行 JavaScript 代码
+            String script = executorUnit.getService();
             Object result = executeJavaScript(featureExecuteContext, script);
             log.info("handle script result={}", JSON.toJSONString(result));
 
@@ -71,6 +66,7 @@ public class ScriptExecuteStrategy extends BaseExecuteStrategy {
 
             //如果配置了全局覆盖则将返回变量添加context中
             ScriptConfig scriptConfig = JSON.parseObject(executorUnit.getMethod(), ScriptConfig.class);
+            log.info("log script config = {}", JSON.toJSONString(scriptConfig));
             if (Objects.nonNull(scriptConfig) && scriptConfig.getGlobal()) {
                 log.info("script config cover global , then add result to response");
                 response.setContext(resultMap);
@@ -87,6 +83,11 @@ public class ScriptExecuteStrategy extends BaseExecuteStrategy {
     }
 
     private Object executeJavaScript(FeatureExecuteContext featureExecuteContext, String script) throws ScriptException {
+        if (StringUtils.isBlank(script)) {
+            log.info("execute script is empty, not execute");
+            throw new ExecuteException("execute script is empty, not execute");
+        }
+
         Bindings bindings = new SimpleBindings();
         Map<String, Object> context = featureExecuteContext.toMap();
         bindings.put("context", context);
