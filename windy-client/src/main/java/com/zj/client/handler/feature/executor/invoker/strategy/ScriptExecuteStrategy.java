@@ -72,6 +72,7 @@ public class ScriptExecuteStrategy extends BaseExecuteStrategy {
             //如果配置了全局覆盖则将返回变量添加context中
             ScriptConfig scriptConfig = JSON.parseObject(executorUnit.getMethod(), ScriptConfig.class);
             if (Objects.nonNull(scriptConfig) && scriptConfig.getGlobal()) {
+                log.info("script config cover global , then add result to response");
                 response.setContext(resultMap);
             }
         } catch (Exception e) {
