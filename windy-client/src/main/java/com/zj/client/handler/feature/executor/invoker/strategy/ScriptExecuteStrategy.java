@@ -2,6 +2,7 @@ package com.zj.client.handler.feature.executor.invoker.strategy;
 
 import com.alibaba.fastjson.JSON;
 import com.zj.client.entity.bo.ExecutePoint;
+import com.zj.client.handler.feature.executor.vo.ScriptConfig;
 import com.zj.common.entity.feature.FeatureResponse;
 import com.zj.client.handler.feature.executor.compare.CompareHandler;
 import com.zj.client.handler.feature.executor.interceptor.InterceptorProxy;
@@ -18,10 +19,12 @@ import org.springframework.stereotype.Component;
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import javax.script.SimpleBindings;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -54,25 +57,23 @@ public class ScriptExecuteStrategy extends BaseExecuteStrategy {
             }
 
             // 执行 JavaScript 代码
-            Bindings bindings = new SimpleBindings();
-            Map<String, Object> context = featureExecuteContext.toMap();
-            bindings.put("context", context);
-            String execScript = "function execute(context) {" + script + "}execute(context);";
-            Object result = engine.eval(execScript, bindings);
-            if (!(result instanceof Map)) {
-                log.info("after execute script , can not get map result");
-                throw new ExecuteException("after execute script , can not get map result");
-            }
+            Object result = executeJavaScript(featureExecuteContext, script);
             log.info("handle script result={}", JSON.toJSONString(result));
-            Map<String, Object> resultMap = (Map<String, Object>) result;
-            //脚本执行结果添加到当前用例的上下文中
-            featureExecuteContext.bindMap(resultMap);
 
+            //脚本执行结果添加到当前用例的上下文中
+            Map<String, Object> resultMap = (Map<String, Object>) result;
+            featureExecuteContext.bindMap(resultMap);
             ExecuteDetailVo executeDetail = new ExecuteDetailVo();
             executeDetail.setResBody(JSON.parseObject(JSON.toJSONString(result)));
             executeDetail.setStatus(true);
             response = FeatureResponse.builder().name(executorUnit.getName()).pointId(executePoint.getPointId())
                     .executeDetailVo(executeDetail).build();
+
+            //如果配置了全局覆盖则将返回变量添加context中
+            ScriptConfig scriptConfig = JSON.parseObject(executorUnit.getMethod(), ScriptConfig.class);
+            if (Objects.nonNull(scriptConfig) && scriptConfig.getGlobal()) {
+                response.setContext(resultMap);
+            }
         } catch (Exception e) {
             log.info("execute javascript error", e);
             ExecuteDetailVo executeDetail = new ExecuteDetailVo();
@@ -82,5 +83,18 @@ public class ScriptExecuteStrategy extends BaseExecuteStrategy {
                     .executeDetailVo(executeDetail).build();
         }
         return Collections.singletonList(response);
+    }
+
+    private Object executeJavaScript(FeatureExecuteContext featureExecuteContext, String script) throws ScriptException {
+        Bindings bindings = new SimpleBindings();
+        Map<String, Object> context = featureExecuteContext.toMap();
+        bindings.put("context", context);
+        String execScript = "function execute(context) {" + script + "}execute(context);";
+        Object result = engine.eval(execScript, bindings);
+        if (!(result instanceof Map)) {
+            log.info("after execute script , can not get map result");
+            throw new ExecuteException("after execute script , can not get map result");
+        }
+        return result;
     }
 }
