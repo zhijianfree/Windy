@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
@@ -23,7 +24,7 @@ import java.util.concurrent.*;
  */
 @Slf4j
 @Getter
-@Builder
+@NoArgsConstructor
 public class WindyThreadPool extends ExecutorConfigurationSupport implements
     AsyncListenableTaskExecutor {
 

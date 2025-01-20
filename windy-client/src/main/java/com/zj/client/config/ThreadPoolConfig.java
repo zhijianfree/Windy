@@ -18,82 +18,78 @@ public class ThreadPoolConfig {
 
   @Bean("pipelinePool")
   public Executor getPipelineExecutor() {
-    WindyThreadPool windyThreadPool = WindyThreadPool.builder()
-            .corePoolSize(10)
-            .maxPoolSize(30)
-            .allowCoreThreadTimeOut(false)
-            .queueSize(100).build();
+    WindyThreadPool windyThreadPool = new WindyThreadPool();
+    windyThreadPool.setCorePoolSize(10);
+    windyThreadPool.setMaxPoolSize(30);
+    windyThreadPool.setAllowCoreThreadTimeOut(false);
+    windyThreadPool.setQueueSize(100);
     windyThreadPool.setThreadNamePrefix("pipeline-thread-");
     return windyThreadPool;
   }
 
   @Bean("loopQueryPool")
   public Executor getQueryLooperExecutor() {
-    WindyThreadPool windyThreadPool = WindyThreadPool.builder()
-            .corePoolSize(20)
-            .maxPoolSize(80)
-            .allowCoreThreadTimeOut(false)
-            .queueSize(1000).build();
+    WindyThreadPool windyThreadPool = new WindyThreadPool();
+    windyThreadPool.setCorePoolSize(20);
+    windyThreadPool.setMaxPoolSize(80);
+    windyThreadPool.setAllowCoreThreadTimeOut(false);
+    windyThreadPool.setQueueSize(100);
     windyThreadPool.setThreadNamePrefix("query-loop-thread-");
     return windyThreadPool;
   }
 
   @Bean("gitOperatePool")
   public Executor gitOperateExecutor() {
-    WindyThreadPool windyThreadPool = WindyThreadPool.builder().timeout(60 * 60L)
-            .corePoolSize(10)
-            .maxPoolSize(30)
-            .allowCoreThreadTimeOut(false)
-            .queueSize(200)
-            .build();
+    WindyThreadPool windyThreadPool = new WindyThreadPool();
+    windyThreadPool.setTimeout(60 * 60L);
+    windyThreadPool.setCorePoolSize(10);
+    windyThreadPool.setMaxPoolSize(30);
+    windyThreadPool.setAllowCoreThreadTimeOut(false);
+    windyThreadPool.setQueueSize(100);
     windyThreadPool.setThreadNamePrefix("buildCode-thread-");
     return windyThreadPool;
   }
 
   @Bean("eventBusPool")
   public Executor getEventBusPool() {
-    WindyThreadPool windyThreadPool = WindyThreadPool.builder().timeout(60L)
-            .corePoolSize(10)
-            .maxPoolSize(20)
-            .allowCoreThreadTimeOut(false)
-            .queueSize(100)
-            .build();
+    WindyThreadPool windyThreadPool = new WindyThreadPool();
+    windyThreadPool.setCorePoolSize(10);
+    windyThreadPool.setMaxPoolSize(20);
+    windyThreadPool.setAllowCoreThreadTimeOut(false);
+    windyThreadPool.setQueueSize(100);
     windyThreadPool.setThreadNamePrefix("event-bus-");
     return windyThreadPool;
   }
 
   @Bean("generatePool")
   public Executor getGeneratePool() {
-    WindyThreadPool windyThreadPool = WindyThreadPool.builder().timeout(10 * 60L)
-            .corePoolSize(10)
-            .maxPoolSize(20)
-            .allowCoreThreadTimeOut(false)
-            .queueSize(100)
-            .build();
+    WindyThreadPool windyThreadPool = new WindyThreadPool();
+    windyThreadPool.setCorePoolSize(10);
+    windyThreadPool.setMaxPoolSize(20);
+    windyThreadPool.setAllowCoreThreadTimeOut(false);
+    windyThreadPool.setQueueSize(100);
     windyThreadPool.setThreadNamePrefix("generate-");
     return windyThreadPool;
   }
 
   @Bean("featureExecutePool")
   public Executor getFeatureExecutePool() {
-    WindyThreadPool windyThreadPool = WindyThreadPool.builder().timeout(5 * 60L)
-            .corePoolSize(10)
-            .maxPoolSize(40)
-            .allowCoreThreadTimeOut(false)
-            .queueSize(100)
-            .build();
+    WindyThreadPool windyThreadPool = new WindyThreadPool();
+    windyThreadPool.setCorePoolSize(10);
+    windyThreadPool.setMaxPoolSize(40);
+    windyThreadPool.setAllowCoreThreadTimeOut(false);
+    windyThreadPool.setQueueSize(100);
     windyThreadPool.setThreadNamePrefix("feature-");
     return windyThreadPool;
   }
 
   @Bean("cleanDirtyDataExecutePool")
   public Executor getCleanDirtyDataExecutePool() {
-    WindyThreadPool windyThreadPool = WindyThreadPool.builder().timeout(60L)
-            .corePoolSize(10)
-            .maxPoolSize(40)
-            .allowCoreThreadTimeOut(false)
-            .queueSize(100)
-            .build();
+    WindyThreadPool windyThreadPool = new WindyThreadPool();
+    windyThreadPool.setCorePoolSize(10);
+    windyThreadPool.setMaxPoolSize(40);
+    windyThreadPool.setAllowCoreThreadTimeOut(false);
+    windyThreadPool.setQueueSize(100);
     windyThreadPool.setThreadNamePrefix("clean-dirty-");
     //清理脏数据处理任务，堆积就直接清除
     windyThreadPool.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
@@ -102,12 +98,11 @@ public class ThreadPoolConfig {
 
   @Bean("asyncExecuteFeaturePool")
   public Executor getAsyncExecuteFeaturePool() {
-    WindyThreadPool windyThreadPool = WindyThreadPool.builder().timeout(5 * 60L)
-            .corePoolSize(10)
-            .maxPoolSize(40)
-            .allowCoreThreadTimeOut(false)
-            .queueSize(1000)
-            .build();
+    WindyThreadPool windyThreadPool = new WindyThreadPool();
+    windyThreadPool.setCorePoolSize(10);
+    windyThreadPool.setMaxPoolSize(40);
+    windyThreadPool.setAllowCoreThreadTimeOut(false);
+    windyThreadPool.setQueueSize(1000);
     windyThreadPool.setThreadNamePrefix("async-exe-");
     return windyThreadPool;
   }
