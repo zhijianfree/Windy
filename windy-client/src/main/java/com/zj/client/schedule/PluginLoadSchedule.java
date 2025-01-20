@@ -42,7 +42,7 @@ public class PluginLoadSchedule {
   @Scheduled(cron = "0/5 * * * * ? ")
   public void loadSchedule() {
     if (instanceMonitor.isUnStable()) {
-      log.info("server is not unstable");
+      log.info("server is unstable");
       return;
     }
 

@@ -148,7 +148,7 @@ public class TaskDispatch implements IDispatchExecutor {
         return executeContext;
     }
 
-    private TaskRecordBO buildTaskRecord(TaskInfoBO taskDetail, String triggerId, String user) {
+    private TaskRecordBO buildTaskRecord(TaskInfoBO taskDetail, String triggerId, String userId) {
         TaskRecordBO taskRecordBO = new TaskRecordBO();
         taskRecordBO.setTaskConfig(taskDetail.getTaskConfig());
         taskRecordBO.setTaskName(taskDetail.getTaskName());
@@ -160,10 +160,12 @@ public class TaskDispatch implements IDispatchExecutor {
         taskRecordBO.setTestCaseId(taskDetail.getTestCaseId());
         taskRecordBO.setCreateTime(System.currentTimeMillis());
         taskRecordBO.setUpdateTime(System.currentTimeMillis());
-        Optional.ofNullable(user).ifPresent(userId -> {
-            UserBO userInfo = userRepository.getUserByUserId(userId);
-            taskRecordBO.setExecuteUser(Optional.ofNullable(userInfo.getNickName()).orElseGet(userInfo::getUserName));
-            taskRecordBO.setUserId(userInfo.getUserId());
+        taskRecordBO.setUserId(userId);
+        Optional.ofNullable(userId).ifPresent(id -> {
+            UserBO userInfo = userRepository.getUserByUserId(id);
+            Optional.ofNullable(userInfo).ifPresent(userBO -> {
+                taskRecordBO.setExecuteUser(Optional.ofNullable(userInfo.getNickName()).orElseGet(userInfo::getUserName));
+            });
         });
         return taskRecordBO;
     }

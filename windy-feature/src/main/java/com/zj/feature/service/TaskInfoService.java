@@ -2,7 +2,6 @@ package com.zj.feature.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.common.adapter.auth.IAuthService;
-import com.zj.common.adapter.auth.UserDetail;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.adapter.invoker.IMasterInvoker;
