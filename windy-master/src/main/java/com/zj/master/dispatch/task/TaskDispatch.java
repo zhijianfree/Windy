@@ -7,11 +7,13 @@ import com.zj.common.entity.dto.DispatchTaskModel;
 import com.zj.common.enums.FeatureStatus;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
+import com.zj.domain.entity.bo.auth.UserBO;
 import com.zj.domain.entity.bo.feature.FeatureInfoBO;
 import com.zj.domain.entity.bo.feature.TaskInfoBO;
 import com.zj.domain.entity.bo.feature.TaskRecordBO;
 import com.zj.domain.entity.bo.log.DispatchLogBO;
 import com.zj.domain.entity.bo.log.SubDispatchLogBO;
+import com.zj.domain.repository.auth.IUserRepository;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
 import com.zj.domain.repository.feature.ITaskRepository;
@@ -27,6 +29,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -44,11 +47,12 @@ public class TaskDispatch implements IDispatchExecutor {
     private final ISubDispatchLogRepository subTaskLogRepository;
     private final IDispatchLogRepository dispatchLogRepository;
     private final UniqueIdService uniqueIdService;
+    private IUserRepository userRepository;
 
     public TaskDispatch(ITaskRepository taskRepository, IFeatureRepository featureRepository,
                         ITaskRecordRepository taskRecordRepository, FeatureExecuteProxy featureExecuteProxy,
                         ISubDispatchLogRepository subTaskLogRepository, IDispatchLogRepository dispatchLogRepository,
-                        UniqueIdService uniqueIdService) {
+                        UniqueIdService uniqueIdService, IUserRepository userRepository) {
         this.taskRepository = taskRepository;
         this.featureRepository = featureRepository;
         this.taskRecordRepository = taskRecordRepository;
@@ -56,6 +60,7 @@ public class TaskDispatch implements IDispatchExecutor {
         this.subTaskLogRepository = subTaskLogRepository;
         this.dispatchLogRepository = dispatchLogRepository;
         this.uniqueIdService = uniqueIdService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -83,7 +88,7 @@ public class TaskDispatch implements IDispatchExecutor {
             return "";
         }
 
-        TaskRecordBO taskRecordBO = buildTaskRecordDTO(taskDetail, task.getTriggerId(), task.getUser());
+        TaskRecordBO taskRecordBO = buildTaskRecord(taskDetail, task.getTriggerId(), task.getUser());
         taskRecordRepository.save(taskRecordBO);
 
         dispatchLogRepository.updateLogSourceRecord(logId, taskRecordBO.getRecordId());
@@ -143,19 +148,23 @@ public class TaskDispatch implements IDispatchExecutor {
         return executeContext;
     }
 
-    private TaskRecordBO buildTaskRecordDTO(TaskInfoBO taskDetail, String triggerId, String user) {
+    private TaskRecordBO buildTaskRecord(TaskInfoBO taskDetail, String triggerId, String user) {
         TaskRecordBO taskRecordBO = new TaskRecordBO();
         taskRecordBO.setTaskConfig(taskDetail.getTaskConfig());
         taskRecordBO.setTaskName(taskDetail.getTaskName());
         taskRecordBO.setTaskId(taskDetail.getTaskId());
         taskRecordBO.setRecordId(uniqueIdService.getUniqueId());
-        taskRecordBO.setExecuteUser(user);
         taskRecordBO.setTriggerId(triggerId);
         taskRecordBO.setStatus(ProcessStatus.RUNNING.getType());
         taskRecordBO.setMachines(taskDetail.getMachines());
         taskRecordBO.setTestCaseId(taskDetail.getTestCaseId());
         taskRecordBO.setCreateTime(System.currentTimeMillis());
         taskRecordBO.setUpdateTime(System.currentTimeMillis());
+        Optional.ofNullable(user).ifPresent(userId -> {
+            UserBO userInfo = userRepository.getUserByUserId(userId);
+            taskRecordBO.setExecuteUser(Optional.ofNullable(userInfo.getNickName()).orElseGet(userInfo::getUserName));
+            taskRecordBO.setUserId(userInfo.getUserId());
+        });
         return taskRecordBO;
     }
 
@@ -190,7 +199,7 @@ public class TaskDispatch implements IDispatchExecutor {
         FeatureTask featureTask = buildResumeFeatureTask(dispatchLog, taskDetail,
                 featureList, completedFeatures);
         if (StringUtils.isBlank(dispatchLog.getSourceRecordId())) {
-            TaskRecordBO taskRecordBO = buildTaskRecordDTO(taskDetail, null, null);
+            TaskRecordBO taskRecordBO = buildTaskRecord(taskDetail, null, null);
             taskRecordRepository.save(taskRecordBO);
             featureTask.setTaskRecordId(taskRecordBO.getRecordId());
         }

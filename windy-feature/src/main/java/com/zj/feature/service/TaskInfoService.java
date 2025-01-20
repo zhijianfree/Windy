@@ -115,9 +115,7 @@ public class TaskInfoService {
 
     DispatchTaskModel dispatchTaskModel = new DispatchTaskModel();
     dispatchTaskModel.setType(LogType.FEATURE_TASK.getType());
-    UserDetail userDetail = authService.getUserDetail();
-    String user = Optional.ofNullable(userDetail.getNickName()).orElseGet(userDetail::getUserName);
-    dispatchTaskModel.setUser(user);
+    dispatchTaskModel.setUser(authService.getCurrentUserId());
     dispatchTaskModel.setSourceId(taskId);
     dispatchTaskModel.setSourceName(taskDetail.getTaskName());
     String recordId = masterInvoker.runFeatureTask(dispatchTaskModel);
