@@ -43,12 +43,14 @@ public class UpdateNodeRecordEvent implements INotifyEvent {
   @Override
   public boolean handle(ResultEvent resultEvent) {
     String string = JSON.toJSONString(resultEvent.getParams());
-    log.info("receive node record update event id = {} event={}", resultEvent.getExecuteId(),
-        resultEvent.getExecuteType());
+    log.info("receive node record update event id = {} event={} status={}", resultEvent.getExecuteId(),
+        resultEvent.getExecuteType(), resultEvent.getStatus());
     NodeRecordBO oldNodeRecord = nodeRecordRepository.getRecordById(resultEvent.getExecuteId());
     if (ProcessStatus.isCompleteStatus(oldNodeRecord.getStatus()) && !Objects.equals(
         ExecuteType.APPROVAL.name(), resultEvent.getExecuteType())) {
-      log.info("node record status completed,not update recordId={}", oldNodeRecord.getRecordId());
+      //如果任务已经是完结状态，不能再更新记录
+      //审批节点节点完成需要由负责人在console界面操作而不是在通知中完成，所以审批完成可以继续执行下一个节点
+      log.info("node record status completed, not update recordId={}", oldNodeRecord.getRecordId());
       return true;
     }
 
