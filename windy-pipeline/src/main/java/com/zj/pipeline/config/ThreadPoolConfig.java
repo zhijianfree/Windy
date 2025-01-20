@@ -18,13 +18,14 @@ public class ThreadPoolConfig {
 
   @Bean("webHookExecutorPool")
   public Executor getWebHookExecutor() {
-    WindyThreadPool windyThreadPool = new WindyThreadPool();
+    WindyThreadPool windyThreadPool = WindyThreadPool.builder()
+            .corePoolSize(5)
+            .queueSize(100)
+            .maxPoolSize(20)
+            .timeout(600L)
+            .allowCoreThreadTimeOut(false)
+            .build();
     windyThreadPool.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
-    windyThreadPool.setCorePoolSize(5);
-    windyThreadPool.setMaxPoolSize(20);
-    windyThreadPool.setTimeout(600L);
-    windyThreadPool.setAllowCoreThreadTimeOut(false);
-    windyThreadPool.setQueueSize(100);
     windyThreadPool.setThreadNamePrefix("web-hook-thread-");
     return windyThreadPool;
   }

@@ -17,24 +17,24 @@ public class ThreadPoolConfig {
 
   @Bean("pipelineExecutorPool")
   public Executor getPipelineExecutor() {
-    WindyThreadPool windyThreadPool = new WindyThreadPool();
-    windyThreadPool.setCorePoolSize(20);
-    windyThreadPool.setMaxPoolSize(40);
-    windyThreadPool.setTimeout(3600 * 3L);
-    windyThreadPool.setAllowCoreThreadTimeOut(false);
-    windyThreadPool.setQueueSize(100);
+    WindyThreadPool windyThreadPool = WindyThreadPool.builder()
+            .maxPoolSize(40)
+            .corePoolSize(20)
+            .timeout(3600 * 3L)
+            .queueSize(100)
+            .allowCoreThreadTimeOut(false).build();
     windyThreadPool.setThreadNamePrefix("master-pipeline-");
     return windyThreadPool;
   }
 
   @Bean("featureExecutorPool")
   public Executor getFeatureExecutor() {
-    WindyThreadPool windyThreadPool = new WindyThreadPool();
-    windyThreadPool.setCorePoolSize(20);
-    windyThreadPool.setMaxPoolSize(40);
-    windyThreadPool.setTimeout(3600 * 3L);
-    windyThreadPool.setAllowCoreThreadTimeOut(false);
-    windyThreadPool.setQueueSize(100);
+    WindyThreadPool windyThreadPool = WindyThreadPool.builder()
+            .maxPoolSize(40)
+            .corePoolSize(20)
+            .timeout(3600 * 3L)
+            .queueSize(100)
+            .allowCoreThreadTimeOut(false).build();
     windyThreadPool.setThreadNamePrefix("master-feature-");
     return windyThreadPool;
   }
