@@ -28,7 +28,12 @@ public class TaskRecord {
   private Integer percent;
 
   /**
-   * 任务执行人
+   * 任务执行人ID
+   */
+  private String userId;
+
+  /**
+   * 任务执行人名称
    */
   private String executeUser;
 
