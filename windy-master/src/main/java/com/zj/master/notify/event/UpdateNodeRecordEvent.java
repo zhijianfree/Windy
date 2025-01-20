@@ -49,7 +49,7 @@ public class UpdateNodeRecordEvent implements INotifyEvent {
     if (ProcessStatus.isCompleteStatus(oldNodeRecord.getStatus()) && !Objects.equals(
         ExecuteType.APPROVAL.name(), resultEvent.getExecuteType())) {
       //如果任务已经是完结状态，不能再更新记录
-      //审批节点节点完成需要由负责人在console界面操作而不是在通知中完成，所以审批完成可以继续执行下一个节点
+      //审批节点完成需要由负责人在console界面操作而不是在通知中完成，所以审批完成可以继续执行下一个节点
       log.info("node record status completed, not update recordId={}", oldNodeRecord.getRecordId());
       return true;
     }

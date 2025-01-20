@@ -192,7 +192,6 @@ public class CodeBuildService {
         model.setStatus(status.getType());
         model.setContext(context);
         model.addMessage(message);
-
         model.setData(new ResponseStatus(status.getType()));
         statusMap.put(recordId, model);
     }

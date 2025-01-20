@@ -34,7 +34,8 @@ public class DelayQuery implements Delayed {
 
     @Override
     public long getDelay(TimeUnit unit) {
-        return unit.convert(expire.get(), TimeUnit.MILLISECONDS);
+        long delay = expire.get() - System.currentTimeMillis();
+        return unit.convert(delay, TimeUnit.MILLISECONDS);
     }
 
     @Override
