@@ -55,6 +55,7 @@ public class DispatchLogSchedule {
     try {
       TraceUtils.initTrace();
       if (instanceMonitor.isUnStable()) {
+        log.info("server is un stable, not start pipeline schedule");
         return;
       }
 
