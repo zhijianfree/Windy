@@ -27,6 +27,8 @@ import com.zj.master.dispatch.listener.IStopEventListener;
 import com.zj.master.dispatch.listener.InternalEvent;
 import com.zj.master.dispatch.listener.InternalEventFactory;
 import com.zj.master.entity.enums.EventType;
+import com.zj.master.entity.vo.ExecuteContext;
+import com.zj.plugin.loader.ExecuteStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -38,9 +40,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 
@@ -105,7 +110,7 @@ public class FeatureExecuteProxy implements IStopEventListener {
             featureExecuteParam.setDispatchType(DispatchType.FEATURE.name());
             featureExecuteParam.setMasterIp(IpUtils.getLocalIP());
             boolean result = clientInvoker.runFeatureTask(featureExecuteParam);
-            log.info("run feature result = {}", result);
+            log.info("run feature result = {} token={}", result, featureTask.getExecuteContext().toMap().get("token"));
             if (Objects.equals(featureExecuteParam.getFeatureId(), "2851acc7741448179c91fb98d9ef1bf9")){
                 log.info("log feature info={}", JSON.toJSONString(featureExecuteParam));
             }
