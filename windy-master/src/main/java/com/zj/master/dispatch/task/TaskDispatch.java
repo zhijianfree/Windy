@@ -202,7 +202,8 @@ public class TaskDispatch implements IDispatchExecutor {
                 featureList, completedFeatures);
         if (StringUtils.isBlank(dispatchLog.getSourceRecordId())) {
             TaskRecordBO taskRecordBO = buildTaskRecord(taskDetail, null, null);
-            taskRecordRepository.save(taskRecordBO);
+            boolean save = taskRecordRepository.save(taskRecordBO);
+            log.info("resume task record result={}", save);
             featureTask.setTaskRecordId(taskRecordBO.getRecordId());
         }
         featureExecuteProxy.execute(featureTask);

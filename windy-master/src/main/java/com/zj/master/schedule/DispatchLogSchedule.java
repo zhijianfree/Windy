@@ -103,7 +103,8 @@ public class DispatchLogSchedule {
       return;
     }
 
-    subDispatchLogRepository.batchDeleteByLogIds(logIds);
+    boolean batchDeleteSubLogs = subDispatchLogRepository.batchDeleteByLogIds(logIds);
+    log.info("batch delete sub logs result={}", batchDeleteSubLogs);
   }
 
   /**
