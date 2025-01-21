@@ -78,12 +78,12 @@ public class DispatchLogRepository extends ServiceImpl<DispatchLogMapper, Dispat
   }
 
   @Override
-  public void updateLogSourceRecord(String logId, String sourceRecordId) {
+  public boolean updateLogSourceRecord(String logId, String sourceRecordId) {
     DispatchLog dispatchLog = new DispatchLog();
     dispatchLog.setLogId(logId);
     dispatchLog.setSourceRecordId(sourceRecordId);
     dispatchLog.setUpdateTime(System.currentTimeMillis());
-    update(dispatchLog, Wrappers.lambdaUpdate(DispatchLog.class).eq(DispatchLog::getLogId, logId));
+    return update(dispatchLog, Wrappers.lambdaUpdate(DispatchLog.class).eq(DispatchLog::getLogId, logId));
   }
 
   @Override

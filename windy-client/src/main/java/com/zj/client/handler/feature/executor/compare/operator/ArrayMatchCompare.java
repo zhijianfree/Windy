@@ -86,14 +86,4 @@ public class ArrayMatchCompare extends BaseCompare {
 
         private String expectValue;
     }
-
-    public static void main(String[] args) {
-        CompareDefine compareDefine = new CompareDefine();
-        compareDefine.setResponseValue(JSON.parseArray("[{\"msg\":\"sssssssss;\",\"nickName\":\"云边协同应用\"}]"));
-        compareDefine.setOperator("");
-        compareDefine.setExpectValue("{msg}sssssssss;");
-        ArrayMatchCompare arrayMatchCompare = new ArrayMatchCompare();
-        CompareResult compareResult = arrayMatchCompare.compare(compareDefine);
-        log.info(JSON.toJSONString(compareResult));
-    }
 }

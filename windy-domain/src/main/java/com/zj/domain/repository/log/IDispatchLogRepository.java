@@ -48,7 +48,7 @@ public interface IDispatchLogRepository {
    * @param logId 日志ID
    * @param recordId 记录ID
    */
-  void updateLogSourceRecord(String logId, String recordId);
+  boolean updateLogSourceRecord(String logId, String recordId);
 
   /**
    * 获取日志

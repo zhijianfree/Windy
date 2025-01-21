@@ -89,14 +89,15 @@ public class TaskDispatch implements IDispatchExecutor {
         }
 
         TaskRecordBO taskRecordBO = buildTaskRecord(taskDetail, task.getTriggerId(), task.getUser());
-        taskRecordRepository.save(taskRecordBO);
+        boolean saveTask = taskRecordRepository.save(taskRecordBO);
+        log.info("save task record result = {}", saveTask);
 
-        dispatchLogRepository.updateLogSourceRecord(logId, taskRecordBO.getRecordId());
+        boolean updateLog = dispatchLogRepository.updateLogSourceRecord(logId, taskRecordBO.getRecordId());
+        log.info("update log result = {}", updateLog);
 
-        List<String> featureIds =
-                featureList.stream().filter(feature -> Objects.equals(feature.getStatus(),
-                                FeatureStatus.NORMAL.getType()))
-                        .map(FeatureInfoBO::getFeatureId).collect(Collectors.toList());
+        List<String> featureIds = featureList.stream()
+                .filter(feature -> Objects.equals(feature.getStatus(), FeatureStatus.NORMAL.getType()))
+                .map(FeatureInfoBO::getFeatureId).collect(Collectors.toList());
         FeatureTask featureTask = buildFeatureTask(task, logId, featureIds, taskRecordBO);
         saveSubTaskLog(featureIds, featureTask.getLogId());
         featureExecuteProxy.execute(featureTask);
@@ -163,9 +164,8 @@ public class TaskDispatch implements IDispatchExecutor {
         taskRecordBO.setUserId(userId);
         Optional.ofNullable(userId).ifPresent(id -> {
             UserBO userInfo = userRepository.getUserByUserId(id);
-            Optional.ofNullable(userInfo).ifPresent(userBO -> {
-                taskRecordBO.setExecuteUser(Optional.ofNullable(userInfo.getNickName()).orElseGet(userInfo::getUserName));
-            });
+            Optional.ofNullable(userInfo).ifPresent(userBO ->
+                taskRecordBO.setExecuteUser(Optional.ofNullable(userInfo.getNickName()).orElseGet(userInfo::getUserName)));
         });
         return taskRecordBO;
     }
