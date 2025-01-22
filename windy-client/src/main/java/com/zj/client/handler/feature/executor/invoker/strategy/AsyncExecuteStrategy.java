@@ -87,6 +87,8 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy{
                             return featureResponse;
                         }
                     }).collect(Collectors.toList());
+                    //异步任务中的执行点都结束了，还未释放等待则直接结束
+                    releaseWaitIfNeed(featureExecuteContext);
                 }
                 notifyAsyncRecordResult(newContext, responses);
                 countDownLatch.countDown();
@@ -120,7 +122,7 @@ public class AsyncExecuteStrategy extends BaseExecuteStrategy{
         }).collect(Collectors.toList());
     }
 
-    private static void releaseWaitIfNeed(FeatureExecuteContext featureExecuteContext) {
+    private void releaseWaitIfNeed(FeatureExecuteContext featureExecuteContext) {
         CountDownLatch asyncCount = featureExecuteContext.getCountDownLatch();
         if (Objects.nonNull(asyncCount) && asyncCount.getCount() > 0){
             log.info("find count down release wait");
