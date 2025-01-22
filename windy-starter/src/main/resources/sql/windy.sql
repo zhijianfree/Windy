@@ -406,7 +406,7 @@ CREATE TABLE `feature_info` (
                                 `status` int(2) NOT NULL DEFAULT '1' COMMENT '用例状态',
                                 `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
                                 `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
-                                `sort_order` int(5) DEFAULT '0' COMMENT '排序',
+                                `sort_order` int(5) DEFAULT '1' COMMENT '排序',
                                 `description` varchar(256) DEFAULT NULL,
                                 PRIMARY KEY (`id`),
                                 KEY `idx_test_case_id` (`test_case_id`),
