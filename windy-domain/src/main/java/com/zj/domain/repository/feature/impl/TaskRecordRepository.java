@@ -56,9 +56,10 @@ public class TaskRecordRepository extends ServiceImpl<TaskRecordMapper, TaskReco
   }
 
   @Override
-  public PageSize<TaskRecordBO> getTaskRecordPage(Integer pageNum, Integer size) {
+  public PageSize<TaskRecordBO> getTaskRecordPage(Integer pageNum, Integer size, String userId) {
     IPage<TaskRecord> page = new Page<>(pageNum, size);
     IPage<TaskRecord> recordIPage = page(page, Wrappers.lambdaQuery(TaskRecord.class)
+            .eq(TaskRecord::getUserId, userId)
             .eq(TaskRecord::getType, TaskRecordType.FEATURE_TASK.getType()).orderByDesc(TaskRecord::getUpdateTime));
     return convertRecordPage(recordIPage);
   }

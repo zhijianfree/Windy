@@ -1,6 +1,7 @@
 package com.zj.domain.repository.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zj.common.entity.service.ApiParamModel;
@@ -15,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -42,11 +45,10 @@ public class ServiceApiRepository extends ServiceImpl<IServiceApiMapper, Service
     }
 
     @Override
-    public boolean updateApi(ServiceApiBO serviceApi) {
-        ServiceApi api = convertServiceApi(serviceApi);
+    public boolean updateApi(ServiceApiBO serviceApiBO) {
+        ServiceApi api = convertServiceApi(serviceApiBO);
         api.setUpdateTime(System.currentTimeMillis());
-        return update(api,
-                Wrappers.lambdaUpdate(ServiceApi.class).eq(ServiceApi::getApiId, serviceApi.getApiId()));
+        return update(api, Wrappers.lambdaUpdate(ServiceApi.class).eq(ServiceApi::getApiId, serviceApiBO.getApiId()));
     }
 
     @Override
@@ -90,6 +92,10 @@ public class ServiceApiRepository extends ServiceImpl<IServiceApiMapper, Service
         ServiceApiBO serviceApiBO = OrikaUtil.convert(serviceApi, ServiceApiBO.class);
         serviceApiBO.setRequestParams(JSON.parseArray(serviceApi.getRequestParameter(), ApiParamModel.class));
         serviceApiBO.setResponseParams(JSON.parseArray(serviceApi.getResponseParameter(), ApiParamModel.class));
+        Optional.ofNullable(serviceApi.getHeader()).ifPresent(header ->
+                serviceApiBO.setHeader(JSON.parseObject(header, new TypeReference<Map<String, String>>() {
+        })));
+
         return serviceApiBO;
     }
 
@@ -97,6 +103,7 @@ public class ServiceApiRepository extends ServiceImpl<IServiceApiMapper, Service
         ServiceApi serviceApi = OrikaUtil.convert(serviceApiBO, ServiceApi.class);
         serviceApi.setRequestParameter(JSON.toJSONString(serviceApiBO.getRequestParams()));
         serviceApi.setResponseParameter(JSON.toJSONString(serviceApiBO.getResponseParams()));
+        serviceApi.setHeader(JSON.toJSONString(serviceApiBO.getHeader()));
         return serviceApi;
     }
 }

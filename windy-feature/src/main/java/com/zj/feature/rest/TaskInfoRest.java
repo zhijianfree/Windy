@@ -33,8 +33,10 @@ public class TaskInfoRest {
 
   @GetMapping("/tasks")
   public ResponseMeta<PageSize<TaskInfoBO>> getTaskList(@RequestParam(value = "page", defaultValue = "1") Integer page,
-                                                        @RequestParam(value = "size", defaultValue = "10") Integer size, @RequestParam(value = "name", defaultValue = "") String name) {
-    return new ResponseMeta<>(ErrorCode.SUCCESS, taskInfoService.getTaskList(name, page, size));
+                                                        @RequestParam(value = "size", defaultValue = "10") Integer size,
+                                                        @RequestParam(value = "name", defaultValue = "") String name,
+                                                        @RequestParam(value = "serviceId", required = false) String serviceId) {
+    return new ResponseMeta<>(ErrorCode.SUCCESS, taskInfoService.getTaskList(name, page, size, serviceId));
   }
 
   @GetMapping("/{serviceId}/tasks")

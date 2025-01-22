@@ -125,7 +125,10 @@ public class YapiApiImportStrategy implements IApiImportStrategy {
             serviceApi.setDescription(apiModel.getTitle());
             serviceApi.setType(HTTP_API_TYPE);
             serviceApi.setResource(apiModel.getPath());
-            serviceApi.setHeader(JSON.toJSONString(apiModel.getHeaders()));
+
+            Map<String, String> headerMap = apiModel.getHeaders().stream().collect(Collectors.toMap(YapiImportApi.HeaderParam::getName,
+                    YapiImportApi.HeaderParam::getValue));
+            serviceApi.setHeader(headerMap);
 
             List<ApiRequestVariable> apiRequestVariables = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(apiModel.getPathParams())) {

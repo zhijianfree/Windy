@@ -24,10 +24,16 @@ public class TaskRepository extends ServiceImpl<TaskInfoMapper, TaskInfo> implem
     ITaskRepository {
 
   @Override
-  public IPage<TaskInfo> getFuzzTaskList(String name, Integer pageNum, Integer size) {
-    LambdaQueryWrapper<TaskInfo> wrapper = Wrappers.lambdaQuery(TaskInfo.class).orderByDesc(TaskInfo::getCreateTime);
+  public IPage<TaskInfo> getFuzzTaskList(String name, Integer pageNum, Integer size, String userId, String serviceId) {
+    LambdaQueryWrapper<TaskInfo> wrapper =
+            Wrappers.lambdaQuery(TaskInfo.class).orderByDesc(TaskInfo::getCreateTime);
     if (StringUtils.isNotBlank(name)) {
       wrapper = wrapper.like(TaskInfo::getTaskName, name);
+    }
+    if (StringUtils.isNotBlank(serviceId)) {
+      wrapper.eq(TaskInfo::getServiceId, serviceId);
+    }else {
+      wrapper.eq(TaskInfo::getUserId, userId);
     }
     IPage<TaskInfo> page = new Page<>(pageNum, size);
     return page(page, wrapper);

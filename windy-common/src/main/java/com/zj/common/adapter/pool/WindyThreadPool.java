@@ -2,7 +2,10 @@ package com.zj.common.adapter.pool;
 
 import com.alibaba.ttl.threadpool.TtlExecutors;
 import java.util.Optional;
+
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
@@ -19,8 +22,9 @@ import java.util.concurrent.*;
  * @author guyuelan
  * @since 2023/6/27
  */
-@Getter
 @Slf4j
+@Getter
+@NoArgsConstructor
 public class WindyThreadPool extends ExecutorConfigurationSupport implements
     AsyncListenableTaskExecutor {
 
@@ -99,11 +103,10 @@ public class WindyThreadPool extends ExecutorConfigurationSupport implements
   }
 
   @Override
-  protected ExecutorService initializeExecutor(ThreadFactory threadFactory,
-      RejectedExecutionHandler rejectedExecutionHandler) {
+  protected ExecutorService initializeExecutor(ThreadFactory threadFactory, RejectedExecutionHandler rejectedHandler) {
     BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(queueSize);
     ThreadPoolExecutor executor = new ThreadPoolExecutor(corePoolSize, maxPoolSize, timeout,
-        TimeUnit.SECONDS, queue, threadFactory, rejectedExecutionHandler) {
+        TimeUnit.SECONDS, queue, threadFactory, rejectedHandler) {
       protected void beforeExecute(Thread t, Runnable r) {
         timeCache.put(String.valueOf(r.hashCode()), System.currentTimeMillis());
         super.beforeExecute(t, r);

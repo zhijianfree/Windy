@@ -13,12 +13,15 @@ public interface ITaskRepository {
 
   /**
    * 模糊查询任务列表
-   * @param name 任务名称
-   * @param pageNum 页码
-   * @param size 每页数量
+   *
+   * @param name      任务名称
+   * @param pageNum   页码
+   * @param size      每页数量
+   * @param userId    用户ID
+   * @param serviceId 服务ID
    * @return 任务列表
    */
-  IPage<TaskInfo> getFuzzTaskList(String name, Integer pageNum, Integer size);
+  IPage<TaskInfo> getFuzzTaskList(String name, Integer pageNum, Integer size, String userId, String serviceId);
 
   /**
    * 创建任务

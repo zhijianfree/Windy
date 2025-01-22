@@ -41,6 +41,7 @@ public class ThreadPoolConfig {
   @Bean("gitOperatePool")
   public Executor gitOperateExecutor() {
     WindyThreadPool windyThreadPool = new WindyThreadPool();
+    windyThreadPool.setTimeout(60 * 60L);
     windyThreadPool.setCorePoolSize(10);
     windyThreadPool.setMaxPoolSize(30);
     windyThreadPool.setAllowCoreThreadTimeOut(false);

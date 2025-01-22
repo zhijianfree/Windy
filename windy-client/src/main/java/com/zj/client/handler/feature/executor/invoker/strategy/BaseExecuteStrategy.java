@@ -53,29 +53,38 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
   }
 
 
-  public FeatureResponse executeFeature(FeatureExecuteContext featureExecuteContext, ExecutePoint executePoint,
+  /**
+   * 异步执点使用的是异步线程触发，也就是说线程内执行点触发的时间是不确定的。如果有的异步任务需要在下一个执行点执行之前就已经进入就绪状态，
+   * 这种情况下编排用例的时候无法准确知道时间，所以使用IAsyncNotifyListener，在执行点中通过回调notifyStart来通知windy client
+   * 开始执行用例的下一个执行点，以此来保证用例的执行的先后顺序。
+   * @param executeContext 执行的上下文
+   * @param executePoint 执行点信息
+   * @param listener 执行点异步通知监听器
+   * @return 返回执行结果
+   */
+  public FeatureResponse executeFeature(FeatureExecuteContext executeContext, ExecutePoint executePoint,
                                         IAsyncNotifyListener listener) {
     //1 执行用例，目前使用反射/http执行，后续考虑使用dubbo调用
     ExecutorUnit executorUnit = executePoint.getExecutorUnit();
 
     //2 将全局变量配置给执行点
-    interceptorProxy.beforeExecute(executorUnit, featureExecuteContext);
+    interceptorProxy.beforeExecute(executorUnit, executeContext);
     log.info("step 1 execute before interceptor service={} context={}", executorUnit.getService(),
-            JSON.toJSONString(featureExecuteContext.toMap()));
+            JSON.toJSONString(executeContext.toMap()));
 
     //3 调用方法执行
     Integer invokeType = Optional.ofNullable(executorUnit.getRelatedTemplate())
             .map(executor -> InvokerType.RELATED_TEMPLATE.getType()).orElseGet(executorUnit::getInvokeType);
     IExecuteInvoker executeInvoker = executeInvokerMap.get(invokeType);
     long currentTime = System.currentTimeMillis();
-    ExecuteDetailVo executeDetailVo = (ExecuteDetailVo) executeInvoker.invoke(executorUnit, featureExecuteContext, listener);
+    ExecuteDetailVo executeDetailVo = (ExecuteDetailVo) executeInvoker.invoke(executorUnit, executeContext, listener);
     long spendTime = System.currentTimeMillis() - currentTime;
     log.info("step 2 execute invoker ={} invoke time={}", executeInvoker.type().name(), spendTime);
 
     //4 将执行之后的响应结果添加到context中，方便后面用例使用
-    interceptorProxy.afterExecute(executePoint, executeDetailVo, featureExecuteContext);
+    interceptorProxy.afterExecute(executePoint, executeDetailVo, executeContext);
     log.info("step 3 execute execute after interceptor service={} context={}", executorUnit.getService(),
-            JSON.toJSONString(featureExecuteContext.toMap()));
+            JSON.toJSONString(executeContext.toMap()));
 
     //5 下面开始对比
     List<CompareDefine> compareDefines = executePoint.getCompareDefines();
@@ -86,7 +95,7 @@ public abstract class BaseExecuteStrategy implements IExecuteStrategy {
     Map<String, Object> globalContext = new HashMap<>();
     if (CollectionUtils.isNotEmpty(variableDefines)) {
       variableDefines.stream().filter(VariableDefine::isGlobal).forEach(variableDefine -> {
-        Object runtimeValue = featureExecuteContext.toMap().get(variableDefine.getVariableKey());
+        Object runtimeValue = executeContext.toMap().get(variableDefine.getVariableKey());
         globalContext.put(variableDefine.getVariableKey(), runtimeValue);
       });
     }

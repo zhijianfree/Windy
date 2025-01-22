@@ -2,7 +2,6 @@ package com.zj.feature.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zj.common.adapter.auth.IAuthService;
-import com.zj.common.adapter.auth.UserDetail;
 import com.zj.common.enums.LogType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.adapter.invoker.IMasterInvoker;
@@ -22,7 +21,6 @@ import com.zj.domain.repository.feature.ITaskRepository;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -56,8 +54,9 @@ public class TaskInfoService {
     this.authService = authService;
   }
 
-  public PageSize<TaskInfoBO> getTaskList(String name, Integer pageNum, Integer size) {
-    IPage<TaskInfo> taskInfoIPage = taskRepository.getFuzzTaskList(name, pageNum, size);
+  public PageSize<TaskInfoBO> getTaskList(String name, Integer pageNum, Integer size, String serviceId) {
+    String currentUserId = authService.getCurrentUserId();
+    IPage<TaskInfo> taskInfoIPage = taskRepository.getFuzzTaskList(name, pageNum, size, currentUserId, serviceId);
     PageSize<TaskInfoBO> pageSize = new PageSize<>();
     pageSize.setTotal(taskInfoIPage.getTotal());
     if (CollectionUtils.isEmpty(taskInfoIPage.getRecords())) {
@@ -89,6 +88,7 @@ public class TaskInfoService {
   public Boolean createTask(TaskInfoBO taskInfoBO) {
     String taskId = uniqueIdService.getUniqueId();
     taskInfoBO.setTaskId(taskId);
+    taskInfoBO.setUserId(authService.getCurrentUserId());
     return taskRepository.createTask(taskInfoBO);
   }
 
@@ -113,9 +113,7 @@ public class TaskInfoService {
 
     DispatchTaskModel dispatchTaskModel = new DispatchTaskModel();
     dispatchTaskModel.setType(LogType.FEATURE_TASK.getType());
-    UserDetail userDetail = authService.getUserDetail();
-    String user = Optional.ofNullable(userDetail.getNickName()).orElseGet(userDetail::getUserName);
-    dispatchTaskModel.setUser(user);
+    dispatchTaskModel.setUser(authService.getCurrentUserId());
     dispatchTaskModel.setSourceId(taskId);
     dispatchTaskModel.setSourceName(taskDetail.getTaskName());
     String recordId = masterInvoker.runFeatureTask(dispatchTaskModel);

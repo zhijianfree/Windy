@@ -1,5 +1,6 @@
 package com.zj.feature.service;
 
+import com.zj.common.adapter.auth.IAuthService;
 import com.zj.common.entity.dto.PageSize;
 import com.zj.common.enums.FeatureStatus;
 import com.zj.domain.entity.bo.feature.FeatureHistoryBO;
@@ -25,16 +26,19 @@ public class TaskRecordService {
     private final FeatureHistoryService featureHistoryService;
     private final FeatureService featureService;
     private final ITaskRecordRepository taskRecordRepository;
+    private final IAuthService authService;
 
     public TaskRecordService(FeatureHistoryService featureHistoryService,
-                             FeatureService featureService, ITaskRecordRepository taskRecordRepository) {
+                             FeatureService featureService, ITaskRecordRepository taskRecordRepository, IAuthService authService) {
         this.featureHistoryService = featureHistoryService;
         this.featureService = featureService;
         this.taskRecordRepository = taskRecordRepository;
+        this.authService = authService;
     }
 
     public PageSize<TaskRecordBO> getTaskRecordPage(Integer pageNum, Integer size) {
-        return taskRecordRepository.getTaskRecordPage(pageNum, size);
+        String currentUserId = authService.getCurrentUserId();
+        return taskRecordRepository.getTaskRecordPage(pageNum, size, currentUserId);
     }
 
     public boolean deleteTaskRecord(String recordId) {

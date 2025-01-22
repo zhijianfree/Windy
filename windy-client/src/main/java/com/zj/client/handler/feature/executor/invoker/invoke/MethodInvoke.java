@@ -98,6 +98,10 @@ public class MethodInvoke implements IExecuteInvoker {
             ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
             executeDetailVo.setStatus(false);
             executeDetailVo.setErrorMessage(stringBuilder);
+            if (Objects.nonNull(featureExecuteContext.getCountDownLatch())) {
+                //如果异步用例执行失败，则将当前的异步用例等待直接释放
+                featureExecuteContext.getCountDownLatch().countDown();
+            }
             return executeDetailVo;
         }
     }

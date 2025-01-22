@@ -1,5 +1,6 @@
 package com.zj.master.schedule;
 
+import com.zj.common.adapter.monitor.InstanceMonitor;
 import com.zj.common.entity.dto.DispatchTaskModel;
 import com.zj.common.entity.pipeline.PipelineConfig;
 import com.zj.common.enums.LogType;
@@ -38,16 +39,18 @@ public class PipelineSchedule implements CommandLineRunner {
     private final IPipelineRepository pipelineRepository;
     private final TaskScheduler taskScheduler;
     private final TaskLogService taskLogService;
+    private final InstanceMonitor instanceMonitor;
 
     private final Map<String, ScheduleHolder> scheduledMap = new ConcurrentHashMap<>();
 
     public PipelineSchedule(IOptimisticLockRepository lockRepository,
                             IPipelineRepository pipelineRepository, TaskScheduler taskScheduler,
-                            TaskLogService taskLogService) {
+                            TaskLogService taskLogService, InstanceMonitor instanceMonitor) {
         this.lockRepository = lockRepository;
         this.pipelineRepository = pipelineRepository;
         this.taskScheduler = taskScheduler;
         this.taskLogService = taskLogService;
+        this.instanceMonitor = instanceMonitor;
     }
 
     /**
@@ -55,6 +58,11 @@ public class PipelineSchedule implements CommandLineRunner {
      * */
     @Scheduled(cron = "0 0/5 * * * ?")
     public void scanTaskLog() {
+        if (instanceMonitor.isUnStable()) {
+            log.info("server is unstable, not start pipeline schedule");
+            return;
+        }
+
         log.debug("start scan schedule pipeline");
         loadSchedulePipeline();
     }
@@ -86,11 +94,11 @@ public class PipelineSchedule implements CommandLineRunner {
                         return;
                     }
                     log.info("start dispatch pipeline task pipelineId={}", pipeline.getPipelineId());
-                    DispatchTaskModel task = new DispatchTaskModel();
-                    task.setType(LogType.PIPELINE.getType());
-                    task.setSourceName(pipeline.getPipelineName());
-                    task.setSourceId(pipeline.getPipelineId());
-                    taskLogService.createTask(task);
+                    DispatchTaskModel dispatchPipeline = new DispatchTaskModel();
+                    dispatchPipeline.setType(LogType.PIPELINE.getType());
+                    dispatchPipeline.setSourceName(pipeline.getPipelineName());
+                    dispatchPipeline.setSourceId(pipeline.getPipelineId());
+                    taskLogService.createTask(dispatchPipeline);
                 }, trigger);
 
                 ScheduleHolder scheduleHolder = new ScheduleHolder();

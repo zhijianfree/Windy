@@ -55,6 +55,7 @@ public class DispatchLogSchedule {
     try {
       TraceUtils.initTrace();
       if (instanceMonitor.isUnStable()) {
+        log.info("server is un stable, not start pipeline schedule");
         return;
       }
 
@@ -102,7 +103,8 @@ public class DispatchLogSchedule {
       return;
     }
 
-    subDispatchLogRepository.batchDeleteByLogIds(logIds);
+    boolean batchDeleteSubLogs = subDispatchLogRepository.batchDeleteByLogIds(logIds);
+    log.info("batch delete sub logs result={}", batchDeleteSubLogs);
   }
 
   /**

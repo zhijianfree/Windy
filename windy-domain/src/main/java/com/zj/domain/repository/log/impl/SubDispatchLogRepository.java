@@ -49,8 +49,8 @@ public class SubDispatchLogRepository extends
   }
 
   @Override
-  public void batchDeleteByLogIds(List<String> logIds) {
-    remove(Wrappers.lambdaQuery(SubDispatchLog.class).in(SubDispatchLog::getLogId, logIds));
+  public boolean batchDeleteByLogIds(List<String> logIds) {
+    return remove(Wrappers.lambdaQuery(SubDispatchLog.class).in(SubDispatchLog::getLogId, logIds));
   }
 
   @Override

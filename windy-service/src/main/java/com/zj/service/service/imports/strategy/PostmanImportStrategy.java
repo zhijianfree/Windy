@@ -78,7 +78,7 @@ public class PostmanImportStrategy implements IApiImportStrategy {
                 Map<String, String> headerMap =
                         headers.stream().collect(Collectors.toMap(PostmanImport.PostmanApiHeader::getKey,
                                 PostmanImport.PostmanApiHeader::getValue));
-                serviceApi.setHeader(JSON.toJSONString(headerMap));
+                serviceApi.setHeader(headerMap);
             });
             return serviceApi;
         }).collect(Collectors.toList());

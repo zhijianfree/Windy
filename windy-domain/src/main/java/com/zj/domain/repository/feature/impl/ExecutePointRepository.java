@@ -32,6 +32,7 @@ public class ExecutePointRepository extends ServiceImpl<ExecutePointMapper, Exec
 
   @Override
   public ExecutePointBO getExecutePoint(String executePointId) {
+    log.info("get execute point={}", executePointId);
     ExecutePoint executePoint = getOne(
         Wrappers.lambdaQuery(ExecutePoint.class).eq(ExecutePoint::getPointId, executePointId));
     return convertExecutePointBO(executePoint);

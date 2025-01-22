@@ -9,6 +9,8 @@ import com.zj.common.entity.dto.DispatchTaskModel;
 import com.zj.common.entity.dto.PageSize;
 import com.zj.common.adapter.invoker.IMasterInvoker;
 import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.exception.ApiException;
+import com.zj.common.exception.ErrorCode;
 import com.zj.domain.entity.bo.feature.ExecutePointBO;
 import com.zj.domain.entity.bo.feature.FeatureInfoBO;
 import com.zj.domain.entity.bo.feature.TaskRecordBO;
@@ -38,18 +40,16 @@ public class TestCaseService {
     private final UniqueIdService uniqueIdService;
     private final ITestCaseRepository testCaseRepository;
     private final IFeatureRepository featureRepository;
-    private final IExecutePointRepository executePointRepository;
     private final ITaskRecordRepository taskRecordRepository;
     private final IAuthService authService;
     private final IMasterInvoker masterInvoker;
 
     public TestCaseService(UniqueIdService uniqueIdService, ITestCaseRepository testCaseRepository,
-                           IFeatureRepository featureRepository, IExecutePointRepository executePointRepository,
-                           ITaskRecordRepository taskRecordRepository, IAuthService authService, IMasterInvoker masterInvoker) {
+                           IFeatureRepository featureRepository, ITaskRecordRepository taskRecordRepository,
+                           IAuthService authService, IMasterInvoker masterInvoker) {
         this.uniqueIdService = uniqueIdService;
         this.testCaseRepository = testCaseRepository;
         this.featureRepository = featureRepository;
-        this.executePointRepository = executePointRepository;
         this.taskRecordRepository = taskRecordRepository;
         this.authService = authService;
         this.masterInvoker = masterInvoker;
@@ -97,23 +97,13 @@ public class TestCaseService {
         return testCaseRepository.getTestCaseById(caseId);
     }
 
-    @Transactional
     public Boolean deleteTestCase(String caseId) {
         List<FeatureInfoBO> featureList = featureRepository.queryFeatureList(caseId);
         if (CollectionUtils.isEmpty(featureList)) {
-            return testCaseRepository.deleteTestCase(caseId);
+            log.info("there are features in the case , can not delete caseId={}", caseId);
+            throw new ApiException(ErrorCode.CASE_EXIST_FEATURE);
         }
-
-        List<String> featureIds = featureList.stream().map(FeatureInfoBO::getFeatureId).collect(Collectors.toList());
-        List<ExecutePointBO> executePoints = executePointRepository.getPointsByFeatureIds(featureIds);
-
-        boolean deleteFeatures = featureRepository.batchDeleteByFeatureId(featureIds);
-        if (CollectionUtils.isEmpty(executePoints)) {
-            return deleteFeatures && testCaseRepository.deleteTestCase(caseId);
-        }
-
-        boolean deletePoints = executePointRepository.deleteByFeatureIds(featureIds);
-        return deleteFeatures && deletePoints && testCaseRepository.deleteTestCase(caseId);
+        return testCaseRepository.deleteTestCase(caseId);
     }
 
     public List<TestCaseBO> getE2ECases() {

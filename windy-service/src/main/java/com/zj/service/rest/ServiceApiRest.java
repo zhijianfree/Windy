@@ -5,11 +5,14 @@ import com.zj.common.entity.generate.GenerateRecordBO;
 import com.zj.common.exception.ErrorCode;
 import com.zj.domain.entity.bo.service.ServiceApiBO;
 import com.zj.domain.entity.bo.service.ServiceGenerateBO;
+import com.zj.domain.entity.vo.Create;
+import com.zj.domain.entity.vo.Update;
 import com.zj.service.entity.ApiModel;
 import com.zj.service.entity.ExecuteTemplateDto;
 import com.zj.service.entity.GenerateTemplate;
 import com.zj.service.entity.ImportApiResult;
 import com.zj.service.service.ApiService;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,13 +47,12 @@ public class ServiceApiRest {
   }
 
   @GetMapping("/service/{serviceId}/resources")
-  public ResponseMeta<List<ServiceApiBO>> getServiceApis(
-      @PathVariable("serviceId") String serviceId) {
+  public ResponseMeta<List<ServiceApiBO>> getServiceApis(@PathVariable("serviceId") String serviceId) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.getServiceApis(serviceId));
   }
 
   @PostMapping("/service/resources")
-  public ResponseMeta<Boolean> createServiceApi(@RequestBody ApiModel apiModel) {
+  public ResponseMeta<Boolean> createServiceApi(@Validated(Create.class) @RequestBody ApiModel apiModel) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.createServiceApi(apiModel));
   }
 
@@ -60,7 +62,7 @@ public class ServiceApiRest {
   }
 
   @PutMapping("/service/resources")
-  public ResponseMeta<Boolean> updateServiceApi(@RequestBody ApiModel apiModel) {
+  public ResponseMeta<Boolean> updateServiceApi(@Validated(Update.class) @RequestBody ApiModel apiModel) {
     return new ResponseMeta<>(ErrorCode.SUCCESS, apiService.updateServiceApi(apiModel));
   }
 

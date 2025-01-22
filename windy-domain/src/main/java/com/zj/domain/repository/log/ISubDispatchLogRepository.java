@@ -34,7 +34,7 @@ public interface ISubDispatchLogRepository {
    * 批量删除日志
    * @param logIds 日志ID列表
    */
-  void batchDeleteByLogIds(List<String> logIds);
+  boolean batchDeleteByLogIds(List<String> logIds);
 
   /**
    * 获取子任务记录日志

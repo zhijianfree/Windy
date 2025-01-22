@@ -20,6 +20,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class JSONArrayCompare extends BaseCompare {
 
+  public static final String COMPARE_ERROR_MSG = "json array compare error";
+
   @Override
   public CompareType getType() {
     return CompareType.JSON_ARRAY;
@@ -28,24 +30,29 @@ public class JSONArrayCompare extends BaseCompare {
   @Override
   public CompareResult compare(CompareDefine compareDefine) {
     CompareResult compareResult = createSuccessResult();
-    List<Object> resList = JSON.parseArray(JSON.toJSONString(compareDefine.getResponseValue()), Object.class);
-    List<Object> expectList = JSON.parseArray(compareDefine.getExpectValue(), Object.class);
-    if (expectList.size() > resList.size()) {
-      log.info("json array compare expect list size more than response list size");
-      compareResult.setErrorType(ErrorCode.COMPARE_ERROR);
-      compareResult.setErrorMessage("JSON compare error");
-      return compareResult;
-    }
-    for (int i = 0; i < expectList.size(); i++) {
-      Map<String, Object> result = CompareJsonUtils.compareJsonObject(
-          JSON.toJSONString(resList.get(i)), JSON.toJSONString(expectList.get(i)));
-      if (!result.isEmpty()) {
+    try {
+      List<Object> resList = JSON.parseArray(JSON.toJSONString(compareDefine.getResponseValue()), Object.class);
+      List<Object> expectList = JSON.parseArray(compareDefine.getExpectValue(), Object.class);
+      if (expectList.size() > resList.size()) {
+        log.info("json array compare expect list size more than response list size");
         compareResult.setErrorType(ErrorCode.COMPARE_ERROR);
-        compareResult.setErrorMessage("JSON compare error");
+        compareResult.setErrorMessage(COMPARE_ERROR_MSG);
         return compareResult;
       }
+      for (int i = 0; i < expectList.size(); i++) {
+        Map<String, Object> result = CompareJsonUtils.compareJsonObject(
+                JSON.toJSONString(resList.get(i)), JSON.toJSONString(expectList.get(i)));
+        if (!result.isEmpty()) {
+          compareResult.setErrorType(ErrorCode.COMPARE_ERROR);
+          compareResult.setErrorMessage(COMPARE_ERROR_MSG);
+          return compareResult;
+        }
+      }
+    }catch (Exception e){
+      log.info("array json compare error", e);
+      compareResult.setErrorType(ErrorCode.COMPARE_ERROR);
+      compareResult.setErrorMessage(COMPARE_ERROR_MSG);
     }
-
     return compareResult;
   }
 }

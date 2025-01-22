@@ -39,11 +39,13 @@ public interface ITaskRecordRepository {
 
     /**
      * 分页获取任务记录列表
+     *
      * @param pageNum 页码
-     * @param size 每页数量
+     * @param size    每页数量
+     * @param userId  用户ID
      * @return 任务记录列表
      */
-    PageSize<TaskRecordBO> getTaskRecordPage(Integer pageNum, Integer size);
+    PageSize<TaskRecordBO> getTaskRecordPage(Integer pageNum, Integer size, String userId);
 
     /**
      * 获取任务记录
