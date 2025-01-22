@@ -30,7 +30,7 @@ docker run \
   --name windy-master \
   -p 9888:9888 \
   -d \
-  guyuelan/windy-master:1.0-alpha
+  guyuelan/windy-master:latest
 ```
 > 启动console
 ```shell
@@ -42,7 +42,7 @@ docker run \
   --name windy-console \
   -p 9768:9768 \
   -d \
-  guyuelan/windy-console:1.0-alpha
+  guyuelan/windy-console:latest
 ```
 > 启动client
 ```shell
@@ -54,7 +54,7 @@ docker run \
   -v /var/run/docker.sock:/var/run/docker.sock \ 
   -p 8070:8070 \
   -d \
-  guyuelan/windy-client:1.0-alpha
+  guyuelan/windy-client:latest
 ```
 ### 3 用浏览器打开console
 ```
