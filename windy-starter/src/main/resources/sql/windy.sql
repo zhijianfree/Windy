@@ -1086,6 +1086,7 @@ CREATE TABLE `task_record` (
                                `percent` int(3) DEFAULT NULL COMMENT '任务执行百分比',
                                `type` int(1) DEFAULT '1' COMMENT '记录类型: 1 用例任务  2 临时任务',
                                `execute_user` varchar(64) DEFAULT '' COMMENT '任务执行人',
+                               `user_id` varchar(64) DEFAULT NULL COMMENT '执行人ID',
                                PRIMARY KEY (`id`),
                                UNIQUE KEY `unique_record_id` (`record_id`),
                                KEY `idx_task_id` (`task_id`)
