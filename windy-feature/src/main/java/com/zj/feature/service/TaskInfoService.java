@@ -21,7 +21,6 @@ import com.zj.domain.repository.feature.ITaskRepository;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -55,9 +54,9 @@ public class TaskInfoService {
     this.authService = authService;
   }
 
-  public PageSize<TaskInfoBO> getTaskList(String name, Integer pageNum, Integer size) {
+  public PageSize<TaskInfoBO> getTaskList(String name, Integer pageNum, Integer size, String serviceId) {
     String currentUserId = authService.getCurrentUserId();
-    IPage<TaskInfo> taskInfoIPage = taskRepository.getFuzzTaskList(name, pageNum, size, currentUserId);
+    IPage<TaskInfo> taskInfoIPage = taskRepository.getFuzzTaskList(name, pageNum, size, currentUserId, serviceId);
     PageSize<TaskInfoBO> pageSize = new PageSize<>();
     pageSize.setTotal(taskInfoIPage.getTotal());
     if (CollectionUtils.isEmpty(taskInfoIPage.getRecords())) {
