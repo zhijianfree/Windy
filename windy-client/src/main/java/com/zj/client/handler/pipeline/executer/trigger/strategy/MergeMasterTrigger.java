@@ -52,7 +52,6 @@ import java.util.stream.StreamSupport;
 @Component
 public class MergeMasterTrigger implements INodeTrigger {
 
-    public static final String MASTER = "master";
     public static final String ORIGIN = "origin";
     public static final String MERGER_ERROR_TIPS = "merger error, find conflict files: ";
     public static final String REFS_HEADS = "refs/heads/";
@@ -80,7 +79,7 @@ public class MergeMasterTrigger implements INodeTrigger {
             MergeRequest mergeRequest = JSON.parseObject(JSON.toJSONString(triggerContext.getData()),
                     MergeRequest.class);
             String serviceName = GitUtils.getServiceFromUrl(mergeRequest.getGitUrl());
-            Git git = gitProcessor.pullCodeFromGit(mergeRequest, MASTER,
+            Git git = gitProcessor.pullCodeFromGit(mergeRequest, mergeRequest.getMainBranch(),
                     globalEnvConfig.getPipelineWorkspace(serviceName, mergeRequest.getPipelineId()));
 
             //2 合并代码
@@ -100,7 +99,7 @@ public class MergeMasterTrigger implements INodeTrigger {
             }
 
             //存在冲突则回退本地的merge状态
-            ObjectId objectId = git.getRepository().findRef(MASTER).getObjectId();
+            ObjectId objectId = git.getRepository().findRef(mergeRequest.getMainBranch()).getObjectId();
             git.reset().setMode(ResetCommand.ResetType.HARD).setRef(objectId.getName()).call();
 
             List<String> fileNames = new ArrayList<>();
@@ -147,7 +146,7 @@ public class MergeMasterTrigger implements INodeTrigger {
 
     private void push2Repository(MergeRequest mergeRequest, Git git) throws GitAPIException {
         // 推送合并后的代码到远程仓库的目标分支
-        Iterable<PushResult> results = git.push().setRemote(ORIGIN).setRefSpecs(new RefSpec(MASTER + ":" + MASTER))
+        Iterable<PushResult> results = git.push().setRemote(ORIGIN).setRefSpecs(new RefSpec(mergeRequest.getMainBranch() + ":" + mergeRequest.getMainBranch()))
                 .setCredentialsProvider(
                         getCredentialsProvider(mergeRequest.getTokenName(), mergeRequest.getToken())).call();
         Optional<RemoteRefUpdate> optional =

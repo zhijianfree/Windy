@@ -45,7 +45,13 @@ public class RepositoryFactory {
   public GitAccessInfo getServiceRepositoryAccessInfo(String serviceId) {
     MicroserviceBO service = checkServiceExist(serviceId);
     GitAccessInfo gitAccessInfo = Optional.ofNullable(service.getServiceConfig())
-            .map(ServiceConfig::getGitAccessInfo).filter(access -> StringUtils.isNotBlank(access.getAccessToken()))
+            .map(config ->{
+              GitAccessInfo gitAccess = config.getGitAccessInfo();
+              if (Objects.nonNull(config.getServiceContext())) {
+                gitAccess.setMainBranch(config.getServiceContext().getMainBranch());
+              }
+              return gitAccess;
+            }).filter(access -> StringUtils.isNotBlank(access.getAccessToken()))
             .orElseGet(systemConfigRepository::getGitAccess);
     gitAccessInfo.setGitUrl(service.getGitUrl());
     return gitAccessInfo;

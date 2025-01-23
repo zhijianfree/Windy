@@ -111,7 +111,7 @@ public class GitlabGitRepositoryHandler implements IGitRepositoryHandler {
     @Override
     public void createBranch(String branchName, GitAccessInfo accessInfo) {
         Integer projectId = transformProjectId(accessInfo);
-        String path = String.format("/api/v4/projects/%s/repository/branches?branch=%s&ref=master",
+        String path = String.format("/api/v4/projects/%s/repository/branches?branch=%s&ref=" + accessInfo.getMainBranch(),
                 projectId, branchName);
         String result = gitRequestProxy.post(accessInfo.getGitDomain() + path, "", getTokenHeader(accessInfo));
         log.info("gitlab create branch result = {}", result);

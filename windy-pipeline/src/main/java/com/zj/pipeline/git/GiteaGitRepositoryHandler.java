@@ -103,7 +103,7 @@ public class GiteaGitRepositoryHandler implements IGitRepositoryHandler {
 
     log.info("get list={}", result);
     return branches.stream().map(BranchInfo::getName)
-        .filter(branch -> !Objects.equals(branch, "master") && !branch.startsWith("temp_"))
+        .filter(branch -> !branch.startsWith("temp_"))
         .collect(Collectors.toList());
   }
 }

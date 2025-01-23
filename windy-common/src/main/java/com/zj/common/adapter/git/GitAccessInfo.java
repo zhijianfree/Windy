@@ -36,6 +36,10 @@ public class GitAccessInfo {
      */
     private String pushSecret;
 
+    /**
+     * 主干分支名称
+     */
+    private String mainBranch;
     public String getGitServiceName() {
         return GitUtils.getServiceFromUrl(getGitUrl());
     }

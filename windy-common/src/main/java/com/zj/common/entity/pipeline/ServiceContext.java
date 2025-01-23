@@ -21,4 +21,9 @@ public class ServiceContext {
      * 开发语言的构建版本
      */
     private String buildVersion;
+
+    /**
+     * 主干分支名称
+     */
+    private String mainBranch;
 }

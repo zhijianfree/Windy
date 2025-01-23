@@ -102,12 +102,12 @@ public class BuildCodeInterceptor implements INodeExecuteInterceptor {
         buildCodeContext.setBranches(branches);
         buildCodeContext.setIsPublish(isPublish);
         buildCodeContext.setServiceName(serviceConfig.getAppName());
-        Integer deployType = Optional.ofNullable(serviceConfig.getServiceContext()).map(ServiceContext::getDeployType).orElse(null);
-        buildCodeContext.setDeployType(deployType);
-        String code = Optional.ofNullable(serviceConfig.getServiceContext()).map(ServiceContext::getCode).orElse(null);
-        buildCodeContext.setCode(code);
-        String buildVersion = Optional.ofNullable(serviceConfig.getServiceContext()).map(ServiceContext::getBuildVersion).orElse(null);
-        buildCodeContext.setBuildVersion(buildVersion);
+        Optional.ofNullable(serviceConfig.getServiceContext()).ifPresent(context ->{
+            buildCodeContext.setDeployType(context.getDeployType());
+            buildCodeContext.setCode(context.getCode());
+            buildCodeContext.setBuildVersion(context.getBuildVersion());
+            buildCodeContext.setMainBranch(context.getMainBranch());
+        });
         if (Objects.nonNull(repository)) {
             buildCodeContext.setUser(repository.getUserName());
             buildCodeContext.setPassword(repository.getPassword());

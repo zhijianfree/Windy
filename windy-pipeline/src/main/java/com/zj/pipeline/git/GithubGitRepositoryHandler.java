@@ -95,10 +95,14 @@ public class GithubGitRepositoryHandler implements IGitRepositoryHandler {
         log.info("get github repository result= {}", result);
     }
 
-    // 获取指定分支的 SHA
+    /**
+     * 获取基础主干分支的sha
+     * @param accessInfo git信息
+     * @return 返回sha
+     */
     private String getBaseBranchSHA(GitAccessInfo accessInfo) throws IOException {
         String url = String.format("%s/repos/%s/%s/git/ref/heads/%s", accessInfo.getGitDomain(), accessInfo.getOwner(),
-                accessInfo.getGitServiceName(), "master");
+                accessInfo.getGitServiceName(), accessInfo.getMainBranch());
         Request request = new Request.Builder()
                 .url(url)
                 .headers(Headers.of(exchangeHeaders(accessInfo)))
