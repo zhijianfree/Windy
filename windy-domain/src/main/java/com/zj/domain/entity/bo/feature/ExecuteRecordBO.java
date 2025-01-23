@@ -8,6 +8,8 @@ import java.util.List;
 @Data
 public class ExecuteRecordBO {
 
+    private Long id;
+
     /**
      * 执行Id
      * */

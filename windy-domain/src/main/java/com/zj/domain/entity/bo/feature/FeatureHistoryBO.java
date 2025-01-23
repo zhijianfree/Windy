@@ -5,6 +5,8 @@ import lombok.Data;
 @Data
 public class FeatureHistoryBO {
 
+    private Long id;
+
     private String historyId;
     /**
      * 用例Id

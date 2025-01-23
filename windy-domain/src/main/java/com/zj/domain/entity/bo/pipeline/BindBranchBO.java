@@ -13,6 +13,8 @@ import javax.validation.constraints.NotNull;
 @Data
 public class BindBranchBO {
 
+    private Long id;
+
     /**
      * 绑定Id
      */

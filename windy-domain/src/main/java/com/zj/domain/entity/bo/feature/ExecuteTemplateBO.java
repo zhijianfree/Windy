@@ -7,6 +7,9 @@ import java.util.List;
 
 @Data
 public class ExecuteTemplateBO {
+
+    private Long id;
+
     /**
      * 模版Id
      */

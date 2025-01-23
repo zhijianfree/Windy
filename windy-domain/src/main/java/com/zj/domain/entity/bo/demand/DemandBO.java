@@ -5,6 +5,8 @@ import lombok.Data;
 @Data
 public class DemandBO {
 
+  private Long id;
+
   /**
    * 需求Id
    */

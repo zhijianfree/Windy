@@ -12,6 +12,8 @@ import javax.validation.constraints.NotEmpty;
 @Data
 public class CodeChangeBO {
 
+    private Long id;
+
     /**
      * 变更ID
      */

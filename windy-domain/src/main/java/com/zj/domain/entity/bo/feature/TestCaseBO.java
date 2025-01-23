@@ -9,6 +9,8 @@ import lombok.Data;
 @Data
 public class TestCaseBO {
 
+  private Long id;
+
   /**
    * 测试用例集ID
    * */

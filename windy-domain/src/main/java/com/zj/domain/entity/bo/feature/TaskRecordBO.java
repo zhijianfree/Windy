@@ -5,6 +5,8 @@ import lombok.Data;
 @Data
 public class TaskRecordBO {
 
+  private Long id;
+
   /**
    * 任务记录ID
    * */
