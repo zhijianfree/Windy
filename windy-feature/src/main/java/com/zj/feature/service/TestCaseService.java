@@ -99,7 +99,7 @@ public class TestCaseService {
 
     public Boolean deleteTestCase(String caseId) {
         List<FeatureInfoBO> featureList = featureRepository.queryFeatureList(caseId);
-        if (CollectionUtils.isEmpty(featureList)) {
+        if (CollectionUtils.isNotEmpty(featureList)) {
             log.info("there are features in the case , can not delete caseId={}", caseId);
             throw new ApiException(ErrorCode.CASE_EXIST_FEATURE);
         }

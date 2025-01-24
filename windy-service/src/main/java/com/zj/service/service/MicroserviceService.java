@@ -172,11 +172,19 @@ public class MicroserviceService {
     public Boolean deleteService(String serviceId) {
         List<PipelineBO> servicePipelines = pipelineRepository.getServicePipelines(serviceId);
         if (CollectionUtils.isNotEmpty(servicePipelines)) {
+            log.info("service exit pipeline, can not delete={}", serviceId);
             throw new ApiException(ErrorCode.SERVICE_EXIST_PIPELINE);
         }
 
         List<TestCaseBO> serviceCases = testCaseRepository.getServiceCases(serviceId);
         if (CollectionUtils.isNotEmpty(serviceCases)) {
+            log.info("service exit test case, can not delete={}", serviceId);
+            throw new ApiException(ErrorCode.SERVICE_EXIST_FEATURE);
+        }
+
+        List<ServiceApiBO> serviceApiList = serviceApiRepository.getApiByService(serviceId);
+        if (CollectionUtils.isNotEmpty(serviceApiList)) {
+            log.info("service exit api, can not delete={}", serviceId);
             throw new ApiException(ErrorCode.SERVICE_EXIST_FEATURE);
         }
 
