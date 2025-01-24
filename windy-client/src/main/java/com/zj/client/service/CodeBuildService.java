@@ -109,9 +109,8 @@ public class CodeBuildService {
                 String remoteImage = "";
                 if (checkImageRepository(codeBuildParam)) {
                     updateProcessMsg(taskNode, "开始构建docker镜像");
-                    String dockerFilePath =
-                            new File(pomPath).getParentFile().getPath() + File.separator + "docker" + File.separator +
-                                    "Dockerfile";
+                    String dockerFilePath = new File(pomPath).getParentFile().getPath() + File.separator + "docker"
+                            + File.separator + "Dockerfile";
                     remoteImage = startBuildDocker(serviceName, dockerFilePath, codeBuildParam);
                     updateProcessMsg(taskNode, "构建docker镜像完成 镜像地址: " + remoteImage);
                 }

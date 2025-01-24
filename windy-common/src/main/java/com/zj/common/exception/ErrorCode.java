@@ -46,6 +46,7 @@ public enum ErrorCode {
   SERVICE_API_NOT_FIND(HttpStatus.BAD_REQUEST, "Service.000014", "未发现服务API列表"),
   LOAD_CLIENT_BUILD_TOOL_ERROR(HttpStatus.OK, "Service.000015", "加载client节点构建工具失败,节点列表: %s"),
   SERVICE_EXIST_API(HttpStatus.BAD_REQUEST, "Service.000016", "服务下存在API无法删除"),
+  SERVICE_EXIST_TEMPLATE(HttpStatus.BAD_REQUEST, "Service.000017", "服务下存在用例模版无法删除"),
   /*==================用例服务==================*/
   COMPARE_ERROR(HttpStatus.FORBIDDEN, "Feature.000002", "feature compare error"),
   EXECUTE_POINT_NOT_FIND(HttpStatus.NOT_FOUND, "Feature.000003", "can not find execute point"),

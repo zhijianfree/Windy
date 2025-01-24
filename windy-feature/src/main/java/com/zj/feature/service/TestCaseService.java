@@ -11,24 +11,21 @@ import com.zj.common.adapter.invoker.IMasterInvoker;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
-import com.zj.domain.entity.bo.feature.ExecutePointBO;
 import com.zj.domain.entity.bo.feature.FeatureInfoBO;
 import com.zj.domain.entity.bo.feature.TaskRecordBO;
 import com.zj.domain.entity.bo.feature.TestCaseBO;
 import com.zj.domain.entity.enums.TaskRecordType;
-import com.zj.domain.repository.feature.IExecutePointRepository;
 import com.zj.domain.repository.feature.IFeatureRepository;
 import com.zj.domain.repository.feature.ITaskRecordRepository;
+import com.zj.domain.repository.feature.ITestCaseConfigRepository;
 import com.zj.domain.repository.feature.ITestCaseRepository;
 import com.zj.feature.entity.BatchExecuteFeature;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @author guyuelan
@@ -39,16 +36,18 @@ import java.util.stream.Collectors;
 public class TestCaseService {
     private final UniqueIdService uniqueIdService;
     private final ITestCaseRepository testCaseRepository;
+    private final ITestCaseConfigRepository testCaseConfigRepository;
     private final IFeatureRepository featureRepository;
     private final ITaskRecordRepository taskRecordRepository;
     private final IAuthService authService;
     private final IMasterInvoker masterInvoker;
 
     public TestCaseService(UniqueIdService uniqueIdService, ITestCaseRepository testCaseRepository,
-                           IFeatureRepository featureRepository, ITaskRecordRepository taskRecordRepository,
+                           ITestCaseConfigRepository testCaseConfigRepository, IFeatureRepository featureRepository, ITaskRecordRepository taskRecordRepository,
                            IAuthService authService, IMasterInvoker masterInvoker) {
         this.uniqueIdService = uniqueIdService;
         this.testCaseRepository = testCaseRepository;
+        this.testCaseConfigRepository = testCaseConfigRepository;
         this.featureRepository = featureRepository;
         this.taskRecordRepository = taskRecordRepository;
         this.authService = authService;
@@ -67,8 +66,6 @@ public class TestCaseService {
             dtoPageSize.setTotal(0);
             return dtoPageSize;
         }
-
-
         long total = page.getTotal();
         dtoPageSize.setTotal(total);
         dtoPageSize.setData(records);
@@ -104,6 +101,8 @@ public class TestCaseService {
             log.info("there are features in the case , can not delete caseId={}", caseId);
             throw new ApiException(ErrorCode.CASE_EXIST_FEATURE);
         }
+        boolean result = testCaseConfigRepository.deleteByCaseId(caseId);
+        log.info("delete case config result = {}", result);
         return testCaseRepository.deleteTestCase(caseId);
     }
 

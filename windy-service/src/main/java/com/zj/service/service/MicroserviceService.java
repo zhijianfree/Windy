@@ -170,6 +170,13 @@ public class MicroserviceService {
     }
 
     public Boolean deleteService(String serviceId) {
+        checkServiceExistResource(serviceId);
+        boolean resourceMember = memberRepository.deleteResourceMemberByType(serviceId, MemberType.SERVICE_MEMBER);
+        log.info("delete service member result={}", resourceMember);
+        return microServiceRepository.deleteService(serviceId);
+    }
+
+    private void checkServiceExistResource(String serviceId) {
         List<PipelineBO> servicePipelines = pipelineRepository.getServicePipelines(serviceId);
         if (CollectionUtils.isNotEmpty(servicePipelines)) {
             log.info("service exit pipeline, can not delete={}", serviceId);
@@ -182,15 +189,17 @@ public class MicroserviceService {
             throw new ApiException(ErrorCode.SERVICE_EXIST_FEATURE);
         }
 
+        List<ExecuteTemplateBO> serviceTemplates = executeTemplateRepository.getServiceTemplates(serviceId);
+        if (CollectionUtils.isNotEmpty(serviceTemplates)) {
+            log.info("service exit template, can not delete={}", serviceId);
+            throw new ApiException(ErrorCode.SERVICE_EXIST_TEMPLATE);
+        }
+
         List<ServiceApiBO> serviceApiList = serviceApiRepository.getApiByService(serviceId);
         if (CollectionUtils.isNotEmpty(serviceApiList)) {
             log.info("service exit api, can not delete={}", serviceId);
-            throw new ApiException(ErrorCode.SERVICE_EXIST_FEATURE);
+            throw new ApiException(ErrorCode.SERVICE_EXIST_API);
         }
-
-        boolean resourceMember = memberRepository.deleteResourceMemberByType(serviceId, MemberType.SERVICE_MEMBER);
-        log.info("delete service member result={}", resourceMember);
-        return microServiceRepository.deleteService(serviceId);
     }
 
     public MicroserviceBO queryServiceDetail(String serviceId) {

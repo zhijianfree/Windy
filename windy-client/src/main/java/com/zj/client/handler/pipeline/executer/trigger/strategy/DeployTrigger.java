@@ -87,8 +87,9 @@ public class DeployTrigger implements INodeTrigger {
                 globalEnvConfig.getPipelineWorkspace(serviceName, deployRequest.getPipelineId()) + File.separator + DEPLOY;
         DeployParams deployParams = JSON.parseObject(JSON.toJSONString(deployRequest.getParams()), DeployParams.class);
         SSHParams sshParams = deployParams.getSshParams();
-        String serverPort = Optional.ofNullable(deployRequest.getServerPort()).orElse("");
-        return JarDeployContext.builder().sshUser(sshParams.getUser()).sshPassword(sshParams.getPassword()).remotePath(sshParams.getRemotePath()).sshIp(sshParams.getSshIp()).sshPort(sshParams.getSshPort()).localPath(filePath).servicePort(serverPort).build();
+        return JarDeployContext.builder().sshUser(sshParams.getUser()).sshPassword(sshParams.getPassword())
+                .remotePath(sshParams.getRemotePath()).sshIp(sshParams.getSshIp()).sshPort(sshParams.getSshPort())
+                .localPath(filePath).servicePort(deployRequest.getServerPort()).build();
     }
 
     private K8sDeployContext buildK8SContext(DeployRequest deployRequest) {
@@ -96,6 +97,7 @@ public class DeployTrigger implements INodeTrigger {
         DeployParams deployParams = JSON.parseObject(JSON.toJSONString(deployRequest.getParams()), DeployParams.class);
         K8SAccessParams k8SAccessParams = deployParams.getK8SAccessParams();
         ServiceConfig serviceConfig = deployParams.getServiceConfig();
-        return K8sDeployContext.builder().serviceConfig(serviceConfig).k8SAccessParams(k8SAccessParams).serviceName(serviceName).build();
+        return K8sDeployContext.builder().serviceConfig(serviceConfig).k8SAccessParams(k8SAccessParams)
+                .serviceName(serviceName).build();
     }
 }

@@ -26,4 +26,9 @@ public class ServiceContext {
      * 主干分支名称
      */
     private String mainBranch;
+
+    /**
+     * 服务端口
+     */
+    private Integer servicePort;
 }

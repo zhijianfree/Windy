@@ -57,12 +57,14 @@ public class JarDeploy extends AbstractDeployMode<JarDeployContext> {
       session.connect();
       updateDeployStatus(deployContext.getRecordId(), ProcessStatus.RUNNING, Collections.singletonList(
               "=====已连接到远程SSH服务"));
-      channelSftp = (ChannelSftp) session.openChannel("sftp");
-      channelSftp.connect();
-      updateDeployStatus(deployContext.getRecordId(), ProcessStatus.RUNNING, Collections.singletonList(
-              "=====已连接到远程sftp服务"));
+      //创建目录
+      ChannelExec channel = (ChannelExec) session.openChannel("exec");
+      channel.setCommand("mkdir -p " + deployContext.getRemotePath());
+      channel.connect();
 
       // 上传本地JAR文件到远程服务器
+      channelSftp = (ChannelSftp) session.openChannel("sftp");
+      channelSftp.connect();
       String shFileName = "";
       Collection<File> files = FileUtils.listFiles(new File(deployContext.getLocalPath()),
           TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
@@ -85,9 +87,9 @@ public class JarDeploy extends AbstractDeployMode<JarDeployContext> {
       }
 
       // 执行远程shell脚本
+      String port = Optional.ofNullable(deployContext.getServicePort()).map(String::valueOf).orElse("");
       ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
-      String shellCommand = "cd " + deployContext.getRemotePath() + " && sh " + shFileName + " "
-          + deployContext.getServicePort();
+      String shellCommand = "cd " + deployContext.getRemotePath() + " && sh " + shFileName + " " + port;
       channelExec.setCommand(shellCommand);
       channelExec.connect();
       updateDeployStatus(deployContext.getRecordId(), ProcessStatus.RUNNING, Collections.singletonList(
@@ -115,6 +117,30 @@ public class JarDeploy extends AbstractDeployMode<JarDeployContext> {
       if (session != null) {
         session.disconnect();
       }
+    }
+  }
+
+  public static void main(String[] args) {
+    JSch jsch = new JSch();
+    Session session = null;
+    try {
+      session = jsch.getSession("root", "192.168.123.184", 22);
+      session.setPassword("linkeding");
+      session.setConfig("StrictHostKeyChecking", "no");
+      session.connect();
+
+      ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
+      channelExec.setCommand("mkdir -p /app/test");
+      channelExec.connect();
+
+      channelExec.setCommand("mkdir -p /app/dddd");
+      channelExec.connect();
+
+
+      channelExec.disconnect();
+      session.disconnect();
+    }catch (Exception e){
+    e.printStackTrace();
     }
   }
 
