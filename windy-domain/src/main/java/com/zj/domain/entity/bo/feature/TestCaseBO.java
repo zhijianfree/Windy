@@ -38,6 +38,11 @@ public class TestCaseBO {
    */
   private Integer caseType;
 
+  /**
+   * 创建人ID
+   */
+  private String userId;
+
   private Long createTime;
 
   private Long updateTime;

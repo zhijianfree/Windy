@@ -39,6 +39,11 @@ public class TestCase {
   private Integer caseType;
 
   /**
+   * 用户ID
+   */
+  private String userId;
+
+  /**
    * 创建时间
    */
   private Long createTime;
