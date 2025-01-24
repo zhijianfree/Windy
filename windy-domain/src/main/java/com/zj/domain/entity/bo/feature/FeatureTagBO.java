@@ -9,8 +9,6 @@ import lombok.Data;
 @Data
 public class FeatureTagBO {
 
-  private Long id;
-
   /**
    * 用例ID
    */

@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -54,9 +55,12 @@ public class JarDeploy extends AbstractDeployMode<JarDeployContext> {
       session.setPassword(deployContext.getSshPassword());
       session.setConfig("StrictHostKeyChecking", "no");
       session.connect();
-
+      updateDeployStatus(deployContext.getRecordId(), ProcessStatus.RUNNING, Collections.singletonList(
+              "=====已连接到远程SSH服务"));
       channelSftp = (ChannelSftp) session.openChannel("sftp");
       channelSftp.connect();
+      updateDeployStatus(deployContext.getRecordId(), ProcessStatus.RUNNING, Collections.singletonList(
+              "=====已连接到远程sftp服务"));
 
       // 上传本地JAR文件到远程服务器
       String shFileName = "";
@@ -76,6 +80,8 @@ public class JarDeploy extends AbstractDeployMode<JarDeployContext> {
         FileInputStream fis = new FileInputStream(file);
         channelSftp.put(fis, remoteFile, ChannelSftp.OVERWRITE);
         fis.close();
+        updateDeployStatus(deployContext.getRecordId(), ProcessStatus.RUNNING, Collections.singletonList(
+                "=====推送至远程服务: " + file.getName()));
       }
 
       // 执行远程shell脚本
@@ -84,7 +90,8 @@ public class JarDeploy extends AbstractDeployMode<JarDeployContext> {
           + deployContext.getServicePort();
       channelExec.setCommand(shellCommand);
       channelExec.connect();
-
+      updateDeployStatus(deployContext.getRecordId(), ProcessStatus.RUNNING, Collections.singletonList(
+              "=====已执行启动脚本"));
       while (!channelExec.isClosed()) {
         Thread.sleep(3000);
       }
@@ -93,7 +100,8 @@ public class JarDeploy extends AbstractDeployMode<JarDeployContext> {
       int exitStatus = channelExec.getExitStatus();
       channelExec.disconnect();
       log.info("execute shell result = {}", exitStatus);
-      
+      updateDeployStatus(deployContext.getRecordId(), ProcessStatus.RUNNING, Collections.singletonList(
+              "=====执行脚本结果：" + exitStatus));
       ProcessStatus status = Optional.of(exitStatus).filter(s -> Objects.equals(exitStatus, 0))
           .map(s -> ProcessStatus.SUCCESS).orElse(ProcessStatus.FAIL);
       updateDeployStatus(deployContext.getRecordId(), status);

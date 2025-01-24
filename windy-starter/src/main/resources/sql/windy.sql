@@ -1130,6 +1130,7 @@ CREATE TABLE `test_case_config` (
                                     `param_key` varchar(100) DEFAULT NULL COMMENT '参数key',
                                     `param_type` varchar(100) DEFAULT NULL COMMENT '参数类型',
                                     `value` varchar(1000) DEFAULT NULL COMMENT '参数值',
+                                    `description` varchar(100) DEFAULT NULL COMMENT '参数描述',
                                     `sort_order` int(2) DEFAULT NULL COMMENT '排序',
                                     `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
                                     `update_time` bigint(20) DEFAULT NULL COMMENT '更新时间',
