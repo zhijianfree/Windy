@@ -3,6 +3,7 @@ package com.zj.client.handler.pipeline.deploy.jar;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.zj.client.handler.pipeline.deploy.AbstractDeployMode;
 import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
@@ -50,13 +51,7 @@ public class JarDeploy extends AbstractDeployMode<JarDeployContext> {
     Session session = null;
     ChannelSftp channelSftp = null;
     try {
-      session = jsch.getSession(deployContext.getSshUser(), deployContext.getSshIp(),
-          deployContext.getSshPort());
-      session.setPassword(deployContext.getSshPassword());
-      session.setConfig("StrictHostKeyChecking", "no");
-      session.connect();
-      updateDeployStatus(deployContext.getRecordId(), ProcessStatus.RUNNING, Collections.singletonList(
-              "=====已连接到远程SSH服务"));
+      session = connectServer(deployContext);
       //创建目录
       ChannelExec channel = (ChannelExec) session.openChannel("exec");
       channel.setCommand("mkdir -p " + deployContext.getRemotePath());
@@ -65,35 +60,11 @@ public class JarDeploy extends AbstractDeployMode<JarDeployContext> {
       // 上传本地JAR文件到远程服务器
       channelSftp = (ChannelSftp) session.openChannel("sftp");
       channelSftp.connect();
-      String shFileName = "";
-      Collection<File> files = FileUtils.listFiles(new File(deployContext.getLocalPath()),
-          TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
-      for (File file : files) {
-        if (file.isDirectory()) {
-          continue;
-        }
-        String remoteFile = deployContext.getRemotePath() + File.separator + file.getName();
-        if (isShFile(file)) {
-          shFileName = file.getName();
-          sendShFile(channelSftp, remoteFile, file);
-          continue;
-        }
-
-        FileInputStream fis = new FileInputStream(file);
-        channelSftp.put(fis, remoteFile, ChannelSftp.OVERWRITE);
-        fis.close();
-        updateDeployStatus(deployContext.getRecordId(), ProcessStatus.RUNNING, Collections.singletonList(
-                "=====推送至远程服务: " + file.getName()));
-      }
+      String shFileName = uploadFiles(deployContext, channelSftp);
 
       // 执行远程shell脚本
-      String port = Optional.ofNullable(deployContext.getServicePort()).map(String::valueOf).orElse("");
       ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
-      String shellCommand = "cd " + deployContext.getRemotePath() + " && sh " + shFileName + " " + port;
-      channelExec.setCommand(shellCommand);
-      channelExec.connect();
-      updateDeployStatus(deployContext.getRecordId(), ProcessStatus.RUNNING, Collections.singletonList(
-              "=====已执行启动脚本"));
+      executeShell(deployContext, shFileName, channelExec);
       while (!channelExec.isClosed()) {
         Thread.sleep(3000);
       }
@@ -120,28 +91,48 @@ public class JarDeploy extends AbstractDeployMode<JarDeployContext> {
     }
   }
 
-  public static void main(String[] args) {
-    JSch jsch = new JSch();
-    Session session = null;
-    try {
-      session = jsch.getSession("root", "192.168.123.184", 22);
-      session.setPassword("linkeding");
-      session.setConfig("StrictHostKeyChecking", "no");
-      session.connect();
+  private Session connectServer(JarDeployContext deployContext) throws JSchException {
+    Session session = jsch.getSession(deployContext.getSshUser(), deployContext.getSshIp(),
+            deployContext.getSshPort());
+    session.setPassword(deployContext.getSshPassword());
+    session.setConfig("StrictHostKeyChecking", "no");
+    session.connect();
+    updateDeployStatus(deployContext.getRecordId(), ProcessStatus.RUNNING, Collections.singletonList(
+            "=====已连接到远程SSH服务"));
+    return session;
+  }
 
-      ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
-      channelExec.setCommand("mkdir -p /app/test");
-      channelExec.connect();
+  private void executeShell(JarDeployContext deployContext, String shFileName, ChannelExec channelExec) throws JSchException {
+    String port = Optional.ofNullable(deployContext.getServicePort()).map(String::valueOf).orElse("");
+    String shellCommand = "cd " + deployContext.getRemotePath() + " && sh " + shFileName + " " + port;
+    channelExec.setCommand(shellCommand);
+    channelExec.connect();
+    updateDeployStatus(deployContext.getRecordId(), ProcessStatus.RUNNING, Collections.singletonList(
+            "=====已执行启动脚本"));
+  }
 
-      channelExec.setCommand("mkdir -p /app/dddd");
-      channelExec.connect();
+  private String uploadFiles(JarDeployContext deployContext, ChannelSftp channelSftp) throws Exception {
+    String shFileName = "";
+    Collection<File> files = FileUtils.listFiles(new File(deployContext.getLocalPath()),
+        TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+    for (File file : files) {
+      if (file.isDirectory()) {
+        continue;
+      }
+      String remoteFile = deployContext.getRemotePath() + File.separator + file.getName();
+      if (isShFile(file)) {
+        shFileName = file.getName();
+        sendShFile(channelSftp, remoteFile, file);
+        continue;
+      }
 
-
-      channelExec.disconnect();
-      session.disconnect();
-    }catch (Exception e){
-    e.printStackTrace();
+      FileInputStream fis = new FileInputStream(file);
+      channelSftp.put(fis, remoteFile, ChannelSftp.OVERWRITE);
+      fis.close();
+      updateDeployStatus(deployContext.getRecordId(), ProcessStatus.RUNNING, Collections.singletonList(
+              "=====推送至远程服务: " + file.getName()));
     }
+    return shFileName;
   }
 
   private boolean isShFile(File file) {
