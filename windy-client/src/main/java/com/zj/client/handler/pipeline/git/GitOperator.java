@@ -43,7 +43,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class GitOperator implements IGitProcessor {
-  public static final String MASTER = "master";
   public static final String ORIGIN = "origin";
 
   public Git pullCodeFromGit(GitMeta gitMeta, String branch, String workspace) throws Exception {
@@ -94,8 +93,8 @@ public class GitOperator implements IGitProcessor {
 
   public MergeResult createTempBranch(GitMeta gitMeta, List<String> branches, String workspace)
       throws Exception {
-    Git git = pullCodeFromGit(gitMeta, MASTER, workspace);
-    hasDifferencesWithMaster(branches, git);
+    Git git = pullCodeFromGit(gitMeta, gitMeta.getMainBranch(), workspace);
+    hasDifferencesWithMaster(branches, git, gitMeta.getMainBranch());
 
     String tempBranch = getTempBranchName();
     git.checkout().setCreateBranch(true).setName(tempBranch).call();
@@ -117,10 +116,10 @@ public class GitOperator implements IGitProcessor {
   /**
    * 如果合并的分支与master无差异不支持发布
    */
-  private void hasDifferencesWithMaster(List<String> branches, Git git) throws Exception {
+  private void hasDifferencesWithMaster(List<String> branches, Git git, String mainBranch) throws Exception {
     for (String branch : branches) {
       ObjectId branchHead = git.getRepository().resolve(ORIGIN + "/" + branch);
-      ObjectId masterHead = git.getRepository().resolve(ORIGIN + "/" + MASTER);
+      ObjectId masterHead = git.getRepository().resolve(ORIGIN + "/" + mainBranch);
 
       // 比较两个分支的差异
       boolean hasDifferences = git.diff()

@@ -66,8 +66,7 @@ public class DeployNodeInterceptor implements INodeExecuteInterceptor {
         if (!Objects.equals(taskNode.getExecuteType(), ExecuteType.DEPLOY.name())) {
             return;
         }
-        List<SubDispatchLogBO> subLogs = subDispatchLogRepository.getSubLogByLogId(
-                taskNode.getLogId());
+        List<SubDispatchLogBO> subLogs = subDispatchLogRepository.getSubLogByLogId(taskNode.getLogId());
         Optional<SubDispatchLogBO> optional = subLogs.stream()
                 .filter(subLog -> Objects.equals(subLog.getExecuteType(), ExecuteType.BUILD.name()))
                 .findFirst();
@@ -86,6 +85,7 @@ public class DeployNodeInterceptor implements INodeExecuteInterceptor {
         DeployParams deployParams = getDeployParams(taskNode.getServiceId(), deployEnvironment, deployContext.getImageName());
         deployContext.setParams(deployParams);
         deployContext.setDeployType(deployEnvironment.getEnvType());
+        deployContext.setServerPort(deployParams.getServiceConfig().getServiceContext().getServicePort());
         taskNode.setRequestContext(deployContext);
     }
 

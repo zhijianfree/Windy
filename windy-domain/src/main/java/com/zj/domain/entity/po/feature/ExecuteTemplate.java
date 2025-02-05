@@ -12,12 +12,12 @@ public class ExecuteTemplate {
     private String templateId;
 
     /**
-     * 模版类型
+     * 模版类型 {@link com.zj.common.enums.TemplateType}
      */
     private Integer templateType;
 
     /**
-     * 模版执行方式
+     * 模版执行方式 {@link com.zj.common.enums.InvokerType}
      */
     private Integer invokeType;
 

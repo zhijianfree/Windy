@@ -12,6 +12,7 @@ import com.zj.plugin.loader.ExecuteDetailVo;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
@@ -49,15 +50,16 @@ public class HttpInvoker implements IExecuteInvoker {
     //执行并记录状态数据
     ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
     saveRequestInfo(executeDetailVo, url, method,body,headers);
-    try (Response response = okHttpClient.newCall(request).execute();) {
-      Optional.ofNullable(response.body()).ifPresent(responseBody -> {
+    try (Response response = okHttpClient.newCall(request).execute()) {
+      if (Objects.nonNull(response.body())){
+        String string = response.body().string();
         try {
-          String string = responseBody.string();
           executeDetailVo.setResBody(JSON.parse(string));
-        } catch (IOException e) {
-          executeDetailVo.setErrorMessage(ExceptionUtils.getSimplifyError(e));
+        } catch (Exception e) {
+          executeDetailVo.setResBody(string);
+          log.info("parse http response error", e);
         }
-      });
+      }
       executeDetailVo.setStatus(response.code() == HttpStatus.OK.value());
     } catch (Exception e) {
       executeDetailVo.setErrorMessage(ExceptionUtils.getSimplifyError(e));

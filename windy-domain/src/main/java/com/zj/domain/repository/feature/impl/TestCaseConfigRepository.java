@@ -51,6 +51,12 @@ public class TestCaseConfigRepository extends
   }
 
   @Override
+  public boolean deleteByCaseId(String caseId) {
+    return remove(
+            Wrappers.lambdaQuery(TestCaseConfig.class).eq(TestCaseConfig::getUnionId, caseId));
+  }
+
+  @Override
   @Transactional
   public boolean batchUpdateCaseConfig(List<TestCaseConfigBO> updateList) {
     if (CollectionUtils.isEmpty(updateList)) {

@@ -15,7 +15,7 @@ public class DeployRequest {
 
   private Object params;
 
-  private String serverPort;
+  private Integer serverPort;
 
   private Integer deployType;
 }

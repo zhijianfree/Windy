@@ -43,4 +43,11 @@ public interface ITestCaseConfigRepository {
    * @return 是否成功
    */
   boolean batchUpdateCaseConfig(List<TestCaseConfigBO> updateList);
+
+  /**
+   * 删除测试集关联的配置项
+   * @param caseId 测试集ID
+   * @return 返回删除结果
+   */
+  boolean deleteByCaseId(String caseId);
 }

@@ -4,9 +4,11 @@ import com.zj.common.enums.ExecuteType;
 import com.zj.domain.entity.bo.pipeline.PipelineBO;
 import com.zj.domain.entity.bo.pipeline.PipelineNodeBO;
 import com.zj.domain.entity.bo.pipeline.PublishBindBO;
+import com.zj.domain.entity.bo.service.MicroserviceBO;
 import com.zj.domain.repository.pipeline.IPipelineNodeRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.domain.repository.pipeline.IPublishBindRepository;
+import com.zj.domain.repository.service.IMicroServiceRepository;
 import com.zj.master.entity.vo.MergeMasterContext;
 import com.zj.common.entity.pipeline.PipelineConfig;
 import com.zj.master.entity.vo.TaskNode;
@@ -31,12 +33,15 @@ public class MergeNodeInterceptor implements INodeExecuteInterceptor{
   private final IPipelineNodeRepository pipelineNodeRepository;
   private final IPublishBindRepository publishBindRepository;
   private final IPipelineRepository pipelineRepository;
+  private final IMicroServiceRepository microServiceRepository;
 
   public MergeNodeInterceptor(IPipelineNodeRepository pipelineNodeRepository,
-      IPublishBindRepository publishBindRepository, IPipelineRepository pipelineRepository) {
+                              IPublishBindRepository publishBindRepository, IPipelineRepository pipelineRepository,
+                              IMicroServiceRepository microServiceRepository) {
     this.pipelineNodeRepository = pipelineNodeRepository;
     this.publishBindRepository = publishBindRepository;
     this.pipelineRepository = pipelineRepository;
+    this.microServiceRepository = microServiceRepository;
   }
 
   @Override
@@ -62,7 +67,8 @@ public class MergeNodeInterceptor implements INodeExecuteInterceptor{
       Object tagName = pipelineConfig.getParamList().get(TAG_NAME);
       requestContext.setTagName(String.valueOf(tagName));
     }
-
+    MicroserviceBO service = microServiceRepository.queryServiceDetail(pipeline.getServiceId());
+    requestContext.setMainBranch(service.getServiceConfig().getServiceContext().getMainBranch());
     requestContext.setBranches(branches);
     requestContext.setMessage(messages);
     taskNode.setRequestContext(requestContext);

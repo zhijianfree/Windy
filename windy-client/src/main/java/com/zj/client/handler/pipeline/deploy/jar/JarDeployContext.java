@@ -24,6 +24,6 @@ public class JarDeployContext extends DeployContext {
 
   private String remotePath;
 
-  private String servicePort;
+  private Integer servicePort;
 
 }

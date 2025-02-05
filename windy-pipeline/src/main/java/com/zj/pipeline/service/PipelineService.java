@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -231,7 +232,7 @@ public class PipelineService {
         BindBranchBO bindBranchBO = new BindBranchBO();
         bindBranchBO.setBindId(uniqueIdService.getUniqueId());
         bindBranchBO.setPipelineId(pipelineId);
-        bindBranchBO.setGitBranch("master");
+        bindBranchBO.setGitBranch(serviceDetail.getServiceConfig().getServiceContext().getMainBranch());
         bindBranchBO.setGitUrl(serviceDetail.getGitUrl());
         bindBranchBO.setIsChoose(true);
         return bindBranchRepository.saveGitBranch(bindBranchBO);

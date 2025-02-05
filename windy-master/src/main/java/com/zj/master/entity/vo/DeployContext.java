@@ -15,6 +15,8 @@ public class DeployContext extends RequestContext{
 
   private Integer deployType;
 
+  private Integer serverPort;
+
   private String imageName;
 
 }

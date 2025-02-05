@@ -170,19 +170,36 @@ public class MicroserviceService {
     }
 
     public Boolean deleteService(String serviceId) {
+        checkServiceExistResource(serviceId);
+        boolean resourceMember = memberRepository.deleteResourceMemberByType(serviceId, MemberType.SERVICE_MEMBER);
+        log.info("delete service member result={}", resourceMember);
+        return microServiceRepository.deleteService(serviceId);
+    }
+
+    private void checkServiceExistResource(String serviceId) {
         List<PipelineBO> servicePipelines = pipelineRepository.getServicePipelines(serviceId);
         if (CollectionUtils.isNotEmpty(servicePipelines)) {
+            log.info("service exit pipeline, can not delete={}", serviceId);
             throw new ApiException(ErrorCode.SERVICE_EXIST_PIPELINE);
         }
 
         List<TestCaseBO> serviceCases = testCaseRepository.getServiceCases(serviceId);
         if (CollectionUtils.isNotEmpty(serviceCases)) {
+            log.info("service exit test case, can not delete={}", serviceId);
             throw new ApiException(ErrorCode.SERVICE_EXIST_FEATURE);
         }
 
-        boolean resourceMember = memberRepository.deleteResourceMemberByType(serviceId, MemberType.SERVICE_MEMBER);
-        log.info("delete service member result={}", resourceMember);
-        return microServiceRepository.deleteService(serviceId);
+        List<ExecuteTemplateBO> serviceTemplates = executeTemplateRepository.getServiceTemplates(serviceId);
+        if (CollectionUtils.isNotEmpty(serviceTemplates)) {
+            log.info("service exit template, can not delete={}", serviceId);
+            throw new ApiException(ErrorCode.SERVICE_EXIST_TEMPLATE);
+        }
+
+        List<ServiceApiBO> serviceApiList = serviceApiRepository.getApiByService(serviceId);
+        if (CollectionUtils.isNotEmpty(serviceApiList)) {
+            log.info("service exit api, can not delete={}", serviceId);
+            throw new ApiException(ErrorCode.SERVICE_EXIST_API);
+        }
     }
 
     public MicroserviceBO queryServiceDetail(String serviceId) {

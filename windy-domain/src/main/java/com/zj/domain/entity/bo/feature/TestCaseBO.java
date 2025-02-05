@@ -9,6 +9,8 @@ import lombok.Data;
 @Data
 public class TestCaseBO {
 
+  private Long id;
+
   /**
    * 测试用例集ID
    * */
@@ -35,6 +37,11 @@ public class TestCaseBO {
    * 2 e2e测试集
    */
   private Integer caseType;
+
+  /**
+   * 创建人ID
+   */
+  private String userId;
 
   private Long createTime;
 

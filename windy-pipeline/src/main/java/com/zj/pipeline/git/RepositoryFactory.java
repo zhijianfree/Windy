@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.zj.common.adapter.git.GitAccessInfo;
 import com.zj.common.adapter.git.IGitRepositoryHandler;
 import com.zj.common.entity.pipeline.ServiceConfig;
+import com.zj.common.entity.pipeline.ServiceContext;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.domain.entity.bo.service.MicroserviceBO;
@@ -47,6 +48,10 @@ public class RepositoryFactory {
     GitAccessInfo gitAccessInfo = Optional.ofNullable(service.getServiceConfig())
             .map(ServiceConfig::getGitAccessInfo).filter(access -> StringUtils.isNotBlank(access.getAccessToken()))
             .orElseGet(systemConfigRepository::getGitAccess);
+    ServiceContext serviceContext = service.getServiceConfig().getServiceContext();
+    if (Objects.nonNull(serviceContext)) {
+      gitAccessInfo.setMainBranch(serviceContext.getMainBranch());
+    }
     gitAccessInfo.setGitUrl(service.getGitUrl());
     return gitAccessInfo;
   }
