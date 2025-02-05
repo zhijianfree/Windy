@@ -43,8 +43,8 @@ public class TestCaseService {
     private final IMasterInvoker masterInvoker;
 
     public TestCaseService(UniqueIdService uniqueIdService, ITestCaseRepository testCaseRepository,
-                           ITestCaseConfigRepository testCaseConfigRepository, IFeatureRepository featureRepository, ITaskRecordRepository taskRecordRepository,
-                           IAuthService authService, IMasterInvoker masterInvoker) {
+                           ITestCaseConfigRepository testCaseConfigRepository, IFeatureRepository featureRepository, 
+                           ITaskRecordRepository taskRecordRepository,IAuthService authService, IMasterInvoker masterInvoker) {
         this.uniqueIdService = uniqueIdService;
         this.testCaseRepository = testCaseRepository;
         this.testCaseConfigRepository = testCaseConfigRepository;
