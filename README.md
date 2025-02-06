@@ -20,13 +20,13 @@ docker run --env=MYSQL_ROOT_PASSWORD=123456 -p 3306:3306 -d mysql:5.7
 数据库准备好后，先创建数据:**windy**, 然后下载并导入sql文件:
 [windy.sql](https://github.com/zhijianfree/Windy/blob/master/windy-starter/src/main/resources/sql/windy.sql)
 ### 2 启动docker服务
-> 启动Master
+> 启动master
 ```shell
 docker run \
-  --env=DB_HOST='{宿主机IP:数据库端口}' \
-  --env=DB_USERNAME={数据库用户} \
-  --env=DB_PASSWORD={数据库密码} \
-  --env=EUREKA_ZONE='http://{宿主机IP}:9888/eureka' \
+  --env=DB_HOST='数据库IP:数据库端口' \
+  --env=DB_USERNAME='数据库用户' \
+  --env=DB_PASSWORD='数据库密码' \
+  --env=EUREKA_ZONE='http://master服务IP:9888/eureka' \
   --name windy-master \
   -p 9888:9888 \
   -d \
@@ -35,10 +35,10 @@ docker run \
 > 启动console
 ```shell
 docker run \
-  --env=DB_HOST='{宿主机IP:数据库端口}' \
-  --env=DB_USERNAME={数据库用户} \
-  --env=DB_PASSWORD={数据库密码} \
-  --env=EUREKA_ZONE='http://{宿主机IP}:9888/eureka' \
+  --env=DB_HOST='数据库IP:数据库端口' \
+  --env=DB_USERNAME='数据库用户' \
+  --env=DB_PASSWORD='数据库密码' \
+  --env=EUREKA_ZONE='http://master服务IP:9888/eureka' \
   --name windy-console \
   -p 9768:9768 \
   -d \
@@ -47,7 +47,7 @@ docker run \
 > 启动client
 ```shell
 docker run \
-  --env=EUREKA_ZONE='http://{宿主机IP}:9888/eureka' \
+  --env=EUREKA_ZONE='http://master服务IP:9888/eureka' \
   --name windy-client \
   --privileged \
   --env=TZ=Asia/Shanghai \
@@ -58,7 +58,7 @@ docker run \
 ```
 ### 3 用浏览器打开console
 ```
-http://{宿主机IP}:9768
+http://console服务IP:9768
 ```
 在浏览器中输入地址即可访问Windy，默认用户名/密码: windy/admin
 ![登录页](./doc/images/login.png)
