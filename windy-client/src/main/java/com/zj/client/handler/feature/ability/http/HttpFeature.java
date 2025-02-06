@@ -50,16 +50,17 @@ public class HttpFeature implements Feature {
     private ExecuteDetailVo startRequest(Request request, String body) {
         ExecuteDetailVo executeDetailVo = new ExecuteDetailVo();
         try (Response response = okHttpClient.newCall(request).execute()) {
-            Optional.ofNullable(response.body()).ifPresent(responseBody -> {
+            if (Objects.nonNull(response.body())){
+                String string = response.body().string();
                 try {
-                    String string = responseBody.string();
                     executeDetailVo.setResBody(JSON.parse(string));
-                } catch (IOException e) {
-                    executeDetailVo.setErrorMessage(ExceptionUtils.getSimplifyError(e));
+                } catch (Exception e) {
+                    executeDetailVo.setResBody(string);
+                    log.info("parse http response error", e);
                 }
-            });
+            }
             executeDetailVo.setStatus(response.code() == HttpStatus.OK.value());
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("run http feature error", e);
             executeDetailVo.setErrorMessage(ExceptionUtils.getSimplifyError(e));
         }
