@@ -30,8 +30,8 @@ import org.springframework.http.HttpStatus;
 @Slf4j
 public class HttpFeature implements Feature {
 
-    private static MediaType mediaType = MediaType.get("application/json; charset=utf-8");
-    private OkHttpClient okHttpClient = new OkHttpClient();
+    private static final MediaType mediaType = MediaType.get("application/json; charset=utf-8");
+    private final OkHttpClient okHttpClient = new OkHttpClient();
 
     public ExecuteDetailVo startHttp(String url, String method, Map<String, String> headers,
                                      String body) {
