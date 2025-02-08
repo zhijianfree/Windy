@@ -249,18 +249,21 @@ public class MicroserviceService {
 
     public Map<Boolean, List<ServiceApiBO>> getServiceApiPartMap(String serviceId, List<ServiceApiBO> serviceApiList) {
         List<ExecuteTemplateBO> templates = getServiceAllExecuteTemplate(serviceId);
-
-        List<String> templateApiList =
-                templates.stream().map(template -> template.getMethod().toUpperCase() + "_" + template.getService()).map(uri -> uri.replace(WindyConstants.VARIABLE_CHAR, "")).collect(Collectors.toList());
-        return serviceApiList.stream().collect(Collectors.partitioningBy(serviceApi -> templateApiList.stream().anyMatch(templateApi -> {
-            int index = templateApi.indexOf("_");
-            String method = templateApi.substring(0, index);
-            String api = templateApi.substring(index + 1);
-            if (!Objects.equals(method, serviceApi.getMethod().toUpperCase())) {
-                return false;
-            }
-            return arePathsEqual(api, serviceApi.getResource());
-        })));
+        List<String> templateApiList = templates.stream()
+                .map(template -> template.getMethod().toUpperCase() + "_" + template.getService())
+                .map(uri -> uri.replace(WindyConstants.VARIABLE_CHAR, ""))
+                .collect(Collectors.toList());
+        return serviceApiList.stream().collect(Collectors.partitioningBy(serviceApi ->
+                templateApiList.stream().anyMatch(templateApi -> {
+                    int index = templateApi.indexOf("_");
+                    String method = templateApi.substring(0, index);
+                    String api = templateApi.substring(index + 1);
+                    if (!Objects.equals(method, serviceApi.getMethod().toUpperCase())) {
+                        return false;
+                    }
+                    return arePathsEqual(api, serviceApi.getResource());
+                })
+        ));
     }
 
     private List<ExecuteTemplateBO> getServiceAllExecuteTemplate(String serviceId) {
@@ -299,8 +302,11 @@ public class MicroserviceService {
         return templateList;
     }
 
+    public static void main(String[] args) {
+        System.out.println(arePathsEqual("${host}/say","${host}/say"));
+    }
 
-    public boolean arePathsEqual(String templatePath, String apiPath) {
+    public static boolean arePathsEqual(String templatePath, String apiPath) {
         // 去掉路径前缀（例如 {host}/ 或 ${host}/）
         String path = "/";
         templatePath = StringUtils.removeStart(templatePath,
