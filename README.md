@@ -19,42 +19,14 @@ docker run --env=MYSQL_ROOT_PASSWORD=123456 -p 3306:3306 -d mysql:5.7
 ```
 数据库准备好后，先创建数据:**windy**, 然后下载并导入sql文件:
 [windy.sql](https://github.com/zhijianfree/Windy/blob/master/windy-starter/src/main/resources/sql/windy.sql)
-### 2 启动docker服务
-> 启动master
+### 2 通过脚本启动docker服务
+> 执行脚本
 ```shell
-docker run \
-  --env=DB_HOST='数据库IP:数据库端口' \
-  --env=DB_USERNAME='数据库用户' \
-  --env=DB_PASSWORD='数据库密码' \
-  --env=EUREKA_ZONE='http://master服务IP:9888/eureka' \
-  --name windy-master \
-  -p 9888:9888 \
-  -d \
-  guyuelan/windy-master:latest
-```
-> 启动console
-```shell
-docker run \
-  --env=DB_HOST='数据库IP:数据库端口' \
-  --env=DB_USERNAME='数据库用户' \
-  --env=DB_PASSWORD='数据库密码' \
-  --env=EUREKA_ZONE='http://master服务IP:9888/eureka' \
-  --name windy-console \
-  -p 9768:9768 \
-  -d \
-  guyuelan/windy-console:latest
-```
-> 启动client
-```shell
-docker run \
-  --env=EUREKA_ZONE='http://master服务IP:9888/eureka' \
-  --name windy-client \
-  --privileged \
-  --env=TZ=Asia/Shanghai \
-  -v /var/run/docker.sock:/var/run/docker.sock \ 
-  -p 8070:8070 \
-  -d \
-  guyuelan/windy-client:latest
+curl -sSL https://github.com/languyue/Windy/raw/master/shell/docker_start.sh \
+  | bash -s \
+  数据库IP:数据库端口 \
+  数据库用户 \
+  数据库用户密码
 ```
 ### 3 用浏览器打开console
 ```

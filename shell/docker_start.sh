@@ -3,7 +3,7 @@
 # 检查参数个数
 if [ "$#" -ne 3 ]; then
   echo "脚本执行错误缺失执行参数，执行格式如下: "
-  echo " $0 数据库IP:数据库端口 数据库用户 数据库用户密码"
+  echo " sh docker_start.sh 数据库IP:数据库端口 数据库用户 数据库用户密码"
   exit 1
 fi
 
