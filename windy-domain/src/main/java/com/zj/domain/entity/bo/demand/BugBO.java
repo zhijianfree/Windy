@@ -53,6 +53,11 @@ public class BugBO {
   private String proposer;
 
   /**
+   * 工作量
+   */
+  private Integer workload;
+
+  /**
    * 接受人名称
    * */
   private String acceptorName;
@@ -83,25 +88,20 @@ public class BugBO {
   private Integer status;
 
   /**
-   * 需求ID
-   */
-  private String relationId;
-
-  /**
    * 空间ID
    */
   private String spaceId;
+
+  /**
+   * 需求ID
+   */
+  private String relationId;
 
   /**
    * 迭代ID
    */
   private String iterationId;
 
-
-  /**
-   * 工作量
-   */
-  private Integer workload;
 
   /**
    * 创建时间
