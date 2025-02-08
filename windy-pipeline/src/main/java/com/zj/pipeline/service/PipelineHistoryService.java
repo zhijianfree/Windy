@@ -1,15 +1,20 @@
 package com.zj.pipeline.service;
 
 import com.zj.common.adapter.uuid.UniqueIdService;
+import com.zj.common.exception.ApiException;
+import com.zj.common.exception.ErrorCode;
 import com.zj.domain.entity.bo.pipeline.NodeRecordBO;
 import com.zj.domain.entity.bo.pipeline.NodeStatus;
+import com.zj.domain.entity.bo.pipeline.PipelineBO;
 import com.zj.domain.entity.bo.pipeline.PipelineExecuteInfo;
 import com.zj.domain.entity.bo.pipeline.PipelineHistoryBO;
 import com.zj.domain.repository.pipeline.IPipelineHistoryRepository;
+import com.zj.domain.repository.pipeline.IPipelineRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -21,12 +26,14 @@ import java.util.stream.Collectors;
 public class PipelineHistoryService {
   private final NodeRecordService recordService;
   private final UniqueIdService uniqueIdService;
+  private final IPipelineRepository pipelineRepository;
   private final IPipelineHistoryRepository pipelineHistoryRepository;
 
   public PipelineHistoryService(NodeRecordService recordService, UniqueIdService uniqueIdService,
-      IPipelineHistoryRepository pipelineHistoryRepository) {
+                                IPipelineRepository pipelineRepository, IPipelineHistoryRepository pipelineHistoryRepository) {
     this.recordService = recordService;
     this.uniqueIdService = uniqueIdService;
+    this.pipelineRepository = pipelineRepository;
     this.pipelineHistoryRepository = pipelineHistoryRepository;
   }
 
@@ -41,11 +48,30 @@ public class PipelineHistoryService {
   }
 
   public List<PipelineHistoryBO> listPipelineHistories(String pipelineId) {
+    checkPipeline(pipelineId);
     return pipelineHistoryRepository.listPipelineHistories(pipelineId);
   }
 
-  public PipelineHistoryBO getLatestPipelineHistory(String pipelineId) {
+  public PipelineHistoryBO getLatestPipelineHistory(String serviceId, String pipelineId) {
+    checkPipelineWithService(serviceId, pipelineId);
     return pipelineHistoryRepository.getLatestPipelineHistory(pipelineId);
+  }
+
+  private void checkPipelineWithService(String serviceId, String pipelineId) {
+    PipelineBO pipelineBO = checkPipeline(pipelineId);
+    if (Objects.equals(pipelineBO.getServiceId(), serviceId)) {
+      log.info("pipeline={} not belong serviceId={}", pipelineId, serviceId);
+      throw new ApiException(ErrorCode.PIPELINE_NOT_BELONG_SERVICE);
+    }
+  }
+
+  private PipelineBO checkPipeline(String pipelineId) {
+    PipelineBO pipelineBO = pipelineRepository.getPipeline(pipelineId);
+    if (Objects.isNull(pipelineBO)) {
+      log.info("can not find pipeline={}", pipelineId);
+      throw new ApiException(ErrorCode.NOT_FOUND_PIPELINE);
+    }
+    return pipelineBO;
   }
 
   public PipelineExecuteInfo getPipeLineStatusDetail(String historyId) {
@@ -65,6 +91,7 @@ public class PipelineHistoryService {
   }
 
   public boolean deleteByPipelineId(String pipelineId) {
+    checkPipeline(pipelineId);
     return pipelineHistoryRepository.deleteByPipelineId(pipelineId);
   }
 }

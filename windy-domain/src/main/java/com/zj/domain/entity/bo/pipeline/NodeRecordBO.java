@@ -8,6 +8,8 @@ import java.util.Map;
 @Data
 public class NodeRecordBO {
 
+  private Long id;
+
   /**
    * 流水线节点Id
    * */

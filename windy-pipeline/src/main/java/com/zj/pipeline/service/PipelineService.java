@@ -32,7 +32,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -187,7 +186,7 @@ public class PipelineService {
 
         if (!Objects.equals(pipeline.getServiceId(), serviceId)) {
             log.info("pipeline not belong service pipelineId={} serviceId={}", pipelineId, serviceId);
-            throw new ApiException(ErrorCode.PIPELINE_NOT_BIND_SERVICE);
+            throw new ApiException(ErrorCode.PIPELINE_NOT_BELONG_SERVICE);
         }
     }
 

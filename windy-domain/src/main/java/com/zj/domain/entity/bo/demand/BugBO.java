@@ -5,6 +5,8 @@ import lombok.Data;
 @Data
 public class BugBO {
 
+  private Long id;
+
   /**
    * bug名称
    * */

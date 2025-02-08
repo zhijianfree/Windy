@@ -11,6 +11,8 @@ import java.util.List;
 @Data
 public class NodeBindBO {
 
+  private Long id;
+
   /**
    * 流水线执行点ID
    */
@@ -26,7 +28,6 @@ public class NodeBindBO {
    */
   private String description;
 
-  //todo 这个时接口参数不是数据库参数
   private List<String> executors;
 
   /**

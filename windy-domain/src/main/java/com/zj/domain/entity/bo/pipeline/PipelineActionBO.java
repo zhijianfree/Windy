@@ -12,6 +12,9 @@ import java.util.Map;
  */
 @Data
 public class PipelineActionBO {
+
+  private Long id;
+
   /**
    * 执行动作Id
    */
