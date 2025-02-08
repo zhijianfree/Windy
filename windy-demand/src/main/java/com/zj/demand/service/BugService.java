@@ -38,18 +38,21 @@ public class BugService {
     private final IUserRepository userRepository;
     private final ICodeChangeRepository codeChangeRepository;
     private final IBusinessStatusRepository businessStatusRepository;
+    private final IterationService iterationService;
 
     public BugService(IBugRepository bugRepository, UniqueIdService uniqueIdService, IAuthService authService,
-                      IUserRepository userRepository, ICodeChangeRepository codeChangeRepository, IBusinessStatusRepository businessStatusRepository) {
+                      IUserRepository userRepository, ICodeChangeRepository codeChangeRepository, IBusinessStatusRepository businessStatusRepository, IterationService iterationService) {
         this.bugRepository = bugRepository;
         this.uniqueIdService = uniqueIdService;
         this.authService = authService;
         this.userRepository = userRepository;
         this.codeChangeRepository = codeChangeRepository;
         this.businessStatusRepository = businessStatusRepository;
+        this.iterationService = iterationService;
     }
 
     public BugDto createBug(BugDto bugDto) {
+        iterationService.checkIterationUnchangeable(bugDto.getIterationId());
         bugDto.setBugId(uniqueIdService.getUniqueId());
         BugBO bugBO = OrikaUtil.convert(bugDto, BugBO.class);
         UserDetail userDetail = authService.getUserDetail();

@@ -15,6 +15,7 @@ import com.zj.domain.entity.bo.demand.DemandBO;
 import com.zj.domain.entity.bo.demand.IterationBO;
 import com.zj.domain.entity.bo.service.ResourceMemberBO;
 import com.zj.domain.entity.enums.BusinessStatusType;
+import com.zj.domain.entity.enums.IterationStatus;
 import com.zj.domain.entity.enums.MemberType;
 import com.zj.domain.repository.demand.IBugRepository;
 import com.zj.domain.repository.demand.IBusinessStatusRepository;
@@ -23,6 +24,7 @@ import com.zj.domain.repository.demand.IMemberRepository;
 import com.zj.domain.repository.demand.IterationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -150,5 +152,18 @@ public class IterationService {
 
     public List<BusinessStatusBO> getIterationStatuses() {
         return businessStatusRepository.getIterationStatuses();
+    }
+
+    public void checkIterationUnchangeable(String iterationId){
+        if (StringUtils.isBlank(iterationId)) {
+            return;
+        }
+        IterationBO iteration = iterationRepository.getIteration(iterationId);
+        if (Objects.nonNull(iteration) && (Objects.equals(IterationStatus.COMPLETE.getType(),
+                iteration.getStatus()) || Objects.equals(IterationStatus.CLOSED.getType(),
+                iteration.getStatus()))) {
+            log.info("iteration is complete can not create bug or demand = {}", iterationId);
+            throw new ApiException(ErrorCode.ITERATION_IS_UNCHANGEABLE);
+        }
     }
 }

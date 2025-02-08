@@ -19,7 +19,7 @@ import com.zj.domain.entity.enums.RelationType;
 import com.zj.domain.repository.auth.IUserRepository;
 import com.zj.domain.repository.demand.IBusinessStatusRepository;
 import com.zj.domain.repository.demand.IDemandRepository;
-import com.zj.domain.repository.demand.IMemberRepository;
+import com.zj.domain.repository.demand.IterationRepository;
 import com.zj.domain.repository.pipeline.ICodeChangeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -39,18 +39,23 @@ public class DemandService {
     private final IUserRepository userRepository;
     private final IBusinessStatusRepository businessStatusRepository;
     private final ICodeChangeRepository codeChangeRepository;
+    private final IterationService iterationService;
 
     public DemandService(IAuthService authService, IDemandRepository demandRepository,
-                         UniqueIdService uniqueIdService, IUserRepository userRepository, IBusinessStatusRepository businessStatusRepository, ICodeChangeRepository codeChangeRepository) {
+                         UniqueIdService uniqueIdService, IUserRepository userRepository,
+                         IBusinessStatusRepository businessStatusRepository, ICodeChangeRepository codeChangeRepository,
+                         IterationService iterationService) {
         this.authService = authService;
         this.demandRepository = demandRepository;
         this.uniqueIdService = uniqueIdService;
         this.userRepository = userRepository;
         this.businessStatusRepository = businessStatusRepository;
         this.codeChangeRepository = codeChangeRepository;
+        this.iterationService = iterationService;
     }
 
     public DemandBO createDemand(DemandDto demandDto) {
+        iterationService.checkIterationUnchangeable(demandDto.getIterationId());
         DemandBO demandBO = OrikaUtil.convert(demandDto, DemandBO.class);
         demandBO.setDemandId(uniqueIdService.getUniqueId());
         UserDetail userDetail = authService.getUserDetail();

@@ -75,6 +75,7 @@ public enum ErrorCode {
   ITERATION_NOT_EXIST(HttpStatus.BAD_REQUEST, "Iteration.000001", "迭代不存在"),
   ITERATION_HAS_NOT_COMPLETE_DEMAND(HttpStatus.BAD_REQUEST, "Iteration.000002", "迭代下有未完成的需求"),
   ITERATION_HAS_NOT_COMPLETE_BUG(HttpStatus.BAD_REQUEST, "Iteration.00003", "迭代下有未完成的bug无法删除"),
+  ITERATION_IS_UNCHANGEABLE(HttpStatus.BAD_REQUEST, "Iteration.000004", "迭代已完成不可新增"),
   /*==================Client端构建运行==================*/
   NOT_FIND_JAR(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000001", "构建时未发现JAR包"),
   UNKNOWN_EXECUTE_TYPE(HttpStatus.INTERNAL_SERVER_ERROR, "Client.000002", "未找到节点执行类型"),
