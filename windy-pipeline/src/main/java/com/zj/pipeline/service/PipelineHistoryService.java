@@ -59,7 +59,7 @@ public class PipelineHistoryService {
 
   private void checkPipelineWithService(String serviceId, String pipelineId) {
     PipelineBO pipelineBO = checkPipeline(pipelineId);
-    if (Objects.equals(pipelineBO.getServiceId(), serviceId)) {
+    if (!Objects.equals(pipelineBO.getServiceId(), serviceId)) {
       log.info("pipeline={} not belong serviceId={}", pipelineId, serviceId);
       throw new ApiException(ErrorCode.PIPELINE_NOT_BELONG_SERVICE);
     }

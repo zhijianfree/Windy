@@ -34,10 +34,8 @@ public class PipelineHistoryRest {
 
     @ResponseBody
     @GetMapping("/history/{historyId}")
-    public ResponseMeta<PipelineHistoryBO> queryPipelineHistory(
-            @NotNull @PathVariable("historyId") String historyId) {
-        return new ResponseMeta<PipelineHistoryBO>(ErrorCode.SUCCESS,
-                historyService.getPipelineHistory(historyId));
+    public ResponseMeta<PipelineHistoryBO> queryPipelineHistory(@Validated @NotNull @PathVariable("historyId") String historyId) {
+        return new ResponseMeta<PipelineHistoryBO>(ErrorCode.SUCCESS, historyService.getPipelineHistory(historyId));
     }
 
     @ResponseBody
