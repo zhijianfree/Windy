@@ -154,7 +154,7 @@ public class GitBindService {
 
     private void updateProcessStatusIfNeed(GitPushResultVo gitPushResultVo) {
         try {
-            if (Objects.nonNull(gitPushResultVo) && Objects.equals(gitPushResultVo.getEventType(), GitEventType.COMMIT.getType())) {
+            if (Objects.nonNull(gitPushResultVo) && Objects.equals(gitPushResultVo.getEventType(), GitEventType.PUSH.getType())) {
                 List<CodeChangeBO> codeChanges = codeChangeRepository.getServiceChanges(gitPushResultVo.getRelatedServiceId());
                 List<String> demandCodeChanges = codeChanges.stream().filter(codeChange ->
                                 Objects.equals(RelationType.DEMAND.getType(), codeChange.getRelationType()))

@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum GitEventType {
-    COMMIT("push", "代码提交");
+    PUSH("push", "代码提交");
 
     private final String type;
     private final String desc;
