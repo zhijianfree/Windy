@@ -7,14 +7,14 @@
   </appender>
 
   <appender name="info_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>starter_log/starter.log</file>
+    <file>console_log/console.log</file>
     <filter class="ch.qos.logback.classic.filter.LevelFilter">
       <level>INFO</level>
       <onMatch>ACCEPT</onMatch>
       <onMismatch>DENY</onMismatch>
     </filter>
     <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-      <fileNamePattern>starter_log/starter-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+      <fileNamePattern>console_log/console-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
       <maxFileSize>50MB</maxFileSize>
       <totalSizeCap>2GB</totalSizeCap>
       <maxHistory>30</maxHistory>
@@ -28,14 +28,14 @@
   </appender>
 
   <appender name="warn_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>starter_log/warn.log</file>
+    <file>console_log/warn.log</file>
     <filter class="ch.qos.logback.classic.filter.LevelFilter">
       <level>WARN</level>
       <onMatch>ACCEPT</onMatch>
       <onMismatch>DENY</onMismatch>
     </filter>
     <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-      <fileNamePattern>starter_log/warn-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+      <fileNamePattern>console_log/warn-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
       <maxFileSize>50MB</maxFileSize>
       <totalSizeCap>2GB</totalSizeCap>
       <maxHistory>30</maxHistory>
@@ -49,14 +49,14 @@
   </appender>
 
   <appender name="error_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>starter_log/error.log</file>
+    <file>console_log/error.log</file>
     <filter class="ch.qos.logback.classic.filter.LevelFilter">
       <level>ERROR</level>
       <onMatch>ACCEPT</onMatch>
       <onMismatch>DENY</onMismatch>
     </filter>
     <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-      <fileNamePattern>starter_log/error-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+      <fileNamePattern>console_log/error-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
       <maxFileSize>50MB</maxFileSize>
       <totalSizeCap>2GB</totalSizeCap>
       <maxHistory>30</maxHistory>
