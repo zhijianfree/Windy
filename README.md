@@ -19,14 +19,24 @@ docker run --env=MYSQL_ROOT_PASSWORD=123456 -p 3306:3306 -d mysql:5.7
 ```
 数据库准备好后，先创建数据:**windy**, 然后下载并导入sql文件:
 [windy.sql](https://github.com/zhijianfree/Windy/blob/master/windy-starter/src/main/resources/sql/windy.sql)
-### 2 通过脚本启动docker服务
-> 执行脚本
+### 2 启动Windy服务
+启动Windy支持docker和jar两种方式:
+> 使用Docker安装
 ```shell
 curl -sSL https://github.com/languyue/Windy/raw/master/shell/docker_start.sh \
   | bash -s \
   数据库IP:数据库端口 \
   数据库用户 \
   数据库用户密码
+```
+> 使用jar部署
+
+请前往 [Windy发布页](https://github.com/languyue/Windy/releases) 下载需要的版本
+```shell
+#解压后进入windy目录，下面以1.0.0版本为例:
+cd windy-1.0.0
+
+./start.sh 数据库IP:数据库端口 数据库用户 数据库用户密码
 ```
 ### 3 用浏览器打开console
 ```
