@@ -49,7 +49,7 @@ public class GiteaWebhook extends AbstractWebhook {
     String branch = getBranchFromHookData(giteaHookVo.getRef());
     log.info("get repository name={} branch name={}", name, branch);
     return GitPushResultVo.builder().repository(name).branch(branch).gitType(PlatformEnum.gitea.name())
-            .eventType(GitEventType.COMMIT.getType()).build();
+            .eventType(GitEventType.PUSH.getType()).build();
   }
 
   private boolean checkSecret(HttpServletRequest request) {

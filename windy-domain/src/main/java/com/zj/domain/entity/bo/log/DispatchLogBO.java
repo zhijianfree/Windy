@@ -9,6 +9,8 @@ import lombok.Data;
 @Data
 public class DispatchLogBO {
 
+  private Long id;
+
   /**
    * 日志Id
    * */

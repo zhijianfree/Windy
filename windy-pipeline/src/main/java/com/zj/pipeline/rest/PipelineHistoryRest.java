@@ -34,35 +34,29 @@ public class PipelineHistoryRest {
 
     @ResponseBody
     @GetMapping("/history/{historyId}")
-    public ResponseMeta<PipelineHistoryBO> queryPipelineHistory(
-            @NotNull @PathVariable("historyId") String historyId) {
-        return new ResponseMeta<PipelineHistoryBO>(ErrorCode.SUCCESS,
-                historyService.getPipelineHistory(historyId));
+    public ResponseMeta<PipelineHistoryBO> queryPipelineHistory(@Validated @NotNull @PathVariable("historyId") String historyId) {
+        return new ResponseMeta<PipelineHistoryBO>(ErrorCode.SUCCESS, historyService.getPipelineHistory(historyId));
     }
 
     @ResponseBody
     @PostMapping("/history")
     public ResponseMeta<String> createPipelineHistory(
             @NotNull @Validated @RequestBody PipelineHistoryBO pipelineHistoryBO) {
-        return new ResponseMeta<String>(ErrorCode.SUCCESS,
-                historyService.createPipelineHistory(pipelineHistoryBO));
+        return new ResponseMeta<String>(ErrorCode.SUCCESS, historyService.createPipelineHistory(pipelineHistoryBO));
     }
 
     @ResponseBody
     @GetMapping("/{pipelineId}/histories")
-    public ResponseMeta<List<PipelineHistoryBO>> listPipelineHistories(
-            @NotNull @PathVariable("pipelineId") String pipelineId) {
-        return new ResponseMeta<List<PipelineHistoryBO>>(ErrorCode.SUCCESS,
-                historyService.listPipelineHistories(pipelineId));
+    public ResponseMeta<List<PipelineHistoryBO>> listPipelineHistories(@NotNull @PathVariable("pipelineId") String pipelineId) {
+        return new ResponseMeta<List<PipelineHistoryBO>>(ErrorCode.SUCCESS, historyService.listPipelineHistories(pipelineId));
     }
 
     @ResponseBody
     @GetMapping("/{service}/{pipelineId}/latest/history")
-    public ResponseMeta<PipelineHistoryBO> getLatestPipelineHistory(
-            @PathVariable("service") String service,
-            @PathVariable("pipelineId") String pipelineId) {
+    public ResponseMeta<PipelineHistoryBO> getLatestPipelineHistory(@PathVariable("service") String service,
+                                                                    @PathVariable("pipelineId") String pipelineId) {
         return new ResponseMeta<PipelineHistoryBO>(ErrorCode.SUCCESS,
-                historyService.getLatestPipelineHistory(pipelineId));
+                historyService.getLatestPipelineHistory(service, pipelineId));
     }
 
     @ResponseBody

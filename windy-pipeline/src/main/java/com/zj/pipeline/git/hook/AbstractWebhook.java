@@ -60,10 +60,11 @@ public abstract class AbstractWebhook implements IGitWebhook {
       log.info("can not find service by git url={}", gitPushResultVo.getRepository());
       return null;
     }
-
+    //如果没有流水线执行就直接退出
+    gitPushResultVo.setRelatedServiceId(microservice.getServiceId());
     List<PipelineBO> pushPipelines = getServicePipelineByType(microservice, gitPushResultVo, PipelineExecuteType.PUSH);
     if (CollectionUtils.isEmpty(pushPipelines)){
-      return null;
+      return gitPushResultVo;
     }
 
     //根据当前推送的分支查找关联的流水线，然后执行
@@ -77,8 +78,6 @@ public abstract class AbstractWebhook implements IGitWebhook {
         log.info("web hook trigger pipeline execute pipeline={}", pipeline.getPipelineId());
       }
     }));
-
-    gitPushResultVo.setRelatedServiceId(microservice.getServiceId());
     return gitPushResultVo;
   }
 

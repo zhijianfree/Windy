@@ -95,22 +95,15 @@ public class CodeChangeService {
     }
 
     public List<RelationDemandBug> queryRelationIds(String queryName) {
-        CompletableFuture<List<BugBO>> bugFuture =
-                CompletableFuture.supplyAsync(() -> bugRepository.getBugsFuzzyByName(queryName));
-        CompletableFuture<List<DemandBO>> demandFuture =
-                CompletableFuture.supplyAsync(() -> demandRepository.getDemandsByFuzzName(queryName));
-        CompletableFuture<List<WorkTaskBO>> workFuture =
-                CompletableFuture.supplyAsync(() -> workTaskRepository.getWorkTaskByName(queryName));
-        CompletableFuture.allOf(bugFuture, demandFuture, workFuture).join();
+        List<BugBO> bugs = bugRepository.getBugsFuzzyByName(queryName);
+        List<DemandBO> demands = demandRepository.getDemandsByFuzzName(queryName);
+        List<WorkTaskBO> works = workTaskRepository.getWorkTaskByName(queryName);
         try {
-            List<RelationDemandBug> relationList =
-                    bugFuture.get().stream().map(bug -> new RelationDemandBug(bug.getBugId(),
+            List<RelationDemandBug> relationList = bugs.stream().map(bug -> new RelationDemandBug(bug.getBugId(),
                     RelationType.BUG.getType(), bug.getBugName())).collect(Collectors.toList());
-            List<RelationDemandBug> relationDemands =
-                    demandFuture.get().stream().map(demand -> new RelationDemandBug(demand.getDemandId(),
+            List<RelationDemandBug> relationDemands = demands.stream().map(demand -> new RelationDemandBug(demand.getDemandId(),
                             RelationType.DEMAND.getType(), demand.getDemandName())).collect(Collectors.toList());
-            List<RelationDemandBug> relationWorks =
-                    workFuture.get().stream().map(work -> new RelationDemandBug(work.getTaskId(),
+            List<RelationDemandBug> relationWorks = works.stream().map(work -> new RelationDemandBug(work.getTaskId(),
                             RelationType.WORK.getType(), work.getTaskName())).collect(Collectors.toList());
             relationList.addAll(relationDemands);
             relationList.addAll(relationWorks);

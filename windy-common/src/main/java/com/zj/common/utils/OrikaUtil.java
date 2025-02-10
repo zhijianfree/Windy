@@ -5,6 +5,7 @@ import ma.glasnost.orika.impl.DefaultMapperFactory;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 对象拷贝
@@ -17,7 +18,7 @@ public class OrikaUtil {
     }
 
     public static <S, D> List<D> convertList(Iterable<S> source, Class<D> target) {
-        if (source == null) {
+        if (Objects.isNull(source)) {
             return Collections.emptyList();
         }
         return mapperFactory.getMapperFacade().mapAsList(source, target);

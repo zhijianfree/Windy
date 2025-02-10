@@ -49,7 +49,7 @@ public class GithubWebHook extends AbstractWebhook {
         return GitPushResultVo.builder().repository(repository.getRepository())
                 .gitType(PlatformEnum.github.name())
                 .branch(branch)
-                .eventType(GitEventType.COMMIT.getType()).build();
+                .eventType(GitEventType.PUSH.getType()).build();
     }
 
     private boolean checkSignature(String data, HttpServletRequest request) {
