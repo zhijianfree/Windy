@@ -53,7 +53,7 @@ public class UserService {
             }
 
             if (e instanceof InternalAuthenticationServiceException) {
-                log.info("user not find error user={}", loginUser.getUserName());
+                log.info("user not find error user={}", loginUser.getUserName(), e);
                 throw new ApiException(ErrorCode.USER_PASSWORD_ERROR);
             }
 
