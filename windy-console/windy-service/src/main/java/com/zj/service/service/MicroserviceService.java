@@ -302,10 +302,6 @@ public class MicroserviceService {
         return templateList;
     }
 
-    public static void main(String[] args) {
-        System.out.println(arePathsEqual("${host}/say","${host}/say"));
-    }
-
     public static boolean arePathsEqual(String templatePath, String apiPath) {
         // 去掉路径前缀（例如 {host}/ 或 ${host}/）
         String path = "/";
