@@ -3,16 +3,20 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
-    <artifactId>windy</artifactId>
     <groupId>com.zj</groupId>
+    <artifactId>windy-console</artifactId>
     <version>${revision}</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>windy-feature</artifactId>
+  <artifactId>windy-service</artifactId>
 
   <dependencies>
-    <!--    内部引用开始-->
+    <!--    内部依赖开始-->
+    <dependency>
+      <groupId>com.zj</groupId>
+      <artifactId>windy-common</artifactId>
+    </dependency>
     <dependency>
       <groupId>io.github.languyue</groupId>
       <artifactId>windy-plugin</artifactId>
@@ -21,31 +25,22 @@
       <groupId>com.zj</groupId>
       <artifactId>windy-domain</artifactId>
     </dependency>
-    <!--    内部引用结束-->
+    <!--    内部依赖结束-->
 
-    <!--    外部引用开始-->
+    <!--    外部依赖开始-->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
+      <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
+      <groupId>com.jcraft</groupId>
+      <artifactId>jsch</artifactId>
     </dependency>
-    <!--    外部应用结束-->
+    <!--    外部依赖结束-->
   </dependencies>
-
 </project>

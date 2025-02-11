@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.zj</groupId>
+        <artifactId>windy</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>windy-console</artifactId>
+    <packaging>pom</packaging>
+    <version>${revision}</version>
+
+    <modules>
+        <module>windy-starter</module>
+        <module>windy-service</module>
+        <module>windy-pipeline</module>
+        <module>windy-demand</module>
+        <module>windy-auth</module>
+        <module>windy-feature</module>
+        <module>windy-metrics</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.zj</groupId>
+                <artifactId>windy-feature</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zj</groupId>
+                <artifactId>windy-pipeline</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zj</groupId>
+                <artifactId>windy-service</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zj</groupId>
+                <artifactId>windy-demand</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zj</groupId>
+                <artifactId>windy-auth</artifactId>
+                <version>${revision}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>
