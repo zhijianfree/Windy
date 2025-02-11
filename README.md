@@ -15,7 +15,7 @@ Windy是一款轻量级Devops平台工具,支持服务代码变更管理，代�
 ```shell
 docker pull mysql:5.7
 
-docker run --env=MYSQL_ROOT_PASSWORD=123456 -p 3306:3306 -d mysql:5.7 --name mysql5.7
+docker run --env=MYSQL_ROOT_PASSWORD=123456 -p 3306:3306 --name mysql5.7 -d mysql:5.7
 ```
 数据库准备好后，先创建数据库名称为:**windy**, 然后下载并导入sql文件:
 [windy.sql](https://github.com/zhijianfree/Windy/blob/master/windy-starter/src/main/resources/sql/windy.sql)
