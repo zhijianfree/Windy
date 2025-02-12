@@ -84,3 +84,6 @@ http://主机IP:9768
 ## 架构设计
 ![整体设计](./doc/images/design.png)
 
+## 加群交流
+![QQ group](https://github.com/user-attachments/assets/fdd78f13-30dd-4753-969d-116bddd0e5a8)
+
