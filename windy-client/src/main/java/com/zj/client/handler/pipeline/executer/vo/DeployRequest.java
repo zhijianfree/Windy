@@ -18,4 +18,6 @@ public class DeployRequest {
   private Integer serverPort;
 
   private Integer deployType;
+
+  private String buildFilePath;
 }

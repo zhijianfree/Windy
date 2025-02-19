@@ -5,7 +5,6 @@ import com.github.dockerjava.api.async.ResultCallback.Adapter;
 import com.github.dockerjava.api.command.BuildImageResultCallback;
 import com.github.dockerjava.api.model.AuthConfig;
 import com.github.dockerjava.api.model.AuthConfigurations;
-import com.github.dockerjava.api.model.AuthResponse;
 import com.github.dockerjava.api.model.PushResponseItem;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
@@ -21,6 +20,7 @@ import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel;
 import com.zj.client.handler.pipeline.executer.vo.QueryResponseModel.ResponseStatus;
 import com.zj.client.handler.pipeline.executer.vo.TaskNode;
 import com.zj.client.handler.pipeline.git.IGitProcessor;
+import com.zj.common.entity.WindyConstants;
 import com.zj.common.enums.DeployType;
 import com.zj.common.enums.ProcessStatus;
 import com.zj.common.utils.GitUtils;
@@ -54,8 +54,6 @@ public class CodeBuildService {
     public static final String SUFFIX = "/";
     public static final String SPLIT_STRING = ":";
     public final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-    public static final String IMAGE_NAME = "imageName";
-
     private final IGitProcessor gitProcessor;
     private final Executor executorService;
     private final GlobalEnvConfig globalEnvConfig;
@@ -116,7 +114,9 @@ public class CodeBuildService {
                 }
 
                 // 4处理构建结果
-                handleBuildResult(codeBuildParam, exitCode, remoteImage);
+                String deployDirPath =
+                        new File(pomPath).getParentFile().getPath() + File.separator + WindyConstants.DEPLOY;
+                handleBuildResult(codeBuildParam, exitCode, remoteImage, deployDirPath);
             } catch (Exception e) {
                 log.error("buildCode error", e);
                 saveStatus(codeBuildParam.getRecordId(), ProcessStatus.FAIL, e.getMessage(), null);
@@ -132,12 +132,13 @@ public class CodeBuildService {
                 codeBuildParam.getUser()) && StringUtils.isNotBlank(codeBuildParam.getPassword());
     }
 
-    private void handleBuildResult(CodeBuildParamDto codeBuildParamDto, Integer exitCode,
-                                   String remoteImage) {
+    private void handleBuildResult(CodeBuildParamDto codeBuildParamDto, Integer exitCode, String remoteImage,
+                                   String deployDirPath) {
         ProcessStatus result = Optional.of(exitCode).filter(code -> Objects.equals(BUILD_SUCCESS, code))
                 .map(code -> ProcessStatus.SUCCESS).orElse(ProcessStatus.FAIL);
         Map<String, Object> context = new HashMap<>();
-        context.put(IMAGE_NAME, remoteImage);
+        context.put(WindyConstants.IMAGE_NAME, remoteImage);
+        context.put(WindyConstants.BUILD_FILE_PATH, deployDirPath);
         saveStatus(codeBuildParamDto.getRecordId(), result, BUILD_SUCCESS_TIPS, context);
     }
 

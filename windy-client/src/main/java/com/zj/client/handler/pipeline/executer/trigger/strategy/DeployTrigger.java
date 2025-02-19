@@ -41,16 +41,12 @@ import java.util.function.Function;
 @Slf4j
 @Component
 public class DeployTrigger implements INodeTrigger {
-
-    public static final String DEPLOY = "deploy";
     private final DeployFactory deployFactory;
-    private final GlobalEnvConfig globalEnvConfig;
 
     private final Map<Integer, Function<DeployRequest, DeployContext>> functionMap = new HashMap<>();
 
-    public DeployTrigger(DeployFactory deployFactory, GlobalEnvConfig globalEnvConfig) {
+    public DeployTrigger(DeployFactory deployFactory) {
         this.deployFactory = deployFactory;
-        this.globalEnvConfig = globalEnvConfig;
         functionMap.put(DeployType.SSH.getType(), this::buildSSHContext);
         functionMap.put(DeployType.K8S.getType(), this::buildK8SContext);
     }
@@ -82,14 +78,11 @@ public class DeployTrigger implements INodeTrigger {
     }
 
     private JarDeployContext buildSSHContext(DeployRequest deployRequest) {
-        String serviceName = GitUtils.getServiceFromUrl(deployRequest.getGitUrl());
-        String filePath =
-                globalEnvConfig.getPipelineWorkspace(serviceName, deployRequest.getPipelineId()) + File.separator + DEPLOY;
         DeployParams deployParams = JSON.parseObject(JSON.toJSONString(deployRequest.getParams()), DeployParams.class);
         SSHParams sshParams = deployParams.getSshParams();
         return JarDeployContext.builder().sshUser(sshParams.getUser()).sshPassword(sshParams.getPassword())
                 .remotePath(sshParams.getRemotePath()).sshIp(sshParams.getSshIp()).sshPort(sshParams.getSshPort())
-                .localPath(filePath).servicePort(deployRequest.getServerPort()).build();
+                .localPath(deployRequest.getBuildFilePath()).servicePort(deployRequest.getServerPort()).build();
     }
 
     private K8sDeployContext buildK8SContext(DeployRequest deployRequest) {

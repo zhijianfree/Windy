@@ -6,6 +6,7 @@ import com.zj.client.config.GlobalEnvConfig;
 import com.zj.client.handler.pipeline.build.CodeBuildContext;
 import com.zj.client.handler.pipeline.build.IBuildNotifyListener;
 import com.zj.client.handler.pipeline.build.ICodeBuilder;
+import com.zj.common.entity.WindyConstants;
 import com.zj.common.enums.ToolType;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
@@ -32,10 +33,7 @@ import java.util.*;
 @Slf4j
 @Component
 public class JavaMavenBuilder implements ICodeBuilder {
-
-  public static final String DEPLOY = "deploy";
   public static final String SH_COMMAND_FORMAT = "nohup java -jar %s > app.log 2>&1 &";
-  public static final String DOCKER = "docker";
   private final GlobalEnvConfig globalEnvConfig;
   private List<String> templateShell;
 
@@ -103,13 +101,13 @@ public class JavaMavenBuilder implements ICodeBuilder {
     }
 
     //ssh镜像部署
-    String destDir = pomFile.getParentFile().getPath() + File.separator + DEPLOY;
+    String destDir = pomFile.getParentFile().getPath() + File.separator + WindyConstants.DEPLOY;
     File dir = new File(destDir);
     createSHFileIfNeed(jarFile.getName(), destDir, dir);
     FileUtils.copyToDirectory(jarFile, dir);
 
     //docker镜像部署
-    String dockerDir = pomFile.getParentFile().getPath() + File.separator + DOCKER;
+    String dockerDir = pomFile.getParentFile().getPath() + File.separator + WindyConstants.DOCKER;
     File dockerDirFile = new File(dockerDir);
     createSHFileIfNeed(jarFile.getName(), dockerDir, dockerDirFile);
     FileUtils.copyToDirectory(jarFile, dockerDirFile);

@@ -1,7 +1,7 @@
 package com.zj.master.dispatch.pipeline.intercept;
 
 import com.alibaba.fastjson.JSON;
-import com.zj.common.enums.DeployType;
+import com.zj.common.entity.WindyConstants;
 import com.zj.common.enums.ExecuteType;
 import com.zj.common.entity.pipeline.DeployParams;
 import com.zj.common.entity.pipeline.K8SAccessParams;
@@ -35,8 +35,6 @@ import java.util.Optional;
  */
 @Component
 public class DeployNodeInterceptor implements INodeExecuteInterceptor {
-
-    public static final String IMAGE_NAME = "imageName";
     private final ISubDispatchLogRepository subDispatchLogRepository;
     private final IEnvironmentRepository environmentRepository;
     private final IDispatchLogRepository dispatchLogRepository;
@@ -73,9 +71,7 @@ public class DeployNodeInterceptor implements INodeExecuteInterceptor {
         DeployContext deployContext = (DeployContext) taskNode.getRequestContext();
         if (optional.isPresent()) {
             SubDispatchLogBO subDispatchLogBO = optional.get();
-            if (!Objects.equals(deployContext.getDeployType(), DeployType.SSH.getType())) {
-                findDockerImageName(subDispatchLogBO, deployContext);
-            }
+            wrapBuildContext(subDispatchLogBO, deployContext);
 
             deployContext.setSingleClientIp(subDispatchLogBO.getClientIp());
             deployContext.setRequestSingle(true);
@@ -108,7 +104,7 @@ public class DeployNodeInterceptor implements INodeExecuteInterceptor {
         return deployParams;
     }
 
-    private void findDockerImageName(SubDispatchLogBO subDispatchLogBO, DeployContext deployContext) {
+    private void wrapBuildContext(SubDispatchLogBO subDispatchLogBO, DeployContext deployContext) {
         DispatchLogBO dispatchLog = dispatchLogRepository.getDispatchLog(
                 subDispatchLogBO.getLogId());
         String nodeId = subDispatchLogBO.getExecuteId();
@@ -117,7 +113,8 @@ public class DeployNodeInterceptor implements INodeExecuteInterceptor {
                 nodeId);
         Map<String, Object> context = nodeRecord.getPipelineContext();
         if (Objects.nonNull(context)) {
-            deployContext.setImageName(String.valueOf(context.get(IMAGE_NAME)));
+            deployContext.setImageName(String.valueOf(context.get(WindyConstants.IMAGE_NAME)));
+            deployContext.setBuildFilePath(String.valueOf(context.get(WindyConstants.BUILD_FILE_PATH)));
         }
     }
 }
