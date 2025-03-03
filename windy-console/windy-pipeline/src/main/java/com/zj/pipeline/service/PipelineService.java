@@ -21,6 +21,7 @@ import com.zj.domain.repository.pipeline.INodeRecordRepository;
 import com.zj.domain.repository.pipeline.IPipelineRepository;
 import com.zj.domain.repository.service.impl.MicroServiceRepository;
 import com.zj.pipeline.entity.dto.PipelineDto;
+import com.zj.pipeline.entity.dto.PipelineStatusDto;
 import com.zj.pipeline.entity.enums.PipelineStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -329,5 +330,20 @@ public class PipelineService {
 
     public List<PipelineBO> getServicePipelines(String serviceId) {
         return pipelineRepository.getServicePipelines(serviceId);
+    }
+
+    public List<PipelineStatusDto> getPipelineStatus(String serviceId) {
+        List<PipelineBO> servicePipelines = pipelineRepository.getServicePipelines(serviceId);
+        return servicePipelines.stream().filter(pipelineBO -> Objects.equals(pipelineBO.getPipelineType(),
+                PipelineType.CUSTOM.getType())).map(pipelineBO -> {
+            PipelineHistoryBO latestPipelineHistory = pipelineHistoryService.getLatestPipelineHistory(serviceId,
+                    pipelineBO.getPipelineId());
+            PipelineStatusDto pipelineStatusDto = new PipelineStatusDto();
+            pipelineStatusDto.setPipelineId(pipelineBO.getPipelineId());
+            pipelineStatusDto.setPipelineName(pipelineBO.getPipelineName());
+            pipelineStatusDto.setPipelineType(pipelineBO.getPipelineType());
+            pipelineStatusDto.setStatus(latestPipelineHistory.getPipelineStatus());
+            return pipelineStatusDto;
+        }).collect(Collectors.toList());
     }
 }

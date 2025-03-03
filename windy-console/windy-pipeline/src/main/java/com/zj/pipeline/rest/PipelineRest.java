@@ -6,6 +6,7 @@ import com.zj.domain.entity.bo.pipeline.PipelineBO;
 import com.zj.domain.entity.vo.Create;
 import com.zj.domain.entity.vo.Update;
 import com.zj.pipeline.entity.dto.PipelineDto;
+import com.zj.pipeline.entity.dto.PipelineStatusDto;
 import com.zj.pipeline.service.PipelineService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -59,6 +60,12 @@ public class PipelineRest {
     @GetMapping("/{serviceId}/list")
     public ResponseMeta<List<PipelineBO>> listPipelines(@PathVariable("serviceId") String serviceId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, pipelineService.listPipelines(serviceId));
+    }
+
+    @ResponseBody
+    @GetMapping("/{serviceId}/status")
+    public ResponseMeta<List<PipelineStatusDto>> getPipelineStatus(@PathVariable("serviceId") String serviceId) {
+        return new ResponseMeta<>(ErrorCode.SUCCESS, pipelineService.getPipelineStatus(serviceId));
     }
 
     @ResponseBody

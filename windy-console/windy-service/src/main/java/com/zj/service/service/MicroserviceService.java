@@ -208,7 +208,8 @@ public class MicroserviceService {
 
     public List<MicroserviceBO> getServices() {
         String currentUserId = authService.getCurrentUserId();
-        return microServiceRepository.getUserRelatedServices(currentUserId).stream().sorted(Comparator.comparing(MicroserviceBO::getPriority).reversed()).collect(Collectors.toList());
+        return microServiceRepository.getUserRelatedServices(currentUserId).stream()
+                .sorted(Comparator.comparing(MicroserviceBO::getPriority).reversed()).collect(Collectors.toList());
     }
 
     public List<UserBO> queryServiceMembers(String serviceId) {
