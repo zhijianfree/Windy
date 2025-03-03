@@ -60,7 +60,7 @@ public class PipelineHistoryRest {
     }
 
     @ResponseBody
-    @GetMapping("/{historyId}/status")
+    @GetMapping("/histories/{historyId}/status")
     public ResponseMeta<PipelineExecuteInfo> getPipeLineStatusDetail(@NotNull @PathVariable("historyId") String historyId) {
         return new ResponseMeta<PipelineExecuteInfo>(ErrorCode.SUCCESS, historyService.getPipeLineStatusDetail(historyId));
     }
