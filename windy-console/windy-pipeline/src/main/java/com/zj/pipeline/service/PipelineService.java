@@ -6,6 +6,7 @@ import com.zj.common.adapter.invoker.IMasterInvoker;
 import com.zj.common.adapter.uuid.UniqueIdService;
 import com.zj.common.entity.dto.DispatchTaskModel;
 import com.zj.common.enums.LogType;
+import com.zj.common.enums.ProcessStatus;
 import com.zj.common.exception.ApiException;
 import com.zj.common.exception.ErrorCode;
 import com.zj.common.utils.OrikaUtil;
@@ -284,6 +285,13 @@ public class PipelineService {
         if (Objects.isNull(pipeline)) {
             log.info("can not find pipeline pipelineId={}", pipelineId);
             throw new ApiException(ErrorCode.NOT_FIND_PIPELINE);
+        }
+
+        PipelineHistoryBO latestHistory = pipelineHistoryService.getLatestPipelineHistory(pipeline.getServiceId(), pipeline.getPipelineId());
+        if (Objects.nonNull(latestHistory) && Objects.equals(latestHistory.getPipelineStatus(),
+                ProcessStatus.RUNNING.getType())) {
+            log.info("pipeline is running , can not run again={}", pipeline.getPipelineId());
+            throw new ApiException(ErrorCode.PIPELINE_IS_RUNNING);
         }
 
         DispatchTaskModel dispatchTaskModel = new DispatchTaskModel();
