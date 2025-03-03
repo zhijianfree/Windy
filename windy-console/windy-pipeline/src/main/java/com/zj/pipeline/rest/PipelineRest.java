@@ -63,7 +63,7 @@ public class PipelineRest {
     }
 
     @ResponseBody
-    @GetMapping("/{serviceId}/status")
+    @GetMapping("/services/{serviceId}/status")
     public ResponseMeta<List<PipelineStatusDto>> getPipelineStatus(@PathVariable("serviceId") String serviceId) {
         return new ResponseMeta<>(ErrorCode.SUCCESS, pipelineService.getPipelineStatus(serviceId));
     }
