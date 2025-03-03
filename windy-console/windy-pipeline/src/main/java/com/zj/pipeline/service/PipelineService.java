@@ -333,7 +333,7 @@ public class PipelineService {
         return pipelineRepository.getServicePipelines(serviceId);
     }
 
-    public List<PipelineStatusDto> getPipelinesStatus(String serviceId) {
+    public List<PipelineStatusDto> getServicePipelineStatus(String serviceId) {
         List<PipelineBO> servicePipelines = pipelineRepository.getServicePipelines(serviceId);
         return servicePipelines.stream().filter(pipelineBO -> Objects.equals(pipelineBO.getPipelineType(),
                 PipelineType.CUSTOM.getType())).map(pipelineBO -> {
