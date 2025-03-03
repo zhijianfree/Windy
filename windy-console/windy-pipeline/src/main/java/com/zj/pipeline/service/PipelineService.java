@@ -333,7 +333,7 @@ public class PipelineService {
         return pipelineRepository.getServicePipelines(serviceId);
     }
 
-    public List<PipelineStatusDto> getPipelineStatus(String serviceId) {
+    public List<PipelineStatusDto> getPipelinesStatus(String serviceId) {
         List<PipelineBO> servicePipelines = pipelineRepository.getServicePipelines(serviceId);
         return servicePipelines.stream().filter(pipelineBO -> Objects.equals(pipelineBO.getPipelineType(),
                 PipelineType.CUSTOM.getType())).map(pipelineBO -> {
@@ -347,5 +347,18 @@ public class PipelineService {
                     pipelineStatusDto.setStatus(history.getPipelineStatus()));
             return pipelineStatusDto;
         }).collect(Collectors.toList());
+    }
+
+    public PipelineStatusDto getPipelineStatus(String pipelineId) {
+        PipelineBO pipelineBO = pipelineRepository.getPipeline(pipelineId);
+        PipelineStatusDto pipelineStatusDto = new PipelineStatusDto();
+        pipelineStatusDto.setPipelineId(pipelineBO.getPipelineId());
+        pipelineStatusDto.setPipelineName(pipelineBO.getPipelineName());
+        pipelineStatusDto.setPipelineType(pipelineBO.getPipelineType());
+        PipelineHistoryBO latestPipelineHistory = pipelineHistoryService.getLatestPipelineHistory(pipelineBO.getServiceId(),
+                pipelineBO.getPipelineId());
+        Optional.ofNullable(latestPipelineHistory).ifPresent(history ->
+                pipelineStatusDto.setStatus(history.getPipelineStatus()));
+        return pipelineStatusDto;
     }
 }
