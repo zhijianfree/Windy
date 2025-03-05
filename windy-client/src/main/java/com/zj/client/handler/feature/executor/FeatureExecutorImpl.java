@@ -175,7 +175,7 @@ public class FeatureExecutorImpl implements IFeatureExecutor {
             return;
         }
         try {
-            countDownLatch.await();
+            countDownLatch.await(5, TimeUnit.MINUTES);
         } catch (InterruptedException ignore) {
             log.info("async task not trigger,continue execute next task");
         }
